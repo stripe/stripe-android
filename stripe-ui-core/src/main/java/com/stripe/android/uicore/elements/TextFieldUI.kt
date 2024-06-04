@@ -148,9 +148,7 @@ fun TextField(
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 
-    val fieldState by textFieldController.fieldState.collectAsState(
-        TextFieldStateConstants.Error.Blank
-    )
+    val fieldState by textFieldController.fieldState.collectAsState()
     val label by textFieldController.label.collectAsState()
 
     LaunchedEffect(fieldState) {

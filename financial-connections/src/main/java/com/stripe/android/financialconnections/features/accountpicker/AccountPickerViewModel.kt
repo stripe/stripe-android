@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -72,6 +73,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     init {
         logErrors()
         onPayloadLoaded()
+        loadInstitution()
         loadAccounts()
     }
 
@@ -81,6 +83,16 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             allowBackNavigation = false,
             error = state.payload.error,
         )
+    }
+
+    private fun loadInstitution() {
+        suspend {
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
+            requireNotNull(manifest.activeInstitution)
+        }.execute {
+            copy(institution = it)
+        }
     }
 
     private fun loadAccounts() {
@@ -99,6 +111,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (partnerAccountList.data.isNotEmpty()) {
                 eventTracker.track(
                     PollAccountsSucceeded(
+                        pane = PANE,
                         authSessionId = activeAuthSession.id,
                         duration = millis
                     )
@@ -157,6 +170,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     val selectedId = setOfNotNull(payload.selectableAccounts.firstOrNull()?.id)
                     eventTracker.track(
                         AccountsAutoSelected(
+                            pane = PANE,
                             isSingleAccount = true,
                             accountIds = selectedId
                         )
@@ -169,6 +183,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     val selectedIds = payload.selectableAccounts.map { it.id }.toSet()
                     eventTracker.track(
                         AccountsAutoSelected(
+                            pane = PANE,
                             isSingleAccount = false,
                             accountIds = selectedIds
                         )
@@ -237,6 +252,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (newIds.size == 1) {
                 eventTracker.track(
                     AccountSelected(
+                        pane = PANE,
                         isSingleAccount = isSingleAccount,
                         selected = true,
                         accountId = newIds.first()
@@ -246,6 +262,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (removedIds.size == 1) {
                 eventTracker.track(
                     AccountSelected(
+                        pane = PANE,
                         isSingleAccount = isSingleAccount,
                         selected = false,
                         accountId = removedIds.first()
@@ -371,6 +388,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
 }
 
 internal data class AccountPickerState(
+    val institution: Async<FinancialConnectionsInstitution> = Uninitialized,
     val payload: Async<Payload> = Uninitialized,
     val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,

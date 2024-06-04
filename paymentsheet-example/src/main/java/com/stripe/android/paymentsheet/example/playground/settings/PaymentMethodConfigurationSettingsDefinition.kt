@@ -9,10 +9,17 @@ internal object PaymentMethodConfigurationSettingsDefinition :
     override val key: String = "paymentMethodConfigurationId"
     override val displayName: String = "Payment Method Configuration ID"
     override val defaultValue: String = ""
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<String>> = emptyList()
 
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
+
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 
     override fun configure(
         value: String,

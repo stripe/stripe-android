@@ -1,14 +1,52 @@
 # CHANGELOG
 
-## XX.XX.XX - 2023-XX-XX
+## XX.XX.XX - 20XX-XX-XX
+
+## 20.44.2 - 2024-06-03
+
+### Identity
+* [FIXED][8566](https://github.com/stripe/stripe-android/pull/8566) Fixed a crash when scan finishes and states is cleared.
+
+## 20.44.1 - 2024-05-28
+
+### PaymentSheet
+* [FIXED][8538](https://github.com/stripe/stripe-android/pull/8538) Change the autocomplete screen’s "Enter address manually" button background to prevent unexpected changes to user-defined colors
+### CardScan
+* [FIXED][8537](https://github.com/stripe/stripe-android/pull/8537) Fix a crash that happened on some devices with odd camera-to-screen ratios
+
+## 20.44.0 - 2024-05-20
+
+### PaymentSheet
+* [ADDED][8466](https://github.com/stripe/stripe-android/pull/8466) Added support for [external payment methods](https://docs.stripe.com/payments/external-payment-methods?platform=android).
+* [CHANGED][8340](https://github.com/stripe/stripe-android/pull/8480) Recreate PaymentSheet and FlowController in `rememberPaymentSheet` and `rememberPaymentSheetFlowController` functions when an input callback changes.
+* [FIXED][8486](https://github.com/stripe/stripe-android/pull/8486) Prevent soft keyboard from covering "Enter address manually" button for Address Autocomplete
+* [REMOVED][8504](https://github.com/stripe/stripe-android/pull/8504) Remove support for using `Maestro` cards with `Google Pay`
+
+### Payments
+* [REMOVED][8504](https://github.com/stripe/stripe-android/pull/8504) Remove support for using `Maestro` cards with `Google Pay`
+
+### Identity
+* [FIXED][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected. 
+
+## 20.43.0 - 2024-05-13
+
+### Financial Connections
+* [CHANGED][8377](https://github.com/stripe/stripe-android/pull/8377) The `FinancialConnectionsEvent.Name.CONSENT_ACQUIRED` event is now emitted when the consent has been acquired _and_ successfully confirmed with the Stripe backend. Previously, the event was emitted before the confirmation, making it possible to receive multiple `CONSENT_ACQUIRED` events in a single session.
 
 ### PaymentSheet
 * [ADDED][8430](https://github.com/stripe/stripe-android/pull/8430) Added support for using `Maestro` cards with `Google Pay`
+* [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to PaymentSheet.
+
+### Payments
+* [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to API bindings.
 
 ## 20.42.0 - 2024-05-01
 
 Dependencies updated in [8381](https://github.com/stripe/stripe-android/pull/8381):
 * Bumped Play Services Wallet from 19.2.1 to 19.3.0.
+
+### Payments
+* [ADDED][8344](https://github.com/stripe/stripe-android/pull/8344) Added support for `onBehalfOf` to `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`. This parameter may be required when setting a connected account as the merchant of record for a payment. For more information, see the [Connect docs](https://docs.stripe.com/connect/charges#on_behalf_of).
 
 ## 20.41.1 - 2024-04-22
 
@@ -28,7 +66,7 @@ Dependencies updated in [8381](https://github.com/stripe/stripe-android/pull/838
 ## 20.40.4 - 2024-04-04
 
 ### Financial Connections
-[Fixed][8223](https://github.com/stripe/stripe-android/pull/8223) Fixed a crash that occurred when using Compose 1.6.
+* [Fixed][8223](https://github.com/stripe/stripe-android/pull/8223) Fixed a crash that occurred when using Compose 1.6.
 
 ## 20.40.3 - 2024-04-01
 

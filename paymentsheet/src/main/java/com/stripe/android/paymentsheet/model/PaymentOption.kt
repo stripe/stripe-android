@@ -18,6 +18,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,46 +29,37 @@ import kotlinx.coroutines.withContext
 /**
  * The customer's selected payment option.
  */
-data class PaymentOption
-@Deprecated("Not intended for public use.")
-constructor(
+@OptIn(DelicateCoroutinesApi::class)
+data class PaymentOption internal constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
     @Deprecated("Please use icon() instead.")
-    @DrawableRes
     val drawableResourceId: Int,
-
     /**
      * A label that describes the payment option.
      *
      * For example, "····4242" for a Visa ending in 4242.
      */
-    val label: String
+    val label: String,
+    internal val lightThemeIconUrl: String?,
+    internal val darkThemeIconUrl: String?,
+    internal val imageLoader: suspend (PaymentOption) -> Drawable,
+    private val delegateDrawableScope: CoroutineScope = GlobalScope,
+    private val delegateDrawableDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
-    // These aren't part of the primary constructor in order to maintain binary compatibility.
-    internal var lightThemeIconUrl: String? = null
-        private set
-
-    internal var darkThemeIconUrl: String? = null
-        private set
-
-    private var imageLoader: suspend (PaymentOption) -> Drawable = {
-        throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
-    }
-
-    @Suppress("DEPRECATION")
-    internal constructor(
-        @DrawableRes drawableResourceId: Int,
-        label: String,
-        lightThemeIconUrl: String?,
-        darkThemeIconUrl: String?,
-        imageLoader: suspend (PaymentOption) -> Drawable
-    ) : this(drawableResourceId, label) {
-        this.lightThemeIconUrl = lightThemeIconUrl
-        this.darkThemeIconUrl = darkThemeIconUrl
-        this.imageLoader = imageLoader
-    }
+    @Deprecated("Not intended for public use.")
+    constructor(
+        @DrawableRes
+        drawableResourceId: Int,
+        label: String
+    ) : this(
+        drawableResourceId = drawableResourceId,
+        label = label,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        imageLoader = errorImageLoader,
+    )
 
     /**
      * A [Painter] to draw the icon associated with this [PaymentOption].
@@ -79,20 +72,31 @@ constructor(
      * Fetches the icon associated with this [PaymentOption].
      */
     fun icon(): Drawable {
-        return DelegateDrawable(ShapeDrawable(), imageLoader, this)
+        return DelegateDrawable(
+            ShapeDrawable(),
+            imageLoader,
+            this,
+            delegateDrawableScope,
+            delegateDrawableDispatcher
+        )
     }
+}
+
+private val errorImageLoader: suspend (PaymentOption) -> Drawable = {
+    throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
 }
 
 private class DelegateDrawable(
     @Volatile private var delegate: Drawable,
     private val imageLoader: suspend (PaymentOption) -> Drawable,
     private val paymentOption: PaymentOption,
+    scope: CoroutineScope,
+    dispatcher: CoroutineDispatcher,
 ) : Drawable() {
     init {
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch {
+        scope.launch {
             delegate = imageLoader(paymentOption)
-            withContext(Dispatchers.Main) {
+            withContext(dispatcher) {
                 super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
                 invalidateSelf()
             }

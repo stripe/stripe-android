@@ -93,8 +93,8 @@ internal class ConsentViewModel @AssistedInject constructor(
     fun onContinueClick() {
         suspend {
             eventTracker.track(ConsentAgree)
-            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
+            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
             navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
             updatedManifest
         }.execute { copy(acceptConsent = it) }

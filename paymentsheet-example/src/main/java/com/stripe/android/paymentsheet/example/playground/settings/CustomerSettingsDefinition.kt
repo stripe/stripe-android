@@ -3,18 +3,28 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomerSettingsDefinition :
     PlaygroundSettingDefinition<CustomerType>,
     PlaygroundSettingDefinition.Saveable<CustomerType>,
     PlaygroundSettingDefinition.Displayable<CustomerType> {
     override val displayName: String = "Customer"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> =
-        listOf(
-            option("Guest", CustomerType.GUEST),
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ): List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> {
+        val configurableOptions = if (configurationData.integrationType.isPaymentFlow()) {
+            listOf(option("Guest", CustomerType.GUEST))
+        } else {
+            listOf()
+        }
+
+        return configurableOptions + listOf(
             option("New", CustomerType.NEW),
             option("Returning", CustomerType.RETURNING),
         )
+    }
 
     override fun configure(
         value: CustomerType,
@@ -25,8 +35,15 @@ internal object CustomerSettingsDefinition :
 
     override fun configure(
         value: CustomerType,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.customerType(value.value)
+    }
+
+    override fun configure(
+        value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)

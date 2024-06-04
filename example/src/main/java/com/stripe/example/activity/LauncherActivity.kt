@@ -130,6 +130,10 @@ class LauncherActivity : AppCompatActivity() {
                 BacsDebitPaymentMethodActivity::class.java
             ),
             Item(
+                activity.getString(R.string.multibanco_example),
+                MultibancoActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.sofort_example),
                 SofortPaymentMethodActivity::class.java
             ),
@@ -201,6 +205,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 "StripeImage Example",
                 StripeImageActivity::class.java
+            ),
+            Item(
+                "Card Input Widget Compose Example",
+                CardInputWidgetComposeExampleActivity::class.java
             )
         )
 

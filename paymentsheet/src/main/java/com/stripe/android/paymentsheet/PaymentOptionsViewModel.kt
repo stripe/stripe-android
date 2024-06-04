@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -124,10 +125,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    // Only used to determine if we should skip the list and go to the add card view.
-    // and how to populate that view.
-    override var newPaymentSelection: PaymentSelection.New? =
-        args.state.paymentSelection as? PaymentSelection.New
+    // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
+    override var newPaymentSelection: NewOrExternalPaymentSelection? =
+        when (val selection = args.state.paymentSelection) {
+            is PaymentSelection.New -> NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.ExternalPaymentMethod -> NewOrExternalPaymentSelection.External(selection)
+            else -> null
+        }
 
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
         scope = viewModelScope,
@@ -321,6 +325,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
+            return listOf(VerticalModeInitialScreenFactory.create(this))
+        }
         val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods
         } else {

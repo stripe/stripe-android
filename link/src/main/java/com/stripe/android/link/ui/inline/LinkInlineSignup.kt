@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -66,7 +65,7 @@ internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 fun LinkInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     enabled: Boolean,
-    onStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     linkConfigurationCoordinator.component?.let { component ->
@@ -78,7 +77,7 @@ fun LinkInlineSignup(
         val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
-            onStateChanged(component.configuration, viewState)
+            onStateChanged(viewState)
         }
 
         val focusManager = LocalFocusManager.current

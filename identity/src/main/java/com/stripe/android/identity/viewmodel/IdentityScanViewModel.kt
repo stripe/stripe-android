@@ -141,8 +141,12 @@ internal abstract class IdentityScanViewModel(
     }
 
     fun stopScan(lifecycleOwner: LifecycleOwner) {
-        requireNotNull(identityScanFlow).resetFlow()
-        cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
+        runCatching {
+            requireNotNull(identityScanFlow).resetFlow()
+            cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
+        }.onFailure {
+            identityAnalyticsRequestFactory.genericError("required object is null", it.stackTraceToString())
+        }
     }
 
     /**

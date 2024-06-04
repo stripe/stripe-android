@@ -14,6 +14,7 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 internal fun PaymentMethodForm(
@@ -60,7 +61,7 @@ internal fun PaymentMethodForm(
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(paymentMethodCode) {
-        completeFormValues.collect {
+        completeFormValues.distinctUntilChanged().collect {
             onFormFieldValuesChanged(it)
         }
     }

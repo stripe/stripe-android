@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import java.util.Locale
 
 internal object CountrySettingsDefinition :
@@ -12,19 +13,39 @@ internal object CountrySettingsDefinition :
         defaultValue = Country.US,
     ),
     PlaygroundSettingDefinition.Displayable<Country> {
-    private val supportedCountries = Country.entries.map { it.value }.toSet()
+    private val supportedPaymentFlowCountries = Country.entries.map { it.value }.toSet()
+    private val supportedCustomerFlowCountries = setOf(
+        Country.US.value,
+        Country.FR.value,
+    )
 
     override val displayName: String = "Merchant"
 
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Country>>
-        get() = CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ): List<PlaygroundSettingDefinition.Displayable.Option<Country>> {
+        val supportedCountries = if (configurationData.integrationType.isPaymentFlow()) {
+            supportedPaymentFlowCountries
+        } else {
+            supportedCustomerFlowCountries
+        }
+
+        return CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
             country.code.value in supportedCountries
         }.map { country ->
             option(country.name, convertToValue(country.code.value))
         }.toList()
+    }
 
     override fun configure(value: Country, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.merchantCountryCode(value.value)
+    }
+
+    override fun configure(
+        value: Country,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.value)
     }
 
     override fun valueUpdated(value: Country, playgroundSettings: PlaygroundSettings) {

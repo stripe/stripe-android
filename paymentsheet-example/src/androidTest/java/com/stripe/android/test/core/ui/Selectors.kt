@@ -16,9 +16,12 @@ import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
+import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
+import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
@@ -58,6 +61,8 @@ internal class Selectors(
         testParameters.paymentMethodCode
     )
 
+    val formElement = FormElement(composeTestRule)
+
     val mandateText = composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
 
     val buyButton = BuyButton(
@@ -71,6 +76,31 @@ internal class Selectors(
         } else {
             5.seconds
         }
+    )
+
+    val customerSheetSaveButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
+    )
+
+    val customerSheetConfirmButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+    )
+
+    val externalPaymentMethodSucceedButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(FawryActivity.COMPLETED_BUTTON_TEST_TAG)
+    )
+
+    val externalPaymentMethodCancelButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(FawryActivity.CANCELED_BUTTON_TEST_TAG)
+    )
+
+    val externalPaymentMethodFailButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(FawryActivity.FAILED_BUTTON_TEST_TAG)
     )
 
     val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))

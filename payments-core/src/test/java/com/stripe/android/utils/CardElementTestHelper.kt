@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ApiKeyFixtures
@@ -24,6 +25,7 @@ internal object CardElementTestHelper {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveCardElementConfig(
                     requestOptions: ApiRequest.Options,
+                    params: Map<String, String>?
                 ): Result<MobileCardElementConfig> {
                     return Result.success(
                         MobileCardElementConfig(
@@ -34,6 +36,7 @@ internal object CardElementTestHelper {
                     )
                 }
             },
+            handle = SavedStateHandle()
         )
 
         val viewModelStore = ViewModelStore().apply {

@@ -32,8 +32,14 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
         data class Complete(
             val cause: EarlyTerminationCause? = null
         ) : Message {
-            enum class EarlyTerminationCause(val value: String) {
-                USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY("user_initiated_with_custom_manual_entry")
+            enum class EarlyTerminationCause(
+                val value: String,
+                val analyticsValue: String,
+            ) {
+                USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY(
+                    value = "user_initiated_with_custom_manual_entry",
+                    analyticsValue = "custom_manual_entry"
+                )
             }
         }
 

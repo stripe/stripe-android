@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -61,6 +62,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -105,7 +107,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    private val errorReporter: ErrorReporter,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -151,7 +154,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
-    override var newPaymentSelection: PaymentSelection.New? = null
+    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
@@ -453,7 +456,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                errorReporter = errorReporter,
             )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
@@ -576,7 +580,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
 
         externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(),
+            ExternalPaymentMethodContract(errorReporter),
             ::onExternalPaymentMethodResult
         )
 
@@ -809,6 +813,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onError(error: String?) = resetViewState(error)
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
+            return listOf(VerticalModeInitialScreenFactory.create(this))
+        }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods

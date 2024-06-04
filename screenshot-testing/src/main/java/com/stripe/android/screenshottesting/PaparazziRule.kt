@@ -77,6 +77,7 @@ class PaparazziRule(
                     }
                 }
             } finally {
+                testCase.reset()
                 paparazzi.close()
             }
         }
@@ -88,6 +89,7 @@ class PaparazziRule(
 
     private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
         return Paparazzi(
+            maxPercentDifference = 0.001,
             deviceConfig = deviceConfig,
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
@@ -127,6 +129,10 @@ private data class TestCase(
 
     fun initialize() {
         configOptions.forEach { it.initialize() }
+    }
+
+    fun reset() {
+        configOptions.forEach { it.reset() }
     }
 
     fun apply(deviceConfig: DeviceConfig): DeviceConfig {

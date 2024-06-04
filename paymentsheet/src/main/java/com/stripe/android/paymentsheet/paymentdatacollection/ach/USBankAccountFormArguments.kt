@@ -1,9 +1,15 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
@@ -43,4 +49,41 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (String?) -> Unit,
-)
+) {
+    companion object {
+        fun create(viewModel: BaseSheetViewModel, selectedPaymentMethodCode: String): USBankAccountFormArguments {
+            val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
+            val isSaveForFutureUseValueChangeable = paymentMethodMetadata?.let {
+                isSaveForFutureUseValueChangeable(
+                    code = selectedPaymentMethodCode,
+                    metadata = it,
+                )
+            } ?: false
+            val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+            val initializationMode = (viewModel as? PaymentSheetViewModel)
+                ?.args
+                ?.initializationMode
+            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+                ?.intentConfiguration
+                ?.onBehalfOf
+            val stripeIntent = paymentMethodMetadata?.stripeIntent
+            return USBankAccountFormArguments(
+                showCheckbox = isSaveForFutureUseValueChangeable,
+                instantDebits = instantDebits,
+                onBehalfOf = onBehalfOf,
+                isCompleteFlow = viewModel is PaymentSheetViewModel,
+                isPaymentFlow = stripeIntent is PaymentIntent,
+                stripeIntentId = stripeIntent?.id,
+                clientSecret = stripeIntent?.clientSecret,
+                shippingDetails = viewModel.config.shippingDetails,
+                draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
+                onMandateTextChanged = viewModel::updateMandateText,
+                onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
+                onCollectBankAccountResult = null,
+                onUpdatePrimaryButtonUIState = viewModel::updateCustomPrimaryButtonUiState,
+                onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
+                onError = viewModel::onError
+            )
+        }
+    }
+}

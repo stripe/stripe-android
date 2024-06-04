@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter.Companion.EVENTS_TO_EMIT
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -81,7 +81,7 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
 }
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val locale: Locale,
     context: Context,
@@ -107,7 +107,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     }
 
     private suspend fun commonParams(): Map<String, String?> {
-        val manifest = getManifest()
+        val manifest = getOrFetchSync().manifest
         return mapOf(
             "las_client_secret" to configuration.financialConnectionsSessionClientSecret,
 //            "las_creator_client_secret": this.linkAccountSessionCreatorClientSecret,

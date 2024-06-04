@@ -498,6 +498,87 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `External payment method event should return expected event`() {
+        val newPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.ExternalPaymentMethod(
+                type = "external_fawry",
+                billingDetails = null,
+                label = "Fawry",
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = null,
+            ),
+            duration = 1.milliseconds,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_unknown_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "external_fawry",
+            )
+        )
+    }
+
+    @Test
+    fun `External payment method failure event should return expected event`() {
+        val newPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.ExternalPaymentMethod(
+                type = "external_fawry",
+                billingDetails = null,
+                label = "Fawry",
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = null,
+            ),
+            duration = 1.milliseconds,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.ExternalPaymentMethod,
+            ),
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_unknown_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "external_fawry",
+                "error_message" to "externalPaymentMethodError",
+            )
+        )
+    }
+
+    @Test
     fun `New payment method failure event should return expected event`() {
         val newPMEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,

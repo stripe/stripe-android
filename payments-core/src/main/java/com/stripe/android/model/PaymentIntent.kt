@@ -177,6 +177,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
                 StripeIntent.NextActionType.DisplayKonbiniDetails
             }
+            is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
+                StripeIntent.NextActionType.DisplayMultibancoDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -208,6 +211,12 @@ constructor(
 
     override val lastErrorMessage: String?
         get() = lastPaymentError?.message
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val requireCvcRecollection: Boolean
+        get() = paymentMethodOptionsJsonString?.let { json ->
+            JSONObject(json).optJSONObject(CARD)?.optBoolean(REQUIRE_CVC_RECOLLECTION) ?: false
+        } ?: false
 
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
@@ -451,5 +460,8 @@ constructor(
                 PaymentIntentJsonParser().parse(it)
             }
         }
+
+        internal const val CARD = "card"
+        internal const val REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
     }
 }

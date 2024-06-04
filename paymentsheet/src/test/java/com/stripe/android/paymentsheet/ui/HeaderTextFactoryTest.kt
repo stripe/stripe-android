@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import org.junit.Test
 import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR
@@ -110,5 +111,42 @@ class HeaderTextFactoryTest {
         )
 
         assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method)
+    }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when first opened`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = true, isEditing = false)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when first opened - FlowController`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = false, isEditing = false)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when editing`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = true, isEditing = true)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+    }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when editing - FlowController`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = false, isEditing = true)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+    }
+
+    private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean, isEditing: Boolean): Int? {
+        return HeaderTextFactory(isCompleteFlow = isCompleteFlow).create(
+            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
+            isWalletEnabled = false,
+            types = emptyList(),
+            isEditing,
+        )
     }
 }

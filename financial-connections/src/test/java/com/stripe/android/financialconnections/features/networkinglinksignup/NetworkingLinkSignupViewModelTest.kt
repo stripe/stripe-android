@@ -8,11 +8,10 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
-import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
@@ -38,19 +37,18 @@ class NetworkingLinkSignupViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val getAuthorizationSessionAccounts = mock<GetCachedAccounts>()
     private val navigationManager = NavigationManagerImpl()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
-    private val sync = mock<SynchronizeFinancialConnectionsSession>()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
     ) = NetworkingLinkSignupViewModel(
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         initialState = state,
@@ -58,7 +56,6 @@ class NetworkingLinkSignupViewModelTest {
         getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop(), eventTracker),
-        sync = sync,
         saveAccountToLink = saveAccountToLink,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentNoticeSheet = mock(),
@@ -71,15 +68,15 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "test@test.com"
         )
 
-        whenever(sync()).thenReturn(
+        whenever(getOrFetchSync(any())).thenReturn(
             syncResponse().copy(
+                manifest = manifest,
                 text = TextUpdate(
                     consent = null,
                     networkingLinkSignupPane = networkingLinkSignupPane()
                 )
             )
         )
-        whenever(getManifest()).thenReturn(manifest)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
@@ -92,7 +89,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Redirects to verification screen if entering returning user email`() = runTest {
         val manifest = ApiKeyFixtures.sessionManifest()
 
-        whenever(sync()).thenReturn(
+        whenever(getOrFetchSync(any())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -100,7 +97,7 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(getOrFetchSync().manifest).thenReturn(manifest)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
@@ -124,7 +121,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Enables Save To Link button if we encounter a returning user`() = runTest {
         val manifest = ApiKeyFixtures.sessionManifest()
 
-        whenever(sync()).thenReturn(
+        whenever(getOrFetchSync(any())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -132,7 +129,7 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(getOrFetchSync().manifest).thenReturn(manifest)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())

@@ -27,6 +27,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -59,7 +60,7 @@ internal fun FinancialConnectionsTopAppBar(
     state: TopAppBarState,
     onCloseClick: () -> Unit
 ) {
-    val elevation by animateDpAsState(
+    val elevation = animateDpAsState(
         targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
         label = "TopAppBarElevation",
     )
@@ -77,9 +78,10 @@ internal fun FinancialConnectionsTopAppBar(
 private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
     testMode: Boolean,
-    elevation: Dp,
+    elevation: State<Dp>,
     allowBackNavigation: Boolean,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
     val localBackPressed = onBackPressedDispatcher?.onBackPressedDispatcher
@@ -97,7 +99,7 @@ private fun FinancialConnectionsTopAppBar(
                 testmode = testMode
             )
         },
-        elevation = elevation,
+        elevation = 0.dp,
         navigationIcon = if (canShowBackIcon && allowBackNavigation) {
             {
                 BackButton(
@@ -117,7 +119,10 @@ private fun FinancialConnectionsTopAppBar(
             )
         },
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
-        contentColor = FinancialConnectionsTheme.colors.textBrand
+        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        modifier = modifier.graphicsLayer {
+            shadowElevation = elevation.value.toPx()
+        }
     )
 }
 

@@ -41,6 +41,8 @@
   <string name="stripe_paymentsheet_close">ปิด</string>
   <!-- A button used to confirm selecting a saved payment method -->
   <string name="stripe_paymentsheet_confirm">ยืนยัน</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">ยืนยัน CVC ของคุณ</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">ป้อนที่อยู่ด้วยตนเอง</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->

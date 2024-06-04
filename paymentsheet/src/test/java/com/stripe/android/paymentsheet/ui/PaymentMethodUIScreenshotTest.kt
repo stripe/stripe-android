@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentMethodUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -24,9 +23,9 @@ internal class PaymentMethodUIScreenshotTest {
     )
 
     @Test
-    fun testSelectedState() {
+    fun testSelectedStateForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -34,7 +33,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = true,
                 isEnabled = true,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -42,9 +41,9 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testUnselectedState() {
+    fun testUnselectedStateForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -52,7 +51,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = false,
                 isEnabled = true,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -60,9 +59,9 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testDisabled() {
+    fun testDisabledForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -70,7 +69,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = false,
                 isEnabled = false,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -78,17 +77,17 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testLongTitle() {
+    fun testLongTitleForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "The Greatest US Bank Account",
                 isSelected = false,
                 isEnabled = false,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )

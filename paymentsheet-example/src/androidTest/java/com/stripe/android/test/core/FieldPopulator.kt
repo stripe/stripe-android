@@ -43,6 +43,8 @@ internal class FieldPopulator(
     }
 
     fun populateFields() {
+        selectors.formElement.waitFor()
+
         populateCustomLpmFields()
 
         selectors.composeTestRule.waitForIdle()

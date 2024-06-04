@@ -45,7 +45,9 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -59,7 +61,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -68,6 +69,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -75,6 +78,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -92,6 +96,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
@@ -146,7 +151,7 @@ internal class DefaultFlowControllerTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val lifeCycleOwner = TestLifecycleOwner()
+    private val lifecycleOwner = TestLifecycleOwner()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -235,7 +240,15 @@ internal class DefaultFlowControllerTest {
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
-        lifeCycleOwner.currentState = Lifecycle.State.RESUMED
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<CvcRecollectionContract>(),
+                any()
+            )
+        ).thenReturn(mock())
+
+        lifecycleOwner.currentState = Lifecycle.State.RESUMED
     }
 
     @AfterTest
@@ -353,13 +366,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(
-                PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    label = "····$last4"
-                )
-            )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····$last4")
     }
 
     @Test
@@ -379,13 +388,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(
-                PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    label = "····$last4"
-                )
-            )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····$last4")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
         // customer, who doesn't have any saved payment methods
@@ -453,7 +458,7 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
-        lifeCycleOwner.currentState = Lifecycle.State.DESTROYED
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
         whenever(paymentOptionActivityLauncher.launch(any(), any())).thenThrow(IllegalStateException("Boom"))
         verifyNoInteractions(paymentResultCallback)
 
@@ -479,9 +484,15 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(VISA_PAYMENT_OPTION)
+        verify(paymentOptionCallback).onPaymentOption(
+            argThat {
+                drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
+                    label == "····4242"
+            }
+        )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····4242")
     }
 
     @Test
@@ -499,11 +510,14 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(
-                R.drawable.stripe_google_pay_mark,
-                "Google Pay"
-            )
+            argThat {
+                drawableResourceId == R.drawable.stripe_google_pay_mark &&
+                    label == "Google Pay"
+            }
         )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption?.label).isEqualTo("Google Pay")
     }
 
     @Test
@@ -577,8 +591,14 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
+            argThat {
+                drawableResourceId == R.drawable.stripe_google_pay_mark &&
+                    label == "Google Pay"
+            }
         )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption?.label).isEqualTo("Google Pay")
     }
 
     @Test
@@ -1823,6 +1843,43 @@ internal class DefaultFlowControllerTest {
         assertThat(isPhoneRequired).isFalse()
     }
 
+    @Test
+    fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+            error("I’m alive")
+        }
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+    }
+
+    @Test
+    fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+            ExternalPaymentMethodConfirmHandler { _, _ ->
+                error("I’m alive")
+            }
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
+    }
+
     private suspend fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -1918,10 +1975,11 @@ internal class DefaultFlowControllerTest {
     private fun createFlowController(
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
-        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock()
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
     ) = DefaultFlowController(
         viewModelScope = testScope,
-        lifecycleOwner = lifeCycleOwner,
+        lifecycleOwner = lifecycleOwner,
         activityResultRegistryOwner = activityResultRegistryOwner,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
@@ -1951,6 +2009,8 @@ internal class DefaultFlowControllerTest {
             paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+        errorReporter = FakeErrorReporter(),
+        cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
     )
 
     private fun createViewModel(): FlowControllerViewModel {
@@ -1993,10 +2053,6 @@ internal class DefaultFlowControllerTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-        )
-        private val VISA_PAYMENT_OPTION = PaymentOption(
-            drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-            label = "····4242"
         )
 
         private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(

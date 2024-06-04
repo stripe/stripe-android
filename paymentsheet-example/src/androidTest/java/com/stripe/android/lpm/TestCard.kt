@@ -23,15 +23,18 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 internal class TestCard : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "card",
+        authorizationAction = null,
+        executeInNightlyRun = true,
+    ).copy(
+        saveForFutureUseCheckboxVisible = true,
+    )
+
     @Test
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ).copy(
-                authorizationAction = null,
-                saveForFutureUseCheckboxVisible = true,
-            ),
+            testParameters,
             populateCustomLpmFields = {
                 populateCardDetails()
             },
@@ -41,9 +44,7 @@ internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ) { settings ->
+            testParameters.copyPlaygroundSettings { settings ->
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
@@ -53,10 +54,7 @@ internal class TestCard : BasePlaygroundTest() {
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-            }.copy(
-                authorizationAction = null,
-                saveForFutureUseCheckboxVisible = true,
-            ),
+            },
             populateCustomLpmFields = {
                 populateCardDetails()
                 populateEmail()
@@ -70,9 +68,7 @@ internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testCardWithCustomBillingDetailsCollectionWithDefaults() {
         testDriver.confirmNewOrGuestComplete(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ) { settings ->
+            testParameters.copyPlaygroundSettings { settings ->
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
@@ -82,10 +78,7 @@ internal class TestCard : BasePlaygroundTest() {
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-            }.copy(
-                authorizationAction = null,
-                saveForFutureUseCheckboxVisible = true,
-            ),
+            },
             populateCustomLpmFields = {
                 populateCardDetails()
             },
@@ -95,12 +88,7 @@ internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testCardInCustomFlow() {
         testDriver.confirmCustom(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ).copy(
-                authorizationAction = null,
-                saveForFutureUseCheckboxVisible = true,
-            ),
+            testParameters,
             populateCustomLpmFields = {
                 populateCardDetails()
             },
@@ -118,11 +106,7 @@ internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testDefaultSavedPaymentMethodUsedAfterSingleSave() {
         val cardNumber = "6011111111111117"
-        val testParameters = TestParameters.create(
-            paymentMethodCode = "card",
-        ).copy(
-            authorizationAction = null,
-            saveForFutureUseCheckboxVisible = true,
+        val testParameters = testParameters.copy(
             saveCheckboxValue = true,
         )
 
@@ -137,7 +121,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -160,11 +144,7 @@ internal class TestCard : BasePlaygroundTest() {
         val firstCardNumber = "6011111111111117"
         val secondCardNumber = "6011000990139424"
 
-        val testParameters = TestParameters.create(
-            paymentMethodCode = "card",
-        ).copy(
-            authorizationAction = null,
-            saveForFutureUseCheckboxVisible = true,
+        val testParameters = testParameters.copy(
             saveCheckboxValue = true,
         )
 
@@ -179,7 +159,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmExistingComplete(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
@@ -190,7 +170,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -212,11 +192,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testDefaultSavedPaymentMethodUsedAfterSingleSaveInCustomFlow() {
         val cardNumber = "6011111111111117"
 
-        val testParameters = TestParameters.create(
-            paymentMethodCode = "card",
-        ).copy(
-            authorizationAction = null,
-            saveForFutureUseCheckboxVisible = true,
+        val testParameters = testParameters.copy(
             saveCheckboxValue = true,
         )
 
@@ -231,7 +207,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -253,11 +229,7 @@ internal class TestCard : BasePlaygroundTest() {
         val cardNumber = "6011111111111117"
         val secondCardNumber = "6011000990139424"
 
-        val testParameters = TestParameters.create(
-            paymentMethodCode = "card",
-        ).copy(
-            authorizationAction = null,
-            saveForFutureUseCheckboxVisible = true,
+        val testParameters = testParameters.copy(
             saveCheckboxValue = true,
         )
 
@@ -271,7 +243,7 @@ internal class TestCard : BasePlaygroundTest() {
             },
         )
 
-        val customerId = state?.customerConfig?.id
+        val customerId = state?.asPaymentState()?.customerConfig?.id
 
         testDriver.confirmCustomAndBuy(
             customerId = customerId,
@@ -300,11 +272,8 @@ internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testCardWith3ds2() {
         testDriver.confirmNewOrGuestComplete(
-            TestParameters.create(
-                paymentMethodCode = "card",
-            ).copy(
+            testParameters.copy(
                 authorizationAction = AuthorizeAction.Authorize3ds2,
-                saveForFutureUseCheckboxVisible = true,
             ),
             populateCustomLpmFields = {
                 populateCardDetails()

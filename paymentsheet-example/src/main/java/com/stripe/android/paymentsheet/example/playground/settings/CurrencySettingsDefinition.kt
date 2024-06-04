@@ -12,10 +12,15 @@ internal object CurrencySettingsDefinition :
     PlaygroundSettingDefinition.Displayable<Currency> {
     override val displayName: String = "Currency"
 
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Currency>> =
-        Currency.entries.map {
-            option(it.displayName, it)
-        }
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = Currency.entries.map {
+        option(it.displayName, it)
+    }
 
     override fun configure(value: Currency, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.currency(value.value)

@@ -7,7 +7,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/web-testmode-data-testoauthinstitution-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=web&merchant=testmode
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=web&merchant=testmode&financial_connections_test_mode=true
 - tapOn:
     id: "connect_accounts"
 - extendedWaitUntil:

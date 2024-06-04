@@ -27,39 +27,44 @@ internal data class SupportedPaymentMethod(
     /** An optional dark theme icon url if it's supported. */
     val darkThemeIconUrl: String?,
 
-    /** Indicates if the lpm icon in the selector is a single color and should be tinted
-     * on selection.
-     */
-    val tintIconOnSelection: Boolean,
+    /** Indicates if the lpm icon in the selector requires tinting. */
+    val iconRequiresTinting: Boolean,
+
+    /** The subtitle, or marketing copy for an LPM. */
+    val subtitle: ResolvableString? = null,
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
         sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        tintIconOnSelection: Boolean = false,
+        iconRequiresTinting: Boolean = false,
+        subtitle: ResolvableString? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = resolvableString(id = displayNameResource),
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
-        tintIconOnSelection = tintIconOnSelection,
+        iconRequiresTinting = iconRequiresTinting,
+        subtitle = subtitle,
     )
 
     constructor(
         code: PaymentMethodCode,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        tintIconOnSelection: Boolean = false,
+        iconRequiresTinting: Boolean = false,
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
+        subtitle: ResolvableString? = null,
     ) : this(
         code = code,
         displayName = resolvableString(id = displayNameResource),
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,
-        tintIconOnSelection = tintIconOnSelection,
+        iconRequiresTinting = iconRequiresTinting,
+        subtitle = subtitle,
     )
 }

@@ -127,7 +127,6 @@
     "elements_enable_mobilepay": false,
     "elements_enable_mx_card_installments": false,
     "elements_enable_passive_captcha": false,
-    "elements_enable_payment_element_optimized_sign_up": true,
     "elements_enable_save_last_used_payment_method": true,
     "elements_enable_south_korea_market_underlying_pms": false,
     "elements_enable_use_last_used_payment_method": false,

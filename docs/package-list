@@ -82,6 +82,7 @@ com.stripe.android.ui.core.forms.resources.injection
 module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
+com.stripe.android.customersheet.ui
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.injection
@@ -107,6 +108,7 @@ module:stripe-ui-core
 com.stripe.android.uicore
 com.stripe.android.uicore.address
 com.stripe.android.uicore.elements
+com.stripe.android.uicore.elements.bottomsheet
 com.stripe.android.uicore.elements.menu
 com.stripe.android.uicore.format
 com.stripe.android.uicore.forms

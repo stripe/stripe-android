@@ -8,7 +8,11 @@ interface PaparazziConfigOption {
     fun apply(deviceConfig: DeviceConfig): DeviceConfig = deviceConfig
 
     fun initialize() {
-        // Nothing to do
+        // Do nothing by default.
+    }
+
+    fun reset() {
+        // Do nothing by default.
     }
 }
 

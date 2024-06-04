@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FakeAnalyticsRequestV2Storage
 import com.stripe.android.core.utils.FakeStripeNetworkClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -29,11 +30,13 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
     @Test
     fun `Enqueues requests directly if WorkManager is available`() = runTest {
         val networkClient = FakeStripeNetworkClient()
+        val storage = FakeAnalyticsRequestV2Storage()
 
         val executor = DefaultAnalyticsRequestV2Executor(
             application = application,
             networkClient = networkClient,
             logger = Logger.noop(),
+            storage = storage,
             isWorkManagerAvailable = { true },
         )
 
@@ -49,11 +52,13 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
     @Test
     fun `Executes requests directly if WorkManager isn't available`() = runTest {
         val networkClient = FakeStripeNetworkClient()
+        val storage = FakeAnalyticsRequestV2Storage()
 
         val executor = DefaultAnalyticsRequestV2Executor(
             application = application,
             networkClient = networkClient,
             logger = Logger.noop(),
+            storage = storage,
             isWorkManagerAvailable = { false },
         )
 

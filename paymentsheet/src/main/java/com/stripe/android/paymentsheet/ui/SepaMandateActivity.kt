@@ -22,11 +22,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -50,8 +50,12 @@ internal class SepaMandateActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState()
-                BottomSheet(state = bottomSheetState, onDismissed = { finish() }) {
+                val bottomSheetState = rememberStripeBottomSheetState()
+
+                ElementsBottomSheetLayout(
+                    state = bottomSheetState,
+                    onDismissed = this::finish,
+                ) {
                     SepaMandateScreen(
                         merchantName = merchantName,
                         acknowledgedCallback = {

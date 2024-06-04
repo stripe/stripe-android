@@ -11,14 +11,20 @@ internal object InitializationTypeSettingsDefinition :
     ),
     PlaygroundSettingDefinition.Displayable<InitializationType> {
     override val displayName: String = "Initialization"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<InitializationType>> =
-        listOf(
-            option("Normal", InitializationType.Normal),
-            option("Deferred CSC", InitializationType.DeferredClientSideConfirmation),
-            option("Deferred SSC", InitializationType.DeferredServerSideConfirmation),
-            option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation),
-            option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
-        )
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("Normal", InitializationType.Normal),
+        option("Deferred CSC", InitializationType.DeferredClientSideConfirmation),
+        option("Deferred SSC", InitializationType.DeferredServerSideConfirmation),
+        option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation),
+        option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
+    )
+
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 
     override fun configure(
         value: InitializationType,

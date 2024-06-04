@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.espresso.web
+    androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
 }
 
@@ -85,6 +86,8 @@ android {
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+        buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"
+        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),

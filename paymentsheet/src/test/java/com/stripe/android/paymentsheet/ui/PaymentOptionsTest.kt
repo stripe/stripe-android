@@ -7,7 +7,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import org.junit.Rule
@@ -28,7 +27,7 @@ class PaymentOptionsTest {
         var didCallOnAddCardPressed = false
 
         composeTestRule.setContent {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                     selectedIndex = 1,
@@ -43,7 +42,7 @@ class PaymentOptionsTest {
         }
 
         val label = "+ Add"
-        val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_$label"
+        val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$label"
 
         assertThat(didCallOnAddCardPressed).isFalse()
 
@@ -59,7 +58,7 @@ class PaymentOptionsTest {
         var didCallOnItemSelected = false
 
         composeTestRule.setContent {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                     selectedIndex = 1,
@@ -73,7 +72,7 @@ class PaymentOptionsTest {
             )
         }
 
-        val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay"
+        val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay"
 
         assertThat(didCallOnItemSelected).isFalse()
 

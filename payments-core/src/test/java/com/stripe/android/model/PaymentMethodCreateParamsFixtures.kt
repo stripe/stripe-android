@@ -114,6 +114,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS,
     )
 
+    internal val MULTIBANCO = PaymentMethodCreateParams.createMultibanco(
+        billingDetails = BILLING_DETAILS,
+    )
+
     internal val REVOLUT_PAY = PaymentMethodCreateParams.createRevolutPay(
         billingDetails = BILLING_DETAILS,
     )

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +57,8 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.strings.resolve
 import kotlinx.coroutines.delay
 
@@ -220,10 +223,17 @@ private fun PaymentSheetContent(
             )
         }
 
-        currentScreen.Content(
-            viewModel = viewModel,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            CompositionLocalProvider(
+                LocalAutofillEventReporter provides viewModel::reportAutofillEvent,
+                LocalCardNumberCompletedEventReporter provides viewModel::reportCardNumberCompleted,
+            ) {
+                currentScreen.Content(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+            }
+        }
 
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
@@ -235,7 +245,9 @@ private fun PaymentSheetContent(
         error?.let {
             ErrorMessage(
                 error = it,
-                modifier = Modifier.padding(vertical = 2.dp, horizontal = horizontalPadding),
+                modifier = Modifier
+                    .padding(vertical = 2.dp, horizontal = horizontalPadding)
+                    .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
         }
     }
@@ -338,4 +350,5 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowT
 }
 
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
+const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

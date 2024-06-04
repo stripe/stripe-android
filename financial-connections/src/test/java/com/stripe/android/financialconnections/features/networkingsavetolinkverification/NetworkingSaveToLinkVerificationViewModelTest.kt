@@ -5,12 +5,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -42,7 +43,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
@@ -58,7 +59,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getCachedAccounts = getCachedAccounts,
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
@@ -67,7 +68,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {
         val consumerSession = consumerSession()
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
         whenever(getCachedConsumerSession()).thenReturn(consumerSession)
 
         val viewModel = buildViewModel()
@@ -85,7 +86,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
-            whenever(getManifest()).thenReturn(sessionManifest())
+            whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
 
@@ -125,7 +126,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
-            whenever(getManifest()).thenReturn(sessionManifest())
+            whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
             whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException("error"))

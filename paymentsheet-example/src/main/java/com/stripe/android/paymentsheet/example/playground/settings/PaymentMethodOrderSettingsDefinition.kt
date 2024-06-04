@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -10,16 +12,31 @@ internal object PaymentMethodOrderSettingsDefinition :
     override val key: String = "paymentMethodOrder"
     override val displayName: String = "Payment method order"
     override val defaultValue: String = ""
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<String>> = emptyList()
 
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
 
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
+
     override fun configure(
         value: String,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    override fun configure(
+        value: String,
+        configurationBuilder: CustomerSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Customer,
+        configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })

@@ -5,11 +5,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -38,7 +39,7 @@ class LinkStepUpVerificationViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
@@ -51,7 +52,7 @@ class LinkStepUpVerificationViewModelTest {
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
     ) = LinkStepUpVerificationViewModel(
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         navigationManager = navigationManager,
         eventTracker = eventTracker,
         confirmVerification = confirmVerification,
@@ -100,8 +101,7 @@ class LinkStepUpVerificationViewModelTest {
         val email = "test@test.com"
         val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
 
-        whenever(getManifest())
-            .thenReturn(sessionManifest().copy(accountholderCustomerEmailAddress = email))
+        getManifestReturnsManifestWithEmail(email)
 
         buildViewModel().stateFlow.test {
             assertThat(awaitItem().payload).isInstanceOf(Loading::class.java)
@@ -148,9 +148,8 @@ class LinkStepUpVerificationViewModelTest {
             val selectedAccount = ApiKeyFixtures.cachedPartnerAccount()
 
             // verify succeeds
-            whenever(getManifest()).thenReturn(
-                sessionManifest().copy(accountholderCustomerEmailAddress = email)
-            )
+            getManifestReturnsManifestWithEmail(email)
+
             // cached accounts are available.
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
             // link succeeds
@@ -194,9 +193,11 @@ class LinkStepUpVerificationViewModelTest {
     private suspend fun getManifestReturnsManifestWithEmail(
         email: String
     ) {
-        whenever(getManifest()).thenReturn(
-            sessionManifest().copy(
-                accountholderCustomerEmailAddress = email
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse(
+                sessionManifest().copy(
+                    accountholderCustomerEmailAddress = email
+                )
             )
         )
     }

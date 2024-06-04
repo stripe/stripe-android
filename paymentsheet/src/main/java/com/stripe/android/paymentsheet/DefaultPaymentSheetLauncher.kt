@@ -9,7 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -28,6 +28,7 @@ internal class DefaultPaymentSheetLauncher(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
                     super.onDestroy(owner)
                 }
             }

@@ -98,6 +98,7 @@ sealed interface StripeIntent : StripeModel {
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
+        DisplayMultibancoDetails("multibanco_display_details"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
@@ -171,8 +172,13 @@ sealed interface StripeIntent : StripeModel {
     }
 
     sealed class NextActionData : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        interface DisplayVoucherDetails {
+            val hostedVoucherUrl: String?
+        }
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayOxxoDetails(
             /**
              * The timestamp after which the OXXO expires.
@@ -187,8 +193,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
-            val hostedVoucherUrl: String? = null
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null
+        ) : NextActionData(), DisplayVoucherDetails
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -196,8 +202,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this payment.
              */
-            val hostedVoucherUrl: String? = null,
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -205,8 +211,17 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this payment.
              */
-            val hostedVoucherUrl: String? = null,
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayMultibancoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         /**
          * Contains instructions for authenticating by redirecting your customer to another

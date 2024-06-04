@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,9 +24,9 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
-import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
@@ -113,7 +114,7 @@ internal fun SelectPaymentMethod(
                 .padding(horizontal = horizontalPadding)
         )
 
-        PaymentOptions(
+        SavedPaymentMethodTabLayoutUI(
             state = PaymentOptionsStateFactory.create(
                 paymentMethods = viewState.savedPaymentMethods,
                 showGooglePay = viewState.isGooglePayEnabled,
@@ -218,7 +219,7 @@ internal fun AddPaymentMethod(
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
-                onLinkSignupStateChanged = { _, _ -> },
+                onLinkSignupStateChanged = { _ -> },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
                 onFormFieldValuesChanged = {
@@ -293,8 +294,11 @@ private fun EditPaymentMethod(
     }
 }
 
-internal const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
-internal const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
 
 private class DefaultCardNumberCompletedEventReporter(
     private val viewActionHandler: (CustomerSheetViewAction) -> Unit

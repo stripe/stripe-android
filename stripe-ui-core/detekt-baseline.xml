@@ -12,6 +12,7 @@
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, boxShape: Shape = MaterialTheme.shapes.medium, boxTextStyle: TextStyle = OTPElementUI.defaultTextStyle(), boxSpacing: Dp = 8.dp, middleSpacing: Dp = 20.dp, otpInputPlaceholder: String = "●", colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.stripeColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
+    <ID>MagicNumber:AnimationConstants.kt$34</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
@@ -29,6 +30,7 @@
     <ID>MagicNumber:StateFlows.kt$3</ID>
     <ID>MagicNumber:StateFlows.kt$4</ID>
     <ID>MagicNumber:StateFlows.kt$5</ID>
+    <ID>MagicNumber:StripeBottomSheetState.kt$StripeBottomSheetState$10</ID>
     <ID>MagicNumber:StripeTheme.kt$0.15</ID>
     <ID>MagicNumber:StripeTheme.kt$0.32</ID>
     <ID>MagicNumber:StripeTheme.kt$3</ID>

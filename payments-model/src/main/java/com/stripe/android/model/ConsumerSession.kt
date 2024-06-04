@@ -18,6 +18,8 @@ data class ConsumerSession(
     val clientSecret: String = "",
     @SerialName("email_address")
     val emailAddress: String,
+    @SerialName("redacted_formatted_phone_number")
+    val redactedFormattedPhoneNumber: String,
     @SerialName("redacted_phone_number")
     val redactedPhoneNumber: String,
     @SerialName("verification_sessions")

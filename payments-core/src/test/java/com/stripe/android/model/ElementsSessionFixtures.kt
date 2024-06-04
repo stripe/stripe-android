@@ -1234,7 +1234,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_mx_card_installments": false,
                     "elements_enable_passive_captcha": true,
                     "elements_enable_passive_hcaptcha_in_payment_method_creation": true,
-                    "elements_enable_payment_element_optimized_sign_up": true,
                     "elements_enable_payment_element_postal_validation": true,
                     "elements_enable_read_allow_redisplay": false,
                     "elements_enable_save_for_future_payments_pre_check": false,
@@ -1251,7 +1250,6 @@ internal object ElementsSessionFixtures {
                     "enable_third_party_recurring_express_checkout_element": false,
                     "financial_connections_enable_deferred_intent_flow": true,
                     "legacy_confirmation_tokens": false,
-                    "link_2024_rebrand_m1": true,
                     "link_enable_card_brand_choice": true,
                     "link_purchase_protections_enabled": false,
                     "link_share_expand_payment_method": true,
@@ -1266,7 +1264,6 @@ internal object ElementsSessionFixtures {
                     "type": "shopping"
                 },
                 "link_settings": {
-                    "link_2024_rebrand_m1": true,
                     "link_authenticated_change_event_enabled": false,
                     "link_bank_incentives_enabled": false,
                     "link_bank_onboarding_enabled": false,

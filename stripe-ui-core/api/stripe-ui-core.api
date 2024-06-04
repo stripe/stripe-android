@@ -246,6 +246,17 @@ public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun TextFieldSection-vbMXUkU (Landroidx/compose/ui/Modifier;Lcom/stripe/android/uicore/elements/TextFieldController;IZZLjava/lang/Integer;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class com/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSheetLayoutInfoKt {
+	public static final fun rememberStripeBottomSheetLayoutInfo-Hde_KZM (FJJLandroidx/compose/runtime/Composer;II)Lcom/stripe/android/uicore/elements/bottomsheet/StripeBottomSheetLayoutInfo;
+}
+
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

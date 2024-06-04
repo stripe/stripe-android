@@ -76,6 +76,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
             }
             eventTracker.track(
                 PollAttachPaymentsSucceeded(
+                    pane = PANE,
                     authSessionId = authSession.id,
                     duration = millis
                 )

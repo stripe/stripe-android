@@ -11,7 +11,7 @@ internal object MockPaymentMethodsFactory {
                 code = "card",
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-                tintIconOnSelection = true
+                iconRequiresTinting = true
             ),
             mockPaymentMethod(
                 code = "klarna",
@@ -35,7 +35,7 @@ internal object MockPaymentMethodsFactory {
         code: String,
         displayNameResource: Int,
         iconResource: Int,
-        tintIconOnSelection: Boolean = false
+        iconRequiresTinting: Boolean = false
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = code,
@@ -43,7 +43,7 @@ internal object MockPaymentMethodsFactory {
             iconResource = iconResource,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            tintIconOnSelection = tintIconOnSelection,
+            iconRequiresTinting = iconRequiresTinting,
         )
     }
 }

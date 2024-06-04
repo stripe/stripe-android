@@ -6,7 +6,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 
 internal class CustomerSheetPage(
     private val composeTestRule: ComposeTestRule,
@@ -18,7 +18,7 @@ internal class CustomerSheetPage(
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$text")
+        composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$text")
             .performClick()
 
         composeTestRule.waitForIdle()

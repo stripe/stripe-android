@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
     private val navigationManager: NavigationManager,
@@ -63,7 +63,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-            runCatching { getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) } }
+            runCatching { getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) } }
                 .onSuccess { manifest ->
                     lookupConsumerAndStartVerification(
                         email = requireNotNull(manifest.accountholderCustomerEmailAddress),

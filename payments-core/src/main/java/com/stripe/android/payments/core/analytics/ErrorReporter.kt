@@ -129,6 +129,12 @@ interface ErrorReporter {
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
         ),
+        EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
+            eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
+        ),
+        EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
+            eventName = "paymentsheet.external_payment_method.launcher_is_null"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -147,9 +153,6 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
-        ),
-        GOOGLE_PAY_UNEXPECTED_RESULT_CODE(
-            partialEventName = "google_pay.confirm.unexpected_result_code"
         ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
@@ -178,6 +181,12 @@ interface ErrorReporter {
         INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
             partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
         ),
+        EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
+            partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
+        ),
+        CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
+            partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
+        ),
         ;
 
         override val eventName: String
@@ -205,6 +214,9 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_SUCCESS(
             eventName = "link.log_out.success"
+        ),
+        EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
+            eventName = "paymentsheet.external_payment_method.launch_success"
         ),
     }
 }

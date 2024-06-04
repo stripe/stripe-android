@@ -48,12 +48,14 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHos
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -98,10 +100,19 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         setContent {
             FinancialConnectionsTheme {
                 val state by viewModel.stateFlow.collectAsState()
-                NavHost(
-                    initialPane = state.initialPane,
-                    testMode = state.testMode,
+                val bottomSheetState = rememberStripeBottomSheetState(
+                    initialValue = ModalBottomSheetValue.Expanded,
                 )
+
+                FinancialConnectionsBottomSheetLayout(
+                    state = bottomSheetState,
+                    onDismissed = viewModel::onBackPressed,
+                ) {
+                    NavHost(
+                        initialPane = state.initialPane,
+                        testMode = state.testMode,
+                    )
+                }
             }
         }
     }

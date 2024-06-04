@@ -6,12 +6,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.assertCompleted
+import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,13 +23,13 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetBillingConfigurationTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
-
+    private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val testRules: TestRules = TestRules.create(composeTestRule = composeTestRule)
+
+    private val networkRule = testRules.networkRule
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
@@ -167,5 +170,53 @@ internal class PaymentSheetBillingConfigurationTest {
         page.clickPrimaryButton()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testAddressInputNotReset() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = IntegrationType.Compose,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "foo@bar.com",
+                        phone = "+13105551234",
+                        address = PaymentSheet.Address(
+                            postalCode = "94111",
+                            country = "US",
+                            state = "CA",
+                            city = "South San Francisco",
+                            line1 = "123 Main Street",
+                            line2 = null,
+                        ),
+                    ),
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                        attachDefaultsToPaymentMethod = false,
+                    ),
+                ),
+            )
+        }
+
+        page.replaceText("123 Main Street", "123 Main Road")
+        page.replaceText("MM / YY", "12/34")
+
+        // Check that line 1 was not reset to default value
+        page.waitForText("123 Main Road")
+
+        testContext.markTestSucceeded()
     }
 }

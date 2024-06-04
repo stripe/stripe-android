@@ -1460,12 +1460,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun retrieveCardElementConfig(
         requestOptions: ApiRequest.Options,
+        params: Map<String, String>?
     ): Result<MobileCardElementConfig> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = mobileCardElementConfigUrl,
                 options = requestOptions,
-                params = null,
+                params = params,
             ),
             jsonParser = MobileCardElementConfigParser(),
         )
@@ -1493,7 +1494,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
-            params.externalPaymentMethods?.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
+            params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }

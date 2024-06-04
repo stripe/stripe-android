@@ -17,6 +17,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -29,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -49,8 +52,10 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -138,8 +143,9 @@ internal abstract class BaseSheetViewModel(
             currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,
-        ) { screen, walletsState, supportedPaymentMethods ->
-            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods)
+            editing,
+        ) { screen, walletsState, supportedPaymentMethods, editing ->
+            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods, editing)
         }
     }
 
@@ -166,6 +172,7 @@ internal abstract class BaseSheetViewModel(
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
 
+    private val linkInlineSignUpState = MutableStateFlow<InlineSignupViewState?>(null)
     protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
 
     private var previouslySentDeepLinkEvent: Boolean
@@ -193,7 +200,7 @@ internal abstract class BaseSheetViewModel(
      * save a new payment method that is added so that the payment data entered is recovered when
      * the user returns to that payment method type.
      */
-    abstract var newPaymentSelection: PaymentSelection.New?
+    abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -216,7 +223,7 @@ internal abstract class BaseSheetViewModel(
         )
     }
 
-    private fun providePaymentMethodName(code: PaymentMethodCode?): String {
+    internal fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
         }?.displayName?.resolve(getApplication()).orEmpty()
@@ -254,13 +261,7 @@ internal abstract class BaseSheetViewModel(
     )
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
-        get() = when (val selection = newPaymentSelection) {
-            is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
-            is PaymentSelection.New.Card,
-            is PaymentSelection.New.USBankAccount,
-            is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-            else -> _supportedPaymentMethodsFlow.value.first()
-        }
+        get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
 
     init {
         viewModelScope.launch {
@@ -282,7 +283,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             currentScreen.collectLatest { screen ->
                 when (screen) {
-                    is AddFirstPaymentMethod, AddAnotherPaymentMethod -> {
+                    is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
                     }
                     is PaymentSheetScreen.EditPaymentMethod,
@@ -291,6 +292,40 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
+                    is PaymentSheetScreen.Form, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            var inLinkSignUpMode = false
+
+            combine(
+                linkHandler.linkInlineSelection,
+                selection,
+                linkInlineSignUpState
+            ).collectLatest { (linkInlineSelection, paymentSelection, linkInlineSignUpState) ->
+                // Only reset custom primary button state if we haven't already
+                if (paymentSelection !is PaymentSelection.New.Card) {
+                    if (inLinkSignUpMode) {
+                        // US bank account will update the custom primary state on its own
+                        if (paymentSelection !is PaymentSelection.New.USBankAccount) {
+                            updateLinkPrimaryButtonUiState(null)
+                        }
+
+                        inLinkSignUpMode = false
+                    }
+
+                    return@collectLatest
+                }
+
+                inLinkSignUpMode = true
+
+                if (linkInlineSignUpState != null) {
+                    updatePrimaryButtonForLinkSignup(linkInlineSignUpState)
+                } else if (linkInlineSelection != null) {
+                    updatePrimaryButtonForLinkInline()
                 }
             }
         }
@@ -321,20 +356,23 @@ internal abstract class BaseSheetViewModel(
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    private fun transitionTo(target: PaymentSheetScreen) {
+    fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { (it - PaymentSheetScreen.Loading) + target }
     }
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.Loading,
+            is PaymentSheetScreen.EditPaymentMethod,
+            is PaymentSheetScreen.Form,
+            is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
+            is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }
@@ -437,8 +475,11 @@ internal abstract class BaseSheetViewModel(
     abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
 
     fun updateSelection(selection: PaymentSelection?) {
-        if (selection is PaymentSelection.New) {
-            newPaymentSelection = selection
+        when (selection) {
+            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.ExternalPaymentMethod ->
+                newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
+            else -> Unit
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
@@ -644,11 +685,13 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         walletsState: WalletsState?,
         supportedPaymentMethods: List<PaymentMethodCode>,
+        editing: Boolean,
     ): Int? {
         return headerTextFactory.create(
             screen = screen,
             isWalletEnabled = walletsState != null,
             types = supportedPaymentMethods,
+            isEditing = editing,
         )
     }
 
@@ -664,6 +707,10 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun onLinkSignUpStateUpdated(state: InlineSignupViewState) {
+        linkInlineSignUpState.value = state
+    }
+
     fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(
@@ -673,14 +720,14 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun formElementsForCode(code: String): List<FormElement> {
-        val currentSelection = newPaymentSelection?.takeIf { it.paymentMethodCreateParams.typeCode == code }
+        val currentSelection = newPaymentSelection?.takeIf { it.getType() == code }
 
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
-                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+                paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+                paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),
         ) ?: emptyList()
     }
@@ -766,6 +813,17 @@ internal abstract class BaseSheetViewModel(
         eventReporter.onCardNumberCompleted()
     }
 
+    fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        paymentMethodMetadata.value?.let { paymentMethodMetadata ->
+            val newSelection = formValues?.transformToPaymentSelection(
+                context = getApplication(),
+                paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            updateSelection(newSelection)
+        }
+    }
+
     private fun reportFormShown(code: String) {
         /*
          * Prevents this event from being reported multiple times on the same payment form after process death. We
@@ -787,6 +845,51 @@ internal abstract class BaseSheetViewModel(
     abstract fun onError(error: String? = null)
 
     data class UserErrorMessage(val message: String)
+
+    internal sealed interface NewOrExternalPaymentSelection {
+
+        val paymentSelection: PaymentSelection
+
+        fun getPaymentMethodCode(): PaymentMethodCode
+
+        fun getType(): String
+
+        fun getPaymentMethodCreateParams(): PaymentMethodCreateParams?
+
+        fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
+
+        data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
+
+            override fun getPaymentMethodCode(): PaymentMethodCode {
+                return when (paymentSelection) {
+                    is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
+                    is PaymentSelection.New.Card,
+                    is PaymentSelection.New.USBankAccount,
+                    is PaymentSelection.New.GenericPaymentMethod -> paymentSelection.paymentMethodCreateParams.typeCode
+                }
+            }
+
+            override fun getType(): String = paymentSelection.paymentMethodCreateParams.typeCode
+
+            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams =
+                paymentSelection.paymentMethodCreateParams
+
+            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? =
+                paymentSelection.paymentMethodExtraParams
+        }
+
+        data class External(override val paymentSelection: PaymentSelection.ExternalPaymentMethod) :
+            NewOrExternalPaymentSelection {
+
+            override fun getPaymentMethodCode(): PaymentMethodCode = paymentSelection.type
+
+            override fun getType(): String = paymentSelection.type
+
+            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams? = null
+
+            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
+        }
+    }
 
     companion object {
         internal const val SAVED_CUSTOMER = "customer_info"

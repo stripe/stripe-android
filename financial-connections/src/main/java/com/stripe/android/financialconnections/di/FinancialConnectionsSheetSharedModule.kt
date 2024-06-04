@@ -8,11 +8,13 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.networking.AnalyticsRequestV2Storage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
@@ -22,7 +24,7 @@ import com.stripe.android.financialconnections.analytics.DefaultFinancialConnect
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.common.enableWorkManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
@@ -55,6 +57,10 @@ import kotlin.coroutines.CoroutineContext
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
 internal interface FinancialConnectionsSheetSharedModule {
+
+    @Binds
+    @Singleton
+    fun bindsAnalyticsRequestV2Storage(impl: RealAnalyticsRequestV2Storage): AnalyticsRequestV2Storage
 
     @Binds
     @Singleton
@@ -95,14 +101,14 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         fun providesAnalyticsTracker(
             context: Application,
-            getManifest: GetManifest,
+            getOrFetchSync: GetOrFetchSync,
             locale: Locale?,
             configuration: FinancialConnectionsSheet.Configuration,
             requestExecutor: AnalyticsRequestV2Executor,
         ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
             context = context,
             configuration = configuration,
-            getManifest = getManifest,
+            getOrFetchSync = getOrFetchSync,
             locale = locale ?: Locale.getDefault(),
             requestExecutor = requestExecutor,
         )
@@ -149,10 +155,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @Singleton
         internal fun providesIsWorkManagerAvailable(
-            getManifest: GetManifest,
+            getOrFetchSync: GetOrFetchSync,
         ): IsWorkManagerAvailable {
             return RealIsWorkManagerAvailable(
-                isEnabledForMerchant = { getManifest().enableWorkManager() },
+                isEnabledForMerchant = { getOrFetchSync().manifest.enableWorkManager() },
             )
         }
 

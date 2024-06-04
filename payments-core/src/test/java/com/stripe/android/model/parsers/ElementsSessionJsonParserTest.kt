@@ -20,7 +20,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -46,7 +46,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -71,7 +71,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -88,7 +88,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -115,7 +115,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -130,7 +130,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -145,7 +145,7 @@ class ElementsSessionJsonParserTest {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -162,7 +162,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -184,7 +184,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -207,7 +207,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -231,7 +231,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -255,7 +255,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -277,7 +277,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -298,7 +298,7 @@ class ElementsSessionJsonParserTest {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         ).parse(
@@ -329,7 +329,7 @@ class ElementsSessionJsonParserTest {
                     paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 ),
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
             timeProvider = { 1 }
@@ -371,7 +371,7 @@ class ElementsSessionJsonParserTest {
                     paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 ),
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
             timeProvider = { 1 }
@@ -408,7 +408,7 @@ class ElementsSessionJsonParserTest {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
         )
@@ -424,7 +424,7 @@ class ElementsSessionJsonParserTest {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
         )
@@ -440,7 +440,7 @@ class ElementsSessionJsonParserTest {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
         )
@@ -490,7 +490,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test",
         )
@@ -545,7 +545,7 @@ class ElementsSessionJsonParserTest {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             apiKey = "test"
         )

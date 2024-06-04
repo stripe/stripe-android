@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -30,13 +30,13 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -66,7 +66,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -77,7 +77,7 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -102,7 +102,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -113,7 +113,7 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -238,7 +238,7 @@ class GooglePayJsonFactoryTest {
             }
 
         assertThat(allowedCardNetworks)
-            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"))
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
     }
 
     @Test
@@ -255,7 +255,7 @@ class GooglePayJsonFactoryTest {
                 }
 
         assertThat(allowedCardNetworks)
-            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO", "JCB"))
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "JCB"))
     }
 
     @Test

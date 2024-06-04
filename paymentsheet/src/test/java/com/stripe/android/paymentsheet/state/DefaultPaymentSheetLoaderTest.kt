@@ -1298,7 +1298,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     private suspend fun testExternalPaymentMethods(
-        requestedExternalPaymentMethods: List<String>?,
+        requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
         expectedExternalPaymentMethods: List<String>?
     ) {

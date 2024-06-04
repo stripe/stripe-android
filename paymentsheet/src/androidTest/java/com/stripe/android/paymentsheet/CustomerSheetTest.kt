@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -24,25 +23,20 @@ import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.PrefsTestStore
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
-import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
-    private val composeTestRule = createEmptyComposeRule()
-    private val retryRule = RetryRule(5)
-    private val networkRule = NetworkRule()
-
     @get:Rule
-    val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(composeTestRule)
-        .around(retryRule)
-        .around(networkRule)
+    val testRules: TestRules = TestRules.create()
+
+    private val composeTestRule = testRules.compose
+    private val networkRule = testRules.networkRule
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
 

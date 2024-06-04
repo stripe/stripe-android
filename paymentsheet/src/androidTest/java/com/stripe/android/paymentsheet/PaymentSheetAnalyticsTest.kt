@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -17,32 +16,28 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
-import com.stripe.android.testing.RetryRule
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
-    private val composeTestRule = createEmptyComposeRule()
-    private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
 
     @get:Rule
-    val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(composeTestRule)
-        .around(retryRule)
-        .around(networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+
+    private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 

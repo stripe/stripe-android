@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -26,6 +27,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher,
+                handle = SavedStateHandle()
             )
 
             viewModel.isCbcEligible.test {
@@ -44,6 +46,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher,
+                handle = SavedStateHandle()
             )
 
             viewModel.isCbcEligible.test {
@@ -61,12 +64,71 @@ class CardWidgetViewModelTest {
             paymentConfigProvider = { paymentConfig },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher,
+            handle = SavedStateHandle()
         )
 
         viewModel.isCbcEligible.test {
             assertThat(awaitItem()).isFalse()
             stripeRepository.enqueueFailure()
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `Saves OBO to savedStateHandle`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+        val handle = SavedStateHandle()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = handle
+        )
+
+        viewModel.onBehalfOf = "test"
+        val obo: String? = handle["on_behalf_of"]
+        assertThat(obo).isEqualTo("test")
+    }
+
+    @Test
+    fun `Setting valid OBO re-fetches correct eligibility`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = SavedStateHandle()
+        )
+
+        viewModel.isCbcEligible.test {
+            assertThat(awaitItem()).isFalse()
+            stripeRepository.enqueueEligible()
+            viewModel.onBehalfOf = "valid_obo"
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `Setting invalid OBO re-fetches correct eligibility`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = SavedStateHandle()
+        )
+
+        stripeRepository.enqueueEligible()
+
+        viewModel.isCbcEligible.test {
+            viewModel.onBehalfOf = "valid_obo"
+            assertThat(awaitItem()).isTrue()
+            stripeRepository.enqueueNotEligible()
+            viewModel.onBehalfOf = "invalid_obo"
+            assertThat(awaitItem()).isFalse()
         }
     }
 }

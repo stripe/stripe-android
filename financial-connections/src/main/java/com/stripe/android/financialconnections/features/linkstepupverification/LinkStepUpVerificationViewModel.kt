@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -50,7 +50,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     @Assisted initialState: LinkStepUpVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val confirmVerification: ConfirmVerification,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
@@ -74,7 +74,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     }
 
     private suspend fun lookupAndStartVerification() = runCatching {
-        getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) }
+        getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) }
     }
         .onFailure { setState { copy(payload = Fail(it)) } }
         .onSuccess { manifest ->
@@ -184,7 +184,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     }
 
     private suspend fun onResendOtp() = runCatching {
-        getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) }
+        getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) }
     }
         .onFailure { setState { copy(resendOtp = Fail(it)) } }
         .onSuccess { manifest ->

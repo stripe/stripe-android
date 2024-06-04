@@ -30,9 +30,10 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
-import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
@@ -62,7 +63,7 @@ import javax.inject.Named
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     savedStateHandle: SavedStateHandle,
-    private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
+    private val getOrFetchSync: GetOrFetchSync,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -71,7 +72,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    initialState: FinancialConnectionsSheetState
+    initialState: FinancialConnectionsSheetState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -106,7 +107,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun fetchManifest() {
         viewModelScope.launch {
             kotlin.runCatching {
-                synchronizeFinancialConnectionsSession()
+                getOrFetchSync(refetchCondition = Always)
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
@@ -129,7 +130,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val manifest = sync.manifest
         val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
-        viewModelScope.launch { nativeRouter.logExposure(manifest, isInstantDebits) }
+        nativeRouter.logExposure(manifest, isInstantDebits)
         val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
         if (hostedAuthUrl == null) {
             finishWithResult(
@@ -209,6 +210,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 activityRecreated = true
             )
         }
+    }
+
+    fun onDismissed() {
+        finishWithResult(
+            state = stateFlow.value,
+            result = Canceled
+        )
     }
 
     /**

@@ -141,10 +141,12 @@ private fun Header(payload: Payload) {
         Text(
             text = stringResource(R.string.stripe_networking_verification_title),
             style = FinancialConnectionsTheme.typography.headingXLarge,
+            color = FinancialConnectionsTheme.colors.textDefault,
         )
         Text(
             text = stringResource(R.string.stripe_networking_verification_desc, payload.phoneNumber),
             style = FinancialConnectionsTheme.typography.bodyMedium,
+            color = FinancialConnectionsTheme.colors.textDefault,
         )
     }
 }

@@ -7,13 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.utils.fadeOut
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -124,32 +123,25 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     GooglePayPaymentMethodLauncher.Result.Canceled
                 )
             }
-            AutoResolveHelper.RESULT_ERROR -> {
+            else -> {
                 val status = taskResult.status
                 val statusMessage = status.statusMessage.orEmpty()
-                val statusCode = status.statusCode
+                val statusCode = status.statusCode.toString()
+
                 errorReporter.report(
                     ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
                     additionalNonPiiParams = mapOf(
                         "status_message" to statusMessage,
-                        "status_code" to statusCode.toString(),
+                        "status_code" to statusCode,
                     )
                 )
-                updateResult(
+
+                viewModel.updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay failed with error $statusCode: $statusMessage"
+                            "Google Pay failed with error ${status.statusCode}: ${status.statusMessage.orEmpty()}"
                         ),
-                        googlePayStatusCodeToErrorCode(statusCode)
-                    )
-                )
-            }
-            else -> {
-                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
-                updateResult(
-                    GooglePayPaymentMethodLauncher.Result.Failed(
-                        RuntimeException("Google Pay returned an unexpected result code."),
-                        GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+                        googlePayStatusCodeToErrorCode(status.statusCode)
                     )
                 )
             }

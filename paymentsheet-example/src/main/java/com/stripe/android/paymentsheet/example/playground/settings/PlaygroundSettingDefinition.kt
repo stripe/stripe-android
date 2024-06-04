@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal interface PlaygroundSettingDefinition<T> {
     val defaultValue: T
@@ -10,8 +13,17 @@ internal interface PlaygroundSettingDefinition<T> {
     fun configure(
         value: T,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PaymentSheetConfigurationData,
+    ) {
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun configure(
+        value: T,
+        configurationBuilder: CustomerSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Customer,
+        configurationData: CustomerSheetConfigurationData,
     ) {
     }
 
@@ -21,7 +33,15 @@ internal interface PlaygroundSettingDefinition<T> {
     ) {
     }
 
+    fun configure(
+        value: T,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder,
+    ) {
+    }
+
     fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
+
+    fun applicable(configurationData: PlaygroundConfigurationData): Boolean = true
 
     fun saveable(): Saveable<T>? {
         @Suppress("UNCHECKED_CAST")
@@ -52,6 +72,27 @@ internal interface PlaygroundSettingDefinition<T> {
         }
     }
 
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    data class CustomerSheetConfigurationData(
+        private val configurationBuilder: CustomerSheet.Configuration.Builder,
+        var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration()
+    ) {
+        // Billing details is a nested configuration, but we have individual settings for it in the
+        // UI, this helper keeps all of the configurations, rather than just the most recent.
+        fun updateBillingDetails(
+            block: PaymentSheet.BillingDetailsCollectionConfiguration.() ->
+            PaymentSheet.BillingDetailsCollectionConfiguration
+        ) {
+            billingDetailsCollectionConfiguration.apply {
+                billingDetailsCollectionConfiguration = block()
+            }
+            configurationBuilder.billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration
+            )
+        }
+    }
+
     interface Saveable<T> {
         val key: String
         val defaultValue: T
@@ -61,9 +102,10 @@ internal interface PlaygroundSettingDefinition<T> {
             get() = true
     }
 
-    interface Displayable<T> : PlaygroundSettingDefinition<T> {
+    sealed interface Displayable<T> : PlaygroundSettingDefinition<T> {
         val displayName: String
-        val options: List<Option<T>>
+
+        fun createOptions(configurationData: PlaygroundConfigurationData): List<Option<T>>
 
         fun option(name: String, value: T): Option<T> {
             return Option(name, value)

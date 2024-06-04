@@ -10,7 +10,7 @@ internal object LpmRepositoryTestHelpers {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
-        tintIconOnSelection = true,
+        iconRequiresTinting = true,
     )
 
     val usBankAccount: SupportedPaymentMethod = SupportedPaymentMethod(
@@ -19,7 +19,7 @@ internal object LpmRepositoryTestHelpers {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
-        tintIconOnSelection = true,
+        iconRequiresTinting = true,
     )
 
     private fun cardFromPaymentMethodMetadata(): SupportedPaymentMethod? = runCatching {

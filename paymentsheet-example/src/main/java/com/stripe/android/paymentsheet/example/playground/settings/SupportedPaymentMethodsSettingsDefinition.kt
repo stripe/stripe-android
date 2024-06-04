@@ -15,8 +15,15 @@ internal object SupportedPaymentMethodsSettingsDefinition :
 
     override val key: String = "supportedPaymentMethods"
     override val displayName: String = "Supported Payment Methods (comma separated)"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<String>> = emptyList()
     override val defaultValue: String = ""
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
+
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
