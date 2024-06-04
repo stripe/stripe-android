@@ -5,6 +5,7 @@
     "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
     "email_address": "test@stripe.com",
     "redacted_phone_number": "+1********56",
+    "redacted_formatted_phone_number": "(***) *** **56",
     "support_payment_details_types": [
       "CARD"
     ],

@@ -14,13 +14,19 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 internal class TestCardInCustomerSheet : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "card",
+        executeInNightlyRun = true,
+    ).copyPlaygroundSettings { settings ->
+        settings[CustomerSettingsDefinition] = CustomerType.NEW
+        settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
+    }
+
     @Test
     fun testCard() {
         testDriver.savePaymentMethodInCustomerSheet(
-            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            testParameters.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
-                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -31,10 +37,8 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     @Test
     fun testCardWithNonUsMerchant() {
         testDriver.savePaymentMethodInCustomerSheet(
-            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            testParameters.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.FR
-                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
             },
             populateCustomLpmFields = {
                 populateCardDetails()

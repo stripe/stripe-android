@@ -54,7 +54,8 @@ class FakeLinkConfigurationCoordinator(
         return Result.success(
             ConsumerSession(
                 emailAddress = "email@email.com",
-                redactedPhoneNumber = "+15555555555",
+                redactedPhoneNumber = "+1********55",
+                redactedFormattedPhoneNumber = "(***) *** **55",
             )
         )
     }

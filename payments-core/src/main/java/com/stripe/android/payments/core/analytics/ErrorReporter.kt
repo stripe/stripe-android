@@ -154,9 +154,6 @@ interface ErrorReporter {
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
         ),
-        GOOGLE_PAY_UNEXPECTED_RESULT_CODE(
-            partialEventName = "google_pay.confirm.unexpected_result_code"
-        ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
         ),

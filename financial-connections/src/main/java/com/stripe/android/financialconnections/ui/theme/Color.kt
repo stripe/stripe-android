@@ -27,8 +27,8 @@ internal val Brand400 = Color(0xff8D7FFA)
 internal val Attention200 = Color(0xffFCAF4F)
 
 internal object LinkColors {
-    val Brand200 = Color(0xffA6FBDD)
-    val Brand600 = Color(0xff1AC59B)
+    val Brand200 = Color(0xff00D66F)
+    val Brand900 = Color(0xff011E0F)
 }
 
 @Immutable

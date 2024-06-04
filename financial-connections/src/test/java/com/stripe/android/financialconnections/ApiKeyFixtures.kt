@@ -130,7 +130,8 @@ internal object ApiKeyFixtures {
     fun consumerSession() = ConsumerSession(
         clientSecret = "clientSecret",
         emailAddress = "test@test.com",
-        redactedPhoneNumber = "+1***123",
+        redactedPhoneNumber = "+1********12",
+        redactedFormattedPhoneNumber = "(***) *** **12",
         verificationSessions = emptyList(),
         authSessionClientSecret = null,
         publishableKey = null

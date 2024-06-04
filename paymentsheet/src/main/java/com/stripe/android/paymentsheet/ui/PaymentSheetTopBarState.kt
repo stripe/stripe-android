@@ -46,7 +46,8 @@ internal object PaymentSheetTopBarStateFactory {
             StripeR.string.stripe_edit
         }
 
-        val showEditMenu = screen is SelectSavedPaymentMethods && canEdit
+        val showEditMenu =
+            (screen is SelectSavedPaymentMethods || screen is PaymentSheetScreen.ManageSavedPaymentMethods) && canEdit
 
         return PaymentSheetTopBarState(
             icon = icon,

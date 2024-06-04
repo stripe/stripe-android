@@ -60,13 +60,13 @@ internal class TestBacs : BasePlaygroundTest() {
     ): TestParameters {
         return TestParameters.create(
             paymentMethodCode = "bacs_debit",
+            authorizationAction = bacsAuthAction,
+            executeInNightlyRun = true,
         ) { settings ->
             settings[AutomaticPaymentMethodsSettingsDefinition] = true
             settings[DelayedPaymentMethodsSettingsDefinition] = true
             settings[CountrySettingsDefinition] = Country.GB
             settings[CurrencySettingsDefinition] = Currency.GBP
-        }.copy(
-            authorizationAction = bacsAuthAction
-        )
+        }
     }
 }

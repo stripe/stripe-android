@@ -20,12 +20,13 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
                 } ?: emptyList()
 
         return ConsumerSession(
-            consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
-            consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
-            consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
-            verificationSession,
-            optString(json, FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET),
-            optString(json, FIELD_PUBLISHABLE_KEY)
+            clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
+            emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
+            redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
+            redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
+            verificationSessions = verificationSession,
+            authSessionClientSecret = optString(json, FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET),
+            publishableKey = optString(json, FIELD_PUBLISHABLE_KEY)
         )
     }
 
@@ -46,6 +47,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
+        private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"
         private const val FIELD_CONSUMER_SESSION_VERIFICATION_SESSIONS = "verification_sessions"
         private const val FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET = "auth_session_client_secret"
 

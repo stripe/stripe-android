@@ -34,15 +34,7 @@ internal sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = true
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
-        private val isCbcEligible = displayableSavedPaymentMethod.isCbcEligible
-
-        val isModifiable: Boolean by lazy {
-            val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
-                available.size > 1
-            } ?: false
-
-            isCbcEligible && hasMultipleNetworks
-        }
+        val isModifiable: Boolean by lazy { displayableSavedPaymentMethod.isModifiable() }
 
         fun getDescription(resources: Resources) = when (paymentMethod.type) {
             PaymentMethod.Type.Card -> resources.getString(

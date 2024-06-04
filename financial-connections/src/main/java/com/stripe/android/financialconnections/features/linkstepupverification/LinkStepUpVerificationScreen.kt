@@ -159,10 +159,12 @@ private fun HeaderSection(
         Text(
             text = stringResource(R.string.stripe_link_stepup_verification_title),
             style = typography.headingXLarge,
+            color = colors.textDefault,
         )
         Text(
             text = stringResource(id = R.string.stripe_link_stepup_verification_desc, email),
             style = typography.bodyMedium,
+            color = colors.textDefault,
         )
     }
 }

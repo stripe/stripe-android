@@ -1,2 +1,25 @@
-# Automatically request reviews from @android-sdk-reviewers by default, allow reviews from @android-sdk-non-core-reviewers
+# Require approvals from the android-sdk-reviewers team for all changes not in directories listed below.
 * @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+
+# Payments SDK
+/payment-method-messaging/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/payments/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/payments-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/payments-core-testing/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/payments-model/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+
+# CardScan SDK
+/stripecardscan/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan-example/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan-tflite/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+
+# Identity SDK
+/identity/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/identity-example/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+
+# Financial Connections SDK
+/financial-connections/ @stripe/android-connections-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/financial-connections-example/ @stripe/android-connections-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
