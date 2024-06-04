@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.error.ErrorReporter
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -40,6 +41,7 @@ import java.util.Date
 internal class ConsentViewModel @AssistedInject constructor(
     @Assisted initialState: ConsentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val errorReporter: ErrorReporter,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -81,6 +83,7 @@ internal class ConsentViewModel @AssistedInject constructor(
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
+            errorReporter.reportError(it)
             eventTracker.logError(
                 extraMessage = "Error accepting consent",
                 error = it,
@@ -92,6 +95,7 @@ internal class ConsentViewModel @AssistedInject constructor(
 
     fun onContinueClick() {
         suspend {
+            throw IllegalStateException("Testing error reporting on Android")
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)

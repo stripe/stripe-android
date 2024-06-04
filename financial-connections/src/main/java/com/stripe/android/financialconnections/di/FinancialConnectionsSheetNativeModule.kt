@@ -4,11 +4,14 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.error.ErrorReporter
+import com.stripe.android.core.error.SentryErrorReporter
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
@@ -48,6 +51,8 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+
 
     @Binds
     fun bindsHandleError(
@@ -109,6 +114,19 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale = locale ?: Locale.getDefault(),
             logger = logger,
         )
+
+        @Singleton
+        @Provides
+        fun provideErrorReporter(
+            context: Application,
+            logger: Logger
+        ): ErrorReporter {
+            return SentryErrorReporter(
+                context,
+                logger = logger,
+                sentryConfig = FinancialConnectionsSentryConfig
+            )
+        }
 
         @Singleton
         @Provides
