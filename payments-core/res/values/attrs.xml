@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <declare-styleable name="CardInputView">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <declare-styleable name="CardInputView" tools:ignore="ResourceName">
         <attr name="cardHintText" format="string" />
         <attr name="cardTint" format="color" />
         <attr name="cardTextErrorColor" format="color" />
         <attr name="android:focusedByDefault" />
     </declare-styleable>
 
-    <declare-styleable name="CardElement">
+    <declare-styleable name="CardElement" tools:ignore="ResourceName">
         <attr name="shouldShowPostalCode" format="boolean" />
         <attr name="shouldRequirePostalCode" format="boolean" />
         <attr name="shouldRequireUsZipCode" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="BecsDebitWidget">
+    <declare-styleable name="BecsDebitWidget" tools:ignore="ResourceName">
         <attr name="companyName" format="string" />
     </declare-styleable>
 
-    <declare-styleable name="StripeCountryAutoCompleteTextInputLayout">
+    <declare-styleable name="StripeCountryAutoCompleteTextInputLayout" tools:ignore="ResourceName">
         <attr name="countryAutoCompleteStyle" format="reference" />
         <attr name="countryItemLayout" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="StripeCardFormView">
+    <declare-styleable name="StripeCardFormView" tools:ignore="ResourceName">
         <attr name="cardFormStyle" format="enum">
             <enum name="standard" value="0" />
             <enum name="borderless" value="1" />

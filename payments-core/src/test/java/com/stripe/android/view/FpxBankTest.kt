@@ -36,7 +36,7 @@ class FpxBankTest {
             "Standard Chartered",
             "UOB"
         )
-        val actual = FpxBank.values().map { it.displayName }
+        val actual = FpxBank.entries.map { it.displayName }
         assertThat(expected)
             .isEqualTo(actual)
     }

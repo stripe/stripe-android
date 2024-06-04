@@ -6,7 +6,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
+import com.stripe.android.attachPaymentMethod
+import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.confirmSetupIntent
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.createPaymentMethod
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -15,8 +19,10 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.updatePaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -25,6 +31,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.Test
+
+private const val FrenchPublishableKey = "pk_test_51JtgfQKG6vc7r7YCU0qQNOkDaaHrEgeHgGKrJMNfuWwaKgXMLzPUA1f8ZlCNPonIROLOnzpUnJK1C1xFH3M3Mz8X00Q6O4GfUt"
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -43,10 +51,12 @@ internal class EndToEndTest {
     )
 
     /**
-     * MARK: LOG.04.01c
+     * MARK: PAP.01.08d
      * In this test, a PaymentIntent object is created from an example merchant backend,
      * confirmed by the Android SDK, and then retrieved to validate that the original amount,
      * currency, and merchant are the same as the original inputs.
+     *
+     * https://confluence.corp.stripe.com/x/dAHfHQ
      */
     @Test
     fun testRigCon() = runTest {
@@ -261,7 +271,7 @@ internal class EndToEndTest {
     }
 
     @Test
-    fun `test us_bank_account payment intent flow with desciptor code`() = runTest {
+    fun `test us_bank_account payment intent flow with descriptor code`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
 
         // Create a PaymentIntent on the backend
@@ -418,6 +428,86 @@ internal class EndToEndTest {
     }
 
     @Test
+    fun `test cashapp payment intent flow`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createPaymentIntent(
+            Request.CreatePaymentIntentParams(
+                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+            )
+        )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+        ).copy(
+            returnUrl = "myapp://success",
+        )
+
+        val confirmedPaymentIntent = stripe.confirmPaymentIntent(confirmParams)
+
+        assertThat(confirmedPaymentIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedPaymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
+    }
+
+    @Test
+    fun `test cashapp payment intent flow with setup future usage`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createPaymentIntent(
+            Request.CreatePaymentIntentParams(
+                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+            )
+        )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        ).copy(
+            returnUrl = "myapp://success",
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        val confirmedPaymentIntent = stripe.confirmPaymentIntent(confirmParams)
+
+        assertThat(confirmedPaymentIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedPaymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
+    }
+
+    @Test
+    fun `test cashapp setup intent flow`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createSetupIntent(
+            Request.CreateSetupIntentParams(
+                createParams = Request.CreateParams(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            )
+        )
+
+        val confirmParams = ConfirmSetupIntentParams.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+        ).copy(
+            returnUrl = "myapp://success",
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        val confirmedSetupIntent = stripe.confirmSetupIntent(confirmParams)
+
+        assertThat(confirmedSetupIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedSetupIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
+    }
+
+    @Test
     fun `test us_bank_account setup intent flow with descriptor code`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
 
@@ -467,6 +557,49 @@ internal class EndToEndTest {
         }
         assertThat(verifiedSetupIntent.status)
             .isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `Test update payment method`() = runTest {
+        val stripe = Stripe(context, FrenchPublishableKey)
+
+        val card = PaymentMethodCreateParams.Card.Builder()
+            .setNumber("4000002500001001")
+            .setExpiryMonth(1)
+            .setExpiryYear(2028)
+            .setCvc("123")
+            .build()
+
+        val paymentMethod = stripe.createPaymentMethod(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(card),
+        )
+
+        val createEphemeralKeyResponse = service.createEphemeralKey(
+            request = Request.CreateEphemeralKeyParams(account = "fr"),
+        )
+
+        val attachResult = stripe.attachPaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
+            customerId = createEphemeralKeyResponse.customerId,
+            ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
+        )
+        assertThat(attachResult.isSuccess).isTrue()
+
+        val updateParams = PaymentMethodUpdateParams.createCard(
+            expiryMonth = 2,
+            networks = PaymentMethodUpdateParams.Card.Networks(
+                preferred = "visa",
+            ),
+        )
+
+        val updatedPaymentMethod = stripe.updatePaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
+            paymentMethodUpdateParams = updateParams,
+            ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
+        )
+
+        assertThat(updatedPaymentMethod.card?.expiryMonth).isEqualTo(2)
+        assertThat(updatedPaymentMethod.card?.networks?.preferred).isEqualTo("visa")
     }
 
     private companion object {

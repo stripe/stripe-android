@@ -128,6 +128,7 @@ data class SourceParams internal constructor(
     /**
      * Create a string-keyed map representing this object that is ready to be sent over the network.
      */
+    @Suppress("LongMethod")
     override fun toParamMap(): Map<String, Any> {
         return mapOf<String, Any>(PARAM_TYPE to typeRaw)
             .plus(
@@ -552,6 +553,7 @@ data class SourceParams internal constructor(
         fun createCardParams(
             cardParams: CardParams
         ): SourceParams {
+            @OptIn(DelicateCardDetailsApi::class)
             return SourceParams(
                 SourceType.CARD,
                 typeData = TypeData.Card(

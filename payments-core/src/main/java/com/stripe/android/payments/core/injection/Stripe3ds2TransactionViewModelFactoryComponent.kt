@@ -1,31 +1,28 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
+import com.stripe.android.core.injection.RetryDelayModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
 
-/**
- * Component to inject [Stripe3ds2TransactionViewModelFactory] when the app process is killed and
- * there is no [Injector] available.
- */
 @Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
         Stripe3ds2TransactionModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class
+        CoreCommonModule::class,
+        RetryDelayModule::class
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
-    fun inject(stripe3ds2TransactionViewModelFactory: Stripe3ds2TransactionViewModelFactory)
+    val subcomponentBuilder: Stripe3ds2TransactionViewModelSubcomponent.Builder
 
     @Component.Builder
     interface Builder {

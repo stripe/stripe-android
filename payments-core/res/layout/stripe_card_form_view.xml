@@ -45,7 +45,7 @@
                 style="@style/StripeCardFormTextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/acc_label_zip_short"
+                android:hint="@string/stripe_acc_label_zip_short"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/country_postal_divider">

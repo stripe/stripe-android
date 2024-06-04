@@ -1,0 +1,20 @@
+name: Data Theorem Build 
+on:
+  schedule:
+    # every day at 8am
+    - cron: '0 8 * * *'
+jobs:
+  apk:
+    name: Generate and upload APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Build debug APK
+        run: ./gradlew :paymentsheet-example:assembleDebug
+      - name: Upload to Data Theorem
+        uses: datatheorem/datatheorem-mobile-secure-action@b53b274c3cb4d0205f12982637c5d81903de60d8
+        with:
+          UPLOAD_BINARY_PATH: "./paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk"
+          DT_UPLOAD_API_KEY: ${{ secrets.DT_UPLOAD_API_KEY }}

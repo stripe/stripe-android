@@ -7,8 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.Html
+import com.stripe.android.R as StripeR
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,9 +17,8 @@ fun AuBecsDebitMandateElementUI(
     element: AuBecsDebitMandateTextElement
 ) {
     Html(
-        html = stringResource(id = R.string.au_becs_mandate, element.merchantName ?: ""),
-        imageGetter = emptyMap(),
-        color = MaterialTheme.paymentsColors.subtitle,
+        html = stringResource(id = StripeR.string.stripe_au_becs_mandate, element.merchantName ?: ""),
+        color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.body2,
         modifier = Modifier.padding(vertical = 8.dp)
     )

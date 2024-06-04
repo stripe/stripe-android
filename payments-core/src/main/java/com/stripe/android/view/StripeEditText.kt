@@ -20,6 +20,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
 import kotlinx.parcelize.Parcelize
+import androidx.appcompat.R as AppCompatR
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -31,9 +32,10 @@ import kotlinx.parcelize.Parcelize
 open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
-    protected var isLastKeyDelete: Boolean = false
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    internal var isLastKeyDelete: Boolean = false
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
@@ -85,6 +87,12 @@ open class StripeEditText @JvmOverloads constructor(
         }
 
     private var errorMessageListener: ErrorMessageListener? = null
+
+    private val isLastKeyDeleteTextWatcher = object : StripeTextWatcher() {
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            isLastKeyDelete = count == 0
+        }
+    }
 
     /**
      * The color used for error text.
@@ -196,18 +204,31 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForDeleteEmpty() {
+        // On some devices, the OnKeyListener isn't invoked for software keyboards. It is invoked on
+        // other devices such as my Pixel. To fix the issue for all devices, we're adding an
+        // additional text watcher to keep isLastKeyDelete in the correct state.
+        if (isLastKeyDeleteTextWatcher !in textWatchers.orEmpty()) {
+            addTextChangedListener(isLastKeyDeleteTextWatcher)
+        }
+
         // This method works for hard keyboards and older phones.
         setOnKeyListener { _, keyCode, event ->
-            isLastKeyDelete = isDeleteKey(keyCode, event)
-            if (isLastKeyDelete && length() == 0) {
-                deleteEmptyListener?.onDeleteEmpty()
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                // We only care about ACTION_DOWN and will ignore ACTION_UP
+                val isDelete = isDeleteKey(keyCode)
+                isLastKeyDelete = isDelete
+
+                if (isLastKeyDelete && length() == 0) {
+                    deleteEmptyListener?.onDeleteEmpty()
+                }
             }
+
             false
         }
     }
 
-    private fun isDeleteKey(keyCode: Int, event: KeyEvent): Boolean {
-        return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
+    private fun isDeleteKey(keyCode: Int): Boolean {
+        return keyCode == KeyEvent.KEYCODE_DEL
     }
 
     fun interface DeleteEmptyListener {

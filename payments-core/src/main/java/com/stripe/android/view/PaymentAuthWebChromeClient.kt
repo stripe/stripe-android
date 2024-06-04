@@ -24,7 +24,7 @@ internal class PaymentAuthWebChromeClient(
         message: String?,
         result: JsResult?
     ): Boolean {
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+        AlertDialog.Builder(activity, R.style.StripeAlertDialogStyle)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ -> result?.confirm() }
             .setNegativeButton(android.R.string.cancel) { _, _ -> result?.cancel() }

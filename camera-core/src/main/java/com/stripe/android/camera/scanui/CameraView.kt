@@ -12,6 +12,7 @@ import androidx.annotation.RestrictTo
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.camera.R
+import com.stripe.android.camera.scanui.CameraView.ViewFinderType
 import com.stripe.android.camera.scanui.util.addConstraints
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.constrainToParent
@@ -25,16 +26,13 @@ import kotlin.math.roundToInt
  * and [ScanFlow].
  *
  * Has the following styleable parameters to configure in xml
- *  [R.styleable.CameraView_viewFinderType] - a enum to decide the type of [ViewFinderType], which dictates the aspect ratio of [viewFinderWindowView].
- *  [R.styleable.CameraView_borderDrawable] - an optional reference for [viewFinderBorderView]'s drawable resource.
+ *  [R.styleable.StripeCameraView_stripeViewFinderType] - a enum to decide the type of [ViewFinderType], which dictates the aspect ratio of [viewFinderWindowView].
+ *  [R.styleable.StripeCameraView_stripeBorderDrawable] - an optional reference for [viewFinderBorderView]'s drawable resource.
  *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CameraView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+class CameraView : ConstraintLayout {
+
     /**
      * a [FrameLayout] to display the preview frame of camera feed, has the same size of the [CameraView].
      */
@@ -60,14 +58,93 @@ class CameraView @JvmOverloads constructor(
     @DrawableRes
     private var borderDrawable: Int = NO_BORDER
 
-    private var isCreatedFromXML: Boolean = false
-
     private var viewFinderType: ViewFinderType = ViewFinderType.CreditCard
+
+    /**
+     * Constructor when created programmatically. Leaving [borderDrawable] and
+     * [viewFinderType] as default value, add the UI components without adding any constraints.
+     * The caller of this constructor is responsible for adding constraint of subviews.
+     */
+    constructor(context: Context) : super(context) {
+        addUiComponents()
+    }
+
+    /**
+     * Constructor when created programmatically, assigning [borderDrawable] and
+     * [viewFinderType] values. The UI components are added and constraints are set up accordingly.
+     */
+    constructor(
+        context: Context,
+        argViewFinderType: ViewFinderType,
+        @DrawableRes argBorderDrawable: Int = NO_BORDER
+    ) : super(context) {
+        viewFinderType = argViewFinderType
+        borderDrawable = argBorderDrawable
+        addUiComponents()
+        setupBorder()
+        post {
+            setupUiConstraints()
+        }
+    }
+
+    /**
+     * Constructor used when inflated from XML, initialize [borderDrawable] and
+     * [viewFinderType] from [attrs] and add the constraints accordingly.
+     */
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        initFromXML(context, attrs)
+    }
+
+    /**
+     * Constructor used when inflated from XML, initialize [borderDrawable] and
+     * [viewFinderType] from [attrs] and add the constraints accordingly.
+     */
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+        initFromXML(context, attrs)
+    }
+
+    /**
+     * Constructor used when inflated from XML, initialize [borderDrawable] and
+     * [viewFinderType] from [attrs] and add the constraints accordingly.
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr, defStyleRes) {
+        initFromXML(context, attrs)
+    }
+
+    private fun initFromXML(context: Context, attrs: AttributeSet? = null) {
+        context.withStyledAttributes(
+            attrs,
+            R.styleable.StripeCameraView
+        ) {
+            viewFinderType =
+                ViewFinderType.entries[getInt(R.styleable.StripeCameraView_stripeViewFinderType, 0)]
+            borderDrawable =
+                getResourceId(
+                    R.styleable.StripeCameraView_stripeBorderDrawable,
+                    NO_BORDER
+                )
+        }
+        addUiComponents()
+        setupBorder()
+        post {
+            setupUiConstraints()
+        }
+    }
 
     /**
      * The type of viewfinder, decides if [viewFinderBackgroundView] should be drawn and the aspect ratio of [viewFinderWindowView]
      */
-    private enum class ViewFinderType(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class ViewFinderType(
         val aspectRatio: String
     ) {
         /**
@@ -89,39 +166,6 @@ class CameraView @JvmOverloads constructor(
          * [Passport] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [Passport]
          */
         Passport(PASSPORT_ASPECT_RATIO)
-    }
-
-    init {
-        context.withStyledAttributes(
-            attrs,
-            R.styleable.CameraView
-        ) {
-            // if it's null then the view is created programmatically by Bouncer, default to credit
-            // card specifics
-            // TODO(awush): migrate Bouncer to use xml with type [ViewFinderType.CreditCard]
-            isCreatedFromXML = (attrs != null)
-            if (isCreatedFromXML) {
-                viewFinderType =
-                    ViewFinderType.values()[getInt(R.styleable.CameraView_viewFinderType, 0)]
-                borderDrawable =
-                    getResourceId(
-                        R.styleable.CameraView_borderDrawable,
-                        NO_BORDER
-                    )
-            } else {
-                viewFinderType = ViewFinderType.CreditCard
-            }
-        }
-        addUiComponents()
-        // only setup constraints if it is created from XML, otherwise let the user set up the
-        // constraints programmatically
-        // TODO(awush): remove this after Bouncer no longer creates it programmatically
-        if (isCreatedFromXML) {
-            setupBorder()
-            post {
-                setupUiConstraints()
-            }
-        }
     }
 
     private fun addUiComponents() {

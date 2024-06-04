@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -74,6 +75,22 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Konbini(
+        private val confirmationNumber: String
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Konbini) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CONFIRMATION_NUMBER to confirmationNumber
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CONFIRMATION_NUMBER = "confirmation_number"
+        }
+    }
+
+    @Parcelize
     data class WeChatPay(
         var appId: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
@@ -87,6 +104,14 @@ sealed class PaymentMethodOptionsParams(
         internal companion object {
             const val PARAM_CLIENT = "client"
             const val PARAM_APP_ID = "app_id"
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    object WeChatPayH5 : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf("client" to "mobile_web")
         }
     }
 

@@ -10,5 +10,6 @@ package com.stripe.android.identity.networking
 internal enum class Status {
     SUCCESS,
     ERROR,
-    LOADING
+    LOADING,
+    IDLE
 }

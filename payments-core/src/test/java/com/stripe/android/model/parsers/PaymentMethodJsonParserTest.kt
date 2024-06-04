@@ -25,18 +25,29 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withCardWithDisplayBrand_shouldCreateExpectedObject() {
+        val actualDisplayBrand =
+            PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_DISPLAY_BRAND_JSON)
+                .card?.displayBrand
+
+        assertThat(actualDisplayBrand)
+            .isEqualTo("cartes_bancaires")
+    }
+
+    @Test
     fun parse_withIdeal_shouldCreateExpectedObject() {
         val expectedPaymentMethod = PaymentMethod(
             id = "pm_123456789",
             created = 1550757934255L,
             liveMode = true,
             type = PaymentMethod.Type.Ideal,
-            customerId = "cus_AQsHpvKfKwJDrF",
             billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            customerId = "cus_AQsHpvKfKwJDrF",
             ideal = PaymentMethod.Ideal(
                 bank = "my bank",
                 bankIdentifierCode = "bank id"
-            )
+            ),
+            code = "ideal"
         )
 
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.IDEAL_JSON))
@@ -66,10 +77,15 @@ class PaymentMethodJsonParserTest {
         assertThat(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
             .isEqualTo(
                 PaymentMethod(
-                    type = PaymentMethod.Type.SepaDebit,
                     id = "pm_1FSQaJCR",
-                    liveMode = false,
                     created = 1570809799L,
+                    liveMode = false,
+                    type = PaymentMethod.Type.SepaDebit,
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny.rosen@example.com",
+                        address = Address()
+                    ),
                     sepaDebit = PaymentMethod.SepaDebit(
                         "3704",
                         null,
@@ -77,11 +93,7 @@ class PaymentMethodJsonParserTest {
                         "vIZc7Ywn0",
                         "3000"
                     ),
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "jenny.rosen@example.com",
-                        address = Address()
-                    )
+                    code = "sepa_debit"
                 )
             )
     }
@@ -96,5 +108,19 @@ class PaymentMethodJsonParserTest {
     fun parse_withIdeal_returnsExpectedObject() {
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.IDEAL_JSON).type)
             .isEqualTo(PaymentMethod.Type.Ideal)
+    }
+
+    @Test
+    fun parse_withUsBankAccount_returnsExpectedObject() {
+        val usBankAccount = PaymentMethodJsonParser().parse(
+            PaymentMethodFixtures.US_BANK_ACCOUNT_WITH_FCA
+        )
+
+        assertThat(usBankAccount.type)
+            .isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(usBankAccount.usBankAccount?.linkedAccount)
+            .isEqualTo("fca_111")
+        assertThat(usBankAccount.usBankAccount?.financialConnectionsAccount)
+            .isEqualTo("fca_111")
     }
 }

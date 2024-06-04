@@ -1,12 +1,13 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.app.Application
+import android.graphics.Color
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -14,12 +15,9 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -34,9 +32,8 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
+import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -47,20 +44,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentLauncherViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    internal class TestFragment : Fragment()
 
     private val stripeApiRepository = mock<StripeApiRepository>()
     private val authenticatorRegistry = mock<PaymentAuthenticatorRegistry>()
@@ -72,10 +70,11 @@ class PaymentLauncherViewModelTest {
     private val paymentIntentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
 
-    private val analyticsRequestExecutor = mock<DefaultAnalyticsRequestExecutor>()
+    private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = mock<PaymentAnalyticsRequestFactory>()
     private val uiContext = UnconfinedTestDispatcher()
     private val activityResultCaller = mock<ActivityResultCaller>()
+    private val lifecycleOwner = TestLifecycleOwner()
     private val savedStateHandle = mock<SavedStateHandle>()
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
@@ -124,20 +123,21 @@ class PaymentLauncherViewModelTest {
             savedStateHandle,
             isInstantApp
         ).apply {
-            register(
-                caller = activityResultCaller
-            )
+            register(activityResultCaller, lifecycleOwner)
         }
 
     @Before
     fun setUpMocks() = runTest {
+        reset(paymentIntent)
+        reset(setupIntent)
+
         whenever(
             stripeApiRepository.confirmPaymentIntent(any(), any(), any())
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         whenever(
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
-        ).thenReturn(setupIntent)
+        ).thenReturn(Result.success(setupIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
@@ -147,12 +147,11 @@ class PaymentLauncherViewModelTest {
 
         whenever(
             stripeApiRepository.retrieveStripeIntent(
-                eq(CLIENT_SECRET),
-                eq(apiRequestOptions),
-                any()
+                clientSecret = eq(CLIENT_SECRET),
+                options = eq(apiRequestOptions),
+                expandFields = any(),
             )
-        )
-            .thenReturn(stripeIntent)
+        ).thenReturn(Result.success(stripeIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
@@ -161,6 +160,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm PaymentIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
@@ -186,6 +187,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm PaymentIntent with returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(
                 confirmPaymentIntentParams.also {
                     it.returnUrl = RETURN_URL
@@ -215,8 +218,47 @@ class PaymentLauncherViewModelTest {
         }
 
     @Test
+    fun `verify confirm PaymentIntent when no action is required does not invoke authenticator`() =
+        runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(false)
+
+            val viewModel = createViewModel()
+            viewModel.confirmStripeIntent(
+                confirmPaymentIntentParams.also {
+                    it.returnUrl = RETURN_URL
+                },
+                authHost
+            )
+
+            verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
+            verify(analyticsRequestFactory).createRequest(
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
+            )
+            verify(stripeApiRepository).confirmPaymentIntent(
+                argWhere {
+                    it.returnUrl == RETURN_URL &&
+                        it.paymentMethodId == PM_ID &&
+                        it.clientSecret == CLIENT_SECRET &&
+                        it.shouldUseStripeSdk()
+                },
+                eq(apiRequestOptions),
+                eq(EXPAND_PAYMENT_METHOD)
+            )
+            verify(piAuthenticator, never()).authenticate(
+                eq(authHost),
+                eq(paymentIntent),
+                eq(apiRequestOptions)
+            )
+
+            assertThat(viewModel.internalPaymentResult.value)
+                .isEqualTo(InternalPaymentResult.Completed(paymentIntent))
+        }
+
+    @Test
     fun `verify confirm SetupIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(setupIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -243,6 +285,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm SetupIntent with returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(setupIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(
                 confirmSetupIntentParams.also {
                     it.returnUrl = RETURN_URL
@@ -292,25 +336,25 @@ class PaymentLauncherViewModelTest {
     fun `verify when stripeApiRepository fails then confirmPaymentIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
     fun `verify when stripeApiRepository fails then confirmSetupIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmSetupIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
@@ -335,13 +379,13 @@ class PaymentLauncherViewModelTest {
                     eq(apiRequestOptions),
                     any()
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
@@ -350,7 +394,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel(isPaymentIntent = true)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededPaymentResult)
+                .thenReturn(Result.success(succeededPaymentResult))
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             verify(paymentIntentFlowResultProcessor).processResult(paymentFlowResult)
@@ -363,7 +407,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel(isPaymentIntent = false)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(setupIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededSetupResult)
+                .thenReturn(Result.success(succeededSetupResult))
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             verify(setupIntentFlowResultProcessor).processResult(paymentFlowResult)
@@ -376,12 +420,12 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededPaymentResult)
+                .thenReturn(Result.success(succeededPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isEqualTo(PaymentResult.Completed)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isEqualTo(InternalPaymentResult.Completed(paymentIntent))
         }
 
     @Test
@@ -390,12 +434,12 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(failedPaymentResult)
+                .thenReturn(Result.success(failedPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
@@ -404,12 +448,12 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(canceledPaymentResult)
+                .thenReturn(Result.success(canceledPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isEqualTo(PaymentResult.Canceled)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isEqualTo(InternalPaymentResult.Canceled)
         }
 
     @Test
@@ -418,12 +462,12 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(timedOutPaymentResult)
+                .thenReturn(Result.success(timedOutPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
@@ -432,100 +476,49 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(unknownPaymentResult)
+                .thenReturn(Result.success(unknownPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+            assertThat(viewModel.internalPaymentResult.value)
+                .isInstanceOf(InternalPaymentResult.Failed::class.java)
         }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<PaymentLauncherViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<PaymentLauncherViewModelSubcomponent>()
-        // The reason the ViewModel cannot be mocked here is because
-        // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
-        // ViewModel.mBagOfTags that's initialized in base class.
-        // Mocking it would leave this field null, causing an NPE.
-        val vmToBeReturned = createViewModel(isPaymentIntent = true)
-
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever(mockBuilder.isPaymentIntent(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-        whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
-
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentLauncherViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = PaymentLauncherViewModel.Factory(
-            {
-                PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    injectorKey,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    mock<ConfirmPaymentIntentParams>()
-                )
-            },
-            { ApplicationProvider.getApplicationContext() },
-            mockSavedStateRegistryOwner
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(PaymentLauncherViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
-
-        WeakMapInjectorRegistry.clear()
+    fun `Invalidates launcher when lifecycle owner is destroyed`() = runTest {
+        createViewModel()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        verify(authenticatorRegistry).onLauncherInvalidated()
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
+    fun `Factory gets initialized`() = runTest {
+        val factory = PaymentLauncherViewModel.Factory {
+            PaymentLauncherContract.Args.IntentConfirmationArgs(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                enableLogging = false,
+                productUsage = PRODUCT_USAGE,
+                includePaymentSheetAuthenticators = false,
+                confirmStripeIntentParams = mock<ConfirmPaymentIntentParams>(),
+                statusBarColor = Color.RED,
+            )
+        }
 
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
+        val fragmentScenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
 
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val factory = PaymentLauncherViewModel.Factory(
-            {
-                PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    DUMMY_INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    mock<ConfirmPaymentIntentParams>()
+        fragmentScenario.onFragment { fragment ->
+            val factorySpy = spy(factory)
+
+            assertNotNull(
+                factorySpy.create(
+                    modelClass = PaymentLauncherViewModel::class.java,
+                    extras = fragment.fakeCreationExtras(),
                 )
-            },
-            { ApplicationProvider.getApplicationContext() },
-            mockSavedStateRegistryOwner
-        )
-        val factorySpy = spy(factory)
-
-        assertNotNull(factorySpy.create(PaymentLauncherViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
+            )
+        }
     }
 
     companion object {

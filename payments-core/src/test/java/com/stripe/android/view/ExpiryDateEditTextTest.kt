@@ -18,6 +18,7 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.Test
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * Test class for [ExpiryDateEditText].
@@ -85,14 +86,14 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
-    fun afterInputThreeDigits_whenDeletingOne_textDoesContainSlash() {
+    fun afterInputThreeDigits_whenDeletingOne_textDoesNotContainSlash() {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("3")
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
-            .isEqualTo("12/")
+            .isEqualTo("12")
     }
 
     @Test
@@ -195,7 +196,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14")
     }
@@ -207,20 +208,20 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14/3")
     }
 
     @Test
-    fun delete_whenAcrossSeparator_deletesSeparator() {
+    fun delete_whenAcrossSeparator_deletesSeparatorAndLastCharacterBeforeSeparator() {
         expiryDateEditText.append("12")
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("12/")
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
-            .isEqualTo("12")
+            .isEqualTo("1")
     }
 
     @Test
@@ -240,7 +241,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_year))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
         assertThat(invocations)
             .isEqualTo(0)
     }
@@ -261,7 +262,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_year))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
@@ -291,7 +292,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_month))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_month))
     }
 
     @Test
@@ -376,15 +377,7 @@ class ExpiryDateEditTextTest {
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 / ")
-
-        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 /")
-
-        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 ")
+            .isEqualTo("12")
     }
 
     @Test
@@ -422,7 +415,7 @@ class ExpiryDateEditTextTest {
 
         idleLooper()
 
-        verify(errorMessageListener).displayErrorMessage(context.getString(R.string.incomplete_expiry_date))
+        verify(errorMessageListener).displayErrorMessage(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.Keep
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
@@ -29,10 +30,11 @@ sealed class SourceTypeModel : StripeModel {
             Recommended("recommended"),
             Unknown("unknown");
 
+            @Keep
             override fun toString(): String = code
 
             internal companion object {
-                fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+                fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
             }
         }
     }

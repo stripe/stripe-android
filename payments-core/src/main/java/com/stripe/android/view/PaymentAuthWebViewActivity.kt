@@ -6,25 +6,29 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
+import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
-    private val viewBinding: PaymentAuthWebViewActivityBinding by lazy {
-        PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
+    private val viewBinding: StripePaymentAuthWebViewActivityBinding by lazy {
+        StripePaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
     private val _args: PaymentBrowserAuthContract.Args? by lazy {
@@ -49,6 +53,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
+                )
             return
         }
 
@@ -59,21 +67,35 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         setSupportActionBar(viewBinding.toolbar)
         customizeToolbar()
 
+        onBackPressedDispatcher.addCallback {
+            if (viewBinding.webView.canGoBack()) {
+                viewBinding.webView.goBack()
+            } else {
+                cancelIntentSource()
+            }
+        }
+
         val clientSecret = args.clientSecret
         setResult(Activity.RESULT_OK, createResultIntent(viewModel.paymentResult))
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
+                )
             return
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
 
-        val isPagedLoaded = MutableLiveData(false)
-        isPagedLoaded.observe(this) { shouldHide ->
-            if (shouldHide) {
-                viewBinding.progressBar.isGone = true
+        val isPagedLoaded = MutableStateFlow(false)
+        lifecycleScope.launch {
+            isPagedLoaded.collect { shouldHide ->
+                if (shouldHide) {
+                    viewBinding.progressBar.isGone = true
+                }
             }
         }
 
@@ -103,6 +125,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
+                    stripeException = StripeException.create(error),
+                )
             viewModel.logError()
             setResult(
                 Activity.RESULT_OK,
@@ -129,7 +156,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         logger.debug("PaymentAuthWebViewActivity#onCreateOptionsMenu()")
-        menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
+        menuInflater.inflate(R.menu.stripe_payment_auth_web_view_menu, menu)
 
         viewModel.buttonText?.let {
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")
@@ -146,14 +173,6 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onBackPressed() {
-        if (viewBinding.webView.canGoBack()) {
-            viewBinding.webView.goBack()
-        } else {
-            cancelIntentSource()
-        }
     }
 
     private fun cancelIntentSource() {

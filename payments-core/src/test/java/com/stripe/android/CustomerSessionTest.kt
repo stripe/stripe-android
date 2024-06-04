@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
@@ -17,7 +16,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -40,7 +38,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerSessionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -66,7 +63,10 @@ internal class CustomerSessionTest {
         Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
-                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
+                .thenReturn(
+                    Result.success(FIRST_CUSTOMER),
+                    Result.success(SECOND_CUSTOMER),
+                )
 
             whenever(
                 stripeRepository.addCustomerSource(
@@ -77,8 +77,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.deleteCustomerSource(
@@ -88,8 +87,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.setDefaultCustomerSource(
@@ -100,39 +98,32 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SECOND_CUSTOMER)
+            ).thenReturn(Result.success(SECOND_CUSTOMER))
 
             whenever(
                 stripeRepository.attachPaymentMethod(
-                    any(),
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any(),
-                    any()
+                    customerId = any(),
+                    productUsageTokens = any(),
+                    paymentMethodId = any(),
+                    requestOptions = any()
                 )
-            )
-                .thenReturn(PAYMENT_METHOD)
+            ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.detachPaymentMethod(
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any(),
-                    any()
+                    productUsageTokens = any(),
+                    paymentMethodId = any(),
+                    requestOptions = any()
                 )
-            )
-                .thenReturn(PAYMENT_METHOD)
+            ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.getPaymentMethods(
-                    any(),
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any()
+                    listPaymentMethodsParams = any(),
+                    productUsageTokens = any(),
+                    requestOptions = any()
                 )
-            )
-                .thenReturn(listOf(PAYMENT_METHOD))
+            ).thenReturn(Result.success(listOf(PAYMENT_METHOD)))
 
             whenever(
                 stripeRepository.setCustomerShippingInfo(
@@ -142,7 +133,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            ).thenReturn(FIRST_CUSTOMER)
+            ).thenReturn(Result.success(FIRST_CUSTOMER))
         }
     }
 
@@ -170,11 +161,10 @@ internal class CustomerSessionTest {
         idleLooper()
 
         verify(stripeRepository).attachPaymentMethod(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(DEFAULT_PRODUCT_USAGE),
-            any(),
-            any()
+            customerId = any(),
+            productUsageTokens = eq(DEFAULT_PRODUCT_USAGE),
+            paymentMethodId = any(),
+            requestOptions = any()
         )
     }
 
@@ -574,11 +564,10 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).attachPaymentMethod(
-            eq(FIRST_CUSTOMER.id.orEmpty()),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            eq("pm_abc123"),
-            requestOptionsArgumentCaptor.capture()
+            customerId = eq(FIRST_CUSTOMER.id.orEmpty()),
+            productUsageTokens = eq(expectedProductUsage),
+            paymentMethodId = eq("pm_abc123"),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -645,10 +634,9 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).detachPaymentMethod(
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            eq("pm_abc123"),
-            requestOptionsArgumentCaptor.capture()
+            productUsageTokens = eq(expectedProductUsage),
+            paymentMethodId = eq("pm_abc123"),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -710,15 +698,14 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).getPaymentMethods(
-            eq(
+            listPaymentMethodsParams = eq(
                 ListPaymentMethodsParams(
                     customerId = FIRST_CUSTOMER.id.orEmpty(),
                     paymentMethodType = PaymentMethod.Type.Card
                 )
             ),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            requestOptionsArgumentCaptor.capture()
+            productUsageTokens = eq(expectedProductUsage),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -741,8 +728,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card is invalid"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card is invalid"))
 
         whenever(
             stripeRepository.deleteCustomerSource(
@@ -752,8 +740,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card does not exist"))
 
         whenever(
             stripeRepository.setDefaultCustomerSource(
@@ -764,39 +753,38 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
-        )
-            .thenThrow(APIException(statusCode = 405, message = "auth error"))
+        ).thenReturn(Result.failure(APIException(statusCode = 405, message = "auth error")))
 
         whenever(
             stripeRepository.attachPaymentMethod(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+                customerId = any(),
+                productUsageTokens = any(),
+                paymentMethodId = any(),
+                requestOptions = any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method is invalid"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method is invalid"))
 
         whenever(
             stripeRepository.detachPaymentMethod(
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+                productUsageTokens = any(),
+                paymentMethodId = any(),
+                requestOptions = any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
 
         whenever(
             stripeRepository.getPaymentMethods(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any()
+                listPaymentMethodsParams = any(),
+                productUsageTokens = any(),
+                requestOptions = any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
     }
 
     private fun createCustomerSession(
@@ -805,7 +793,6 @@ internal class CustomerSessionTest {
             createEphemeralKeyManagerFactory(timeSupplier)
     ): CustomerSession {
         return CustomerSession(
-            ApplicationProvider.getApplicationContext(),
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",

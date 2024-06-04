@@ -2,11 +2,12 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.DropdownConfig
 import org.junit.Test
 
 class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
-        R.string.ideal_bank,
+        R.string.stripe_ideal_bank,
         listOf(
             DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
             DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),
@@ -48,11 +49,5 @@ class SimpleDropdownConfigTest {
     fun `Verify convert from value returns appropriate string`() {
         assertThat(config.convertFromRaw("asn_bank"))
             .isEqualTo("ASN Bank")
-    }
-
-    @Test
-    fun `Verify convert to rawValue returns appropriate string`() {
-        assertThat(config.convertToRaw("SNS Bank (De Volksbank)"))
-            .isEqualTo("sns_bank")
     }
 }

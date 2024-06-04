@@ -1,14 +1,19 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.uicore.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -21,38 +26,50 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     }
 
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        PaymentLauncherViewModel.Factory(
-            { requireNotNull(starterArgs) },
-            { application },
-            this
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = PaymentLauncherViewModel.Factory {
+        requireNotNull(starterArgs)
+    }
 
     @VisibleForTesting
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        disableAnimations()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
-            finishWithResult(PaymentResult.Failed(it))
+            finishWithResult(InternalPaymentResult.Failed(it))
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
+                    stripeException = StripeException.create(it),
+                )
             return
         }
 
-        args.statusBarColor?.let {
-            window.statusBarColor = it
+        onBackPressedDispatcher.addCallback {
+            // Prevent back presses while confirming payment
         }
 
-        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
-        viewModel.register(this)
-        val host = AuthActivityStarterHost.create(this)
+        lifecycleScope.launch {
+            viewModel.internalPaymentResult.collect {
+                it?.let(::finishWithResult)
+            }
+        }
+
+        viewModel.register(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
+        val host = AuthActivityStarterHost.create(
+            activity = this,
+            statusBarColor = args.statusBarColor,
+        )
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
@@ -66,26 +83,16 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.cleanUp()
-    }
-
     override fun finish() {
         super.finish()
-        disableAnimations()
-    }
-
-    private fun disableAnimations() {
-        // this is a transparent Activity so we want to disable animations
-        overridePendingTransition(0, 0)
+        fadeOut()
     }
 
     /**
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult(result: PaymentResult) {
+    private fun finishWithResult(result: InternalPaymentResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()

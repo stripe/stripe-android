@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
@@ -16,7 +17,9 @@ import java.util.regex.Pattern
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
 @Parcelize
-data class PaymentIntent internal constructor(
+data class PaymentIntent
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */
@@ -81,6 +84,12 @@ data class PaymentIntent internal constructor(
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
     /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val countryCode: String?,
+
+    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
@@ -136,16 +145,61 @@ data class PaymentIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData? = null
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String> = emptyList(),
+
+    override val nextActionData: StripeIntent.NextActionData? = null,
+
+    private val paymentMethodOptionsJsonString: String? = null,
+
 ) : StripeIntent {
+
+    override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
+        StripeJsonUtils.jsonObjectToMap(JSONObject(it))
+    } ?: emptyMap()
+
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-            is StripeIntent.NextActionData.VerifyWithMicrodeposits ->
+            is StripeIntent.NextActionData.SdkData -> {
+                StripeIntent.NextActionType.UseStripeSdk
+            }
+            is StripeIntent.NextActionData.RedirectToUrl -> {
+                StripeIntent.NextActionType.RedirectToUrl
+            }
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                StripeIntent.NextActionType.DisplayOxxoDetails
+            }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
+            is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
+                StripeIntent.NextActionType.DisplayMultibancoDetails
+            }
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
-            else -> null
+            }
+            is StripeIntent.NextActionData.UpiAwaitNotification -> {
+                StripeIntent.NextActionType.UpiAwaitNotification
+            }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                StripeIntent.NextActionType.CashAppRedirect
+            }
+            is StripeIntent.NextActionData.BlikAuthorize -> {
+                StripeIntent.NextActionType.BlikAuthorize
+            }
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                StripeIntent.NextActionType.SwishRedirect
+            }
+            is StripeIntent.NextActionData.AlipayRedirect,
+            is StripeIntent.NextActionData.WeChatPayRedirect,
+            null -> {
+                null
+            }
         }
 
     override val isConfirmed: Boolean
@@ -158,6 +212,12 @@ data class PaymentIntent internal constructor(
     override val lastErrorMessage: String?
         get() = lastPaymentError?.message
 
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val requireCvcRecollection: Boolean
+        get() = paymentMethodOptionsJsonString?.let { json ->
+            JSONObject(json).optJSONObject(CARD)?.optBoolean(REQUIRE_CVC_RECOLLECTION) ?: false
+        } ?: false
+
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }
@@ -166,17 +226,29 @@ data class PaymentIntent internal constructor(
         return status === StripeIntent.Status.RequiresConfirmation
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+    }
+
     /**
      * SetupFutureUsage is considered to be set if it is on or off session.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isSetupFutureUsageSet() =
-        when (setupFutureUsage) {
+    private fun isTopLevelSetupFutureUsageSet(): Boolean {
+        return when (setupFutureUsage) {
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
             null -> false
         }
+    }
+
+    private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return paymentMethodOptionsJsonString?.let { json ->
+            val pmOptions = JSONObject(json).optJSONObject(code)
+            pmOptions?.has("setup_future_usage") ?: false
+        } ?: false
+    }
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
@@ -241,7 +313,7 @@ data class PaymentIntent internal constructor(
             RateLimitError("rate_limit_error");
 
             internal companion object {
-                fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
+                fun fromCode(typeCode: String?) = entries.firstOrNull { it.code == typeCode }
             }
         }
 
@@ -328,18 +400,28 @@ data class PaymentIntent internal constructor(
         Automatic("automatic");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
     /**
      * Controls when the funds will be captured from the customer’s account.
      */
-    enum class CaptureMethod(private val code: String) {
+    enum class CaptureMethod(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val code: String,
+    ) {
         /**
          * (Default) Stripe automatically captures funds when the customer authorizes the payment.
          */
         Automatic("automatic"),
+
+        /**
+         * Stripe asynchronously captures funds when the customer authorizes the payment.
+         * Recommended over [Automatic] due to improved latency, but may require additional
+         * integration changes.
+         */
+        AutomaticAsync("automatic_async"),
 
         /**
          * Place a hold on the funds when the customer authorizes the payment, but don’t capture
@@ -348,7 +430,7 @@ data class PaymentIntent internal constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 
@@ -367,7 +449,7 @@ data class PaymentIntent internal constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 
@@ -378,5 +460,8 @@ data class PaymentIntent internal constructor(
                 PaymentIntentJsonParser().parse(it)
             }
         }
+
+        internal const val CARD = "card"
+        internal const val REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
     }
 }

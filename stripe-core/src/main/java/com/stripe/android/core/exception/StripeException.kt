@@ -12,12 +12,15 @@ import java.util.Objects
 abstract class StripeException(
     val stripeError: StripeError? = null,
     val requestId: String? = null,
-    val statusCode: Int = 0,
+    val statusCode: Int = DEFAULT_STATUS_CODE,
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val isClientError = statusCode in 400..499
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open fun analyticsValue(): String = "stripeException"
 
     override fun toString(): String {
         return listOfNotNull(
@@ -47,6 +50,10 @@ abstract class StripeException(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val DEFAULT_STATUS_CODE = 0
+
         fun create(throwable: Throwable): StripeException {
             return when (throwable) {
                 is StripeException -> throwable
@@ -56,8 +63,16 @@ abstract class StripeException(
                     message = throwable.message,
                     cause = throwable
                 )
-                else -> APIException(throwable)
+                else -> GenericStripeException(throwable, analyticsValue = analyticsValueForThrowable(throwable))
             }
+        }
+
+        private fun analyticsValueForThrowable(throwable: Throwable): String? {
+            val throwableClass = throwable.javaClass
+            if (throwableClass.name.startsWith("android.") || throwableClass.name.startsWith("java.")) {
+                return throwableClass.name
+            }
+            return null
         }
     }
 }

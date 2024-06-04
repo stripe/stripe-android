@@ -4,16 +4,20 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
-import com.stripe.android.databinding.PaymentFlowActivityBinding
+import com.stripe.android.databinding.StripePaymentFlowActivityBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.utils.argsAreInvalid
+import kotlinx.coroutines.launch
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -21,10 +25,10 @@ import com.stripe.android.model.ShippingMethod
  */
 class PaymentFlowActivity : StripeActivity() {
 
-    private val viewBinding: PaymentFlowActivityBinding by lazy {
-        viewStub.layoutResource = R.layout.payment_flow_activity
+    private val viewBinding: StripePaymentFlowActivityBinding by lazy {
+        viewStub.layoutResource = R.layout.stripe_payment_flow_activity
         val root = viewStub.inflate() as ViewGroup
-        PaymentFlowActivityBinding.bind(root)
+        StripePaymentFlowActivityBinding.bind(root)
     }
 
     private val viewPager: PaymentFlowViewPager by lazy {
@@ -61,6 +65,10 @@ class PaymentFlowActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (argsAreInvalid { args }) {
+            return
+        }
+
         val args = PaymentFlowActivityStarter.Args.create(intent)
         args.windowFlags?.let { window.addFlags(it) }
 
@@ -73,6 +81,11 @@ class PaymentFlowActivity : StripeActivity() {
         paymentFlowPagerAdapter.shippingInformation = shippingInformation
         paymentFlowPagerAdapter.selectedShippingMethod = viewModel.selectedShippingMethod
 
+        val onBackPressedCallback = onBackPressedDispatcher.addCallback {
+            viewModel.currentPage -= 1
+            viewPager.currentItem = viewModel.currentPage
+        }
+
         viewPager.adapter = paymentFlowPagerAdapter
         viewPager.addOnPageChangeListener(
             object : ViewPager.OnPageChangeListener {
@@ -84,6 +97,8 @@ class PaymentFlowActivity : StripeActivity() {
                         viewModel.isShippingInfoSubmitted = false
                         paymentFlowPagerAdapter.isShippingInfoSubmitted = false
                     }
+
+                    onBackPressedCallback.isEnabled = hasPreviousPage()
                 }
 
                 override fun onPageScrollStateChanged(i: Int) {
@@ -92,6 +107,8 @@ class PaymentFlowActivity : StripeActivity() {
         )
 
         viewPager.currentItem = viewModel.currentPage
+        onBackPressedCallback.isEnabled = hasPreviousPage()
+
         title = paymentFlowPagerAdapter.getPageTitle(viewPager.currentItem)
     }
 
@@ -118,23 +135,19 @@ class PaymentFlowActivity : StripeActivity() {
 
     private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
-            viewModel.saveCustomerShippingInformation(shippingInfo)
-                .observe(
-                    this,
-                    { result ->
-                        result.fold(
-                            onSuccess = {
-                                onShippingInfoSaved(
-                                    it.shippingInformation,
-                                    shippingMethods
-                                )
-                            },
-                            onFailure = {
-                                showError(it.message.orEmpty())
-                            }
+            lifecycleScope.launch {
+                viewModel.saveCustomerShippingInformation(shippingInfo).fold(
+                    onSuccess = {
+                        onShippingInfoSaved(
+                            it.shippingInformation,
+                            shippingMethods
                         )
+                    },
+                    onFailure = {
+                        showError(it.message.orEmpty())
                     }
                 )
+            }
         }
     }
 
@@ -202,22 +215,19 @@ class PaymentFlowActivity : StripeActivity() {
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
     ) {
-        viewModel.validateShippingInformation(
-            shippingInfoValidator,
-            shippingMethodsFactory,
-            shippingInformation
-        ).observe(
-            this,
-            { result ->
-                result.fold(
-                    // show shipping methods screen
-                    onSuccess = ::onShippingInfoValidated,
+        lifecycleScope.launch {
+            viewModel.validateShippingInformation(
+                shippingInfoValidator,
+                shippingMethodsFactory,
+                shippingInformation
+            ).fold(
+                // show shipping methods screen
+                onSuccess = ::onShippingInfoValidated,
 
-                    // show error on current screen
-                    onFailure = ::onShippingInfoError
-                )
-            }
-        )
+                // show error on current screen
+                onFailure = ::onShippingInfoError
+            )
+        }
     }
 
     private fun onShippingInfoError(error: Throwable) {
@@ -226,7 +236,7 @@ class PaymentFlowActivity : StripeActivity() {
         if (!errorMessage.isNullOrEmpty()) {
             showError(errorMessage)
         } else {
-            showError(getString(R.string.invalid_shipping_information))
+            showError(getString(R.string.stripe_invalid_shipping_information))
         }
         viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
             shippingInformation = null
@@ -239,15 +249,6 @@ class PaymentFlowActivity : StripeActivity() {
             Intent().putExtra(EXTRA_PAYMENT_SESSION_DATA, paymentSessionData)
         )
         finish()
-    }
-
-    override fun onBackPressed() {
-        if (hasPreviousPage()) {
-            viewModel.currentPage -= 1
-            viewPager.currentItem = viewModel.currentPage
-        } else {
-            super.onBackPressed()
-        }
     }
 
     internal companion object {

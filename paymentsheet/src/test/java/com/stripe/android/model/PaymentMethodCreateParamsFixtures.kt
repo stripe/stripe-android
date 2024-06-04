@@ -64,14 +64,6 @@ internal object PaymentMethodCreateParamsFixtures {
         BILLING_DETAILS
     )
 
-    internal val BACS_DEBIT = PaymentMethodCreateParams.create(
-        bacsDebit = PaymentMethodCreateParams.BacsDebit(
-            accountNumber = "00012345",
-            sortCode = "108800"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val SOFORT = PaymentMethodCreateParams.create(
         sofort = PaymentMethodCreateParams.Sofort(
             country = "DE"
@@ -82,6 +74,8 @@ internal object PaymentMethodCreateParamsFixtures {
     internal val P24 = PaymentMethodCreateParams.createP24(
         billingDetails = BILLING_DETAILS
     )
+
+    internal val PAYPAL = PaymentMethodCreateParams.createPayPal()
 
     internal val BANCONTACT = PaymentMethodCreateParams.createBancontact(
         billingDetails = BILLING_DETAILS

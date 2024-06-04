@@ -1,0 +1,11 @@
+// Auto-generated. Don't edit it directly.
+// Modify sdk/src/main/html/hcaptcha.html instead and run `./gradlew build` instead
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
+package ${packageName}
+
+import androidx.annotation.RestrictTo
+
+val HCAPTCHA_WEBVIEW_HTML_PROVIDER = { """
+${htmlContent}
+""" }

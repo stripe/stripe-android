@@ -62,8 +62,6 @@ internal class MainLoopAnalyzer(
         )
     }
 
-    override val statsName = "main_loop_images_processed"
-
     class Factory(
         private val ssdOcrFactory: AnalyzerFactory<
             SSDOcr.Input,

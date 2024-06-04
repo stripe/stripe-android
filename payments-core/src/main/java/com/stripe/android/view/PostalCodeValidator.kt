@@ -34,7 +34,7 @@ class PostalCodeValidator {
             return false
         }
 
-        return if (postalCode.isEmpty() &&
+        return if (postalCode.isBlank() &&
             isPostalCodeNotRequired(optionalShippingInfoFields, hiddenShippingInfoFields)
         ) {
             // user has configured postal code as optional or hidden and customer has not inputted

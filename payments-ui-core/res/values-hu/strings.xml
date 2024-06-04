@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">2. címsor</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirátus</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Külváros vagy város</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Egyházközség</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Megye</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Kerület</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Terület</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Irányítószám</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Major</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Irányítószám</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Sziget</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektúra</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Körzet</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Terület</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Posta vagy kisváros</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Külváros</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Falu vagy község</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Fizetés <num_installments/>, egyenként <installment_price/> összegű kamatmentes részletben <img/> használatával]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">A fizetés megerősítésével az Amazon Pay engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje az Amazon Pay-számláját.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Vissza</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Számlaszám</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">A számlaszáma hiányos.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bankszámla</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Tudomásul veszem, hogy a Stripe beszedéseket végez a(z) %s nevében, és megerősítem, hogy én vagyok a számla tulajdonosa és az egyetlen személy, aki a terheléseket engedélyezheti erről a számláról.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Bankazonosító</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">A bankazonosítója hiányos.</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Számlázási cím</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Ez a mező nem lehet üres.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Módosítás</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Érvénytelen e-mail-cím.</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (nem kötelező)</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">A beírt IBAN-szám hiányos.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">A beírt IBAN-szám érvénytelen.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">A beírt IBAN-szám érvénytelen, a(z) „%s” nem támogatott országkód.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL bank</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Megvásárlás most, vagy fizetés később Klarnával.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Fizetés később Klarnával.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Przelewy24 Bank</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Mentés a jövőbeni %s fizetésekhez</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Kártya beolvasása</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Fizetési adatainak megadásával és a fizetés megerősítésével Ön felhatalmazza (A) a(z) %s céget és a Stripe-ot, fizetési szolgáltatónkat, hogy utasításokat küldjön a bankjának, hogy megterhelje a számláját, és (B) bankját, hogy az utasításoknak megfelelően megterhelje a számláját. A jogai részeként Ön jogosult a bankjától a velük kötött megállapodás feltételei szerinti visszatérítésre. A visszatérítést a számla megterhelésének napjától számított 8 héten belül kell igényelni. Jogait egy, a bankjától beszerezhető nyilatkozat tartalmazza. Beleegyezik abba, hogy a jövőbeni terhelésekről értesítést kap, legfeljebb 2 nappal azok bekövetkezése előtt.</string>
+  <string name="stripe_billing_details">Számlázási cím</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK kód</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Ha folytatja, azzal engedélyezi, hogy a(z) %1$s megterhelje a Cash App számláját ezzel a fizetéssel, és jövőbeli fizetésekkel a(z) %2$s feltételeinek megfelelően, ameddig az engedélyt vissza nem vonja. Ezt bármikor megváltoztathatja a Cash App beállításaiban.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Kapcsolattartási adatok</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Folytatás</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">A beírt IBAN-szám hiányos.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">A beírt IBAN-szám érvénytelen, a(z) „%s” nem támogatott országkód.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">BLIK kódja hiányos.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">BLIK kódja érvénytelen.</string>
+  <string name="stripe_invalid_email_address">Érvénytelen e-mail-cím: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Érvénytelen UPI-azonosító</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Megvásárlás most, vagy fizetés később Klarnával.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">A Klarna fizetési módra történő továbblépéssel Ön engedélyezi, hogy a(z) %1$s és a Klarna feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a Klarna-számláját. Ezt bármikor megváltoztathatja a Klarna alkalmazásban vagy a(z) %2$s felkeresésével.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Fizetés később Klarnával.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">A kártyán szereplő név</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s kifizetése</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kártyaadatok</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Vásárlás UPI-azonosítóval</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-beszedés</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs közvetlen beszedés</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kártya</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA beszedés</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">A fizetés megerősítésével a PayPalon engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a PayPal számláját.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">A fizetés megerősítésével a RevolutPayen engedélyezi, hogy a(z) %s a feltételeinek megfelelően a későbbi kifizetésekkel megterhelje a RevolutPay számláját.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Mentés a jövőbeni %s fizetésekhez</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Kártya beolvasása</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Fizetési adatainak megadásával és a fizetés megerősítésével Ön felhatalmazza (A) a(z) %s céget és a Stripe-ot, fizetési szolgáltatónkat, hogy utasításokat küldjön a bankjának, hogy megterhelje a számláját, és (B) bankját, hogy az utasításoknak megfelelően megterhelje a számláját. A jogai részeként Ön jogosult a bankjától a velük kötött megállapodás feltételei szerinti visszatérítésre. A visszatérítést a számla megterhelésének napjától számított 8 héten belül kell igényelni. Jogait egy, a bankjától beszerezhető nyilatkozat tartalmazza. Beleegyezik abba, hogy a jövőbeni terhelésekről értesítést kap, legfeljebb 2 nappal azok bekövetkezése előtt.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Beállítás</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">UPI-azonosító</string>
 </resources>

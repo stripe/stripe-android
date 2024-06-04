@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements.autocomplete.model
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.RestrictTo
 import java.util.Locale
 
 // Largely duplicated from
@@ -29,10 +30,11 @@ internal data class Address(
 // of "King Street 123" instead of "123 King Street"
 // Reference for country formats:
 // https://docs.google.com/spreadsheets/d/1tIZO0-Iqvs_8CA9UL3S9qYvoTzjPdrHZr-hdetz6Uuo/edit#gid=696373988
-internal val STREET_NAME_FIRST_COUNTRIES = listOf(
+internal val STREET_NAME_FIRST_COUNTRIES = setOf(
     "BE",
     "BR",
     "CH",
+    "DE",
     "ES",
     "ID",
     "IT",
@@ -41,7 +43,7 @@ internal val STREET_NAME_FIRST_COUNTRIES = listOf(
     "NO",
     "PL",
     "RU",
-    "SE"
+    "SE",
 )
 
 internal fun Place.filter(type: Place.Type): AddressComponent? {
@@ -53,15 +55,15 @@ internal fun composeAddressLine1(
     addressLine1: AddressLine1,
     address: Address
 ): String {
-    val streetNumber = addressLine1.streetNumber
-    val streetName = addressLine1.route
+    val streetNumber = addressLine1.streetNumber ?: ""
+    val streetName = addressLine1.route ?: ""
     val locality = address.locality
     val countryCode = address.country
 
     return if (countryCode == "JP") {
         val premise = address.addressLine2
         composeJapaneseAddressLine1(context, addressLine1, locality, premise)
-    } else if (streetNumber != null || streetName != null) {
+    } else if (streetNumber.isNotBlank() || streetName.isNotBlank()) {
         // Depending on the country we'll want either
         // "123 King Street" or "King Street 123"
         return if (STREET_NAME_FIRST_COUNTRIES.contains(countryCode)) {
@@ -176,7 +178,8 @@ internal fun Address.modifyStripeAddressByCountry(place: Place): Address {
     return newAddress
 }
 
-internal fun Place.transformGoogleToStripeAddress(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Place.transformGoogleToStripeAddress(
     context: Context
 ): com.stripe.android.model.Address {
     var address = Address()

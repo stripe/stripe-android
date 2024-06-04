@@ -1,9 +1,6 @@
 package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
-import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +18,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 internal object NoAnalyzersAvailableException : Exception()
 
@@ -59,10 +59,11 @@ interface AnalyzerLoopErrorListener {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
-    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    private val statsName: String? = null
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
-    protected var startedAt: ClockMark? = null
+    protected var startedAt: ComparableTimeMark? = null
     private var finished: Boolean = false
 
     private val cancelMutex = Mutex()
@@ -74,7 +75,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         processingCoroutineScope: CoroutineScope
     ): Job? {
         if (!started.getAndSet(true)) {
-            startedAt = Clock.markNow()
+            startedAt = TimeSource.Monotonic.markNow()
         } else {
             analyzerLoopErrorListener.onAnalyzerFailure(AlreadySubscribedException)
             return null
@@ -115,7 +116,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, in State, Output>
     ) {
         flow.collect { frame ->
-            val stat = analyzer.statsName?.let { Stats.trackRepeatingTask(it) }
+            val stat = statsName?.let { Stats.trackRepeatingTask(it) }
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
 
@@ -173,10 +174,12 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
-    analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    statsName: String? = null
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
+    statsName
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -211,10 +214,12 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val timeLimit: Duration = Duration.INFINITE
+    private val timeLimit: Duration = Duration.INFINITE,
+    statsName: String? = null
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
+    statsName
 ) {
     private val framesProcessed: AtomicInteger = AtomicInteger(0)
     private var framesToProcess = 0
@@ -233,7 +238,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 
     override suspend fun onResult(result: Output, data: DataFrame): Boolean {
         val framesProcessed = this.framesProcessed.incrementAndGet()
-        val timeElapsed = startedAt?.elapsedSince() ?: Duration.ZERO
+        val timeElapsed = startedAt?.elapsedNow() ?: Duration.ZERO
         resultHandler.onResult(result, data)
 
         if (framesProcessed >= framesToProcess) {

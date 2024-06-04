@@ -1,0 +1,35 @@
+name: Notify Risky Change
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    paths:
+      - 'example/build.gradle'
+      - '**-example/build.gradle'
+
+jobs:
+  validate-risky-change:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: peter-evans/find-comment@a54c31d7fa095754bfef525c0c8e5e5674c4b4b1
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Risky Change
+      - uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+        with:
+          body: |
+            Risky Change
+            
+            This is considered a risky change because it adjusts the sample app build.gradle, please review carefully.
+            We've seen issues in the past which resulted in failed builds for merchants. Please make sure the build.gradle change is intended.
+            
+            By adding the label `accept-risky-change` to this PR, I acknowledge that I'm changing an example app and have verified that the SDK remains in a shippable state.
+          edit-mode: replace
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fail if not accepted
+        if: "!contains(github.event.pull_request.labels.*.name, 'accept-risky-change')"
+        run: exit 1

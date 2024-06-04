@@ -11,7 +11,6 @@ apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
 
 assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
 check.dependsOn('ktlint')
 
 configurations {
@@ -23,12 +22,15 @@ if (System.getenv("JITPACK")) {
 }
 
 android {
+    namespace STRIPE_ANDROID_NAMESPACE
+    resourcePrefix 'Stripe'
+
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
-        consumerProguardFiles 'proguard-rules.txt'
+        consumerProguardFiles "consumer-rules.txt"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -46,10 +48,16 @@ android {
         }
     }
 
+    lint {
+        enable 'Interoperability'
+        lintConfig file('../settings/lint.xml')
+    }
+
     lintOptions {
-        enable "Interoperability"
-        disable "CoroutineCreationDuringComposition"
-        lintConfig file("../settings/lint.xml")
+        // Our workflow is to add a new string first and then have it translated in Lokalise. As a
+        // result, we will have a certain timespan during which there are no translations for the
+        // string yet.
+        disable 'MissingTranslation'
     }
 
     dokkaHtml {
@@ -57,11 +65,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
+    }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of("11"))
+        }
     }
 }

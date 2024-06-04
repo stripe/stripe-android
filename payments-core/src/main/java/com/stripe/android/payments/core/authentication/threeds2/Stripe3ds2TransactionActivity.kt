@@ -35,12 +35,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
     lateinit var args: Stripe3ds2TransactionContract.Args
 
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        Stripe3ds2TransactionViewModelFactory(
-            { application },
-            this,
-            { args }
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = Stripe3ds2TransactionViewModelFactory { args }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         val argsResult = runCatching {

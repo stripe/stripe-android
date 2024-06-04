@@ -1,0 +1,9 @@
+<resources>
+
+    <style name="StripeHCaptchaDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:windowMinWidthMajor">100%</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+</resources>

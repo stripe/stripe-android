@@ -1,9 +1,7 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
-import com.stripe.android.camera.framework.time.milliseconds
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
@@ -16,6 +14,10 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 
 /**
  * [IdentityScanStateTransitioner] for IDDetector model, decides transition based on the
@@ -30,15 +32,32 @@ import kotlin.math.min
  * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
 internal class IDDetectorTransitioner(
-    private val timeoutAt: ClockMark,
+    private val timeout: Duration,
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
     private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
+    private val blurThreshold: Float = DEFAULT_BLUR_THRESHOLD,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME,
     private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION,
     private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
+
+    @VisibleForTesting
+    var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
+
+    /**
+     * Rest internal state and return itself.
+     */
+    @VisibleForTesting
+    fun resetAndReturn(): IDDetectorTransitioner {
+        previousBoundingBox = null
+        unmatchedFrame = 0
+        timeoutAt = TimeSource.Monotonic.markNow() + timeout
+        Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
+        return this
+    }
+
     override suspend fun transitionFromInitial(
         initialState: Initial,
         analyzerInput: AnalyzerInput,
@@ -48,17 +67,23 @@ internal class IDDetectorTransitioner(
             "Unexpected output type: $analyzerOutput"
         }
         return when {
-            timeoutAt.hasPassed() -> {
+            timeoutAt.hasPassedNow() -> {
                 IdentityScanState.TimeOut(initialState.type, this)
             }
+
             analyzerOutput.category.matchesScanType(initialState.type) -> {
                 Log.d(
                     TAG,
                     "Matching model output detected with score ${analyzerOutput.resultScore}, " +
                         "transition to Found."
                 )
-                Found(initialState.type, this)
+                Found(
+                    initialState.type,
+                    this,
+                    isFromLegacyDetector = analyzerOutput is IDDetectorOutput.Legacy
+                )
             }
+
             else -> {
                 Log.d(
                     TAG,
@@ -78,23 +103,131 @@ internal class IDDetectorTransitioner(
         require(analyzerOutput is IDDetectorOutput) {
             "Unexpected output type: $analyzerOutput"
         }
+        return when (analyzerOutput) {
+            is IDDetectorOutput.Legacy -> {
+                transitionFromFoundLegacy(
+                    foundState,
+                    analyzerOutput
+                )
+            }
+
+            is IDDetectorOutput.Modern -> {
+                transitionFromFoundModern(
+                    foundState,
+                    analyzerOutput
+                )
+            }
+        }
+    }
+
+    private fun transitionFromFoundLegacy(
+        foundState: Found,
+        analyzerOutput: IDDetectorOutput.Legacy
+    ) = when {
+        foundState.isFromLegacyDetector != true -> Unsatisfied(
+            "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        timeoutAt.hasPassedNow() -> {
+            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+        }
+
+        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
+            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        !iOUCheckPass(analyzerOutput.boundingBox) -> {
+            // reset timer of the foundState
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState
+        }
+
+        isBlurry(analyzerOutput.blurScore) -> {
+            // reset timer of the foundState
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState
+        }
+
+        moreResultsRequired(foundState) -> foundState
+        else -> {
+            Satisfied(foundState.type, foundState.transitioner)
+        }
+    }
+
+    private fun transitionFromFoundModern(
+        foundState: Found,
+        analyzerOutput: IDDetectorOutput.Modern
+    ): IdentityScanState {
+        // Call iOUCheckPass to update its internal state
+        val iOUCheckPassed = iOUCheckPass(analyzerOutput.boundingBox)
+        val feedbackIntRes =
+            if (analyzerOutput.mbOutput is MBDetector.DetectorResult.Capturing) {
+                analyzerOutput.mbOutput.feedback.stringResource
+            } else {
+                null
+            }
         return when {
-            timeoutAt.hasPassed() -> {
+            foundState.isFromLegacyDetector == true -> Unsatisfied(
+                "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
+                foundState.type,
+                foundState.transitioner
+            )
+            timeoutAt.hasPassedNow() -> {
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
             }
+
             !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
                 foundState.type,
                 foundState.transitioner
             )
-            !iOUCheckPass(analyzerOutput.boundingBox) -> {
+
+            analyzerOutput.mbOutput is MBDetector.DetectorResult.Error -> Unsatisfied(
+                "MB detector error",
+                foundState.type,
+                foundState.transitioner
+            )
+
+            !iOUCheckPassed -> {
                 // reset timer of the foundState
-                foundState.reachedStateAt = Clock.markNow()
-                foundState
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.withFeedback(feedbackIntRes)
             }
+
+            isBlurry(analyzerOutput.blurScore) -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.withFeedback(feedbackIntRes)
+            }
+
             moreResultsRequired(foundState) -> foundState
+
+            // Transition to Finished state if either the modern or legacy logic would have transitioned to Finished
+            analyzerOutput.mbOutput is MBDetector.DetectorResult.Captured -> {
+                IdentityScanState.Finished(
+                    foundState.type,
+                    foundState.transitioner
+                )
+            }
+
+            !isBlurry(analyzerOutput.blurScore) -> {
+                IdentityScanState.Finished(
+                    foundState.type,
+                    foundState.transitioner
+                )
+            }
+
             else -> {
-                Satisfied(foundState.type, foundState.transitioner)
+                // This should never occur
+                Unsatisfied(
+                    "Unknown state! ",
+                    foundState.type,
+                    foundState.transitioner
+                )
             }
         }
     }
@@ -104,7 +237,7 @@ internal class IDDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        return if (satisfiedState.reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
+        return if (satisfiedState.reachedStateAt.elapsedNow() > displaySatisfiedDuration.milliseconds) {
             Log.d(TAG, "Scan for ${satisfiedState.type} Satisfied, transition to Finished.")
             IdentityScanState.Finished(satisfiedState.type, this)
         } else {
@@ -118,16 +251,19 @@ internal class IDDetectorTransitioner(
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return when {
-            timeoutAt.hasPassed() -> {
+            timeoutAt.hasPassedNow() -> {
                 IdentityScanState.TimeOut(unsatisfiedState.type, this)
             }
-            unsatisfiedState.reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
+
+            unsatisfiedState.reachedStateAt.elapsedNow() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(
                     TAG,
-                    "Scan for ${unsatisfiedState.type} Unsatisfied with reason ${unsatisfiedState.reason}, transition to Initial."
+                    "Scan for ${unsatisfiedState.type} Unsatisfied with reason " +
+                        "${unsatisfiedState.reason}, transition to Initial."
                 )
-                Initial(unsatisfiedState.type, this)
+                Initial(unsatisfiedState.type, this.resetAndReturn())
             }
+
             else -> {
                 unsatisfiedState
             }
@@ -175,8 +311,15 @@ internal class IDDetectorTransitioner(
         }
     }
 
+    /**
+     * Decide if the image is blurry or not
+     */
+    private fun isBlurry(blurScore: Float): Boolean {
+        return blurScore <= blurThreshold
+    }
+
     private fun moreResultsRequired(foundState: Found): Boolean {
-        return foundState.reachedStateAt.elapsedSince() < timeRequired.milliseconds
+        return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
     }
 
     /**
@@ -213,12 +356,13 @@ internal class IDDetectorTransitioner(
         return interArea / (boxAArea + boxBArea - interArea)
     }
 
-    private companion object {
+    internal companion object {
         const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
+        const val DEFAULT_BLUR_THRESHOLD = 0f
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
@@ -227,10 +371,8 @@ internal class IDDetectorTransitioner(
      * Note: the ML model will output ID_FRONT or ID_BACK for both ID and Driver License.
      */
     private fun Category.matchesScanType(scanType: ScanType): Boolean {
-        return this == Category.ID_BACK && scanType == ScanType.ID_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.ID_FRONT ||
-            this == Category.ID_BACK && scanType == ScanType.DL_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.DL_FRONT ||
-            this == Category.PASSPORT && scanType == ScanType.PASSPORT
+        return this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
+            this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
+            this == Category.PASSPORT && scanType == ScanType.DOC_FRONT
     }
 }

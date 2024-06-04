@@ -80,5 +80,11 @@ constructor(
      *
      * [doc_url](https://stripe.com/docs/api/errors#errors-doc_url)
      */
-    val docUrl: String? = null
+    val docUrl: String? = null,
+
+    /**
+     * Internal list of extra fields related to the error.
+     * Note - value type is ignored and always parsed as string (true -> "true")
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val extraFields: Map<String, String>? = null
 ) : StripeModel, Serializable

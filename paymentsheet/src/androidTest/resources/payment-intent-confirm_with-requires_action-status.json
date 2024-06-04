@@ -1,0 +1,84 @@
+{
+  "id": "pi_example",
+  "object": "payment_intent",
+  "amount": 5099,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic",
+  "client_secret": "pi_example_secret_example",
+  "confirmation_method": "automatic",
+  "created": 1674747412,
+  "currency": "usd",
+  "description": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": {
+    "id": "pm_1MUXVpLu5o3P18ZpS2NCqb2F",
+    "object": "payment_method",
+    "billing_details": {
+      "address": {
+        "city": null,
+        "country": "US",
+        "line1": null,
+        "line2": null,
+        "postal_code": "12345",
+        "state": null
+      },
+      "email": null,
+      "name": null,
+      "phone": null
+    },
+    "card": {
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": null,
+        "address_postal_code_check": null,
+        "cvc_check": null
+      },
+      "country": "US",
+      "exp_month": 1,
+      "exp_year": 2032,
+      "funding": "credit",
+      "generated_from": null,
+      "last4": "4242",
+      "networks": {
+        "available": [
+          "visa"
+        ],
+        "preferred": null
+      },
+      "three_d_secure_usage": {
+        "supported": true
+      },
+      "wallet": null
+    },
+    "created": 1674747437,
+    "customer": null,
+    "livemode": false,
+    "type": "card"
+  },
+  "payment_method_options": {
+    "us_bank_account": {
+      "verification_method": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "afterpay_clearpay",
+    "klarna",
+    "us_bank_account",
+    "affirm",
+    "link"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "status": "requires_action"
+}

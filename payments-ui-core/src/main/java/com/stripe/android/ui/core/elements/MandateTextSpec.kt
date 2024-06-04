@@ -2,6 +2,9 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,18 +13,19 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
+@Parcelize
 data class MandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
     val stringResId: Int
 ) : FormItemSpec() {
-    fun transform(merchantName: String): FormElement =
-        // It could be argued that the static text should have a controller, but
-        // since it doesn't provide a form field we leave it out for now
-        MandateTextElement(
-            this.apiPath,
-            this.stringResId,
-            merchantName
+
+    fun transform(vararg args: String): FormElement {
+        return MandateTextElement(
+            identifier = apiPath,
+            stringResId = stringResId,
+            args = args.toList(),
         )
+    }
 }

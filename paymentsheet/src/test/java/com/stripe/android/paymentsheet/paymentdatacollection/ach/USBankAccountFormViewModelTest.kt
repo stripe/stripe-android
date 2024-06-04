@@ -1,36 +1,40 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.StripeRepository
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -39,33 +43,32 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
-    private val usBankAccount = lpmRepository.fromCode(PaymentMethod.Type.USBankAccount.code)!!
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
-        formArgs = FormFragmentArguments(
+        formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-            showCheckbox = false,
-            showCheckboxControlledFields = false,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
-            injectorKey = INJECTOR_KEY,
             billingDetails = PaymentSheet.BillingDetails(
                 name = CUSTOMER_NAME,
                 email = CUSTOMER_EMAIL
-            )
+            ),
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         ),
-        completePayment = true,
-        clientSecret = PaymentIntentClientSecret("pi_12345"),
-        savedScreenState = null,
-        savedPaymentMethod = null
+        showCheckbox = false,
+        isCompleteFlow = true,
+        isPaymentFlow = true,
+        stripeIntentId = "id_12345",
+        clientSecret = "pi_12345_secret_54321",
+        onBehalfOf = "on_behalf_of_id",
+        savedPaymentMethod = null,
+        shippingDetails = null,
+        instantDebits = false,
     )
 
-    private val stripeRepository = mock<StripeRepository>()
-    private val collectBankAccountLauncher = mock<CollectBankAccountLauncher>()
+    private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
 
     @BeforeTest
@@ -83,10 +86,24 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEqualTo(CUSTOMER_NAME)
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.name.value).isEqualTo(
+                CUSTOMER_NAME
+            )
+            assertThat(viewModel.email.value).isEqualTo(
+                CUSTOMER_EMAIL
+            )
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
+    fun `when name is valid then required fields are filled for instant debits flow`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(instantDebits = true),
+            )
+
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
 
     @Test
@@ -97,144 +114,333 @@ class USBankAccountFormViewModelTest {
             viewModel.nameController.onRawValueChange("      ")
             viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.requiredFields.value).isFalse()
 
             viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
             viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.requiredFields.value).isTrue()
 
             viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
             viewModel.emailController.onRawValueChange("")
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.requiredFields.value).isFalse()
         }
 
     @Test
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+            val currentScreenState =
+                viewModel.currentScreenState.value
 
             assertThat(
                 currentScreenState
             ).isInstanceOf(
-                USBankAccountFormScreenState.NameAndEmailCollection::class.java
+                USBankAccountFormScreenState.BillingDetailsCollection::class.java
             )
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
-    fun `when payment sheet, unverified bank account, then confirm intent callable`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+    fun `when payment sheet, unverified bank account, then confirm intent callable`() = runTest {
+        val viewModel = createViewModel()
 
-            viewModel.handleCollectBankAccountResult(
-                mockUnverifiedBankAccount()
-            )
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
-
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
-            val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.ConfirmIntent::class.java)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
+    }
 
     @Test
-    fun `when payment sheet, verified bank account, then confirm intent callable`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+    fun `when payment sheet, verified bank account, then confirm intent callable`() = runTest {
+        val viewModel = createViewModel()
 
-            viewModel.handleCollectBankAccountResult(
-                mockVerifiedBankAccount()
-            )
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
-
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
-            val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.ConfirmIntent::class.java)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
+    }
 
     @Test
-    fun `when payment options, unverified bank account, then finished`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+    fun `when payment options, unverified bank account, then finished`() = runTest {
+        val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
+        val bankAccount = mockUnverifiedBankAccount()
 
-            viewModel.handleCollectBankAccountResult(
-                mockUnverifiedBankAccount()
-            )
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
-
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
-            val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.Finished::class.java)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
+    }
 
     @Test
-    fun `when payment options, verified bank account, then finished`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+    fun `when payment options, verified bank account, then finished`() = runTest {
+        val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
+        val bankAccount = mockVerifiedBankAccount()
 
-            viewModel.handleCollectBankAccountResult(
-                mockVerifiedBankAccount()
-            )
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
-
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
-            val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-            assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.Finished::class.java)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
+    }
+
+    @Test
+    fun `when payment options, verified bank account, then result has correct paymentMethodOptionsParams`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
+            )
+        )
+        val bankAccount = mockVerifiedBankAccount()
+
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(bankAccount)
+
+            val currentScreenState = viewModel.currentScreenState.value
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
+
+            assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
+            )
+        }
+    }
 
     @Test
     fun `when reset, primary button launches bank account collection`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.reset()
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState =
+                viewModel.currentScreenState.value
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
-    fun `when reset, save for future usage should be true`() {
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+    fun `when reset, save for future usage should be false`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
-            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+        viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
-            assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isFalse()
-
+        viewModel.saveForFutureUseElement.controller.saveForFutureUse.test {
+            assertThat(awaitItem()).isFalse()
             viewModel.reset()
+            assertThat(awaitItem()).isTrue()
+        }
+    }
 
-            assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isTrue()
+    @Test
+    fun `Correctly restores input when re-opening screen`() = runTest {
+        val input = PaymentSelection.New.USBankAccount.Input(
+            name = "Some One",
+            email = "someone@email.com",
+            phone = "1112223456",
+            address = Address(
+                line1 = "123 Not Main Street",
+                line2 = "Apt 123",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94111",
+                country = "US",
+            ),
+            saveForFutureUse = true,
+        )
+
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(billingDetails = null),
+                savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                    labelResource = "Test",
+                    iconResource = 0,
+                    paymentMethodCreateParams = mock(),
+                    customerRequestedSave = mock(),
+                    input = input,
+                    instantDebits = null,
+                    screenState = USBankAccountFormScreenState.SavedAccount(
+                        financialConnectionsSessionId = "session_1234",
+                        intentId = "intent_1234",
+                        bankName = "Stripe Bank",
+                        last4 = "6789",
+                        primaryButtonText = "Continue",
+                        mandateText = null,
+                    ),
+                )
+            )
+        )
+
+        assertThat(viewModel.name.value).isEqualTo(input.name)
+        assertThat(viewModel.email.value).isEqualTo(input.email)
+        assertThat(viewModel.phone.value).isEqualTo(input.phone)
+        assertThat(viewModel.address.value).isEqualTo(input.address)
+    }
+
+    @Test
+    fun `Prioritizes previous input over default values`() = runTest {
+        val input = PaymentSelection.New.USBankAccount.Input(
+            name = "Some One",
+            email = "someone@email.com",
+            phone = "1112223456",
+            address = Address(
+                line1 = "123 Not Main Street",
+                line2 = "Apt 123",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94111",
+                country = "US",
+            ),
+            saveForFutureUse = true,
+        )
+
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = CUSTOMER_PHONE,
+                        address = CUSTOMER_ADDRESS,
+                    ),
+                ),
+                savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                    labelResource = "Test",
+                    iconResource = 0,
+                    paymentMethodCreateParams = mock(),
+                    customerRequestedSave = mock(),
+                    input = input,
+                    instantDebits = null,
+                    screenState = USBankAccountFormScreenState.SavedAccount(
+                        financialConnectionsSessionId = "session_1234",
+                        intentId = "intent_1234",
+                        bankName = "Stripe Bank",
+                        last4 = "6789",
+                        primaryButtonText = "Continue",
+                        mandateText = null,
+                    ),
+                )
+            )
+        )
+
+        assertThat(viewModel.name.value).isEqualTo(input.name)
+        assertThat(viewModel.email.value).isEqualTo(input.email)
+        assertThat(viewModel.phone.value).isEqualTo(input.phone)
+        assertThat(viewModel.address.value).isEqualTo(input.address)
+    }
+
+    @Test
+    fun `Uses default values if no previous input is provided`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                        address = CUSTOMER_ADDRESS,
+                    ),
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                ),
+            )
+        )
+
+        assertThat(viewModel.name.value).isEqualTo(CUSTOMER_NAME)
+        assertThat(viewModel.email.value).isEqualTo(CUSTOMER_EMAIL)
+        assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
+        assertThat(viewModel.phone.value).isEqualTo(CUSTOMER_PHONE)
+        assertThat(viewModel.address.value).isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
+    }
+
+    @Test
+    fun `Restores screen state when re-opening screen`() = runTest {
+        val screenStates = listOf(
+            USBankAccountFormScreenState.BillingDetailsCollection(
+                primaryButtonText = "Continue",
+                isProcessing = false,
+            ),
+            USBankAccountFormScreenState.MandateCollection(
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.Session("session_1234"),
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = null,
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+            USBankAccountFormScreenState.VerifyWithMicrodeposits(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                paymentAccount = BankAccount(
+                    id = "bank_id",
+                    last4 = "6789",
+                ),
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+            USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+        )
+
+        for (screenState in screenStates) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                        labelResource = "Test",
+                        iconResource = 0,
+                        paymentMethodCreateParams = mock(),
+                        customerRequestedSave = mock(),
+                        input = PaymentSelection.New.USBankAccount.Input(
+                            name = "Some One",
+                            email = "someone@email.com",
+                            phone = "1112223456",
+                            address = CUSTOMER_ADDRESS.asAddressModel(),
+                            saveForFutureUse = true,
+                        ),
+                        instantDebits = null,
+                        screenState = screenState,
+                    )
+                )
+            )
+
+            assertThat(viewModel.currentScreenState.value).isEqualTo(screenState)
         }
     }
 
@@ -246,17 +452,30 @@ class USBankAccountFormViewModelTest {
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
                         labelResource = "Test",
                         iconResource = 0,
-                        bankName = "Test",
-                        last4 = "Test",
-                        financialConnectionsSessionId = "1234",
-                        intentId = "1234",
                         paymentMethodCreateParams = mock(),
-                        customerRequestedSave = mock()
+                        customerRequestedSave = mock(),
+                        input = PaymentSelection.New.USBankAccount.Input(
+                            name = "",
+                            email = null,
+                            phone = null,
+                            address = null,
+                            saveForFutureUse = false,
+                        ),
+                        instantDebits = null,
+                        screenState = USBankAccountFormScreenState.SavedAccount(
+                            financialConnectionsSessionId = "session_1234",
+                            intentId = "intent_1234",
+                            bankName = "Stripe Bank",
+                            last4 = "6789",
+                            primaryButtonText = "Continue",
+                            mandateText = null,
+                        ),
                     )
                 )
             )
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState =
+                viewModel.currentScreenState.value
 
             assertThat(
                 currentScreenState
@@ -266,50 +485,599 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
-    fun `when saved screen state, saved screen state is emitted`() =
+    fun `Test defaults are used when not collecting fields if they are attached`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
                 defaultArgs.copy(
-                    savedScreenState = USBankAccountFormScreenState.SavedAccount(
-                        name = "Test",
-                        email = "test@email.com",
-                        bankName = "Test",
-                        last4 = "Test",
-                        financialConnectionsSessionId = "1234",
-                        intentId = "1234",
-                        primaryButtonText = "Test",
-                        mandateText = "Test",
-                        saveForFutureUsage = true
-                    )
-                )
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Never,
+                            email = CollectionMode.Never,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
             )
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-
-            assertThat(
-                currentScreenState
-            ).isInstanceOf(
-                USBankAccountFormScreenState.SavedAccount::class.java
-            )
+            assertThat(viewModel.name.value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.value)
+                .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
+            assertThat(viewModel.address.value)
+                .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
+
+    @Test
+    fun `Test defaults are only used for fields that are being collected`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
+    fun `Test defaults are not used when not collecting fields if not attached`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.value)
+                .isEqualTo("Jenny Rose")
+            assertThat(viewModel.email.value)
+                .isEqualTo("email@email.com")
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
+    fun `Test all collected fields are required`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isFalse()
+        }
+
+    @Test
+    fun `Test phone country changes with country`() = runTest(UnconfinedTestDispatcher()) {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Always,
+            email = CollectionMode.Always,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                ),
+            )
+        )
+
+        viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+        assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `Doesn't save for future use by default`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
+            ),
+        )
+        assertThat(viewModel.saveForFutureUse.value).isFalse()
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier for default config`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting phone number`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Never,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                ),
+                showCheckbox = true,
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+                showCheckbox = true,
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when only address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+                showCheckbox = true,
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting no fields`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Never,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+                showCheckbox = true,
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `Launches collect bank account for deferred payment screen when deferred payment`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null
+            )
+        )
+
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        val currentScreenState =
+            viewModel.currentScreenState.value
+
+        assertThat(
+            currentScreenState
+        ).isInstanceOf(
+            USBankAccountFormScreenState.BillingDetailsCollection::class.java
+        )
+
+        viewModel.handlePrimaryButtonClick(
+            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+        )
+
+        verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
+            publishableKey = any(),
+            stripeAccountId = any(),
+            configuration = any(),
+            elementsSessionId = any(),
+            customerId = anyOrNull(),
+            onBehalfOf = any(),
+            amount = any(),
+            currency = any()
+        )
+    }
+
+    @Test
+    fun `Launches collect bank account for deferred setup screen when deferred setup`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null,
+                isPaymentFlow = false
+            )
+        )
+
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        val currentScreenState =
+            viewModel.currentScreenState.value
+
+        assertThat(
+            currentScreenState
+        ).isInstanceOf(
+            USBankAccountFormScreenState.BillingDetailsCollection::class.java
+        )
+
+        viewModel.handlePrimaryButtonClick(
+            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+        )
+
+        verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
+            publishableKey = any(),
+            stripeAccountId = any(),
+            configuration = any(),
+            elementsSessionId = any(),
+            customerId = anyOrNull(),
+            onBehalfOf = any(),
+        )
+    }
+
+    @Test
+    fun `When form destroyed, collect bank account result is null and screen is not reset`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null,
+                isPaymentFlow = false
+            )
+        )
+
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(
+                result = mockVerifiedBankAccount()
+            )
+
+            viewModel.onDestroy()
+
+            assertThat(awaitItem()).isNull()
+
+            val currentScreenState =
+                viewModel.currentScreenState.value
+
+            assertThat(currentScreenState)
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+        }
+    }
+
+    @Test
+    fun `When the primary button is pressed, the primary button state moves to processing`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().isProcessing)
+                .isFalse()
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+
+            assertThat(awaitItem().isProcessing)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When collect bank account is returned from FC SDK, the result is emitted`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.collectBankAccountResult.test {
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(verifiedAccount)
+
+            viewModel.handleCollectBankAccountResult(
+                result = CollectBankAccountResultInternal.Cancelled
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(CollectBankAccountResultInternal.Cancelled)
+            // Reset was called, so the result should be null
+            assertThat(awaitItem())
+                .isNull()
+
+            val failure = CollectBankAccountResultInternal.Failed(
+                IllegalArgumentException("Failed")
+            )
+            viewModel.handleCollectBankAccountResult(
+                result = failure
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(failure)
+            // Reset was called, so the result should be null
+            assertThat(awaitItem())
+                .isNull()
+        }
+    }
+
+    @Test
+    fun `When the view model is reset, collect bank account result should be null`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.collectBankAccountResult.test {
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(verifiedAccount)
+
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `Should be reset after confirming bank account and attempting to reset`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
+    }
+
+    @Test
+    fun `Should not be reset after attempting to reset on the billing details screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
+    }
+
+    @Test
+    fun `customerRequestedSave equals RequestReuse when showCheckbox and saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = true,
+                saveForFutureUse = true
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+    }
+
+    @Test
+    fun `customerRequestedSave equals RequestNoReuse when showCheckbox and not saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = true,
+                saveForFutureUse = false
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+    }
+
+    @Test
+    fun `customerRequestedSave equals NoRequest when not showCheckbox and not saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = false,
+                saveForFutureUse = false
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+    }
+
+    @Test
+    fun `Uses CollectBankAccountLauncher for ACH when not in Instant Debits flow`() {
+        val viewModel = createViewModel().apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.nameController.onValueChange("Some Name")
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccount(
+                    name = "Some Name",
+                    email = "email@email.com",
+                )
+            ),
+        )
+    }
+
+    @Test
+    fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(instantDebits = true),
+        ).apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.InstantDebits(
+                    email = "email@email.com",
+                )
+            ),
+        )
+    }
 
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val paymentConfiguration = PaymentConfiguration(
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            STRIPE_ACCOUNT_ID
+        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            stripeRepository = stripeRepository,
             lazyPaymentConfig = { paymentConfiguration },
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
         )
     }
 
-    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResult {
+    private fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
+        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
         whenever(financialConnectionsSession.id).thenReturn("123")
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             BankAccount(
@@ -319,22 +1087,22 @@ class USBankAccountFormViewModelTest {
                 routingNumber = "123"
             )
         )
-        whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any())
-        ).thenReturn(paymentIntent)
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
 
-    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResult {
+    private fun mockVerifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
+        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
         whenever(financialConnectionsSession.id).thenReturn("123")
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             FinancialConnectionsAccount(
@@ -346,22 +1114,33 @@ class USBankAccountFormViewModelTest {
                 supportedPaymentMethodTypes = listOf()
             )
         )
-        whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any())
-        ).thenReturn(paymentIntent)
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
 
     private companion object {
-        const val INJECTOR_KEY = "injectorKey"
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
+        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
+        const val CUSTOMER_COUNTRY = "US"
+        const val CUSTOMER_PHONE_COUNTRY_CODE = "+1"
+        const val CUSTOMER_PHONE = "3105551234"
+        val CUSTOMER_ADDRESS = PaymentSheet.Address(
+            line1 = "123 Main Street",
+            line2 = "Apt 456",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94111",
+            country = "US",
+        )
     }
 }

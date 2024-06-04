@@ -12,21 +12,22 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.R
-import com.stripe.android.databinding.CardBrandSpinnerDropdownBinding
-import com.stripe.android.databinding.CardBrandSpinnerMainBinding
+import com.stripe.android.databinding.StripeCardBrandSpinnerDropdownBinding
+import com.stripe.android.databinding.StripeCardBrandSpinnerMainBinding
 import com.stripe.android.model.CardBrand
+import androidx.appcompat.R as AppCompatR
 
 internal class CardBrandSpinner @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.spinnerStyle
+    defStyleAttr: Int = AppCompatR.attr.spinnerStyle
 ) : AppCompatSpinner(context, attrs, defStyleAttr, MODE_DROPDOWN) {
     private val cardBrandsAdapter = Adapter(context)
     private var defaultBackground: Drawable? = null
 
     init {
         adapter = cardBrandsAdapter
-        dropDownWidth = resources.getDimensionPixelSize(R.dimen.card_brand_spinner_dropdown_width)
+        dropDownWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_brand_spinner_dropdown_width)
     }
 
     val cardBrand: CardBrand?
@@ -82,8 +83,8 @@ internal class CardBrandSpinner @JvmOverloads constructor(
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val viewBinding = convertView?.let {
-                CardBrandSpinnerMainBinding.bind(it)
-            } ?: CardBrandSpinnerMainBinding.inflate(layoutInflater, parent, false)
+                StripeCardBrandSpinnerMainBinding.bind(it)
+            } ?: StripeCardBrandSpinnerMainBinding.inflate(layoutInflater, parent, false)
 
             val cardBrand = requireNotNull(getItem(position))
             viewBinding.image.also {
@@ -96,8 +97,8 @@ internal class CardBrandSpinner @JvmOverloads constructor(
 
         override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
             val viewBinding = convertView?.let {
-                CardBrandSpinnerDropdownBinding.bind(it)
-            } ?: CardBrandSpinnerDropdownBinding.inflate(layoutInflater, parent, false)
+                StripeCardBrandSpinnerDropdownBinding.bind(it)
+            } ?: StripeCardBrandSpinnerDropdownBinding.inflate(layoutInflater, parent, false)
 
             val cardBrand = requireNotNull(getItem(position))
             viewBinding.textView.also {

@@ -1,10 +1,13 @@
 package com.stripe.android.networking
 
+import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
+import com.stripe.android.core.networking.HEADER_X_STRIPE_USER_AGENT
 import com.stripe.android.core.networking.RequestHeadersFactory
+import com.stripe.android.core.version.StripeSdkVersion
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -35,7 +38,12 @@ class FraudDetectionDataRequestTest {
                 mapOf(
                     "Cookie" to "m=${FRAUD_DETECTION_DATA.guid}",
                     "User-Agent" to RequestHeadersFactory.getUserAgent(),
-                    "Accept-Charset" to "UTF-8"
+                    "Accept-Charset" to "UTF-8",
+                    HEADER_X_STRIPE_USER_AGENT to "{\"lang\":\"kotlin\"," +
+                        "\"bindings_version\":\"${StripeSdkVersion.VERSION_NAME}\"," +
+                        "\"os_version\":\"${Build.VERSION.SDK_INT}\"," +
+                        "\"type\":\"robolectric_robolectric_robolectric\"," +
+                        "\"model\":\"robolectric\"}"
                 )
             )
     }

@@ -1,0 +1,64 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig false
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+}
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation project(":payments-core")
+    implementation project(":payments-ui-core")
+    implementation project(":stripe-ui-core")
+    implementation libs.androidx.annotation
+    implementation libs.androidx.browser
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.navigation
+    implementation libs.compose.ui
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+
+    ksp libs.daggerCompiler
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.junit
+    testImplementation testLibs.truth
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+ext {
+    artifactId = "payment-method-messaging"
+    artifactName = "payment-method-messaging"
+    artifactDescrption = "The Payment Method Messaging module of Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

@@ -1,111 +1,63 @@
-plugins {
-    id "com.android.library"
-    id "kotlin-android"
-    id 'kotlin-kapt'
-    id 'org.jetbrains.dokka'
-    id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'org.jetbrains.kotlin.plugin.serialization'
-}
+apply from: configs.androidLibrary
 
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
-
-if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
-}
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
+    implementation project(":stripe-ui-core")
     compileOnly project(":stripecardscan")
-    compileOnly "com.google.android.libraries.places:places:$placesVersion"
+    compileOnly libs.places
 
-    implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.material
+    implementation libs.dagger
+    ksp libs.daggerCompiler
 
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
-    // Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
-    implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
+    implementation libs.compose.ui
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
+    implementation libs.accompanist.flowLayout
+    implementation libs.compose.uiToolingPreview
+
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
+    implementation libs.kotlin.serialization
+
     // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    debugImplementation libs.compose.uiTooling
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$playServicesVersion"
-
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "com.google.android.libraries.places:places:$placesVersion"
+    testImplementation project(':payments-core-testing')
     testImplementation project(':stripecardscan')
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
+    testImplementation libs.places
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.truth
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.hamcrest
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        vectorDrawables.useSupportLibrary = true
-
-        // From https://developer.android.com/training/testing/junit-runner:
-        // > To remove all shared state from your device"s CPU and memory after each test,
-        // > use the clearPackageData flag.
-        testInstrumentationRunnerArguments clearPackageData: "true"
-    }
-
-    sourceSets {
-        main {
-            res.srcDirs = ['res']
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     buildFeatures {
         compose = true
         viewBinding = true
@@ -122,34 +74,12 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
-    lintOptions {
-        disable "UnrememberedMutableState"
+    kotlinOptions {
+        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
     }
-
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-    }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
 
 ext {

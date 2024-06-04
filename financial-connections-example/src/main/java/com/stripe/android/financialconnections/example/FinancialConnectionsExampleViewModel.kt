@@ -1,12 +1,15 @@
 package com.stripe.android.financialconnections.example
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 import com.stripe.android.financialconnections.example.data.BackendRepository
+import com.stripe.android.financialconnections.example.data.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,15 +17,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FinancialConnectionsExampleViewModel : ViewModel() {
+class FinancialConnectionsExampleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = BackendRepository()
+    private val repository = BackendRepository(Settings(application))
 
     private val _state = MutableStateFlow(FinancialConnectionsExampleState())
     val state: StateFlow<FinancialConnectionsExampleState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsExampleViewEffect>()
     val viewEffect: SharedFlow<FinancialConnectionsExampleViewEffect> = _viewEffect
+
+    // For Java
+    val stateLiveData = state.asLiveData()
+    val viewEffectLiveData = viewEffect.asLiveData()
 
     fun startFinancialConnectionsSessionForData() {
         viewModelScope.launch {

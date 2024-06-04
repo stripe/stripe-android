@@ -4,13 +4,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.stripe.android.databinding.AddPaymentMethodRowBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodRowBinding
 
 internal class AddPaymentMethodRowView private constructor(
     context: Context
 ) : FrameLayout(context) {
 
-    private val viewBinding = AddPaymentMethodRowBinding.inflate(
+    private val viewBinding = StripeAddPaymentMethodRowBinding.inflate(
         LayoutInflater.from(context),
         this,
         true

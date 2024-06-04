@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.model.StripeModel
@@ -45,7 +46,9 @@ constructor(
      *
      * [country](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-country)
      */
-    @param:Size(2) @field:Size(2) @get:Size(2)
+    @param:Size(2)
+    @field:Size(2)
+    @get:Size(2)
     val countryCode: String? = null,
 
     /**
@@ -53,7 +56,9 @@ constructor(
      *
      * [currency](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-currency)
      */
-    @param:Size(3) @field:Size(3) @get:Size(3)
+    @param:Size(3)
+    @field:Size(3)
+    @get:Size(3)
     val currency: String? = null,
 
     /**
@@ -101,10 +106,11 @@ constructor(
         Company("company"),
         Individual("individual");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
-            internal fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            internal fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -115,11 +121,12 @@ constructor(
         VerificationFailed("verification_failed"),
         Errored("errored");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

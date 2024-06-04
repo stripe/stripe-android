@@ -3,7 +3,6 @@ package com.stripe.android.payments.core.injection
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +13,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class WeakMapInjectorRegistryTest {
 
     @Before

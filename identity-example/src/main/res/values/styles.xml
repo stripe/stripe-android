@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Customize the button font-->
+    <style name="TextAppearance.IdentityExampleAppTheme2.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">@font/aclonica_regular</item>
+    </style>
+
+    <!-- Customize the body1 font-->
+    <style name="TextAppearance.IdentityExampleAppTheme2.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">monospace</item>
+    </style>
+    <!-- Customize the h6 font-->
+    <style name="TextAppearance.IdentityExampleAppTheme2.H6" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">monospace</item>
+    </style>
+    <!-- Customize the subtitle1 font-->
+    <style name="TextAppearance.IdentityExampleAppTheme2.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="fontFamily">monospace</item>
+    </style>
+</resources>

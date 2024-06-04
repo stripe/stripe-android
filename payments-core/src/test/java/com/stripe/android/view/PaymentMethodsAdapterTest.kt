@@ -8,7 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.mock
@@ -20,7 +19,6 @@ import kotlin.test.Test
  * Test class for [PaymentMethodsAdapter]
  */
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class PaymentMethodsAdapterTest {
     private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
     private val listener: PaymentMethodsAdapter.Listener = mock()
@@ -263,10 +261,8 @@ class PaymentMethodsAdapterTest {
             shouldShowGooglePay = true
         )
 
-        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args?>()
-        adapter.addPaymentMethodArgs.observeForever { args ->
-            argsList.add(args)
-        }
+        val listener = mock<PaymentMethodsAdapter.Listener>()
+        adapter.listener = listener
 
         val viewHolder = adapter.createViewHolder(
             FrameLayout(context),
@@ -275,8 +271,7 @@ class PaymentMethodsAdapterTest {
         adapter.onBindViewHolder(viewHolder, 0)
         viewHolder.itemView.performClick()
 
-        assertThat(argsList.filterNotNull())
-            .containsExactly(adapter.addCardArgs)
+        verify(listener).onAddPaymentMethodClick(adapter.addCardArgs)
     }
 
     @Test
@@ -286,12 +281,8 @@ class PaymentMethodsAdapterTest {
             shouldShowGooglePay = true
         )
 
-        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
-        adapter.addPaymentMethodArgs.observeForever { args ->
-            if (args != null) {
-                argsList.add(args)
-            }
-        }
+        val listener = mock<PaymentMethodsAdapter.Listener>()
+        adapter.listener = listener
 
         val viewHolder = adapter.createViewHolder(
             FrameLayout(context),
@@ -300,8 +291,7 @@ class PaymentMethodsAdapterTest {
         adapter.onBindViewHolder(viewHolder, 0)
         viewHolder.itemView.performClick()
 
-        assertThat(argsList)
-            .containsExactly(adapter.addFpxArgs)
+        verify(listener).onAddPaymentMethodClick(adapter.addFpxArgs)
     }
 
     private companion object {
@@ -312,7 +302,7 @@ class PaymentMethodsAdapterTest {
         private val PaymentMethodsAdapter.viewTypes: List<PaymentMethodsAdapter.ViewType>
             get() {
                 return (0 until itemCount).map {
-                    PaymentMethodsAdapter.ViewType.values()[getItemViewType(it)]
+                    PaymentMethodsAdapter.ViewType.entries[getItemViewType(it)]
                 }
             }
     }

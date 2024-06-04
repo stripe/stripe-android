@@ -6,6 +6,8 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.version.StripeSdkVersion
+import java.util.Locale
+import java.util.UUID
 import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -14,9 +16,8 @@ open class AnalyticsRequestFactory(
     private val packageInfo: PackageInfo?,
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
-    internal val defaultProductUsageTokens: Set<String> = emptySet()
+    private val networkTypeProvider: Provider<String?>,
 ) {
-
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
      * including common params + event-specific params defined in [AnalyticsEvent.params]
@@ -27,7 +28,7 @@ open class AnalyticsRequestFactory(
      */
     fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any>
+        additionalParams: Map<String, Any?>
     ): AnalyticsRequest {
         return AnalyticsRequest(
             params = createParams(event) + additionalParams,
@@ -55,8 +56,15 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG
-    )
+        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
+        AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.LOCALE to Locale.getDefault().toString(),
+    ) + networkType()
+
+    private fun networkType(): Map<String, String> {
+        val networkType = networkTypeProvider.get() ?: return emptyMap()
+        return mapOf(AnalyticsFields.NETWORK_TYPE to networkType)
+    }
 
     internal fun appDataParams(): Map<String, Any> {
         return when {
@@ -81,6 +89,10 @@ open class AnalyticsRequestFactory(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        @Volatile
+        var sessionId: UUID = UUID.randomUUID()
+            private set
+
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
@@ -88,6 +100,10 @@ open class AnalyticsRequestFactory(
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
         const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
+
+        fun setSessionId(id: UUID) {
+            sessionId = id
+        }
     }
 }
 

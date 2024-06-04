@@ -1,6 +1,7 @@
 package com.stripe.android.model.wallets
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Address
 import kotlinx.parcelize.Parcelize
@@ -11,21 +12,28 @@ import kotlinx.parcelize.Parcelize
  * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
  */
 sealed class Wallet(
-    internal val walletType: Type
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val walletType: Type
 ) : StripeModel {
 
     @Parcelize
-    data class AmexExpressCheckoutWallet internal constructor(
+    data class AmexExpressCheckoutWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.AmexExpressCheckout)
 
     @Parcelize
-    data class ApplePayWallet internal constructor(
+    data class ApplePayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.ApplePay)
 
     @Parcelize
-    data class GooglePayWallet internal constructor(
+    data class GooglePayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.GooglePay), Parcelable
 
@@ -38,7 +46,9 @@ sealed class Wallet(
     ) : Wallet(Type.Masterpass)
 
     @Parcelize
-    data class SamsungPayWallet internal constructor(
+    data class SamsungPayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.SamsungPay)
 
@@ -51,17 +61,26 @@ sealed class Wallet(
         val dynamicLast4: String?
     ) : Wallet(Type.VisaCheckout)
 
-    internal enum class Type(val code: String) {
+    @Parcelize
+    data class LinkWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.Link)
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Type(val code: String) {
         AmexExpressCheckout("amex_express_checkout"),
         ApplePay("apple_pay"),
         GooglePay("google_pay"),
         Masterpass("master_pass"),
         SamsungPay("samsung_pay"),
-        VisaCheckout("visa_checkout");
+        VisaCheckout("visa_checkout"),
+        Link("link");
 
         internal companion object {
             internal fun fromCode(code: String?): Type? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

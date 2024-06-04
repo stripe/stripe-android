@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import kotlin.properties.Delegates
+import com.google.android.material.R as MaterialR
 
 /**
  * An [TextInputLayout] that can show a loading indicator.
@@ -19,7 +20,7 @@ import kotlin.properties.Delegates
 class CardNumberTextInputLayout @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.textInputStyle
+    defStyleAttr: Int = MaterialR.attr.textInputStyle
 ) : TextInputLayout(context, attrs, defStyleAttr) {
     private val progressView = CardWidgetProgressView(context, attrs, defStyleAttr)
 
@@ -40,7 +41,7 @@ class CardNumberTextInputLayout @JvmOverloads internal constructor(
             attachProgressView()
         }
 
-        placeholderText = resources.getString(R.string.card_number_hint)
+        placeholderText = resources.getString(R.string.stripe_card_number_hint)
     }
 
     private fun attachProgressView() {

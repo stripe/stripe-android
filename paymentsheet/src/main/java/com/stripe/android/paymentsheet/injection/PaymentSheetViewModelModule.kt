@@ -3,17 +3,17 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PrefsRepository
 import dagger.Module
 import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContract.Args) {
+internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContractV2.Args) {
 
     @Provides
-    fun provideArgs(): PaymentSheetContract.Args {
+    fun provideArgs(): PaymentSheetContractV2.Args {
         return starterArgs
     }
 
@@ -22,12 +22,10 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         appContext: Context,
         @IOContext workContext: CoroutineContext
     ): PrefsRepository {
-        return starterArgs.config?.customer?.let { (id) ->
-            DefaultPrefsRepository(
-                appContext,
-                customerId = id,
-                workContext = workContext
-            )
-        } ?: PrefsRepository.Noop()
+        return DefaultPrefsRepository(
+            appContext,
+            customerId = starterArgs.config.customer?.id,
+            workContext = workContext
+        )
     }
 }

@@ -1,15 +1,34 @@
 package com.stripe.android.financialconnections.example.data
 
-private const val BASE_URL = "https://stripe-mobile-connections-example.glitch.me/"
+import com.stripe.android.financialconnections.example.BuildConfig
+import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 class BackendRepository(
-    private val backendService: BackendApiService = BackendApiFactory(BASE_URL).create()
+    settings: Settings
 ) {
+    private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
-    suspend fun createLinkAccountSession() =
-        backendService.createLinkAccountSession()
+    suspend fun createLinkAccountSession(
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
+        )
+    ) = backendService.createLinkAccountSession(linkAccountSessionBody)
 
-    suspend fun createLinkAccountSessionForToken() =
-        backendService.createLinkAccountSessionForToken()
+    suspend fun createLinkAccountSessionForToken(
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
+        )
+    ) = backendService.createLinkAccountSessionForToken(
+        linkAccountSessionBody
+    )
 
+    suspend fun createPaymentIntent(
+        paymentIntentBody: PaymentIntentBody = PaymentIntentBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
+        )
+    ): CreateIntentResponse = backendService.createPaymentIntent(
+        paymentIntentBody
+    )
 }

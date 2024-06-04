@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
-import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationFlow.Companion.MAX_COMPLETION_LOOP_FRAMES
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -59,14 +58,18 @@ class CardImageVerificationSheet private constructor(
          */
         val enableCannotScanButton: Boolean = true
     ) : Parcelable {
-        sealed class StrictModeFrameCount(val count: Int) : Parcelable {
-            @Parcelize object None : StrictModeFrameCount(0)
+        sealed class StrictModeFrameCount(val count: (maxCompletionLoopFrames: Int) -> Int) : Parcelable {
+            @Parcelize
+            data object None : StrictModeFrameCount({ 0 })
 
-            @Parcelize object Low : StrictModeFrameCount(1)
+            @Parcelize
+            data object Low : StrictModeFrameCount({ 1 })
 
-            @Parcelize object Medium : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES / 2)
+            @Parcelize
+            data object Medium : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames / 2 })
 
-            @Parcelize object High : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES)
+            @Parcelize
+            data object High : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames })
         }
     }
 

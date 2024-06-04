@@ -2,6 +2,7 @@ package com.stripe.android.auth
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Color
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -91,22 +92,6 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
-    fun `createIntent() should set statusBarColor from activity`() {
-        val intent = PaymentBrowserAuthContract().createIntent(
-            activity,
-            ARGS
-        )
-
-        val args = requireNotNull(
-            intent.getParcelableExtra<PaymentBrowserAuthContract.Args>("extra_args")
-        )
-        assertThat(args.statusBarColor)
-            .isNotNull()
-        assertThat(args.statusBarColor)
-            .isEqualTo(activity.window.statusBarColor)
-    }
-
-    @Test
     fun `unparcel when no parameters as when started from StripeBrowserLauncherActivity`() {
         val parcel = Parcel.obtain()
 
@@ -123,6 +108,7 @@ class PaymentBrowserAuthContractTest {
             requestCode = 5000,
             url = "https://mybank.com/auth",
             returnUrl = "myapp://custom",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.launcher
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
@@ -15,8 +14,10 @@ internal class FinancialConnectionsSheetForDataContract :
         context: Context,
         input: FinancialConnectionsSheetActivityArgs.ForData
     ): Intent {
-        return Intent(context, FinancialConnectionsSheetActivity::class.java)
-            .putExtra(Mavericks.KEY_ARG, input)
+        return FinancialConnectionsSheetActivity.intent(
+            context = context,
+            args = input
+        )
     }
 
     override fun parseResult(
@@ -34,9 +35,19 @@ internal class FinancialConnectionsSheetForDataContract :
     private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetResult =
         when (this) {
             is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetResult.Canceled
-            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(error)
-            is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetResult.Completed(
-                financialConnectionsSession = financialConnectionsSession
+            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(
+                error
             )
+
+            is FinancialConnectionsSheetActivityResult.Completed ->
+                when (financialConnectionsSession) {
+                    null -> FinancialConnectionsSheetResult.Failed(
+                        IllegalArgumentException("financialConnectionsSession not set.")
+                    )
+
+                    else -> FinancialConnectionsSheetResult.Completed(
+                        financialConnectionsSession = financialConnectionsSession
+                    )
+                }
         }
 }

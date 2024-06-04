@@ -4,12 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
+import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
+import com.stripe.android.mlcore.base.InterpreterWrapper
+import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.Loader
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.io.Closeable
 import java.nio.ByteBuffer
 
@@ -17,8 +18,7 @@ import java.nio.ByteBuffer
  * A TensorFlowLite analyzer uses an [Interpreter] to analyze data.
  */
 internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
-    private val tfInterpreter: Interpreter,
-    private val delegate: NnApiDelegate? = null
+    private val tfInterpreter: InterpreterWrapper,
 ) : Analyzer<Input, Any, Output>, Closeable {
 
     protected abstract suspend fun interpretMLOutput(data: Input, mlOutput: MLOutput): Output
@@ -26,7 +26,7 @@ internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>
     protected abstract suspend fun transformData(data: Input): MLInput
 
     protected abstract suspend fun executeInference(
-        tfInterpreter: Interpreter,
+        tfInterpreter: InterpreterWrapper,
         data: MLInput
     ): MLOutput
 
@@ -40,7 +40,6 @@ internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>
 
     override fun close() {
         tfInterpreter.close()
-        delegate?.close()
     }
 }
 
@@ -55,7 +54,7 @@ internal abstract class TFLAnalyzerFactory<
     private val context: Context,
     private val fetchedModel: FetchedData
 ) : AnalyzerFactory<Input, Any, Output, AnalyzerType> {
-    protected abstract val tfOptions: Interpreter.Options
+    protected abstract val tfOptions: InterpreterOptionsWrapper
 
     private val loader by lazy { Loader(context) }
 
@@ -63,11 +62,14 @@ internal abstract class TFLAnalyzerFactory<
 
     private var loadedModel: ByteBuffer? = null
 
-    protected suspend fun createInterpreter(): Interpreter? =
+//    protected suspend fun createInterpreter(): Interpreter? =
+//        createInterpreter(fetchedModel)
+
+    protected suspend fun createInterpreter(): InterpreterWrapper? =
         createInterpreter(fetchedModel)
 
-    private suspend fun createInterpreter(fetchedModel: FetchedData): Interpreter? = try {
-        loadModel(fetchedModel)?.let { Interpreter(it, tfOptions) }
+    private suspend fun createInterpreter(fetchedModel: FetchedData): InterpreterWrapper? = try {
+        loadModel(fetchedModel)?.let { InterpreterWrapperImpl(it, tfOptions) }
     } catch (t: Throwable) {
         Log.e(
             LOG_TAG,

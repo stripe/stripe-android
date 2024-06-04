@@ -8,7 +8,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.BankItemBinding
+import com.stripe.android.databinding.StripeBankItemBinding
 import com.stripe.android.model.BankStatuses
 
 internal class AddPaymentMethodListAdapter(
@@ -37,7 +37,7 @@ internal class AddPaymentMethodListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return BankViewHolder(
-            BankItemBinding.inflate(
+            StripeBankItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -77,7 +77,7 @@ internal class AddPaymentMethodListAdapter(
     }
 
     internal class BankViewHolder constructor(
-        private val viewBinding: BankItemBinding,
+        private val viewBinding: StripeBankItemBinding,
         private val themeConfig: ThemeConfig
     ) : RecyclerView.ViewHolder(viewBinding.root) {
         private val resources: Resources = itemView.resources
@@ -87,7 +87,7 @@ internal class AddPaymentMethodListAdapter(
                 bank.displayName
             } else {
                 resources.getString(
-                    R.string.fpx_bank_offline,
+                    R.string.stripe_fpx_bank_offline,
                     bank.displayName
                 )
             }

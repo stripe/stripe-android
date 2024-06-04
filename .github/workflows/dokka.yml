@@ -1,0 +1,20 @@
+name: Generate Dokka
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**/*.gradle'
+      - '*.gradle'
+  push:
+    branches:
+      - master
+
+jobs:
+  generate-dokka:
+    name: Generate Dokka
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Dokka Documentation
+        run: ./gradlew dokkaHtmlMultiModule

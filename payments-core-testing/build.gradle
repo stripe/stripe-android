@@ -1,0 +1,15 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":payments-core")
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.viewModel
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation testLibs.junit
+    implementation testLibs.kotlin.coroutines
+    implementation testLibs.leakCanaryInstrumentation
+
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+}

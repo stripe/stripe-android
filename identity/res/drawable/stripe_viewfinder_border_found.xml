@@ -1,0 +1,44 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="180dp"
+            android:height="120dp"
+            android:viewportWidth="300"
+            android:viewportHeight="200">
+            <path
+                android:name="card_border"
+                android:pathData="
+                    M 2.5,20
+                    L 2.5,7.5
+                    a 5,5,0,0,1,5,-5
+                    L 292.5,2.5
+                    a 5,5,0,0,1,5,5
+                    L 297.5,192.5
+                    a 5,5,0,0,1,-5,5
+                    L 7.5,197.5
+                    a 5,5,0,0,1,-5,-5
+                    Z"
+                android:trimPathStart="0"
+                android:trimPathEnd="0.5"
+                android:strokeColor="@color/stripe_viewfinder_border_center"
+                android:strokeWidth="5" />
+        </vector>
+    </aapt:attr>
+    <target android:name="card_border">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="1500"
+                android:interpolator="@android:interpolator/linear"
+                android:repeatCount="infinite"
+                android:repeatMode="restart">
+                <propertyValuesHolder
+                    android:propertyName="trimPathOffset"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+</animated-vector>

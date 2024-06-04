@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:baselineAligned="false">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/name_text_input_layout"
+                style="@style/Widget.Design.TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/stripe_becs_widget_name"
+                android:accessibilityTraversalBefore="@+id/email_text_input_layout"
+                android:nextFocusRight="@+id/email_text_input_layout"
+                android:nextFocusForward="@+id/email_text_input_layout"
+                android:nextFocusDown="@+id/email_text_input_layout"
+                tools:ignore="UnusedAttribute">
+
+                <com.stripe.android.view.StripeEditText
+                    android:id="@+id/name_edit_text"
+                    style="@style/Stripe.BecsDebitWidget.EditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/email_text_input_layout"
+                style="@style/Widget.Design.TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/stripe_becs_widget_email"
+                android:accessibilityTraversalBefore="@+id/bsb_text_input_layout"
+                android:accessibilityTraversalAfter="@+id/name_text_input_layout"
+                android:nextFocusRight="@+id/bsb_text_input_layout"
+                android:nextFocusForward="@+id/bsb_text_input_layout"
+                android:nextFocusDown="@+id/bsb_text_input_layout"
+                android:nextFocusLeft="@id/name_text_input_layout"
+                android:nextFocusUp="@id/name_text_input_layout"
+                tools:ignore="UnusedAttribute">
+
+                <com.stripe.android.view.EmailEditText
+                    android:id="@+id/email_edit_text"
+                    style="@style/Stripe.BecsDebitWidget.EditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:imeOptions="actionNext" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:baselineAligned="false"
+            android:layout_marginTop="24dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/bsb_text_input_layout"
+                style="@style/Widget.Design.TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/stripe_becs_widget_bsb"
+                android:accessibilityTraversalBefore="@+id/account_number_text_input_layout"
+                android:accessibilityTraversalAfter="@+id/email_text_input_layout"
+                android:nextFocusRight="@+id/account_number_text_input_layout"
+                android:nextFocusForward="@+id/account_number_text_input_layout"
+                android:nextFocusDown="@+id/account_number_text_input_layout"
+                android:nextFocusLeft="@id/email_text_input_layout"
+                android:nextFocusUp="@id/email_text_input_layout"
+                tools:ignore="UnusedAttribute">
+
+                <com.stripe.android.view.BecsDebitBsbEditText
+                    android:id="@+id/bsb_edit_text"
+                    style="@style/Stripe.BecsDebitWidget.EditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:drawableStart="@drawable/stripe_ic_bank_becs" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/account_number_text_input_layout"
+                style="@style/Widget.Design.TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/stripe_becs_widget_account_number"
+                android:accessibilityTraversalAfter="@+id/bsb_text_input_layout"
+                android:nextFocusLeft="@id/bsb_text_input_layout"
+                android:nextFocusUp="@id/bsb_text_input_layout"
+                tools:ignore="UnusedAttribute">
+
+                <com.stripe.android.view.BecsDebitAccountNumberEditText
+                    android:id="@+id/account_number_edit_text"
+                    style="@style/Stripe.BecsDebitWidget.EditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.stripe.android.view.BecsDebitMandateAcceptanceTextView
+            android:id="@+id/mandate_acceptance_text_view"
+            style="@style/Stripe.BecsDebitWidget.MandateAcceptanceTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</merge>

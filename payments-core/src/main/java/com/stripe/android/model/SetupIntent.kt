@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -14,7 +16,9 @@ import java.util.regex.Pattern
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
-data class SetupIntent internal constructor(
+data class SetupIntent
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */
@@ -29,6 +33,12 @@ data class SetupIntent internal constructor(
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
+
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
@@ -91,17 +101,55 @@ data class SetupIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData?
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String>,
+
+    override val nextActionData: StripeIntent.NextActionData?,
+
+    private val paymentMethodOptionsJsonString: String? = null,
 ) : StripeIntent {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
+        StripeJsonUtils.jsonObjectToMap(JSONObject(it))
+    } ?: emptyMap()
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-            is StripeIntent.NextActionData.VerifyWithMicrodeposits ->
+            is StripeIntent.NextActionData.SdkData -> {
+                StripeIntent.NextActionType.UseStripeSdk
+            }
+            is StripeIntent.NextActionData.RedirectToUrl -> {
+                StripeIntent.NextActionType.RedirectToUrl
+            }
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                StripeIntent.NextActionType.DisplayOxxoDetails
+            }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
+            is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
+                StripeIntent.NextActionType.DisplayMultibancoDetails
+            }
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
-            else -> null
+            }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                StripeIntent.NextActionType.CashAppRedirect
+            }
+            is StripeIntent.NextActionData.AlipayRedirect,
+            is StripeIntent.NextActionData.BlikAuthorize,
+            is StripeIntent.NextActionData.WeChatPayRedirect,
+            is StripeIntent.NextActionData.UpiAwaitNotification,
+            is StripeIntent.NextActionData.SwishRedirect,
+            null -> {
+                null
+            }
         }
 
     override val isConfirmed: Boolean
@@ -181,7 +229,7 @@ data class SetupIntent internal constructor(
 
             internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
-                    return values().firstOrNull { it.code == typeCode }
+                    return entries.firstOrNull { it.code == typeCode }
                 }
             }
         }
@@ -219,7 +267,7 @@ data class SetupIntent internal constructor(
 
         internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

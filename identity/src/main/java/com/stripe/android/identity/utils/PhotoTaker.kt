@@ -8,30 +8,32 @@ import android.provider.MediaStore
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.SavedStateHandle
 
 /**
  * A class to take a photo through camera.
  */
 internal class PhotoTaker(
     activityResultCaller: ActivityResultCaller,
-    private val identityIO: IdentityIO
+    identityIO: IdentityIO,
+    onPhotoTaken: (Uri) -> Unit,
+    savedStateHandle: SavedStateHandle,
+    savedUriId: String
 ) {
-
-    private var newPhotoTakenUri: Uri? = null
-
-    private var onPhotoTaken: ((Uri) -> Unit)? = null
+    private val newPhotoTakenUri: Uri =
+        savedStateHandle.get<Uri>(savedUriId) ?: run {
+            val newUri = identityIO.createInternalFileUri().contentUri
+            savedStateHandle.set(savedUriId, newUri)
+            newUri
+        }
 
     private val takePhotoLauncher: ActivityResultLauncher<Intent> =
         activityResultCaller.registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == RESULT_OK) {
-                requireNotNull(onPhotoTaken) {
-                    "onPhotoTaken callback is not set."
-                }(
-                    requireNotNull(newPhotoTakenUri) {
-                        "newPhotoTakeUri is still null after a photo is taken."
-                    }
+                onPhotoTaken(
+                    newPhotoTakenUri
                 )
             }
         }
@@ -40,18 +42,12 @@ internal class PhotoTaker(
      * Starts an Activity to take a photo with camera, saves it locally to the app's internal file
      * storage and posts its Uri to [onPhotoTaken] when finished.
      */
-    // TODO(ccen): add error/exception
-    internal fun takePhoto(context: Context, onPhotoTaken: (Uri) -> Unit) {
-        this.onPhotoTaken = onPhotoTaken
-
+    internal fun takePhoto(context: Context) {
         takePhotoLauncher.launch(
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                 // Ensure that there's a camera activity to handle the intent
                 takePictureIntent.resolveActivity(context.packageManager).also {
-                    identityIO.createInternalFileUri().also {
-                        newPhotoTakenUri = it.contentUri
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, newPhotoTakenUri)
-                    }
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, newPhotoTakenUri)
                 }
             }
         )

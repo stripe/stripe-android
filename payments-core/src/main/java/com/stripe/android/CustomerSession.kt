@@ -28,7 +28,6 @@ import kotlin.coroutines.CoroutineContext
  * See [Creating ephemeral keys](https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys)
  */
 class CustomerSession @VisibleForTesting internal constructor(
-    context: Context,
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
@@ -62,12 +61,26 @@ class CustomerSession @VisibleForTesting internal constructor(
                 }
             }
 
-            override fun onKeyError(operationId: String, errorCode: Int, errorMessage: String) {
-                listeners.remove(operationId)?.onError(
-                    errorCode,
-                    errorMessage,
-                    null
-                )
+            override fun onKeyError(
+                operationId: String,
+                errorCode: Int,
+                errorMessage: String,
+                throwable: Throwable
+            ) {
+                when (val listener = listeners.remove(operationId)) {
+                    is RetrievalWithExceptionListener -> listener.onError(
+                        errorCode,
+                        errorMessage,
+                        null,
+                        throwable
+                    )
+                    is RetrievalListener -> listener.onError(
+                        errorCode,
+                        errorMessage,
+                        null
+                    )
+                    else -> Unit
+                }
             }
         }
     )
@@ -421,12 +434,29 @@ class CustomerSession @VisibleForTesting internal constructor(
         fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>)
     }
 
+    internal interface PaymentMethodsRetrievalWithExceptionListener :
+        PaymentMethodsRetrievalListener,
+        RetrievalWithExceptionListener
+
     interface RetrievalListener {
         fun onError(
             errorCode: Int,
             errorMessage: String,
             stripeError: StripeError?
         )
+    }
+
+    internal interface RetrievalWithExceptionListener : RetrievalListener {
+        fun onError(
+            errorCode: Int,
+            errorMessage: String,
+            stripeError: StripeError?,
+            throwable: Throwable
+        )
+
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            onError(errorCode, errorMessage, stripeError, Exception(errorMessage))
+        }
     }
 
     companion object {
@@ -473,7 +503,6 @@ class CustomerSession @VisibleForTesting internal constructor(
             val config = PaymentConfiguration.getInstance(context)
 
             instance = CustomerSession(
-                context,
                 StripeApiRepository(context, { config.publishableKey }, appInfo),
                 config.publishableKey,
                 config.stripeAccountId,

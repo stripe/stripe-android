@@ -41,6 +41,10 @@ class LauncherActivity : AppCompatActivity() {
                 PaymentAuthActivity::class.java
             ),
             Item(
+                activity.getString(R.string.card_brand_choice),
+                CardBrandChoiceExampleActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.create_card_token),
                 CreateCardTokenActivity::class.java
             ),
@@ -68,6 +72,10 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.googlepaycomposelauncher_example),
+                GooglePayLauncherComposeActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
 //            Item(
 //                activity.getString(R.string.googlepayplayground_example),
@@ -76,6 +84,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.googlepaypaymentmethodlauncher_example),
                 GooglePayPaymentMethodLauncherIntegrationActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.googlepaypaymentmethodcomposelauncher_example),
+                GooglePayPaymentMethodLauncherComposeActivity::class.java
             ),
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
@@ -102,6 +114,14 @@ class LauncherActivity : AppCompatActivity() {
                 AffirmPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.confirm_with_alipay_native),
+                AlipayPaymentNativeActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.confirm_with_alipay_web),
+                AlipayPaymentWebActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),
@@ -110,8 +130,16 @@ class LauncherActivity : AppCompatActivity() {
                 BacsDebitPaymentMethodActivity::class.java
             ),
             Item(
+                activity.getString(R.string.multibanco_example),
+                MultibancoActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.sofort_example),
                 SofortPaymentMethodActivity::class.java
+            ),
+            Item(
+                "iDEAL Payment Example",
+                IDEALPaymentMethodActivity::class.java
             ),
             Item(
                 activity.getString(R.string.upi_example),
@@ -144,6 +172,43 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.manual_us_bank_account_example),
                 ManualUSBankAccountPaymentMethodActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.amazon_pay_example),
+                AmazonPayActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.cash_app_pay_example),
+                CashAppPayActivity::class.java
+            ),
+            Item(
+                "BLIK",
+                BlikPaymentMethodActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.revolut_pay_example),
+                RevolutPayActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.swish_example),
+                SwishExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.mobilepay_example),
+                MobilePayExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.alma_example),
+                AlmaActivity::class.java
+            ),
+            // This is for internal use so as not to confuse the user.
+            Item(
+                "StripeImage Example",
+                StripeImageActivity::class.java
+            ),
+            Item(
+                "Card Input Widget Compose Example",
+                CardInputWidgetComposeExampleActivity::class.java
             )
         )
 

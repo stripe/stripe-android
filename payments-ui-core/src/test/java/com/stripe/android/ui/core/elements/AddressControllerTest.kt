@@ -2,7 +2,10 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.uicore.elements.AddressController
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -10,7 +13,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
+import com.stripe.android.uicore.R as UiCoreR
 
+// TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressControllerTest {
     private val emailController = SimpleTextFieldController(
@@ -36,7 +41,6 @@ class AddressControllerTest {
         sectionFieldElementFlow
     )
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify the first error field is the error published`() {
         runBlocking {
@@ -49,14 +53,14 @@ class AddressControllerTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressController.error.first()?.errorMessage)
-                .isEqualTo(R.string.email_is_invalid)
+                .isEqualTo(UiCoreR.string.stripe_email_is_invalid)
 
             emailController.onValueChange("joe@email.com")
 
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressController.error.first()?.errorMessage)
-                .isEqualTo(R.string.iban_invalid_start)
+                .isEqualTo(R.string.stripe_iban_invalid_start)
         }
     }
 }

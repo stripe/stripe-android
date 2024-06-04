@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.scanui
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
@@ -14,13 +15,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
+import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -28,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.camera.R as CameraR
 
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
@@ -42,7 +46,13 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     protected var isFlashlightOn: Boolean = false
         private set
 
-    internal val cameraAdapter by lazy { buildCameraAdapter() }
+    abstract val cameraAdapterBuilder: (
+        Activity,
+        ViewGroup,
+        Size,
+        CameraErrorListener
+    ) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+    internal val cameraAdapter by lazy { buildCameraAdapter(cameraAdapterBuilder) }
     private val cameraErrorListener by lazy {
         DefaultCameraErrorListener(requireActivity()) { t -> scanFailure(t) }
     }
@@ -134,7 +144,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun showCameraNotSupported() {
         instructionsText.visibility = View.VISIBLE
-        instructionsText.setText(R.string.stripe_error_camera_unsupported)
+        instructionsText.setText(CameraR.string.stripe_error_camera_unsupported)
         scanFailure()
     }
 
@@ -212,6 +222,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun closeScanner() {
         setFlashlightState(false)
+        cameraAdapter.unbindFromLifecycle(this)
     }
 
     /**
@@ -235,7 +246,17 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             onSupportsMultipleCameras(it)
         }
 
-        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+        lifecycleScope.launch(Dispatchers.IO) {
+            InterpreterInitializerImpl.initialize(
+                context = requireContext(),
+                onSuccess = {
+                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+                },
+                onFailure = {
+                    scanFailure(it)
+                }
+            )
+        }
     }
 
     /**
@@ -255,13 +276,10 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    internal open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
-        getCameraAdapter(
-            activity = requireActivity(),
-            previewView = previewFrame,
-            minimumResolution = minimumAnalysisResolution,
-            cameraErrorListener = cameraErrorListener
-        )
+    internal open fun buildCameraAdapter(
+        cameraProvider: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+    ): CameraAdapter<CameraPreviewImage<Bitmap>> =
+        cameraProvider(requireActivity(), previewFrame, minimumAnalysisResolution, cameraErrorListener)
 
     protected abstract val previewFrame: ViewGroup
 

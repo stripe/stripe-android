@@ -1,6 +1,6 @@
 package com.stripe.android.payments.bankaccount.ui
 
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 
 /**
  * Used communicate view side-effects from [CollectBankAccountViewModel]
@@ -15,13 +15,14 @@ internal sealed class CollectBankAccountViewEffect {
      */
     data class OpenConnectionsFlow(
         val publishableKey: String,
-        val financialConnectionsSessionSecret: String
+        val financialConnectionsSessionSecret: String,
+        val stripeAccountId: String?
     ) : CollectBankAccountViewEffect()
 
     /**
-     * Instruct the view to finish with the given [CollectBankAccountResult].
+     * Instruct the view to finish with the given [CollectBankAccountResultInternal].
      */
     data class FinishWithResult(
-        val result: CollectBankAccountResult
+        val result: CollectBankAccountResultInternal
     ) : CollectBankAccountViewEffect()
 }

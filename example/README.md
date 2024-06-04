@@ -10,20 +10,17 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [deploying the example backend to Heroku](#deploy-the-example-backend-to-heroku) and [configuring the app](#configure-the-app), build and run the project.
+3. After [remixing the Glitch project](#remix-the-example-project-on-glitch) and [configuring the app](#configure-the-app), build and run the project.
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/run.png" />
 
-### Deploy the example backend to Heroku
-1. [Create a Heroku account](https://signup.heroku.com/) if you don't have one.
-2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-mobile-backend/tree/v19.0.0)
-   and click "Deploy to Heroku".
-3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
-4. Under _Config Vars_, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
-   for the `STRIPE_TEST_SECRET_KEY` field.
-5. Click "Deploy for Free".
-
-<img width="700" height="793" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/heroku.png" />
+### Remix the example project on Glitch
+We provide an example backend hosted on Glitch, allowing you to easily test an integration end-to-end.
+1. [Open the Glitch project](https://glitch.com/edit/#!/stripe-example-mobile-backend).
+2. Click on "Remix", on the top right.
+3. In your newly created project, open the `.env` file in the left sidebar.
+4. Set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys) as the `STRIPE_TEST_SECRET_KEY` field.
+5. Your backend implementation should now be running. You can see the logs by clicking on "Logs" in the bottom bar.
 
 ### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
@@ -32,8 +29,8 @@
 2. Append the following entries to `gradle.properties`.
 
 ```
-# Set to example backend deployed to Heroku
-STRIPE_EXAMPLE_BACKEND_URL=https://my-backend.herokuapp.com/
+# Set to example backend project in Glitch
+STRIPE_EXAMPLE_BACKEND_URL=https://stripe-example-mobile-backend.glitch.me/
 
 # Set to a test publishable key from https://dashboard.stripe.com/test/apikeys
 STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_mykey

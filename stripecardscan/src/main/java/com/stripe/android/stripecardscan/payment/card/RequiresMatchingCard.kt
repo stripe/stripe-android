@@ -34,8 +34,8 @@ internal interface RequiresMatchingCard {
 }
 
 internal sealed interface CardMatchResult {
-    object NoRequiredCard : CardMatchResult
-    object Match : CardMatchResult
-    object Mismatch : CardMatchResult
-    object NoPan : CardMatchResult
+    data object NoRequiredCard : CardMatchResult
+    data object Match : CardMatchResult
+    data object Mismatch : CardMatchResult
+    data object NoPan : CardMatchResult
 }

@@ -20,14 +20,12 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int
-    ): Result<PaymentIntent> = kotlin.runCatching {
-        stripeRepository.verifyPaymentIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            firstAmount = firstAmount,
-            secondAmount = secondAmount,
-            requestOptions = ApiRequest.Options(publishableKey)
-        )
-    }.mapCatching { it ?: throw InternalError("Error verifying PaymentIntent with microdeposits") }
+    ): Result<PaymentIntent> = stripeRepository.verifyPaymentIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        firstAmount = firstAmount,
+        secondAmount = secondAmount,
+        requestOptions = ApiRequest.Options(publishableKey)
+    )
 
     /**
      * Verifies a PaymentIntent given a microdeposit,
@@ -39,13 +37,11 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         descriptorCode: String
-    ): Result<PaymentIntent> = kotlin.runCatching {
-        stripeRepository.verifyPaymentIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            descriptorCode = descriptorCode,
-            requestOptions = ApiRequest.Options(publishableKey)
-        )
-    }.mapCatching { it ?: throw InternalError("Error verifying PaymentIntent with microdeposits") }
+    ): Result<PaymentIntent> = stripeRepository.verifyPaymentIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        descriptorCode = descriptorCode,
+        requestOptions = ApiRequest.Options(publishableKey)
+    )
 
     /**
      * Verifies a SetupIntent given a microdeposit,
@@ -58,14 +54,12 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int
-    ): Result<SetupIntent> = kotlin.runCatching {
-        stripeRepository.verifySetupIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            firstAmount = firstAmount,
-            secondAmount = secondAmount,
-            requestOptions = ApiRequest.Options(publishableKey)
-        )
-    }.mapCatching { it ?: throw InternalError("Error verifying SetupIntent with microdeposits") }
+    ): Result<SetupIntent> = stripeRepository.verifySetupIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        firstAmount = firstAmount,
+        secondAmount = secondAmount,
+        requestOptions = ApiRequest.Options(publishableKey)
+    )
 
     /**
      * Verifies a PaymentIntent given a microdeposit,
@@ -77,11 +71,9 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         descriptorCode: String
-    ): Result<SetupIntent> = kotlin.runCatching {
-        stripeRepository.verifySetupIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            descriptorCode = descriptorCode,
-            requestOptions = ApiRequest.Options(publishableKey)
-        )
-    }.mapCatching { it ?: throw InternalError("Error verifying SetupIntent with microdeposits") }
+    ): Result<SetupIntent> = stripeRepository.verifySetupIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        descriptorCode = descriptorCode,
+        requestOptions = ApiRequest.Options(publishableKey)
+    )
 }

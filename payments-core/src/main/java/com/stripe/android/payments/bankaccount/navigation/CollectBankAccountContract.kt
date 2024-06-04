@@ -14,7 +14,7 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CollectBankAccountContract :
-    ActivityResultContract<CollectBankAccountContract.Args, CollectBankAccountResult>() {
+    ActivityResultContract<CollectBankAccountContract.Args, CollectBankAccountResultInternal>() {
 
     override fun createIntent(
         context: Context,
@@ -26,21 +26,24 @@ class CollectBankAccountContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): CollectBankAccountResult {
+    ): CollectBankAccountResultInternal {
         val result =
             intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.collectBankAccountResult
-        return result ?: CollectBankAccountResult.Failed(
+        return result ?: CollectBankAccountResultInternal.Failed(
             IllegalArgumentException("Failed to retrieve a CollectBankAccountResult.")
         )
     }
 
     /**
      * @param attachToIntent enable this to attach the link account session to the given intent
+     * @param clientSecret the client secret of the StripeIntent, null when running in the deferred
+     * intent flow.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,
-        open val clientSecret: String,
+        open val stripeAccountId: String?,
+        open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean
     ) : Parcelable {
@@ -48,21 +51,71 @@ class CollectBankAccountContract :
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class ForPaymentIntent constructor(
+        data class ForPaymentIntent(
             override val publishableKey: String,
+            override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean
-        ) : Args(publishableKey, clientSecret, configuration, attachToIntent)
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = clientSecret,
+            configuration = configuration,
+            attachToIntent = attachToIntent
+        )
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class ForSetupIntent constructor(
+        data class ForSetupIntent(
             override val publishableKey: String,
+            override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean
-        ) : Args(publishableKey, clientSecret, configuration, attachToIntent)
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = clientSecret,
+            configuration = configuration,
+            attachToIntent = attachToIntent
+        )
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForDeferredPaymentIntent(
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val configuration: CollectBankAccountConfiguration,
+            val elementsSessionId: String,
+            val customerId: String?,
+            val onBehalfOf: String?,
+            val amount: Int?,
+            val currency: String?
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = null,
+            configuration = configuration,
+            attachToIntent = false
+        )
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForDeferredSetupIntent(
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val configuration: CollectBankAccountConfiguration,
+            val elementsSessionId: String,
+            val customerId: String?,
+            val onBehalfOf: String?,
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = null,
+            configuration = configuration,
+            attachToIntent = false
+        )
 
         companion object {
             fun fromIntent(intent: Intent): Args? {
@@ -73,7 +126,7 @@ class CollectBankAccountContract :
 
     @Parcelize
     internal data class Result(
-        val collectBankAccountResult: CollectBankAccountResult
+        val collectBankAccountResult: CollectBankAccountResultInternal
     ) : Parcelable {
         fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)

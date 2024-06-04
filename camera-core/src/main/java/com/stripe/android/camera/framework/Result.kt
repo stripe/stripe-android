@@ -6,8 +6,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.framework.util.FrameRateTracker
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -98,6 +99,8 @@ abstract class ResultAggregator<
 ) : StatefulResultHandler<DataFrame, State, AnalyzerResult, Boolean>(initialState),
     LifecycleEventObserver {
 
+    private val finalResultMutex = Mutex()
+
     private var isCanceled = false
     private var isPaused = false
     private var isFinished = false
@@ -178,16 +181,19 @@ abstract class ResultAggregator<
         else -> withContext(Dispatchers.Default) {
             frameRateTracker.trackFrameProcessed()
 
-            val (interimResult, finalResult) = aggregateResult(data, result)
+            finalResultMutex.withLock {
+                val (interimResult, finalResult) = aggregateResult(data, result)
 
-            launch { listener.onInterimResult(interimResult) }
+                aggregatorExecutionStats?.trackResult("frame_processed")
 
-            aggregatorExecutionStats?.trackResult("frame_processed")
+                listener.onInterimResult(interimResult)
 
-            finalResult?.also {
-                isFinished = true
-                launch { listener.onResult(it) }
-            } != null
+                if (!isFinished && finalResult != null) {
+                    isFinished = true
+                    listener.onResult(finalResult)
+                }
+                isFinished
+            }
         }
     }
 

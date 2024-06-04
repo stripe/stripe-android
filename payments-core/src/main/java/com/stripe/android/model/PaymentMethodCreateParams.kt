@@ -2,13 +2,12 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.CardUtils
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Objects
 
 /**
  * Model for PaymentMethod creation parameters.
@@ -34,6 +33,8 @@ data class PaymentMethodCreateParams internal constructor(
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
     private val link: Link? = null,
+    private val cashAppPay: CashAppPay? = null,
+    private val swish: Swish? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -64,6 +65,8 @@ data class PaymentMethodCreateParams internal constructor(
         netbanking: Netbanking? = null,
         usBankAccount: USBankAccount? = null,
         link: Link? = null,
+        cashAppPay: CashAppPay? = null,
+        swish: Swish? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
@@ -82,6 +85,8 @@ data class PaymentMethodCreateParams internal constructor(
         netbanking,
         usBankAccount,
         link,
+        cashAppPay,
+        swish,
         billingDetails,
         metadata,
         productUsage,
@@ -91,7 +96,8 @@ data class PaymentMethodCreateParams internal constructor(
     val typeCode: String
         get() = code
 
-    internal val attribution: Set<String>
+    val attribution: Set<String>
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmSynthetic
         get() {
             return when (code) {
@@ -210,6 +216,33 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        cashAppPay: CashAppPay,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.CashAppPay,
+        cashAppPay = cashAppPay,
+        billingDetails = billingDetails,
+        metadata = metadata,
+    )
+
+    private constructor(
+        swish: Swish,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.Swish,
+        swish = swish,
+        billingDetails = billingDetails,
+        metadata = metadata,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun requiresMandate(): Boolean {
+        return requiresMandate
+    }
+
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
             ?: mapOf(
@@ -245,6 +278,17 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun cardLast4(): String? {
+        return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun instantDebitsPaymentMethodId(): String? {
+        val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
+        return linkParams["payment_method_id"] as? String
+    }
+
     @Parcelize
     data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -254,13 +298,39 @@ data class PaymentMethodCreateParams internal constructor(
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
         private val token: String? = null,
-        internal val attribution: Set<String>? = null
+        internal val attribution: Set<String>? = null,
+        internal val networks: Networks? = null,
     ) : StripeParamsModel, Parcelable {
-        internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
-        internal val last4: String? get() = number?.takeLast(4)
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-        fun getLast4() = last4
+        @Parcelize
+        class Networks(
+            val preferred: String? = null,
+        ) : StripeParamsModel, Parcelable {
+
+            override fun toParamMap(): Map<String, Any> {
+                return if (preferred != null) {
+                    mapOf(PARAM_PREFERRED to preferred)
+                } else {
+                    emptyMap()
+                }
+            }
+
+            override fun equals(other: Any?): Boolean {
+                return other is Networks && other.preferred == preferred
+            }
+
+            override fun hashCode(): Int {
+                return Objects.hash(preferred)
+            }
+
+            override fun toString(): String {
+                return "PaymentMethodCreateParams.Card.Networks(preferred=$preferred)"
+            }
+
+            private companion object {
+                const val PARAM_PREFERRED = "preferred"
+            }
+        }
 
         override fun toParamMap(): Map<String, Any> {
             return listOf(
@@ -268,7 +338,8 @@ data class PaymentMethodCreateParams internal constructor(
                 PARAM_EXP_MONTH to expiryMonth,
                 PARAM_EXP_YEAR to expiryYear,
                 PARAM_CVC to cvc,
-                PARAM_TOKEN to token
+                PARAM_TOKEN to token,
+                PARAM_NETWORKS to networks?.toParamMap(),
             ).mapNotNull {
                 it.second?.let { value ->
                     it.first to value
@@ -280,11 +351,12 @@ data class PaymentMethodCreateParams internal constructor(
          * Used to create a [Card] object with the user's card details. To create a
          * [Card] with a Stripe token (e.g. for Google Pay), use [Card.create].
          */
-        class Builder : ObjectBuilder<Card> {
+        class Builder {
             private var number: String? = null
             private var expiryMonth: Int? = null
             private var expiryYear: Int? = null
             private var cvc: String? = null
+            private var networks: Networks? = null
 
             fun setNumber(number: String?): Builder = apply {
                 this.number = number
@@ -302,12 +374,17 @@ data class PaymentMethodCreateParams internal constructor(
                 this.cvc = cvc
             }
 
-            override fun build(): Card {
+            fun setNetworks(networks: Networks?): Builder = apply {
+                this.networks = networks
+            }
+
+            fun build(): Card {
                 return Card(
                     number = number,
                     expiryMonth = expiryMonth,
                     expiryYear = expiryYear,
-                    cvc = cvc
+                    cvc = cvc,
+                    networks = networks,
                 )
             }
         }
@@ -318,6 +395,7 @@ data class PaymentMethodCreateParams internal constructor(
             private const val PARAM_EXP_YEAR: String = "exp_year"
             private const val PARAM_CVC: String = "cvc"
             private const val PARAM_TOKEN: String = "token"
+            private const val PARAM_NETWORKS: String = "networks"
 
             /**
              * Create a [Card] from a Card token.
@@ -430,9 +508,31 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        private companion object {
+        internal companion object {
             private const val PARAM_ACCOUNT_NUMBER: String = "account_number"
             private const val PARAM_SORT_CODE: String = "sort_code"
+
+            internal fun fromParams(params: PaymentMethodCreateParams): BacsDebit? {
+                val code = PaymentMethod.Type.BacsDebit.code
+
+                val bacsParams = params.toParamMap()[code] as? Map<*, *>
+
+                val accountNumber = bacsParams?.get(
+                    PARAM_ACCOUNT_NUMBER
+                ) as? String
+
+                val sortCode = bacsParams?.get(
+                    PARAM_SORT_CODE
+                ) as? String
+
+                return when {
+                    accountNumber != null && sortCode != null -> BacsDebit(
+                        accountNumber = accountNumber,
+                        sortCode = sortCode
+                    )
+                    else -> null
+                }
+            }
         }
     }
 
@@ -464,6 +564,22 @@ data class PaymentMethodCreateParams internal constructor(
         private companion object {
             private const val PARAM_BANK = "bank"
         }
+    }
+
+    /**
+     * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Cash App Pay.
+     */
+    @Parcelize
+    class CashAppPay : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> = emptyMap()
+    }
+
+    /**
+     * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Swish.
+     */
+    @Parcelize
+    class Swish : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> = emptyMap()
     }
 
     @Parcelize
@@ -559,6 +675,7 @@ data class PaymentMethodCreateParams internal constructor(
         fun createCard(
             cardParams: CardParams
         ): PaymentMethodCreateParams {
+            @OptIn(DelicateCardDetailsApi::class)
             return create(
                 card = Card(
                     number = cardParams.number,
@@ -917,6 +1034,109 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [CashAppPay] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createCashAppPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.AmazonPay] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createAmazonPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.AmazonPay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Multibanco] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createMultibanco(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Multibanco,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Alma] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createAlma(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Alma,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createSwish(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(Swish(), billingDetails, metadata)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createRevolutPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.RevolutPay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createMobilePay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.MobilePay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
@@ -934,18 +1154,75 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createInstantDebits(
+            paymentMethodId: String,
+            requiresMandate: Boolean,
+            productUsage: Set<String>,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                code = PaymentMethod.Type.Link.code,
+                requiresMandate = requiresMandate,
+                overrideParamMap = mapOf(
+                    "link" to mapOf(
+                        "payment_method_id" to paymentMethodId,
+                    ),
+                ),
+                productUsage = productUsage,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             code: PaymentMethodCode,
+            billingDetails: PaymentMethod.BillingDetails?,
             requiresMandate: Boolean,
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
+                billingDetails = billingDetails,
                 requiresMandate = requiresMandate,
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage
             )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createBacsFromParams(
+            params: PaymentMethodCreateParams
+        ): BacsDebit? {
+            return BacsDebit.fromParams(params)
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getNameFromParams(
+            params: PaymentMethodCreateParams
+        ): String? {
+            return params.billingDetails?.name ?: getBillingDetailsValueFromOverrideParams(
+                params,
+                PaymentMethod.BillingDetails.PARAM_NAME
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getEmailFromParams(
+            params: PaymentMethodCreateParams
+        ): String? {
+            return params.billingDetails?.email ?: getBillingDetailsValueFromOverrideParams(
+                params,
+                PaymentMethod.BillingDetails.PARAM_EMAIL
+            )
+        }
+
+        private fun getBillingDetailsValueFromOverrideParams(
+            params: PaymentMethodCreateParams,
+            key: String
+        ): String? {
+            val billingDetailsParams = params.overrideParamMap
+                ?.get(PARAM_BILLING_DETAILS) as? Map<*, *>
+
+            return billingDetailsParams?.get(key) as? String
         }
     }
 }

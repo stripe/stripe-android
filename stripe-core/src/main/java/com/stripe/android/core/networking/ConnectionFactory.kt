@@ -26,7 +26,31 @@ interface ConnectionFactory {
     @Throws(IOException::class, InvalidRequestException::class)
     fun createForFile(request: StripeRequest, outputFile: File): StripeConnection<File>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface ConnectionOpener {
+        fun open(
+            request: StripeRequest,
+            callback: HttpURLConnection.(request: StripeRequest) -> Unit
+        ): HttpURLConnection
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        object Default : ConnectionOpener {
+            override fun open(
+                request: StripeRequest,
+                callback: HttpURLConnection.(request: StripeRequest) -> Unit
+            ): HttpURLConnection {
+                return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                    callback(request)
+                }
+            }
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
+        @Volatile
+        var connectionOpener: ConnectionOpener = ConnectionOpener.Default
+
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection<String> {
@@ -43,11 +67,13 @@ interface ConnectionFactory {
             )
         }
 
-        private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
-            return (URL(request.url).openConnection() as HttpURLConnection).apply {
+        private fun openConnectionAndApplyFields(
+            originalRequest: StripeRequest
+        ): HttpURLConnection {
+            return connectionOpener.open(originalRequest) { request ->
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = false
+                useCaches = request.shouldCache
                 requestMethod = request.method.code
 
                 request.headers.forEach { (key, value) ->

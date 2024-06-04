@@ -1,11 +1,9 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
@@ -29,72 +27,32 @@ internal interface LinkRepository {
         email: String,
         phone: String,
         country: String,
-        authSessionCookie: String?
+        name: String?,
+        authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession>
 
     /**
-     * Start an SMS verification.
+     * Create a new card payment method in the consumer account.
      */
-    suspend fun startVerification(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
-     * Confirm an SMS verification code.
-     */
-    suspend fun confirmVerification(
-        verificationCode: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
-     * Logs out the current consumer.
-     */
-    suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
-     * Fetch all saved payment methods for the consumer.
-     */
-    suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails>
-
-    /**
-     * Create a new payment method in the consumer account.
-     */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        active: Boolean,
+    ): Result<LinkPaymentDetails.New>
+
+    suspend fun shareCardPaymentDetails(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        id: String,
+        last4: String,
+        consumerSessionClientSecret: String,
     ): Result<LinkPaymentDetails>
 
-    /**
-     * Update an existing payment method in the consumer account.
-     */
-    suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams,
+    suspend fun logOut(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails>
-
-    /**
-     * Delete the payment method from the consumer account.
-     */
-    suspend fun deletePaymentDetails(
-        paymentDetailsId: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<Unit>
+        consumerAccountPublishableKey: String?,
+    ): Result<ConsumerSession>
 }

@@ -44,7 +44,8 @@ internal class DefaultCardAccountRangeStore(
     internal fun createPrefKey(bin: Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
 
     private companion object {
-        private const val PREF_FILE = "InMemoryCardAccountRangeSource.Store"
+        private const val VERSION = 2
+        private const val PREF_FILE = "InMemoryCardAccountRangeSource.Store.$VERSION"
         private const val PREF_KEY_ACCOUNT_RANGES = "key_account_ranges"
     }
 }

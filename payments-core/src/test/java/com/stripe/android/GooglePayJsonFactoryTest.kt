@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -36,7 +36,7 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -77,7 +77,7 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -113,7 +113,7 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:version": "StripeAndroid/${StripeSdkVersion.VERSION_NAME}",
                             "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
@@ -144,7 +144,7 @@ class GooglePayJsonFactoryTest {
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-                totalPrice = 500,
+                totalPrice = 500L,
                 countryCode = "US",
                 transactionId = transactionId,
                 totalPriceLabel = "Your total price",

@@ -1,13 +1,15 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 
 @Parcelize
-internal data class Stripe3ds2AuthParams(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class Stripe3ds2AuthParams(
     private val sourceId: String,
     private val sdkAppId: String,
     private val sdkReferenceNumber: String,

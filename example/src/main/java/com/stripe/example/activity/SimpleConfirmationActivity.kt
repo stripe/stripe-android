@@ -158,7 +158,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
         private val layoutInflater = LayoutInflater.from(context)
 
         init {
-            addAll(*DropdownItem.values())
+            addAll(DropdownItem.entries)
         }
 
         /**

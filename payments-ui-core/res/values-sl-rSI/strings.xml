@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Vrstica naslova 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Predmestje ali mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Župnija</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Oddelek</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Okrožje</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Območje</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Upravna enota</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Otok</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektura</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Mestna četrt</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Pošta ali mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Predmestje</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Vas ali občina</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Plačajte v <num_installments/> obrokih po <installment_price/> brez obresti s storitvijo <img/>.]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">S potrditvijo plačila s storitvijo AmazonPay pooblaščate podjetje %s, da bremeni vaš račun za AmazonPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Nazaj</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Številka računa</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Številka vašega računa ni popolna.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bančni račun</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Potrjujem, da bo podjetje Stripe zbiralo direktne obremenitve v imenu podjetja %s ter da sem lastnik računa in edina oseba, ki lahko odobri bremenitve s tega računa.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Številka banke</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Vaša številka banke ni popolna.</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Naslov plačnika računa</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">To polje ne sme biti prazno.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Spremeni</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-poštni naslov</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Vaš e-poštni naslov ni veljaven.</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (izbirno)</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Vnesena koda IBAN ni popolna.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Vnesena koda IBAN ni veljavna.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Vnesena koda IBAN ni veljavna. \"%s\" ni podprta koda države.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">Banka iDEAL</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Kupite zdaj ali pa plačajte pozneje s storitvijo Klarna.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Plačajte pozneje s storitvijo Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Przelewy24 Bank</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu %s</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Optično preberi kartico</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
+  <string name="stripe_billing_details">Naslov plačnika računa</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Koda BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Če nadaljujete, pooblaščate podjetje %1$s, da bremeni vaš račun za Cash App s tem plačilom in prihodnjimi plačili v skladu s pogoji podjetja %2$s do preklica tega pooblastila. To lahko kadar koli spremenite v nastavitvah aplikacije Cash App.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Podatki za stik</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Nadaljuj</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Banka FPX</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">Vnesena koda IBAN ni popolna.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">Vnesena koda IBAN ni veljavna. \"%s\" ni podprta koda države.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">Banka iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Vaša koda BLIK ni popolna.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Vaša koda BLIK ni veljavna.</string>
+  <string name="stripe_invalid_email_address">Neveljaven e-poštni naslov: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Neveljaven UPI ID</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Kupite zdaj ali pa plačajte pozneje s storitvijo Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Če potrdite preusmeritev v storitev Klarna, pooblaščate podjetje %1$s, da bremeni vaš račun Klarna s prihodnjimi plačili v skladu s pogoji podjetja in pogoji storitve Klarna. To lahko kadar koli spremenite v aplikaciji Klarna ali tako, da pišete na naslov %2$s.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Plačajte pozneje s storitvijo Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Ime na kartici</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Plačaj %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Banka</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Podatki o kartici</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Za nakup uporabite UPI ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Direktna obremenitev AU BECS</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Direktna obremenitev Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kartica</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Obremenitev SEPA</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">S potrditvijo plačila s storitvijo PayPal pooblaščate podjetje %s, da bremeni vaš račun za PayPal s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">S potrditvijo plačila s storitvijo RevolutPay pooblaščate podjetje %s, da bremeni vaš račun za RevolutPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu %s</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Optično preberi kartico</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastavi</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

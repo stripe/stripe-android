@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for Address field on address form -->
+  <string name="stripe_address_label_address">Cím</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="stripe_address_label_address_line2">2. címsor</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="stripe_address_label_ae_emirate">Emirátus</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_au_suburb_or_city">Külváros vagy város</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_bb_jm_parish">Egyházközség</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_department">Megye</string>
+  <!-- Label for the district field on an address form -->
+  <string name="stripe_address_label_district">Kerület</string>
+  <!-- Label of an address field in hk -->
+  <string name="stripe_address_label_hk_area">Terület</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_ie_eircode">Irányítószám</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="stripe_address_label_ie_townland">Major</string>
+  <!-- Used to describe postal code in India -->
+  <string name="stripe_address_label_in_pin">Irányítószám</string>
+  <!-- Used to describe part of an address -->
+  <string name="stripe_address_label_island">Sziget</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_jp_prefecture">Prefektúra</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_neighborhood">Körzet</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_oblast">Terület</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_post_town">Posta vagy kisváros</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_suburb">Külváros</string>
+  <!-- Used to describe an address field. -->
+  <string name="stripe_address_label_village_township">Falu vagy község</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="stripe_address_search_content_description">Keresés</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="stripe_address_zip_invalid">Irányítószáma érvénytelen.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="stripe_address_zip_postal_invalid">Irányítószáma érvénytelen.</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="stripe_billing_same_as_shipping">A számlázási cím megegyezik a szállítási címmel</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="stripe_blank_and_required">Ez a mező nem lehet üres.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="stripe_change">Módosítás</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_email">E-mail</string>
+  <!-- Error message when email is invalid -->
+  <string name="stripe_email_is_invalid">Érvénytelen e-mail-cím.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiration_date_hint">HH / ÉÉ</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Ezt kötelező megadni</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_form_label_optional">%s (nem kötelező)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="stripe_incomplete_expiry_date">A kártya lejárati dátuma hiányos.</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="stripe_incomplete_phone_number">Hiányos telefonszám</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="stripe_invalid_expiry_month">Kártyájának lejárati hónapja érvénytelen.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="stripe_invalid_expiry_year">Kártyájának lejárati éve érvénytelen.</string>
+</resources>

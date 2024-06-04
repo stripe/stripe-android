@@ -65,6 +65,29 @@ internal object PaymentDetailsFixtures {
                   },
                   "is_default": false,
                   "type": "CARD"
+                },
+                {
+                  "id": "wAAACGA",
+                  "bank_account_details": {
+                    "bank_icon_code": null,
+                    "bank_name": "STRIPE TEST BANK",
+                    "last4": "6789"
+                  },
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": null,
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": null,
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": null,
+                  "is_default": false,
+                  "type": "BANK_ACCOUNT"
                 }
               ]
             }
@@ -110,4 +133,36 @@ internal object PaymentDetailsFixtures {
     )
     val CONSUMER_SINGLE_PAYMENT_DETAILS =
         ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
+
+    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": {
+                  "id": "wAAACGA",
+                  "bank_account_details": {
+                    "bank_icon_code": null,
+                    "bank_name": "STRIPE TEST BANK",
+                    "last4": "6789"
+                  },
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": null,
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": null,
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": null,
+                  "is_default": false,
+                  "type": "BANK_ACCOUNT"
+                }
+            }
+        """.trimIndent()
+    )
+    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS =
+        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON)
 }

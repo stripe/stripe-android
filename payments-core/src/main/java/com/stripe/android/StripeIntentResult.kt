@@ -19,20 +19,26 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     @Outcome
     @get:Outcome
     val outcome: Int
-        get() = determineOutcome(intent.status, outcomeFromFlow)
+        get() = determineOutcome(intent, outcomeFromFlow)
 
-    @StripeIntentResult.Outcome
+    @Outcome
     private fun determineOutcome(
-        stripeIntentStatus: StripeIntent.Status?,
-        @StripeIntentResult.Outcome outcome: Int
+        stripeIntent: StripeIntent,
+        @Outcome outcome: Int
     ): Int {
         if (outcome != Outcome.UNKNOWN) {
             return outcome
         }
 
-        return when (stripeIntentStatus) {
+        return getOutcome(stripeIntent)
+    }
+
+    private fun getOutcome(stripeIntent: StripeIntent): Int {
+        return when (stripeIntent.status) {
             StripeIntent.Status.RequiresAction -> {
-                if (isNextActionSuccessState(intent)) {
+                if (stripeIntent.nextActionData == null) {
+                    Outcome.FAILED
+                } else if (isRequireActionSuccessState(intent)) {
                     Outcome.SUCCEEDED
                 } else {
                     Outcome.CANCELED
@@ -63,22 +69,28 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     }
 
     /**
-     * Check if the [nextAction] is expected state after a successful on-session transaction
+     * Check if the [stripeIntent] is in expected state after a successful on-session transaction
      * e.g. for voucher-based payment methods like OXXO that require out-of-band payment and
      * ACHv2 payments which requires verification of the customers bank details before
      * confirming payment.
      */
-    private fun isNextActionSuccessState(nextAction: StripeIntent): Boolean {
-        return when (nextAction.nextActionType) {
+    private fun isRequireActionSuccessState(stripeIntent: StripeIntent): Boolean {
+        return when (stripeIntent.nextActionType) {
             StripeIntent.NextActionType.RedirectToUrl,
             StripeIntent.NextActionType.UseStripeSdk,
             StripeIntent.NextActionType.AlipayRedirect,
-            StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.WeChatPayRedirect,
+            StripeIntent.NextActionType.CashAppRedirect,
+            StripeIntent.NextActionType.SwishRedirect,
             null -> {
                 false
             }
+            StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.DisplayOxxoDetails,
+            StripeIntent.NextActionType.DisplayBoletoDetails,
+            StripeIntent.NextActionType.DisplayKonbiniDetails,
+            StripeIntent.NextActionType.DisplayMultibancoDetails,
+            StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true
             }

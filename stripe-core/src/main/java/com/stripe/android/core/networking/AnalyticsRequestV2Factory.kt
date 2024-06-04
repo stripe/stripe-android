@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
 
 /**
@@ -23,7 +24,7 @@ class AnalyticsRequestV2Factory(
     context: Context,
     private val clientId: String,
     private val origin: String,
-    private val pluginType: String = PLUGIN_NATIVE
+    private val pluginType: String = PluginDetector.pluginType ?: PLUGIN_NATIVE
 ) {
     private val appContext = context.applicationContext
 
@@ -36,7 +37,7 @@ class AnalyticsRequestV2Factory(
         eventName: String,
         additionalParams: Map<String, Any?> = mapOf(),
         includeSDKParams: Boolean = true
-    ) = AnalyticsRequestV2(
+    ) = AnalyticsRequestV2.create(
         eventName = eventName,
         clientId = clientId,
         origin = origin,
@@ -71,7 +72,6 @@ class AnalyticsRequestV2Factory(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         const val PLUGIN_NATIVE = "native"
-        const val PLUGIN_REACT_NATIVE = "react-native"
 
         internal const val PARAM_SDK_PLATFORM = "sdk_platform"
         internal const val PARAM_SDK_VERSION = "sdk_version"

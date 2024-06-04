@@ -48,11 +48,50 @@ internal interface IdentityRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun verifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun unverifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun generatePhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun cannotVerifyPhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun uploadImage(
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: StripeFilePurpose
+        filePurpose: StripeFilePurpose,
+        onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): StripeFile
 
     @Throws(

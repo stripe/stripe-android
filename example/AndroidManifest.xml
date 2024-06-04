@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.stripe.example"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -50,15 +49,20 @@
         <activity android:name=".activity.PaymentSessionActivity" />
         <activity android:name=".activity.GooglePayLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
+        <activity android:name=".activity.GooglePayLauncherComposeActivity" />
         <activity android:name=".activity.GooglePayPaymentMethodLauncherIntegrationActivity" />
+        <activity android:name=".activity.GooglePayPaymentMethodLauncherComposeActivity" />
         <activity android:name=".activity.PaymentAuthActivity" />
+        <activity android:name=".activity.CardBrandChoiceExampleActivity" />
         <activity android:name=".activity.FragmentExamplesActivity" />
         <activity android:name=".activity.ConfirmSepaDebitActivity" />
         <activity android:name=".activity.FpxPaymentActivity" />
         <activity android:name=".activity.NetbankingListPaymentActivity" />
         <activity android:name=".activity.BecsDebitPaymentMethodActivity" />
         <activity android:name=".activity.BacsDebitPaymentMethodActivity" />
+        <activity android:name=".activity.MultibancoActivity" />
         <activity android:name=".activity.SofortPaymentMethodActivity" />
+        <activity android:name=".activity.IDEALPaymentMethodActivity" />
         <activity android:name=".activity.UpiPaymentActivity" />
         <activity android:name=".activity.UpiWaitingActivity" />
         <activity android:name=".activity.KlarnaSourceActivity" />
@@ -69,8 +73,19 @@
         <activity android:name=".activity.ComposeExampleActivity" />
         <activity android:name=".activity.KlarnaPaymentActivity"/>
         <activity android:name=".activity.AffirmPaymentActivity"/>
+        <activity android:name=".activity.AlipayPaymentNativeActivity"/>
+        <activity android:name=".activity.AlipayPaymentWebActivity"/>
         <activity android:name=".activity.ConnectUSBankAccountActivity"/>
         <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity"/>
+        <activity android:name=".activity.StripeImageActivity"/>
+        <activity android:name=".activity.CashAppPayActivity"/>
+        <activity android:name=".activity.AmazonPayActivity"/>
+        <activity android:name=".activity.BlikPaymentMethodActivity"/>
+        <activity android:name=".activity.RevolutPayActivity"/>
+        <activity android:name=".activity.SwishExampleActivity"/>
+        <activity android:name=".activity.MobilePayExampleActivity"/>
+        <activity android:name=".activity.AlmaActivity"/>
+        <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
     </application>
 
 </manifest>

@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Baris alamat ke-2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Suburb atau kota</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parish</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Departemen</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Distrik</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Area</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Pulau</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektur</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Rukun tetangga</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Pos atau Kota</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Suburb</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Kelurahan atau Kecamatan</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> angsuran bebas bunga sebesar <installment_price/> dengan <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Dengan mengonfirmasi pembayaran menggunakan Amazon Pay, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun Amazon Pay Anda sesuai dengan ketentuan mereka.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Kembali</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Nomor rekening</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Rekening bank</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Saya memahami bahwa Stripe akan menagih Debit Langsung atas nama %s serta mengonfirmasikan bahwa sayalah pemilik akun dan satu-satunya orang yang diperlukan untuk mengotorisasi debit dari akun ini.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Kode sort</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Kode sort Anda tidak lengkap.</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Alamat tagihan</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Bidang ini tidak boleh kosong.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Ubah</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Email</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Email Anda tidak valid.</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">Bank EPS</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (opsional)</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">IBAN yang Anda masukkan tidak lengkap.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">IBAN yang Anda masukkan tidak valid.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">IBAN yang Anda masukkan tidak valid. \"%s\" bukan kode negara yang didukung.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">IBAN Anda harus diawali dengan kode negara dua-huruf.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL Bank</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Beli sekarang atau bayar nanti dengan Klarna.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Bayar nanti dengan Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Bank Przelewy24</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s mendatang</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Pindai kartu</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Dengan memberikan informasi pembayaran dan mengonfirmasi pembayaran ini, berarti Anda mengotorisasi (A) %s dan Stripe, penyedia layanan pembayaran kami, untuk mengirim instruksi kepada bank untuk mendebit rekening Anda dan (B) kepada bank untuk mendebit rekening Anda sesuai instruksi itu. Sebagai bagian dari hak Anda, Anda berhak mendapat pengembalian dana dari bank berdasarkan ketentuan dan persyaratan perjanjian Anda dengan bank. Pengembalian dana harus diklaim dalam waktu 8 minggu sejak tanggal pendebitan rekening Anda. Hak Anda dijelaskan dalam pernyataan yang dapat Anda peroleh dari bank Anda. Anda setuju untuk menerima notifikasi pendebitan di masa mendatang hingga 2 hari sebelum dilakukan.</string>
+  <string name="stripe_billing_details">Alamat tagihan</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Kode BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Dengan melanjutkan, berarti Anda memberi %1$s otorisasi untuk mendebit akun Cash App Anda bagi pembayaran ini dan pembayaran mendatang sesuai dengan ketentuan %2$s, hingga otorisasi ini dicabut. Anda dapat mengubahnya kapan saja di Pengaturan Cash App.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Informasi kontak</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Lanjutkan</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">Bank EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">IBAN yang Anda masukkan tidak lengkap.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">IBAN yang Anda masukkan tidak valid. \"%s\" bukan kode negara yang didukung.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">IBAN Anda harus diawali dengan kode negara dua-huruf.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Kode BLIK Anda tidak lengkap.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Kode BLIK Anda tidak valid.</string>
+  <string name="stripe_invalid_email_address">Alamat email tidak valid: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Identifikasi UPI tidak valid</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Beli sekarang atau bayar nanti dengan Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Dengan melanjutkan ke Klarna, berarti Anda mengizinkan %1$s mengenakan charge untuk pembayaran mendatang pada akun Klarna Anda sesuai dengan ketentuan mereka dan ketentuan Klarna. Anda dapat mengubahnya kapan saja di aplikasi Klarna atau dengan menghubungi %2$s.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Bayar nanti dengan Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telepon</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Nama pada kartu</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Bayar %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informasi kartu</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Beli menggunakan identifikasi UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Langsung BECS AU</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Debit Langsung Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kartu</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">Dengan mengonfirmasi pembayaran menggunakan PayPal, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun PayPal Anda sesuai dengan ketentuan mereka.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Dengan mengonfirmasi pembayaran menggunakan RevolutPay, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun RevolutPay Anda sesuai dengan ketentuan mereka.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s mendatang</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Pindai kartu</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Dengan memberikan informasi pembayaran dan mengonfirmasi pembayaran ini, berarti Anda mengotorisasi (A) %s dan Stripe, penyedia layanan pembayaran kami, untuk mengirim instruksi kepada bank untuk mendebit rekening Anda dan (B) kepada bank untuk mendebit rekening Anda sesuai instruksi itu. Sebagai bagian dari hak Anda, Anda berhak mendapat pengembalian dana dari bank berdasarkan ketentuan dan persyaratan perjanjian Anda dengan bank. Pengembalian dana harus diklaim dalam waktu 8 minggu sejak tanggal pendebitan rekening Anda. Hak Anda dijelaskan dalam pernyataan yang dapat Anda peroleh dari bank Anda. Anda setuju untuk menerima notifikasi pendebitan di masa mendatang hingga 2 hari sebelum dilakukan.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Siapkan</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">Identifikasi UPI</string>
 </resources>

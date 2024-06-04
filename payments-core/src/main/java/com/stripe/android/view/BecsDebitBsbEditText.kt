@@ -6,11 +6,12 @@ import android.text.InputFilter
 import android.text.InputType
 import android.util.AttributeSet
 import com.stripe.android.R
+import androidx.appcompat.R as AppCompatR
 
 internal class BecsDebitBsbEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     private val banks = BecsDebitBanks(context)
@@ -22,13 +23,13 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
         get() {
             errorMessage = when {
                 fieldText.length < MIN_VALIDATION_THRESHOLD -> {
-                    resources.getString(R.string.becs_widget_bsb_incomplete)
+                    resources.getString(R.string.stripe_becs_widget_bsb_incomplete)
                 }
                 bank == null -> {
-                    resources.getString(R.string.becs_widget_bsb_invalid)
+                    resources.getString(R.string.stripe_becs_widget_bsb_invalid)
                 }
                 fieldText.length < MAX_LENGTH -> {
-                    resources.getString(R.string.becs_widget_bsb_incomplete)
+                    resources.getString(R.string.stripe_becs_widget_bsb_incomplete)
                 }
                 else -> {
                     null
@@ -91,7 +92,7 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
 
                     val isInvalid = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
                     errorMessage = if (isInvalid) {
-                        resources.getString(R.string.becs_widget_bsb_invalid)
+                        resources.getString(R.string.stripe_becs_widget_bsb_invalid)
                     } else {
                         null
                     }

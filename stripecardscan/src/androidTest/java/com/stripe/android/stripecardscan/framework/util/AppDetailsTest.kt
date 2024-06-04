@@ -22,7 +22,7 @@ class AppDetailsTest {
             appDetails.libraryPackageName
         )
         assertTrue(
-            appDetails.sdkVersion.startsWith("1."),
+            appDetails.sdkVersion.startsWith("20."),
             "${appDetails.sdkVersion} does not start with \"2.\""
         )
         assertEquals(-1, appDetails.sdkVersionCode)

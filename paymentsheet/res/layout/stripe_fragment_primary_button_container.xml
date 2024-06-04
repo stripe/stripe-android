@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!-- Needs to be wrapped in a FrameLayout to prevent layout issues after configuration changes. -->
+
+    <com.stripe.android.paymentsheet.ui.PrimaryButton
+        android:id="@+id/primary_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
+        android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
+        android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+        android:layout_marginEnd="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+        android:text="@string/stripe_paymentsheet_pay_button_label"
+        android:visibility="gone" />
+</FrameLayout>

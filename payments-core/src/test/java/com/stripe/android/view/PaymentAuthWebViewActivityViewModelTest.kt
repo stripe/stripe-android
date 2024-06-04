@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -151,6 +152,7 @@ class PaymentAuthWebViewActivityViewModelTest {
             requestCode = 100,
             clientSecret = "client_secret",
             url = "https://example.com",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

@@ -4,14 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.StripeCardScanProxy
-import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
+import com.stripe.android.ui.core.databinding.StripeActivityCardScanBinding
 
 internal class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
-        ActivityCardScanBinding.inflate(layoutInflater)
+        StripeActivityCardScanBinding.inflate(layoutInflater)
     }
 
     private lateinit var stripeCardScanProxy: StripeCardScanProxy
@@ -23,18 +23,10 @@ internal class CardScanActivity : AppCompatActivity() {
         stripeCardScanProxy = StripeCardScanProxy.create(
             this,
             PaymentConfiguration.getInstance(this).publishableKey,
-            this::onScanFinished
+            this::onScanFinished,
+            ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
         )
-    }
-
-    override fun onStart() {
-        super.onStart()
-        stripeCardScanProxy.attachCardScanFragment(
-            this,
-            supportFragmentManager,
-            R.id.fragment_container,
-            this::onScanFinished
-        )
+        stripeCardScanProxy.present()
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {
@@ -45,11 +37,6 @@ internal class CardScanActivity : AppCompatActivity() {
             )
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    override fun onStop() {
-        StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
-        super.onStop()
     }
 
     companion object {

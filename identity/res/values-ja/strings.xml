@@ -1,98 +1,224 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids -->
+  <string name="stripe_accepted_forms_of_id">身分証明書として受け付けられる書式</string>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">身分証明書として受け付けられる書式は次のとおりです</string>
+  <!-- Instructional text when user needs to align the edge with camera -->
+  <string name="stripe_align_document">身分証明書を水平に保持してください</string>
   <!-- Opens the app's settings in the Settings app -->
-  <string name="app_settings">アプリの設定</string>
+  <string name="stripe_app_settings">アプリの設定</string>
   <!-- Description of back of driver's license image -->
-  <string name="back_of_dl">運転免許証の裏面</string>
+  <string name="stripe_back_of_dl">運転免許証の裏面</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
-  <string name="back_of_dl_selected">運転免許証の裏面が選択されました</string>
+  <string name="stripe_back_of_dl_selected">運転免許証の裏面が選択されました</string>
   <!-- Description of back of identity card image -->
-  <string name="back_of_id">身分証明書の裏面</string>
+  <string name="stripe_back_of_id">身分証明書の裏面</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
-  <string name="back_of_id_selected">ID の裏面が選択されました</string>
+  <string name="stripe_back_of_id_selected">ID の裏面が選択されました</string>
   <!-- Title displayed when requesting camera permissions -->
-  <string name="camera_permission">カメラの使用許可</string>
-  <string name="camera_permission_rationale">このアプリはカメラを使用して身分証明書をスキャンし、写真を撮影してお客様の身元を確認します。</string>
+  <string name="stripe_camera_permission">カメラの使用許可</string>
+  <string name="stripe_camera_permission_rationale">このアプリはカメラを使用して身分証明書をスキャンし、写真を撮影してお客様の身元を確認します。</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="stripe_capturing">キャプチャーしています...</string>
   <!-- Description of the check mark, used for A11Y -->
-  <string name="check_mark">チェックマークは、書類のキャプチャーが完了したことを示します</string>
+  <string name="stripe_check_mark">チェックマークは、書類のキャプチャーが完了したことを示します</string>
   <!-- Text for choosing a photo from gallery -->
-  <string name="choose_file">写真を選択</string>
+  <string name="stripe_choose_file">写真を選択</string>
+  <!-- Close button text -->
+  <string name="stripe_close_button_text">閉じる</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">テストデータで完了</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">目的の結果を選択し、その結果を速やかに完了することで、時間を短縮します。モバイル SDK のフローでは完了の結果が返されます。</string>
   <!-- Line1 body text of error screen when live capture fails -->
-  <string name="could_not_capture_body1">高画質の画像をキャプチャーできませんでした。</string>
+  <string name="stripe_could_not_capture_body1">高画質の画像をキャプチャーできませんでした。</string>
   <!-- Line2 body text of error screen when live capture fails -->
-  <string name="could_not_capture_body2">もう一度お試しいただくか、デバイスから画像をアプロードしてください。</string>
+  <string name="stripe_could_not_capture_body2">もう一度お試しいただくか、デバイスから画像をアプロードしてください。</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
-  <string name="could_not_capture_title">画像をキャプチャーできませんでした</string>
+  <string name="stripe_could_not_capture_title">画像をキャプチャーできませんでした</string>
+  <!-- Instructional text when environment is too bright -->
+  <string name="stripe_decrease_lighting">詳細が見えません</string>
+  <string name="stripe_decrease_lighting_2">もっと暗い場所に移動してください</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">カメラアイコン</string>
   <!-- Description of the clock icon, used for A11Y -->
-  <string name="description_clock">クロックアイコン</string>
+  <string name="stripe_description_clock">クロックアイコン</string>
+  <!-- Content description for close button -->
+  <string name="stripe_description_close">確認ページを閉じる</string>
+  <!-- Content description for cloud icon -->
+  <string name="stripe_description_cloud">クラウドアイコン</string>
+  <!-- Content description for create_identity_verification icon -->
+  <string name="stripe_description_create_identity_verification">create_identity_verification アイコン</string>
+  <!-- Content description for dispute_protection icon -->
+  <string name="stripe_description_dispute_protection">dispute_protection アイコン</string>
+  <!-- Content description for document icon -->
+  <string name="stripe_description_document">書類アイコン</string>
+  <!-- Content description for ellipsis icon -->
+  <string name="stripe_description_ellipsis">省略記号アイコン</string>
+  <!-- Content description for exclamation icon -->
+  <string name="stripe_description_exclamation">感嘆符アイコン</string>
+  <!-- Content description for back button -->
+  <string name="stripe_description_go_back">前の画面に戻る</string>
+  <!-- Content description for lock icon -->
+  <string name="stripe_description_lock">ロックアイコン</string>
+  <!-- Content description for merchant logo -->
+  <string name="stripe_description_merchant_logo">加盟店ロゴ</string>
+  <!-- Content description for moved icon -->
+  <string name="stripe_description_moved">移動アイコン</string>
+  <!-- Content description for phone icon -->
+  <string name="stripe_description_phone">写真アイコン</string>
+  <!-- Content description for plus icon -->
+  <string name="stripe_description_plus">プラスアイコン</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="stripe_description_privacy_policy">プライバシーポリシーのアイコン</string>
+  <!-- Content description for stripe logo -->
+  <string name="stripe_description_stripe_logo">Stripe ロゴ</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="stripe_description_time_estimate">確認アイコンが完了するまでの推定時間</string>
+  <!-- Content description for wallet icon -->
+  <string name="stripe_description_wallet">ウォレットアイコン</string>
+  <!-- Label for Date of birth field -->
+  <string name="stripe_dob">生年月日</string>
+  <!-- Body for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_body">明るい場所にいることを確認してください。</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">写真付き身分証明書の直接撮影を準備する</string>
   <!-- Label of the driver's license option for document type selection -->
-  <string name="driver_license">運転免許証</string>
+  <string name="stripe_driver_license">運転免許証</string>
   <!-- Text for error labels -->
-  <string name="error">エラー</string>
+  <string name="stripe_error">エラー</string>
   <!-- Button that opens file upload screen -->
-  <string name="file_upload">ファイルをアップロード</string>
+  <string name="stripe_file_upload">ファイルをアップロード</string>
   <!-- Instructions for uploading images of drivers license -->
-  <string name="file_upload_content_dl">運転免許証の表裏両面の画像をアップロードしてください</string>
+  <string name="stripe_file_upload_content_dl">運転免許証の表裏両面の画像をアップロードしてください</string>
   <!-- Instructions for uploading images of identity card -->
-  <string name="file_upload_content_id">身分証明書の表裏両面の画像をアップロードしてください</string>
+  <string name="stripe_file_upload_content_id">身分証明書の表裏両面の画像をアップロードしてください</string>
   <!-- Instructions for uploading images of passport -->
-  <string name="file_upload_content_passport">パスポートの画像をアップロードしてください</string>
+  <string name="stripe_file_upload_content_passport">パスポートの画像をアップロードしてください</string>
+  <!-- Label for first (given) name field -->
+  <string name="stripe_first_name">名</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="stripe_flash_mask">顔写真のアニメーションのマスク</string>
   <!-- Description of front of driver's license image -->
-  <string name="front_of_dl">運転免許証の表面</string>
+  <string name="stripe_front_of_dl">運転免許証の表面</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
-  <string name="front_of_dl_selected">運転免許証の表面が選択されました</string>
+  <string name="stripe_front_of_dl_selected">運転免許証の表面が選択されました</string>
   <!-- Description of front of identity card image -->
-  <string name="front_of_id">身分証明書の表面</string>
+  <string name="stripe_front_of_id">身分証明書の表面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
-  <string name="front_of_id_selected">ID の表面が選択されました</string>
+  <string name="stripe_front_of_id_selected">ID の表面が選択されました</string>
   <!-- Button to go back to the previous screen -->
-  <string name="go_back">戻る</string>
+  <string name="stripe_go_back">戻る</string>
+  <!-- display name for Government issued photo ID -->
+  <string name="stripe_government_id">政府発行の写真付き身分証明書</string>
   <!-- Text displayed when requesting camera permissions -->
-  <string name="grant_camera_permission_text">カメラへのアクセス許可が必要です。アプリの設定でカメラへのアクセスを許可してください。</string>
+  <string name="stripe_grant_camera_permission_text">カメラへのアクセス許可が必要です。アプリの設定でカメラへのアクセスを許可してください。</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
-  <string name="hold_still">動かさないでください、スキャンしています</string>
+  <string name="stripe_hold_still">動かさないでください、スキャンしています</string>
   <!-- display name for ID -->
-  <string name="id_card">ID</string>
+  <string name="stripe_id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="stripe_id_number">ID 番号</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">準備完了</string>
+  <!-- An error message. -->
+  <string name="stripe_incomplete_id_number">入力した ID 番号に不備があります。</string>
+  <!-- Instructional text when environment is too dark -->
+  <string name="stripe_increase_lighting">明るい場所に移動してください</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="stripe_individual_cpf">個人 CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="stripe_invalid_dob_error">生年月日が無効のようです</string>
+  <!-- Instructional text when user needs remove anything blocking the document -->
+  <string name="stripe_keep_fully_visible">詳細が見えません</string>
   <!-- Continue button text -->
-  <string name="kontinue">続ける</string>
+  <string name="stripe_kontinue">続ける</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="stripe_last_4_of_ssn">社会保障番号の末尾 4 桁</string>
+  <!-- Label for last (family) name field -->
+  <string name="stripe_last_name">姓</string>
   <!-- Status while screen is loading -->
-  <string name="loading">読み込み中</string>
+  <string name="stripe_loading">読み込み中</string>
+  <!-- Instructional text when camera is too far from a document -->
+  <string name="stripe_move_closer">身分証明書を少し近づけてください</string>
+  <!-- Instructional text when camera is too close to a document -->
+  <string name="stripe_move_farther">身分証明書を少し遠ざけてください</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="stripe_nric_or_fin">NRIC または FIN</string>
   <!-- No comment provided by engineer. -->
-  <string name="ok">OK</string>
+  <string name="stripe_ok">OK</string>
   <!-- Label of the passport option for document type selection -->
-  <string name="passport">パスポート</string>
+  <string name="stripe_passport">パスポート</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
-  <string name="passport_selected">パスポートが選択されました</string>
+  <string name="stripe_passport_selected">パスポートが選択されました</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">電話番号</string>
+  <!-- Instructional text when there is no document in camera frame -->
+  <string name="stripe_point_camera_to_document">書類を検出できませんでした</string>
   <!-- Instructional text for scanning back of a driver's license -->
-  <string name="position_dl_back">運転免許証を裏返してください</string>
+  <string name="stripe_position_dl_back">運転免許証を裏返してください</string>
   <!-- Instructional text for scanning front of a driver's license -->
-  <string name="position_dl_front">運転免許証をフレームの中央に置いてください</string>
+  <string name="stripe_position_dl_front">運転免許証をフレームの中央に置いてください</string>
   <!-- Instructional text for scanning back of a identity card -->
-  <string name="position_id_back">身分証明書を裏返してください</string>
+  <string name="stripe_position_id_back">身分証明書を裏返してください</string>
   <!-- Instructional text for scanning front of a identity card -->
-  <string name="position_id_front">身分証明書をフレームの中央に置いてください</string>
+  <string name="stripe_position_id_front">身分証明書をフレームの中央に置いてください</string>
   <!-- Instructional text for scanning a passport -->
-  <string name="position_passport">パスポートをフレームの中央に置いてください</string>
+  <string name="stripe_position_passport">パスポートをフレームの中央に置いてください</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="stripe_position_selfie">フレームの中央に顔を置いてください。</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">身分証明書に焦点が合っていません</string>
+  <!-- Instructional text when the document has too much glare -->
+  <string name="stripe_reduce_glare">詳細が見えません</string>
+  <string name="stripe_reduce_glare_2">光の反射を抑えて、身分証明書が見えるようにしてください</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="stripe_retake_photos">写真を撮り直す</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">身分証明書を水平に保持してください</string>
   <!-- State when identity document has been successfully scanned -->
-  <string name="scanned">スキャン終了</string>
+  <string name="stripe_scanned">スキャン終了</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
-  <string name="select">選択</string>
+  <string name="stripe_select">選択</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="stripe_selfie_capture_complete">顔写真の記録が完了しました</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">顔写真の記録</string>
+  <!-- Content description of a captured selfie -->
+  <string name="stripe_selfie_item_description">1 件の顔写真が記録されました</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="stripe_selfie_not_saved_warning">顔写真の画像が保存されていません。終了しますか？</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">次のステップで写真が数枚撮影され、本人確認が行われます。</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">顔写真の撮影準備をする</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
-  <string name="take_photo">写真を撮る</string>
+  <string name="stripe_take_photo">写真を撮る</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">このページはテスト環境でのみ表示されます。</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">現在、テスト環境です</string>
   <!-- Button to attempt to re-scan identity document image -->
-  <string name="try_again">やり直す</string>
+  <string name="stripe_try_again">やり直す</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="unexpected_error_try_again">予期しないエラーが発生しました。数秒後にもう一度お試しください</string>
+  <string name="stripe_unexpected_error_try_again">予期しないエラーが発生しました。数秒後にもう一度お試しください</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">写真をアップロードする</string>
   <!-- Title of dialog to upload back of driver license -->
-  <string name="upload_dialog_title_dl_back">運転免許証の裏面をアップロード</string>
+  <string name="stripe_upload_dialog_title_dl_back">運転免許証の裏面をアップロード</string>
   <!-- Title of dialog to upload front of driver license -->
-  <string name="upload_dialog_title_dl_front">運転免許証の表面をアップロード</string>
+  <string name="stripe_upload_dialog_title_dl_front">運転免許証の表面をアップロード</string>
   <!-- Title of dialog to upload back of ID -->
-  <string name="upload_dialog_title_id_back">ID の裏面をアップロード</string>
+  <string name="stripe_upload_dialog_title_id_back">ID の裏面をアップロード</string>
   <!-- Title of dialog to upload front of ID -->
-  <string name="upload_dialog_title_id_front">ID の表面をアップロード</string>
+  <string name="stripe_upload_dialog_title_id_front">ID の表面をアップロード</string>
   <!-- Title of dialog to upload passport -->
-  <string name="upload_dialog_title_passport">パスポートをアップロード</string>
+  <string name="stripe_upload_dialog_title_passport">パスポートをアップロード</string>
+  <!-- Generic message for alternative options when uploading a document -->
+  <string name="stripe_upload_file_generic_text">または、写真付き身分証明書の写真を手動でアップロードすることもできます。</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+  <string name="stripe_upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">写真付き身分証明書をアップロードする</string>
 </resources>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for Address field on address form -->
+  <string name="stripe_address_label_address">Adrese</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="stripe_address_label_address_line2">2. adreses rindiņa</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="stripe_address_label_ae_emirate">Emirāts</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_au_suburb_or_city">Priekšpilsēta vai pilsēta</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_bb_jm_parish">Pagasts</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_department">Departaments</string>
+  <!-- Label for the district field on an address form -->
+  <string name="stripe_address_label_district">Rajons</string>
+  <!-- Label of an address field in hk -->
+  <string name="stripe_address_label_hk_area">Apgabals</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_ie_eircode">Pasta indekss (Eirkods)</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="stripe_address_label_ie_townland">Apgabals</string>
+  <!-- Used to describe postal code in India -->
+  <string name="stripe_address_label_in_pin">Pasta kods (Pin)</string>
+  <!-- Used to describe part of an address -->
+  <string name="stripe_address_label_island">Sala</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_jp_prefecture">Prefektūra</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_kr_do_si">Province un pilsēta (Do Si)</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_neighborhood">Apkaime</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_oblast">Apgabals</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_post_town">Pasts vai pilsēta</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_suburb">Priekšpilsēta</string>
+  <!-- Used to describe an address field. -->
+  <string name="stripe_address_label_village_township">Ciems vai apdzīvota vieta</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="stripe_address_search_content_description">Meklēšana</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="stripe_address_zip_invalid">Pasta indekss nav derīgs.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="stripe_address_zip_postal_invalid">Pasta indekss nav derīgs</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="stripe_billing_same_as_shipping">Norēķinu adrese un piegādes adrese sakrīt</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="stripe_blank_and_required">Šis lauks nevar būt tukšs.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="stripe_change">Mainīt</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_email">E-pasts</string>
+  <!-- Error message when email is invalid -->
+  <string name="stripe_email_is_invalid">E-pasta adrese nav derīga.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiration_date_hint">MM/GG</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Tas ir obligāti aizpildāms lauks</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_form_label_optional">%s (nav obligāti)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="stripe_incomplete_expiry_date">Kartes derīguma termiņa datums nav pilnīgs.</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="stripe_incomplete_phone_number">Nepilnīgs tālruņa numurs</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="stripe_invalid_expiry_month">Kartes derīguma termiņa mēnesis nav derīgs.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="stripe_invalid_expiry_year">Kartes derīguma termiņa gads nav derīgs.</string>
+</resources>

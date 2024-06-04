@@ -2,10 +2,10 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
@@ -46,6 +46,14 @@ constructor(
      * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-livemode)
      */
     @JvmField val liveMode: Boolean,
+
+    /**
+     * The code of the PaymentMethod. This is useful when the PaymentMethodType is not
+     * hard coded in the SDK.
+     *
+     * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
+     */
+    @JvmField internal val code: PaymentMethodCode?,
 
     /**
      * The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a
@@ -158,182 +166,296 @@ constructor(
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
-        private val hasDelayedSettlement: Boolean
+        private val hasDelayedSettlement: Boolean,
+        internal val shouldRefreshIfIntentRequiresAction: Boolean,
     ) : Parcelable {
         Link(
             "link",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Card(
             "card",
             isReusable = true,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         CardPresent(
             "card_present",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Fpx(
             "fpx",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Ideal(
             "ideal",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         SepaDebit(
             "sepa_debit",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         AuBecsDebit(
             "au_becs_debit",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         BacsDebit(
             "bacs_debit",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Sofort(
             "sofort",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Upi(
             "upi",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         P24(
             "p24",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Bancontact(
             "bancontact",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Giropay(
             "giropay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Eps(
             "eps",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Oxxo(
             "oxxo",
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Alipay(
             "alipay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         GrabPay(
             "grabpay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         PayPal(
             "paypal",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         AfterpayClearpay(
             "afterpay_clearpay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Netbanking(
             "netbanking",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Blik(
             "blik",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         WeChatPay(
             "wechat_pay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Klarna(
             "klarna",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Affirm(
             "affirm",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        RevolutPay(
+            "revolut_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        AmazonPay(
+            "amazon_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
+        ),
+        Alma(
+            "alma",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        MobilePay(
+            "mobilepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Multibanco(
+            "multibanco",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Zip(
+            "zip",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        CashAppPay(
+            code = "cashapp",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
+        ),
+        Boleto(
+            code = "boleto",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Konbini(
+            code = "konbini",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Swish(
+            code = "swish",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
+        ),
+        Twint(
+            code = "twint",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -348,16 +470,17 @@ constructor(
             // For paymentsheet
             @JvmSynthetic
             fun fromCode(code: String?): Type? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
 
-    class Builder : ObjectBuilder<PaymentMethod> {
+    class Builder {
         private var id: String? = null
         private var created: Long? = null
         private var liveMode: Boolean = false
         private var type: Type? = null
+        private var code: PaymentMethodCode? = null
         private var billingDetails: BillingDetails? = null
         private var metadata: Map<String, String>? = null
         private var customerId: String? = null
@@ -445,12 +568,17 @@ constructor(
             this.upi = upi
         }
 
-        override fun build(): PaymentMethod {
+        fun setCode(code: String?): Builder = apply {
+            this.code = code
+        }
+
+        fun build(): PaymentMethod {
             return PaymentMethod(
                 id = id,
                 created = created,
                 liveMode = liveMode,
                 type = type,
+                code = code,
                 billingDetails = billingDetails,
                 customerId = customerId,
                 card = card,
@@ -535,7 +663,12 @@ constructor(
                 )
         }
 
-        class Builder : ObjectBuilder<BillingDetails> {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isFilledOut(): Boolean {
+            return (address != null && address.isFilledOut()) || email != null || name != null || phone != null
+        }
+
+        class Builder {
             private var address: Address? = null
             private var email: String? = null
             private var name: String? = null
@@ -557,7 +690,7 @@ constructor(
                 this.phone = phone
             }
 
-            override fun build(): BillingDetails {
+            fun build(): BillingDetails {
                 return BillingDetails(address, email, name, phone)
             }
         }
@@ -663,7 +796,11 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        internal val networks: Networks? = null
+        val networks: Networks? = null,
+
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayBrand: String? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -718,6 +855,7 @@ constructor(
         @Parcelize
         data class Networks(
             val available: Set<String> = emptySet(),
+            @Deprecated("This field is deprecated and will be removed in a future release.")
             val selectionMandatory: Boolean = false,
             val preferred: String? = null
         ) : StripeModel
@@ -912,11 +1050,11 @@ constructor(
         @JvmField val last4: String?,
 
         /**
-         * The token of the Linked Account used to create the payment method
+         * The ID of the Financial Connections Account used to create the payment method
          *
-         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         * [us_bank_account.financial_connections_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-financial_connections_account)
          */
-        @JvmField val linkedAccount: String?,
+        @JvmField val financialConnectionsAccount: String?,
 
         /**
          * Contains information about US bank account networks that can be used
@@ -930,8 +1068,22 @@ constructor(
          *
          * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
          */
-        @JvmField val routingNumber: String?
+        @JvmField val routingNumber: String?,
     ) : TypeData() {
+        /**
+         * The token of the Linked Account used to create the payment method
+         *
+         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         */
+        @Deprecated(
+            message = "Renamed to 'financialConnectionsAccount', " +
+                "'linkedAccount' will be removed in a future major update",
+            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
+        )
+        @IgnoredOnParcel
+        @JvmField
+        val linkedAccount: String? = financialConnectionsAccount
+
         override val type: Type get() = Type.USBankAccount
 
         @Parcelize

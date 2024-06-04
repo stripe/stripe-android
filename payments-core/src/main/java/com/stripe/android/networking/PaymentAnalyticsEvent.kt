@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import androidx.annotation.Keep
 import com.stripe.android.core.networking.AnalyticsEvent
 
 internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
@@ -8,6 +9,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
 
     // Payment Methods
     PaymentMethodCreate("payment_method_creation"),
+    PaymentMethodUpdate("payment_method_update"),
 
     // Customer
     CustomerRetrieve("retrieve_customer"),
@@ -30,13 +32,21 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Payment Intents
     PaymentIntentConfirm("payment_intent_confirmation"),
     PaymentIntentRetrieve("payment_intent_retrieval"),
+    PaymentIntentRetrieveOrdered("payment_intent_retrieval_ordered"),
     PaymentIntentCancelSource("payment_intent_cancel_source"),
     PaymentIntentRefresh("payment_intent_refresh"),
 
     // Setup Intents
     SetupIntentConfirm("setup_intent_confirmation"),
     SetupIntentRetrieve("setup_intent_retrieval"),
+    SetupIntentRetrieveOrdered("setup_intent_retrieval_ordered"),
     SetupIntentCancelSource("setup_intent_cancel_source"),
+
+    // Payment Launcher
+    PaymentLauncherConfirmStarted("paymenthandler.confirm.started"),
+    PaymentLauncherConfirmFinished("paymenthandler.confirm.finished"),
+    PaymentLauncherNextActionStarted("paymenthandler.handle_next_action.started"),
+    PaymentLauncherNextActionFinished("paymenthandler.handle_next_action.finished"),
 
     // File
     FileCreate("create_file"),
@@ -95,6 +105,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     CardMetadataLoadFailure("card_metadata_load_failure"),
     CardMetadataMissingRange("card_metadata_missing_range");
 
+    @Keep
     override fun toString(): String {
         return "$PREFIX.$code"
     }

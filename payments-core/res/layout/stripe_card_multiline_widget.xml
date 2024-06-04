@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <FrameLayout
+        android:id="@+id/card_number_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.stripe.android.view.CardNumberTextInputLayout
+            android:id="@+id/tl_card_number"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/stripe_acc_label_card_number"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin">
+
+            <com.stripe.android.view.CardNumberEditText
+                android:id="@+id/et_card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@+id/et_expiry"
+                android:nextFocusForward="@+id/et_expiry" />
+
+        </com.stripe.android.view.CardNumberTextInputLayout>
+
+        <com.stripe.android.view.CardBrandView
+            android:id="@+id/card_brand_view"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/stripe_card_brand_view_height"
+            android:layout_marginTop="@dimen/stripe_card_icon_padding"
+            android:layout_marginBottom="@dimen/stripe_card_icon_padding"
+            android:layout_marginEnd="@dimen/stripe_card_icon_padding"
+            android:layout_gravity="center_vertical|end" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/second_row_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_expiry"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
+            android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            android:hint="@string/stripe_acc_label_expiry_date"
+            app:placeholderText="@string/stripe_expiry_date_hint">
+
+            <com.stripe.android.view.ExpiryDateEditText
+                android:id="@+id/et_expiry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:digits="@string/stripe_expiration_date_allowlist"
+                android:nextFocusDown="@+id/et_cvc"
+                android:nextFocusForward="@+id/et_cvc"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_cvc"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
+            android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            app:placeholderText="@string/stripe_cvc_multiline_helper">
+
+            <com.stripe.android.view.CvcEditText
+                android:id="@+id/et_cvc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@+id/et_postal_code"
+                android:nextFocusForward="@+id/et_postal_code"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_postal_code"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
+            app:placeholderText="@string/stripe_postalcode_placeholder">
+
+            <com.stripe.android.view.PostalCodeEditText
+                android:id="@+id/et_postal_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+</merge>

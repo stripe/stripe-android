@@ -1,64 +1,70 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.R
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.stripecardscan.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
 
     private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
-    fun `Verify the first field in error is returned in error flow`() {
-        val cardController = CardDetailsController(context, emptyMap())
-
-        val flowValues = mutableListOf<FieldError?>()
-        cardController.error.asLiveData()
-            .observeForever {
-                flowValues.add(it)
-            }
-
-        cardController.numberElement.controller.onValueChange("4242424242424243")
-        cardController.cvcElement.controller.onValueChange("123")
-        cardController.expirationDateElement.controller.onValueChange("13")
-
-        idleLooper()
-
-        assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            R.string.invalid_card_number
+    fun `Verify the first field in error is returned in error flow`() = runTest {
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = emptyMap(),
         )
 
-        cardController.numberElement.controller.onValueChange("4242424242424242")
-        idleLooper()
+        cardController.error.test {
+            assertThat(awaitItem()).isNull()
 
-        assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            R.string.incomplete_expiry_date
-        )
+            cardController.numberElement.controller.onValueChange("4242424242424243")
+            cardController.cvcElement.controller.onValueChange("123")
+            cardController.expirationDateElement.controller.onValueChange("13")
+
+            idleLooper()
+
+            assertThat(awaitItem()?.errorMessage).isEqualTo(
+                StripeR.string.stripe_invalid_card_number
+            )
+
+            cardController.numberElement.controller.onValueChange("4242424242424242")
+            idleLooper()
+
+            assertThat(awaitItem()?.errorMessage).isEqualTo(
+                UiCoreR.string.stripe_incomplete_expiry_date
+            )
+        }
     }
 
     @Test
-    fun `When card number is not view only then CardNumberControllerEditable is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap())
+    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() = runTest {
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = mapOf(
+                IdentifierSpec.CardNumber to "4000002500001001",
+                IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
+            ),
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
+        )
 
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberEditableController::class.java)
-    }
-
-    @Test
-    fun `When card number is view only then CardNumberControllerViewOnly is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap(), true)
-
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberViewOnlyController::class.java)
+        cardController.numberElement.controller.cardBrandFlow.test {
+            assertThat(awaitItem()).isEqualTo(CardBrand.CartesBancaires)
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -15,7 +14,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherActivityTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = GooglePayLauncherContract()
 
     @BeforeTest
@@ -28,7 +26,7 @@ class GooglePayLauncherActivityTest {
 
     @Test
     fun `start without args should finish with Error result`() {
-        ActivityScenario.launch(
+        ActivityScenario.launchActivityForResult(
             GooglePayLauncherActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->

@@ -1,9 +1,12 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Parcelize
 internal data class FaceUploadParam(
     @SerialName("best_high_res_image")
     val bestHighResImage: String,
@@ -37,4 +40,4 @@ internal data class FaceUploadParam(
     val bestExposureIso: Float? = null,
     @SerialName("training_consent")
     val trainingConsent: Boolean? = null
-)
+) : Parcelable

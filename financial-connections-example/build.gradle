@@ -1,77 +1,80 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-}
+apply from: configs.androidApplication
 
-ext {
-    retrofitVersion = '2.9.0'
-}
+apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+
+
+def testEnvironment = System.getenv("test_environment") ?: "production"
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
     defaultConfig {
         applicationId "com.stripe.android.financialconnections.example"
-        minSdk 21
-        targetSdk rootProject.ext.compileSdkVersion
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        versionName VERSION_NAME
+        versionCode getVersionCode(versionName)
+
+        buildConfigField "String", "TEST_ENVIRONMENT", "\"${testEnvironment}\""
+
+        manifestPlaceholders = [
+            STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
+        ]
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        debug {
+            firebaseAppDistribution {
+                groups = "financial-connections"
+            }
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     buildFeatures {
-        viewBinding true
         compose true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
+}
 
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
 }
 
 dependencies {
     implementation project(':financial-connections')
+    implementation project(':payments-core')
 
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.workManager
+    implementation libs.compose.activity
+    implementation libs.compose.material
+    implementation libs.compose.liveData
+    implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.retrofit
+    implementation libs.retrofitKotlinSerializationConverter
+    implementation libs.kotlin.serialization
+    implementation libs.zxing
 
-    // Jetpack Compose
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
+    debugImplementation libs.compose.uiTestManifest
+    debugImplementation libs.compose.uiTooling
+    debugImplementation libs.leakCanary
 
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.junit
 
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.androidx.composeUi
 }

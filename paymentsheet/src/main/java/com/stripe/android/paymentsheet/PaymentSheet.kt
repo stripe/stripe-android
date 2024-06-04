@@ -6,15 +6,25 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.account.LinkStore
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.getRawValueFromDimenResource
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -24,10 +34,10 @@ class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
     /**
-     * Constructor to be used when launching the payment sheet from an Activity.
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
-     * @param activity  the Activity that is presenting the payment sheet.
-     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
     constructor(
         activity: ComponentActivity,
@@ -37,7 +47,67 @@ class PaymentSheet internal constructor(
     )
 
     /**
-     * Constructor to be used when launching the payment sheet from a Fragment.
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and external payment methods are
+     * specified in your [Configuration].
+     *
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
+     * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
+     */
+    constructor(
+        activity: ComponentActivity,
+        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+        callback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    ) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+    }
+
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
+    constructor(
+        activity: ComponentActivity,
+        createIntentCallback: CreateIntentCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server and external payment methods
+     * are specified in your [Configuration].
+     *
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
+    constructor(
+        activity: ComponentActivity,
+        createIntentCallback: CreateIntentCallback,
+        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+    ) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Constructor to be used when launching the payment sheet from a [Fragment].
      *
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
@@ -50,40 +120,296 @@ class PaymentSheet internal constructor(
     )
 
     /**
-     * Present the payment sheet to process a [PaymentIntent].
+     * Constructor to be used when launching the payment sheet from a [Fragment] and external payment methods
+     * are specified in your [Configuration].
+     *
+     * @param fragment the Fragment that is presenting the payment sheet.
+     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
+     * @param callback called with the result of the payment after the payment sheet is dismissed.
+     */
+    constructor(
+        fragment: Fragment,
+        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+        callback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback)
+    ) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+    }
+
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
+     * create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param fragment The Fragment that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
+    constructor(
+        fragment: Fragment,
+        createIntentCallback: CreateIntentCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
+     * create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server and external payment methods
+     * are specified in your [Configuration].
+     *
+     * @param fragment The Fragment that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
+    constructor(
+        fragment: Fragment,
+        createIntentCallback: CreateIntentCallback,
+        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+    ) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Present [PaymentSheet] to process a [PaymentIntent].
+     *
      * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param paymentIntentClientSecret the client secret for the [PaymentIntent].
-     * @param configuration optional [PaymentSheet] settings.
+     * @param paymentIntentClientSecret The client secret of the [PaymentIntent].
+     * @param configuration An optional [PaymentSheet] configuration.
      */
     @JvmOverloads
     fun presentWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithPaymentIntent(paymentIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
+            configuration = configuration,
+        )
     }
 
     /**
-     * Present the payment sheet to process a [SetupIntent].
+     * Present [PaymentSheet] to process a [SetupIntent].
+     *
      * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param setupIntentClientSecret the client secret for the [SetupIntent].
-     * @param configuration optional [PaymentSheet] settings.
+     * @param setupIntentClientSecret The client secret of the [SetupIntent].
+     * @param configuration An optional [PaymentSheet] configuration.
      */
     @JvmOverloads
     fun presentWithSetupIntent(
         setupIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.SetupIntent(setupIntentClientSecret),
+            configuration = configuration,
+        )
+    }
+
+    /**
+     * Present [PaymentSheet] with an [IntentConfiguration].
+     *
+     * @param intentConfiguration The [IntentConfiguration] to use.
+     * @param configuration An optional [PaymentSheet] configuration.
+     */
+    @JvmOverloads
+    fun presentWithIntentConfiguration(
+        intentConfiguration: IntentConfiguration,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(
+            mode = InitializationMode.DeferredIntent(intentConfiguration),
+            configuration = configuration,
+        )
+    }
+
+    internal sealed class InitializationMode : Parcelable {
+
+        internal abstract fun validate()
+
+        @Parcelize
+        internal data class PaymentIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                PaymentIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @Parcelize
+        internal data class SetupIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                SetupIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @Parcelize
+        internal data class DeferredIntent(
+            val intentConfiguration: IntentConfiguration,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                // Nothing to do here
+            }
+        }
+    }
+
+    /**
+     * Contains information needed to render [PaymentSheet]. The values are used to calculate
+     * the payment methods displayed and influence the UI.
+     *
+     * **Note**: The [PaymentIntent] or [SetupIntent] you create on your server must have the same
+     * values or the payment/setup will fail.
+     *
+     * @param mode Whether [PaymentSheet] should present a payment or setup flow.
+     * @param paymentMethodTypes The payment methods types to display. If empty, we dynamically
+     * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
+     * @param paymentMethodConfigurationId The configuration ID (if any) for the selected payment method configuration.
+     * See https://stripe.com/docs/payments/multiple-payment-method-configs for more information.
+     * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
+     * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
+     */
+    @Parcelize
+    class IntentConfiguration @JvmOverloads constructor(
+        val mode: Mode,
+        val paymentMethodTypes: List<String> = emptyList(),
+        val paymentMethodConfigurationId: String? = null,
+        val onBehalfOf: String? = null,
+    ) : Parcelable {
+
+        /**
+         * Contains information about the desired payment or setup flow.
+         */
+        sealed class Mode : Parcelable {
+
+            internal abstract val setupFutureUse: SetupFutureUse?
+            internal abstract val captureMethod: CaptureMethod?
+
+            /**
+             * Use this if your integration creates a [PaymentIntent].
+             *
+             * @param amount Amount intended to be collected in the smallest currency unit
+             * (e.g. 100 cents to charge $1.00). Shown in Google Pay, Buy now pay later UIs, the Pay
+             * button, and influences available payment methods. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-amount) for more info.
+             * @param currency Three-letter ISO currency code. Filters out payment methods based on
+             * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
+             * @param setupFutureUse Indicates that you intend to make future payments. See
+             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+             * @param captureMethod Controls when the funds will be captured from the customer's
+             * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
+             */
+            @Parcelize
+            class Payment @JvmOverloads constructor(
+                val amount: Long,
+                val currency: String,
+                override val setupFutureUse: SetupFutureUse? = null,
+                override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
+            ) : Mode()
+
+            /**
+             * Use this if your integration creates a [SetupIntent].
+             *
+             * @param currency Three-letter ISO currency code. Filters out payment methods based on
+             * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
+             * @param setupFutureUse Indicates that you intend to make future payments. See
+             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+             */
+            @Parcelize
+            class Setup @JvmOverloads constructor(
+                val currency: String? = null,
+                override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
+            ) : Mode() {
+
+                override val captureMethod: CaptureMethod?
+                    get() = null
+            }
+        }
+
+        /**
+         * Indicates that you intend to make future payments with this [PaymentIntent]'s payment
+         * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+         */
+        enum class SetupFutureUse {
+
+            /**
+             * Use this if you intend to only reuse the payment method when your customer is present
+             * in your checkout flow.
+             */
+            OnSession,
+
+            /**
+             * Use this if your customer may or may not be present in your checkout flow.
+             */
+            OffSession,
+        }
+
+        /**
+         * Controls when the funds will be captured.
+         *
+         * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
+         */
+        enum class CaptureMethod {
+
+            /**
+             * Stripe automatically captures funds when the customer authorizes the payment.
+             */
+            Automatic,
+
+            /**
+             * Stripe asynchronously captures funds when the customer authorizes the payment.
+             * Recommended over [CaptureMethod.Automatic] due to improved latency, but may require
+             * additional integration changes.
+             */
+            AutomaticAsync,
+
+            /**
+             * Place a hold on the funds when the customer authorizes the payment, but don't capture
+             * the funds until later.
+             *
+             * **Note**: Not all payment methods support this.
+             */
+            Manual,
+        }
+
+        companion object {
+
+            /**
+             * Pass this as the client secret into [CreateIntentResult.Success] to force
+             * [PaymentSheet] to show success, dismiss the sheet without confirming the intent, and
+             * return [PaymentSheetResult.Completed].
+             *
+             * **Note**: If provided, the SDK performs no action to complete the payment or setup.
+             * It doesn't confirm a [PaymentIntent] or [SetupIntent] or handle next actions. You
+             * should only use this if your integration can't create a [PaymentIntent] or
+             * [SetupIntent]. It is your responsibility to ensure that you only pass this value if
+             * the payment or setup is successful.
+             */
+            @DelicatePaymentSheetApi
+            const val COMPLETE_WITHOUT_CONFIRMING_INTENT =
+                IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT
+        }
     }
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    data class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -94,14 +420,14 @@ class PaymentSheet internal constructor(
         /**
          * If set, the customer can select a previously saved payment method within PaymentSheet.
          */
-        val customer: CustomerConfiguration? = null,
+        val customer: CustomerConfiguration? = ConfigurationDefaults.customer,
 
         /**
          * Configuration related to the Stripe Customer making a payment.
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
          */
-        val googlePay: GooglePayConfiguration? = null,
+        val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
 
         /**
          * The color of the Pay or Add button. Keep in mind the text color is white.
@@ -115,14 +441,25 @@ class PaymentSheet internal constructor(
                     "or PrimaryButton.colorsLight/colorsDark.background"
             )
         )
-        val primaryButtonColor: ColorStateList? = null,
+        val primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
 
         /**
          * The billing information for the customer.
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+         * these values will be attached to the payment method even if they are not collected by
+         * the PaymentSheet UI.
          */
-        val defaultBillingDetails: BillingDetails? = null,
+        val defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
+
+        /**
+         * The shipping information for the customer.
+         * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
+         * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
+         */
+        val shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
 
         /**
          * If true, allows payment methods that do not move money at the end of the checkout.
@@ -136,25 +473,211 @@ class PaymentSheet internal constructor(
          *
          * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
-        val allowsDelayedPaymentMethods: Boolean = false,
+        val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
+
+        /**
+         * If `true`, allows payment methods that require a shipping address, like Afterpay and
+         * Affirm. Defaults to `false`.
+         *
+         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+         * [FlowController.shippingDetails].
+         *
+         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+         * on the PaymentIntent when PaymentSheet loads.
+         */
+        val allowsPaymentMethodsRequiringShippingAddress: Boolean =
+            ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
 
         /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance()
+        val appearance: Appearance = ConfigurationDefaults.appearance,
+
+        /**
+         * The label to use for the primary button.
+         *
+         * If not set, Payment Sheet will display suitable default labels for payment and setup
+         * intents.
+         */
+        val primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
+
+        /**
+         * Describes how billing details should be collected.
+         * All values default to `automatic`.
+         * If `never` is used for a required field for the Payment Method used during checkout,
+         * you **must** provide an appropriate value as part of [defaultBillingDetails].
+         */
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            ConfigurationDefaults.billingDetailsCollectionConfiguration,
+
+        /**
+         * A list of preferred networks that should be used to process payments
+         * made with a co-branded card if your user hasn't selected a network
+         * themselves.
+         *
+         * The first preferred network that matches any available network will
+         * be used. If no preferred network is applicable, Stripe will select
+         * the network.
+         */
+        val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+
+        internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
+            ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+
+        internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
+
+        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
     ) : Parcelable {
+
+        @JvmOverloads
+        constructor(
+            /**
+             * Your customer-facing business name.
+             *
+             * The default value is the name of your app.
+             */
+            merchantDisplayName: String,
+
+            /**
+             * If set, the customer can select a previously saved payment method within PaymentSheet.
+             */
+            customer: CustomerConfiguration? = ConfigurationDefaults.customer,
+
+            /**
+             * Configuration related to the Stripe Customer making a payment.
+             *
+             * If set, PaymentSheet displays Google Pay as a payment option.
+             */
+            googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
+
+            /**
+             * The color of the Pay or Add button. Keep in mind the text color is white.
+             *
+             * If set, PaymentSheet displays the button with this color.
+             */
+            primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
+
+            /**
+             * The billing information for the customer.
+             *
+             * If set, PaymentSheet will pre-populate the form fields with the values provided.
+             * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+             * these values will be attached to the payment method even if they are not collected by
+             * the PaymentSheet UI.
+             */
+            defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
+
+            /**
+             * The shipping information for the customer.
+             * If set, PaymentSheet will pre-populate the form fields with the values provided.
+             * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
+             * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
+             */
+            shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
+
+            /**
+             * If true, allows payment methods that do not move money at the end of the checkout.
+             * Defaults to false.
+             *
+             * Some payment methods can't guarantee you will receive funds from your customer at the end
+             * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
+             * or require customer action to complete (e.g. OXXO, Konbini, Boleto). If this is set to
+             * true, make sure your integration listens to webhooks for notifications on whether a
+             * payment has succeeded or not.
+             *
+             * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
+             */
+            allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
+
+            /**
+             * If `true`, allows payment methods that require a shipping address, like Afterpay and
+             * Affirm. Defaults to `false`.
+             *
+             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+             * [FlowController.shippingDetails].
+             *
+             * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+             * on the PaymentIntent when PaymentSheet loads.
+             */
+            allowsPaymentMethodsRequiringShippingAddress: Boolean =
+                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
+
+            /**
+             * Describes the appearance of Payment Sheet.
+             */
+            appearance: Appearance = ConfigurationDefaults.appearance,
+
+            /**
+             * The label to use for the primary button.
+             *
+             * If not set, Payment Sheet will display suitable default labels for payment and setup
+             * intents.
+             */
+            primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
+
+            /**
+             * Describes how billing details should be collected.
+             * All values default to `automatic`.
+             * If `never` is used for a required field for the Payment Method used during checkout,
+             * you **must** provide an appropriate value as part of [defaultBillingDetails].
+             */
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+                ConfigurationDefaults.billingDetailsCollectionConfiguration,
+
+            /**
+             * A list of preferred networks that should be used to process payments
+             * made with a co-branded card if your user hasn't selected a network
+             * themselves.
+             *
+             * The first preferred network that matches any available network will
+             * be used. If no preferred network is applicable, Stripe will select
+             * the network.
+             */
+            preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+        ) : this(
+            merchantDisplayName = merchantDisplayName,
+            customer = customer,
+            googlePay = googlePay,
+            primaryButtonColor = primaryButtonColor,
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            appearance = appearance,
+            primaryButtonLabel = primaryButtonLabel,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            preferredNetworks = preferredNetworks,
+            allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
+        @Suppress("TooManyFunctions")
         class Builder(
             private var merchantDisplayName: String
         ) {
-            private var customer: CustomerConfiguration? = null
-            private var googlePay: GooglePayConfiguration? = null
-            private var primaryButtonColor: ColorStateList? = null
-            private var defaultBillingDetails: BillingDetails? = null
-            private var allowsDelayedPaymentMethods: Boolean = false
-            private var appearance: Appearance = Appearance()
+            private var customer: CustomerConfiguration? = ConfigurationDefaults.customer
+            private var googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay
+            private var primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor
+            private var defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails
+            private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
+            private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
+                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
+            private var appearance: Appearance = ConfigurationDefaults.appearance
+            private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
+            private var billingDetailsCollectionConfiguration =
+                ConfigurationDefaults.billingDetailsCollectionConfiguration
+            private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
+            private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
+                ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
+            private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
+            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -178,21 +701,112 @@ class PaymentSheet internal constructor(
             fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
+            fun shippingDetails(shippingDetails: AddressDetails?) =
+                apply { this.shippingDetails = shippingDetails }
+
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
+
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
+            }
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun primaryButtonLabel(primaryButtonLabel: String) =
+                apply { this.primaryButtonLabel = primaryButtonLabel }
+
+            fun billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            }
+
+            fun preferredNetworks(
+                preferredNetworks: List<CardBrand>
+            ) = apply {
+                this.preferredNetworks = preferredNetworks
+            }
+
+            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
+                this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
+            }
+
+            /**
+             * By default, PaymentSheet will use a dynamic ordering that optimizes payment method display for the
+             * customer. You can override the default order in which payment methods are displayed in PaymentSheet with
+             * a list of payment method types.
+             *
+             * See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid
+             *  types.
+             * - Example: listOf("card", "klarna")
+             * - Note: If you omit payment methods from this list, they’ll be automatically ordered by Stripe after the
+             *  ones you provide. Invalid payment methods are ignored.
+             */
+            fun paymentMethodOrder(paymentMethodOrder: List<String>): Builder = apply {
+                this.paymentMethodOrder = paymentMethodOrder
+            }
+
+            /**
+             * External payment methods to display in PaymentSheet.
+             *
+             * If you specify any external payment methods here, you must also pass an
+             * [ExternalPaymentMethodConfirmHandler] to the FlowController or PaymentSheet constructor.
+             *
+             * To learn more about external payment methods, see
+             * https://docs.stripe.com/payments/external-payment-methods?platform=android. For the full list of
+             * supported payment methods, see
+             * https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-payment-methods.
+             */
+            fun externalPaymentMethods(externalPaymentMethods: List<String>): Builder = apply {
+                this.externalPaymentMethods = externalPaymentMethods
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalPaymentMethodLayoutApi
+            fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
+                this.paymentMethodLayout = paymentMethodLayout
+            }
+
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                allowsDelayedPaymentMethods,
-                appearance
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                preferredNetworks = preferredNetworks,
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                paymentMethodOrder = paymentMethodOrder,
+                externalPaymentMethods = externalPaymentMethods,
+                paymentMethodLayout = paymentMethodLayout,
             )
+        }
+
+        internal companion object {
+            fun default(context: Context): Configuration {
+                val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
+                return Configuration(appName)
+            }
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentMethodLayout {
+        Horizontal, Vertical;
+
+        internal companion object {
+            internal val default: PaymentMethodLayout = Horizontal
         }
     }
 
@@ -221,8 +835,16 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
-        val primaryButton: PrimaryButton = PrimaryButton()
+        val primaryButton: PrimaryButton = PrimaryButton(),
     ) : Parcelable {
+        constructor() : this(
+            colorsLight = Colors.defaultLight,
+            colorsDark = Colors.defaultDark,
+            shapes = Shapes.default,
+            typography = Typography.default,
+            primaryButton = PrimaryButton(),
+        )
+
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
         }
@@ -234,12 +856,29 @@ class PaymentSheet internal constructor(
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
 
-            fun colorsLight(colors: Colors) = apply { this.colorsLight = colors }
-            fun colorsDark(colors: Colors) = apply { this.colorsDark = colors }
-            fun shapes(shapes: Shapes) = apply { this.shapes = shapes }
-            fun typography(typography: Typography) = apply { this.typography = typography }
-            fun primaryButton(primaryButton: PrimaryButton) =
-                apply { this.primaryButton = primaryButton }
+            fun colorsLight(colors: Colors) = apply {
+                this.colorsLight = colors
+            }
+
+            fun colorsDark(colors: Colors) = apply {
+                this.colorsDark = colors
+            }
+
+            fun shapes(shapes: Shapes) = apply {
+                this.shapes = shapes
+            }
+
+            fun typography(typography: Typography) = apply {
+                this.typography = typography
+            }
+
+            fun primaryButton(primaryButton: PrimaryButton) = apply {
+                this.primaryButton = primaryButton
+            }
+
+            fun build(): Appearance {
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+            }
         }
     }
 
@@ -340,31 +979,31 @@ class PaymentSheet internal constructor(
 
         companion object {
             val defaultLight = Colors(
-                primary = PaymentsThemeDefaults.colorsLight.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsLight.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsLight.component,
-                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsLight.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsLight.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsLight.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
-                error = PaymentsThemeDefaults.colorsLight.materialColors.error
+                primary = StripeThemeDefaults.colorsLight.materialColors.primary,
+                surface = StripeThemeDefaults.colorsLight.materialColors.surface,
+                component = StripeThemeDefaults.colorsLight.component,
+                componentBorder = StripeThemeDefaults.colorsLight.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsLight.componentDivider,
+                onComponent = StripeThemeDefaults.colorsLight.onComponent,
+                subtitle = StripeThemeDefaults.colorsLight.subtitle,
+                placeholderText = StripeThemeDefaults.colorsLight.placeholderText,
+                onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
+                error = StripeThemeDefaults.colorsLight.materialColors.error
             )
 
             val defaultDark = Colors(
-                primary = PaymentsThemeDefaults.colorsDark.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsDark.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsDark.component,
-                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsDark.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsDark.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsDark.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
-                error = PaymentsThemeDefaults.colorsDark.materialColors.error
+                primary = StripeThemeDefaults.colorsDark.materialColors.primary,
+                surface = StripeThemeDefaults.colorsDark.materialColors.surface,
+                component = StripeThemeDefaults.colorsDark.component,
+                componentBorder = StripeThemeDefaults.colorsDark.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsDark.componentDivider,
+                onComponent = StripeThemeDefaults.colorsDark.onComponent,
+                subtitle = StripeThemeDefaults.colorsDark.subtitle,
+                placeholderText = StripeThemeDefaults.colorsDark.placeholderText,
+                onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
+                error = StripeThemeDefaults.colorsDark.materialColors.error
             )
         }
     }
@@ -388,8 +1027,8 @@ class PaymentSheet internal constructor(
 
         companion object {
             val default = Shapes(
-                cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth
+                cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius,
+                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             )
         }
     }
@@ -410,8 +1049,8 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
         companion object {
             val default = Typography(
-                sizeScaleFactor = PaymentsThemeDefaults.typography.fontSizeMultiplier,
-                fontResId = PaymentsThemeDefaults.typography.fontFamily
+                sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
+                fontResId = StripeThemeDefaults.typography.fontFamily
             )
         }
     }
@@ -453,8 +1092,32 @@ class PaymentSheet internal constructor(
          * The border color of the primary button.
          */
         @ColorInt
-        val border: Int
+        val border: Int,
+        /**
+         * The background color for the primary button when in a success state. Defaults
+         * to base green background color.
+         */
+        @ColorInt
+        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        /**
+         * The success color for the primary button text when in a success state. Defaults
+         * to `onBackground`.
+         */
+        @ColorInt
+        val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
+        constructor(
+            background: Int?,
+            onBackground: Int,
+            border: Int
+        ) : this(
+            background = background,
+            onBackground = onBackground,
+            border = border,
+            successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+            onSuccessBackgroundColor = onBackground,
+        )
+
         constructor(
             background: Color?,
             onBackground: Color,
@@ -462,21 +1125,37 @@ class PaymentSheet internal constructor(
         ) : this(
             background = background?.toArgb(),
             onBackground = onBackground.toArgb(),
-            border = border.toArgb()
+            border = border.toArgb(),
+        )
+
+        constructor(
+            background: Color?,
+            onBackground: Color,
+            border: Color,
+            successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+            onSuccessBackgroundColor: Color = onBackground,
+        ) : this(
+            background = background?.toArgb(),
+            onBackground = onBackground.toArgb(),
+            border = border.toArgb(),
+            successBackgroundColor = successBackgroundColor.toArgb(),
+            onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
         companion object {
             val defaultLight = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
             )
         }
     }
@@ -608,6 +1287,13 @@ class PaymentSheet internal constructor(
          */
         val phone: String? = null
     ) : Parcelable {
+        internal fun isFilledOut(): Boolean {
+            return address != null ||
+                email != null ||
+                name != null ||
+                phone != null
+        }
+
         /**
          * [BillingDetails] builder for cleaner object creation from Java.
          */
@@ -629,8 +1315,129 @@ class PaymentSheet internal constructor(
         }
     }
 
+    /**
+     * Configuration for how billing details are collected during checkout.
+     */
     @Parcelize
-    data class CustomerConfiguration(
+    data class BillingDetailsCollectionConfiguration(
+        /**
+         * How to collect the name field.
+         */
+        val name: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the phone field.
+         */
+        val phone: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the email field.
+         */
+        val email: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the billing address.
+         */
+        val address: AddressCollectionMode = AddressCollectionMode.Automatic,
+
+        /**
+         * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
+         * should be attached to the payment method, this includes fields that aren't displayed in the form.
+         *
+         * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
+         */
+        val attachDefaultsToPaymentMethod: Boolean = false,
+    ) : Parcelable {
+
+        internal val collectsName: Boolean
+            get() = name == CollectionMode.Always
+
+        internal val collectsEmail: Boolean
+            get() = email == CollectionMode.Always
+
+        internal val collectsPhone: Boolean
+            get() = phone == CollectionMode.Always
+
+        internal val collectsAnything: Boolean
+            get() = name == CollectionMode.Always ||
+                phone == CollectionMode.Always ||
+                email == CollectionMode.Always ||
+                address == AddressCollectionMode.Full
+
+        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
+            val collectAddress = address == AddressCollectionMode.Full
+            val collectPhone = phone == CollectionMode.Always
+
+            val format = when (address) {
+                AddressCollectionMode.Never,
+                AddressCollectionMode.Automatic -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min
+                }
+                AddressCollectionMode.Full -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full
+                }
+            }
+
+            return GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = collectAddress || collectPhone,
+                format = format,
+                isPhoneNumberRequired = collectPhone,
+            )
+        }
+
+        /**
+         * Billing details fields collection options.
+         */
+        enum class CollectionMode {
+            /**
+             * The field will be collected depending on the Payment Method's requirements.
+             */
+            Automatic,
+
+            /**
+             * The field will never be collected.
+             * If this field is required by the Payment Method, you must provide it as part of `defaultBillingDetails`.
+             */
+            Never,
+
+            /**
+             * The field will always be collected, even if it isn't required for the Payment Method.
+             */
+            Always,
+        }
+
+        /**
+         * Billing address collection options.
+         */
+        enum class AddressCollectionMode {
+            /**
+             * Only the fields required by the Payment Method will be collected, this may be none.
+             */
+            Automatic,
+
+            /**
+             * Address will never be collected.
+             * If the Payment Method requires a billing address, you must provide it as part of `defaultBillingDetails`.
+             */
+            Never,
+
+            /**
+             * Collect the full billing address, regardless of the Payment Method requirements.
+             */
+            Full,
+        }
+    }
+
+    internal sealed interface CustomerAccessType : Parcelable {
+        @Parcelize
+        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType
+
+        @Parcelize
+        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType
+    }
+
+    @Parcelize
+    data class CustomerConfiguration internal constructor(
         /**
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
@@ -640,36 +1447,114 @@ class PaymentSheet internal constructor(
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
          */
-        val ephemeralKeySecret: String
-    ) : Parcelable
+        val ephemeralKeySecret: String,
 
-    @Parcelize
-    data class GooglePayConfiguration(
-        /**
-         * The Google Pay environment to use.
-         *
-         * See [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment) for more information.
-         */
-        val environment: Environment,
-        /**
-         * The two-letter ISO 3166 code of the country of your business, e.g. "US".
-         * See your account's country value [here](https://dashboard.stripe.com/settings/account).
-         */
-        val countryCode: String,
-        /**
-         * The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
-         * Required in order to support Google Pay when processing a Setup Intent.
-         */
-        val currencyCode: String? = null
+        internal val accessType: CustomerAccessType,
     ) : Parcelable {
         constructor(
-            environment: Environment,
-            countryCode: String
-        ) : this(environment, countryCode, null)
+            id: String,
+            ephemeralKeySecret: String,
+        ) : this(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            accessType = CustomerAccessType.LegacyCustomerEphemeralKey(ephemeralKeySecret)
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @ExperimentalCustomerSessionApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun createWithCustomerSession(
+                id: String,
+                clientSecret: String
+            ): CustomerConfiguration {
+                return CustomerConfiguration(
+                    id = id,
+                    ephemeralKeySecret = "",
+                    accessType = CustomerAccessType.CustomerSession(clientSecret)
+                )
+            }
+        }
+    }
+
+    /**
+     * @param environment The Google Pay environment to use. See
+     * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+     * for more information.
+     * @param countryCode The two-letter ISO 3166 code of the country of your business, e.g. "US".
+     * See your account's country value [here](https://dashboard.stripe.com/settings/account).
+     * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
+     * Required in order to support Google Pay when processing a Setup Intent.
+     * @param amount An optional amount to display for setup intents. Google Pay may or may not
+     * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
+     * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
+     * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+     * for more information on button types.
+     */
+    @Parcelize
+    data class GooglePayConfiguration @JvmOverloads constructor(
+        val environment: Environment,
+        val countryCode: String,
+        val currencyCode: String? = null,
+        val amount: Long? = null,
+        val label: String? = null,
+        val buttonType: ButtonType = ButtonType.Pay
+    ) : Parcelable {
 
         enum class Environment {
             Production,
-            Test
+            Test,
+        }
+
+        @Suppress("MaxLineLength")
+        /**
+         * Google Pay button type options
+         *
+         * See [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions) for more information on button types.
+         */
+        enum class ButtonType {
+            /**
+             * Displays "Buy with" alongside the Google Pay logo.
+             */
+            Buy,
+
+            /**
+             * Displays "Book with" alongside the Google Pay logo.
+             */
+            Book,
+
+            /**
+             * Displays "Checkout with" alongside the Google Pay logo.
+             */
+            Checkout,
+
+            /**
+             * Displays "Donate with" alongside the Google Pay logo.
+             */
+            Donate,
+
+            /**
+             * Displays "Order with" alongside the Google Pay logo.
+             */
+            Order,
+
+            /**
+             * Displays "Pay with" alongside the Google Pay logo.
+             */
+            Pay,
+
+            /**
+             * Displays "Subscribe with" alongside the Google Pay logo.
+             */
+            Subscribe,
+
+            /**
+             * Displays only the Google Pay logo.
+             */
+            Plain
         }
     }
 
@@ -677,6 +1562,8 @@ class PaymentSheet internal constructor(
      * A class that presents the individual steps of a payment sheet flow.
      */
     interface FlowController {
+
+        var shippingDetails: AddressDetails?
 
         /**
          * Configure the FlowController to process a [PaymentIntent].
@@ -700,6 +1587,19 @@ class PaymentSheet internal constructor(
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
+            configuration: Configuration? = null,
+            callback: ConfigCallback
+        )
+
+        /**
+         * Configure the FlowController with an [IntentConfiguration].
+         *
+         * @param intentConfiguration The [IntentConfiguration] to use.
+         * @param configuration An optional [PaymentSheet] configuration.
+         * @param callback called with the result of configuring the FlowController.
+         */
+        fun configureWithIntentConfiguration(
+            intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
             callback: ConfigCallback
         )
@@ -739,13 +1639,17 @@ class PaymentSheet internal constructor(
 
         companion object {
 
+            internal var linkHandler: LinkHandler? = null
+
             /**
-             * Create the FlowController when launching the payment sheet from an Activity.
+             * Create a [FlowController] that you configure with a client secret by calling
+             * [configureWithPaymentIntent] or [configureWithSetupIntent].
              *
-             * @param activity  the Activity that is presenting the payment sheet.
-             * @param paymentOptionCallback called when the customer's desired payment method
-             *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
-             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
              */
             @JvmStatic
             fun create(
@@ -756,15 +1660,104 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
-                    ShippingAddressCallback {},
                     paymentResultCallback
                 ).create()
             }
 
             /**
-             * Create the FlowController when launching the payment sheet from a Fragment.
+             * Create a [FlowController] that you configure with a client secret by calling
+             * [configureWithPaymentIntent] or [configureWithSetupIntent].
              *
-             * @param fragment the Fragment that is presenting the payment sheet.
+             * Use this creator if external payment methods are specified in your [Configuration].
+             *
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
+             * method.
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
+            @JvmStatic
+            fun create(
+                activity: ComponentActivity,
+                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                    externalPaymentMethodConfirmHandler
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
+             * [configureWithIntentConfiguration].
+             *
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
+            @JvmStatic
+            fun create(
+                activity: ComponentActivity,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallback: CreateIntentCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
+             * [configureWithIntentConfiguration].
+             *
+             * Use this creator if external payment methods are specified in your [Configuration].
+             *
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
+             * method.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
+            @JvmStatic
+            fun create(
+                activity: ComponentActivity,
+                paymentOptionCallback: PaymentOptionCallback,
+                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+                createIntentCallback: CreateIntentCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                    externalPaymentMethodConfirmHandler
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * Create a [FlowController] that you configure with a client secret by calling
+             * [configureWithPaymentIntent] or [configureWithSetupIntent].
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
              * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
@@ -777,10 +1770,111 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
-                    ShippingAddressCallback {},
                     paymentResultCallback
                 ).create()
             }
+
+            /**
+             * Create a [FlowController] that you configure with a client secret by calling
+             * [configureWithPaymentIntent] or [configureWithSetupIntent].
+             *
+             * Use this creator if external payment methods are specified in your [Configuration].
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
+             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
+             * method.
+             * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             */
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                    externalPaymentMethodConfirmHandler
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
+             * [configureWithIntentConfiguration].
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallback: CreateIntentCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
+             * [configureWithIntentConfiguration].
+             *
+             * Use this creator if external payment methods are specified in your [Configuration].
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
+             * method.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallback: CreateIntentCallback,
+                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                    externalPaymentMethodConfirmHandler
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+        }
+    }
+
+    companion object {
+        /**
+         * Deletes all persisted authentication state associated with a customer.
+         *
+         * You must call this method when the user logs out from your app.
+         * This will ensure that any persisted authentication state in PaymentSheet, such as
+         * authentication cookies, is also cleared during logout.
+         *
+         * @param context the Application [Context].
+         */
+        fun resetCustomer(context: Context) {
+            LinkStore(context).clear()
         }
     }
 }

@@ -4,14 +4,14 @@ internal object PaymentMethodCreateParamsFixtures {
     internal val CARD = PaymentMethodCreateParams.Card(
         number = "4242424242424242",
         expiryMonth = 1,
-        expiryYear = 2024,
+        expiryYear = 2054,
         cvc = "111"
     )
 
     internal val CARD_WITH_ATTRIBUTION = PaymentMethodCreateParams.Card(
         number = "4242424242424242",
         expiryMonth = 1,
-        expiryYear = 2024,
+        expiryYear = 2054,
         cvc = "111",
         attribution = setOf("CardMultilineWidget")
     )
@@ -96,13 +96,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val NETBANKING = PaymentMethodCreateParams.create(
-        netbanking = PaymentMethodCreateParams.Netbanking(
-            bank = "hdfc"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
         usBankAccount = PaymentMethodCreateParams.USBankAccount(
             accountNumber = "000123456789",
@@ -110,6 +103,34 @@ internal object PaymentMethodCreateParamsFixtures {
             accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
             accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL
         ),
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val CASH_APP_PAY = PaymentMethodCreateParams.createCashAppPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val AMAZON_PAY = PaymentMethodCreateParams.createAmazonPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val MULTIBANCO = PaymentMethodCreateParams.createMultibanco(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val REVOLUT_PAY = PaymentMethodCreateParams.createRevolutPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val SWISH = PaymentMethodCreateParams.createSwish(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val MOBILE_PAY = PaymentMethodCreateParams.createMobilePay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val ALMA = PaymentMethodCreateParams.createAlma(
         billingDetails = BILLING_DETAILS
     )
 

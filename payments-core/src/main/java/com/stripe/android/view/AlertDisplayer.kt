@@ -12,7 +12,7 @@ internal interface AlertDisplayer {
     ) : AlertDisplayer {
         override fun show(message: String) {
             if (!activity.isFinishing) {
-                AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                AlertDialog.Builder(activity, R.style.StripeAlertDialogStyle)
                     .setMessage(message)
                     .setCancelable(true)
                     .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->

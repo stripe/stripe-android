@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:CardImageVerificationDemoActivity.kt$CardImageVerificationDemoActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>SwallowedException:CardImageVerificationDemoActivity.kt$CardImageVerificationDemoActivity$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:CardImageVerificationDemoActivity.kt$CardImageVerificationDemoActivity$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -3,6 +3,7 @@ package com.stripe.android.payments.core.authentication
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
@@ -34,15 +35,17 @@ class DefaultPaymentAuthenticatorRegistryTest {
     private val dispayOxxoDetailsAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
 
     private val registry = DefaultPaymentAuthenticatorRegistry(
-        noOpIntentAuthenticator,
-        sourceAuthenticator,
-        mapOf(
+        noOpIntentAuthenticator = noOpIntentAuthenticator,
+        sourceAuthenticator = sourceAuthenticator,
+        paymentAuthenticators = mapOf(
             NextActionData.SdkData.Use3DS1::class.java to threeDs1lAuthenticator,
             NextActionData.SdkData.Use3DS2::class.java to threeDs2lAuthenticator,
             NextActionData.RedirectToUrl::class.java to redirectToUrlAuthenticator,
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
             NextActionData.DisplayOxxoDetails::class.java to dispayOxxoDetailsAuthenticator
-        )
+        ),
+        includePaymentSheetAuthenticators = false,
+        applicationContext = ApplicationProvider.getApplicationContext(),
     )
 
     private val allAuthenticators = setOf(

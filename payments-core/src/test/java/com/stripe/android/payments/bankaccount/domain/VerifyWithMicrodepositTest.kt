@@ -1,12 +1,11 @@
 package com.stripe.android.payments.bankaccount.domain
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -15,7 +14,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@ExperimentalCoroutinesApi
 class VerifyWithMicrodepositTest {
 
     private val stripeRepository = mock<StripeRepository>()
@@ -30,7 +28,7 @@ class VerifyWithMicrodepositTest {
             val paymentIntent = mock<PaymentIntent> {
                 on { this.clientSecret } doReturn clientSecret
             }
-            givenVerifyPaymentIntentReturns { paymentIntent }
+            givenVerifyPaymentIntentReturns { Result.success(paymentIntent) }
 
             // When
             val result: Result<PaymentIntent> = verifyWithMicrodeposit.forPaymentIntent(
@@ -47,7 +45,7 @@ class VerifyWithMicrodepositTest {
                 secondAmount = 34,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat((result)).isEqualTo(Result.success(paymentIntent))
+            assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
     }
 
@@ -60,7 +58,7 @@ class VerifyWithMicrodepositTest {
             val paymentIntent = mock<PaymentIntent> {
                 on { this.clientSecret } doReturn clientSecret
             }
-            givenVerifyPaymentIntentReturns { paymentIntent }
+            givenVerifyPaymentIntentReturns { Result.success(paymentIntent) }
 
             // When
             val result: Result<PaymentIntent> = verifyWithMicrodeposit.forPaymentIntent(
@@ -75,34 +73,7 @@ class VerifyWithMicrodepositTest {
                 descriptorCode = "code",
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat((result)).isEqualTo(Result.success(paymentIntent))
-        }
-    }
-
-    @Test
-    fun `forPaymentIntent - given repository returns null, results in internal error failure`() {
-        runTest {
-            // Given
-            val publishableKey = "publishable_key"
-            val clientSecret = "pi_1234_secret_5678"
-            givenVerifyPaymentIntentReturns { null }
-
-            // When
-            val result: Result<PaymentIntent> = verifyWithMicrodeposit.forPaymentIntent(
-                publishableKey,
-                clientSecret,
-                12,
-                34
-            )
-
-            // Then
-            verify(stripeRepository).verifyPaymentIntentWithMicrodeposits(
-                clientSecret = clientSecret,
-                firstAmount = 12,
-                secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
-            )
-            Truth.assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
+            assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
     }
 
@@ -113,7 +84,7 @@ class VerifyWithMicrodepositTest {
             val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
             val expectedException = APIException()
-            givenVerifyPaymentIntentReturns { throw expectedException }
+            givenVerifyPaymentIntentReturns { Result.failure(expectedException) }
 
             // When
             val result: Result<PaymentIntent> = verifyWithMicrodeposit.forPaymentIntent(
@@ -130,7 +101,7 @@ class VerifyWithMicrodepositTest {
                 secondAmount = 34,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
     }
 
@@ -143,7 +114,7 @@ class VerifyWithMicrodepositTest {
             val setupIntent = mock<SetupIntent> {
                 on { this.clientSecret } doReturn clientSecret
             }
-            givenVerifySetupIntentReturns { setupIntent }
+            givenVerifySetupIntentReturns { Result.success(setupIntent) }
 
             // When
             val result: Result<SetupIntent> = verifyWithMicrodeposit.forSetupIntent(
@@ -160,7 +131,7 @@ class VerifyWithMicrodepositTest {
                 secondAmount = 34,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat((result)).isEqualTo(Result.success(setupIntent))
+            assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
     }
 
@@ -173,7 +144,7 @@ class VerifyWithMicrodepositTest {
             val setupIntent = mock<SetupIntent> {
                 on { this.clientSecret } doReturn clientSecret
             }
-            givenVerifySetupIntentReturns { setupIntent }
+            givenVerifySetupIntentReturns { Result.success(setupIntent) }
 
             // When
             val result: Result<SetupIntent> = verifyWithMicrodeposit.forSetupIntent(
@@ -188,34 +159,7 @@ class VerifyWithMicrodepositTest {
                 descriptorCode = "code",
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat((result)).isEqualTo(Result.success(setupIntent))
-        }
-    }
-
-    @Test
-    fun `forSetupIntent - given repository returns null, results in internal error failure`() {
-        runTest {
-            // Given
-            val publishableKey = "publishable_key"
-            val clientSecret = "pi_1234_secret_5678"
-            givenVerifySetupIntentReturns { null }
-
-            // When
-            val result: Result<SetupIntent> = verifyWithMicrodeposit.forSetupIntent(
-                publishableKey,
-                clientSecret,
-                12,
-                34
-            )
-
-            // Then
-            verify(stripeRepository).verifySetupIntentWithMicrodeposits(
-                clientSecret = clientSecret,
-                firstAmount = 12,
-                secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
-            )
-            Truth.assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
+            assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
     }
 
@@ -226,7 +170,7 @@ class VerifyWithMicrodepositTest {
             val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
             val expectedException = APIException()
-            givenVerifySetupIntentReturns { throw expectedException }
+            givenVerifySetupIntentReturns { Result.failure(expectedException) }
 
             // When
             val result: Result<SetupIntent> = verifyWithMicrodeposit.forSetupIntent(
@@ -243,11 +187,13 @@ class VerifyWithMicrodepositTest {
                 secondAmount = 34,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            Truth.assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
     }
 
-    private suspend fun givenVerifyPaymentIntentReturns(paymentIntent: () -> PaymentIntent?) {
+    private suspend fun givenVerifyPaymentIntentReturns(
+        paymentIntent: () -> Result<PaymentIntent>,
+    ) {
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 any(),
@@ -255,17 +201,17 @@ class VerifyWithMicrodepositTest {
                 any(),
                 any()
             )
-        ).thenAnswer { paymentIntent() }
+        ).doReturn(paymentIntent())
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 any(),
                 any(),
                 any()
             )
-        ).thenAnswer { paymentIntent() }
+        ).doReturn(paymentIntent())
     }
 
-    private suspend fun givenVerifySetupIntentReturns(setupIntent: () -> SetupIntent?) {
+    private suspend fun givenVerifySetupIntentReturns(setupIntent: () -> Result<SetupIntent>) {
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 any(),
@@ -273,13 +219,13 @@ class VerifyWithMicrodepositTest {
                 any(),
                 any()
             )
-        ).thenAnswer { setupIntent() }
+        ).thenReturn(setupIntent())
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 any(),
                 any(),
                 any()
             )
-        ).thenAnswer { setupIntent() }
+        ).thenReturn(setupIntent())
     }
 }

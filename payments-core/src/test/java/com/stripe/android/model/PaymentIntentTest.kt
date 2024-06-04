@@ -219,4 +219,99 @@ class PaymentIntentTest {
         assertThat(PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value)
             .isEqualTo("pi_a1b2c3_secret_x7y8z9")
     }
+
+    @Test
+    fun `Determines SFU correctly if it's set on the intent itself`() {
+        val offSession = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+        assertThat(offSession.isSetupFutureUsageSet("card")).isTrue()
+
+        val onSession = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OnSession,
+        )
+        assertThat(onSession.isSetupFutureUsageSet("card")).isTrue()
+
+        val oneTime = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OneTime,
+        )
+        assertThat(oneTime.isSetupFutureUsageSet("card")).isFalse()
+
+        val none = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = null,
+        )
+        assertThat(none.isSetupFutureUsageSet("card")).isFalse()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage exists in payment method options`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "setup_future_usage": ""
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage does not exist in payment method options`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "some_other_key_that_has_nothing_to_do_with_sfu": ""
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `getPaymentMethodOptions returns expected results`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "card": {
+                        "mandate_options": null,
+                        "network": null,
+                        "request_three_d_secure": "automatic"
+                    },
+                    "us_bank_account": {
+                        "financial_connections": {
+                            "permissions": "balances"
+                        },
+                        "setup_future_usage": "on_session",
+                        "verification_method": "automatic"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        assertThat(paymentIntent.getPaymentMethodOptions())
+            .isEqualTo(
+                mapOf(
+                    "card" to mapOf(
+                        "mandate_options" to null,
+                        "network" to null,
+                        "request_three_d_secure" to "automatic"
+                    ),
+                    "us_bank_account" to mapOf(
+                        "financial_connections" to mapOf(
+                            "permissions" to "balances"
+                        ),
+                        "setup_future_usage" to "on_session",
+                        "verification_method" to "automatic"
+                    )
+                )
+            )
+    }
 }

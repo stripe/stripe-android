@@ -1,5 +1,19 @@
 # Migration Guide
 
+## Migrating from versions < 20.26.0
+- Changes to `PaymentSheetContract`:
+  * The class has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or the new `rememberPaymentSheet()` method.
+- Changes to `PaymentLauncher`:
+  * `PaymentLauncher.rememberLauncher()` has been deprecated and will be removed in a future release. Use the top-level `rememberPaymentLauncher()` method instead.
+- Changes to `GooglePayLauncher`:
+  * `GooglePayLauncher.rememberLauncher()` has been deprecated and will be removed in a future release. Use the top-level `rememberGooglePayLauncher()` method instead.
+- Changes to `GooglePayPaymentMethodLauncher`:
+  * `GooglePayPaymentMethodLauncher.rememberLauncher()` has been deprecated and will be removed in a future release. Use the top-level `rememberGooglePayPaymentMethodLauncher()` method instead.
+- Changes to `GooglePayLauncherContract`:
+  * The class has been deprecated and will be removed in a future release. Use `GooglePayLauncher` directly.
+- Changes to `GooglePayPaymentMethodLauncherContract`:
+  * The class has been deprecated and will be removed in a future release. Use `GooglePayPaymentMethodLauncher` directly.
+
 ## Migrating from versions < 20.5.0
 - Changes to `PaymentSheet.Configuration`
   * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:
@@ -7,7 +21,6 @@
     * `PrimaryButton.colorsLight/colorsDark.backgroundColor`
 
 ## Migrating from versions < 20.2.0
-
 - Changes to `CollectBankAccountLauncher`
   * Required, dependent artifact `com.stripe.connections` has been renamed to `com.stripe.financial-connections`.
   

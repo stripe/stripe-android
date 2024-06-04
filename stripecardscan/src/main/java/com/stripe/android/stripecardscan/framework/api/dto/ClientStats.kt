@@ -68,8 +68,8 @@ internal data class TaskStatistics(
     companion object {
         @JvmStatic
         internal fun fromTaskStats(taskStats: TaskStats) = TaskStatistics(
-            startedAtMs = taskStats.started.toMillisecondsSinceEpoch(),
-            durationMs = taskStats.duration.inMilliseconds.toLong(),
+            startedAtMs = taskStats.started.elapsedNow().inWholeMilliseconds,
+            durationMs = taskStats.duration.inWholeMilliseconds,
             result = taskStats.result
         )
     }
@@ -96,5 +96,7 @@ internal data class ConfigurationStats(
 internal data class PayloadInfo(
     @SerialName("image_compression_type") val imageCompressionType: String,
     @SerialName("image_compression_quality") val imageCompressionQuality: Float,
-    @SerialName("image_payload_size") val imagePayloadSizeInBytes: Int
+    @SerialName("image_payload_size") val imagePayloadSizeInBytes: Int,
+    @SerialName("image_payload_count") val imagePayloadCount: Int,
+    @SerialName("image_payload_max_count") val imagePayloadMaxCount: Int
 )

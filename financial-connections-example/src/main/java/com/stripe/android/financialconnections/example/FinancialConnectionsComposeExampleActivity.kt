@@ -31,7 +31,6 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
         }
     }
 
-
     @Composable
     private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()

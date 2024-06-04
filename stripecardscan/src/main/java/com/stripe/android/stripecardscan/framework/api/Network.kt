@@ -1,11 +1,9 @@
 package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
-import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.core.utils.decodeFromJson
+import com.stripe.android.core.utils.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
-import com.stripe.android.stripecardscan.framework.util.decodeFromJson
-import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
 import kotlinx.serialization.KSerializer
 import java.io.File
@@ -18,6 +16,8 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPOutputStream
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private const val LOG_TAG = "Network"
 

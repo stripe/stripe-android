@@ -31,6 +31,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.stripe.android.camera.R as CameraR
 
 internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
@@ -437,7 +438,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         }
         val viewFinderMargin = (
             min(screenSize.width, screenSize.height) *
-                getFloatResource(R.dimen.stripeViewFinderMargin)
+                getFloatResource(CameraR.dimen.stripeViewFinderMargin)
             ).roundToInt()
 
         listOf(viewFinderWindowView, viewFinderBorderView).forEach { view ->
@@ -450,8 +451,8 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
 
             view.constrainToParent()
             view.addConstraints {
-                setVerticalBias(it.id, getFloatResource(R.dimen.stripeViewFinderVerticalBias))
-                setHorizontalBias(it.id, getFloatResource(R.dimen.stripeViewFinderHorizontalBias))
+                setVerticalBias(it.id, getFloatResource(CameraR.dimen.stripeViewFinderVerticalBias))
+                setHorizontalBias(it.id, getFloatResource(CameraR.dimen.stripeViewFinderHorizontalBias))
 
                 setDimensionRatio(it.id, viewFinderAspectRatio)
             }

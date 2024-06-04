@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.stripe.android.financialconnections">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
         <activity
-            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity"
+            android:name=".FinancialConnectionsSheetRedirectActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -14,7 +14,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- Accepts success and cancel URIs that begin with "stripe-auth://link-accounts” -->
+                <!-- Returning from app2app: return_url is triggered to reopen web AuthFlow and poll accounts. -->
+                <data
+                    android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:pathPrefix="/${applicationId}/authentication_return" />
+
+                <!-- Returning from app2app: return_url is triggered to reopen native AuthFlow and poll accounts. -->
+                <data
+                    android:host="link-native-accounts"
+                    android:scheme="stripe-auth"
+                    android:pathPrefix="/${applicationId}/authentication_return" />
+
+                <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts/{app-id}/...” -->
                 <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
@@ -23,18 +35,30 @@
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
+
+                <!-- Opening app2app: Web flow triggers stripe-auth://native-redirect/{app-id}/http://web-that-redirects-to-native -->
+                <data
+                    android:host="native-redirect"
+                    android:pathPrefix="/${applicationId}"
+                    android:scheme="stripe-auth" />
+
+                <!-- Accepts success/cancel/fail URIs that begin with "stripe://auth-redirect” -->
+                <data
+                    android:host="auth-redirect"
+                    android:scheme="stripe"
+                    android:pathPrefix="/${applicationId}" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+            android:name=".FinancialConnectionsSheetActivity"
             android:exported="false"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeFinancialConnectionsDefaultTheme" />
 
-        <provider
-            android:name=".appinitializer.FinancialConnectionsInitializer"
-            android:authorities="${applicationId}.financialconnections-init"
+        <activity
+            android:name="com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
             android:exported="false"
-            android:multiprocess="true" />
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/StripeFinancialConnectionsDefaultTheme" />
     </application>
 
     <!--

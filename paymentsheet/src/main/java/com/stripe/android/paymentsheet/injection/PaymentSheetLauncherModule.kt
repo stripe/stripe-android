@@ -13,7 +13,6 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentSheetViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
     ]
 )
 internal abstract class PaymentSheetLauncherModule {
@@ -29,5 +28,10 @@ internal abstract class PaymentSheetLauncherModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet")
+
+        @Provides
+        @Singleton
+        @Named(IS_FLOW_CONTROLLER)
+        fun provideIsFlowController() = false
     }
 }

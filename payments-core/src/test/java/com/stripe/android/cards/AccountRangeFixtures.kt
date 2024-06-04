@@ -60,12 +60,32 @@ internal object AccountRangeFixtures {
         brandInfo = AccountRange.BrandInfo.DinersClub
     )
 
+    val DISCOVER = AccountRange(
+        binRange = BinRange(
+            low = "6011000000000000",
+            high = "6011011999999999"
+        ),
+        panLength = 16,
+        brandInfo = AccountRange.BrandInfo.Discover,
+        country = "US"
+    )
+
     val UNIONPAY19 = AccountRange(
         binRange = BinRange(
             low = "6216828050000000000",
             high = "6216828059999999999"
         ),
         panLength = 19,
+        brandInfo = AccountRange.BrandInfo.UnionPay,
+        country = "CN"
+    )
+
+    val UNIONPAY16 = AccountRange(
+        binRange = BinRange(
+            low = "3568400000000000",
+            high = "3568409999999999"
+        ),
+        panLength = 16,
         brandInfo = AccountRange.BrandInfo.UnionPay,
         country = "CN"
     )

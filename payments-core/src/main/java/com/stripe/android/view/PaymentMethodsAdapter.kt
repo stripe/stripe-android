@@ -7,13 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.AddPaymentMethodRowBinding
-import com.stripe.android.databinding.GooglePayRowBinding
-import com.stripe.android.databinding.MaskedCardRowBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodRowBinding
+import com.stripe.android.databinding.StripeGooglePayRowBinding
+import com.stripe.android.databinding.StripeMaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -40,9 +38,6 @@ internal class PaymentMethodsAdapter constructor(
 
     internal var listener: Listener? = null
     private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
-
-    private val _addPaymentMethodArgs = MutableLiveData<AddPaymentMethodActivityStarter.Args>()
-    val addPaymentMethodArgs: LiveData<AddPaymentMethodActivityStarter.Args> = _addPaymentMethodArgs
 
     internal val addCardArgs = AddPaymentMethodActivityStarter.Args.Builder()
         .setBillingAddressFields(intentArgs.billingAddressFields)
@@ -144,12 +139,12 @@ internal class PaymentMethodsAdapter constructor(
             }
             is ViewHolder.AddCardPaymentMethodViewHolder -> {
                 holder.itemView.setOnClickListener {
-                    _addPaymentMethodArgs.value = addCardArgs
+                    listener?.onAddPaymentMethodClick(addCardArgs)
                 }
             }
             is ViewHolder.AddFpxPaymentMethodViewHolder -> {
                 holder.itemView.setOnClickListener {
-                    _addPaymentMethodArgs.value = addFpxArgs
+                    listener?.onAddPaymentMethodClick(addFpxArgs)
                 }
             }
         }
@@ -180,7 +175,7 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup,
         viewType: Int
     ): RecyclerView.ViewHolder {
-        return when (ViewType.values()[viewType]) {
+        return when (ViewType.entries[viewType]) {
             ViewType.Card -> createPaymentMethodViewHolder(parent)
             ViewType.AddCard -> createAddCardPaymentMethodViewHolder(parent)
             ViewType.AddFpx -> createAddFpxPaymentMethodViewHolder(parent)
@@ -208,7 +203,7 @@ internal class PaymentMethodsAdapter constructor(
         if (canDeletePaymentMethods) {
             ViewCompat.addAccessibilityAction(
                 viewHolder.itemView,
-                parent.context.getString(R.string.delete_payment_method)
+                parent.context.getString(R.string.stripe_delete_payment_method)
             ) { _, _ ->
                 listener?.onDeletePaymentMethodAction(
                     paymentMethod = getPaymentMethodAtPosition(viewHolder.bindingAdapterPosition)
@@ -271,10 +266,10 @@ internal class PaymentMethodsAdapter constructor(
 
     internal sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal class AddCardPaymentMethodViewHolder(
-            viewBinding: AddPaymentMethodRowBinding
+            viewBinding: StripeAddPaymentMethodRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                AddPaymentMethodRowBinding.inflate(
+                StripeAddPaymentMethodRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -284,17 +279,17 @@ internal class PaymentMethodsAdapter constructor(
             init {
                 itemView.id = R.id.stripe_payment_methods_add_card
                 itemView.contentDescription =
-                    itemView.resources.getString(R.string.payment_method_add_new_card)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_card)
                 viewBinding.label.text =
-                    itemView.resources.getString(R.string.payment_method_add_new_card)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_card)
             }
         }
 
         internal class AddFpxPaymentMethodViewHolder(
-            viewBinding: AddPaymentMethodRowBinding
+            viewBinding: StripeAddPaymentMethodRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                AddPaymentMethodRowBinding.inflate(
+                StripeAddPaymentMethodRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -304,17 +299,17 @@ internal class PaymentMethodsAdapter constructor(
             init {
                 itemView.id = R.id.stripe_payment_methods_add_fpx
                 itemView.contentDescription =
-                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_fpx)
                 viewBinding.label.text =
-                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_fpx)
             }
         }
 
         internal class GooglePayViewHolder(
-            private val viewBinding: GooglePayRowBinding
+            private val viewBinding: StripeGooglePayRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                GooglePayRowBinding.inflate(
+                StripeGooglePayRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -346,10 +341,10 @@ internal class PaymentMethodsAdapter constructor(
         }
 
         internal class PaymentMethodViewHolder constructor(
-            private val viewBinding: MaskedCardRowBinding
+            private val viewBinding: StripeMaskedCardRowBinding
         ) : ViewHolder(viewBinding.root) {
             constructor(parent: ViewGroup) : this(
-                MaskedCardRowBinding.inflate(
+                StripeMaskedCardRowBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -370,6 +365,7 @@ internal class PaymentMethodsAdapter constructor(
     internal interface Listener {
         fun onPaymentMethodClick(paymentMethod: PaymentMethod)
         fun onGooglePayClick()
+        fun onAddPaymentMethodClick(args: AddPaymentMethodActivityStarter.Args)
         fun onDeletePaymentMethodAction(paymentMethod: PaymentMethod)
     }
 

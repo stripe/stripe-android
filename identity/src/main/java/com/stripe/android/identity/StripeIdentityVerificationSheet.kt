@@ -2,7 +2,6 @@ package com.stripe.android.identity
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.injection.Injectable
@@ -11,13 +10,11 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.identity.injection.DaggerIdentityVerificationSheetComponent
 import com.stripe.android.identity.injection.IdentityVerificationSheetComponent
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 
-internal class StripeIdentityVerificationSheet private constructor(
-    activityResultCaller: ActivityResultCaller,
+internal class StripeIdentityVerificationSheet internal constructor(
+    private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args>,
     context: Context,
-    private val configuration: IdentityVerificationSheet.Configuration,
-    identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    private val configuration: IdentityVerificationSheet.Configuration
 ) : IdentityVerificationSheet, Injector {
 
     constructor(
@@ -25,10 +22,12 @@ internal class StripeIdentityVerificationSheet private constructor(
         configuration: IdentityVerificationSheet.Configuration,
         identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
     ) : this(
-        from as ActivityResultCaller,
+        from.registerForActivityResult(
+            IdentityVerificationSheetContract(),
+            identityVerificationCallback::onVerificationFlowResult
+        ),
         from,
-        configuration,
-        identityVerificationCallback
+        configuration
     )
 
     constructor(
@@ -36,10 +35,12 @@ internal class StripeIdentityVerificationSheet private constructor(
         configuration: IdentityVerificationSheet.Configuration,
         identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
     ) : this(
-        from as ActivityResultCaller,
+        from.registerForActivityResult(
+            IdentityVerificationSheetContract(),
+            identityVerificationCallback::onVerificationFlowResult
+        ),
         from.requireContext(),
-        configuration,
-        identityVerificationCallback
+        configuration
     )
 
     @InjectorKey
@@ -52,14 +53,8 @@ internal class StripeIdentityVerificationSheet private constructor(
 
     private val identityVerificationSheetComponent: IdentityVerificationSheetComponent =
         DaggerIdentityVerificationSheetComponent.builder()
-            .context(context)
+            .context(context.applicationContext)
             .build()
-
-    private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
-        activityResultCaller.registerForActivityResult(
-            IdentityVerificationSheetContract(),
-            identityVerificationCallback::onVerificationFlowResult
-        )
 
     override fun present(
         verificationSessionId: String,
@@ -78,7 +73,7 @@ internal class StripeIdentityVerificationSheet private constructor(
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is IdentityViewModel.IdentityViewModelFactory -> {
+            is IdentityActivity -> {
                 identityVerificationSheetComponent.inject(injectable)
             }
             else -> {

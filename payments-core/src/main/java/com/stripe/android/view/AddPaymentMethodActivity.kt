@@ -13,13 +13,16 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.Stripe
-import com.stripe.android.databinding.AddPaymentMethodActivityBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.utils.argsAreInvalid
+import kotlinx.coroutines.launch
 
 /**
  * Activity used to display a [AddPaymentMethodView] and receive the resulting
@@ -66,18 +69,36 @@ class AddPaymentMethodActivity : StripeActivity() {
         )
     }
 
+    private val cardInputListener = object : CardInputListener {
+        override fun onFocusChange(focusField: CardInputListener.FocusField) {
+            // No-op
+        }
+        override fun onCardComplete() {
+            viewModel.onCardNumberCompleted()
+        }
+        override fun onExpirationComplete() {
+            // No-op
+        }
+        override fun onCvcComplete() {
+            // No-op
+        }
+        override fun onPostalCodeComplete() {
+            // No-op
+        }
+    }
+
     private val titleStringRes: Int
         @StringRes
         get() {
             return when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
-                    R.string.title_add_a_card
+                    R.string.stripe_title_add_a_card
                 }
                 PaymentMethod.Type.Fpx -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 PaymentMethod.Type.Netbanking -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 else -> {
                     throw IllegalArgumentException(
@@ -89,6 +110,10 @@ class AddPaymentMethodActivity : StripeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (argsAreInvalid { args }) {
+            return
+        }
+        viewModel.onFormShown()
         configureView(args)
         setResult(
             Activity.RESULT_OK,
@@ -105,14 +130,20 @@ class AddPaymentMethodActivity : StripeActivity() {
         addPaymentMethodView.requestFocus()
     }
 
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+
+        viewModel.onFormInteracted()
+    }
+
     private fun configureView(args: AddPaymentMethodActivityStarter.Args) {
         args.windowFlags?.let {
             window.addFlags(it)
         }
 
-        viewStub.layoutResource = R.layout.add_payment_method_activity
+        viewStub.layoutResource = R.layout.stripe_add_payment_method_activity
         val scrollView = viewStub.inflate() as ViewGroup
-        val viewBinding = AddPaymentMethodActivityBinding.bind(scrollView)
+        val viewBinding = StripeAddPaymentMethodActivityBinding.bind(scrollView)
 
         viewBinding.root.addView(addPaymentMethodView)
         createFooterView(viewBinding.root)?.let {
@@ -134,7 +165,9 @@ class AddPaymentMethodActivity : StripeActivity() {
                 AddPaymentMethodCardView(
                     context = this,
                     billingAddressFields = args.billingAddressFields
-                )
+                ).also { view ->
+                    view.setCardInputListener(cardInputListener)
+                }
             }
             PaymentMethod.Type.Fpx -> {
                 AddPaymentMethodFpxView.create(this)
@@ -172,6 +205,7 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     public override fun onActionSave() {
+        viewModel.onSaveClicked()
         createPaymentMethod(viewModel, addPaymentMethodView.createParams)
     }
 
@@ -185,24 +219,21 @@ class AddPaymentMethodActivity : StripeActivity() {
 
         isProgressBarVisible = true
 
-        viewModel.createPaymentMethod(params).observe(
-            this,
-            { result ->
-                result.fold(
-                    onSuccess = {
-                        if (shouldAttachToCustomer) {
-                            attachPaymentMethodToCustomer(it)
-                        } else {
-                            finishWithPaymentMethod(it)
-                        }
-                    },
-                    onFailure = {
-                        isProgressBarVisible = false
-                        showError(it.message.orEmpty())
+        lifecycleScope.launch {
+            viewModel.createPaymentMethod(params).fold(
+                onSuccess = {
+                    if (shouldAttachToCustomer) {
+                        attachPaymentMethodToCustomer(it)
+                    } else {
+                        finishWithPaymentMethod(it)
                     }
-                )
-            }
-        )
+                },
+                onFailure = {
+                    isProgressBarVisible = false
+                    showError(it.message.orEmpty())
+                }
+            )
+        }
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
@@ -210,21 +241,18 @@ class AddPaymentMethodActivity : StripeActivity() {
             CustomerSession.getInstance()
         }.fold(
             onSuccess = { customerSession ->
-                viewModel.attachPaymentMethod(
-                    customerSession,
-                    paymentMethod
-                ).observe(
-                    this,
-                    { result ->
-                        result.fold(
-                            onSuccess = ::finishWithPaymentMethod,
-                            onFailure = {
-                                isProgressBarVisible = false
-                                showError(it.message.orEmpty())
-                            }
-                        )
-                    }
-                )
+                lifecycleScope.launch {
+                    viewModel.attachPaymentMethod(
+                        customerSession,
+                        paymentMethod
+                    ).fold(
+                        onSuccess = ::finishWithPaymentMethod,
+                        onFailure = {
+                            isProgressBarVisible = false
+                            showError(it.message.orEmpty())
+                        }
+                    )
+                }
             },
             onFailure = {
                 finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))

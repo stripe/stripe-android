@@ -31,6 +31,7 @@ class PaymentIntentResultTest {
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
+            countryCode = null,
             paymentMethodTypes = listOf("card"),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList()
@@ -48,11 +49,12 @@ class PaymentIntentResultTest {
             created = 500L,
             amount = 1000L,
             clientSecret = "secret",
-            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT_PAYMENT_METHOD,
+            paymentMethod = PaymentMethodFixtures.OXXO_PAYMENT_METHOD,
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
-            paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
+            countryCode = null,
+            paymentMethodTypes = listOf(PaymentMethod.Type.Oxxo.code),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList(),
             nextActionData = StripeIntent.NextActionData.DisplayOxxoDetails()
@@ -74,6 +76,7 @@ class PaymentIntentResultTest {
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
+            countryCode = null,
             paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
             status = StripeIntent.Status.RequiresAction,
             unactivatedPaymentMethods = emptyList(),
@@ -100,6 +103,7 @@ class PaymentIntentResultTest {
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
+            countryCode = null,
             paymentMethodTypes = listOf("card"),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList()
@@ -109,6 +113,29 @@ class PaymentIntentResultTest {
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+    }
+
+    @Test
+    fun outcome_whenBlikAndRequiresAction_shouldReturnSuccess() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.BLIK_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "pln",
+            countryCode = "pl",
+            paymentMethodTypes = listOf("blik"),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.BlikAuthorize,
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     @Test

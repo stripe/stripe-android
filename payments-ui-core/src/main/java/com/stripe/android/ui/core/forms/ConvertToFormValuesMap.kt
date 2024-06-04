@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun convertToFormValuesMap(paramMap: Map<String, Any?>): Map<IdentifierSpec, String?> {

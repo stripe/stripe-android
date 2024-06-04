@@ -2,14 +2,13 @@ package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Address
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 class AddressJsonParser : ModelJsonParser<Address> {
     override fun parse(json: JSONObject): Address {
         val city = StripeJsonUtils.optString(json, FIELD_CITY)

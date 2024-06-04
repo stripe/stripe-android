@@ -4,10 +4,10 @@ import android.util.Log
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.utils.decodeFromJson
+import com.stripe.android.core.utils.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
-import com.stripe.android.stripecardscan.framework.util.decodeFromJson
-import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import kotlinx.serialization.KSerializer
 import java.io.File
 import java.net.HttpURLConnection.HTTP_MULT_CHOICE

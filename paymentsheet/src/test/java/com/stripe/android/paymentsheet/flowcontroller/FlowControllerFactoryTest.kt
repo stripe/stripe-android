@@ -11,7 +11,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -22,7 +21,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -76,7 +74,6 @@ class FlowControllerFactoryTest {
         return FlowControllerFactory(
             activity,
             mock(),
-            mock(),
             mock()
         )
     }
@@ -86,7 +83,6 @@ class FlowControllerFactoryTest {
     ): FlowControllerFactory {
         return FlowControllerFactory(
             fragment,
-            mock(),
             mock(),
             mock()
         )

@@ -44,9 +44,10 @@ internal object PaymentMethodFixtures {
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
-        customerId = "cus_AQsHpvKfKwJDrF",
         billingDetails = BILLING_DETAILS,
-        card = CARD
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD,
+        code = "card"
     )
 
     val FPX_PAYMENT_METHOD = PaymentMethod(
@@ -58,7 +59,8 @@ internal object PaymentMethodFixtures {
         fpx = PaymentMethod.Fpx(
             bank = "hsbc",
             accountHolderType = "individual"
-        )
+        ),
+        code = "fpx"
     )
 
     val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -75,7 +77,8 @@ internal object PaymentMethodFixtures {
             bsbNumber = "000000",
             fingerprint = "lm7qI5V7PUkWUM7E",
             last4 = "3456"
-        )
+        ),
+        code = "au_becs_debit"
     )
 
     val BACS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -88,7 +91,8 @@ internal object PaymentMethodFixtures {
             fingerprint = "UkSG0Hf",
             last4 = "2345",
             sortCode = "108800"
-        )
+        ),
+        code = "bacs_debit"
     )
 
     val US_BANK_ACCOUNT_PAYMENT_METHOD = PaymentMethod(
@@ -103,10 +107,20 @@ internal object PaymentMethodFixtures {
             bankName = "Stripe Bank",
             fingerprint = "UkSG0Hf",
             last4 = "2345",
-            linkedAccount = null,
+            financialConnectionsAccount = null,
             networks = null,
             routingNumber = "110000000"
-        )
+        ),
+        code = "us_bank_account"
+    )
+
+    val OXXO_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1IcuwoL32KlRot01",
+        created = 1617638802,
+        liveMode = false,
+        type = PaymentMethod.Type.Oxxo,
+        billingDetails = BILLING_DETAILS,
+        code = "oxxo"
     )
 
     val SEPA_DEBIT_JSON = JSONObject(
@@ -225,6 +239,52 @@ internal object PaymentMethodFixtures {
                     "selection_mandatory": true,
                     "preferred": "network1"
                 },
+                "three_d_secure_usage": {
+                    "supported": true
+                },
+                "wallet": null
+            },
+            "created": 15821393,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "card"
+        }
+        """.trimIndent()
+    )
+
+    internal val CARD_WITH_DISPLAY_BRAND_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GDwTNAI5zDH",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null
+            },
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": null,
+                    "address_postal_code_check": null,
+                    "cvc_check": null
+                },
+                "country": "US",
+                "exp_month": 12,
+                "exp_year": 2024,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "9999",
+                "display_brand": "cartes_bancaires",
                 "three_d_secure_usage": {
                     "supported": true
                 },
@@ -362,36 +422,79 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    val US_BANK_ACCOUNT_WITH_FCA = JSONObject(
+        """
+        {
+            "id": "pm_123456",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": "Seattle",
+                    "country": "US",
+                    "line1": "123 Main St.",
+                    "line2": null,
+                    "postal_code": "99999",
+                    "state": "AL"
+                },
+                "email": "jenny@example.com",
+                "name": "Jenny Rosen",
+                "phone": null
+            },
+            "created": 1706132691,
+            "customer": null,
+            "livemode": false,
+            "type": "us_bank_account",
+            "us_bank_account": {
+                "account_holder_type": "individual",
+                "account_type": "checking",
+                "bank_name": "STRIPE TEST BANK",
+                "financial_connections_account": "fca_111",
+                "fingerprint": "FFDMA0xfhBjWSZLu",
+                "last4": "6789",
+                "networks":{ 
+                    "preferred": "ach",
+                    "supported": ["ach","us_domestic_wire"]},
+                    "routing_number": "110000000", 
+                    "status_details": null
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
     val CARD_PAYMENT_METHODS = listOf(
         PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
-            created = 1000L,
             id = "pm_1000",
+            created = 1000L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = "4242"
-            )
+            ),
+            code = "card"
         ),
         PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
-            created = 2000L,
             id = "pm_2000",
+            created = 2000L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = "3063"
-            )
+            ),
+            code = "card"
         ),
         PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
-            created = 3000L,
             id = "pm_3000",
+            created = 3000L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = "3220"
-            )
+            ),
+            code = "card"
         )
     )
 
@@ -400,17 +503,18 @@ internal object PaymentMethodFixtures {
         val id = "pm_" + UUID.randomUUID().toString()
             .replace("-", "")
         return PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
+            id = id,
             created = ThreadLocalRandom.current().nextLong(
                 createdOrigin ?: 1L,
                 10000000
             ),
-            id = id,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = createLast4()
-            )
+            ),
+            code = "card"
         )
     }
 
@@ -430,12 +534,44 @@ internal object PaymentMethodFixtures {
     fun createPaymentMethod(type: PaymentMethod.Type): PaymentMethod {
         return PaymentMethod(
             id = "pm_123",
+            created = ThreadLocalRandom.current().nextLong(1L, 10000000L),
+            liveMode = false,
             type = type,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa
             ),
-            created = ThreadLocalRandom.current().nextLong(1L, 10000000L),
-            liveMode = false
+            code = "card"
         )
     }
+
+    val BLIK_JSON = JSONObject(
+        """
+        {
+            "payment_method": {
+                "id": "pm_1Mm5TUKG6vc7r7YC41rnkvqS",
+                "object": "payment_method",
+                "billing_details": {
+                  "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                  },
+                  "email": null,
+                  "name": null,
+                  "phone": null
+                },
+                "blik": {},
+                "created": 1678929564,
+                "customer": null,
+                "livemode": false,
+                "type": "blik"
+            }
+        }
+        """.trimIndent()
+    )
+
+    val BLIK_PAYMENT_METHOD = PaymentMethodJsonParser().parse(BLIK_JSON)
 }

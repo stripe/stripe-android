@@ -1,82 +1,205 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-enum class CheckoutMode(val value: String) {
-    Setup("setup"),
-    Payment("payment"),
-    PaymentWithSetup("payment_with_setup")
-}
+@Serializable
+@Suppress("TooManyFunctions")
+class CheckoutRequest private constructor(
+    @SerialName("initialization")
+    val initialization: String?,
+    @SerialName("customer")
+    val customer: String?,
+    @SerialName("customer_key_type")
+    val customerKeyType: CustomerKeyType?,
+    @SerialName("currency")
+    val currency: String?,
+    @SerialName("mode")
+    val mode: String?,
+    @SerialName("set_shipping_address")
+    val setShippingAddress: Boolean?,
+    @SerialName("automatic_payment_methods")
+    val automaticPaymentMethods: Boolean?,
+    @SerialName("use_link")
+    val useLink: Boolean?,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String?,
+    @SerialName("supported_payment_methods")
+    val supportedPaymentMethods: List<String>?,
+    @SerialName("payment_method_configuration")
+    val paymentMethodConfigurationId: String?,
+    @SerialName("require_cvc_recollection")
+    val requireCvcRecollection: Boolean?,
+    @SerialName("customer_session_payment_method_save")
+    val paymentMethodSaveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove")
+    val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_redisplay")
+    val paymentMethodRedisplayFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_allow_redisplay_filters")
+    val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
+) {
+    @Serializable
+    enum class CustomerKeyType {
+        @SerialName("customer_session")
+        CustomerSession,
 
-data class CheckoutCurrency(val value: String) {
-    companion object {
-        val USD = CheckoutCurrency("usd")
-        val EUR = CheckoutCurrency("eur")
-        val AUD = CheckoutCurrency("aud")
-        val GBP = CheckoutCurrency("gbp")
+        @SerialName("legacy")
+        Legacy;
+    }
+
+    class Builder {
+        private var initialization: String? = null
+        private var customer: String? = null
+        private var customerKeyType: CustomerKeyType? = null
+        private var currency: String? = null
+        private var mode: String? = null
+        private var setShippingAddress: Boolean? = null
+        private var automaticPaymentMethods: Boolean? = null
+        private var useLink: Boolean? = null
+        private var merchantCountryCode: String? = null
+        private var supportedPaymentMethods: List<String>? = null
+        private var paymentMethodConfigurationId: String? = null
+        private var requireCvcRecollection: Boolean? = null
+
+        fun initialization(initialization: String?) = apply {
+            this.initialization = initialization
+        }
+
+        fun customer(customer: String?) = apply {
+            this.customer = customer
+        }
+
+        fun customerKeyType(customerKeyType: CustomerKeyType?) = apply {
+            this.customerKeyType = customerKeyType
+        }
+
+        fun currency(currency: String?) = apply {
+            this.currency = currency
+        }
+
+        fun mode(mode: String?) = apply {
+            this.mode = mode
+        }
+
+        fun setShippingAddress(setShippingAddress: Boolean?) = apply {
+            this.setShippingAddress = setShippingAddress
+        }
+
+        fun automaticPaymentMethods(automaticPaymentMethods: Boolean?) = apply {
+            this.automaticPaymentMethods = automaticPaymentMethods
+        }
+
+        fun useLink(useLink: Boolean?) = apply {
+            this.useLink = useLink
+        }
+
+        fun merchantCountryCode(merchantCountryCode: String?) = apply {
+            this.merchantCountryCode = merchantCountryCode
+        }
+
+        fun supportedPaymentMethods(supportedPaymentMethods: List<String>?) = apply {
+            this.supportedPaymentMethods = supportedPaymentMethods
+        }
+
+        fun paymentMethodConfigurationId(paymentMethodConfigurationId: String?) = apply {
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+        }
+
+        fun requireCvcRecollection(requireCvcRecollection: Boolean?) = apply {
+            this.requireCvcRecollection = requireCvcRecollection
+        }
+
+        fun build(): CheckoutRequest {
+            return CheckoutRequest(
+                initialization = initialization,
+                customer = customer,
+                customerKeyType = customerKeyType,
+                currency = currency,
+                mode = mode,
+                setShippingAddress = setShippingAddress,
+                automaticPaymentMethods = automaticPaymentMethods,
+                useLink = useLink,
+                merchantCountryCode = merchantCountryCode,
+                supportedPaymentMethods = supportedPaymentMethods,
+                paymentMethodConfigurationId = paymentMethodConfigurationId,
+                requireCvcRecollection = requireCvcRecollection,
+                paymentMethodSaveFeature = FeatureState.Enabled,
+                paymentMethodRemoveFeature = FeatureState.Enabled,
+                paymentMethodRedisplayFeature = FeatureState.Enabled,
+                paymentMethodRedisplayFilters = listOf(
+                    AllowRedisplayFilter.Unspecified,
+                    AllowRedisplayFilter.Limited,
+                    AllowRedisplayFilter.Always,
+                )
+            )
+        }
     }
 }
 
-data class SavedToggles(
-    val customer: String,
-    val googlePay: Boolean,
-    val currency: String,
-    val merchantCountryCode: String,
-    val mode: String,
-    val setShippingAddress: Boolean,
-    val setAutomaticPaymentMethods: Boolean,
-    val setDelayedPaymentMethods: Boolean,
-    val setDefaultBillingAddress: Boolean,
-    val link: Boolean
-)
-
-enum class Toggle(val key: String, val default: Any) {
-    Customer("customer", CheckoutCustomer.Guest.value),
-    Link("link", true),
-    GooglePay("googlePayConfig", true),
-    Currency("currency", CheckoutCurrency.USD.value),
-    MerchantCountryCode("merchantCountry", "US"),
-    Mode("mode", CheckoutMode.Payment.value),
-    SetShippingAddress("setShippingAddress", true),
-    SetDefaultBillingAddress("setDefaultBillingAddress", true),
-    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
-    SetDelayedPaymentMethods("setDelayedPaymentMethods", false)
-}
-
-sealed class CheckoutCustomer(val value: String) {
-    object Guest : CheckoutCustomer("guest")
-    object New : CheckoutCustomer("new")
-    object Returning : CheckoutCustomer("returning")
-    object Snapshot : CheckoutCustomer("snapshot")
-    data class WithId(val customerId: String) : CheckoutCustomer(customerId)
-}
-
-@Serializable
-data class CheckoutRequest(
-    val customer: String,
-    val currency: String,
-    val mode: String,
-    val set_shipping_address: Boolean,
-    val automatic_payment_methods: Boolean,
-    val use_link: Boolean,
-    val merchant_country_code: String
-)
-
 @Serializable
 data class CheckoutResponse(
+    @SerialName("publishableKey")
     val publishableKey: String,
+    @SerialName("intentClientSecret")
     val intentClientSecret: String,
+    @SerialName("customerId")
     val customerId: String? = null,
-    val customerEphemeralKeySecret: String? = null
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String? = null,
+    @SerialName("customerSessionClientSecret")
+    val customerSessionClientSecret: String? = null,
+    @SerialName("amount")
+    val amount: Long,
+    @SerialName("paymentMethodTypes")
+    val paymentMethodTypes: String? = null,
 ) {
-    fun makeCustomerConfig() =
-        if (customerId != null && customerEphemeralKeySecret != null) {
-            PaymentSheet.CustomerConfiguration(
-                id = customerId,
-                ephemeralKeySecret = customerEphemeralKeySecret
-            )
-        } else {
-            null
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    fun makeCustomerConfig(
+        customerKeyType: CheckoutRequest.CustomerKeyType?
+    ) = customerId?.let { id ->
+        when (customerKeyType) {
+            CheckoutRequest.CustomerKeyType.CustomerSession -> {
+                customerSessionClientSecret?.let { clientSecret ->
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = id,
+                        clientSecret = clientSecret,
+                    )
+                }
+            }
+            CheckoutRequest.CustomerKeyType.Legacy,
+            null -> {
+                customerEphemeralKeySecret?.let { ephemeralKeySecret ->
+                    PaymentSheet.CustomerConfiguration(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret
+                    )
+                }
+            }
         }
+    }
 }
+
+@Serializable
+data class ConfirmIntentRequest(
+    @SerialName("client_secret")
+    val clientSecret: String,
+    @SerialName("payment_method_id")
+    val paymentMethodId: String,
+    @SerialName("should_save_payment_method")
+    val shouldSavePaymentMethod: Boolean,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerialName("mode")
+    val mode: String,
+    @SerialName("return_url")
+    val returnUrl: String,
+)
+
+@Serializable
+data class ConfirmIntentResponse(
+    @SerialName("client_secret")
+    val clientSecret: String,
+)

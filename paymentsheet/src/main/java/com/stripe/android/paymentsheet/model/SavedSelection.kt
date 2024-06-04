@@ -5,7 +5,10 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed class SavedSelection : Parcelable {
     @Parcelize
-    object GooglePay : SavedSelection()
+    data object GooglePay : SavedSelection()
+
+    @Parcelize
+    data object Link : SavedSelection()
 
     @Parcelize
     data class PaymentMethod(
@@ -13,5 +16,14 @@ internal sealed class SavedSelection : Parcelable {
     ) : SavedSelection()
 
     @Parcelize
-    object None : SavedSelection()
+    data object None : SavedSelection()
+}
+
+internal fun PaymentSelection.toSavedSelection(): SavedSelection? {
+    return when (this) {
+        is PaymentSelection.GooglePay -> SavedSelection.GooglePay
+        is PaymentSelection.Link -> SavedSelection.Link
+        is PaymentSelection.Saved -> SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+        else -> null
+    }
 }

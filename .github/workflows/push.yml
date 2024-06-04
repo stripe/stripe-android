@@ -1,0 +1,49 @@
+name: Upload aabs on push
+# Upload aabs of example apps when changes are merged to master branch.
+# The aab is used as a base reference to compare with aab built from pull requests.
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  upload-identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle for Identity example app
+        run: ./gradlew :identity-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
+        with:
+          artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: push
+  upload-financial-connections:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle for Financial Connections example app
+        run: ./gradlew :financial-connections-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
+        with:
+          artifact_path: financial-connections-example/build/outputs/bundle/release/financial-connections-example-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: push
+  upload-payment-sheet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle for Payment Sheet example app
+        run: ./gradlew :paymentsheet-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
+        with:
+          artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: push

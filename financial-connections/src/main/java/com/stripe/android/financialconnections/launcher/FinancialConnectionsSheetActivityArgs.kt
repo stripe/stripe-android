@@ -1,8 +1,7 @@
 package com.stripe.android.financialconnections.launcher
 
-import android.content.Intent
 import android.os.Parcelable
-import com.airbnb.mvrx.Mavericks
+import androidx.annotation.RestrictTo
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -12,21 +11,31 @@ import java.security.InvalidParameterException
  * [com.stripe.android.financialconnections.FinancialConnectionsSheetActivity] and
  * instances of [com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher].
  */
-internal sealed class FinancialConnectionsSheetActivityArgs constructor(
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class FinancialConnectionsSheetActivityArgs(
     open val configuration: FinancialConnectionsSheet.Configuration
 ) : Parcelable {
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForData(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForToken(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
-    fun validate() {
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class ForInstantDebits(
+        override val configuration: FinancialConnectionsSheet.Configuration
+    ) : FinancialConnectionsSheetActivityArgs(configuration)
+
+    internal fun validate() {
         if (configuration.financialConnectionsSessionClientSecret.isBlank()) {
             throw InvalidParameterException(
                 "The session client secret cannot be an empty string."
@@ -39,9 +48,5 @@ internal sealed class FinancialConnectionsSheetActivityArgs constructor(
         }
     }
 
-    companion object {
-        internal fun fromIntent(intent: Intent): FinancialConnectionsSheetActivityArgs? {
-            return intent.getParcelableExtra(Mavericks.KEY_ARG)
-        }
-    }
+    internal fun isValid(): Boolean = kotlin.runCatching { validate() }.isSuccess
 }

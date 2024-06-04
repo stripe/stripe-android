@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements.autocomplete
 import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
+import androidx.annotation.RestrictTo
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -10,15 +11,20 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
-import com.stripe.android.ui.core.R
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
+import com.stripe.android.uicore.elements.IsPlacesAvailable
 import kotlinx.coroutines.tasks.await
+import com.google.android.libraries.places.R as PlacesR
 
-internal interface PlacesClientProxy {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PlacesClientProxy {
     suspend fun findAutocompletePredictions(
         query: String?,
         country: String,
@@ -29,21 +35,25 @@ internal interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
         fun create(
             context: Context,
             googlePlacesApiKey: String,
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
-            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) }
+            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
+            errorReporter: ErrorReporter
         ): PlacesClientProxy {
             return if (isPlacesAvailable()) {
                 initializer()
                 DefaultPlacesClientProxy(
-                    clientFactory(context)
+                    clientFactory(context),
+                    errorReporter
                 )
             } else {
-                UnsupportedPlacesClientProxy()
+                UnsupportedPlacesClientProxy(errorReporter)
             }
         }
 
@@ -53,9 +63,9 @@ internal interface PlacesClientProxy {
         ): Int? {
             return if (isPlacesAvailable()) {
                 if (isSystemDarkTheme) {
-                    R.drawable.places_powered_by_google_dark
+                    PlacesR.drawable.places_powered_by_google_dark
                 } else {
-                    R.drawable.places_powered_by_google_light
+                    PlacesR.drawable.places_powered_by_google_light
                 }
             } else {
                 if (BuildConfig.DEBUG) {
@@ -70,7 +80,8 @@ internal interface PlacesClientProxy {
 }
 
 internal class DefaultPlacesClientProxy(
-    private val client: PlacesClient
+    private val client: PlacesClient,
+    private val errorReporter: ErrorReporter
 ) : PlacesClientProxy {
     private val token = AutocompleteSessionToken.newInstance()
 
@@ -89,6 +100,7 @@ internal class DefaultPlacesClientProxy(
                     .setTypeFilter(TypeFilter.ADDRESS)
                     .build()
             ).await()
+            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
             Result.success(
                 FindAutocompletePredictionsResponse(
                     autocompletePredictions = response.autocompletePredictions.map {
@@ -97,10 +109,14 @@ internal class DefaultPlacesClientProxy(
                             secondaryText = it.getSecondaryText(StyleSpan(Typeface.BOLD)),
                             placeId = it.placeId
                         )
-                    }.take(limit ?: response.autocompletePredictions.size)
+                    }.take(limit)
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
+                StripeException.create(e)
+            )
             Result.failure(
                 Exception("Could not find autocomplete predictions: ${e.message}")
             )
@@ -119,6 +135,7 @@ internal class DefaultPlacesClientProxy(
                     )
                 )
             ).await()
+            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS)
             Result.success(
                 FetchPlaceResponse(
                     Place(
@@ -133,6 +150,7 @@ internal class DefaultPlacesClientProxy(
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
                 Exception("Could not fetch place: ${e.message}")
             )
@@ -140,7 +158,7 @@ internal class DefaultPlacesClientProxy(
     }
 }
 
-internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
+internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override suspend fun findAutocompletePredictions(
         query: String?,
         country: String,
@@ -152,6 +170,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
     }
 
@@ -162,21 +181,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
-    }
-}
-
-internal interface IsPlacesAvailable {
-    operator fun invoke(): Boolean
-}
-
-internal class DefaultIsPlacesAvailable : IsPlacesAvailable {
-    override fun invoke(): Boolean {
-        return try {
-            Class.forName("com.google.android.libraries.places.api.Places")
-            true
-        } catch (_: Exception) {
-            false
-        }
     }
 }

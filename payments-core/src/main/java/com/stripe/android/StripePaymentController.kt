@@ -8,15 +8,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.google.android.instantapps.InstantApps
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -37,6 +32,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -69,8 +65,7 @@ constructor(
         publishableKeyProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext,
-        RetryDelaySupplier()
+        workContext
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
@@ -103,17 +98,16 @@ constructor(
 
     private val authenticatorRegistry: PaymentAuthenticatorRegistry =
         DefaultPaymentAuthenticatorRegistry.createInstance(
-            context,
-            stripeRepository,
-            analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory,
-            enableLogging,
-            workContext,
-            uiContext,
-            threeDs1IntentReturnUrlMap,
-            publishableKeyProvider,
-            paymentAnalyticsRequestFactory.defaultProductUsageTokens,
-            isInstantApp
+            context = context,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            enableLogging = enableLogging,
+            workContext = workContext,
+            uiContext = uiContext,
+            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+            publishableKeyProvider = publishableKeyProvider,
+            productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
+            isInstantApp = isInstantApp,
+            includePaymentSheetAuthenticators = false, // StripePaymentController is not used in PaymentSheet.
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -153,26 +147,26 @@ constructor(
                     ?: defaultReturnUrl.value
             }
 
-        runCatching {
-            when (confirmStripeIntentParams) {
-                is ConfirmPaymentIntentParams -> {
-                    confirmPaymentIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
-                is ConfirmSetupIntentParams -> {
-                    confirmSetupIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
+        val result = when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                confirmPaymentIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
             }
-        }.fold(
+            is ConfirmSetupIntentParams -> {
+                confirmSetupIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
+            }
+        }
+
+        result.fold(
             onSuccess = { intent ->
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
@@ -201,31 +195,32 @@ constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
-        return authenticateAlipay(
-            confirmPaymentIntent(
-                confirmPaymentIntentParams,
+    ): Result<PaymentIntentResult> {
+        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+
+        return paymentIntentResult.mapResult { paymentIntent ->
+            authenticateAlipay(
+                paymentIntent,
+                authenticator,
                 requestOptions
-            ),
-            authenticator,
-            requestOptions
-        )
+            )
+        }
     }
 
     override suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): WeChatPayNextAction {
-        confirmPaymentIntent(
-            confirmPaymentIntentParams,
-            requestOptions
-        ).let { paymentIntent ->
+    ): Result<WeChatPayNextAction> {
+        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+
+        return paymentIntentResult.mapCatching { paymentIntent ->
             require(paymentIntent.nextActionData is StripeIntent.NextActionData.WeChatPayRedirect) {
                 "Unable to confirm Payment Intent with WeChatPay SDK"
             }
-            return WeChatPayNextAction(
-                paymentIntent,
-                paymentIntent.nextActionData.weChat
+
+            WeChatPayNextAction(
+                paymentIntent = paymentIntent,
+                weChat = paymentIntent.nextActionData.weChat,
             )
         }
     }
@@ -233,35 +228,25 @@ constructor(
     private suspend fun confirmPaymentIntent(
         confirmStripeIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent {
-        return requireNotNull(
-            stripeRepository.confirmPaymentIntent(
-                // mark this request as `use_stripe_sdk=true`
-                confirmStripeIntentParams
-                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        ) {
-            REQUIRED_ERROR
-        }
+    ): Result<PaymentIntent> {
+        return stripeRepository.confirmPaymentIntent(
+            // mark this request as `use_stripe_sdk=true`
+            confirmPaymentIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
+            options = requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        )
     }
 
     private suspend fun confirmSetupIntent(
         confirmStripeIntentParams: ConfirmSetupIntentParams,
         requestOptions: ApiRequest.Options
-    ): SetupIntent {
-        return requireNotNull(
-            stripeRepository.confirmSetupIntent(
-                // mark this request as `use_stripe_sdk=true`
-                confirmStripeIntentParams
-                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        ) {
-            REQUIRED_ERROR
-        }
+    ): Result<SetupIntent> {
+        return stripeRepository.confirmSetupIntent(
+            // mark this request as `use_stripe_sdk=true`
+            confirmSetupIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
+            options = requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        )
     }
 
     override suspend fun startAuth(
@@ -270,23 +255,16 @@ constructor(
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
     ) {
-        runCatching {
-            val stripeIntent = when (type) {
-                PaymentController.StripeIntentType.PaymentIntent -> {
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
-                PaymentController.StripeIntentType.SetupIntent -> {
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
+        val stripeIntentResult = when (type) {
+            PaymentController.StripeIntentType.PaymentIntent -> {
+                stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
             }
-            requireNotNull(stripeIntent)
-        }.fold(
+            PaymentController.StripeIntentType.SetupIntent -> {
+                stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+            }
+        }
+
+        stripeIntentResult.fold(
             onSuccess = { stripeIntent ->
                 handleNextAction(
                     host = host,
@@ -320,15 +298,11 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
         )
 
-        runCatching {
-            requireNotNull(
-                stripeRepository.retrieveSource(
-                    sourceId = source.id.orEmpty(),
-                    clientSecret = source.clientSecret.orEmpty(),
-                    options = requestOptions
-                )
-            )
-        }.fold(
+        stripeRepository.retrieveSource(
+            sourceId = source.id.orEmpty(),
+            clientSecret = source.clientSecret.orEmpty(),
+            options = requestOptions
+        ).fold(
             onSuccess = { retrievedSourced ->
                 onSourceRetrieved(host, retrievedSourced, requestOptions)
             },
@@ -378,20 +352,7 @@ constructor(
      *
      * @param data the result Intent
      * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     override suspend fun getPaymentIntentResult(data: Intent) =
         paymentIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
@@ -403,20 +364,7 @@ constructor(
      *
      * @param data the result Intent
      * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     override suspend fun getSetupIntentResult(data: Intent) =
         setupIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
@@ -428,21 +376,8 @@ constructor(
      *
      * @param data the result Intent
      * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    override suspend fun getAuthenticateSourceResult(data: Intent): Source {
+    override suspend fun getAuthenticateSourceResult(data: Intent): Result<Source> {
         val result = PaymentFlowResult.Unvalidated.fromIntent(data)
         val sourceId = result.sourceId.orEmpty()
         val clientSecret = result.clientSecret.orEmpty()
@@ -456,12 +391,10 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
         )
 
-        return requireNotNull(
-            stripeRepository.retrieveSource(
-                sourceId,
-                clientSecret,
-                requestOptions
-            )
+        return stripeRepository.retrieveSource(
+            sourceId,
+            clientSecret,
+            requestOptions
         )
     }
 
@@ -469,22 +402,26 @@ constructor(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
-        val outcome =
-            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
-        val refreshedPaymentIntent = requireNotNull(
-            stripeRepository.retrievePaymentIntent(
-                paymentIntent.clientSecret.orEmpty(),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
+    ): Result<PaymentIntentResult> {
+        val outcome = alipayRepository.authenticate(
+            paymentIntent = paymentIntent,
+            authenticator = authenticator,
+            requestOptions = requestOptions,
+        ).outcome
+
+        val refreshedPaymentIntentResult = stripeRepository.retrievePaymentIntent(
+            paymentIntent.clientSecret.orEmpty(),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
         )
 
-        return PaymentIntentResult(
-            refreshedPaymentIntent,
-            outcome,
-            failureMessageFactory.create(refreshedPaymentIntent, outcome)
-        )
+        return refreshedPaymentIntentResult.map { refreshedPaymentIntent ->
+            PaymentIntentResult(
+                refreshedPaymentIntent,
+                outcome,
+                failureMessageFactory.create(refreshedPaymentIntent, outcome)
+            )
+        }
     }
 
     private suspend fun handleError(
@@ -588,7 +525,5 @@ constructor(
 
         internal val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
-
-        private const val REQUIRED_ERROR = "API request returned an invalid response."
     }
 }

@@ -241,4 +241,23 @@ class LayoutTest {
     fun adjustSizeToAspectRatio_horizontalExpand() {
         assertEquals(Size(1800, 900), adjustSizeToAspectRatio(Size(1600, 900), 2F))
     }
+
+    @Test
+    @SmallTest
+    fun sizeUnion_mixed() {
+        assertEquals(Size(100, 200), Size(50, 200).union(Size(100, 100)))
+        assertEquals(Size(100, 200), Size(100, 100).union(Size(50, 200)))
+    }
+
+    @Test
+    @SmallTest
+    fun sizeUnion_smaller() {
+        assertEquals(Size(100, 200), Size(100, 200).union(Size(75, 150)))
+    }
+
+    @Test
+    @SmallTest
+    fun sizeUnion_larger() {
+        assertEquals(Size(100, 200), Size(75, 150).union(Size(100, 200)))
+    }
 }

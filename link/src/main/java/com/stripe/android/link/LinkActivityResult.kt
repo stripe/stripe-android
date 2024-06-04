@@ -1,48 +1,100 @@
 package com.stripe.android.link
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Parcelable
+import android.util.Base64
+import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
-sealed class LinkActivityResult(
-    val resultCode: Int
-) : Parcelable {
-
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class LinkActivityResult : Parcelable {
     /**
-     * The Link flow was completed successfully.
+     * Indicates that the flow was completed successfully.
      */
-    sealed class Success : LinkActivityResult(Activity.RESULT_OK) {
-
-        /**
-         * When Link was launched with [LinkActivityContract.Args.completePayment] set to false,
-         * this class indicates that the flow was completed successfully and the user has selected
-         * a payment method.
-         *
-         * @param paymentDetails The payment method selected by the user.
-         */
-        @Parcelize
-        data class Selected(val paymentDetails: LinkPaymentDetails) : Success()
-
-        /**
-         * When Link was launched with [LinkActivityContract.Args.completePayment] set to true, this
-         * object indicates that the flow was completed successfully and the Stripe Intent was
-         * confirmed.
-         */
-        @Parcelize
-        object Completed : Success()
-    }
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Completed(
+        val paymentMethod: PaymentMethod
+    ) : LinkActivityResult()
 
     /**
      * The user cancelled the Link flow without completing it.
      */
     @Parcelize
-    object Canceled : LinkActivityResult(Activity.RESULT_CANCELED)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Canceled(
+        val reason: Reason = Reason.BackPressed,
+    ) : LinkActivityResult() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Reason {
+            BackPressed,
+            LoggedOut
+        }
+    }
 
     /**
      * Something went wrong. See [error] for more information.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
-    ) : LinkActivityResult(Activity.RESULT_CANCELED)
+    ) : LinkActivityResult()
+}
+
+internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkActivityResult {
+    return when (resultCode) {
+        Activity.RESULT_CANCELED -> {
+            LinkActivityResult.Canceled()
+        }
+
+        LinkForegroundActivity.RESULT_FAILURE -> {
+            val exception = intent?.getSerializableExtra(LinkForegroundActivity.EXTRA_FAILURE)
+            if (exception != null) {
+                LinkActivityResult.Failed(exception as Exception)
+            } else {
+                LinkActivityResult.Canceled()
+            }
+        }
+
+        LinkForegroundActivity.RESULT_COMPLETE -> {
+            val redirectUri = intent?.data ?: return LinkActivityResult.Canceled()
+            when (redirectUri.getQueryParameter("link_status")) {
+                "complete" -> {
+                    val paymentMethod = redirectUri.getQueryParameter("pm")
+                        ?.parsePaymentMethod()
+                    if (paymentMethod == null) {
+                        LinkActivityResult.Canceled()
+                    } else {
+                        LinkActivityResult.Completed(paymentMethod)
+                    }
+                }
+
+                "logout" -> {
+                    LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut)
+                }
+
+                else -> {
+                    LinkActivityResult.Canceled()
+                }
+            }
+        }
+
+        else -> {
+            LinkActivityResult.Canceled()
+        }
+    }
+}
+
+private fun String.parsePaymentMethod(): PaymentMethod? = try {
+    val decodedPaymentMethod = String(Base64.decode(this, 0), Charsets.UTF_8)
+    val paymentMethod = PaymentMethodJsonParser()
+        .parse(JSONObject(decodedPaymentMethod))
+    paymentMethod
+} catch (e: Exception) {
+    null
 }

@@ -11,17 +11,16 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.RetryDelaySupplier
+import com.stripe.android.core.networking.LinearRetryDelaySupplier
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -33,7 +32,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultStripe3ds2ChallengeResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -54,7 +52,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         stripeRepository,
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        RetryDelaySupplier(),
+        LinearRetryDelaySupplier(),
         Logger.noop(),
         testDispatcher
     )
@@ -91,7 +89,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
     fun `process() when completion endpoint call fails should return expected flowOutcome`() =
         runTest {
             stripeRepository.completionValue = {
-                error("Failed")
+                Result.failure(IllegalStateException("Failed"))
             }
 
             val paymentFlowResult = resultProcessor.process(SUCCEEDED)
@@ -113,9 +111,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
     fun `complete3ds2Auth() should retry until max retries are attempted due to a 4xx response`() =
         runTest {
             stripeRepository.completionValue = {
-                throw InvalidRequestException(
-                    statusCode = 400
-                )
+                Result.failure(InvalidRequestException(statusCode = 400))
             }
 
             resultProcessor.process(SUCCEEDED)
@@ -129,11 +125,9 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         runTest {
             stripeRepository.completionValue = {
                 if (stripeRepository.complete3ds2AuthInvocations <= 2) {
-                    throw InvalidRequestException(
-                        statusCode = 400
-                    )
+                    Result.failure(InvalidRequestException(statusCode = 400))
                 } else {
-                    Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION
+                    Result.success(Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION)
                 }
             }
 
@@ -156,7 +150,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
     fun `complete3ds2Auth() should not retry after a 5xx response`() =
         runTest {
             stripeRepository.completionValue = {
-                throw APIException(statusCode = 500)
+                Result.failure(APIException(statusCode = 500))
             }
 
             val paymentFlowResult = resultProcessor.process(SUCCEEDED)
@@ -286,12 +280,12 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         val sourceIds = mutableListOf<String>()
         var complete3ds2AuthInvocations = 0
 
-        var completionValue = { Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION }
+        var completionValue = { Result.success(Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION) }
 
         override suspend fun complete3ds2Auth(
             sourceId: String,
             requestOptions: ApiRequest.Options
-        ): Stripe3ds2AuthResult {
+        ): Result<Stripe3ds2AuthResult> {
             complete3ds2AuthInvocations++
             sourceIds.add(sourceId)
             return completionValue()

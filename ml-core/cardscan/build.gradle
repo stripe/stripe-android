@@ -1,0 +1,21 @@
+apply from: configs.androidLibrary
+
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+}
+
+dependencies {
+    api project(':ml-core:base')
+    implementation project(":stripecardscan-tflite")
+    implementation libs.androidx.annotation
+}
+
+ext {
+    artifactId = "ml-core-cardscan"
+    artifactName = "ml-core-cardscan"
+    artifactDescrption = "the machine learning module with cardscan specific tflite runtime"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

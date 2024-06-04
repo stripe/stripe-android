@@ -1,0 +1,3 @@
+<resources>
+	<string name="stripe_hcaptcha_loading_text">당신이 인간임을 확인</string>
+</resources>

@@ -27,7 +27,7 @@ class PaymentMethodsActivityStarterTest {
             .setIsPaymentSessionActive(true)
             .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-            .setAddPaymentMethodFooter(R.layout.payment_methods_activity)
+            .setAddPaymentMethodFooter(R.layout.stripe_payment_methods_activity)
             .setBillingAddressFields(BillingAddressFields.Full)
             .build()
 

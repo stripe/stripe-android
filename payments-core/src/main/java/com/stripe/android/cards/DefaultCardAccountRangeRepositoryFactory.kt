@@ -10,8 +10,9 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -36,6 +37,27 @@ class DefaultCardAccountRangeRepositoryFactory(
         return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
             remoteSource = createRemoteCardAccountRangeSource(),
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
+        )
+    }
+
+    override fun createWithStripeRepository(
+        stripeRepository: StripeRepository,
+        publishableKey: String
+    ): CardAccountRangeRepository {
+        val store = DefaultCardAccountRangeStore(appContext)
+        return DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = RemoteCardAccountRangeSource(
+                stripeRepository,
+                ApiRequest.Options(
+                    publishableKey
+                ),
+                DefaultCardAccountRangeStore(appContext),
+                DefaultAnalyticsRequestExecutor(),
+                PaymentAnalyticsRequestFactory(appContext, publishableKey)
+            ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )
@@ -90,10 +112,10 @@ class DefaultCardAccountRangeRepositoryFactory(
     }
 
     private class NullCardAccountRangeSource : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? = null
+        ): List<AccountRange>? = null
 
-        override val loading: Flow<Boolean> = flowOf(false)
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
 }

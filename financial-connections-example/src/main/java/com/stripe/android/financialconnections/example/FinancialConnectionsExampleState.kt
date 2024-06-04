@@ -4,4 +4,3 @@ data class FinancialConnectionsExampleState(
     val loading: Boolean = false,
     val status: String = ""
 )
-

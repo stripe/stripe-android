@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
@@ -64,9 +65,23 @@ sealed interface StripeIntent : StripeModel {
      */
     val unactivatedPaymentMethods: List<String>
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    val linkFundingSources: List<String>
+
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getPaymentMethodOptions(): Map<String, Any?>
 
     /**
      * Type of the next action to perform.
@@ -78,15 +93,22 @@ sealed interface StripeIntent : StripeModel {
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
-        VerifyWithMicrodeposits("verify_with_microdeposits");
+        VerifyWithMicrodeposits("verify_with_microdeposits"),
+        UpiAwaitNotification("upi_await_notification"),
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
+        DisplayBoletoDetails("boleto_display_details"),
+        DisplayKonbiniDetails("konbini_display_details"),
+        DisplayMultibancoDetails("multibanco_display_details"),
+        SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
+        @Keep
         override fun toString(): String {
             return code
         }
 
         internal companion object {
             internal fun fromCode(code: String?): NextActionType? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -107,13 +129,14 @@ sealed interface StripeIntent : StripeModel {
         // only applies to Payment Intents
         RequiresCapture("requires_capture");
 
+        @Keep
         override fun toString(): String {
             return code
         }
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -136,20 +159,26 @@ sealed interface StripeIntent : StripeModel {
 
         OneTime("one_time");
 
+        @Keep
         override fun toString(): String {
             return code
         }
 
         internal companion object {
             internal fun fromCode(code: String?): Usage? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
 
     sealed class NextActionData : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        interface DisplayVoucherDetails {
+            val hostedVoucherUrl: String?
+        }
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayOxxoDetails(
             /**
              * The timestamp after which the OXXO expires.
@@ -164,8 +193,35 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
-            val hostedVoucherUrl: String? = null
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayKonbiniDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayMultibancoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         /**
          * Contains instructions for authenticating by redirecting your customer to another
@@ -222,12 +278,26 @@ sealed interface StripeIntent : StripeModel {
                 val url: String
             ) : SdkData()
 
+            /**
+             * Contains all parameters needed to perform a 3DS2 authentication.
+             *
+             * @param threeDS2IntentId The id of the PI/SI used to authenticate using 3DS2. When
+             * non-null, indicates that a different PI/SI is used for authentication. That is the
+             * case for payments using Link, for example, which use a global merchant for
+             * authentication since the payment method is added to the consumer's global (not
+             * merchant-specific) account.
+             * @param publishableKey The publishable key that should be used to make 3DS2-related
+             * API calls. It will only be non-null when the 3DS2 calls should be made with a key
+             * different than the original merchant's key.
+             */
             @Parcelize
             data class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
-                val serverEncryption: DirectoryServerEncryption
+                val serverEncryption: DirectoryServerEncryption,
+                val threeDS2IntentId: String?,
+                val publishableKey: String?
             ) : SdkData() {
                 @Parcelize
                 data class DirectoryServerEncryption(
@@ -240,14 +310,7 @@ sealed interface StripeIntent : StripeModel {
         }
 
         @Parcelize
-        object BlikAuthorize : NextActionData() {
-            override fun hashCode(): Int {
-                return 0
-            }
-            override fun equals(other: Any?): Boolean {
-                return this === other
-            }
-        }
+        data object BlikAuthorize : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
@@ -258,6 +321,25 @@ sealed interface StripeIntent : StripeModel {
             val arrivalDate: Long,
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
+        ) : NextActionData()
+
+        @Parcelize
+        data object UpiAwaitNotification : NextActionData()
+
+        /**
+         * Contains the authentication URL for redirecting your customer to Cash App.
+         */
+        @Parcelize
+        data class CashAppRedirect(
+            val mobileAuthUrl: String,
+        ) : NextActionData()
+
+        /**
+         * Contains the authentication URL for redirecting your customer to Swish.
+         */
+        @Parcelize
+        data class SwishRedirect(
+            val mobileAuthUrl: String,
         ) : NextActionData()
     }
 }

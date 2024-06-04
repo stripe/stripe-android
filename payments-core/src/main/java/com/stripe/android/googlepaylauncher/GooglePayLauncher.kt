@@ -2,7 +2,14 @@ package com.stripe.android.googlepaylauncher
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -97,14 +104,13 @@ class GooglePayLauncher internal constructor(
         readyCallback: ReadyCallback,
         resultCallback: ResultCallback
     ) : this(
-        fragment.viewLifecycleOwner.lifecycleScope,
-        config,
-        readyCallback,
-        fragment.registerForActivityResult(
-            GooglePayLauncherContract()
-        ) {
-            resultCallback.onResult(it)
-        },
+        lifecycleScope = fragment.lifecycleScope,
+        config = config,
+        readyCallback = readyCallback,
+        activityResultLauncher = fragment.registerForActivityResult(
+            GooglePayLauncherContract(),
+            resultCallback::onResult,
+        ),
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 context = fragment.requireActivity().application,
@@ -114,12 +120,12 @@ class GooglePayLauncher internal constructor(
                 allowCreditCards = config.allowCreditCards
             )
         },
-        PaymentAnalyticsRequestFactory(
-            fragment.requireContext(),
-            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
-            setOf(PRODUCT_USAGE)
+        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+            context = fragment.requireContext(),
+            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
-        DefaultAnalyticsRequestExecutor()
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
     )
 
     init {
@@ -146,8 +152,15 @@ class GooglePayLauncher internal constructor(
      * object.
      *
      * @param clientSecret the PaymentIntent's [client secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
      */
-    fun presentForPaymentIntent(clientSecret: String) {
+    @JvmOverloads
+    fun presentForPaymentIntent(
+        clientSecret: String,
+        label: String? = null,
+    ) {
         check(isReady) {
             "presentForPaymentIntent() may only be called when Google Pay is available on this device."
         }
@@ -155,7 +168,8 @@ class GooglePayLauncher internal constructor(
         activityResultLauncher.launch(
             GooglePayLauncherContract.PaymentIntentArgs(
                 clientSecret = clientSecret,
-                config = config
+                config = config,
+                label = label,
             )
         )
     }
@@ -169,10 +183,18 @@ class GooglePayLauncher internal constructor(
      *
      * @param clientSecret the SetupIntent's [client secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * @param currencyCode The ISO 4217 alphabetic currency code.
+     * @param amount An optional amount to display. Google Pay may or may not display this amount
+     * depending on its own internal logic. Defaults to 0 if none is provided.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
      */
+    @JvmOverloads
     fun presentForSetupIntent(
         clientSecret: String,
-        currencyCode: String
+        currencyCode: String,
+        amount: Long? = null,
+        label: String? = null,
     ) {
         check(isReady) {
             "presentForSetupIntent() may only be called when Google Pay is available on this device."
@@ -182,7 +204,9 @@ class GooglePayLauncher internal constructor(
             GooglePayLauncherContract.SetupIntentArgs(
                 clientSecret = clientSecret,
                 config = config,
-                currencyCode = currencyCode
+                currencyCode = currencyCode,
+                amount = amount,
+                label = label,
             )
         )
     }
@@ -257,7 +281,7 @@ class GooglePayLauncher internal constructor(
 
     sealed class Result : Parcelable {
         @Parcelize
-        object Completed : Result()
+        data object Completed : Result()
 
         @Parcelize
         data class Failed(
@@ -265,7 +289,7 @@ class GooglePayLauncher internal constructor(
         ) : Result()
 
         @Parcelize
-        object Canceled : Result()
+        data object Canceled : Result()
     }
 
     fun interface ReadyCallback {
@@ -276,7 +300,84 @@ class GooglePayLauncher internal constructor(
         fun onResult(result: Result)
     }
 
-    internal companion object {
+    companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
+
+        /**
+         * Create a [GooglePayLauncher] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         * The GooglePayLauncher created is remembered across recompositions. Recomposition will
+         * always return the value produced by composition.
+         */
+        @Deprecated(
+            message = "Use rememberGooglePayLauncher() instead",
+            replaceWith = ReplaceWith(
+                expression = "rememberGooglePayLauncher(config, readyCallback, resultCallback)",
+            ),
+        )
+        @Composable
+        fun rememberLauncher(
+            config: Config,
+            readyCallback: ReadyCallback,
+            resultCallback: ResultCallback
+        ): GooglePayLauncher {
+            return rememberGooglePayLauncher(config, readyCallback, resultCallback)
+        }
+    }
+}
+
+/**
+ * Creates a [GooglePayLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param config The [GooglePayLauncher.Config] used to configure the integration.
+ * @param readyCallback Called after determining whether Google Pay is available and ready to use.
+ * [GooglePayLauncher.presentForPaymentIntent] and [GooglePayLauncher.presentForSetupIntent] may
+ * only be called if Google Pay is ready.
+ * @param resultCallback Called with the result of the [GooglePayLauncher] operation
+ */
+@Composable
+fun rememberGooglePayLauncher(
+    config: GooglePayLauncher.Config,
+    readyCallback: GooglePayLauncher.ReadyCallback,
+    resultCallback: GooglePayLauncher.ResultCallback
+): GooglePayLauncher {
+    val currentReadyCallback by rememberUpdatedState(readyCallback)
+
+    val context = LocalContext.current
+    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        GooglePayLauncherContract(),
+        resultCallback::onResult
+    )
+
+    return remember(config) {
+        GooglePayLauncher(
+            lifecycleScope = lifecycleScope,
+            config = config,
+            readyCallback = {
+                currentReadyCallback.onReady(it)
+            },
+            activityResultLauncher = activityResultLauncher,
+            googlePayRepositoryFactory = {
+                DefaultGooglePayRepository(
+                    context = context,
+                    environment = config.environment,
+                    billingAddressParameters = config.billingAddressConfig.convert(),
+                    existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                    allowCreditCards = config.allowCreditCards
+                )
+            },
+            PaymentAnalyticsRequestFactory(
+                context,
+                PaymentConfiguration.getInstance(context).publishableKey,
+                setOf(GooglePayLauncher.PRODUCT_USAGE)
+            ),
+            DefaultAnalyticsRequestExecutor()
+        )
     }
 }

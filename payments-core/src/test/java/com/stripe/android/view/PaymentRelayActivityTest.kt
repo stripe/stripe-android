@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
-import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ActivityScenario.launchActivityForResult
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
@@ -59,7 +59,7 @@ class PaymentRelayActivityTest {
         args: PaymentRelayStarter.Args,
         onComplete: (PaymentFlowResult.Unvalidated) -> Unit
     ) {
-        ActivityScenario.launch<PaymentRelayActivity>(
+        launchActivityForResult<PaymentRelayActivity>(
             contract.createIntent(
                 context,
                 args

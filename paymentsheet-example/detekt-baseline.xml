@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
+    <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_Editable()</ID>
+    <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_NotEditable()</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:Receipt.kt$@Composable fun Receipt( isLoading: Boolean, cartState: CartState, isEditable: Boolean = false, onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> }, bottomContent: @Composable () -> Unit, )</ID>
+    <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
+    <ID>MagicNumber:CartProduct.kt$100</ID>
+    <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$23</ID>
+    <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
+    <ID>MagicNumber:Payment.kt$0.5f</ID>
+    <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:CustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:CustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -22,32 +22,21 @@ internal class CustomerSessionOperationExecutor(
     ) {
         when (operation) {
             is EphemeralOperation.RetrieveKey -> {
-                val result = runCatching {
-                    requireNotNull(
-                        retrieveCustomerWithKey(ephemeralKey, operation.productUsage)
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = retrieveCustomerWithKey(ephemeralKey, operation.productUsage)
                 withContext(Dispatchers.Main) {
                     onCustomerRetrieved(operation, result)
                 }
             }
             is EphemeralOperation.Customer.AddSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.addCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            operation.sourceType,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.addCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    sourceType = operation.sourceType,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -61,19 +50,14 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.DeleteSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.deleteCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.deleteCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -87,19 +71,13 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.AttachPaymentMethod -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.attachPaymentMethod(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.paymentMethodId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.attachPaymentMethod(
+                    customerId = ephemeralKey.objectId,
+                    productUsageTokens = operation.productUsage,
+                    paymentMethodId = operation.paymentMethodId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -113,18 +91,12 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.DetachPaymentMethod -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.detachPaymentMethod(
-                            publishableKey,
-                            operation.productUsage,
-                            operation.paymentMethodId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.detachPaymentMethod(
+                    productUsageTokens = operation.productUsage,
+                    paymentMethodId = operation.paymentMethodId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -138,22 +110,21 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.GetPaymentMethods -> {
-                val result = runCatching {
-                    stripeRepository.getPaymentMethods(
-                        ListPaymentMethodsParams(
-                            customerId = ephemeralKey.objectId,
-                            paymentMethodType = operation.type,
-                            limit = operation.limit,
-                            endingBefore = operation.endingBefore,
-                            startingAfter = operation.startingAfter
-                        ),
-                        publishableKey,
-                        operation.productUsage,
-                        ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                    )
-                }
+                val result = stripeRepository.getPaymentMethods(
+                    listPaymentMethodsParams = ListPaymentMethodsParams(
+                        customerId = ephemeralKey.objectId,
+                        paymentMethodType = operation.type,
+                        limit = operation.limit,
+                        endingBefore = operation.endingBefore,
+                        startingAfter = operation.startingAfter,
+                    ),
+                    productUsageTokens = operation.productUsage,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodsRetrievalListener? = getListener(operation.id)
+                    val listener = getListener<CustomerSession.PaymentMethodsRetrievalListener>(operation.id)
+
                     result.fold(
                         onSuccess = { paymentMethods ->
                             listener?.onPaymentMethodsRetrieved(paymentMethods)
@@ -165,42 +136,33 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.UpdateDefaultSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.setDefaultCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            operation.sourceType,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.setDefaultCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    sourceType = operation.sourceType,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     onCustomerRetrieved(operation, result)
                 }
             }
             is EphemeralOperation.Customer.UpdateShipping -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.setCustomerShippingInfo(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.shippingInformation,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.setCustomerShippingInfo(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    shippingInformation = operation.shippingInformation,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     onCustomerRetrieved(operation, result)
                 }
             }
+            else -> {}
         }
     }
 
@@ -224,21 +186,31 @@ internal class CustomerSessionOperationExecutor(
         listener: CustomerSession.RetrievalListener?,
         error: Throwable
     ) {
-        when (error) {
-            is StripeException -> {
-                listener?.onError(
-                    error.statusCode,
-                    error.message.orEmpty(),
-                    error.stripeError
-                )
-            }
-            else -> {
-                listener?.onError(
-                    0,
-                    error.message.orEmpty(),
-                    null
-                )
-            }
+        val (statusCode, message, stripeError) = when (error) {
+            is StripeException -> Triple(
+                error.statusCode,
+                error.message.orEmpty(),
+                error.stripeError
+            )
+            else -> Triple(
+                0,
+                error.message.orEmpty(),
+                null
+            )
+        }
+
+        when (listener) {
+            is CustomerSession.RetrievalWithExceptionListener -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+                error,
+            )
+            is CustomerSession.RetrievalListener -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+            )
         }
     }
 
@@ -253,19 +225,14 @@ internal class CustomerSessionOperationExecutor(
      * @param key the [EphemeralKey] used for this access
      * @return a [Customer] if one can be found with this key, or `null` if one cannot.
      */
-    @Throws(StripeException::class)
     private suspend fun retrieveCustomerWithKey(
         key: EphemeralKey,
         productUsage: Set<String>
-    ): Customer? {
+    ): Result<Customer> {
         return stripeRepository.retrieveCustomer(
             key.objectId,
             productUsage,
             ApiRequest.Options(key.secret, stripeAccountId)
         )
-    }
-
-    private companion object {
-        private const val REQUIRED_ERROR = "API request returned an invalid response."
     }
 }

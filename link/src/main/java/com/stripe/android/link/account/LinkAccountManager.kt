@@ -1,75 +1,52 @@
 package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.link.BuildConfig
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.StripeIntent
-import kotlinx.coroutines.GlobalScope
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
-@Singleton
+@LinkScope
 internal class LinkAccountManager @Inject constructor(
-    private val args: LinkActivityContract.Args,
+    private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
-    private val cookieStore: CookieStore
+    private val linkEventsReporter: LinkEventsReporter,
+    private val errorReporter: ErrorReporter,
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
-    var linkAccount: StateFlow<LinkAccount?> = _linkAccount
+    val linkAccount: StateFlow<LinkAccount?> = _linkAccount
+
+    @Volatile
+    @VisibleForTesting
+    var authSessionCookie: String? = null
 
     /**
      * The publishable key for the signed in Link account.
      */
+    @Volatile
     @VisibleForTesting
     var consumerPublishableKey: String? = null
 
-    val accountStatus = linkAccount.transform { value ->
-        emit(
-            // If we already fetched an account, return its status
-            value?.accountStatus
-                ?: (
-                    // If consumer has previously logged in, fetch their account
-                    cookieStore.getAuthSessionCookie()?.let {
-                        lookupConsumer(null).getOrNull()?.accountStatus
-                    }
-                        // If the user recently signed up on this device, use their email
-                        ?: cookieStore.getNewUserEmail()?.let {
-                            lookupConsumer(it).getOrNull()?.accountStatus
-                        }
-                        // If a customer email was passed in, lookup the account,
-                        // unless the user has logged out of this account
-                        ?: args.customerEmail?.let {
-                            if (hasUserLoggedOut(it)) {
-                                AccountStatus.SignedOut
-                            } else {
-                                lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
-                            }
-                        } ?: AccountStatus.SignedOut
-                    )
-        )
-    }
-
-    /**
-     * Keeps track of whether the user has logged out during this session. If that's the case, we
-     * want to ignore the email passed in by the merchant to avoid confusion.
-     */
-    private var userHasLoggedOut = false
+    val accountStatus = linkAccount.map { it.fetchAccountStatus() }
 
     /**
      * Retrieves the Link account associated with the email if it exists.
@@ -81,35 +58,18 @@ internal class LinkAccountManager @Inject constructor(
      * cookie.
      */
     suspend fun lookupConsumer(
-        email: String?,
-        startSession: Boolean = true
+        email: String,
+        startSession: Boolean = true,
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, cookie())
-            .map { consumerSessionLookup ->
-                if (email == null && !consumerSessionLookup.exists) {
-                    // Lookup with cookie-only failed, so cookie is invalid
-                    cookieStore.updateAuthSessionCookie("")
-                }
-
+        linkRepository.lookupConsumer(email, authSessionCookie)
+            .onFailure { error ->
+                linkEventsReporter.onAccountLookupFailure(error)
+            }.map { consumerSessionLookup ->
                 consumerSessionLookup.consumerSession?.let { consumerSession ->
                     if (startSession) {
                         setAccountNullable(consumerSession)
                     } else {
                         LinkAccount(consumerSession)
-                    }
-                }
-            }.mapCatching {
-                it?.let { account ->
-                    if (startSession && !account.isVerified) {
-                        setAccount(
-                            linkRepository.startVerification(
-                                account.clientSecret,
-                                consumerPublishableKey,
-                                cookie()
-                            ).getOrThrow()
-                        )
-                    } else {
-                        account
                     }
                 }
             }
@@ -118,195 +78,153 @@ internal class LinkAccountManager @Inject constructor(
      * Use the user input in memory to sign in to an existing account or sign up for a new Link
      * account, starting verification if needed.
      */
-    suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> =
+    suspend fun signInWithUserInput(
+        userInput: UserInput
+    ): Result<LinkAccount> =
         when (userInput) {
             is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
-            is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
+            is UserInput.SignUp -> signUpIfValidSessionState(
+                email = userInput.email,
+                country = userInput.country,
+                phone = userInput.phone,
+                name = userInput.name,
+                consentAction = userInput.consentAction,
+            )
         }
 
+    suspend fun logOut(): Result<ConsumerSession> {
+        return runCatching {
+            requireNotNull(linkAccount.value)
+        }.mapCatching { account ->
+            linkRepository.logOut(
+                consumerSessionClientSecret = account.clientSecret,
+                consumerAccountPublishableKey = consumerPublishableKey,
+            ).getOrThrow()
+        }.onSuccess {
+            errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
+            Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
+        }.onFailure { error ->
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE, StripeException.create(error))
+            Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
+        }
+    }
+
     /**
-     * Registers the user for a new Link account and starts verification if needed.
+     * Attempts sign up if session is in valid state for sign up
      */
-    suspend fun signUp(
+    private suspend fun signUpIfValidSessionState(
         email: String,
         phone: String,
-        country: String
-    ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, cookie())
-            .map { consumerSession ->
-                cookieStore.storeNewUserEmail(email)
-                setAccount(consumerSession)
-            }.mapCatching { account ->
-                if (account.isVerified) {
-                    account
-                } else {
-                    setAccount(
-                        linkRepository.startVerification(
-                            account.clientSecret,
-                            consumerPublishableKey,
-                            cookie()
-                        ).getOrThrow()
+        country: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        val currentAccount = _linkAccount.value
+        val currentEmail = currentAccount?.email ?: config.customerInfo.email
+
+        return when (val status = currentAccount.fetchAccountStatus()) {
+            AccountStatus.Verified -> {
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
+
+                Result.failure(
+                    AlreadyLoggedInLinkException(
+                        email = currentEmail,
+                        accountStatus = status
                     )
+                )
+            }
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted -> {
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
+
+                Result.failure(
+                    AlreadyLoggedInLinkException(
+                        email = currentEmail,
+                        accountStatus = status
+                    )
+                )
+            }
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> {
+                signUp(
+                    email = email,
+                    phone = phone,
+                    country = country,
+                    name = name,
+                    consentAction = consentAction
+                ).onSuccess {
+                    linkEventsReporter.onSignupCompleted(true)
+                }.onFailure { error ->
+                    linkEventsReporter.onSignupFailure(true, error)
                 }
             }
+        }
+    }
 
     /**
-     * Triggers sending a verification code to the user.
+     * Registers the user for a new Link account.
      */
-    suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError { clientSecret ->
-        linkRepository.startVerification(clientSecret, consumerPublishableKey, cookie())
+    private suspend fun signUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> =
+        linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
             .map { consumerSession ->
                 setAccount(consumerSession)
             }
-    }
 
     /**
-     * Confirms a verification code sent to the user.
-     */
-    suspend fun confirmVerification(code: String): Result<LinkAccount> =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey, cookie())
-                .map { consumerSession ->
-                    setAccount(consumerSession)
-                }
-        }
-
-    /**
-     * Fetch all saved payment methods for the signed in consumer.
-     */
-    suspend fun listPaymentDetails() = retryingOnAuthError { clientSecret ->
-        linkRepository.listPaymentDetails(clientSecret, consumerPublishableKey)
-    }
-
-    /**
-     * Creates a new PaymentDetails attached to the current account.
+     * Creates a new PaymentDetails.Card attached to the current account.
      *
      * @return The parameters needed to confirm the current Stripe Intent using the newly created
      *          Payment Details.
      */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
-        linkAccount.value?.let { account ->
-            createPaymentDetails(
-                paymentMethod,
-                paymentMethodCreateParams,
-                account.email,
-                args.stripeIntent
-            )
-        } ?: Result.failure(
-            IllegalStateException("A non-null Link account is needed to create payment details")
-        )
-
-    /**
-     * Create a new payment method in the signed in consumer account.
-     */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        userEmail: String,
-        stripeIntent: StripeIntent
-    ) = retryingOnAuthError { clientSecret ->
-        linkRepository.createPaymentDetails(
-            paymentMethod,
-            paymentMethodCreateParams,
-            userEmail,
-            stripeIntent,
-            clientSecret,
-            consumerPublishableKey
-        )
-    }
-
-    /**
-     * Update an existing payment method in the signed in consumer account.
-     */
-    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams) =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.updatePaymentDetails(updateParams, clientSecret, consumerPublishableKey)
-        }
-
-    /**
-     * Delete the payment method from the signed in consumer account.
-     */
-    suspend fun deletePaymentDetails(paymentDetailsId: String) =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.deletePaymentDetails(
-                paymentDetailsId,
-                clientSecret,
-                consumerPublishableKey
-            )
-        }
-
-    /**
-     * Make an API call with the client_secret for the currently signed in account, retrying once
-     * if the call fails because of an [AuthenticationException].
-     */
-    private suspend fun <T> retryingOnAuthError(apiCall: suspend (String) -> Result<T>): Result<T> =
-        linkAccount.value?.let { account ->
-            apiCall(account.clientSecret).fold(
-                onSuccess = {
-                    Result.success(it)
-                },
-                onFailure = {
-                    if (it is AuthenticationException && cookie() != null) {
-                        // Try fetching the user account with the stored cookie, then retry API call
-                        lookupConsumer(null).fold(
-                            onSuccess = {
-                                it?.let { updatedAccount ->
-                                    apiCall(updatedAccount.clientSecret)
-                                }
-                            },
-                            onFailure = {
-                                Result.failure(it)
-                            }
-                        )
+    ): Result<LinkPaymentDetails> {
+        val linkAccountValue = linkAccount.value
+        return if (linkAccountValue != null) {
+            linkAccountValue.let { account ->
+                linkRepository.createCardPaymentDetails(
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    userEmail = account.email,
+                    stripeIntent = config.stripeIntent,
+                    consumerSessionClientSecret = account.clientSecret,
+                    consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
+                    active = config.passthroughModeEnabled,
+                ).mapCatching {
+                    if (config.passthroughModeEnabled) {
+                        linkRepository.shareCardPaymentDetails(
+                            id = it.paymentDetails.id,
+                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
+                            consumerSessionClientSecret = account.clientSecret,
+                            paymentMethodCreateParams = paymentMethodCreateParams,
+                        ).getOrThrow()
                     } else {
-                        Result.failure(it)
+                        it
                     }
+                }.onSuccess {
+                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
-            )
-        } ?: Result.failure(
-            IllegalStateException("User not signed in")
-        )
-
-    /**
-     * Logs the current consumer out.
-     *
-     * Regardless of the result of the API call, the local cookie is deleted and the current account
-     * is cleared. This will effectively log the user out, so there's no need to wait for the result
-     * of this call to consider it done.
-     */
-    fun logout() =
-        linkAccount.value?.let { account ->
-            val cookie = cookie()
-            cookieStore.logout(account.email)
-            userHasLoggedOut = true
-            _linkAccount.value = null
-            val publishableKey = consumerPublishableKey
-            consumerPublishableKey = null
-            GlobalScope.launch {
-                linkRepository.logout(account.clientSecret, publishableKey, cookie)
             }
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to create payment details")
+            )
         }
-
-    /**
-     * Whether the user has logged out from any account during this session, or the last logout was
-     * from the [email] passed as parameter, even if in a previous session.
-     */
-    fun hasUserLoggedOut(email: String?) = userHasLoggedOut ||
-        (email?.let { cookieStore.isEmailLoggedOut(it) } ?: false)
+    }
 
     private fun setAccount(consumerSession: ConsumerSession): LinkAccount {
         maybeUpdateConsumerPublishableKey(consumerSession)
         val newAccount = LinkAccount(consumerSession)
         _linkAccount.value = newAccount
-        cookieStore.updateAuthSessionCookie(newAccount.getAuthSessionCookie())
-        if (cookieStore.isEmailLoggedOut(newAccount.email)) {
-            cookieStore.storeLoggedOutEmail("")
-        }
+        authSessionCookie = newAccount.getAuthSessionCookie()
         return newAccount
     }
 
@@ -338,5 +256,31 @@ internal class LinkAccountManager @Inject constructor(
         }
     }
 
-    private fun cookie() = cookieStore.getAuthSessionCookie()
+    private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
+        /**
+         * If we already fetched an account, return its status, otherwise if a customer email was passed in,
+         * lookup the account.
+         */
+        this?.accountStatus
+            ?: config.customerInfo.email?.let { customerEmail ->
+                lookupConsumer(customerEmail).map {
+                    it?.accountStatus
+                }.getOrElse {
+                    AccountStatus.Error
+                }
+            } ?: AccountStatus.SignedOut
+
+    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
+        get() = when (this) {
+            SignUpConsentAction.Checkbox ->
+                ConsumerSignUpConsentAction.Checkbox
+            SignUpConsentAction.CheckboxWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
+            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+            SignUpConsentAction.Implied ->
+                ConsumerSignUpConsentAction.Implied
+            SignUpConsentAction.ImpliedWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
+        }
 }

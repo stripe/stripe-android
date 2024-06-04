@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Address line 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirate</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Suburb or city</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parish</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Department</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">District</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Area</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Island</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefecture</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Neighbourhood</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Post or Town</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Suburb</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Village or Township</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">By confirming your payment with Amazon Pay, you allow %s to charge your Amazon Pay account for future payments in accordance with their terms.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Back</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Account number</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Your account number is incomplete.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bank account</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">I understand that Stripe will be collecting Direct Debits on behalf of %s and confirm that I am the account holder and the only person required to authorise debits from this account.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Sort code</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Your sort code is incomplete.</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Billing address</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">This field cannot be blank.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Change</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Email</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Your email is invalid.</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (optional)</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">The IBAN you entered is incomplete.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">The IBAN you entered is invalid.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">The IBAN you entered is invalid; \"%s\" is not a supported country code.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL Bank</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Buy now or pay later with Klarna.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Pay later with Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Przelewy24 Bank</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Save for future %s payments</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Scan card</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
+  <string name="stripe_billing_details">Billing address</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK code</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Contact information</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Continue</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">The IBAN you entered is incomplete.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">The IBAN you entered is invalid; \"%s\" is not a supported country code.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Your BLIK code is incomplete.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Your BLIK code is invalid.</string>
+  <string name="stripe_invalid_email_address">Invalid email address: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Invalid UPI ID</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Buy now or pay later with Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">By continuing to Klarna, you allow %1$s to charge your Klarna account for future payments in accordance with their terms and Klarna\'s terms. You can change this at any time in your Klarna app or by reaching out to %2$s.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Pay later with Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Phone</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Name on card</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Pay %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Clearpay</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Buy using a UPI ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs Direct Debit</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Card</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">By confirming your payment with PayPal, you allow %s to charge your PayPal account for future payments in accordance with their terms.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">By confirming your payment with RevolutPay, you allow %s to charge your RevolutPay account for future payments in accordance with their terms.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Scan card</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Set up</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

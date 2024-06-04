@@ -2,28 +2,31 @@ package com.stripe.android.stripecardscan.cardscan
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Bundle
 import android.util.Size
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
-import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
+import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
-import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
+import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
@@ -34,7 +37,6 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
-import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
@@ -43,8 +45,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -61,9 +61,9 @@ internal interface CardScanResultListener : ScanResultListener {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
-    object NotFound : CardScanState(isFinal = false)
-    object Found : CardScanState(isFinal = false)
-    object Correct : CardScanState(isFinal = true)
+    data object NotFound : CardScanState(isFinal = false)
+    data object Found : CardScanState(isFinal = false)
+    data object Correct : CardScanState(isFinal = true)
 }
 
 internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {
@@ -71,11 +71,23 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
-        ActivityCardscanBinding.inflate(layoutInflater)
+        StripeActivityCardscanBinding.inflate(layoutInflater)
     }
 
     override val previewFrame: ViewGroup by lazy {
-        viewBinding.previewFrame
+        viewBinding.cameraView.previewFrame
+    }
+
+    private val viewFinderWindow: View by lazy {
+        viewBinding.cameraView.viewFinderWindowView
+    }
+
+    private val viewFinderBorder: ImageView by lazy {
+        viewBinding.cameraView.viewFinderBorderView
+    }
+
+    private val viewFinderBackground: ViewFinderBackground by lazy {
+        viewBinding.cameraView.viewFinderBackgroundView
     }
 
     private val params: CardScanSheetParams by lazy {
@@ -90,6 +102,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
+
+    override val cameraAdapterBuilder = ::getScanCameraAdapter
 
     /**
      * The listener which handles results from the scan.
@@ -108,7 +122,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                         )
                     )
                 setResult(RESULT_OK, intent)
-                closeScanner()
             }
 
             override fun userCanceled(reason: CancellationReason) {
@@ -145,6 +158,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
                     resultListener.cardScanComplete(ScannedCard(result.pan))
+                    scanStat.trackResult("card_scanned")
+                    closeScanner()
                 }.let { }
             }
 
@@ -183,7 +198,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             return
         }
 
-        setupViewFinderConstraints()
+        onBackPressedDispatcher.addCallback {
+            runBlocking { scanStat.trackResult("user_canceled") }
+            resultListener.userCanceled(CancellationReason.Back)
+            closeScanner()
+        }
 
         viewBinding.closeButton.setOnClickListener {
             userClosedScanner()
@@ -194,11 +213,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         viewBinding.swapCameraButton.setOnClickListener {
             toggleCamera()
         }
-        viewBinding.viewFinderBorder.setOnTouchListener { _, e ->
+        viewFinderBorder.setOnTouchListener { _, e ->
             setFocus(
                 PointF(
-                    e.x + viewBinding.viewFinderWindow.left,
-                    e.y + viewBinding.viewFinderWindow.top
+                    e.x + viewFinderBorder.left,
+                    e.y + viewFinderBorder.top
                 )
             )
             true
@@ -217,40 +236,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         super.onDestroy()
     }
 
-    /**
-     * Cancel the scan when the user presses back.
-     */
-    override fun onBackPressed() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.Back)
-        closeScanner()
-    }
-
-    /**
-     * Set up viewFinderWindowView and viewFinderBorderView centered with predefined margins
-     */
-    private fun setupViewFinderConstraints() {
-        val screenSize = Resources.getSystem().displayMetrics.let {
-            Size(it.widthPixels, it.heightPixels)
-        }
-        val viewFinderMargin = (
-            min(screenSize.width, screenSize.height) *
-                getFloatResource(R.dimen.stripeViewFinderMargin)
-            ).roundToInt()
-
-        listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
-            (view.layoutParams as ViewGroup.MarginLayoutParams)
-                .updateMargins(
-                    viewFinderMargin,
-                    viewFinderMargin,
-                    viewFinderMargin,
-                    viewFinderMargin
-                )
-        }
-
-        viewBinding.viewFinderBackground.setViewFinderRect(viewBinding.viewFinderWindow.asRect())
-    }
-
     override fun onFlashSupported(supported: Boolean) {
         viewBinding.torchButton.setVisible(supported)
     }
@@ -260,9 +245,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     }
 
     override fun onCameraReady() {
-        viewBinding.viewFinderBackground
-            .setViewFinderRect(viewBinding.viewFinderWindow.asRect())
-        startCameraAdapter()
+        previewFrame.post {
+            viewFinderBackground
+                .setViewFinderRect(viewFinderWindow.asRect())
+            startCameraAdapter()
+        }
     }
 
     /**
@@ -272,7 +259,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,
-            viewFinder = viewBinding.viewFinderWindow.asRect(),
+            viewFinder = viewBinding.cameraView.viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,
             parameters = null
@@ -301,28 +288,28 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound -> {
-                viewBinding.viewFinderBackground
+                viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
-                viewBinding.viewFinderWindow
+                viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_not_found)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
+                viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
             }
             is CardScanState.Found -> {
-                viewBinding.viewFinderBackground
+                viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewBinding.viewFinderWindow
+                viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_found)
+                viewFinderBorder.startAnimation(R.drawable.stripe_card_border_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
                 viewBinding.instructions.show()
             }
             is CardScanState.Correct -> {
-                viewBinding.viewFinderBackground
+                viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeCorrectBackground))
-                viewBinding.viewFinderWindow
+                viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_correct)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_correct)
+                viewFinderBorder.startAnimation(R.drawable.stripe_card_border_correct)
                 viewBinding.instructions.hide()
             }
         }

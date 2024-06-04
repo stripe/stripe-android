@@ -4,12 +4,16 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 internal class FpxViewModel internal constructor(
     application: Application,
@@ -18,13 +22,17 @@ internal class FpxViewModel internal constructor(
 ) : AndroidViewModel(application) {
     internal var selectedPosition: Int? = null
 
-    @JvmSynthetic
-    internal fun getFpxBankStatues() = liveData<BankStatuses> {
-        emit(
-            runCatching {
-                stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))
-            }.getOrDefault(BankStatuses())
-        )
+    private val _fpxBankStatues: MutableStateFlow<BankStatuses?> = MutableStateFlow(null)
+    val fpxBankStatues: StateFlow<BankStatuses?> = _fpxBankStatues.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _fpxBankStatues.value = stripeRepository.getFpxBankStatus(
+                options = ApiRequest.Options(publishableKey),
+            ).getOrElse {
+                BankStatuses()
+            }
+        }
     }
 
     internal class Factory(

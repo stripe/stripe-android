@@ -1,32 +1,28 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
 
-/**
- * Component to inject [PaymentLauncherViewModel.Factory] when the app process is killed and
- * there is no [Injector] available.
- */
 @Singleton
 @Component(
     modules = [
         PaymentLauncherModule::class,
         StripeRepositoryModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class
+        CoreCommonModule::class
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {
-    fun inject(factory: PaymentLauncherViewModel.Factory)
+
+    val viewModelSubcomponentBuilder: PaymentLauncherViewModelSubcomponent.Builder
 
     @Component.Builder
     interface Builder {
@@ -44,6 +40,11 @@ internal interface PaymentLauncherViewModelFactoryComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun includePaymentSheetAuthenticators(
+            @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) includePaymentSheetAuthenticators: Boolean
+        ): Builder
 
         fun build(): PaymentLauncherViewModelFactoryComponent
     }

@@ -2,28 +2,33 @@ package com.stripe.android.payments.core.authentication
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleRegistry
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class Stripe3DS2AuthenticatorTest {
-    private val activity: ComponentActivity = mock()
+    private val activity: ComponentActivity = mock {
+        on { lifecycle } doReturn LifecycleRegistry(mock).apply {
+            currentState = Lifecycle.State.RESUMED
+        }
+    }
+
     private val host = AuthActivityStarterHost.create(activity)
 
     private val paymentAuthConfig = PaymentAuthConfig.Builder().set3ds2Config(
@@ -35,7 +40,6 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2Authenticator(
         paymentAuthConfig,
         enableLogging = false,
-        injectorKey = DUMMY_INJECTOR_KEY,
         publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         productUsage = setOf()
     )

@@ -23,14 +23,13 @@ internal interface PaymentBrowserAuthStarter :
                 .copy(statusBarColor = host.statusBarColor)
                 .toBundle()
 
-            host.startActivityForResult(
-                when (args.hasDefaultReturnUrl(defaultReturnUrl) || args.isInstantApp) {
-                    true -> StripeBrowserLauncherActivity::class.java
-                    false -> PaymentAuthWebViewActivity::class.java
-                },
-                extras,
-                args.requestCode
-            )
+            val destination = if (args.hasDefaultReturnUrl(defaultReturnUrl) || args.isInstantApp) {
+                StripeBrowserLauncherActivity::class.java
+            } else {
+                PaymentAuthWebViewActivity::class.java
+            }
+
+            host.startActivityForResult(destination, extras, args.requestCode)
         }
     }
 

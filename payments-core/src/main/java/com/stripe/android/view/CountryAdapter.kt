@@ -18,7 +18,7 @@ import java.lang.ref.WeakReference
 internal class CountryAdapter(
     context: Context,
     internal var unfilteredCountries: List<Country>,
-    itemLayoutId: Int = R.layout.country_text_view,
+    itemLayoutId: Int = R.layout.stripe_country_text_view,
     private val textViewFactory: (ViewGroup) -> TextView
 ) : ArrayAdapter<Country>(context, itemLayoutId) {
     private val countryFilter: CountryFilter = CountryFilter(

@@ -12,6 +12,7 @@ import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.minAspectRatioSurroundingSize
 import com.stripe.android.camera.framework.util.size
+import com.stripe.android.camera.framework.util.union
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
@@ -79,16 +80,17 @@ internal abstract class CardScanFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = it,
-                analyzerLoopErrorListener = scanErrorListener
+                analyzerLoopErrorListener = scanErrorListener,
+                statsName = "main_loop_images_processed"
             ).apply {
                 mainLoopJob = subscribeTo(
-                    imageStream.map {
+                    imageStream.map { cameraImage ->
                         SSDOcr.cameraPreviewToInput(
-                            it.image,
+                            cameraImage.image,
                             minAspectRatioSurroundingSize(
-                                it.viewBounds.size(),
-                                it.image.width.toFloat() / it.image.height
-                            ).centerOn(it.viewBounds),
+                                cameraImage.viewBounds.size().union(viewFinder.size()),
+                                cameraImage.image.width.toFloat() / cameraImage.image.height
+                            ).centerOn(cameraImage.viewBounds),
                             viewFinder
                         )
                     },
@@ -98,8 +100,20 @@ internal abstract class CardScanFlow(
         }
     }.let { }
 
+    /**
+     * Reset the flow to the initial state, ready to be started again
+     */
+    internal fun resetFlow() {
+        canceled = false
+        cleanUp()
+    }
+
     override fun cancelFlow() {
         canceled = true
+        cleanUp()
+    }
+
+    private fun cleanUp() {
         mainLoopAggregator?.run { cancel() }
         mainLoopAggregator = null
 

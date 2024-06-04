@@ -3,6 +3,7 @@ package com.stripe.android.stripecardscan.cardimageverification
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.util.Size
 import android.view.Gravity
@@ -19,6 +20,7 @@ import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getVerifyCameraAdapter
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardimageverification.exception.StripeNetworkException
@@ -62,11 +64,6 @@ internal const val INTENT_PARAM_RESULT = "result"
 internal interface CardImageVerificationResultListener : ScanResultListener {
 
     /**
-     * A payment card was successfully scanned.
-     */
-    fun cardImageVerificationComplete(pan: String)
-
-    /**
      * A card was scanned and is ready to be verified.
      */
     fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>)
@@ -81,10 +78,10 @@ internal data class CardVerificationFlowParameters(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
-    object NotFound : CardVerificationScanState(isFinal = false)
-    object Found : CardVerificationScanState(isFinal = false)
-    object Correct : CardVerificationScanState(isFinal = true)
-    object Wrong : CardVerificationScanState(isFinal = false)
+    data object NotFound : CardVerificationScanState(isFinal = false)
+    data object Found : CardVerificationScanState(isFinal = false)
+    data object Correct : CardVerificationScanState(isFinal = true)
+    data object Wrong : CardVerificationScanState(isFinal = false)
 }
 
 @Keep
@@ -124,7 +121,14 @@ internal open class CardImageVerificationActivity :
     protected open val processingTextView by lazy { TextView(this) }
 
     private val params: CardImageVerificationSheetParams by lazy {
-        intent.getParcelableExtra(INTENT_PARAM_REQUEST) ?: CardImageVerificationSheetParams(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(
+                INTENT_PARAM_REQUEST,
+                CardImageVerificationSheetParams::class.java
+            )
+        } else {
+            intent.getParcelableExtra(INTENT_PARAM_REQUEST)
+        } ?: CardImageVerificationSheetParams(
             stripePublishableKey = "",
             configuration = CardImageVerificationSheet.Configuration(),
             cardImageVerificationIntentId = "",
@@ -158,21 +162,6 @@ internal open class CardImageVerificationActivity :
      */
     override val resultListener: CardImageVerificationResultListener =
         object : CardImageVerificationResultListener {
-            override fun cardImageVerificationComplete(pan: String) {
-                val intent = Intent()
-                    .putExtra(
-                        INTENT_PARAM_RESULT,
-                        CardImageVerificationSheetResult.Completed(
-                            params.cardImageVerificationIntentId,
-                            ScannedCard(
-                                pan = pan
-                            )
-                        )
-                    )
-                setResult(RESULT_OK, intent)
-                closeScanner()
-            }
-
             override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
                 launch {
                     mainLoopStatsTracker?.trackResult("complete")
@@ -245,7 +234,10 @@ internal open class CardImageVerificationActivity :
                     cameraAdapter.unbindFromLifecycle(this@CardImageVerificationActivity)
                     resultListener.cardReadyForVerification(
                         pan = result.pan,
-                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames)
+                        frames = scanFlow.selectCompletionLoopFrames(
+                            result.savedFrames,
+                            imageConfigs
+                        )
                     )
                 }.let { }
             }
@@ -378,7 +370,9 @@ internal open class CardImageVerificationActivity :
                     CardVerificationFlowParameters(
                         cardIssuer = getIssuerByDisplayName(expectedCard.issuer),
                         lastFour = expectedCard.lastFour,
-                        strictModeFrames = params.configuration.strictModeFrames.count
+                        strictModeFrames = params.configuration.strictModeFrames.count(
+                            imageConfigs.getImageSettings().second.imageCount
+                        )
                     )
                 } else {
                     launch(Dispatchers.Main) {
@@ -389,7 +383,7 @@ internal open class CardImageVerificationActivity :
             }
         is NetworkResult.Error -> {
             launch(Dispatchers.Main) {
-                scanFailure(StripeNetworkException("Unable to get CIV details"))
+                scanFailure(StripeNetworkException(result.error.error.message))
             }
             null
         }
@@ -507,6 +501,8 @@ internal open class CardImageVerificationActivity :
             connect(it.id, ConstraintSet.BOTTOM, cardDescriptionTextView.id, ConstraintSet.TOP)
         }
     }
+
+    override val cameraAdapterBuilder = ::getVerifyCameraAdapter
 
     protected open fun setupCannotScanTextViewConstraints() {
         cannotScanTextView.layoutParams = ConstraintLayout.LayoutParams(
@@ -633,6 +629,22 @@ internal open class CardImageVerificationActivity :
         }
     }
 
+    private suspend fun cardImageVerificationComplete(pan: String) {
+        val intent = Intent()
+            .putExtra(
+                INTENT_PARAM_RESULT,
+                CardImageVerificationSheetResult.Completed(
+                    params.cardImageVerificationIntentId,
+                    ScannedCard(
+                        pan = pan
+                    )
+                )
+            )
+        setResult(RESULT_OK, intent)
+        scanStat.trackResult("card_scanned")
+        closeScanner()
+    }
+
     override fun closeScanner() {
         uploadScanStatsCIV(
             stripePublishableKey = params.stripePublishableKey,
@@ -644,7 +656,9 @@ internal open class CardImageVerificationActivity :
             appDetails = AppDetails.fromContext(this),
             scanStatistics = ScanStatistics.fromStats(),
             scanConfig = ScanConfig(
-                strictModeFrameCount = params.configuration.strictModeFrames.count
+                strictModeFrameCount = params.configuration.strictModeFrames.count(
+                    imageConfigs.getImageSettings().second.imageCount
+                )
             ),
             payloadInfo = currentScanPayloadInfo
         )

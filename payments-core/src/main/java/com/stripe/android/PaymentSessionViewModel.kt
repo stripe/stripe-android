@@ -2,17 +2,27 @@ package com.stripe.android
 
 import android.app.Application
 import androidx.annotation.IntRange
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class PaymentSessionViewModel(
     application: Application,
@@ -27,22 +37,27 @@ internal class PaymentSessionViewModel(
             if (value != field) {
                 field = value
                 savedStateHandle.set(KEY_PAYMENT_SESSION_DATA, value)
-                _paymentSessionDataLiveData.value = value
+                _paymentSessionDataStateFlow.tryEmit(value)
             }
         }
 
-    private val _paymentSessionDataLiveData = MutableLiveData<PaymentSessionData>()
-    val paymentSessionDataLiveData: LiveData<PaymentSessionData> = _paymentSessionDataLiveData
+    private val _paymentSessionDataStateFlow = MutableSharedFlow<PaymentSessionData>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val paymentSessionDataStateFlow: SharedFlow<PaymentSessionData> = _paymentSessionDataStateFlow.asSharedFlow()
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         // read from saved state handle
         savedStateHandle.get<PaymentSessionData>(KEY_PAYMENT_SESSION_DATA)?.let {
             this.paymentSessionData = it
         }
     }
 
-    private val _networkState: MutableLiveData<NetworkState> = MutableLiveData()
-    internal val networkState: LiveData<NetworkState> = _networkState
+    private val _networkState: MutableStateFlow<NetworkState> = MutableStateFlow(NetworkState.Inactive)
+    internal val networkState: StateFlow<NetworkState> = _networkState.asStateFlow()
 
     @JvmSynthetic
     fun updateCartTotal(@IntRange(from = 0) cartTotal: Long) {
@@ -58,40 +73,40 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun fetchCustomer(isInitialFetch: Boolean = false): LiveData<FetchCustomerResult> {
-        _networkState.value = NetworkState.Active
+    suspend fun fetchCustomer(isInitialFetch: Boolean = false): FetchCustomerResult =
+        suspendCoroutine { continuation ->
+            _networkState.value = NetworkState.Active
 
-        val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
-        customerSession.retrieveCurrentCustomer(
-            productUsage = setOf(PaymentSession.PRODUCT_TOKEN),
-            listener = object : CustomerSession.CustomerRetrievalListener {
-                override fun onCustomerRetrieved(customer: Customer) {
-                    onCustomerRetrieved(
-                        customer.id,
-                        isInitialFetch
+            customerSession.retrieveCurrentCustomer(
+                productUsage = setOf(PaymentSession.PRODUCT_TOKEN),
+                listener = object : CustomerSession.CustomerRetrievalListener {
+                    override fun onCustomerRetrieved(customer: Customer) {
+                        onCustomerRetrieved(
+                            customer.id,
+                            isInitialFetch
+                        ) {
+                            _networkState.value = NetworkState.Inactive
+                            continuation.resume(FetchCustomerResult.Success)
+                        }
+                    }
+
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
                     ) {
                         _networkState.value = NetworkState.Inactive
-                        resultData.value = FetchCustomerResult.Success
+                        continuation.resume(
+                            FetchCustomerResult.Error(
+                                errorCode,
+                                errorMessage,
+                                stripeError
+                            )
+                        )
                     }
                 }
-
-                override fun onError(
-                    errorCode: Int,
-                    errorMessage: String,
-                    stripeError: StripeError?
-                ) {
-                    _networkState.value = NetworkState.Inactive
-                    resultData.value = FetchCustomerResult.Error(
-                        errorCode,
-                        errorMessage,
-                        stripeError
-                    )
-                }
-            }
-        )
-
-        return resultData
-    }
+            )
+        }
 
     @JvmSynthetic
     internal fun onCustomerRetrieved(
@@ -100,16 +115,23 @@ internal class PaymentSessionViewModel(
         onComplete: () -> Unit
     ) {
         if (isInitialFetch) {
-            fetchCustomerPaymentMethod(
-                paymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
-            ) { paymentMethod ->
-                paymentMethod?.let {
+            paymentSessionPrefs.getPaymentMethod(customerId)?.let {
+                if (it is PaymentSessionPrefs.SelectedPaymentMethod.GooglePay) {
                     paymentSessionData = paymentSessionData.copy(
-                        paymentMethod = it
+                        useGooglePay = true
                     )
+                    onComplete()
+                } else {
+                    fetchCustomerPaymentMethod(it.stringValue) { paymentMethod ->
+                        paymentMethod?.let {
+                            paymentSessionData = paymentSessionData.copy(
+                                paymentMethod = it
+                            )
+                        }
+                        onComplete()
+                    }
                 }
-                onComplete()
-            }
+            } ?: onComplete()
         } else {
             onComplete()
         }
@@ -150,16 +172,19 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String? = null): String? {
+    fun getSelectedPaymentMethod(userSelectedPaymentMethodId: String? = null):
+        PaymentSessionPrefs.SelectedPaymentMethod? {
         return if (paymentSessionData.useGooglePay) {
             null
         } else {
-            userSelectedPaymentMethodId
+            PaymentSessionPrefs.SelectedPaymentMethod.fromString(userSelectedPaymentMethodId)
                 ?: if (paymentSessionData.paymentMethod != null) {
-                    paymentSessionData.paymentMethod?.id
+                    PaymentSessionPrefs.SelectedPaymentMethod.fromString(
+                        paymentSessionData.paymentMethod?.id
+                    )
                 } else {
                     customerSession.cachedCustomer?.id?.let { customerId ->
-                        paymentSessionPrefs.getPaymentMethodId(customerId)
+                        paymentSessionPrefs.getPaymentMethod(customerId)
                     }
                 }
         }
@@ -178,7 +203,19 @@ internal class PaymentSessionViewModel(
         useGooglePay: Boolean
     ) {
         customerSession.cachedCustomer?.id?.let { customerId ->
-            paymentSessionPrefs.savePaymentMethodId(customerId, paymentMethod?.id)
+            val selectedPaymentMethod = if (useGooglePay) {
+                PaymentSessionPrefs.SelectedPaymentMethod.GooglePay
+            } else {
+                paymentMethod?.id?.let {
+                    PaymentSessionPrefs.SelectedPaymentMethod.Saved(
+                        it
+                    )
+                }
+            }
+            paymentSessionPrefs.savePaymentMethod(
+                customerId,
+                selectedPaymentMethod
+            )
         }
         paymentSessionData = paymentSessionData.copy(
             paymentMethod = paymentMethod,
@@ -193,11 +230,11 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun onListenerAttached() {
-        _paymentSessionDataLiveData.value = paymentSessionData
+        _paymentSessionDataStateFlow.tryEmit(paymentSessionData)
     }
 
     sealed class FetchCustomerResult {
-        object Success : FetchCustomerResult()
+        data object Success : FetchCustomerResult()
 
         data class Error(
             val errorCode: Int,
@@ -212,19 +249,15 @@ internal class PaymentSessionViewModel(
     }
 
     internal class Factory(
-        private val application: Application,
-        owner: SavedStateRegistryOwner,
         private val paymentSessionData: PaymentSessionData,
         private val customerSession: CustomerSession
-    ) : AbstractSavedStateViewModelFactory(owner, null) {
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentSessionViewModel(
-                application,
-                handle,
+                extras.requireApplication(),
+                extras.createSavedStateHandle(),
                 paymentSessionData,
                 customerSession
             ) as T

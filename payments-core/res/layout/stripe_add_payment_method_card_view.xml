@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_payment_method_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/stripe_add_card_total_margin"
+    android:orientation="vertical">
+
+    <com.stripe.android.view.CardMultilineWidget
+        android:id="@+id/card_multiline_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.stripe.android.view.ShippingInfoWidget
+        android:id="@+id/billing_address_widget"
+        android:layout_marginTop="48dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+</LinearLayout>

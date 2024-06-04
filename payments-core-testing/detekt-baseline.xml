@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
+    <ID>TooManyFunctions:AbsFakeStripeRepository.kt$AbsFakeStripeRepository : StripeRepository</ID>
+    <ID>TooManyFunctions:AbsPaymentController.kt$AbsPaymentController : PaymentController</ID>
+  </CurrentIssues>
+</SmellBaseline>

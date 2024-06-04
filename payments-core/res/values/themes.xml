@@ -36,9 +36,11 @@
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
-    <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+    <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 
-    <style name="PayLauncherDefaultTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="StripePayLauncherDefaultTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -48,5 +50,7 @@
         <item name="android:windowAnimationStyle">@null</item>
         <item name="colorSurface">@color/stripe_paymentsheet_background</item>
         <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 </resources>

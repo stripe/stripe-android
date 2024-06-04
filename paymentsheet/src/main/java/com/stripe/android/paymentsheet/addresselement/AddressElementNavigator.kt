@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,27 +13,32 @@ import javax.inject.Singleton
 @Singleton
 internal class AddressElementNavigator @Inject constructor() {
     var navigationController: NavHostController? = null
-    var onDismiss: ((AddressElementResult) -> Unit)? = null
+    var onDismiss: ((AddressLauncherResult) -> Unit)? = null
 
     fun navigateTo(
         target: AddressElementScreen
     ) = navigationController?.navigate(target.route)
 
-    fun setResult(key: String, value: Any) =
+    fun setResult(key: String, value: Any?) =
         navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
 
-    fun <T> getResultFlow(key: String) =
-        navigationController?.currentBackStackEntry?.savedStateHandle?.getLiveData<T>(key)?.asFlow()
+    fun <T : Any?> getResultFlow(key: String): Flow<T>? {
+        val currentBackStackEntry = navigationController?.currentBackStackEntry ?: return null
+        return currentBackStackEntry
+            .savedStateHandle
+            .getStateFlow<T?>(key, initialValue = null)
+            .filterNotNull()
+    }
 
-    fun dismiss(result: AddressElementResult = AddressElementResult.Canceled) =
-        onDismiss?.let {
-            it(result)
-        }
+    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+        onDismiss?.invoke(result)
+    }
 
-    fun onBack() =
+    fun onBack() {
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
                 dismiss()
             }
         }
+    }
 }

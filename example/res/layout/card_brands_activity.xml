@@ -9,6 +9,30 @@
     android:orientation="vertical">
 
     <TextView
+        android:text="@string/possible_card_brands"
+        style="@style/Header" />
+
+    <EditText
+        android:id="@+id/card_brand"
+        android:maxLines="1"
+        android:inputType="number"
+        android:hint="@string/card_brands_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/retrieve_card_brands"
+        android:text="@string/retrieve_possible_card_brands"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/possible_card_brands"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <TextView
         android:text="@string/card_brands"
         style="@style/Header" />
 

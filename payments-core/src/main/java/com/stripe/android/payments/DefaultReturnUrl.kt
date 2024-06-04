@@ -10,11 +10,13 @@ internal data class DefaultReturnUrl(
     private val packageName: String
 ) {
     /**
-     * Must match the pattern used in `StripeBrowserLauncherActivity`'s intent filter.
+     * Must match the pattern used in [StripeBrowserProxyReturnActivity]'s intent filter.
      */
-    val value: String get() = "stripesdk://payment_return_url/$packageName"
+    val value: String get() = PREFIX + packageName
 
     companion object {
+        const val PREFIX = "stripesdk://payment_return_url/"
+
         fun create(context: Context) = DefaultReturnUrl(context.packageName)
     }
 }

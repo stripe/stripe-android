@@ -1,10 +1,8 @@
 package com.stripe.android.payments
 
-import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import org.junit.Test
@@ -13,12 +11,11 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StripeBrowserLauncherActivityTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = PaymentBrowserAuthContract()
 
     @Test
     fun `start with no args should finish with no setResult`() {
-        ActivityScenario.launch(
+        ActivityScenario.launchActivityForResult(
             StripeBrowserLauncherActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->

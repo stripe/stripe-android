@@ -8,6 +8,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import com.stripe.android.view.ActivityHost
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import org.junit.runner.RunWith
@@ -76,7 +77,7 @@ class PaymentBrowserAuthStarterTest {
     @Test
     fun `start with isInstantApp false and defaultReturnUrl will start PaymentAuthWebViewActivity`() {
         val legacyStarter = PaymentBrowserAuthStarter.Legacy(
-            AuthActivityStarterHost.ActivityHost(
+            ActivityHost(
                 activity,
                 statusBarColor = Color.RED
             ),
@@ -98,7 +99,7 @@ class PaymentBrowserAuthStarterTest {
     @Test
     fun `start with isInstantApp true and defaultReturnUrl will start StripeBrowserLauncherActivity`() {
         val legacyStarter = PaymentBrowserAuthStarter.Legacy(
-            AuthActivityStarterHost.ActivityHost(
+            ActivityHost(
                 activity,
                 statusBarColor = Color.RED
             ),
@@ -120,7 +121,7 @@ class PaymentBrowserAuthStarterTest {
     @Test
     fun `intent extras should include statusBarColor when available`() {
         val legacyStarter = PaymentBrowserAuthStarter.Legacy(
-            AuthActivityStarterHost.ActivityHost(
+            ActivityHost(
                 activity,
                 statusBarColor = Color.RED
             ),
@@ -145,6 +146,7 @@ class PaymentBrowserAuthStarterTest {
             clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
             url = "https://hooks.stripe.com/",
             returnUrl = "stripe://payment-auth",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

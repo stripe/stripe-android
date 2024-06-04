@@ -1,0 +1,44 @@
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - edge
+  - testmode-payments
+---
+- startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=testmode&permissions=payment_method&financial_connections_test_mode=true&financial_connections_confirm_intent=true
+- tapOn:
+    id: "connect_accounts"
+# Wait until the consent button is visible
+- extendedWaitUntil:
+    visible:
+      id: "consent_cta"
+    timeout: 30000
+- tapOn:
+    id: "consent_cta"
+# SELECT LEGACY INSTITUTION
+- tapOn: "Test Institution"
+####### Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+###############################################
+# SELECT SUCCESS ACCOUNT
+- scrollUntilVisible:
+    element:
+      text: "Success"
+    timeout: 60000
+- tapOn: "Success" # select all accounts
+- tapOn:
+    text: "Connect account"
+    retryTapIfNoChange: false
+# SKIP NETWORKING
+- tapOn:
+    id: "skip_cta"
+    optional: true # Networking might not be enabled
+# CONFIRM AND COMPLETE
+- tapOn:
+    id: "done_button"
+- scrollUntilVisible:
+    element:
+      text: ".*Intent Confirmed!.*"
+- stopRecording

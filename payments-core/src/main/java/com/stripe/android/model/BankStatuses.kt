@@ -1,12 +1,14 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.view.Bank
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 
 @Parcelize
-internal data class BankStatuses internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class BankStatuses internal constructor(
     private val statuses: Map<String, Boolean> = emptyMap()
 ) : StripeModel {
     @TestOnly

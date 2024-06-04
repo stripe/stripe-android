@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
@@ -16,6 +17,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -27,10 +29,12 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.TimeSource
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    private val identityIO: IdentityIO
+    private val identityIO: IdentityIO,
+    private val context: Context
 ) : IdentityRepository {
 
     @VisibleForTesting
@@ -52,9 +56,12 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPage = executeRequestWithKSerializer(
         apiRequestFactory.createGet(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                APP_IDENTIFIER to context.packageName
             )
         ),
         VerificationPage.serializer()
@@ -67,7 +74,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         clearDataParam: ClearDataParam
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$DATA",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$DATA",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             ),
@@ -84,7 +91,67 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$SUBMIT",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun verifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$VERIFY",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                SIMULATE_DELAY to simulateDelay
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun unverifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String, // todo - need to add this to the request
+        simulateDelay: Boolean
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$UNVERIFY",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                SIMULATE_DELAY to simulateDelay
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun generatePhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$GENERATE",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun cannotVerifyPhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$CANNOT_VERIFY",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )
@@ -96,7 +163,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: StripeFilePurpose
+        filePurpose: StripeFilePurpose,
+        onSuccessExecutionTimeBlock: (Long) -> Unit
     ): StripeFile = executeRequestWithModelJsonParser(
         request = IdentityFileUploadRequest(
             fileParams = StripeFileParams(
@@ -108,7 +176,8 @@ internal class DefaultIdentityRepository @Inject constructor(
             ),
             verificationId = verificationId
         ),
-        responseJsonParser = stripeFileJsonParser
+        responseJsonParser = stripeFileJsonParser,
+        onSuccessExecutionTimeBlock = onSuccessExecutionTimeBlock
     )
 
     override suspend fun downloadModel(modelUrl: String) = runCatching {
@@ -210,39 +279,44 @@ internal class DefaultIdentityRepository @Inject constructor(
 
     private suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
         request: StripeRequest,
-        responseJsonParser: ModelJsonParser<Response>
-    ): Response = runCatching {
-        stripeNetworkClient.executeRequest(
-            request
-        )
-    }.fold(
-        onSuccess = { response ->
-            if (response.isError) {
-                // TODO(ccen) Parse the response code and throw different exceptions
-                throw APIException(
-                    stripeError = stripeErrorJsonParser.parse(response.responseJson()),
-                    requestId = response.requestId?.value,
-                    statusCode = response.code
-                )
-            } else {
-                responseJsonParser.parse(response.responseJson()) ?: run {
-                    throw APIException(
-                        message = "$responseJsonParser returns null for ${response.responseJson()}"
-                    )
-                }
-            }
-        },
-        onFailure = {
-            throw APIConnectionException(
-                "Failed to execute $request",
-                cause = it
+        responseJsonParser: ModelJsonParser<Response>,
+        onSuccessExecutionTimeBlock: (Long) -> Unit = {}
+    ): Response {
+        val started = TimeSource.Monotonic.markNow()
+        return runCatching {
+            stripeNetworkClient.executeRequest(
+                request
             )
-        }
-    )
+        }.fold(
+            onSuccess = { response ->
+                if (response.isError) {
+                    // TODO(ccen) Parse the response code and throw different exceptions
+                    throw APIException(
+                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                        requestId = response.requestId?.value,
+                        statusCode = response.code
+                    )
+                } else {
+                    responseJsonParser.parse(response.responseJson())?.let { response ->
+                        onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
+                        response
+                    } ?: run {
+                        throw APIException(
+                            message = "$responseJsonParser returns null for ${response.responseJson()}"
+                        )
+                    }
+                }
+            },
+            onFailure = {
+                throw APIConnectionException(
+                    "Failed to execute $request",
+                    cause = it
+                )
+            }
+        )
+    }
 
     internal companion object {
-        const val SUBMIT = "submit"
-        const val DATA = "data"
         val TAG: String = DefaultIdentityRepository::class.java.simpleName
     }
 }

@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -19,12 +19,13 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentOptionsViewModelModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class,
+        CoreCommonModule::class,
         ResourceRepositoryModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {
-    fun inject(factory: PaymentOptionsViewModel.Factory)
+    val paymentOptionsViewModelSubcomponentBuilder: PaymentOptionsViewModelSubcomponent.Builder
+    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {

@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -25,6 +27,14 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
+    private val CARD_WITH_NETWORKS = CARD.copy(
+        displayBrand = "cartes_bancaires",
+        networks = PaymentMethod.Card.Networks(
+            available = setOf("visa", "cartes_bancaires"),
+            preferred = "cartes_bancaires",
+        )
+    )
+
     @JvmField
     val BILLING_DETAILS = PaymentMethod.BillingDetails(
         address = Address(
@@ -44,9 +54,31 @@ internal object PaymentMethodFixtures {
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
-        customerId = "cus_AQsHpvKfKwJDrF",
         billingDetails = BILLING_DETAILS,
-        card = CARD
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD,
+        code = "card"
+    )
+
+    val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD_WITH_NETWORKS,
+        code = "card"
+    )
+
+    val PAYPAL_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.PayPal,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        code = "paypal"
     )
 //
 //    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -101,6 +133,13 @@ internal object PaymentMethodFixtures {
     )
 
     val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(SEPA_DEBIT_JSON)
+
+    val PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC = ExternalPaymentMethodSpec(
+        type = "external_paypal",
+        label = "PayPal",
+        lightImageUrl = "example_url",
+        darkImageUrl = null
+    )
 
     //
 //    internal val CARD_JSON: JSONObject = JSONObject(
@@ -290,6 +329,45 @@ internal object PaymentMethodFixtures {
 
     val AU_BECS_DEBIT = PaymentMethodJsonParser().parse(AU_BECS_DEBIT_JSON)
 
+    val US_BANK_ACCOUNT_VERIFIED_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1Kr4seLu5o3P18ZperrPnk39",
+            "object": "payment_method",
+            "us_bank_account": {
+                "account_holder_type": "individual",
+                "account_type": "checking",
+                "bank_name": "STRIPE TEST BANK",
+                "fingerprint": "FFDMA0xfhBjWSZLu",
+                "last4": "6789",
+                "routing_number": "110000000",
+                "linked_account": "la_account_123",
+                "financial_connections_account": "la_account_123"
+            },
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": "jenny.rosen@example.com",
+                "name": "Jenny Rosen",
+                "phone": null
+            },
+            "created": 1583356750,
+            "customer": null,
+            "livemode": false,
+            "metadata": null,
+            "type": "us_bank_account"
+        }
+        """.trimIndent()
+    )
+
+    val US_BANK_ACCOUNT_VERIFIED = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_VERIFIED_JSON)
+
     val US_BANK_ACCOUNT_JSON = JSONObject(
         """
         {
@@ -398,17 +476,29 @@ internal object PaymentMethodFixtures {
         val id = "pm_" + UUID.randomUUID().toString()
             .replace("-", "")
         return PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
+            id = id,
             created = ThreadLocalRandom.current().nextLong(
                 createdOrigin ?: 1L,
                 10000000
             ),
-            id = id,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = createLast4()
-            )
+            ),
+            code = "card"
+        )
+    }
+
+    fun createExternalPaymentMethod(spec: ExternalPaymentMethodSpec): PaymentSelection.ExternalPaymentMethod {
+        return PaymentSelection.ExternalPaymentMethod(
+            type = spec.type,
+            label = spec.type,
+            iconResource = 0,
+            lightThemeIconUrl = spec.lightImageUrl,
+            darkThemeIconUrl = spec.darkImageUrl,
+            billingDetails = null,
         )
     }
 

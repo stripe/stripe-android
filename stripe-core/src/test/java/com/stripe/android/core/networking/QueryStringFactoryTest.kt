@@ -3,6 +3,7 @@ package com.stripe.android.core.networking
 import java.net.URLDecoder
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class QueryStringFactoryTest {
@@ -73,6 +74,7 @@ class QueryStringFactoryTest {
         assertTrue(outParams.containsKey("a"))
         assertTrue(outParams.containsKey("b"))
         assertTrue(outParams.containsKey("c"))
+        assertFalse(outParams.containsKey("d"))
 
         val firstNestedMap = outParams["c"] as Map<*, *>
         assertEquals(2, firstNestedMap.size)
@@ -85,7 +87,7 @@ class QueryStringFactoryTest {
         assertTrue(secondNestedMap.containsKey("2b"))
     }
 
-    private fun createParamsWithNestedMap(): Map<String, Any> {
+    private fun createParamsWithNestedMap(): Map<String, Any?> {
         return mapOf(
             "a" to "fun param",
             "b" to "not null",
@@ -96,7 +98,8 @@ class QueryStringFactoryTest {
                     "2a" to "",
                     "2b" to "hello world"
                 )
-            )
+            ),
+            "d" to null
         )
     }
 

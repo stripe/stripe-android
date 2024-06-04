@@ -66,9 +66,8 @@ afterEvaluate { project ->
 
                     licenses {
                         license {
-                            name = "The MIT License"
-                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
-                            distribution = "repo"
+                            name = "MIT License"
+                            url = "https://opensource.org/licenses/MIT"
                         }
                     }
 
@@ -89,7 +88,10 @@ afterEvaluate { project ->
                         }
 
                         final depGroup = dep.group
-                        final depName = dep.name
+                        // If it's a project dependency, use the artifactId, otherwise use its name.
+                        final depName = dep.hasProperty("dependencyProject") && dep.dependencyProject.hasProperty("artifactId") ?
+                                dep.dependencyProject.artifactId : dep.name
+
                         final depVersion = dep.version != 'unspecified' ? dep.version : VERSION_NAME
 
                         final dependencyNode = dependenciesNode.appendNode("dependency")

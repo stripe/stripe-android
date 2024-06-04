@@ -1,0 +1,73 @@
+/**
+ * Base build configuration for all android example applications (modules applying the android application plugin).
+ *
+ * Don't add any configuration here that is not common to *every* android example application.
+ */
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+
+apply from: rootProject.file('build-configuration/version.gradle')
+
+apply from: rootProject.file('build-configuration/detekt.gradle')
+apply from: rootProject.file('build-configuration/ktlint.gradle')
+
+check.dependsOn('ktlint')
+
+android {
+    namespace STRIPE_ANDROID_NAMESPACE
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        versionName VERSION_NAME
+    }
+
+    signingConfigs {
+        config {
+            keyAlias 'example'
+            keyPassword 'Stripe12345'
+            // Generated with: `echo y | keytool -genkeypair -dname "cn=Stripe Developer, ou=Stripe, o=Stripe, c=US" -alias example -keypass Stripe12345 -keystore stripe-example.keystore -storepass Stripe12345 -keyalg RSA -keysize 2048 -validity 20000`
+            storeFile rootProject.file('stripe-example.keystore')
+            storePassword 'Stripe12345'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
+        }
+    }
+
+    testOptions {
+        // Make sure animations are off when we run espresso tests
+        animationsDisabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of("11"))
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['LICENSE.txt']
+        }
+    }
+}

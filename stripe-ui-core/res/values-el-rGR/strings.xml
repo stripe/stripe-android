@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for Address field on address form -->
+  <string name="stripe_address_label_address">Διεύθυνση</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="stripe_address_label_address_line2">Γραμμή διεύθυνσης 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="stripe_address_label_ae_emirate">Εμιράτο</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_au_suburb_or_city">Προάστιο ή πόλη</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_bb_jm_parish">Δήμος</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_department">Τμήμα</string>
+  <!-- Label for the district field on an address form -->
+  <string name="stripe_address_label_district">Περιφέρεια</string>
+  <!-- Label of an address field in hk -->
+  <string name="stripe_address_label_hk_area">Περιοχή</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_ie_eircode">Ταχυδρομικός κώδικας</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="stripe_address_label_ie_townland">Κοινότητα</string>
+  <!-- Used to describe postal code in India -->
+  <string name="stripe_address_label_in_pin">Pin</string>
+  <!-- Used to describe part of an address -->
+  <string name="stripe_address_label_island">Νησί</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_jp_prefecture">Νομός</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_neighborhood">Συνοικία</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_oblast">Περιφέρεια</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_post_town">Ταχυδρομείο ή πόλη</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_suburb">Προάστιο</string>
+  <!-- Used to describe an address field. -->
+  <string name="stripe_address_label_village_township">Χωριό ή κοινότητα</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="stripe_address_search_content_description">Αναζήτηση</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="stripe_address_zip_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="stripe_address_zip_postal_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="stripe_billing_same_as_shipping">Η διεύθυνση τιμολόγησης είναι ίδια με τη διεύθυνση αποστολής</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="stripe_blank_and_required">Αυτό το πεδίο δεν μπορεί να είναι κενό.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="stripe_change">Αλλαγή</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_email">Διεύθυνση ηλεκτρονικού ταχυδρομείου</string>
+  <!-- Error message when email is invalid -->
+  <string name="stripe_email_is_invalid">Η διεύθυνση email σας δεν είναι έγκυρη.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiration_date_hint">ΜΜ / ΕΕ</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Αυτό το πεδίο είναι υποχρεωτικό</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_form_label_optional">%s (προαιρετικό)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="stripe_incomplete_expiry_date">Η ημερομηνία λήξης της κάρτας σας είναι ελλιπής.</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="stripe_incomplete_phone_number">Ελλιπής αριθμός τηλεφώνου</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="stripe_invalid_expiry_month">Ο μήνας λήξης της κάρτας σας δεν είναι έγκυρος.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="stripe_invalid_expiry_year">Το έτος λήξης της κάρτας σας δεν είναι έγκυρο.</string>
+</resources>

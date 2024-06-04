@@ -23,11 +23,13 @@ class FinancialConnectionsSheet internal constructor(
      *
      * @param financialConnectionsSessionClientSecret the session client secret
      * @param publishableKey the Stripe publishable key
+     * @param stripeAccountId (optional) connected account ID
      */
     @Parcelize
     data class Configuration(
         val financialConnectionsSessionClientSecret: String,
-        val publishableKey: String
+        val publishableKey: String,
+        val stripeAccountId: String? = null
     ) : Parcelable
 
     /**
@@ -48,6 +50,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param activity  the Activity that is presenting the [FinancialConnectionsSheet].
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
+        @JvmStatic
         fun create(
             activity: ComponentActivity,
             callback: FinancialConnectionsSheetResultCallback
@@ -63,6 +66,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          * @param callback called with the result of the payment after the payment sheet is dismissed.
          */
+        @JvmStatic
         fun create(
             fragment: Fragment,
             callback: FinancialConnectionsSheetResultCallback
@@ -78,6 +82,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param activity  the Activity that is presenting the connections sheet.
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
+        @JvmStatic
         fun createForBankAccountToken(
             activity: ComponentActivity,
             callback: FinancialConnectionsSheetResultForTokenCallback
@@ -93,6 +98,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          * @param callback called with the result of the payment after the payment sheet is dismissed.
          */
+        @JvmStatic
         fun createForBankAccountToken(
             fragment: Fragment,
             callback: FinancialConnectionsSheetResultForTokenCallback

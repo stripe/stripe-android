@@ -1,13 +1,14 @@
 package com.stripe.android.payments
 
 import android.app.Activity
-import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.os.Bundle
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
@@ -24,10 +25,7 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory(
-            application,
-            this
-        )
+        StripeBrowserLauncherViewModel.Factory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,42 +33,55 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
 
         val args = PaymentBrowserAuthContract.parseArgs(intent)
         if (args == null) {
-            // handle failures
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
+                )
             return
         }
 
+        if (viewModel.hasLaunched) {
+            finishWithSuccess(args)
+        } else {
+            launchBrowser(args)
+        }
+    }
+
+    private fun launchBrowser(args: PaymentBrowserAuthContract.Args) {
+        val contract = ActivityResultContracts.StartActivityForResult()
+        val launcher = registerForActivityResult(contract) {
+            finishWithSuccess(args)
+        }
+
+        val intent = viewModel.createLaunchIntent(args)
+
+        try {
+            launcher.launch(intent)
+            viewModel.hasLaunched = true
+        } catch (e: ActivityNotFoundException) {
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
+                    stripeException = StripeException.create(e),
+                )
+            finishWithFailure(args)
+        }
+    }
+
+    private fun finishWithSuccess(args: PaymentBrowserAuthContract.Args) {
         setResult(
             Activity.RESULT_OK,
             viewModel.getResultIntent(args)
         )
-
-        if (viewModel.hasLaunched) {
-            finish()
-        } else {
-            val launcher = registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult(),
-                ::onResult
-            )
-
-            launcher.launch(
-                viewModel.createLaunchIntent(args)
-            )
-
-            viewModel.hasLaunched = true
-        }
-    }
-
-    private fun onResult(activityResult: ActivityResult) {
-        // always dismiss the activity when a result is available
-
         finish()
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        // This is invoked by the intent filter. We might not need to implement this method but
-        // leaving it here for posterity.
+    private fun finishWithFailure(args: PaymentBrowserAuthContract.Args) {
+        setResult(
+            Activity.RESULT_OK,
+            viewModel.getFailureIntent(args)
+        )
+        finish()
     }
 }

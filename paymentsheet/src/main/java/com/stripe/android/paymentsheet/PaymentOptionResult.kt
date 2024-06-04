@@ -12,11 +12,9 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentOptionResult(
     val resultCode: Int,
-    open val paymentMethods: List<PaymentMethod>? = null
 ) : Parcelable {
-    fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
-    }
+
+    abstract val paymentMethods: List<PaymentMethod>?
 
     @Parcelize
     data class Succeeded(
@@ -33,16 +31,22 @@ internal sealed class PaymentOptionResult(
     @Parcelize
     data class Canceled(
         val mostRecentError: Throwable?,
+        val paymentSelection: PaymentSelection?,
         // The user could have removed a payment method and canceled the flow. We should update
         // the list of paymentMethods
-        override val paymentMethods: List<PaymentMethod>? = null
-    ) : PaymentOptionResult(Activity.RESULT_CANCELED, paymentMethods)
+        override val paymentMethods: List<PaymentMethod>? = null,
+    ) : PaymentOptionResult(Activity.RESULT_CANCELED)
+
+    fun toBundle(): Bundle {
+        return bundleOf(EXTRA_RESULT to this)
+    }
 
     internal companion object {
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
         @JvmSynthetic
         internal fun fromIntent(intent: Intent?): PaymentOptionResult? {
+            @Suppress("DEPRECATION")
             return intent?.getParcelableExtra(EXTRA_RESULT)
         }
     }

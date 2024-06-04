@@ -1,32 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
-  <string name="add_new_payment_method">Ajouter un moyen de paiement</string>
+  <string name="stripe_add_new_payment_method">Ajouter un moyen de paiement</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
+  <string name="stripe_bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">Veuillez confirmer le paiement dans votre application bancaire sous %s pour effectuer l\'achat.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Vos informations de paiement ne seront pas enregistrées.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Voulez-vous vraiment fermer ce formulaire?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[En continuant, vous autorisez les paiements conformément à <terms>ces conditions</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[En enregistrant votre compte bancaire pour %s, vous autorisez les paiements conformément à <terms>ces conditions</terms>.]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">Un problème est survenu lors de l\'association de votre compte.\nVeuillez réessayer ultérieurement.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ajouter</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ajoutez vos informations de paiement</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Retour</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">Enregistrer l\'adresse</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">Adresse de livraison</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Un courriel sera envoyé à l\'adresse %s sous trois jours ouvrables pour confirmer la configuration de cet ordre de prélèvement.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Confirmez les informations de votre prélèvement automatique</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Mettre à jour les informations</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">En outre, vous recevrez par courriel un préavis de deux jours pour tout prélèvement effectué en vertu de cet ordre. Les paiements apparaîtront sur votre relevé bancaire sous le libellé « %s ».</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Vos paiements sont protégés par la %s.</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Choisir un moyen de paiement</string>
   <string name="stripe_paymentsheet_close">Fermer</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">Confirmer</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">Confirmez votre CVC</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">Saisir l\'adresse manuellement</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">Gérer vos moyens de paiement</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe va effectuer un versement de 0,01 $ sur votre compte sous 1 ou 2 jours ouvrables. Vous recevrez ensuite un courriel contenant des instructions pour finaliser le paiement à %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Mettre à jour %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Ou utiliser</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Ou utiliser une carte</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Payer</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Payer avec</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">Payez avec votre compte bancaire en quelques étapes.</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Traitement en cours...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">Supprimer le compte bancaire</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Retirer la carte</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Supprimer %s</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">Enregistrer</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">Enregistrer un nouveau moyen de paiement</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Enregistrez votre compte bancaire en quelques clics.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Enregistrer pour les prochains achats</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -35,4 +87,16 @@
   <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total : %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Un problème est survenu</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">Annuler et utiliser un autre moyen de paiement</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">Autoriser le paiement</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Ouvrez votre application d\'UPI pour autoriser votre paiement dans %s</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">Veuillez revenir à l\'étape précédente afin de sélectionner un autre moyen de paiement</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">Le paiement a échoué</string>
 </resources>

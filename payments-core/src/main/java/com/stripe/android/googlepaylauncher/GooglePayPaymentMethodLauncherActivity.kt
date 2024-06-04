@@ -7,11 +7,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.contract.ApiTaskResult
+import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * [GooglePayPaymentMethodLauncherActivity] is used to return the result of a Google Pay operation.
@@ -29,26 +33,21 @@ import kotlinx.coroutines.launch
  */
 internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayPaymentMethodLauncherViewModel by viewModels {
-        GooglePayPaymentMethodLauncherViewModel.Factory(
-            application,
-            args,
-            this
-        )
+        GooglePayPaymentMethodLauncherViewModel.Factory(args)
     }
 
-    private lateinit var args: GooglePayPaymentMethodLauncherContract.Args
+    private val errorReporter: ErrorReporter by lazy {
+        ErrorReporter.createFallbackInstance(context = this)
+    }
+
+    private lateinit var args: GooglePayPaymentMethodLauncherContractV2.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
-        if (statusColor != -1) {
-            window.statusBarColor = statusColor
-        }
+        setFadeAnimations()
 
-        disableAnimations()
-
-        val nullableArgs = GooglePayPaymentMethodLauncherContract.Args.fromIntent(intent)
+        val nullableArgs = GooglePayPaymentMethodLauncherContractV2.Args.fromIntent(intent)
         if (nullableArgs == null) {
             finishWithResult(
                 GooglePayPaymentMethodLauncher.Result.Failed(
@@ -62,17 +61,25 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         }
         args = nullableArgs
 
-        viewModel.googlePayResult.observe(this) { googlePayResult ->
-            googlePayResult?.let(::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.googlePayResult.collect { googlePayResult ->
+                googlePayResult?.let(::finishWithResult)
+            }
+        }
+
+        val googlePayLauncher = registerForActivityResult(GetPaymentDataResult()) {
+            onGooglePayResult(it)
         }
 
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
                 runCatching {
-                    viewModel.createLoadPaymentDataTask()
+                    withContext(Dispatchers.IO) {
+                        viewModel.loadPaymentData()
+                    }
                 }.fold(
                     onSuccess = {
-                        launchGooglePay(it)
+                        googlePayLauncher.launch(it)
                         viewModel.hasLaunched = true
                     },
                     onFailure = {
@@ -90,72 +97,63 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        disableAnimations()
+        setFadeAnimations()
     }
 
-    private fun launchGooglePay(task: Task<PaymentData>) {
-        AutoResolveHelper.resolveTask(
-            task,
-            this,
-            LOAD_PAYMENT_DATA_REQUEST_CODE
-        )
-    }
-
-    public override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
-            when (resultCode) {
-                RESULT_OK -> {
-                    onGooglePayResult(data)
-                }
-                RESULT_CANCELED -> {
-                    updateResult(
-                        GooglePayPaymentMethodLauncher.Result.Canceled
-                    )
-                }
-                AutoResolveHelper.RESULT_ERROR -> {
-                    val status = AutoResolveHelper.getStatusFromIntent(data)
-                    val statusMessage = status?.statusMessage.orEmpty()
+    private fun onGooglePayResult(taskResult: ApiTaskResult<PaymentData>) {
+        when (taskResult.status.statusCode) {
+            CommonStatusCodes.SUCCESS -> {
+                val result = taskResult.result
+                if (result != null) {
+                    onGooglePayResult(result)
+                } else {
+                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
                     updateResult(
                         GooglePayPaymentMethodLauncher.Result.Failed(
                             RuntimeException(
-                                "Google Pay failed with error ${status?.statusCode}: $statusMessage"
+                                "Google Pay failed with missing data."
                             ),
-                            status?.statusCode?.let {
-                                googlePayStatusCodeToErrorCode(it)
-                            } ?: GooglePayPaymentMethodLauncher.INTERNAL_ERROR
-                        )
-                    )
-                }
-                else -> {
-                    updateResult(
-                        GooglePayPaymentMethodLauncher.Result.Failed(
-                            RuntimeException("Google Pay returned an expected result code."),
                             GooglePayPaymentMethodLauncher.INTERNAL_ERROR
                         )
                     )
                 }
             }
+            CommonStatusCodes.CANCELED -> {
+                updateResult(
+                    GooglePayPaymentMethodLauncher.Result.Canceled
+                )
+            }
+            else -> {
+                val status = taskResult.status
+                val statusMessage = status.statusMessage.orEmpty()
+                val statusCode = status.statusCode.toString()
+
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+                    additionalNonPiiParams = mapOf(
+                        "status_message" to statusMessage,
+                        "status_code" to statusCode,
+                    )
+                )
+
+                viewModel.updateResult(
+                    GooglePayPaymentMethodLauncher.Result.Failed(
+                        RuntimeException(
+                            "Google Pay failed with error ${status.statusCode}: ${status.statusMessage.orEmpty()}"
+                        ),
+                        googlePayStatusCodeToErrorCode(status.statusCode)
+                    )
+                )
+            }
         }
     }
 
-    private fun onGooglePayResult(data: Intent?) {
-        data?.let { PaymentData.getFromIntent(it) }?.let { paymentData ->
-            lifecycleScope.launch {
-                finishWithResult(
-                    viewModel.createPaymentMethod(paymentData)
-                )
-            }
-        } ?: updateResult(
-            GooglePayPaymentMethodLauncher.Result.Failed(
-                IllegalArgumentException("Google Pay data was not available"),
-                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+    private fun onGooglePayResult(paymentData: PaymentData) {
+        lifecycleScope.launch {
+            finishWithResult(
+                viewModel.createPaymentMethod(paymentData)
             )
-        )
+        }
     }
 
     private fun updateResult(result: GooglePayPaymentMethodLauncher.Result) {
@@ -173,9 +171,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun disableAnimations() {
-        // this is a transparent Activity so we want to disable animations
-        overridePendingTransition(0, 0)
+    private fun setFadeAnimations() {
+        fadeOut()
     }
 
     private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int):
@@ -185,9 +182,5 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             CommonStatusCodes.DEVELOPER_ERROR -> GooglePayPaymentMethodLauncher.DEVELOPER_ERROR
             else -> GooglePayPaymentMethodLauncher.INTERNAL_ERROR
         }
-    }
-
-    private companion object {
-        private const val LOAD_PAYMENT_DATA_REQUEST_CODE = 4444
     }
 }

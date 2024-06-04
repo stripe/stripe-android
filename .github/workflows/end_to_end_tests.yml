@@ -9,26 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
       - name: End-to-end tests
         env:
           STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
           STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: unit-test-report
@@ -36,4 +24,9 @@ jobs:
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
         if: failure()
-        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK

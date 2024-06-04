@@ -1,9 +1,12 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Parcelize
 internal data class VerificationPageStaticContentTextPage(
 
     @SerialName("body")
@@ -12,4 +15,4 @@ internal data class VerificationPageStaticContentTextPage(
     val buttonText: String,
     @SerialName("title")
     val title: String
-)
+) : Parcelable

@@ -14,13 +14,19 @@ import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
+import com.stripe.android.uicore.elements.H6Text
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionController
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
     controller: CardDetailsSectionController,
-    hiddenIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: Set<IdentifierSpec>,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -36,7 +42,7 @@ fun CardDetailsSectionElementUI(
                 }
         )
         if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
-            ScanCardButtonUI {
+            ScanCardButtonUI(enabled = enabled) {
                 controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                     it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                         ?: CardScanSheetResult.Failed(
@@ -47,8 +53,8 @@ fun CardDetailsSectionElementUI(
         }
     }
     SectionElementUI(
-        enabled,
-        SectionElement(
+        enabled = enabled,
+        element = SectionElement(
             IdentifierSpec.Generic("credit_details"),
             listOf(controller.cardDetailsElement),
             SectionController(
@@ -56,7 +62,7 @@ fun CardDetailsSectionElementUI(
                 listOf(controller.cardDetailsElement.sectionFieldErrorController())
             )
         ),
-        hiddenIdentifiers ?: emptyList(),
-        IdentifierSpec.Generic("card_details")
+        hiddenIdentifiers = hiddenIdentifiers,
+        lastTextFieldIdentifier = lastTextFieldIdentifier
     )
 }

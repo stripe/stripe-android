@@ -2,8 +2,8 @@ package com.stripe.android.cards
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A [CardAccountRangeSource] that uses a local, static source of BIN ranges.
@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.flowOf
 class StaticCardAccountRangeSource(
     private val accountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
 ) : CardAccountRangeSource {
-    override val loading: Flow<Boolean> = flowOf(false)
+    override val loading: StateFlow<Boolean> = stateFlowOf(false)
 
-    override suspend fun getAccountRange(
+    override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange? {
-        return accountRanges.first(cardNumber)
+    ): List<AccountRange> {
+        return accountRanges.filter(cardNumber)
     }
 }

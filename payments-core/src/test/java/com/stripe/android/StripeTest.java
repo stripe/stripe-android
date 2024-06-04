@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -31,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PersonTokenParamsFixtures;
+import com.stripe.android.model.PossibleBrands;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceTypeModel;
@@ -41,7 +43,9 @@ import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -69,6 +73,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -101,6 +106,9 @@ public class StripeTest {
     @Mock
     private ApiResultCallback<StripeFile> stripeFileCallback;
 
+    @Mock
+    private ApiResultCallback<PossibleBrands> possibleBrands;
+
     @Captor
     private ArgumentCaptor<AnalyticsRequest> analyticsRequestArgumentCaptor;
     @Captor
@@ -109,6 +117,12 @@ public class StripeTest {
     private ArgumentCaptor<Source> sourceArgumentCaptor;
     @Captor
     private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<PossibleBrands> possibleBrandsArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Exception> errorArgumentCaptor;
 
     @Before
     public void setup() {
@@ -451,38 +465,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
-            throws StripeException {
-        final Stripe stripe = defaultStripe;
-        final SourceParams params = SourceParams.createCardParams(CARD_PARAMS);
-
-        final Source cardSource = stripe.createSourceSynchronous(params);
-        assertNotNull(cardSource);
-        assertNotNull(cardSource.getId());
-        final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                50000L,
-                "brl",
-                "example://return",
-                cardSource.getId());
-        final Map<String, String> metadata = new HashMap<String, String>() {{
-            put("dimensions", "three");
-            put("type", "beach ball");
-        }};
-        threeDParams.setMetadata(metadata);
-
-        final Source threeDSource = stripe.createSourceSynchronous(threeDParams);
-        assertNotNull(threeDSource);
-        assertNotNull(threeDSource.getAmount());
-        assertEquals(50000L, threeDSource.getAmount().longValue());
-        assertEquals("brl", threeDSource.getCurrency());
-        assertNotNull(threeDSource.getClientSecret());
-        assertNotNull(threeDSource.getId());
-        assertNull(threeDSource.getSourceTypeModel());
-        assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
-        assertNotNull(threeDSource.getSourceTypeData());
-    }
-
-    @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
             throws StripeException {
         final SourceParams params = SourceParams.createGiropayParams(
@@ -795,45 +777,6 @@ public class StripeTest {
     }
 
     @Test
-    public void retrieveSourceAsync_withValidData_passesIntegrationTest() throws StripeException {
-        final Source source = createSource();
-
-        final Stripe stripe = createStripe(testDispatcher);
-        stripe.retrieveSource(
-                Objects.requireNonNull(source.getId()),
-                Objects.requireNonNull(source.getClientSecret()),
-                sourceCallback
-        );
-        idle();
-
-        verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture());
-
-        final Source capturedSource = sourceArgumentCaptor.getValue();
-        assertEquals(
-                source.getId(),
-                capturedSource.getId()
-        );
-    }
-
-    @Test
-    public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
-            throws StripeException {
-        final Source source = createSource();
-
-        final String sourceId = source.getId();
-        final String clientSecret = source.getClientSecret();
-        assertNotNull(sourceId);
-        assertNotNull(clientSecret);
-
-        final Source retrievedSource = createStripe()
-                .retrieveSourceSynchronous(sourceId, clientSecret);
-
-        // We aren't actually updating the source on the server, so the two sources should
-        // be identical.
-        assertEquals(source, retrievedSource);
-    }
-
-    @Test
     public void createSourceFromTokenParams_withExtraParams_succeeds()
             throws StripeException {
         final Stripe stripe = defaultStripe;
@@ -846,18 +789,6 @@ public class StripeTest {
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
         assertEquals(Source.Usage.SingleUse, source.getUsage());
-    }
-
-    @Test
-    public void createVisaCheckoutParams_whenUnactivated_throwsException() {
-        final SourceParams sourceParams = SourceParams.createVisaCheckoutParams(
-                UUID.randomUUID().toString()
-        );
-        final InvalidRequestException ex = assertThrows(
-                InvalidRequestException.class,
-                () -> defaultStripe.createSourceSynchronous(sourceParams)
-        );
-        assertEquals("visa_checkout must be activated before use.", ex.getMessage());
     }
 
     @Test
@@ -1259,6 +1190,107 @@ public class StripeTest {
         assertTrue(url.startsWith("https://files.stripe.com/v1/files/file_"));
     }
 
+    @Test
+    public void retrievePossibleBrands_shouldReturnPossibleBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "4242 42",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 1);
+        assertEquals(result.getBrands().get(0), CardBrand.Visa);
+    }
+
+    @Test
+    public void retrievePossibleBrands_shouldReturnMultipleCardBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "5131 30",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 2);
+        assertTrue(result.getBrands().contains(CardBrand.MasterCard));
+        assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
+    }
+
+    @Test
+    public void retrievePossibleBrands_forVisaAndCartesBancaires_shouldReturnMultipleCardBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "4000 0025 0000 1001",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 2);
+        assertTrue(result.getBrands().contains(CardBrand.Visa));
+        assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
+    }
+
+    @Test
+    public void retrievePossibleBrands_forMastercardAndCartesBancaires_shouldReturnMultipleCardBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "5555 5525 0000 1001",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 2);
+        assertTrue(result.getBrands().contains(CardBrand.MasterCard));
+        assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
+    }
+
+    @Test
+    public void retrievePossibleBrands_shouldReturnError() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "4242",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onError(errorArgumentCaptor.capture());
+
+        final Exception result = errorArgumentCaptor.getValue();
+
+        assertEquals(result.getMessage(), "cardNumber cannot be less than 6 characters");
+    }
+
     @NonNull
     private Source createSource() throws StripeException {
         final Stripe stripe = defaultStripe;
@@ -1369,7 +1401,8 @@ public class StripeTest {
                 emptySet(),
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
-                fraudDetectionDataRepository
+                fraudDetectionDataRepository,
+                new DefaultCardAccountRangeRepositoryFactory(context)
         );
     }
 

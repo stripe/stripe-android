@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.scanui
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
@@ -10,14 +11,16 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
-import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.getCameraAdapter
+import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -26,20 +29,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.camera.R as CameraR
 
 sealed interface CancellationReason : Parcelable {
 
     @Parcelize
-    object Closed : CancellationReason
+    data object Closed : CancellationReason
 
     @Parcelize
-    object Back : CancellationReason
+    data object Back : CancellationReason
 
     @Parcelize
-    object UserCannotScan : CancellationReason
+    data object UserCannotScan : CancellationReason
 
     @Parcelize
-    object CameraPermissionDenied : CancellationReason
+    data object CameraPermissionDenied : CancellationReason
 }
 
 internal interface ScanResultListener {
@@ -65,7 +69,14 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     protected var isFlashlightOn: Boolean = false
         private set
 
-    internal val cameraAdapter by lazy { buildCameraAdapter() }
+    abstract val cameraAdapterBuilder: (
+        Activity,
+        ViewGroup,
+        Size,
+        CameraErrorListener
+    ) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+
+    internal val cameraAdapter by lazy { buildCameraAdapter(cameraAdapterBuilder) }
     private val cameraErrorListener by lazy {
         DefaultCameraErrorListener(this) { t -> scanFailure(t) }
     }
@@ -79,6 +90,12 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         super.onCreate(savedInstanceState)
 
         Stats.startScan()
+
+        onBackPressedDispatcher.addCallback {
+            runBlocking { scanStat.trackResult("user_canceled") }
+            resultListener.userCanceled(CancellationReason.Back)
+            closeScanner()
+        }
 
         if (!CameraAdapter.isCameraSupported(this)) {
             showCameraNotSupportedDialog()
@@ -138,9 +155,9 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      */
     protected open fun showCameraNotSupportedDialog() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(R.string.stripe_error_camera_unsupported)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
+            .setTitle(CameraR.string.stripe_error_camera_title)
+            .setMessage(CameraR.string.stripe_error_camera_unsupported)
+            .setPositiveButton(CameraR.string.stripe_error_camera_acknowledge_button) { _, _ ->
                 scanFailure()
             }
             .show()
@@ -184,15 +201,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         Log.e(LOG_TAG, "Canceling scan due to error", cause)
         runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
-        closeScanner()
-    }
-
-    /**
-     * Cancel the scan when the user presses back.
-     */
-    override fun onBackPressed() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
 
@@ -251,7 +259,17 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             onSupportsMultipleCameras(it)
         }
 
-        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+        lifecycleScope.launch(Dispatchers.IO) {
+            InterpreterInitializerImpl.initialize(
+                context = this@ScanActivity,
+                onSuccess = {
+                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+                },
+                onFailure = {
+                    scanFailure(it)
+                }
+            )
+        }
     }
 
     /**
@@ -271,13 +289,10 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     /**
      * Generate a camera adapter
      */
-    internal open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
-        getCameraAdapter(
-            activity = this,
-            previewView = previewFrame,
-            minimumResolution = minimumAnalysisResolution,
-            cameraErrorListener = cameraErrorListener
-        )
+    internal open fun buildCameraAdapter(
+        cameraProvider: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+    ): CameraAdapter<CameraPreviewImage<Bitmap>> =
+        cameraProvider(this, previewFrame, minimumAnalysisResolution, cameraErrorListener)
 
     protected abstract val previewFrame: ViewGroup
 

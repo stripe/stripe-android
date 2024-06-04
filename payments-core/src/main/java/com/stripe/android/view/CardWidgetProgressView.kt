@@ -10,7 +10,7 @@ import android.widget.FrameLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import com.stripe.android.R
-import com.stripe.android.databinding.CardWidgetProgressViewBinding
+import com.stripe.android.databinding.StripeCardWidgetProgressViewBinding
 
 internal class CardWidgetProgressView @JvmOverloads constructor(
     context: Context,
@@ -57,7 +57,7 @@ internal class CardWidgetProgressView @JvmOverloads constructor(
     }
 
     init {
-        CardWidgetProgressViewBinding.inflate(
+        StripeCardWidgetProgressViewBinding.inflate(
             LayoutInflater.from(context),
             this
         )

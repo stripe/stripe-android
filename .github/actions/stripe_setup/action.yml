@@ -1,0 +1,15 @@
+name: "Stripe Setup"
+description: "Sets up the GitHub Actions Workflow"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Copy CI gradle.properties
+      run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+      shell: bash
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'corretto'
+        java-version: '17'
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2

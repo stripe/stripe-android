@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 internal data class VerificationPageDataRequirements(
 
     @SerialName("errors")
-    val errors: List<VerificationPageDataRequirementError>
+    val errors: List<VerificationPageDataRequirementError>,
+
+    @SerialName("missing")
+    val missings: List<Requirement>? = null
 
 )

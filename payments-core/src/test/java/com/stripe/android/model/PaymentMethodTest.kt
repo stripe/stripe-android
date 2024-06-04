@@ -17,9 +17,10 @@ class PaymentMethodTest {
                     created = 1550757934255L,
                     liveMode = true,
                     type = PaymentMethod.Type.Card,
-                    customerId = "cus_AQsHpvKfKwJDrF",
                     billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
-                    card = PaymentMethodFixtures.CARD
+                    customerId = "cus_AQsHpvKfKwJDrF",
+                    card = PaymentMethodFixtures.CARD,
+                    code = "card"
                 )
             )
     }
@@ -35,17 +36,18 @@ class PaymentMethodTest {
     @Test
     fun testParcelable() {
         val paymentMethod = PaymentMethod(
-            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
-            created = 1550757934255L,
-            customerId = "cus_AQsHpvKfKwJDrF",
             id = "pm_123456789",
-            type = PaymentMethod.Type.Card,
+            created = 1550757934255L,
             liveMode = true,
+            type = PaymentMethod.Type.Card,
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            customerId = "cus_AQsHpvKfKwJDrF",
             card = PaymentMethodFixtures.CARD,
             cardPresent = PaymentMethod.CardPresent.EMPTY,
             fpx = PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx,
             ideal = PaymentMethod.Ideal("my bank", "bank id"),
-            sepaDebit = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit
+            sepaDebit = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit,
+            code = "card"
         )
         ParcelUtils.verifyParcelRoundtrip(paymentMethod)
     }

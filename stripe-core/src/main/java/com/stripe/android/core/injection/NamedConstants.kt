@@ -19,3 +19,33 @@ const val PUBLISHABLE_KEY = "publishableKey"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val STRIPE_ACCOUNT_ID = "stripeAccountId"
+
+/**
+ * Name for form initial values
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val INITIAL_VALUES = "initialValues"
+
+/**
+ * Name for user's shipping address
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SHIPPING_VALUES = "shippingValues"
+
+/**
+ * Name for isLiveMode
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val IS_LIVE_MODE = "isLiveMode"
+
+/**
+ * Name for linear delay supplier
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val LINEAR_DELAY = "linearDelaySupplier"
+
+/**
+ * Name for exponential backoff delay supplier
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EXPONENTIAL_BACKOFF_DELAY = "exponentialBackoffDelaySupplier"

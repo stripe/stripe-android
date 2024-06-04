@@ -1,3 +1,227 @@
+public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Companion;
+	public abstract fun attachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun create (Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;)Lcom/stripe/android/customersheet/CustomerAdapter;
+	public static fun create (Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerAdapter;
+	public abstract fun detachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getCanCreateSetupIntents ()Z
+	public abstract fun getPaymentMethodTypes ()Ljava/util/List;
+	public abstract fun retrievePaymentMethods (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun retrieveSelectedPaymentOption (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setSelectedPaymentOption (Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setupIntentClientSecretForCustomerAttach (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Companion {
+	public final fun create (Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;)Lcom/stripe/android/customersheet/CustomerAdapter;
+	public final fun create (Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerAdapter;
+	public static synthetic fun create$default (Lcom/stripe/android/customersheet/CustomerAdapter$Companion;Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerAdapter$PaymentOption {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun fromId (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;
+	public fun getId ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$PaymentOption$Companion {
+	public final fun fromId (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Result$Companion;
+	public static final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+	public static final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Companion {
+	public final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+	public final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Failure : com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public final fun getCause ()Ljava/lang/Throwable;
+	public final fun getDisplayMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Success : com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public final fun getValue ()Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerEphemeralKey {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerEphemeralKey$Companion;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerEphemeralKey;
+}
+
+public final class com/stripe/android/customersheet/CustomerEphemeralKey$Companion {
+	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerEphemeralKey;
+}
+
+public abstract interface class com/stripe/android/customersheet/CustomerEphemeralKeyProvider {
+	public abstract fun provideCustomerEphemeralKey (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Companion;
+	public static final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+	public static final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+	public final fun present ()V
+	public final fun resetCustomer ()V
+	public final fun retrievePaymentOptionSelection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Companion;
+	public static final fun builder (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
+	public final fun getGooglePayEnabled ()Z
+	public final fun getHeaderTextForSelectionScreen ()Ljava/lang/String;
+	public final fun getMerchantDisplayName ()Ljava/lang/String;
+	public final fun getPreferredNetworks ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun newBuilder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Builder {
+	public static final field $stable I
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
+	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Companion {
+	public final fun builder (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetComposeKt {
+	public static final fun rememberCustomerSheet (Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/customersheet/CustomerSheet;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheetContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/CustomerSheetContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Canceled : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getSelection ()Lcom/stripe/android/customersheet/PaymentOptionSelection;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Failed : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getException ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Selected : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getSelection ()Lcom/stripe/android/customersheet/PaymentOptionSelection;
+}
+
+public abstract interface class com/stripe/android/customersheet/CustomerSheetResultCallback {
+	public abstract fun onCustomerSheetResult (Lcom/stripe/android/customersheet/CustomerSheetResult;)V
+}
+
+public abstract interface annotation class com/stripe/android/customersheet/ExperimentalCustomerSheetApi : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Error$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Error;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Error;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Selected$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Selected;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Selected;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/model/PaymentOption;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+}
+
+public final class com/stripe/android/customersheet/PaymentOptionSelection$GooglePay : com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+}
+
+public final class com/stripe/android/customersheet/PaymentOptionSelection$PaymentMethod : com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+}
+
+public abstract interface class com/stripe/android/customersheet/SetupIntentClientSecretProvider {
+	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -5,8 +229,86 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
-	public static final field TEST_TAG_LIST Ljava/lang/String;
+public abstract interface class com/stripe/android/paymentsheet/CreateIntentCallback {
+	public abstract fun onCreateIntent (Lcom/stripe/android/model/PaymentMethod;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/CreateIntentResult {
+}
+
+public final class com/stripe/android/paymentsheet/CreateIntentResult$Failure : com/stripe/android/paymentsheet/CreateIntentResult {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Exception;)V
+	public fun <init> (Ljava/lang/Exception;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Exception;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : com/stripe/android/paymentsheet/CreateIntentResult {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler {
+	public abstract fun confirmExternalPaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
+}
+
+public abstract class com/stripe/android/paymentsheet/ExternalPaymentMethodResult : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Companion;
+	public static final fun canceled ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public static final fun completed ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public static final fun failed ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public static final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+}
+
+public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResult$Companion {
+	public final fun canceled ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public final fun completed ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public final fun failed ()Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+	public static synthetic fun failed$default (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Companion;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;
+}
+
+public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResultHandler {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResultHandler;
+	public static final fun onExternalPaymentMethodResult (Landroid/content/Context;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;)V
+}
+
+public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
@@ -45,26 +347,20 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/PaymentOptionContract$Args;Lkotlin/jvm/functions/Function1;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lkotlin/coroutines/CoroutineContext;Landroid/app/Application;Lcom/stripe/android/core/Logger;Ljava/lang/String;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/link/injection/LinkPaymentLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;Ljavax/inject/Provider;)V
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Companion;
+	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public final fun presentWithIntentConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;)V
+	public final fun presentWithIntentConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
+	public static synthetic fun presentWithIntentConfiguration$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
 	public final fun presentWithPaymentIntent (Ljava/lang/String;)V
 	public final fun presentWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
 	public static synthetic fun presentWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
@@ -149,6 +445,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance : and
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
 	public final fun colorsDark (Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun colorsLight (Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun primaryButton (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButton;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
@@ -206,6 +503,57 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;Z)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component2 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component3 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component4 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public final fun component5 ()Z
+	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;Z)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public final fun getAttachDefaultsToPaymentMethod ()Z
+	public final fun getEmail ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun getName ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun getPhone ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static final field Full Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$AddressCollectionMode;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode : java/lang/Enum {
+	public static final field Always Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$CollectionMode;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -256,6 +604,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Creator :
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Companion {
+	public final fun resetCustomer (Landroid/content/Context;)V
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -264,27 +616,42 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : 
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)V
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;)V
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Z)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Z)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZ)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public final fun component12 ()Ljava/util/List;
 	public final fun component2 ()Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
 	public final fun component3 ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
 	public final fun component4 ()Landroid/content/res/ColorStateList;
 	public final fun component5 ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
-	public final fun component6 ()Z
-	public final fun component7 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
+	public final fun component6 ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;ZLjava/util/List;Ljava/util/List;Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;ZLjava/util/List;Ljava/util/List;Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowsDelayedPaymentMethods ()Z
+	public final fun getAllowsPaymentMethodsRequiringShippingAddress ()Z
 	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
 	public final fun getCustomer ()Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
 	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
 	public final fun getGooglePay ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
 	public final fun getMerchantDisplayName ()Ljava/lang/String;
+	public final fun getPreferredNetworks ()Ljava/util/List;
 	public final fun getPrimaryButtonColor ()Landroid/content/res/ColorStateList;
+	public final fun getPrimaryButtonLabel ()Ljava/lang/String;
+	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -294,13 +661,21 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonColor (Landroid/content/res/ColorStateList;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun shippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Creator : android/os/Parcelable$Creator {
@@ -311,14 +686,30 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Cr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$CustomerSession$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$CustomerSession;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$CustomerSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$LegacyCustomerEphemeralKey$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$LegacyCustomerEphemeralKey;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType$LegacyCustomerEphemeralKey;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerAccessType;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEphemeralKeySecret ()Ljava/lang/String;
@@ -338,17 +729,32 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfigur
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$FlowController {
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion;
+	public abstract fun configureWithIntentConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun confirm ()V
+	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public abstract fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public abstract fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public abstract fun presentPaymentOptions ()V
+	public abstract fun setShippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
@@ -357,6 +763,7 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$DefaultImpls {
+	public static synthetic fun configureWithIntentConfiguration$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 }
@@ -381,20 +788,43 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfigu
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;)V
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()Ljava/lang/Long;
+	public final fun getButtonType ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
 	public final fun getCountryCode ()Ljava/lang/String;
 	public final fun getCurrencyCode ()Ljava/lang/String;
 	public final fun getEnvironment ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
+	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType : java/lang/Enum {
+	public static final field Book Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Buy Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Checkout Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Donate Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Order Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Pay Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Plain Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static final field Subscribe Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$ButtonType;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Creator : android/os/Parcelable$Creator {
@@ -408,8 +838,124 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfigu
 public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment : java/lang/Enum {
 	public static final field Production Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
 	public static final field Test Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$InitializationMode$DeferredIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$DeferredIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$DeferredIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$InitializationMode$PaymentIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$PaymentIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$PaymentIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$InitializationMode$SetupIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$SetupIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$InitializationMode$SetupIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field COMPLETE_WITHOUT_CONFIRMING_INTENT Ljava/lang/String;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Companion;
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun describeContents ()I
+	public final fun getMode ()Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;
+	public final fun getOnBehalfOf ()Ljava/lang/String;
+	public final fun getPaymentMethodConfigurationId ()Ljava/lang/String;
+	public final fun getPaymentMethodTypes ()Ljava/util/List;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;
+	public static final field AutomaticAsync Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;
+	public static final field Manual Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Companion {
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode : android/os/Parcelable {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment : com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (JLjava/lang/String;)V
+	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;)V
+	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;)V
+	public synthetic fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun describeContents ()I
+	public final fun getAmount ()J
+	public final fun getCurrency ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Setup : com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun describeContents ()I
+	public final fun getCurrency ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Setup$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Setup;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Setup;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse : java/lang/Enum {
+	public static final field OffSession Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
+	public static final field OnSession Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButton : android/os/Parcelable {
@@ -447,18 +993,26 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonCol
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion;
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/Integer;II)V
+	public fun <init> (Ljava/lang/Integer;IIII)V
+	public synthetic fun <init> (Ljava/lang/Integer;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()I
 	public final fun component3 ()I
-	public final fun copy (Ljava/lang/Integer;II)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Ljava/lang/Integer;IIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/Integer;IIII)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Ljava/lang/Integer;IIIIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackground ()Ljava/lang/Integer;
 	public final fun getBorder ()I
 	public final fun getOnBackground ()I
+	public final fun getOnSuccessBackgroundColor ()I
+	public final fun getSuccessBackgroundColor ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -596,6 +1150,12 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Creat
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheetContract : androidx/activity/result/contract/ActivityResultContract {
 	public static final field $stable I
 	public static final field EXTRA_ARGS Ljava/lang/String;
@@ -643,6 +1203,22 @@ public final class com/stripe/android/paymentsheet/PaymentSheetContract$Result$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheetContractV2$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheetContractV2$Result$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Result;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Result;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/paymentsheet/PaymentSheetResult : android/os/Parcelable {
 	public static final field $stable I
 }
@@ -652,6 +1228,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled :
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -668,6 +1247,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Completed 
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -706,24 +1288,40 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResu
 	public abstract fun onPaymentSheetResult (Lcom/stripe/android/paymentsheet/PaymentSheetResult;)V
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/app/Application;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Ldagger/Lazy;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lcom/stripe/android/paymentsheet/PrefsRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/lang/String;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/link/injection/LinkPaymentLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
+public final class com/stripe/android/paymentsheet/addresselement/AddressDetails : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/paymentsheet/addresselement/AddressDetails$Companion;
+	public static final field KEY Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhoneNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isCheckboxSelected ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/PaymentSheetViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/PaymentSheetViewModel$Factory;Ljavax/inject/Provider;)V
+public final class com/stripe/android/paymentsheet/addresselement/AddressDetails$Companion {
 }
 
-public abstract interface class com/stripe/android/paymentsheet/ShippingAddressCallback {
-	public abstract fun onShippingAddressCollected (Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;)V
+public final class com/stripe/android/paymentsheet/addresselement/AddressDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args$Creator : android/os/Parcelable$Creator {
@@ -731,14 +1329,6 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressElement
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args$InjectionParams$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args$InjectionParams;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args$InjectionParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -750,309 +1340,218 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressElement
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementNavigator_Factory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance ()Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator;
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher {
+	public static final field $stable I
+	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResultCallback;)V
+	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResultCallback;)V
+	public final fun present (Ljava/lang/String;)V
+	public final fun present (Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;)V
+	public static synthetic fun present$default (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;ILjava/lang/Object;)V
 }
 
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementResult$Succeeded$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Succeeded;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressElementResult$Succeeded;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressElementViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectViewModel (Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel$Factory;Lcom/stripe/android/paymentsheet/addresselement/AddressElementViewModel;)V
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args;Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator;)Lcom/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/addresselement/AutoCompleteViewModel$Factory;Ljavax/inject/Provider;)V
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$AddressElementActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$AddressElementActivityKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutoCompleteScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutoCompleteScreenKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$InputAddressScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$InputAddressScreenKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/InputAddressViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/addresselement/InputAddressViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/addresselement/InputAddressViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args;Lcom/stripe/android/paymentsheet/addresselement/AddressElementNavigator;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/addresselement/InputAddressViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/InputAddressViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/addresselement/InputAddressViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/addresselement/InputAddressViewModel$Factory;Ljavax/inject/Provider;)V
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/ShippingAddress : android/os/Parcelable {
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress$Companion;
-	public static final field KEY Ljava/lang/String;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
+	public fun <init> (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;
+	public final fun copy (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCity ()Ljava/lang/String;
-	public final fun getCompany ()Ljava/lang/String;
-	public final fun getCountry ()Ljava/lang/String;
-	public final fun getLine1 ()Ljava/lang/String;
-	public final fun getLine2 ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getPhoneNumber ()Ljava/lang/String;
-	public final fun getPostalCode ()Ljava/lang/String;
-	public final fun getState ()Ljava/lang/String;
+	public final fun getCheckboxLabel ()Ljava/lang/String;
+	public final fun getPhone ()Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/paymentsheet/addresselement/ShippingAddress$Companion {
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/ShippingAddress$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/ShippingAddress;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository;
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration : java/lang/Enum, android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field HIDDEN Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public static final field OPTIONAL Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public static final field REQUIRED Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/paymentsheet/analytics/DefaultEventReporter_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;Lcom/stripe/android/paymentsheet/analytics/DeviceIdRepository;Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter;
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration$FieldConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
-	public final field bottomSheet Landroid/widget/LinearLayout;
-	public final field bottomSpacer Landroid/view/View;
-	public final field continueButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
-	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
-	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
-	public final field fragmentContainerParent Landroid/widget/LinearLayout;
-	public final field header Landroidx/compose/ui/platform/ComposeView;
-	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
-	public final field message Landroid/widget/TextView;
-	public final field notes Landroidx/compose/ui/platform/ComposeView;
-	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun component2 ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/util/Set;
+	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalFields ()Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun getAllowedCountries ()Ljava/util/Set;
+	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun getAutocompleteCountries ()Ljava/util/Set;
+	public final fun getButtonTitle ()Ljava/lang/String;
+	public final fun getGooglePlacesApiKey ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalFields (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun address (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun allowedCountries (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun autocompleteCountries (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;
+	public final fun buttonTitle (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun googlePlacesApiKey (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun title (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherKt {
+	public static final fun rememberAddressLauncher (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher;
+}
+
+public abstract class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult : android/os/Parcelable {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled : com/stripe/android/paymentsheet/addresselement/AddressLauncherResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded : com/stripe/android/paymentsheet/addresselement/AddressLauncherResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun copy (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/addresselement/AddressLauncherResultCallback {
+	public abstract fun onAddressLauncherResult (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult;)V
+}
+
+public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
+	public final field paymentOptionsPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
+	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
-	public final field bottomSheet Landroid/widget/LinearLayout;
-	public final field bottomSpacer Landroid/view/View;
-	public final field buttonContainer Landroid/widget/FrameLayout;
-	public final field buyButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
-	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
-	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
-	public final field fragmentContainerParent Landroid/widget/LinearLayout;
-	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
-	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
-	public final field header Landroidx/compose/ui/platform/ComposeView;
-	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
-	public final field linkButton Lcom/stripe/android/link/ui/LinkButtonView;
-	public final field message Landroid/widget/TextView;
-	public final field notes Landroidx/compose/ui/platform/ComposeView;
-	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
-	public final field topContainer Landroid/widget/LinearLayout;
-	public final field topMessage Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
+public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
+	public final field paymentSheetPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
+	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
-	public final field linkInlineSignup Lcom/stripe/android/link/ui/inline/LinkInlineSignupView;
-	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
-	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
+public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding : androidx/viewbinding/ViewBinding {
+	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
-	public final field recycler Landroidx/recyclerview/widget/RecyclerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/PrimaryButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field confirmedIcon Landroid/widget/ImageView;
-	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field label Landroidx/compose/ui/platform/ComposeView;
-	public final field lockIcon Landroid/widget/ImageView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/PrimaryButtonBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/PrimaryButtonBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding : androidx/viewbinding/ViewBinding {
-	public final field address1 Lcom/google/android/material/textfield/TextInputEditText;
-	public final field address1Divider Landroid/view/View;
-	public final field address1Layout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field address2 Lcom/google/android/material/textfield/TextInputEditText;
-	public final field address2Divider Landroid/view/View;
-	public final field address2Layout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field city Lcom/google/android/material/textfield/TextInputEditText;
-	public final field cityLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field cityPostalContainer Landroid/widget/LinearLayout;
-	public final field cityPostalDivider Landroid/view/View;
-	public final field countryLayout Lcom/stripe/android/view/CountryTextInputLayout;
-	public final field postalCode Lcom/stripe/android/view/StripeEditText;
-	public final field postalCodeLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field state Lcom/google/android/material/textfield/TextInputEditText;
-	public final field stateDivider Landroid/view/View;
-	public final field stateLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding : androidx/viewbinding/ViewBinding {
-	public final field text1 Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/TextView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field googlePayButtonContent Landroid/widget/ImageView;
-	public final field googlePayButtonIcon Landroid/widget/RelativeLayout;
-	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
+	public final field googlePayButtonLayout Landroid/widget/RelativeLayout;
+	public final field googlePayPaymentButton Lcom/google/android/gms/wallet/button/PayButton;
+	public final field googlePayPrimaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
+public final class com/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding : androidx/viewbinding/ViewBinding {
+	public final field confirmedIcon Landroid/widget/ImageView;
+	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public final field label Landroidx/compose/ui/platform/ComposeView;
+	public final field lockIcon Landroid/widget/ImageView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
 	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
 }
 
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args$Creator : android/os/Parcelable$Creator {
@@ -1060,249 +1559,6 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer;
-}
-
-public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/paymentsheet/model/PaymentOptionFactory;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/ShippingAddressCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/activity/result/ActivityResultCaller;Ljava/lang/String;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;ZLjava/util/Set;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
-}
-
-public final class com/stripe/android/paymentsheet/flowcontroller/InitData$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/flowcontroller/InitData;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/flowcontroller/InitData;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/forms/ComposableSingletons$FormUIKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/ComposableSingletons$FormUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/paymentsheet/forms/TransformSpecToElement;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;Ljavax/inject/Provider;)V
-}
-
-public final class com/stripe/android/paymentsheet/forms/TransformSpecToElement_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/TransformSpecToElement_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/forms/TransformSpecToElement;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Landroid/content/Context;)Lcom/stripe/android/paymentsheet/forms/TransformSpecToElement;
-}
-
-public final class com/stripe/android/paymentsheet/injection/AddressElementViewModelModule_ProvideDummyInjectorKeyFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule_ProvideDummyInjectorKeyFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/lang/String;
-	public static fun provideDummyInjectorKey (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/paymentsheet/injection/AddressElementViewModelModule_ProvideEventReporterModeFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule_ProvideEventReporterModeFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporterMode (Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelModule;)Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerAddressElementViewModelFactoryComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/AddressElementViewModelFactoryComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FlowControllerComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FormViewModelComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelFactoryComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/model/ClientSecret;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideClientSecret (Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;)Lcom/stripe/android/paymentsheet/model/ClientSecret;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterModeFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporterMode ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvidePrefsRepositoryFactoryFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvidePrefsRepositoryFactoryFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function1;
-	public static fun providePrefsRepositoryFactory (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideProductUsageTokensFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideProductUsageTokensFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Set;
-	public static fun provideProductUsageTokens ()Ljava/util/Set;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideViewModelFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideViewModelFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideViewModel (Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FormViewModelModule_Companion_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FormViewModelModule_Companion_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale ()Ljava/util/Locale;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideDummyInjectorKeyFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideDummyInjectorKeyFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/lang/String;
-	public static fun provideDummyInjectorKey (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideEventReporterModeFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideEventReporterModeFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporterMode (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePrefsRepositoryFactoryFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePrefsRepositoryFactoryFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function1;
-	public static fun providePrefsRepositoryFactory (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideEnabledLoggingFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideEnabledLoggingFactory;
-	public fun get ()Ljava/lang/Boolean;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEnabledLogging ()Z
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale ()Ljava/util/Locale;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory;
-	public fun get ()Lcom/stripe/android/PaymentConfiguration;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentConfiguration (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Ljavax/inject/Provider;)Lkotlin/jvm/functions/Function0;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun provideStripeAccountId (Ljavax/inject/Provider;)Lkotlin/jvm/functions/Function0;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporterMode ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideProductUsageTokensFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideProductUsageTokensFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Set;
-	public static fun provideProductUsageTokens ()Ljava/util/Set;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvideArgsFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvideArgsFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideArgs (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvidePrefsRepositoryFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvidePrefsRepositoryFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/PrefsRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePrefsRepository (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/PrefsRepository;
-}
-
-public final class com/stripe/android/paymentsheet/model/FragmentConfig$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/FragmentConfig;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/FragmentConfig;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1319,13 +1575,23 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public fun <init> (ILjava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlinx/coroutines/CoroutineScope;Lkotlinx/coroutines/CoroutineDispatcher;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlinx/coroutines/CoroutineScope;Lkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDrawableResourceId ()I
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun icon ()Landroid/graphics/drawable/Drawable;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentSelection$GooglePay$Creator : android/os/Parcelable$Creator {
@@ -1333,6 +1599,14 @@ public final class com/stripe/android/paymentsheet/model/PaymentSelection$Google
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$GooglePay;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$GooglePay;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$Link$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$Link;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$Link;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1352,11 +1626,11 @@ public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$Ge
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$Link$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Link;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Link;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1365,6 +1639,22 @@ public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$US
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$Input$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$Input;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$Input;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$InstantDebitsInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$InstantDebitsInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$InstantDebitsInfo;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1381,6 +1671,14 @@ public final class com/stripe/android/paymentsheet/model/SavedSelection$GooglePa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/SavedSelection$GooglePay;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/SavedSelection$GooglePay;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/model/SavedSelection$Link$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/SavedSelection$Link;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/SavedSelection$Link;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1408,98 +1706,305 @@ public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/model/StripeIntentValidator_Factory : dagger/internal/Factory {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Args;Landroid/app/Application;Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;Ljavax/inject/Provider;)V
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$PaymentMethod$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$PaymentMethod;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$PaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/DaggerUSBankAccountFormComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormComponent$Builder;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$Session$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$Session;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ResultIdentifier$Session;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePaymentConfigurationFactory;
-	public fun get ()Lcom/stripe/android/PaymentConfiguration;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentConfiguration (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$SavedAccount$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$SavedAccount;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$SavedAccount;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePublishableKeyFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesAppContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesAppContextFactory;
-	public fun get ()Landroid/content/Context;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesAppContext (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/app/Application;)Landroid/content/Context;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesEnableLoggingFactory;
-	public fun get ()Ljava/lang/Boolean;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesEnableLogging (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Z
+public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Cancelled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Cancelled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Cancelled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesProductUsageFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesProductUsageFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Set;
-	public static fun providesProductUsage (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Ljava/util/Set;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Confirmed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Confirmed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$Confirmed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/util/Set;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$ModifyDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$ModifyDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/BacsMandateConfirmationResult$ModifyDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepository_Api_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository_Api_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/ComposableSingletons$BacsMandateConfirmationFormKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/ComposableSingletons$BacsMandateConfirmationFormKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/paymentsheet/ui/AddressOptionsAppBarKt {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Cancelled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Cancelled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Cancelled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Confirmed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Confirmed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/CvcRecollectionResult$Confirmed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function3;
+	public static field lambda-5 Lkotlin/jvm/functions/Function2;
+	public static field lambda-6 Lkotlin/jvm/functions/Function2;
+	public static field lambda-7 Lkotlin/jvm/functions/Function2;
+	public static field lambda-8 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-6$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-7$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-8$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/CustomerState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/GooglePayState$Available$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/GooglePayState$Available;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/GooglePayState$Available;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/GooglePayState$Indeterminate$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/GooglePayState$Indeterminate;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/GooglePayState$Indeterminate;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/GooglePayState$NotAvailable$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/GooglePayState$NotAvailable;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/GooglePayState$NotAvailable;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/LinkState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/PaymentSheetState$Full$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/PaymentSheetState$Full;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/PaymentSheetState$Full;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/PaymentSheetState$Loading$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/PaymentSheetState$Loading;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/PaymentSheetState$Loading;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SepaMandateActivityKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SepaMandateActivityKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/paymentsheet/ui/SepaMandateContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ui/SepaMandateContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ui/SepaMandateContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ui/SepaMandateResult$Acknowledged$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ui/SepaMandateResult$Acknowledged;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ui/SepaMandateResult$Acknowledged;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/ui/SepaMandateResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ui/SepaMandateResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ui/SepaMandateResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodVerticalLayoutUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodVerticalLayoutUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 

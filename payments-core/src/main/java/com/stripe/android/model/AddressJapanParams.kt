@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.ObjectBuilder
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -57,7 +56,7 @@ data class AddressJapanParams(
         }
     }
 
-    class Builder : ObjectBuilder<AddressJapanParams> {
+    class Builder {
         private var city: String? = null
         private var country: String? = null
         private var line1: String? = null
@@ -115,7 +114,7 @@ data class AddressJapanParams(
             this.town = town
         }
 
-        override fun build(): AddressJapanParams {
+        fun build(): AddressJapanParams {
             return AddressJapanParams(
                 city = city,
                 country = country,

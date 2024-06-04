@@ -1,5 +1,6 @@
 package com.stripe.android.core.networking
 
+import android.os.Build
 import android.system.Os
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiVersion
@@ -16,7 +17,8 @@ sealed class RequestHeadersFactory {
         return extraHeaders.plus(
             mapOf(
                 HEADER_USER_AGENT to userAgent,
-                HEADER_ACCEPT_CHARSET to CHARSET
+                HEADER_ACCEPT_CHARSET to CHARSET,
+                HEADER_X_STRIPE_USER_AGENT to xStripeUserAgent
             )
         )
     }
@@ -34,6 +36,16 @@ sealed class RequestHeadersFactory {
     protected abstract val extraHeaders: Map<String, String>
 
     protected open var postHeaders: Map<String, String> = emptyMap()
+
+    protected abstract val xStripeUserAgent: String
+
+    protected fun defaultXStripeUserAgentMap() = mutableMapOf<String, String?>(
+        LANG to KOTLIN,
+        AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
+        AnalyticsFields.OS_VERSION to "${Build.VERSION.SDK_INT}",
+        TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
+        MODEL to Build.MODEL
+    )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     open class BaseApiHeadersFactory(
@@ -57,6 +69,18 @@ sealed class RequestHeadersFactory {
                     getUserAgent(sdkVersion),
                     appInfo?.toUserAgent()
                 ).joinToString(" ")
+            }
+
+        override val xStripeUserAgent: String
+            get() {
+                val paramMap = defaultXStripeUserAgentMap()
+                appInfo?.let {
+                    paramMap.putAll(it.toParamMap())
+                }
+
+                return "{" + paramMap.map { (key, value) ->
+                    "\"$key\":\"$value\""
+                }.joinToString(",") + "}"
             }
 
         override val extraHeaders: Map<String, String>
@@ -107,7 +131,7 @@ sealed class RequestHeadersFactory {
         sdkVersion
     ) {
         override var postHeaders = mapOf(
-            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form}; charset=$CHARSET"
+            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form.code}; charset=$CHARSET"
         )
     }
 
@@ -152,17 +176,31 @@ sealed class RequestHeadersFactory {
         }
 
         override var postHeaders = mapOf(
-            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Json}; charset=$CHARSET"
+            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Json.code}; charset=$CHARSET"
         )
+        override val xStripeUserAgent: String
+            get() {
+                val paramMap = defaultXStripeUserAgentMap()
+                return "{" + paramMap.map { (key, value) ->
+                    "\"$key\":\"$value\""
+                }.joinToString(",") + "}"
+            }
     }
 
     /**
      * Factory for [AnalyticsRequest].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Analytics : RequestHeadersFactory() {
+    data object Analytics : RequestHeadersFactory() {
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
         override val extraHeaders = emptyMap<String, String>()
+        override val xStripeUserAgent: String
+            get() {
+                val paramMap = defaultXStripeUserAgentMap()
+                return "{" + paramMap.map { (key, value) ->
+                    "\"$key\":\"$value\""
+                }.joinToString(",") + "}"
+            }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -174,5 +212,10 @@ sealed class RequestHeadersFactory {
         val CHARSET: String = Charsets.UTF_8.name()
 
         const val UNDETERMINED_LANGUAGE = "und"
+
+        const val LANG = "lang"
+        const val KOTLIN = "kotlin"
+        const val TYPE = "type"
+        const val MODEL = "model"
     }
 }

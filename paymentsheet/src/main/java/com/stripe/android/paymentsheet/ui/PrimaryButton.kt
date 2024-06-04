@@ -6,11 +6,14 @@ import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,14 +21,16 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonStyle
-import com.stripe.android.ui.core.convertDpToPx
-import com.stripe.android.ui.core.getBorderStrokeColor
-import com.stripe.android.ui.core.getComposeTextStyle
-import com.stripe.android.ui.core.getOnBackgroundColor
+import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.uicore.PrimaryButtonStyle
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.uicore.getOnSuccessBackgroundColor
+import com.stripe.android.uicore.getSuccessBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -35,7 +40,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private var defaultTintList: ColorStateList? = null
+    @VisibleForTesting
+    internal var defaultTintList: ColorStateList? = null
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
@@ -43,11 +49,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
     private var originalLabel: String? = null
 
+    private var defaultLabelColor: Int? = null
+
     @VisibleForTesting
     internal var externalLabel: String? = null
 
     @VisibleForTesting
-    internal val viewBinding = PrimaryButtonBinding.inflate(
+    internal val viewBinding = StripePrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
     )
@@ -57,13 +65,19 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private var cornerRadius = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
+        StripeThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
     )
     private var borderStrokeWidth = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
+        StripeThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
     )
     private var borderStrokeColor =
-        PaymentsThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
+        StripeThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
+
+    private var finishedBackgroundColor =
+        StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(context)
+
+    private var finishedOnBackgroundColor =
+        StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(context)
 
     init {
         // This is only needed if the button is inside a fragment
@@ -88,8 +102,26 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
             primaryButtonStyle.getOnBackgroundColor(context)
         )
-        backgroundTintList = tintList
         defaultTintList = tintList
+        backgroundTintList = tintList
+        finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
+        finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
+    }
+
+    fun setDefaultLabelColor(@ColorInt color: Int) {
+        defaultLabelColor = color
+    }
+
+    fun setLockIconDrawable(@DrawableRes drawable: Int) {
+        viewBinding.lockIcon.setImageResource(drawable)
+    }
+
+    fun setIndicatorColor(@ColorInt color: Int) {
+        viewBinding.confirmingIcon.setIndicatorColor(color)
+    }
+
+    fun setConfirmedIconDrawable(@DrawableRes drawable: Int) {
+        viewBinding.confirmedIcon.setImageResource(drawable)
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
@@ -118,14 +150,17 @@ internal class PrimaryButton @JvmOverloads constructor(
         return text
     }
 
-    fun setLabel(text: String?) {
+    private fun setLabel(text: String?) {
         externalLabel = text
         text?.let {
             if (state !is State.StartProcessing) {
                 originalLabel = text
             }
             viewBinding.label.setContent {
-                LabelUI(label = text)
+                LabelUI(
+                    label = text,
+                    color = defaultLabelColor,
+                )
             }
         }
     }
@@ -153,9 +188,8 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
         isClickable = false
-        backgroundTintList = ColorStateList.valueOf(
-            resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
-        )
+        backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
+        confirmedIcon.imageTintList = ColorStateList.valueOf(finishedOnBackgroundColor)
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)
@@ -168,6 +202,21 @@ internal class PrimaryButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         updateAlpha()
+    }
+
+    fun updateUiState(uiState: UIState?) {
+        isVisible = uiState != null
+
+        if (uiState != null) {
+            if (state !is State.StartProcessing && state !is State.FinishProcessing) {
+                // If we're processing or finishing, we're not overriding the label
+                setLabel(uiState.label)
+            }
+
+            isEnabled = uiState.enabled
+            lockVisible = uiState.lockVisible
+            setOnClickListener { uiState.onClick() }
+        }
     }
 
     fun updateState(state: State?) {
@@ -184,6 +233,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             is State.FinishProcessing -> {
                 onFinishProcessing(state.onComplete)
             }
+            null -> {}
         }
     }
 
@@ -200,33 +250,42 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    internal sealed class State {
+    internal sealed class State(
+        val isProcessing: Boolean
+    ) {
+
         /**
          * The label will be applied if the value is not null.
          */
-        object Ready : State()
-        object StartProcessing : State()
-        data class FinishProcessing(val onComplete: () -> Unit) : State()
+        data object Ready : State(
+            isProcessing = false
+        )
+        data object StartProcessing : State(
+            isProcessing = true
+        )
+        data class FinishProcessing(
+            val onComplete: () -> Unit
+        ) : State(
+            isProcessing = true
+        )
     }
 
-    /**
-     * Used to override the current UI state of the Primary Button
-     */
     internal data class UIState(
-        val label: String?,
-        val onClick: (() -> Unit)?,
+        val label: String,
+        val onClick: () -> Unit,
         val enabled: Boolean,
-        val visible: Boolean
+        val lockVisible: Boolean,
     )
 }
 
 @Composable
-private fun LabelUI(label: String) {
-    PaymentsTheme {
+private fun LabelUI(label: String, color: Int?) {
+    StripeTheme {
         Text(
             text = label,
             textAlign = TextAlign.Center,
-            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
+            color = color?.let { Color(it) } ?: Color.Unspecified,
+            style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
         )

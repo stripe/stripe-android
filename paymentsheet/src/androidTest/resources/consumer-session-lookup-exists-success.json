@@ -1,0 +1,10 @@
+{
+  "exists": "true",
+  "consumer_session": {
+    "client_secret": "TA3ZTctNDJhYi1iODI3LWY0NTVlZTdkM2Q2MzIIQWJCWlFibkk",
+    "email_address": "test@stripe.com",
+    "redacted_phone_number": "+1********23",
+    "redacted_formatted_phone_number": "(***) *** **23",
+    "verification_sessions": []
+  }
+}

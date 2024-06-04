@@ -7,15 +7,14 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@ExperimentalCoroutinesApi
 class RetrieveStripeIntentTest {
 
     private val stripeRepository = mock<StripeRepository>()
@@ -28,7 +27,7 @@ class RetrieveStripeIntentTest {
             val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
             givenRetrieveStripeIntentReturns {
-                mock<PaymentIntent>()
+                Result.success(mock<PaymentIntent>())
             }
 
             // When
@@ -55,7 +54,7 @@ class RetrieveStripeIntentTest {
             val clientSecret = "pi_invalid"
             val expectedException = APIException()
             givenRetrieveStripeIntentReturns {
-                throw expectedException
+                Result.failure(expectedException)
             }
 
             // When
@@ -81,7 +80,7 @@ class RetrieveStripeIntentTest {
             val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
             givenRetrieveStripeIntentReturns {
-                mock<SetupIntent>()
+                Result.success(mock<SetupIntent>())
             }
 
             // When
@@ -107,7 +106,7 @@ class RetrieveStripeIntentTest {
             val clientSecret = "seti_invalid"
             val expectedException = APIException()
             givenRetrieveStripeIntentReturns {
-                throw expectedException
+                Result.failure(expectedException)
             }
 
             // When
@@ -127,7 +126,7 @@ class RetrieveStripeIntentTest {
     }
 
     private suspend fun givenRetrieveStripeIntentReturns(
-        intent: () -> StripeIntent
+        result: () -> Result<StripeIntent>
     ) {
         whenever(
             stripeRepository.retrieveStripeIntent(
@@ -135,6 +134,6 @@ class RetrieveStripeIntentTest {
                 any(),
                 any()
             )
-        ).thenAnswer { intent() }
+        ).doReturn(result())
     }
 }

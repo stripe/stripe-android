@@ -1,16 +1,33 @@
 apply from: configs.androidLibrary
 
 apply plugin: 'checkstyle'
+apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
+android {
+    testOptions {
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+    }
+}
 
 dependencies {
     implementation project(":stripe-core")
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.kotlin.serialization
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation project(':network-testing')
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
 }
 
 ext {

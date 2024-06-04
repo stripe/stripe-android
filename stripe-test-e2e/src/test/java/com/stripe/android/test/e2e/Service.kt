@@ -23,4 +23,9 @@ interface Service {
     suspend fun createSetupIntent(
         @Body request: Request.CreateSetupIntentParams
     ): Response.CreatedSetupIntent
+
+    @POST("create_ephemeral_key")
+    suspend fun createEphemeralKey(
+        @Body request: Request.CreateEphemeralKeyParams
+    ): Response.CreatedEphemeralKey
 }

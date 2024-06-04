@@ -1,32 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
-  <string name="add_new_payment_method">Добавление нового метода оплаты</string>
+  <string name="stripe_add_new_payment_method">Добавление нового метода оплаты</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="bank_account_ending_in">Удалить банковский счет, оканчивающийся на %s</string>
+  <string name="stripe_bank_account_ending_in">Удалить банковский счет, оканчивающийся на %s</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">Подтвердите платеж в вашем банковском приложении в течение %s для оформления покупки.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Ваши платежные реквизиты не будут сохранены.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Закрыть форму?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Произошла ошибка. Проверьте подключение и попробуйте еще раз.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Продолжая, вы соглашаетесь авторизовать платежи в соответствии с <terms>этими условиями</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Сохраняя реквизиты своего банковского счета у %s, вы соглашаетесь авторизовать платежи в соответствии с <terms>этими условиями</terms>.]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">При попытке подключить ваш счет произошла ошибка.\nПопробуйте еще раз позже.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавить</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Укажите платежные данные</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Назад</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">Сохранить адрес</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">Адрес доставки</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">В течение трех рабочих дней на электронный адрес %s будет отправлено письмо для подтверждения настройки этой инструкции по дебетованию.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Подтвердите реквизиты для прямого дебетования</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Изменить детали</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Кроме этого, вас предупредят по электронной почте за два дня до списания любой суммы по этой инструкции. Эти платежи будут указаны в выписке операций по вашему счету как \'\'%s\'\'.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Ваши платежи защищает %s.</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Выберите метод оплаты</string>
   <string name="stripe_paymentsheet_close">Закрыть</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">Подтвердить</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">Подтвердить код CVV карты</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">Введите адрес вручную</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">Управление способами оплаты</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Через 1-2 рабочих дня Stripe положит вам на счет сумму $0,01. После этого вы получите электронное письмо с инструкциями по завершению платежа в адрес %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Редактировать%s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Или оплатить с помощью</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Или оплатить картой</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Или используйте</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Или используйте карту</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Оплатить</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Оплатить с помощью</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">Платите с использованием своего банковского счета в несколько простых действий.</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Идет обработка...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">Удалить банковский счет</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Удалить карту</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Удалить %s</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">Сохранить</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">Сохраните новый способ оплаты</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Сохраните реквизиты своего банковского счета всего за несколько шагов.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Сохранить данные для будущих платежей</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -35,4 +87,16 @@
   <string name="stripe_paymentsheet_select_payment_method">Выберите способ оплаты</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Всего: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Произошла ошибка</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">Отменить платеж и оплатить другим способом</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">Подтвердить платеж</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Откройте приложение UPI, чтобы подтвердить платеж, не позднее чем через %s</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">Вернитесь назад и выберите другой способ оплаты</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">Выполнить платеж не удалось</string>
 </resources>

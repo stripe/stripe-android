@@ -8,92 +8,62 @@ on:
 env:
   STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
   STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
+  GRADLE_OPTS: -Dkotlin.incremental=false
 
 jobs:
-  check:
-    name: Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Ktlint
-        run: bash scripts/execute_task_for_changed_modules.sh ktlint
-      - name: Detekt
-        run: ./gradlew detekt
-      - name: Checkstyle
-        run: ./gradlew checkstyle
-      - name: Lint
-        run: bash scripts/execute_task_for_changed_modules.sh lintRelease
-
-      # Check if there has been a binary incompatible change to the API.
-      # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
-      - name: Check binary compatibility
-        run: ./gradlew apiCheck
-
-  unit-tests:
-    name: Unit tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Unit tests
-        run: bash scripts/execute_unittests_for_changed_modules.sh
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: unit-test-report
-          path: payments-core/build/reports/tests/testDebugUnitTest/
-
   end-to-end-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
       - name: End-to-end tests
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
 
+  build-paymentsheet-example-project:
+    name: Build paymentsheet example project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Build example projects
+        run: ./gradlew :paymentsheet-example:assembleAndroidTest
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: test-failures
+          path: |
+            **/build/reports/tests/
+            **/out/failures/
+
+  payment-sheet-apk-size-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle
+        run: ./gradlew :paymentsheet-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
+        with:
+          artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: pull_request
+
+  check-for-untranslated-strings:
+    name: Check for untranslated strings
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for untranslated strings
+        run: cd scripts && ruby lokalise/check_untranslated_strings.rb
+        env:
+          LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}

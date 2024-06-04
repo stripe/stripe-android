@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="card_number_hint" translatable="false">1234 1234 1234 1234</string>
-    <string name="cvc_number_hint" translatable="false">CVC</string>
-    <string name="cvc_amex_hint" translatable="false">CVV</string>
-    <string name="cvc_multiline_helper" translatable="false">123</string>
-    <string name="cvc_multiline_helper_amex" translatable="false">1234</string>
+    <string name="stripe_card_number_hint" translatable="false">1234 1234 1234 1234</string>
+    <string name="stripe_cvc_number_hint" translatable="false">CVC</string>
+    <string name="stripe_cvc_amex_hint" translatable="false">CVV</string>
+    <string name="stripe_cvc_multiline_helper" translatable="false">123</string>
+    <string name="stripe_cvc_multiline_helper_amex" translatable="false">1234</string>
     <string name="stripe_expiration_date_allowlist" translatable="false">0123456789/</string>
     <string name="stripe_postalcode_placeholder" translatable="false">12345</string>
 
@@ -12,6 +12,6 @@
     Google Pay brand guidelines specify that the text should not be translated
     https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
     -->
-    <string name="google_pay" translatable="false">Google Pay</string>
-    <string name="link" translatable="false">Link</string>
+    <string name="stripe_google_pay" translatable="false">Google Pay</string>
+    <string name="stripe_link" translatable="false">Link</string>
 </resources>

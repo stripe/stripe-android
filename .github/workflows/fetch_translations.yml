@@ -1,0 +1,43 @@
+name: Fetch Lokalize translations
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 10 AM East Coast time / 7 AM West Coast time / 2 PM UTC
+    - cron: "0 14 * * 1"
+jobs:
+  fetch-lokalize-translations:
+    runs-on: macos-latest
+    steps:
+      - name: Check out the current state
+        uses: actions/checkout@v4
+      - name: Fetch translations
+        run: cd scripts && ./localize.sh
+        shell: bash
+        env:
+          LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+      - name: Compute timestamp
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+      - name: Generate translations app token
+        id: generate-translations-app-token
+        uses: actions/create-github-app-token@eaddb9eb7e4226c68cf4b39f167c83e5bd132b3e
+        with:
+          app-id: ${{ secrets.ANDROID_TRANSLATIONS_APP_ID }}
+          private-key: ${{ secrets.ANDROID_TRANSLATIONS_APP_PRIVATE_KEY }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
+        id: create-pull-request
+        with:
+          token: ${{ steps.generate-translations-app-token.outputs.token }}
+          commit-message: Fetch latest Lokalize translations
+          author: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
+          committer: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
+          title: Update translations
+          body: This pull request contains the latest translations from Lokalize.
+          branch: update-translations-${{ steps.timestamp.outputs.TIMESTAMP }}
+          base: master
+      - name: Enable Auto-Merge
+        if: ${{ steps.create-pull-request.outputs.pull-request-url }}
+        run: gh pr merge --squash --auto ${{ steps.create-pull-request.outputs.pull-request-url }}
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -3,10 +3,14 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SimpleTextElement
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Suppress("EnumEntryName")
 @Serializable
 enum class Capitalization {
     @SerialName("none")
@@ -19,10 +23,9 @@ enum class Capitalization {
     Words,
 
     @SerialName("sentences")
-    Sentences
+    Sentences;
 }
 
-@Suppress("EnumEntryName")
 @Serializable
 enum class KeyboardType {
     @SerialName("text")
@@ -47,11 +50,12 @@ enum class KeyboardType {
     Password,
 
     @SerialName("number_password")
-    NumberPassword,
+    NumberPassword;
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
+@Parcelize
 data class SimpleTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec,

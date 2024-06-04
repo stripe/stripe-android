@@ -15,13 +15,14 @@ jobs:
   build-master:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           ref: master
+      - uses: ./.github/actions/stripe_setup
       - name: Build in master
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
@@ -30,11 +31,12 @@ jobs:
   build-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
       - name: Build from PR
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
@@ -43,28 +45,30 @@ jobs:
   diffuse:
     needs: [build-master, build-pr]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Download APKs
         uses: actions/download-artifact@v1
         with:
           name: apk
       - name: diffuse
         id: diffuse
-        uses: usefulness/diffuse-action@v1
+        uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
         with:
           old-file-path: apk/paymentsheet-example-release-master.apk
           new-file-path: apk/paymentsheet-example-release-pr.apk
 
       # Post comment with output
 
-      - uses: peter-evans/find-comment@v1
+      - uses: peter-evans/find-comment@d2dae40ed151c634e4189471272b57e76ec19ba8
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Diffuse output
 
-      - uses: peter-evans/create-or-update-comment@v1
+      - uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
         if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
         with:
           body: |
@@ -77,7 +81,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}

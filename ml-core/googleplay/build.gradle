@@ -1,0 +1,21 @@
+apply from: configs.androidLibrary
+
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+}
+
+dependencies {
+    api project(':ml-core:base')
+    implementation libs.tensorflowLitePlayServices
+    api libs.tensorflowLitePlayServicesSupport
+}
+
+ext {
+    artifactId = "ml-core-googleplay"
+    artifactName = "ml-core-googleplay"
+    artifactDescrption = "The machine learning module with google play tflite runtime"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

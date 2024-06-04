@@ -37,7 +37,7 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
 
     override fun createUriForFile(file: File): Uri = FileProvider.getUriForFile(
         context,
-        "${context.packageName}.fileprovider",
+        "${context.packageName}.StripeIdentityFileprovider",
         file
     )
 

@@ -16,8 +16,6 @@ internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 2
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface Analyzer<Input, State, Output> {
     suspend fun analyze(data: Input, state: State): Output
-
-    val statsName: String?
 }
 
 /**

@@ -18,7 +18,7 @@ import com.stripe.android.view.AuthActivityStarterHost
  * [PaymentAuthenticator] implementation to authenticate through WeChatPay SDK.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
+class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
     /**
      * [weChatPayAuthLauncher] is mutable and might be updated during
      * through [onNewActivityResultCaller]
@@ -52,7 +52,7 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
         weChatPayAuthLauncher = null
     }
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options

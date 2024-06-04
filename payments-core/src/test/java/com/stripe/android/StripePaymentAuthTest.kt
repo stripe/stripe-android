@@ -2,7 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -10,18 +10,16 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import org.mockito.kotlin.isA
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class StripePaymentAuthTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -46,7 +44,7 @@ internal class StripePaymentAuthTest {
                 paymentController.getPaymentIntentResult(
                     data
                 )
-            ).thenReturn(result)
+            ).thenReturn(Result.success(result))
 
             val stripe = createStripe()
             stripe.onPaymentResult(
@@ -61,20 +59,23 @@ internal class StripePaymentAuthTest {
         }
 
     @Test
-    fun onPaymentResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
+    fun onPaymentResult_whenShouldHandleResultAndControllerReturnsFailure_shouldThrowException() =
         runTest {
             val data = Intent()
+            val exception = APIException()
+
             whenever(
                 paymentController.shouldHandlePaymentResult(
                     StripePaymentController.PAYMENT_REQUEST_CODE,
                     data
                 )
             ).thenReturn(true)
+
             whenever(
                 paymentController.getPaymentIntentResult(
                     data
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onPaymentResult(
@@ -85,7 +86,7 @@ internal class StripePaymentAuthTest {
 
             idleLooper()
 
-            verify(paymentCallback).onError(isA<InvalidRequestException>())
+            verify(paymentCallback).onError(eq(exception))
         }
 
     @Test
@@ -103,7 +104,7 @@ internal class StripePaymentAuthTest {
                 paymentController.getSetupIntentResult(
                     data
                 )
-            ).thenReturn(result)
+            ).thenReturn(Result.success(result))
 
             val stripe = createStripe()
             stripe.onSetupResult(
@@ -117,20 +118,23 @@ internal class StripePaymentAuthTest {
         }
 
     @Test
-    fun onSetupResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
+    fun onSetupResult_whenShouldHandleResultAndControllerReturnsFailure_shouldThrowException() =
         runTest {
             val data = Intent()
+            val exception = APIException()
+
             whenever(
                 paymentController.shouldHandleSetupResult(
                     StripePaymentController.SETUP_REQUEST_CODE,
                     data
                 )
             ).thenReturn(true)
+
             whenever(
                 paymentController.getSetupIntentResult(
                     data
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onSetupResult(
@@ -141,7 +145,7 @@ internal class StripePaymentAuthTest {
 
             idleLooper()
 
-            verify(setupCallback).onError(isA<InvalidRequestException>())
+            verify(setupCallback).onError(eq(exception))
         }
 
     @Test
@@ -153,7 +157,7 @@ internal class StripePaymentAuthTest {
                 paymentController.getAuthenticateSourceResult(
                     data
                 )
-            ).thenReturn(source)
+            ).thenReturn(Result.success(source))
 
             val stripe = createStripe()
             stripe.onAuthenticateSourceResult(
@@ -167,14 +171,16 @@ internal class StripePaymentAuthTest {
         }
 
     @Test
-    fun onAuthenticateSourceResult_whenControllerReturnsNull_shouldThrowException() =
+    fun onAuthenticateSourceResult_whenControllerReturnsFailure_shouldThrowException() =
         runTest {
             val data = Intent()
+            val exception = APIException()
+
             whenever(
                 paymentController.getAuthenticateSourceResult(
                     data
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onAuthenticateSourceResult(
@@ -184,7 +190,7 @@ internal class StripePaymentAuthTest {
 
             idleLooper()
 
-            verify(sourceCallback).onError(isA<InvalidRequestException>())
+            verify(sourceCallback).onError(eq(exception))
         }
 
     private fun createStripe(): Stripe {

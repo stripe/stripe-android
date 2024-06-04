@@ -3,7 +3,6 @@ package com.stripe.android.model.parsers
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import org.json.JSONObject
 
@@ -26,41 +25,33 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
             when (it.lowercase()) {
                 ConsumerPaymentDetails.Card.type -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
+
                     ConsumerPaymentDetails.Card(
                         json.getString(FIELD_ID),
-                        json.getBoolean(FIELD_IS_DEFAULT),
-                        cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
-                        cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
-                        CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
-                        cardDetails.getString(FIELD_CARD_LAST_4)
+                        cardDetails.getString(FIELD_CARD_LAST_4),
+                    )
+                }
+                ConsumerPaymentDetails.BankAccount.type -> {
+                    val bankAccountDetails = json.getJSONObject(FIELD_BANK_ACCOUNT_DETAILS)
+                    ConsumerPaymentDetails.BankAccount(
+                        json.getString(FIELD_ID),
+                        bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4)
                     )
                 }
                 else -> null
             }
         }
 
-    /**
-     * Fixes the incorrect brand enum values returned from the server in this service.
-     */
-    private fun cardBrandFix(original: String) = original.lowercase().let {
-        when (it) {
-            "american_express" -> "amex"
-            "diners_club" -> "diners"
-            else -> it
-        }
-    }
-
     private companion object {
         private const val FIELD_PAYMENT_DETAILS = "redacted_payment_details"
 
         private const val FIELD_TYPE = "type"
         private const val FIELD_ID = "id"
-        private const val FIELD_IS_DEFAULT = "is_default"
 
         private const val FIELD_CARD_DETAILS = "card_details"
-        private const val FIELD_CARD_EXPIRY_YEAR = "exp_year"
-        private const val FIELD_CARD_EXPIRY_MONTH = "exp_month"
-        private const val FIELD_CARD_BRAND = "brand"
         private const val FIELD_CARD_LAST_4 = "last4"
+
+        private const val FIELD_BANK_ACCOUNT_DETAILS = "bank_account_details"
+        private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
     }
 }

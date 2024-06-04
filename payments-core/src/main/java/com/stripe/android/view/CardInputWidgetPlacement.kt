@@ -73,7 +73,9 @@ internal data class CardInputWidgetPlacement(
 
     private fun toMinimalValueIfNegative(value: Int) = if (value >= 0) {
         value
-    } else MIN_SEPARATION_IN_PX
+    } else {
+        MIN_SEPARATION_IN_PX
+    }
 
     @JvmSynthetic
     internal fun updateSpacing(
@@ -98,7 +100,8 @@ internal data class CardInputWidgetPlacement(
                 )
                 this.cvcPostalCodeSeparation =
                     toMinimalValueIfNegative(
-                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth
+                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation -
+                            postalCodeWidth
                     )
 
                 val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
@@ -143,6 +146,7 @@ internal data class CardInputWidgetPlacement(
      * @return a [Field] that represents the [View] to request focus, or `null`
      * if no such request is necessary.
      */
+    @Suppress("ComplexMethod")
     internal fun getFocusField(
         touchX: Int,
         frameStart: Int,
@@ -168,7 +172,8 @@ internal data class CardInputWidgetPlacement(
             // Our view is
             // |peek card||space||date||space||cvc||space||postal code|
             when {
-                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                // This was a touch on the card number editor, so we don't need to handle it.
+                touchX < frameStart + peekCardWidth ->
                     null
                 touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
                     Field.Number
@@ -193,7 +198,8 @@ internal data class CardInputWidgetPlacement(
             // Our view is
             // |peek card||space||date||space||cvc|
             when {
-                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                // This was a touch on the card number editor, so we don't need to handle it.
+                touchX < frameStart + peekCardWidth ->
                     null
                 touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
                     Field.Number

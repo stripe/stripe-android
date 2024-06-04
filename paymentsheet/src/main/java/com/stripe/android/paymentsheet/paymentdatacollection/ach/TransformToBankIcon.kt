@@ -1,45 +1,46 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.R as StripeR
+import com.stripe.android.financialconnections.R as FinancialConnectionsR
 
 internal interface TransformToBankIcon {
     companion object {
         operator fun invoke(bankName: String?): Int {
-            if (bankName == null) return R.drawable.stripe_ic_bank
+            if (bankName == null) return FinancialConnectionsR.drawable.stripe_ic_bank
             val bankNameRegexIconMap = mapOf(
                 Regex("Bank of America", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_boa,
+                    StripeR.drawable.stripe_ic_bank_boa,
                 Regex("Capital One", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_capitalone,
+                    StripeR.drawable.stripe_ic_bank_capitalone,
                 Regex("Citibank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_citi,
+                    StripeR.drawable.stripe_ic_bank_citi,
                 Regex("BBVA|COMPASS", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_compass,
+                    StripeR.drawable.stripe_ic_bank_compass,
                 Regex("MORGAN CHASE|JP MORGAN|Chase", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_morganchase,
+                    StripeR.drawable.stripe_ic_bank_morganchase,
                 Regex("NAVY FEDERAL CREDIT UNION", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_nfcu,
+                    StripeR.drawable.stripe_ic_bank_nfcu,
                 Regex("PNC\\s?BANK|PNC Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_pnc,
+                    StripeR.drawable.stripe_ic_bank_pnc,
                 Regex("SUNTRUST|SunTrust Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_suntrust,
+                    StripeR.drawable.stripe_ic_bank_suntrust,
                 Regex("Silicon Valley Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_svb,
+                    StripeR.drawable.stripe_ic_bank_svb,
                 Regex("Stripe|TestInstitution", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_stripe,
+                    StripeR.drawable.stripe_ic_bank_stripe,
                 Regex("TD Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_td,
+                    StripeR.drawable.stripe_ic_bank_td,
                 Regex("USAA FEDERAL SAVINGS BANK|USAA Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_usaa,
+                    StripeR.drawable.stripe_ic_bank_usaa,
                 Regex("U\\.?S\\. BANK|US Bank", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_usbank,
+                    StripeR.drawable.stripe_ic_bank_usbank,
                 Regex("Wells Fargo", RegexOption.IGNORE_CASE) to
-                    R.drawable.stripe_ic_bank_wellsfargo
+                    StripeR.drawable.stripe_ic_bank_wellsfargo
             )
             return bankNameRegexIconMap
                 .filter { it.key.findAll(bankName).any() }
                 .firstNotNullOfOrNull { it.value }
-                ?: R.drawable.stripe_ic_bank
+                ?: FinancialConnectionsR.drawable.stripe_ic_bank
         }
     }
 }

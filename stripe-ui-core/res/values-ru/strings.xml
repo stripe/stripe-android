@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for Address field on address form -->
+  <string name="stripe_address_label_address">Адрес</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="stripe_address_label_address_line2">Адрес (строка 2)</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="stripe_address_label_ae_emirate">Эмират</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_au_suburb_or_city">Населенный пункт</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_bb_jm_parish">Приход</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_department">Департамент</string>
+  <!-- Label for the district field on an address form -->
+  <string name="stripe_address_label_district">Район</string>
+  <!-- Label of an address field in hk -->
+  <string name="stripe_address_label_hk_area">Область</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_ie_eircode">Почтовый индекс (Eircode)</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="stripe_address_label_ie_townland">Таунленд</string>
+  <!-- Used to describe postal code in India -->
+  <string name="stripe_address_label_in_pin">Почтовый индекс</string>
+  <!-- Used to describe part of an address -->
+  <string name="stripe_address_label_island">Остров</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_jp_prefecture">Префектура</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_neighborhood">Микрорайон</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_oblast">Область</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_post_town">Почтовое отделение или город</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_suburb">Пригород</string>
+  <!-- Used to describe an address field. -->
+  <string name="stripe_address_label_village_township">Деревня или поселок</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="stripe_address_search_content_description">Поиск</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="stripe_address_zip_invalid">Введенный почтовый индекс неверен.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="stripe_address_zip_postal_invalid">Введенный почтовый индекс неверен</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="stripe_billing_same_as_shipping">Адрес выставления счетов такой же, как адрес доставки</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="stripe_blank_and_required">Введите данные в это поле.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="stripe_change">Изменить</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_email">Эл. почта</string>
+  <!-- Error message when email is invalid -->
+  <string name="stripe_email_is_invalid">Недействительный адрес эл. почты.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiration_date_hint">ММ / ГГ</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Это обязательное поле</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_form_label_optional">%s (необязательно)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="stripe_incomplete_expiry_date">Дата истечения срока действия карты введена не полностью.</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="stripe_incomplete_phone_number">Номер телефона введен не полностью</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="stripe_invalid_expiry_month">Недопустимый месяц окончания действия карты.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="stripe_invalid_expiry_year">Недопустимый год окончания действия карты.</string>
+</resources>

@@ -59,8 +59,9 @@ class CardImageVerificationDemoActivity : AppCompatActivity() {
                 )
                 .responseString { _, _, result ->
                     when (result) {
-                        is Result.Failure -> snackbarController
-                            .show("Error generating CIV: ${result.getException().message}")
+                        is Result.Failure ->
+                            snackbarController
+                                .show("Error generating CIV: ${result.getException().message}")
                         is Result.Success -> runOnUiThread {
                             try {
                                 json.decodeFromString(
@@ -124,8 +125,9 @@ class CardImageVerificationDemoActivity : AppCompatActivity() {
             )
             .responseString { _, _, result ->
                 when (result) {
-                    is Result.Failure -> snackbarController
-                        .show("Error getting validation payload: ${result.getException().message}")
+                    is Result.Failure ->
+                        snackbarController
+                            .show("Error getting validation payload: ${result.getException().message}")
                     is Result.Success -> runOnUiThread {
                         viewBinding.scanResultText.text = result.value
                         viewBinding.civIdText.setText("")

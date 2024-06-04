@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.ObjectBuilder
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -249,7 +248,7 @@ data class PersonTokenParams(
             }
         }
 
-        class Builder : ObjectBuilder<Relationship> {
+        class Builder {
             private var director: Boolean? = null
             private var executive: Boolean? = null
             private var owner: Boolean? = null
@@ -281,7 +280,7 @@ data class PersonTokenParams(
                 this.title = title
             }
 
-            override fun build(): Relationship {
+            fun build(): Relationship {
                 return Relationship(
                     director = director,
                     executive = executive,
@@ -380,7 +379,7 @@ data class PersonTokenParams(
         }
     }
 
-    class Builder : ObjectBuilder<PersonTokenParams> {
+    class Builder {
         private var address: Address? = null
         private var addressKana: AddressJapanParams? = null
         private var addressKanji: AddressJapanParams? = null
@@ -477,7 +476,7 @@ data class PersonTokenParams(
             this.verification = verification
         }
 
-        override fun build(): PersonTokenParams {
+        fun build(): PersonTokenParams {
             return PersonTokenParams(
                 address = address,
                 addressKana = addressKana,

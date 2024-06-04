@@ -3,7 +3,9 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.View
+import android.widget.EditText
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -18,6 +20,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -213,9 +216,42 @@ internal class StripeEditTextTest {
         verifyNoMoreInteractions(textWatcher2)
     }
 
+    @Test
+    fun invokesDeleteListenerIfFieldIsEmpty() {
+        val deleteListener = mock<StripeEditText.DeleteEmptyListener>()
+        editText.setDeleteEmptyListener(deleteListener)
+
+        editText.setText("1")
+        editText.enterBackspace()
+        verify(deleteListener, never()).onDeleteEmpty()
+
+        editText.enterBackspace()
+        verify(deleteListener).onDeleteEmpty()
+    }
+
+    @Test
+    fun setsIsLastKeyDeleteCorrectlyOnSoftKeyboardInput() {
+        // We use `setText()` to simulate the behavior on software keyboards, which result in
+        // OnKeyListener being called on some devices, but not others.
+        editText.setText("1")
+        assertThat(editText.isLastKeyDelete).isFalse()
+
+        editText.enterBackspace()
+        assertThat(editText.isLastKeyDelete).isTrue()
+
+        editText.setText("2")
+        assertThat(editText.isLastKeyDelete).isFalse()
+    }
+
     private fun verifyTextWatcherIsTriggered(watcher: TextWatcher, count: Int) {
         verify(watcher, times(count)).beforeTextChanged(any(), any(), any(), any())
         verify(watcher, times(count)).onTextChanged(any(), any(), any(), any())
         verify(watcher, times(count)).afterTextChanged(any())
     }
+}
+
+private fun EditText.enterBackspace() {
+    dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
+    setText(text.toString().dropLast(1))
+    dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL))
 }

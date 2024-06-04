@@ -1,245 +1,73 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.app.Application
-import android.content.Context
 import androidx.annotation.StringRes
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.asLiveData
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.AddressElement
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.RowElement
+import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSingleFieldElement
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowLooper
-import javax.inject.Provider
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
-@ExperimentalCoroutinesApi
-@FlowPreview
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
-    private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(),
-        R.style.StripeDefaultTheme
-    )
-    val lpmRepository = LpmRepository(context.resources)
-
-    private val resourceRepository =
-        StaticResourceRepository(
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
-            mock()
-        )
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockViewModel = mock<FormViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as FormViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = injectorKey)
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = FormViewModel.Factory(
-            config,
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            PaymentMethod.Type.Sofort.code
-        ) { ApplicationProvider.getApplicationContext<Application>() }
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(FormViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
-
-        WeakMapInjectorRegistry.clear()
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
-        val factory = FormViewModel.Factory(
-            config,
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            PaymentMethod.Type.Sofort.code
-        ) { ApplicationProvider.getApplicationContext<Application>() }
-        val factorySpy = spy(factory)
-        assertNotNull(factorySpy.create(FormViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.resource == ApplicationProvider.getApplicationContext<Application>().resources
-            }
+    fun `Verify completeFormValues is not null when no elements exist`() = runTest {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
         )
-    }
-
-    private fun createRepositorySupportedPaymentMethod(
-        paymentMethodType: PaymentMethod.Type,
-        layoutSpec: LayoutSpec
-    ): StaticResourceRepository {
-        val mockLpmRepository = mock<LpmRepository>()
-
-        whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
-            LpmRepository.SupportedPaymentMethod(
-                paymentMethodType.code,
-                false,
-                R.string.stripe_paymentsheet_payment_method_card,
-                R.drawable.stripe_ic_paymentsheet_pm_card,
-                true,
-                PaymentMethodRequirements(emptySet(), emptySet(), true),
-                layoutSpec
-            )
+        val formViewModel = createViewModel(
+            arguments = args,
+            formElements = emptyList(),
         )
-        return StaticResourceRepository(
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
-            mockLpmRepository
-        )
-    }
-
-    @Test
-    fun `Verify setting save for future use value is updated in flowable`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS
-
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    SaveForFutureUseSpec()
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
-
-        // Set all the card fields, billing is set in the args
-        val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
-
-        emailController?.onValueChange("joe@email.com")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
+            formViewModel.completeFormValues.first()
         ).isNotNull()
-
-        val values = mutableListOf<Boolean?>()
-        formViewModel.saveForFutureUse.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
-        assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-        ).isEqualTo("true")
-
-        formViewModel.setSaveForFutureUse(false)
-
-        assertThat(values[1]).isFalse()
-
-        assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-        ).isEqualTo("false")
     }
 
-    @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() {
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    SaveForFutureUseSpec()
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
-
-        val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
-        assertThat(values[0]).isEmpty()
-
-        formViewModel.saveForFutureUseVisible.value = false
-
-        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-
-        assertThat(values[1][0]).isEqualTo(
-            IdentifierSpec.SaveForFutureUse
-        )
-    }
-
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
         // Here we have just a country, no text fields.
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel(
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    CountrySpec()
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            listOf(
+                CountrySpec().transform(emptyMap())
+            )
         )
 
         // Verify formFieldValues does not contain email
@@ -248,55 +76,48 @@ internal class FormViewModelTest {
         )
     }
 
-    @ExperimentalCoroutinesApi
     @Test
-    fun `Verify if the last text field is hidden the second to last text field is the last text field id`() = runTest {
-        // Here we have one hidden (email) and one required field (name), country will always be in the result,
-        //  and email only if it is not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.P24.code,
-            args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.P24,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    CountrySpec()
+    fun `Verify if the last text field is hidden the second to last text field is the last text field id`() =
+        runTest {
+            // Here we have one hidden (email) and one required field (name), country will always be in the result,
+            //  and email only if it is not hidden
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.P24.code
+            )
+            val formViewModel = createViewModel(
+                args,
+                listOf(
+                    NameSpec().transform(emptyMap()),
+                    EmailSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
                 )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
+            )
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
-        // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
-            IdentifierSpec.Name.v1
-        )
-    }
+            // Verify formFieldValues does not contain email
+            assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
+                IdentifierSpec.Name.v1
+            )
+        }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
         // Here we have one hidden (email) and one required field (name), bank will always be in the result,
         //  and name only if not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel(
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    CountrySpec()
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            listOf(
+                EmailSpec().transform(emptyMap()),
+                CountrySpec().transform(emptyMap()),
+            )
         )
 
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
 
         // Add text to the name to make it valid
         emailController?.onValueChange("email@valid.com")
@@ -306,86 +127,85 @@ internal class FormViewModelTest {
             formViewModel.completeFormValues.first()?.fieldValuePairs
         ).containsKey(IdentifierSpec.Email)
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs)
             .doesNotContainKey(IdentifierSpec.Email)
     }
 
-    @ExperimentalCoroutinesApi
     @Test
-    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() = runTest {
-        // Here we have one hidden (email) and one required field (name), bank will always be in the result,
-        //  and email only if not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    CountrySpec(),
-                    SaveForFutureUseSpec()
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() =
+        runTest {
+            // Here we have one hidden (email) and one required field (name), bank will always be in the result,
+            //  and email only if not hidden
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.Card.code
+            )
+            val formViewModel = createViewModel(
+                args,
+                listOf(
+                    EmailSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
+                    SaveForFutureUseElement(true, ""),
                 )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
+            )
 
-        val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
 
-        // Add text to the email to make it invalid
-        emailController?.onValueChange("joe")
+            // Add text to the email to make it invalid
+            emailController?.onValueChange("joe")
 
-        // Verify formFieldValues is null because the email is required and invalid
-        assertThat(formViewModel.completeFormValues.first()).isNull()
+            // Verify formFieldValues is null because the email is required and invalid
+            assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
-        // Verify formFieldValues is not null even though the card number is invalid
-        // (because it is not required)
-        val completeFormFieldValues = formViewModel.completeFormValues.first()
-        assertThat(
-            completeFormFieldValues
-        ).isNotNull()
-        assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            IdentifierSpec.Email
-        )
-    }
+            // Verify formFieldValues is not null even though the card number is invalid
+            // (because it is not required)
+            val completeFormFieldValues = formViewModel.completeFormValues.first()
+            assertThat(
+                completeFormFieldValues
+            ).isNotNull()
+            assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
+                IdentifierSpec.Email
+            )
+        }
 
     /**
      * This is serving as more of an integration test of forms from
      * spec to FormFieldValues.
      */
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
-            showCheckbox = true,
-            showCheckboxControlledFields = true
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.P24.code,
+        val formViewModel = createViewModel(
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.P24,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
-                    SaveForFutureUseSpec()
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            listOf(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                CountrySpec(
+                    allowedCountryCodes = setOf(
+                        "AT",
+                        "BE",
+                        "DE",
+                        "ES",
+                        "IT",
+                        "NL"
+                    )
+                ).transform(emptyMap()),
+                SaveForFutureUseElement(true, ""),
+            )
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formViewModel, CoreR.string.stripe_address_label_full_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
 
         nameElement?.onValueChange("joe")
         assertThat(
@@ -409,39 +229,32 @@ internal class FormViewModelTest {
         ).isNull()
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element address fields are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
-            showCheckbox = false,
-            showCheckboxControlledFields = true,
+            paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.SepaDebit.code,
+        val formViewModel = createViewModel(
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
-                    )
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            listOfNotNull(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                IbanSpec().transform(emptyMap()),
+                AddressSpec(
+                    IdentifierSpec.Generic("address"),
+                    allowedCountryCodes = setOf("US", "JP")
+                ).transform(emptyMap(), emptyMap()),
+                MandateTextSpec(
+                    IdentifierSpec.Generic("mandate"),
+                    R.string.stripe_sepa_mandate
+                ).transform(""),
+            )
         )
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_name
+            CoreR.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
@@ -450,7 +263,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            UiCoreR.string.stripe_email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
@@ -459,7 +272,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
@@ -468,7 +281,7 @@ internal class FormViewModelTest {
 
         val addressControllers = AddressControllers.create(formViewModel)
         addressControllers.controllers.forEachIndexed { index, textFieldController ->
-            textFieldController.onValueChange("1234")
+            textFieldController.onValueChange("12345")
             if (index == addressControllers.controllers.size - 1) {
                 assertThat(
                     formViewModel
@@ -494,40 +307,35 @@ internal class FormViewModelTest {
         )
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when required address fields are complete`() = runTest {
         /**
          * Using sepa debit as a complex enough example to test the address portion.
          */
         val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.SepaDebit.code,
+        val formViewModel = createViewModel(
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
-                    )
-                )
-            ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            listOfNotNull(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                IbanSpec().transform(emptyMap()),
+                AddressSpec(
+                    IdentifierSpec.Generic("address"),
+                    allowedCountryCodes = setOf("US", "JP")
+                ).transform(emptyMap(), emptyMap()),
+                MandateTextSpec(
+                    IdentifierSpec.Generic("mandate"),
+                    R.string.stripe_sepa_mandate
+                ).transform("")
+            )
         )
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_name
+            CoreR.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -536,7 +344,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            UiCoreR.string.stripe_email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -545,7 +353,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -555,10 +363,10 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label.first() != R.string.address_label_address_line2 }
+            .filter { it.label.first() != UiCoreR.string.stripe_address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
-                textFieldController.onValueChange("1234")
+                textFieldController.onValueChange("12345")
 
                 if (index == populateAddressControllers.size - 1) {
                     assertThat(
@@ -582,11 +390,221 @@ internal class FormViewModelTest {
             }
     }
 
+    @Test
+    fun `Test default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            emptyList(),
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Phone to "+13105551234",
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "456",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test only provided default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                address = PaymentSheet.Address(
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            emptyList(),
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test default values are not filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            emptyList(),
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).isEmpty()
+    }
+
+    @Test
+    fun `Test phone country changes with AddressElement country`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Card.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+
+            val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
+                code = "card",
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+            )!!
+
+            val formViewModel = createViewModel(
+                args,
+                cardFormElements + PhoneSpec().transform(emptyMap()),
+            )
+
+            val elements = formViewModel.elements
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<AddressElement>()
+                .firstOrNull()
+                ?.countryElement
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
+
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
+
+    @Test
+    fun `Test phone country changes with standalone CountryElement`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Sofort.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+            val formViewModel = createViewModel(
+                args,
+                listOfNotNull(
+                    NameSpec().transform(emptyMap()),
+                    EmailSpec().transform(emptyMap()),
+                    PhoneSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
+                    AddressSpec(hideCountry = true).transform(
+                        initialValues = emptyMap(),
+                        shippingValues = emptyMap(),
+                    ),
+                ),
+            )
+
+            val elements = formViewModel.elements
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>()
+                .firstOrNull()
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
+
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
+
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements.first()!!
+        formViewModel.elements
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -603,23 +621,23 @@ internal class FormViewModelTest {
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line1
+                            CoreR.string.stripe_address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line2
+                            UiCoreR.string.stripe_address_label_address_line2
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_city
+                            CoreR.string.stripe_address_label_city
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_state
+                            CoreR.string.stripe_address_label_state
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_zip_code
+                            CoreR.string.stripe_address_label_zip_code
                         )
                     )
                 )
@@ -631,7 +649,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elements.first()!!
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -651,12 +669,12 @@ internal class FormViewModelTest {
                     ?.firstOrNull { it?.label?.first() == label }
         }
     }
-}
 
-@OptIn(FlowPreview::class)
-internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elements
-        .firstOrNull()
-        ?.filterIsInstance<SaveForFutureUseElement>()
-        ?.firstOrNull()?.controller?.onValueChange(value)
+    private fun createViewModel(
+        arguments: FormArguments,
+        formElements: List<FormElement>,
+    ) = FormViewModel(
+        formArguments = arguments,
+        elements = formElements,
+    )
 }

@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter.Args
@@ -51,7 +50,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val canDeletePaymentMethods: Boolean = true
 
     ) : ActivityStarter.Args {
-        class Builder : ObjectBuilder<Args> {
+        class Builder {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
             private var initialPaymentMethodId: String? = null
             private var isPaymentSessionActive = false
@@ -154,7 +153,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.canDeletePaymentMethods = canDeletePaymentMethods
             }
 
-            override fun build(): Args {
+            fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
                     isPaymentSessionActive = isPaymentSessionActive,

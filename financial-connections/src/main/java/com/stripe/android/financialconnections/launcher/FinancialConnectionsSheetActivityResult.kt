@@ -19,7 +19,11 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        val financialConnectionsSession: FinancialConnectionsSession,
+        // Instant Debits sessions: return payment method id and bank details.
+        val instantDebits: InstantDebitsResult? = null,
+        // non-Link sessions: return full LinkedAccountSession
+        val financialConnectionsSession: FinancialConnectionsSession? = null,
+        // Bank account Token sessions: session + token.
         val token: Token? = null
     ) : FinancialConnectionsSheetActivityResult()
 
@@ -27,7 +31,7 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
      * The customer canceled the connections session attempt.
      */
     @Parcelize
-    object Canceled : FinancialConnectionsSheetActivityResult()
+    data object Canceled : FinancialConnectionsSheetActivityResult()
 
     /**
      * The connections session attempt failed.
@@ -47,3 +51,10 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
             "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_result"
     }
 }
+
+@Parcelize
+internal data class InstantDebitsResult(
+    val paymentMethodId: String,
+    val last4: String?,
+    val bankName: String?
+) : Parcelable

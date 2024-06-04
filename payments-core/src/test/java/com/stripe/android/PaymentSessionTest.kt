@@ -11,12 +11,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.ActivityStarter
@@ -25,7 +26,6 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -42,7 +42,6 @@ import org.robolectric.Shadows
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -323,8 +322,6 @@ class PaymentSessionTest {
     ): PaymentSession {
         return PaymentSession(
             activity,
-            activity.application,
-            activity,
             activity,
             activity,
             config,
@@ -339,7 +336,6 @@ class PaymentSessionTest {
         stripeRepository: StripeRepository = FakeStripeRepository()
     ): CustomerSession {
         return CustomerSession(
-            context,
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
@@ -365,11 +361,20 @@ class PaymentSessionTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+
+        override suspend fun getPaymentMethods(
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ): Result<List<PaymentMethod>> {
+            return Result.success(emptyList())
+        }
+
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
-        ): PaymentMethod {
-            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        ): Result<PaymentMethod> {
+            return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
         override suspend fun setDefaultCustomerSource(
@@ -379,16 +384,16 @@ class PaymentSessionTest {
             sourceId: String,
             sourceType: String,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return SECOND_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(SECOND_CUSTOMER)
         }
 
         override suspend fun retrieveCustomer(
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return FIRST_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(FIRST_CUSTOMER)
         }
     }
 

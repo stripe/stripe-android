@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Adressrad 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Förort eller stad</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parish</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Departement</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Distrikt</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Område</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Ö</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektur</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Provins och stad</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Stadsdel</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Post eller stad</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Förort</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">By eller kommun</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Betala av genom <num_installments/> räntefria delbetalningar på <installment_price/> med <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Genom att bekräfta betalningen med Amazon Pay tillåter du %s att debitera ditt Amazon Pay-konto för framtida betalningar i enlighet med deras villkor.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Tillbaka</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Kontonummer</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Kontonumret är ofullständigt.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bankkonto</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Jag är införstådd med att Stripe samlar in autogireringar på uppdrag av %s och bekräftar att jag är kontoinnehavaren och den enda person som krävs för att godkänna debiteringar från detta konto.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Clearingnummer (sort code)</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Sort code (clearingnummer) är ofullständigt.</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Faktureringsadress</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Detta fält kan inte vara tomt.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Ändra</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-post</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Din e-postadress är ogiltig.</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (valfritt)</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Angivet IBAN är ofullständigt.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Angivet IBAN är ogiltigt.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Angivet IBAN är ogiltigt, \"%s\" är inte en giltig landskod.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Ditt IBAN ska börja med en landskod (två bokstäver).</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL Bank</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Köp nu eller betala senare med Klarna.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Betala senare med Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Przelewy24 Bank</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Spara för framtida %s-betalningar</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Skanna kort</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Genom att tillhandahålla din betalningsinformation och bekräfta denna betalning godkänner du (A) %s och Stripe, vår betaltjänstleverantör, att skicka instruktioner till din bank att debitera ditt konto och (B) din bank att debitera ditt konto i enlighet med dessa instruktioner. Som en del av dina rättigheter har du rätt till återbetalning från din bank enligt villkoren för ditt avtal med din bank. Återbetalning måste krävas inom åtta veckor från det datum då ditt konto debiterades. Dina rättigheter förklaras i ett utdrag som du kan få från din bank. Du godkänner att få aviseringar för framtida debiteringar upp till två dagar innan de inträffar.</string>
+  <string name="stripe_billing_details">Faktureringsadress</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK-kod</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Genom att fortsätta godkänner du att %1$s debiterar ditt Cash App-konto för den här betalningen och framtida betalningar i enlighet med %2$ss villkor, tills detta godkännande återkallas. Du kan när som helst ändra detta i dina Cash App-inställningar.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Kontaktinformation</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Fortsätt</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">Angivet IBAN är ofullständigt.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">Angivet IBAN är ogiltigt, \"%s\" är inte en giltig landskod.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">Ditt IBAN ska börja med en landskod (två bokstäver).</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Din BLIK-kod är ofullständig.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Din BLIK-kod är ogiltig.</string>
+  <string name="stripe_invalid_email_address">Ogiltig e-postadress: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Ogiltigt UPI ID</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Köp nu eller betala senare med Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Genom att fortsätta till Klarna tillåter du %1$s att debitera ditt Klarna-konto för framtida betalningar i enlighet med deras och Klarnas villkor. Du kan när som helst ändra detta i din Klarna-app eller genom att kontakta %2$s.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Betala senare med Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefonnummer</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Namn på kortet</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Betala %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformation</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Köp med ett UPI ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs Direct Debit</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kort</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">Genom att bekräfta betalningen med PayPal tillåter du %s att debitera ditt PayPal-konto för framtida betalningar i enlighet med deras villkor.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Genom att bekräfta betalningen med RevolutPay tillåter du %s att debitera ditt RevolutPay-konto för framtida betalningar i enlighet med deras villkor.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Spara för framtida %s-betalningar</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Skanna kort</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Genom att tillhandahålla din betalningsinformation och bekräfta denna betalning godkänner du (A) %s och Stripe, vår betaltjänstleverantör, att skicka instruktioner till din bank att debitera ditt konto och (B) din bank att debitera ditt konto i enlighet med dessa instruktioner. Som en del av dina rättigheter har du rätt till återbetalning från din bank enligt villkoren för ditt avtal med din bank. Återbetalning måste krävas inom åtta veckor från det datum då ditt konto debiterades. Dina rättigheter förklaras i ett utdrag som du kan få från din bank. Du godkänner att få aviseringar för framtida debiteringar upp till två dagar innan de inträffar.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Konfigurera</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

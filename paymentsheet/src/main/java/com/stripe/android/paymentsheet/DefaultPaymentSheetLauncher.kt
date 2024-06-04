@@ -1,17 +1,15 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
-import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -19,46 +17,52 @@ import org.jetbrains.annotations.TestOnly
  * able to pass in an activity.
  */
 internal class DefaultPaymentSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
-    application: Application
-) : PaymentSheetLauncher, Injector {
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentSheetLauncher::class.simpleName))
-
-    private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
-        DaggerPaymentSheetLauncherComponent
-            .builder()
-            .application(application)
-            .injectorKey(injectorKey)
-            .build()
-
+    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
+    private val activity: Activity,
+    private val lifecycleOwner: LifecycleOwner,
+    private val application: Application,
+    private val callback: PaymentSheetResultCallback,
+) : PaymentSheetLauncher {
     init {
-        WeakMapInjectorRegistry.register(this, injectorKey)
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    IntentConfirmationInterceptor.createIntentCallback = null
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    super.onDestroy(owner)
+                }
+            }
+        )
     }
 
     constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        activity.registerForActivityResult(
-            PaymentSheetContract()
+        activityResultLauncher = activity.registerForActivityResult(
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
-        activity.application
+        activity = activity,
+        lifecycleOwner = activity,
+        application = activity.application,
+        callback = callback,
     )
 
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        fragment.registerForActivityResult(
-            PaymentSheetContract()
+        activityResultLauncher = fragment.registerForActivityResult(
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
-        fragment.requireActivity().application
+        activity = fragment.requireActivity(),
+        lifecycleOwner = fragment,
+        application = fragment.requireActivity().application,
+        callback = callback,
     )
 
     @TestOnly
@@ -67,52 +71,39 @@ internal class DefaultPaymentSheetLauncher(
         registry: ActivityResultRegistry,
         callback: PaymentSheetResultCallback
     ) : this(
-        fragment.registerForActivityResult(
-            PaymentSheetContract(),
+        activityResultLauncher = fragment.registerForActivityResult(
+            PaymentSheetContractV2(),
             registry
         ) {
             callback.onPaymentSheetResult(it)
         },
-        fragment.requireActivity().application
+        activity = fragment.requireActivity(),
+        lifecycleOwner = fragment,
+        application = fragment.requireActivity().application,
+        callback = callback,
     )
 
-    override fun presentWithPaymentIntent(
-        paymentIntentClientSecret: String,
+    override fun present(
+        mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-            paymentIntentClientSecret,
-            configuration,
-            injectorKey
+    ) {
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = mode,
+            config = configuration ?: PaymentSheet.Configuration.default(activity),
+            statusBarColor = activity.window?.statusBarColor,
         )
-    )
 
-    override fun presentWithSetupIntent(
-        setupIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createSetupIntentArgsWithInjectorKey(
-            setupIntentClientSecret,
-            configuration,
-            injectorKey
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
         )
-    )
 
-    private fun present(args: PaymentSheetContract.Args) {
-        activityResultLauncher.launch(args)
-    }
-
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is PaymentSheetViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-            }
+        try {
+            activityResultLauncher.launch(args, options)
+        } catch (e: IllegalStateException) {
+            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+            callback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
         }
     }
 }

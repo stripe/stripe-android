@@ -26,16 +26,19 @@ import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
-import com.stripe.android.databinding.CardInputWidgetBinding
+import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -59,7 +62,7 @@ class CardInputWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
-    private val viewBinding = CardInputWidgetBinding.inflate(
+    private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
     )
@@ -72,7 +75,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -173,19 +176,23 @@ class CardInputWidget @JvmOverloads constructor(
                 .filterNotNull()
         }
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
+            return cardParams?.let { params ->
                 PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution
+                    number = params.number,
+                    cvc = params.cvc,
+                    expiryMonth = params.expMonth,
+                    expiryYear = params.expYear,
+                    attribution = params.attribution,
+                    networks = cardBrandView.createNetworksParam(),
                 )
             }
         }
@@ -339,6 +346,23 @@ class CardInputWidget @JvmOverloads constructor(
         updatePostalRequired()
     }
 
+    /**
+     * The Stripe account ID (if any) which is the business of record.
+     * See [use cases](https://docs.stripe.com/connect/charges#on_behalf_of) to determine if this option is relevant
+     * for your integration. This should match the
+     * [on_behalf_of](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-on_behalf_of)
+     * provided on the Intent used when confirming payment.
+     */
+    var onBehalfOf: String? = null
+        set(value) {
+            if (isAttachedToWindow) {
+                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                    viewModel.onBehalfOf = value
+                }
+            }
+            field = value
+        }
+
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
@@ -379,6 +403,16 @@ class CardInputWidget @JvmOverloads constructor(
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
+                cardBrandView.isCbcEligible = isCbcEligible
+            }
+        }
     }
 
     override fun onFinishInflate() {
@@ -456,6 +490,17 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal fun setPostalCode(postalCode: String?) {
         postalCodeEditText.setText(postalCode)
+    }
+
+    /**
+     * A list of preferred networks that should be used to process payments made with a co-branded
+     * card if your user hasn't selected a network themselves.
+     *
+     * The first preferred network that matches any available network will be used. If no preferred
+     * network is applicable, Stripe will select the network.
+     */
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
     /**
@@ -548,48 +593,6 @@ class CardInputWidget @JvmOverloads constructor(
         if (state is Bundle) {
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
-            updateSpaceSizes(isShowingFullCard)
-            placement.totalLengthInPixels = frameWidth
-            val cardStartMargin: Int
-            val dateStartMargin: Int
-            val cvcStartMargin: Int
-            val postalCodeStartMargin: Int
-            if (isShowingFullCard) {
-                cardStartMargin = 0
-                dateStartMargin = placement.getDateStartMargin(isFullCard = true)
-                cvcStartMargin = placement.getCvcStartMargin(isFullCard = true)
-                postalCodeStartMargin = placement.getPostalCodeStartMargin(isFullCard = true)
-            } else {
-                cardStartMargin = -1 * placement.hiddenCardWidth
-                dateStartMargin = placement.getDateStartMargin(isFullCard = false)
-                cvcStartMargin = placement.getCvcStartMargin(isFullCard = false)
-                postalCodeStartMargin = if (postalCodeEnabled) {
-                    placement.getPostalCodeStartMargin(isFullCard = false)
-                } else {
-                    placement.totalLengthInPixels
-                }
-            }
-
-            updateFieldLayout(
-                view = cardNumberTextInputLayout,
-                newWidth = placement.cardWidth,
-                newMarginStart = cardStartMargin
-            )
-            updateFieldLayout(
-                view = expiryDateTextInputLayout,
-                newWidth = placement.dateWidth,
-                newMarginStart = dateStartMargin
-            )
-            updateFieldLayout(
-                view = cvcNumberTextInputLayout,
-                newWidth = placement.cvcWidth,
-                newMarginStart = cvcStartMargin
-            )
-            updateFieldLayout(
-                view = postalCodeTextInputLayout,
-                newWidth = placement.postalCodeWidth,
-                newMarginStart = postalCodeStartMargin
-            )
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
@@ -656,9 +659,11 @@ class CardInputWidget @JvmOverloads constructor(
         newWidth: Int,
         newMarginStart: Int
     ) {
-        view.updateLayoutParams<FrameLayout.LayoutParams> {
-            width = newWidth
-            marginStart = newMarginStart
+        view.doOnPreDraw {
+            it.updateLayoutParams<FrameLayout.LayoutParams> {
+                width = newWidth
+                marginStart = newMarginStart
+            }
         }
     }
 
@@ -771,8 +776,18 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
-            updateCvc()
+            updateCvc(brand)
         }
+
+        cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+            updateCvc(brand)
+        }
+
+        cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
 
         expiryDateEditText.completionCallback = {
             cvcEditText.requestFocus()
@@ -805,14 +820,31 @@ class CardInputWidget @JvmOverloads constructor(
      */
     fun setCvcLabel(cvcLabel: String?) {
         customCvcLabel = cvcLabel
-        updateCvc()
+        updateCvc(cardBrandView.brand)
     }
 
-    private fun updateCvc() {
+    private fun updateCvc(brand: CardBrand) {
         cvcEditText.updateBrand(
-            cardBrandView.brand,
+            brand,
             customCvcLabel
         )
+    }
+
+    private fun handlePossibleCardBrandsChanged(brands: List<CardBrand>) {
+        val currentBrand = cardBrandView.brand
+        cardBrandView.possibleBrands = brands
+
+        if (currentBrand !in brands) {
+            // The brand is no longer available, so we reset to an unknown brand
+            cardBrandView.brand = CardBrand.Unknown
+        }
+
+        hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+
+        // We need to use a known card brand to set the correct expected CVC length. Since both
+        // brands of a co-branded card have the same CVC length, we can just choose the first one.
+        val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+        updateCvc(brand = brandForCvcLength)
     }
 
     /**

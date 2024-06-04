@@ -3,6 +3,7 @@ package com.stripe.android.ui.core
 import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.format.CurrencyFormatter
 import kotlinx.parcelize.Parcelize
 
 /**

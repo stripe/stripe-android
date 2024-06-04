@@ -2,7 +2,7 @@ package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.version.StripeSdkVersion
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -23,7 +23,7 @@ class GooglePayConfigTest {
         assertThat(params.getString("gateway"))
             .isEqualTo("stripe")
         assertThat(params.getString("stripe:version"))
-            .isEqualTo(ApiVersion.get().code)
+            .isEqualTo("StripeAndroid/${StripeSdkVersion.VERSION_NAME}")
         assertThat(params.getString("stripe:publishableKey"))
             .isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
@@ -36,7 +36,7 @@ class GooglePayConfigTest {
         assertThat(params.getString("gateway"))
             .isEqualTo("stripe")
         assertThat(params.getString("stripe:version"))
-            .isEqualTo(ApiVersion.get().code)
+            .isEqualTo("StripeAndroid/${StripeSdkVersion.VERSION_NAME}")
         assertThat(params.getString("stripe:publishableKey"))
             .isEqualTo("pk_test_123/acct_1234")
     }

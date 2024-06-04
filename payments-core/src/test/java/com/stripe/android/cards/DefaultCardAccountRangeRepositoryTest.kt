@@ -2,41 +2,50 @@ package com.stripe.android.cards
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
+import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class DefaultCardAccountRangeRepositoryTest {
+
+    @get:Rule
+    val networkRule = NetworkRule()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
 
-    @Ignore("Failing due to remote change")
+    @Ignore("Failing. See https://jira.corp.stripe.com/browse/RUN_MOBILESDK-1661")
     @Suppress("LongMethod")
     @Test
-    fun `repository with real sources returns expected results`() = runBlocking {
+    fun `repository with real sources returns expected results`(): Unit = runBlocking {
         assertThat(
             realRepository.getAccountRange(
                 CardNumber.Unvalidated("42424")
@@ -83,7 +92,6 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEqualTo(
             AccountRangeFixtures.AMERICANEXPRESS
         )
-
         assertThat(
             realStore.get(BinFixtures.AMEX)
         ).hasSize(1)
@@ -105,27 +113,44 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
 
         assertThat(
-            realRepository.getAccountRange(
-                CardNumber.Unvalidated("356840")
-            )
-        ).isEqualTo(
-            AccountRangeFixtures.JCB
-        )
-        assertThat(
             realStore.get(BinFixtures.JCB)
         ).isEmpty()
 
         assertThat(
             realRepository.getAccountRange(
-                CardNumber.Unvalidated("621682")
+                CardNumber.Unvalidated("601100")
             )
         ).isEqualTo(
-            AccountRangeFixtures.UNIONPAY19
+            AccountRangeFixtures.DISCOVER
+        )
+        assertThat(
+            realStore.get(BinFixtures.DISCOVER)
+        ).containsExactly(
+            AccountRange(
+                binRange = BinRange(low = "6011000000000000", high = "6011011999999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Discover,
+                country = "US"
+            )
         )
 
         assertThat(
-            realStore.get(BinFixtures.UNIONPAY_CN)
-        ).hasSize(69)
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("356840")
+            )
+        ).isEqualTo(
+            AccountRangeFixtures.UNIONPAY16
+        )
+        assertThat(
+            realStore.get(BinFixtures.UNIONPAY16)
+        ).containsExactly(
+            AccountRange(
+                binRange = BinRange(low = "3568400000000000", high = "3568409999999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.UnionPay,
+                country = "CN"
+            )
+        )
     }
 
     @Test
@@ -142,52 +167,116 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     @Test
     fun `loading when no sources are loading should emit false`() = runTest {
-        val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = FakeCardAccountRangeSource(),
             staticSource = FakeCardAccountRangeSource(),
             store = realStore
-        ).loading.collect {
-            collected.add(it)
+        ).loading.test {
+            assertThat(awaitItem()).isFalse()
         }
-
-        assertThat(collected)
-            .containsExactly(false)
     }
 
     @Test
     fun `loading when one source is loading should emit true`() = runTest {
-        val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = FakeCardAccountRangeSource(isLoading = true),
             staticSource = FakeCardAccountRangeSource(),
             store = realStore
-        ).loading.collect {
-            collected.add(it)
+        ).loading.test {
+            assertThat(awaitItem()).isTrue()
         }
-
-        assertThat(collected)
-            .containsExactly(true)
     }
 
     @Test
-    fun `getAccountRange should not access remote source if BIN is in store`() = runTest {
-        val remoteSource = mock<CardAccountRangeSource>()
+    fun `Should return local account ranges if BIN is in store`() = runTest {
+        val accountRanges = FAKE_ACCOUNT_RANGES.shuffled()
+
+        val repository = DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(realStore),
+            remoteSource = FakeCardAccountRangeSource(),
+            staticSource = StaticCardAccountRangeSource(),
+            store = realStore,
+        )
+
+        val bin = requireNotNull(CardNumberFixtures.VISA.bin)
+        realStore.save(bin, accountRanges)
+
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(accountRanges)
+    }
+
+    @Test
+    fun `Should return static account ranges if remote source fails and BIN is not in store`() = runTest {
+        val repository = DefaultCardAccountRangeRepository(
+            inMemorySource = FakeCardAccountRangeSource(accountRanges = null),
+            remoteSource = mock { on { loading } doReturn stateFlowOf(false) },
+            staticSource = StaticCardAccountRangeSource(),
+            store = realStore,
+        )
+
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(VISA_ACCOUNT_RANGES)
+    }
+
+    @Test
+    fun `Should load from remote source if BIN is not in store`() = runTest {
+        val accountRanges = FAKE_ACCOUNT_RANGES.shuffled()
+        val remoteSource = FakeCardAccountRangeSource(accountRanges = accountRanges)
+
         val repository = DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = remoteSource,
             staticSource = FakeCardAccountRangeSource(),
-            store = realStore
+            store = realStore,
         )
 
-        val bin = requireNotNull(CardNumberFixtures.VISA.bin)
-        realStore.save(bin, emptyList())
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(accountRanges)
+    }
 
-        // should not access remote source
-        repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource, never()).getAccountRange(CardNumberFixtures.VISA)
+    @Test
+    fun `getAccountRanges sends all parameters`() = runTest {
+        val binPrefix = "513130"
+        networkRule.enqueue(
+            method("GET"),
+            path("/edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            query("bin_prefix", binPrefix),
+        ) { response ->
+            response.setBody(
+                """
+                    {
+                        "data":[
+                            {
+                                "account_range_high":"5131309999999999",
+                                "account_range_low":"5131300000000000",
+                                "brand":"MASTERCARD",
+                                "country":"FR",
+                                "funding":"DEBIT",
+                                "pan_length":16
+                            },
+                            {
+                                "account_range_high":"5131304799999999",
+                                "account_range_low":"5131304700000000",
+                                "brand":"CARTES_BANCAIRES",
+                                "country":"FR",
+                                "funding":"DEBIT",
+                                "pan_length":16
+                            }
+                        ]
+                    }
+                """.trimIndent()
+            )
+        }
+
+        val accountRanges = realRepository.getAccountRanges(CardNumber.Unvalidated(binPrefix))
+        val cardBrands = accountRanges?.map { it.brand }?.toSet()
+
+        assertThat(accountRanges).isNotEmpty()
+        assertThat(cardBrands).containsExactly(CardBrand.MasterCard, CardBrand.CartesBancaires)
     }
 
     private fun createRealRepository(
@@ -219,14 +308,57 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private class FakeCardAccountRangeSource(
-        isLoading: Boolean = false
+        isLoading: Boolean = false,
+        private val accountRanges: List<AccountRange>? = null,
     ) : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? {
-            return null
+        ): List<AccountRange>? {
+            return accountRanges
         }
 
-        override val loading: Flow<Boolean> = flowOf(isLoading)
+        override val loading: StateFlow<Boolean> = stateFlowOf(isLoading)
+    }
+
+    private companion object {
+        private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+
+        private val VISA_ACCOUNT_RANGES = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+            )
+        )
+
+        private val FAKE_ACCOUNT_RANGES = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+            ),
+            AccountRange(
+                binRange = BinRange(
+                    low = "2221000000000000",
+                    high = "2720999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Mastercard,
+            ),
+            AccountRange(
+                BinRange(
+                    low = "5100000000000000",
+                    high = "5599999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Mastercard,
+            ),
+        )
     }
 }

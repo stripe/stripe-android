@@ -65,6 +65,17 @@ class CountryUtilsTest {
     }
 
     @Test
+    fun countryIsAvailableEvenWhenNotReturnedFrom_getISOCountries() {
+        // https://github.com/stripe/stripe-android/issues/6501
+        // We used to use Locale.getISOCountries instead of our hardcoded set.
+        // Some countries (notably Kosovo) wasn't available on some older Android versions.
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("XK"), Locale.US))
+            .isEqualTo("Kosovo")
+        val country = CountryUtils.getCountryByCode(CountryCode.create("XK"), Locale.US)
+        assertThat(country).isEqualTo(Country("XK", "Kosovo"))
+    }
+
+    @Test
     fun `getOrderedCountriesLocaleLanguage() in the language of the current locale`() {
         val currentLocale = Locale("de", "DE")
         val germany = CountryUtils.getOrderedCountries(currentLocale)
@@ -81,7 +92,7 @@ class CountryUtilsTest {
         val input = "aland"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -89,7 +100,7 @@ class CountryUtilsTest {
         val input = "Dziękuję Åland"
         val expectedOutput = "dziekuje aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -97,7 +108,7 @@ class CountryUtilsTest {
         val input = "Aland"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -105,6 +116,6 @@ class CountryUtilsTest {
         val input = "aºland1!!!"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 }

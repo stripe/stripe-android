@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -14,13 +13,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentSession.PaymentSessionListener
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.launch
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -34,10 +34,8 @@ import com.stripe.android.view.PaymentMethodsActivityStarter
  */
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
-    application: Application,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
-    savedStateRegistryOwner: SavedStateRegistryOwner,
     private val config: PaymentSessionConfig,
     customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
@@ -50,8 +48,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         ViewModelProvider(
             viewModelStoreOwner,
             PaymentSessionViewModel.Factory(
-                application,
-                savedStateRegistryOwner,
                 paymentSessionData,
                 customerSession
             )
@@ -69,26 +65,23 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        viewModel.networkState.observe(
-            lifecycleOwner,
-            {
-                it?.let { networkState ->
-                    listener?.onCommunicatingStateChanged(
-                        when (networkState) {
-                            PaymentSessionViewModel.NetworkState.Active -> true
-                            PaymentSessionViewModel.NetworkState.Inactive -> false
-                        }
-                    )
-                }
-            }
-        )
 
-        viewModel.paymentSessionDataLiveData.observe(
-            lifecycleOwner,
-            {
-                listener?.onPaymentSessionDataChanged(it)
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.networkState.collect { networkState ->
+                listener?.onCommunicatingStateChanged(
+                    when (networkState) {
+                        PaymentSessionViewModel.NetworkState.Active -> true
+                        PaymentSessionViewModel.NetworkState.Inactive -> false
+                    }
+                )
             }
-        )
+        }
+
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.paymentSessionDataStateFlow.collect { sessionData ->
+                listener?.onPaymentSessionDataChanged(sessionData)
+            }
+        }
     }
 
     /**
@@ -102,8 +95,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      */
     constructor(activity: ComponentActivity, config: PaymentSessionConfig) : this(
         activity.applicationContext,
-        activity.application,
-        activity,
         activity,
         activity,
         config,
@@ -122,8 +113,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      */
     constructor(fragment: Fragment, config: PaymentSessionConfig) : this(
         fragment.requireActivity().applicationContext,
-        fragment.requireActivity().application,
-        fragment,
         fragment,
         fragment,
         config,
@@ -155,17 +144,11 @@ class PaymentSession @VisibleForTesting internal constructor(
         resultCode: Int,
         data: Intent?
     ): Boolean {
-        // validate Intent
-        if (data == null) {
+        if (data == null || !isValidRequestCode(requestCode)) {
             return false
         }
 
-        // validate requestCode
-        if (!isValidRequestCode(requestCode)) {
-            return false
-        }
-
-        when (resultCode) {
+        return when (resultCode) {
             Activity.RESULT_CANCELED -> {
                 if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
                     // If resultCode of `PaymentMethodsActivity` is `Activity.RESULT_CANCELED`,
@@ -174,24 +157,28 @@ class PaymentSession @VisibleForTesting internal constructor(
                 } else {
                     fetchCustomer()
                 }
-                return false
+                false
             }
-            Activity.RESULT_OK -> return when (requestCode) {
+
+            Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
                     true
                 }
+
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
                     data.getParcelableExtra<PaymentSessionData>(EXTRA_PAYMENT_SESSION_DATA)?.let {
                         viewModel.onPaymentFlowResult(it)
                     }
                     true
                 }
+
                 else -> {
                     false
                 }
             }
-            else -> return false
+
+            else -> false
         }
     }
 
@@ -231,18 +218,22 @@ class PaymentSession @VisibleForTesting internal constructor(
      *
      *  1. If {@param userSelectedPaymentMethodId} is specified, use that
      *  2. If the instance's [PaymentSessionData.paymentMethod] is non-null, use that
-     *  3. If the instance's [PaymentSessionPrefs.getPaymentMethodId] is non-null, use that
+     *  3. If the instance's [PaymentSessionPrefs.getPaymentMethod] is non-null, use that
      *  4. Otherwise, choose the most recently added Payment Method
      *
      * @param selectedPaymentMethodId if non-null, the ID of the Payment Method that should be
      * initially selected on the Payment Method selection screen
      */
     fun presentPaymentMethodSelection(selectedPaymentMethodId: String? = null) {
+        val selection = viewModel.getSelectedPaymentMethod(selectedPaymentMethodId)
+        val useGooglePay = if (selection is PaymentSessionPrefs.SelectedPaymentMethod.GooglePay) {
+            true
+        } else {
+            viewModel.paymentSessionData.useGooglePay
+        }
         paymentMethodsActivityStarter.startForResult(
             PaymentMethodsActivityStarter.Args.Builder()
-                .setInitialPaymentMethodId(
-                    viewModel.getSelectedPaymentMethodId(selectedPaymentMethodId)
-                )
+                .setInitialPaymentMethodId(selection?.stringValue)
                 .setPaymentMethodsFooter(config.paymentMethodsFooterLayoutId)
                 .setAddPaymentMethodFooter(config.addPaymentMethodFooterLayoutId)
                 .setIsPaymentSessionActive(true)
@@ -251,7 +242,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setShouldShowGooglePay(config.shouldShowGooglePay)
                 .setWindowFlags(config.windowFlags)
                 .setBillingAddressFields(config.billingAddressFields)
-                .setUseGooglePay(viewModel.paymentSessionData.useGooglePay)
+                .setUseGooglePay(useGooglePay)
                 .setCanDeletePaymentMethods(config.canDeletePaymentMethods)
                 .build()
         )
@@ -291,14 +282,13 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun fetchCustomer(isInitialFetch: Boolean = false) {
-        viewModel.fetchCustomer(isInitialFetch).observe(
-            lifecycleOwner,
-            { result ->
-                if (result is PaymentSessionViewModel.FetchCustomerResult.Error) {
-                    listener?.onError(result.errorCode, result.errorMessage)
-                }
+        lifecycleOwner.lifecycleScope.launch {
+            val result = viewModel.fetchCustomer(isInitialFetch)
+
+            if (result is PaymentSessionViewModel.FetchCustomerResult.Error) {
+                listener?.onError(result.errorCode, result.errorMessage)
             }
-        )
+        }
     }
 
     /**

@@ -1,20 +1,6 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'checkstyle'
-    id 'org.jetbrains.kotlin.plugin.parcelize'
-}
+apply from: configs.androidApplication
 
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
-
-ext {
-    retrofitVersion = '2.9.0'
-}
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -32,94 +18,52 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"
 
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.alipay
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.preference
+    implementation libs.androidx.recyclerView
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.liveData
+    implementation libs.compose.material
+    implementation libs.gson
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.playServicesWallet
+    implementation libs.okio
+    implementation libs.retrofit
+    implementation libs.retrofitGsonConverter
 
-    /* Used for server calls */
-    implementation 'com.squareup.okio:okio:3.2.0'
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    debugImplementation libs.leakCanary
 
-    /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    implementation 'com.google.code.gson:gson:2.9.0'
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    testImplementation testLibs.androidx.core
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-
-
-    // Jetpack Compose
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Compose Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
-    // end of Jetpack Compose
-
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-
-    testImplementation "androidx.test:core:$androidTestVersion"
-
-    // Core library
-    androidTestImplementation "androidx.test:core:$androidTestVersion"
-    androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
-
-    // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-
-    // Assertions
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
-    androidTestImplementation "com.google.truth:truth:$truthVersion"
-
-    // Espresso dependencies
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+    androidTestImplementation testLibs.androidx.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation(testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.truth
 
-    // The following Espresso dependency can be either "implementation"
-    // or "androidTestImplementation", depending on whether you want the
-    // dependency to appear on your APK's compile classpath or the test APK
-    // classpath.
-    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
-
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -140,23 +84,8 @@ android {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 
-    packagingOptions {
-        exclude 'LICENSE.txt'
-    }
-
-    lintOptions {
+    lint {
         disable 'MissingTranslation'
-    }
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
     }
 
     sourceSets {
@@ -175,25 +104,6 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
-}
-

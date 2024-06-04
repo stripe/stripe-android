@@ -1,7 +1,9 @@
 package com.stripe.android
 
 import android.content.Intent
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
+import androidx.fragment.app.FragmentActivity
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -12,6 +14,7 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.CardException
+import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.CardParams
@@ -21,14 +24,17 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
+import com.stripe.android.model.PossibleBrands
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Token
 import com.stripe.android.model.WeChatPayNextAction
+import com.stripe.android.utils.mapResult
 
 /**
  * Confirm and authenticate a [PaymentIntent] using the Alipay SDK
@@ -57,15 +63,17 @@ suspend fun Stripe.confirmAlipayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     authenticator: AlipayAuthenticator,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentIntentResult = runApiRequest {
-    paymentController.confirmAndAuthenticateAlipay(
-        confirmPaymentIntentParams,
-        authenticator,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+): PaymentIntentResult {
+    return runApiRequest {
+        paymentController.confirmAndAuthenticateAlipay(
+            confirmPaymentIntentParams,
+            authenticator,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -96,15 +104,63 @@ suspend fun Stripe.createPaymentMethod(
     paymentMethodCreateParams: PaymentMethodCreateParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentMethod = runApiRequest {
-    stripeRepository.createPaymentMethod(
-        paymentMethodCreateParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+): PaymentMethod {
+    return runApiRequest {
+        stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    )
+    }
+}
+
+/**
+ * Update a [PaymentMethod] from a coroutine.
+ *
+ * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
+ * `POST /v1/payment_methods/:id`
+ *
+ * @param paymentMethodId the ID of the [PaymentMethod] to be updated
+ * @param paymentMethodUpdateParams the [PaymentMethodUpdateParams] to be used
+ * @param ephemeralKeySecret the Customer Ephemeral Key secret to be used
+ * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+ * @param stripeAccountId Optional, the Connect account to associate with this request.
+ * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ *
+ * @return a [PaymentMethod] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.updatePaymentMethod(
+    paymentMethodId: String,
+    paymentMethodUpdateParams: PaymentMethodUpdateParams,
+    ephemeralKeySecret: String,
+    idempotencyKey: String? = null,
+    stripeAccountId: String? = this.stripeAccountId
+): PaymentMethod {
+    return runApiRequest {
+        stripeRepository.updatePaymentMethod(
+            paymentMethodId,
+            paymentMethodUpdateParams,
+            ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
+        )
+    }
 }
 
 /**
@@ -135,15 +191,17 @@ suspend fun Stripe.createSource(
     sourceParams: SourceParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequest {
-    stripeRepository.createSource(
-        sourceParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+): Source {
+    return runApiRequest {
+        stripeRepository.createSource(
+            sourceParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    )
+    }
 }
 
 /**
@@ -174,14 +232,11 @@ suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        accountParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = accountParams,
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -213,14 +268,11 @@ suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        bankAccountTokenParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = bankAccountTokenParams,
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -252,14 +304,11 @@ suspend fun Stripe.createPiiToken(
     personalId: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        PiiTokenParams(personalId),
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = PiiTokenParams(personalId),
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -293,14 +342,11 @@ suspend fun Stripe.createCardToken(
     cardParams: CardParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        cardParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = cardParams,
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -331,14 +377,11 @@ suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        CvcTokenParams(cvc),
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = CvcTokenParams(cvc),
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -371,14 +414,11 @@ suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
-        params,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        )
+): Token {
+    return createTokenOrThrow(
+        tokenParams = params,
+        stripeAccountId = stripeAccountId,
+        idempotencyKey = idempotencyKey,
     )
 }
 
@@ -412,15 +452,17 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): StripeFile = runApiRequest {
-    stripeRepository.createFile(
-        fileParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+): StripeFile {
+    return runApiRequest {
+        stripeRepository.createFile(
+            fileParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    )
+    }
 }
 
 /**
@@ -441,14 +483,46 @@ suspend fun Stripe.createFile(
     APIConnectionException::class,
     APIException::class
 )
-suspend fun Stripe.createRadarSession(): RadarSession {
+@JvmOverloads
+suspend fun Stripe.createRadarSession(
+    activity: FragmentActivity? = null
+): RadarSession {
     return runApiRequest {
         stripeRepository.createRadarSession(
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
             )
-        )
+        ).flatMap { radarSession ->
+            val siteKey = radarSession.passiveCaptchaSiteKey
+            if (siteKey.isNullOrEmpty()) {
+                return@flatMap Result.success(radarSession)
+            } else if (activity == null && BuildConfig.DEBUG) {
+                throw IllegalStateException(
+                    "An activity was not provided when creating a radar session. Please provide a valid activity."
+                )
+            } else if (activity == null) {
+                return@flatMap Result.success(radarSession)
+            }
+
+            val hCaptchaToken = performPassiveHCaptcha(
+                activity = activity,
+                siteKey = siteKey,
+                rqdata = radarSession.passiveCaptchaRqdata
+            )
+
+            return@flatMap stripeRepository.attachHCaptchaToRadarSession(
+                radarSessionToken = radarSession.id,
+                hcaptchaToken = hCaptchaToken,
+                hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }.map { radarSession ->
+            RadarSession(id = radarSession.id)
+        }
     }
 }
 
@@ -461,6 +535,7 @@ suspend fun Stripe.createRadarSession(): RadarSession {
  * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
  * @param stripeAccountId Optional, the Connect account to associate with this request.
  * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ * @param expand Optional, a list of keys to expand on the returned `PaymentIntent` object.
  *
  * @return a [PaymentIntent] object
  *
@@ -477,15 +552,19 @@ suspend fun Stripe.createRadarSession(): RadarSession {
 )
 suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
-    stripeAccountId: String? = this.stripeAccountId
-): PaymentIntent = runApiRequest {
-    stripeRepository.retrievePaymentIntent(
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    stripeAccountId: String? = this.stripeAccountId,
+    expand: List<String> = emptyList(),
+): PaymentIntent {
+    return runApiRequest {
+        stripeRepository.retrievePaymentIntent(
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expand,
         )
-    )
+    }
 }
 
 /**
@@ -497,6 +576,7 @@ suspend fun Stripe.retrievePaymentIntent(
  * @param clientSecret the client_secret with which to retrieve the [SetupIntent]
  * @param stripeAccountId Optional, the Connect account to associate with this request.
  * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
  *
  * @return a [SetupIntent] object
  *
@@ -513,15 +593,19 @@ suspend fun Stripe.retrievePaymentIntent(
 )
 suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
-    stripeAccountId: String? = this.stripeAccountId
-): SetupIntent = runApiRequest {
-    stripeRepository.retrieveSetupIntent(
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    stripeAccountId: String? = this.stripeAccountId,
+    expand: List<String> = emptyList(),
+): SetupIntent {
+    return runApiRequest {
+        stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expand,
         )
-    )
+    }
 }
 
 /**
@@ -552,15 +636,17 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) sourceId: String,
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequest {
-    stripeRepository.retrieveSource(
-        sourceId,
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+): Source {
+    return runApiRequest {
+        stripeRepository.retrieveSource(
+            sourceId,
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -571,6 +657,7 @@ suspend fun Stripe.retrieveSource(
  *
  * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
  * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+ * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
  *
  * @return a [SetupIntent] object
  *
@@ -587,16 +674,20 @@ suspend fun Stripe.retrieveSource(
 )
 suspend fun Stripe.confirmSetupIntent(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
-    idempotencyKey: String? = null
-): SetupIntent = runApiRequest {
-    stripeRepository.confirmSetupIntent(
-        confirmSetupIntentParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+    idempotencyKey: String? = null,
+    expand: List<String> = emptyList(),
+): SetupIntent {
+    return runApiRequest {
+        stripeRepository.confirmSetupIntent(
+            confirmSetupIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            ),
+            expand,
         )
-    )
+    }
 }
 
 /**
@@ -619,7 +710,7 @@ suspend fun Stripe.confirmWeChatPayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     stripeAccountId: String? = this.stripeAccountId
 ): WeChatPayNextAction {
-    return runCatching {
+    return runApiRequest {
         paymentController.confirmWeChatPay(
             confirmPaymentIntentParams,
             ApiRequest.Options(
@@ -627,8 +718,6 @@ suspend fun Stripe.confirmWeChatPayPayment(
                 stripeAccount = stripeAccountId
             )
         )
-    }.getOrElse {
-        throw StripeException.create(it)
     }
 }
 
@@ -657,15 +746,17 @@ suspend fun Stripe.confirmWeChatPayPayment(
 suspend fun Stripe.confirmPaymentIntent(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
-): PaymentIntent = runApiRequest {
-    stripeRepository.confirmPaymentIntent(
-        confirmPaymentIntentParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+): PaymentIntent {
+    return runApiRequest {
+        stripeRepository.confirmPaymentIntent(
+            confirmPaymentIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    )
+    }
 }
 
 /**
@@ -674,18 +765,15 @@ suspend fun Stripe.confirmPaymentIntent(
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
 private inline fun <reified ApiObject : StripeModel> runApiRequest(
-    block: () -> ApiObject?
-): ApiObject =
-    runCatching {
-        requireNotNull(block()) {
-            "Failed to parse ${ApiObject::class.java.simpleName}."
-        }
-    }.getOrElse { throw StripeException.create(it) }
+    block: () -> Result<ApiObject>,
+): ApiObject {
+    return block().getOrElse { throw StripeException.create(it) }
+}
 
 /**
  * Get the [PaymentIntentResult] from [Intent] returned via
  * Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation
- * (see [confirmPayment]) or manual confirmation (see [handleNextActionForPayment]})
+ * (see [Stripe.confirmPayment]) or manual confirmation (see [Stripe.handleNextActionForPayment]})
  *
  * @param requestCode [Int] code passed from Activity#onActivityResult
  * @param data [Intent] intent from Activity#onActivityResult
@@ -748,7 +836,7 @@ suspend fun Stripe.getSetupIntentResult(
 /**
  * Get the [Source] from [Intent] returned via
  * Activity#onActivityResult(int, int, Intent)}} for [Source] authentication.
- * (see [authenticateSource])
+ * (see [Stripe.authenticateSource])
  *
  * @param requestCode [Int] code passed from Activity#onActivityResult
  * @param data [Intent] intent from Activity#onActivityResult
@@ -784,14 +872,18 @@ suspend fun Stripe.getAuthenticateSourceResult(
  */
 internal inline fun <reified ApiObject : StripeModel> runApiRequest(
     isValidParam: Boolean,
-    block: () -> ApiObject
-): ApiObject =
-    runCatching {
+    block: () -> Result<ApiObject>,
+): ApiObject {
+    return runCatching {
         require(isValidParam) {
             "Incorrect requestCode and data for ${ApiObject::class.java.simpleName}."
         }
+    }.mapResult {
         block()
-    }.getOrElse { throw StripeException.create(it) }
+    }.getOrElse {
+        throw StripeException.create(it)
+    }
+}
 
 /**
  * Suspend function to verify a customer's bank account with micro-deposits
@@ -799,14 +891,13 @@ internal inline fun <reified ApiObject : StripeModel> runApiRequest(
  * This function should only be called when the PaymentIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the PaymentIntent
  * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
  * sent to the bank account
  * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
  * sent to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [PaymentIntent] object
  *
@@ -825,16 +916,18 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        firstAmount = firstAmount,
-        secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+): PaymentIntent {
+    return runApiRequest {
+        stripeRepository.verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -843,12 +936,11 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * This function should only be called when the PaymentIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the PaymentIntent
  * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
  * statement descriptor to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [PaymentIntent] object
  *
@@ -866,15 +958,17 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
 suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+): PaymentIntent {
+    return runApiRequest {
+        stripeRepository.verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -883,14 +977,13 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * This function should only be called when the SetupIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the SetupIntent
  * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
  * sent to the bank account
  * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
  * sent to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [SetupIntent] object
  *
@@ -909,16 +1002,18 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        firstAmount = firstAmount,
-        secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+): SetupIntent {
+    return runApiRequest {
+        stripeRepository.verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -927,12 +1022,11 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
  * This function should only be called when the SetupIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the SetupIntent
  * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
  * statement descriptor to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [SetupIntent] object
  *
@@ -950,13 +1044,66 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
 suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        descriptorCode = descriptorCode,
+): SetupIntent {
+    return runApiRequest {
+        stripeRepository.verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
+        )
+    }
+}
+
+/**
+ * Retrieve a list of possible brands for the given card number.
+ * Returns an error if the cardNumber length is less than 6 characters.
+ *
+ * @param cardNumber the card number
+ *
+ * @return [PossibleBrands] for the given card number
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.retrievePossibleBrands(
+    cardNumber: String
+): PossibleBrands {
+    return runApiRequest {
+        stripeRepository.retrieveCardMetadata(
+            cardNumber = cardNumber,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
+        ).map { metadata ->
+            val brands = metadata.accountRanges.map { it.brand }
+            PossibleBrands(brands = brands.distinct())
+        }
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+suspend fun Stripe.attachPaymentMethod(
+    paymentMethodId: String,
+    customerId: String,
+    ephemeralKeySecret: String,
+    idempotencyKey: String? = null,
+    stripeAccountId: String? = this.stripeAccountId,
+): Result<PaymentMethod> {
+    return stripeRepository.attachPaymentMethod(
+        customerId = customerId,
+        paymentMethodId = paymentMethodId,
+        productUsageTokens = emptySet(),
         requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+            apiKey = ephemeralKeySecret,
+            stripeAccount = stripeAccountId,
+            idempotencyKey = idempotencyKey,
         )
     )
 }

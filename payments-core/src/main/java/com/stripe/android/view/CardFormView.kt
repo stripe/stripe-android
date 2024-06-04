@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
@@ -17,6 +18,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.R
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
@@ -26,8 +28,12 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateCardDetailsApi
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
+import com.stripe.android.uicore.R as UiCoreR
+import com.stripe.payments.model.R as PaymentsModelR
 
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
@@ -94,6 +100,8 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     private enum class Style(
         internal val attrValue: Int
     ) {
@@ -136,7 +144,7 @@ class CardFormView @JvmOverloads constructor(
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
 
             return CardParams(
-                brand = cardMultilineWidget.brand,
+                brand = brand,
                 loggingTokens = setOf(CARD_FORM_VIEW),
                 number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
                 expMonth = expirationDate.month,
@@ -147,6 +155,49 @@ class CardFormView @JvmOverloads constructor(
                     .setPostalCode(postalCodeView.text?.toString())
                     .build()
             )
+        }
+
+    /**
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
+     */
+    private val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateCardDetailsApi::class)
+        get() {
+            return cardParams?.let {
+                PaymentMethodCreateParams.Card(
+                    number = it.number,
+                    cvc = it.cvc,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear,
+                    attribution = it.attribution,
+                    networks = cardMultilineWidget.cardBrandView.createNetworksParam(),
+                )
+            }
+        }
+
+    /**
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`
+     */
+    val paymentMethodCreateParams: PaymentMethodCreateParams?
+        get() = paymentMethodCard?.let { PaymentMethodCreateParams.create(it) }
+
+    /**
+     * The Stripe account ID (if any) which is the business of record.
+     * See [use cases](https://docs.stripe.com/connect/charges#on_behalf_of) to determine if this option is relevant
+     * for your integration. This should match the
+     * [on_behalf_of](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-on_behalf_of)
+     * provided on the Intent used when confirming payment.
+     */
+    var onBehalfOf: String? = null
+        set(value) {
+            if (isAttachedToWindow) {
+                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                    viewModel.onBehalfOf = value
+                }
+            }
+            field = value
         }
 
     init {
@@ -163,7 +214,7 @@ class CardFormView @JvmOverloads constructor(
         ) {
             backgroundColorStateList =
                 getColorStateList(R.styleable.StripeCardFormView_backgroundColorStateList)
-            style = Style.values()[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
+            style = Style.entries[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
         }
 
         backgroundColorStateList?.let {
@@ -235,10 +286,10 @@ class CardFormView @JvmOverloads constructor(
     private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
         if (CountryCode.isUS(countryCode)) {
             postalCodeView.config = PostalCodeEditText.Config.US
-            postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
+            postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
         } else {
             postalCodeView.config = PostalCodeEditText.Config.Global
-            postalCodeView.setErrorMessage(resources.getString(R.string.address_postal_code_invalid))
+            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
         }
     }
 
@@ -283,10 +334,12 @@ class CardFormView @JvmOverloads constructor(
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint =
-            context.getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(UiCoreR.string.stripe_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
+
+        cardMultilineWidget.viewModelStoreOwner = viewModelStoreOwner
+        cardMultilineWidget.cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
@@ -300,22 +353,29 @@ class CardFormView @JvmOverloads constructor(
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_horizontal)
         val layoutMarginVertical =
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_vertical)
+
+        cardMultilineWidget.cardNumberTextInputLayout.updateLayoutParams<FrameLayout.LayoutParams> {
+            marginStart = layoutMarginHorizontal
+            marginEnd = layoutMarginHorizontal
+            topMargin = layoutMarginVertical
+            bottomMargin = layoutMarginVertical
+        }
+
         setOf(
-            cardMultilineWidget.cardNumberTextInputLayout,
             cardMultilineWidget.expiryTextInputLayout,
             cardMultilineWidget.cvcInputLayout
-        ).forEach { layout ->
-            layout.updateLayoutParams<LayoutParams> {
+        ).forEach { frameLayout ->
+            frameLayout.updateLayoutParams<LayoutParams> {
                 marginStart = layoutMarginHorizontal
                 marginEnd = layoutMarginHorizontal
                 topMargin = layoutMarginVertical
                 bottomMargin = layoutMarginVertical
             }
-            layout.isErrorEnabled = false
-            layout.error = null
+            frameLayout.isErrorEnabled = false
+            frameLayout.error = null
         }
 
-        cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_cvc)
+        cardMultilineWidget.setCvcIcon(PaymentsModelR.drawable.stripe_ic_cvc)
 
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
@@ -364,6 +424,17 @@ class CardFormView @JvmOverloads constructor(
         } else {
             super.onRestoreInstanceState(state)
         }
+    }
+
+    /**
+     * A list of preferred networks that should be used to process payments made with a co-branded
+     * card if your user hasn't selected a network themselves.
+     *
+     * The first preferred network that matches any available network will be used. If no preferred
+     * network is applicable, Stripe will select the network.
+     */
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardMultilineWidget.cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
     private fun applyStandardStyle() {
@@ -451,7 +522,7 @@ class CardFormView @JvmOverloads constructor(
     ) {
         errorsMap[field] = errorMessage
 
-        val error = Fields.values()
+        val error = Fields.entries
             .map { errorsMap[it] }
             .firstOrNull { !it.isNullOrBlank() }
 

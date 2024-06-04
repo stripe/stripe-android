@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
@@ -11,20 +12,19 @@ data class ConsumerPaymentDetails internal constructor(
     val paymentDetails: List<PaymentDetails>
 ) : StripeModel {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class PaymentDetails(
         open val id: String,
-        open val isDefault: Boolean
+        open val type: String
     ) : Parcelable
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Card(
         override val id: String,
-        override val isDefault: Boolean,
-        val expiryYear: Int,
-        val expiryMonth: Int,
-        val brand: CardBrand,
-        val last4: String
-    ) : PaymentDetails(id, isDefault) {
+        val last4: String,
+    ) : PaymentDetails(id, Companion.type) {
+
         companion object {
             const val type = "card"
 
@@ -50,4 +50,29 @@ data class ConsumerPaymentDetails internal constructor(
             }
         }
     }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Passthrough(
+        override val id: String,
+        val last4: String,
+    ) : PaymentDetails(id, "card")
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class BankAccount(
+        override val id: String,
+        val last4: String
+    ) : PaymentDetails(id, Companion.type) {
+        companion object {
+            const val type = "bank_account"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class BillingAddress(
+        val countryCode: CountryCode?,
+        val postalCode: String?
+    ) : Parcelable
 }

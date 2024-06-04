@@ -29,4 +29,12 @@ class SetupIntentJsonParserTest {
         assertThat(setupIntent.paymentMethod?.id)
             .isEqualTo("pm_1GSmaGCRMbs6F")
     }
+
+    @Test
+    fun parse_withCountryCode_shouldCreateExpectedObject() {
+        val setupIntent = requireNotNull(
+            SetupIntentJsonParser().parse(SetupIntentFixtures.SI_WITH_COUNTRY_CODE)
+        )
+        assertThat(setupIntent.countryCode).isEqualTo("CA")
+    }
 }

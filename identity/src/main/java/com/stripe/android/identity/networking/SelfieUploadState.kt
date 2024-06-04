@@ -1,19 +1,24 @@
 package com.stripe.android.identity.networking
 
+import android.os.Parcelable
 import com.stripe.android.identity.states.FaceDetectorTransitioner
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 /**
  * Indicates the update states of images for selfie.
  */
+@Parcelize
 internal data class SelfieUploadState(
-    val firstHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val firstLowResResult: Resource<UploadedResult> = Resource.loading(),
-    val lastHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val lastLowResResult: Resource<UploadedResult> = Resource.loading(),
-    val bestHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val bestLowResResult: Resource<UploadedResult> = Resource.loading()
-) {
+    val firstHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val firstLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val lastHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val lastLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val bestHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val bestLowResResult: Resource<UploadedResult> = Resource.idle()
+) : Parcelable {
 
+    @IgnoredOnParcel
     private val allResults = listOf(
         firstHighResResult,
         firstLowResResult,
@@ -108,6 +113,45 @@ internal data class SelfieUploadState(
         }
     }
 
+    fun updateLoading(
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie
+    ) = when (selfie) {
+        FaceDetectorTransitioner.Selfie.FIRST -> {
+            if (isHighRes) {
+                this.copy(
+                    firstHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    firstLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.BEST -> {
+            if (isHighRes) {
+                this.copy(
+                    bestHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    bestLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.LAST -> {
+            if (isHighRes) {
+                this.copy(
+                    lastHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    lastLowResResult = Resource.loading()
+                )
+            }
+        }
+    }
+
     fun hasError(): Boolean {
         allResults.forEach { result ->
             if (result.status == Status.ERROR) {
@@ -145,4 +189,6 @@ internal data class SelfieUploadState(
         }
         return true
     }
+
+    fun isIdle() = allResults.all { it.status == Status.IDLE }
 }

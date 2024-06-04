@@ -5,11 +5,8 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -21,7 +18,8 @@ import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 
-internal interface PaymentController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
@@ -40,25 +38,12 @@ internal interface PaymentController {
      * @param requestOptions a [ApiRequest.Options] to associate with this request
      *
      * @return a [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult
+    ): Result<PaymentIntentResult>
 
     /**
      * Confirm the Stripe Intent for WeChat Pay, return WeChat Pay params from intent's next action
@@ -66,24 +51,11 @@ internal interface PaymentController {
      * @param confirmPaymentIntentParams params to confirm the intent
      * @param requestOptions options for [ApiRequest]
      * @return the [WeChatPayNextAction] object encapsulating [PaymentIntent] and [WeChat]
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the payment intent's next action data is not for WeChat Pay
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): WeChatPayNextAction
+    ): Result<WeChatPayNextAction>
 
     suspend fun startAuth(
         host: AuthActivityStarterHost,
@@ -119,21 +91,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult
+    suspend fun getPaymentIntentResult(data: Intent): Result<PaymentIntentResult>
 
     /**
      * Get the SetupIntent's client_secret from [data] and use to retrieve
@@ -141,21 +100,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the SetupIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getSetupIntentResult(data: Intent): SetupIntentResult
+    suspend fun getSetupIntentResult(data: Intent): Result<SetupIntentResult>
 
     /**
      * Get the Source's client_secret from [data] and use to retrieve
@@ -163,21 +109,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getAuthenticateSourceResult(data: Intent): Source
+    suspend fun getAuthenticateSourceResult(data: Intent): Result<Source>
 
     /**
      * Determine which authentication mechanism should be used, or bypass authentication
@@ -208,6 +141,7 @@ internal interface PaymentController {
      */
     fun unregisterLaunchers()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class StripeIntentType {
         PaymentIntent,
         SetupIntent

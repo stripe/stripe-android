@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -45,7 +46,8 @@ class StripeCardScanProxyTest {
                 fragment = mockFragment,
                 stripePublishableKey = "test",
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable
+                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
+                errorReporter = FakeErrorReporter(),
             ) is UnsupportedStripeCardScanProxy
         )
         assertTrue(
@@ -53,7 +55,8 @@ class StripeCardScanProxyTest {
                 activity = mockActivity,
                 stripePublishableKey = "test",
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable
+                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
+                errorReporter = FakeErrorReporter(),
             ) is UnsupportedStripeCardScanProxy
         )
     }
@@ -68,7 +71,8 @@ class StripeCardScanProxyTest {
                 stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                provider = { FakeProxy() }
+                provider = { FakeProxy() },
+                errorReporter = FakeErrorReporter(),
             ) is FakeProxy
         )
         assertTrue(
@@ -77,7 +81,8 @@ class StripeCardScanProxyTest {
                 stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                provider = { FakeProxy() }
+                provider = { FakeProxy() },
+                errorReporter = FakeErrorReporter(),
             ) is FakeProxy
         )
     }
@@ -89,7 +94,8 @@ class StripeCardScanProxyTest {
                 fragment = mockFragment,
                 stripePublishableKey = "",
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable
+                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
+                errorReporter = FakeErrorReporter(),
             ).present()
         }
         assertFailsWith<IllegalStateException> {
@@ -97,7 +103,8 @@ class StripeCardScanProxyTest {
                 activity = mockActivity,
                 stripePublishableKey = "",
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable
+                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
+                errorReporter = FakeErrorReporter(),
             ).present()
         }
     }

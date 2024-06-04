@@ -4,17 +4,15 @@ import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.BuildConfig
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
-import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
+import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object Stats {
@@ -53,16 +51,16 @@ object Stats {
         StatTrackerImpl { startedAt, result ->
             taskMutex.withLock {
                 val list = tasks[name]
-                if (list == null) {
-                    tasks[name] = listOf(TaskStats(startedAt, startedAt.elapsedSince(), result))
+                if (list.isNullOrEmpty()) {
+                    tasks[name] = listOf(TaskStats(startedAt, startedAt.elapsedNow(), result))
                 } else {
-                    tasks[name] = list + TaskStats(startedAt, startedAt.elapsedSince(), result)
+                    tasks[name] = list + TaskStats(startedAt, startedAt.elapsedNow(), result)
                 }
             }
             if (BuildConfig.DEBUG) {
                 Log.v(
                     logTag,
-                    "Task $name got result $result after ${startedAt.elapsedSince()}"
+                    "Task $name got result $result after ${startedAt.elapsedNow()}"
                 )
             }
         }
@@ -82,7 +80,7 @@ object Stats {
                 }
 
                 val taskStats = resultStats[resultName]
-                val duration = startedAt.elapsedSince()
+                val duration = startedAt.elapsedNow()
                 if (taskStats == null) {
                     resultStats[resultName] = RepeatingTaskStats(
                         executions = 1,
@@ -96,7 +94,7 @@ object Stats {
                     resultStats[resultName] = RepeatingTaskStats(
                         executions = taskStats.executions + 1,
                         startedAt = taskStats.startedAt,
-                        totalDuration = taskStats.startedAt.elapsedSince(),
+                        totalDuration = taskStats.startedAt.elapsedNow(),
                         totalCpuDuration = taskStats.totalCpuDuration + duration,
                         minimumDuration = minOf(taskStats.minimumDuration, duration),
                         maximumDuration = maxOf(taskStats.maximumDuration, duration)
@@ -106,7 +104,7 @@ object Stats {
             if (BuildConfig.DEBUG) {
                 Log.v(
                     logTag,
-                    "Repeating task $name got result $result after ${startedAt.elapsedSince()}"
+                    "Repeating task $name got result $result after ${startedAt.elapsedNow()}"
                 )
             }
         }
@@ -126,7 +124,7 @@ object Stats {
                 }
 
                 val taskStats = resultStats[resultName]
-                val duration = startedAt.elapsedSince()
+                val duration = startedAt.elapsedNow()
                 if (taskStats == null) {
                     resultStats[resultName] = RepeatingTaskStats(
                         executions = 1,
@@ -140,7 +138,7 @@ object Stats {
                     resultStats[resultName] = RepeatingTaskStats(
                         executions = taskStats.executions + 1,
                         startedAt = taskStats.startedAt,
-                        totalDuration = taskStats.startedAt.elapsedSince(),
+                        totalDuration = taskStats.startedAt.elapsedNow(),
                         totalCpuDuration = taskStats.totalCpuDuration + duration,
                         minimumDuration = minOf(taskStats.minimumDuration, duration),
                         maximumDuration = maxOf(taskStats.maximumDuration, duration)
@@ -151,7 +149,7 @@ object Stats {
                 Log.v(
                     logTag,
                     "Persistent repeating task $name got result $result after " +
-                        "${startedAt.elapsedSince()}"
+                        "${startedAt.elapsedNow()}"
                 )
             }
         }
@@ -191,7 +189,7 @@ interface StatTracker {
     /**
      * When this task was started.
      */
-    val startedAt: ClockMark
+    val startedAt: ComparableTimeMark
 
     /**
      * Track the result from a stat.
@@ -201,16 +199,15 @@ interface StatTracker {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StatTrackerImpl(
-    private val onComplete: suspend (ClockMark, String?) -> Unit
+    private val onComplete: suspend (ComparableTimeMark, String?) -> Unit
 ) : StatTracker {
-    override val startedAt = Clock.markNow()
-    override suspend fun trackResult(result: String?) =
-        coroutineScope { launch { onComplete(startedAt, result) } }.let { }
+    override val startedAt = TimeSource.Monotonic.markNow()
+    override suspend fun trackResult(result: String?) = onComplete(startedAt, result)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class TaskStats(
-    val started: ClockMark,
+    val started: ComparableTimeMark,
     val duration: Duration,
     val result: String?
 )
@@ -218,7 +215,7 @@ data class TaskStats(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class RepeatingTaskStats(
     val executions: Int,
-    val startedAt: ClockMark,
+    val startedAt: ComparableTimeMark,
     val totalDuration: Duration,
     val totalCpuDuration: Duration,
     val minimumDuration: Duration,

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for Address field on address form -->
+  <string name="stripe_address_label_address">地址</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="stripe_address_label_address_line2">地址第 2 行</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="stripe_address_label_ae_emirate">酋長國</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_au_suburb_or_city">市郊或城市</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_bb_jm_parish">堂區</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_department">部門</string>
+  <!-- Label for the district field on an address form -->
+  <string name="stripe_address_label_district">地區</string>
+  <!-- Label of an address field in hk -->
+  <string name="stripe_address_label_hk_area">地區</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_ie_eircode">愛爾蘭郵區編號</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="stripe_address_label_ie_townland">鎮區</string>
+  <!-- Used to describe postal code in India -->
+  <string name="stripe_address_label_in_pin">郵區編號</string>
+  <!-- Used to describe part of an address -->
+  <string name="stripe_address_label_island">島</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_jp_prefecture">轄區</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_kr_do_si">道/縣</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_neighborhood">社區</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_oblast">州</string>
+  <!-- Used to describe a field of an address -->
+  <string name="stripe_address_label_post_town">郵區編號或城鎮</string>
+  <!-- Label of an address field -->
+  <string name="stripe_address_label_suburb">郊區</string>
+  <!-- Used to describe an address field. -->
+  <string name="stripe_address_label_village_township">村或鎮</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="stripe_address_search_content_description">搜尋</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="stripe_address_zip_invalid">您的郵區編號無效。</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="stripe_address_zip_postal_invalid">您的郵區編號無效</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="stripe_billing_same_as_shipping">賬單地址與收貨地址相同</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="stripe_blank_and_required">該欄位不能為空。</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="stripe_change">更改</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_email">電郵地址</string>
+  <!-- Error message when email is invalid -->
+  <string name="stripe_email_is_invalid">您的電郵地址無效。</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiration_date_hint">月份/年份</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">必填</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_form_label_optional">%s（可選）</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="stripe_incomplete_expiry_date">您的銀行卡的有效期不完整。</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="stripe_incomplete_phone_number">電話號碼不完整</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="stripe_invalid_expiry_month">您的銀行卡的到期月份無效。</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="stripe_invalid_expiry_year">您的銀行卡的到期年份無效。</string>
+</resources>

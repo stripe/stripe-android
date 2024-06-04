@@ -6,8 +6,9 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
@@ -19,36 +20,33 @@ internal class RemoteCardAccountRangeSource(
 
     private val _loading = MutableStateFlow(false)
 
-    override val loading: Flow<Boolean>
-        get() = _loading
+    override val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
-    override suspend fun getAccountRange(
+    override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
-            _loading.value = true
+            val result = withLoading {
+                stripeRepository.getCardMetadata(
+                    bin = bin,
+                    options = requestOptions,
+                ).map { metadata ->
+                    metadata.accountRanges
+                }
+            }
 
-            val accountRanges =
-                stripeRepository.getCardMetadata(bin, requestOptions)?.accountRanges.orEmpty()
-            cardAccountRangeStore.save(bin, accountRanges)
+            result.onSuccess { accountRanges ->
+                cardAccountRangeStore.save(bin, accountRanges)
 
-            _loading.value = false
-
-            when {
-                accountRanges.isNotEmpty() -> {
-                    val matchedAccountRange = accountRanges
-                        .firstOrNull { (binRange) ->
-                            binRange.matches(cardNumber)
-                        }
-
-                    if (matchedAccountRange == null && cardNumber.isValidLuhn) {
+                if (accountRanges.isNotEmpty()) {
+                    val hasMatch = accountRanges.any { it.binRange.matches(cardNumber) }
+                    if (!hasMatch && cardNumber.isValidLuhn) {
                         onCardMetadataMissingRange()
                     }
-
-                    matchedAccountRange
                 }
-                else -> null
             }
+
+            result.getOrNull()
         }
     }
 
@@ -56,5 +54,14 @@ internal class RemoteCardAccountRangeSource(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataMissingRange)
         )
+    }
+
+    private inline fun withLoading(
+        block: () -> Result<List<AccountRange>>,
+    ): Result<List<AccountRange>> {
+        _loading.value = true
+        val accountRanges = block()
+        _loading.value = false
+        return accountRanges
     }
 }

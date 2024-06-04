@@ -1,64 +1,84 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     api project(":stripe-core")
     api project(":payments-model")
+    implementation project(":hcaptcha")
+    implementation project(":stripe-ui-core")
     compileOnly project(':financial-connections')
 
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
-    implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
-
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation 'com.google.android.instantapps:instantapps:1.1.0'
-
+    implementation libs.accompanist.appCompatThemeAdapter
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.accompanist.material3ThemeAdapter
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.recyclerView
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.ui
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
+    implementation libs.material
+    implementation libs.playServicesWallet
+    implementation libs.instantApps
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:6.1.5"
+    implementation libs.stripe3ds2
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    ksp libs.daggerCompiler
 
-    javadocDeps "androidx.annotation:annotation:$androidxAnnotationVersion"
-    javadocDeps "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    javadocDeps "com.google.android.material:material:$materialVersion"
+    javadocDeps libs.androidx.annotation
+    javadocDeps libs.androidx.appCompat
+    javadocDeps libs.material
+
     testImplementation project(':financial-connections')
-
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation project(':network-testing')
+    testImplementation project(':payments-core-testing')
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.coreKtx
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.espresso.contrib
+    testImplementation testLibs.espresso.intents
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+    androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.kotlin.coroutines
+    androidTestImplementation testLibs.kotlin.junit
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
@@ -79,12 +99,18 @@ android {
         unitTests {
             // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
+            returnDefaultValues = true
             all {
                 maxHeapSize = "1024m"
             }
         }
-    }
-    productFlavors {
+
+        kotlinOptions {
+            freeCompilerArgs += [
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-Xcontext-receivers",
+            ]
+        }
     }
 
     buildFeatures {
@@ -93,7 +119,16 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    packagingOptions {
+        resources {
+            pickFirsts += [
+                "mockito-extensions/org.mockito.plugins.MemberAccessor",
+                "mockito-extensions/org.mockito.plugins.MockMaker"
+            ]
+        }
     }
 }
 

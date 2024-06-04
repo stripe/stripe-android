@@ -13,10 +13,23 @@ import com.stripe.android.model.PaymentMethod
 internal class ActivityScenarioFactory(
     private val context: Context
 ) {
+
     internal inline fun <reified T : Activity> create(
-        args: ActivityStarter.Args
+        args: ActivityStarter.Args? = null
     ): ActivityScenario<T> {
         return ActivityScenario.launch(
+            Intent(context, T::class.java).apply {
+                if (args != null) {
+                    putExtra(ActivityStarter.Args.EXTRA, args)
+                }
+            }
+        )
+    }
+
+    internal inline fun <reified T : Activity> createForResult(
+        args: ActivityStarter.Args
+    ): ActivityScenario<T> {
+        return ActivityScenario.launchActivityForResult(
             Intent(context, T::class.java)
                 .putExtra(ActivityStarter.Args.EXTRA, args)
         )
@@ -34,7 +47,8 @@ internal class ActivityScenarioFactory(
      * Return a view created with an `Activity` context.
      */
     fun <ViewType : View> createView(
-        viewFactory: (Activity) -> ViewType
+        beforeAttach: (ViewType) -> Unit = {},
+        viewFactory: (Activity) -> ViewType,
     ): ViewType {
         var view: ViewType? = null
 
@@ -47,6 +61,7 @@ internal class ActivityScenarioFactory(
                         root.removeAllViews()
 
                         view = viewFactory(activity).also {
+                            beforeAttach(it)
                             root.addView(it)
                         }
                     }
@@ -54,5 +69,28 @@ internal class ActivityScenarioFactory(
             }
 
         return requireNotNull(view)
+    }
+
+    fun <ViewType : View> createViewAndScenario(
+        beforeAttach: (ViewType) -> Unit = {},
+        viewFactory: (Activity) -> ViewType,
+    ): Pair<ViewType, ActivityScenario<AddPaymentMethodActivity>> {
+        var view: ViewType? = null
+        val activityScenario = createAddPaymentMethodActivity()
+
+        activityScenario.onActivity { activity ->
+            activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+
+            activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                root.removeAllViews()
+
+                view = viewFactory(activity).also {
+                    beforeAttach(it)
+                    root.addView(it)
+                }
+            }
+        }
+
+        return requireNotNull(view) to activityScenario
     }
 }

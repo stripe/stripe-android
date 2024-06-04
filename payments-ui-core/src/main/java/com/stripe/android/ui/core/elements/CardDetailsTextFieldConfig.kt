@@ -4,10 +4,11 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
+import com.stripe.android.uicore.elements.TextFieldState
 
 /**
- * This is similar to the [TextFieldConfig], but in order to determine
- * the state the card brand is required.
+ * This is similar to the [com.stripe.android.uicore.elements.TextFieldConfig],
+ * but in order to determine the state the card brand is required.
  */
 internal interface CardDetailsTextFieldConfig {
     val capitalization: KeyboardCapitalization

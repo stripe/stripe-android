@@ -12,10 +12,10 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
-    <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog" />
+    <style name="StripeAlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog" />
 
     <style name="Stripe.Base.CardInputWidget.EditText" parent="Widget.AppCompat.EditText">
-        <item name="android:textSize">@dimen/ciw_stripe_edit_text_size</item>
+        <item name="android:textSize">@dimen/stripe_ciw_stripe_edit_text_size</item>
     </style>
 
     <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText" />

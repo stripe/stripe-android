@@ -82,9 +82,9 @@ class InjectableActivityScenario<T : Activity>(private val activityClass: Class<
     fun launch(startIntent: Intent? = null): InjectableActivityScenario<T> {
         ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(activityLifecycleObserver)
         delegate = if (startIntent != null) {
-            ActivityScenario.launch(startIntent)
+            ActivityScenario.launchActivityForResult(startIntent)
         } else {
-            ActivityScenario.launch(activityClass)
+            ActivityScenario.launchActivityForResult(activityClass)
         }
         return this
     }

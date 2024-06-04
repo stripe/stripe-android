@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.stripe.android.view.CardBrandView
+        android:id="@+id/card_brand_view"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/stripe_card_brand_view_height"
+        android:layout_marginTop="@dimen/stripe_card_icon_padding"
+        android:layout_marginBottom="@dimen/stripe_card_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_card_icon_padding"
+        android:layout_gravity="center_vertical" />
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical">
+
+        <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/card_number_text_input_layout"
+            style="@style/Stripe.CardInputWidget.TextInputLayout"
+            android:labelFor="@id/card_number_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:visibility="visible"
+            android:background="@android:color/transparent"
+            android:accessibilityTraversalBefore="@+id/text_input_expiry_date"
+            android:nextFocusRight="@+id/text_input_expiry_date"
+            android:nextFocusForward="@+id/text_input_expiry_date"
+            android:nextFocusDown="@+id/text_input_expiry_date"
+            android:contentDescription="@string/stripe_acc_label_card_number"
+            android:accessibilityLiveRegion="polite"
+            app:hintEnabled="false"
+            tools:ignore="UnusedAttribute">
+
+            <com.stripe.android.view.CardNumberEditText
+                android:id="@+id/card_number_edit_text"
+                style="@style/Stripe.CardInputWidget.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionNext"
+                android:hint="@string/stripe_card_number_hint" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/expiry_date_text_input_layout"
+            style="@style/Stripe.CardInputWidget.TextInputLayout"
+            android:labelFor="@id/expiry_date_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
+            android:layout_gravity="start"
+            android:visibility="visible"
+            android:background="@android:color/transparent"
+            android:accessibilityTraversalBefore="@+id/text_input_cvc"
+            android:accessibilityTraversalAfter="@+id/text_input_card_number"
+            android:nextFocusRight="@+id/text_input_cvc"
+            android:nextFocusForward="@+id/text_input_cvc"
+            android:nextFocusDown="@+id/text_input_cvc"
+            android:nextFocusLeft="@id/text_input_card_number"
+            android:nextFocusUp="@id/text_input_card_number"
+            android:contentDescription="@string/stripe_acc_label_expiry_date"
+            android:accessibilityLiveRegion="polite"
+            app:hintEnabled="false"
+            tools:ignore="UnusedAttribute">
+
+            <com.stripe.android.view.ExpiryDateEditText
+                android:id="@+id/expiry_date_edit_text"
+                style="@style/Stripe.CardInputWidget.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionNext"
+                android:digits="@string/stripe_expiration_date_allowlist"
+                android:hint="@string/stripe_expiry_date_hint" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cvc_text_input_layout"
+            style="@style/Stripe.CardInputWidget.TextInputLayout"
+            android:labelFor="@id/cvc_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
+            android:layout_gravity="start"
+            android:background="@android:color/transparent"
+            android:accessibilityTraversalAfter="@+id/text_input_expiry_date"
+            android:nextFocusLeft="@id/text_input_expiry_date"
+            android:nextFocusUp="@id/text_input_expiry_date"
+            android:contentDescription="@string/stripe_cvc_number_hint"
+            android:accessibilityLiveRegion="polite"
+            app:hintEnabled="false"
+            tools:ignore="UnusedAttribute">
+
+            <com.stripe.android.view.CvcEditText
+                android:id="@+id/cvc_edit_text"
+                style="@style/Stripe.CardInputWidget.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionDone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/postal_code_text_input_layout"
+            style="@style/Stripe.CardInputWidget.TextInputLayout"
+            android:labelFor="@id/postal_code_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
+            android:layout_gravity="start"
+            android:background="@android:color/transparent"
+            android:accessibilityTraversalAfter="@+id/text_input_cvc"
+            android:nextFocusLeft="@id/text_input_cvc"
+            android:nextFocusUp="@id/text_input_cvc"
+            android:contentDescription="@string/stripe_address_label_postal_code"
+            android:accessibilityLiveRegion="polite"
+            app:hintEnabled="false"
+            tools:ignore="UnusedAttribute">
+
+            <com.stripe.android.view.PostalCodeEditText
+                android:id="@+id/postal_code_edit_text"
+                style="@style/Stripe.CardInputWidget.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionDone"
+                android:enabled="false" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </FrameLayout>
+</merge>

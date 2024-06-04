@@ -14,19 +14,19 @@ import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.ParcelUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -43,7 +43,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class StripePaymentControllerTest {
     private val activity: ComponentActivity = mock()
     private val sdkTransactionId = mock<SdkTransactionId>().also {
@@ -129,7 +128,7 @@ internal class StripePaymentControllerTest {
                 ).toBundle()
             )
 
-            val paymentIntentResult = controller.getPaymentIntentResult(intent)
+            val paymentIntentResult = controller.getPaymentIntentResult(intent).getOrThrow()
 
             assertThat(stripeRepository.retrievePaymentIntentArgs)
                 .containsExactly(
@@ -206,7 +205,7 @@ internal class StripePaymentControllerTest {
                 ),
                 mock(),
                 REQUEST_OPTIONS
-            )
+            ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
@@ -249,51 +248,55 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ) = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+        ): Result<SetupIntent> {
+            return Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
+        }
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             retrievePaymentIntentArgs.add(
                 Triple(clientSecret, options, expandFields)
             )
-            return retrievePaymentIntentResponse
+            return Result.success(retrievePaymentIntentResponse)
         }
 
         override suspend fun retrieveSource(
             sourceId: String,
             clientSecret: String,
             options: ApiRequest.Options
-        ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
+        ): Result<Source> {
+            return Result.success(SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable))
+        }
 
         override suspend fun cancelPaymentIntentSource(
             paymentIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             cancelPaymentIntentArgs.add(
                 Triple(paymentIntentId, sourceId, options)
             )
-            return cancelPaymentIntentResponse
+            return Result.success(cancelPaymentIntentResponse)
         }
 
         override suspend fun cancelSetupIntentSource(
             setupIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ) = SetupIntentFixtures.CANCELLED
+        ): Result<SetupIntent> = Result.success(SetupIntentFixtures.CANCELLED)
 
         override suspend fun confirmPaymentIntent(
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             confirmPaymentIntentArgs.add(
                 Triple(confirmPaymentIntentParams, options, expandFields)
             )
-            return confirmPaymentIntentResponse
+            return Result.success(confirmPaymentIntentResponse)
         }
     }
 

@@ -1,91 +1,62 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
-    @StringRes open val error: Int? = null
-) {
-    class NameAndEmailCollection(
+    @StringRes open val error: Int? = null,
+    open val isProcessing: Boolean = false
+) : Parcelable {
+    abstract val primaryButtonText: String
+    abstract val mandateText: String?
+
+    @Parcelize
+    data class BillingDetailsCollection(
         @StringRes override val error: Int? = null,
-        val name: String,
-        val email: String?,
-        val primaryButtonText: String?
+        override val primaryButtonText: String,
+        override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
-            NameAndEmailCollection(
-                error = error,
-                name = name,
-                email = email,
-                primaryButtonText = primaryButtonText
-            )
+
+        override val mandateText: String?
+            get() = null
     }
 
+    @Parcelize
     data class MandateCollection(
-        val name: String,
-        val email: String?,
-        val paymentAccount: FinancialConnectionsAccount,
-        val financialConnectionsSessionId: String,
-        val intentId: String,
-        val primaryButtonText: String?,
-        val mandateText: String,
-        val saveForFutureUsage: Boolean
-    ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
-            this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
-    }
+        val resultIdentifier: ResultIdentifier,
+        val bankName: String?,
+        val last4: String?,
+        val intentId: String?,
+        override val primaryButtonText: String,
+        override val mandateText: String?,
+    ) : USBankAccountFormScreenState()
 
+    @Parcelize
     data class VerifyWithMicrodeposits(
-        val name: String,
-        val email: String?,
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
-        val intentId: String,
-        val primaryButtonText: String?,
-        val mandateText: String,
-        val saveForFutureUsage: Boolean
-    ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
-            this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
-    }
+        val intentId: String?,
+        override val primaryButtonText: String,
+        override val mandateText: String?,
+    ) : USBankAccountFormScreenState()
 
+    @Parcelize
     data class SavedAccount(
-        val name: String,
-        val email: String?,
         val financialConnectionsSessionId: String?,
-        val intentId: String,
+        val intentId: String?,
         val bankName: String,
         val last4: String?,
-        val primaryButtonText: String?,
-        val mandateText: String,
-        val saveForFutureUsage: Boolean
-    ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
-            this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
-    }
+        override val primaryButtonText: String,
+        override val mandateText: String?,
+    ) : USBankAccountFormScreenState()
 
-    data class ConfirmIntent(
-        val confirmIntentParams: ConfirmStripeIntentParams
-    ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
-    }
+    internal sealed interface ResultIdentifier : Parcelable {
+        @Parcelize
+        data class Session(val id: String) : ResultIdentifier
 
-    data class Finished(
-        val paymentSelection: PaymentSelection,
-        val financialConnectionsSessionId: String,
-        val intentId: String,
-        val last4: String,
-        val bankName: String
-    ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
+        @Parcelize
+        data class PaymentMethod(val id: String) : ResultIdentifier
     }
-
-    abstract fun updateInputs(
-        name: String,
-        email: String?,
-        saveForFutureUsage: Boolean
-    ): USBankAccountFormScreenState
 }

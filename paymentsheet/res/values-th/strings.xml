@@ -1,32 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
-  <string name="add_new_payment_method">เพิ่มวิธีการชำระเงินใหม่</string>
+  <string name="stripe_add_new_payment_method">เพิ่มวิธีการชำระเงินใหม่</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <string name="stripe_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารภายใน %s เพื่อชำระเงินให้เสร็จสิ้น</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">ข้อมูลการชำระเงินของคุณจะไม่ได้รับการบันทึก</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[การบันทึกบัญชีธนาคารของ %s หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">เกิดข้อผิดพลาดบางอย่างขณะเชื่อมโยงกับบัญชีของคุณ \nโปรดลองอีกครั้งในภายหลัง</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ เพิ่ม</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">เพิ่มข้อมูลการชำระเงิน</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">ย้อนกลับ</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">บันทึกที่อยู่</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">ที่อยู่สำหรับจัดส่ง</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">ระบบจะส่งอีเมลถึง %s ภายใน 3 วันทำการเพื่อยืนยันการตั้งค่าขั้นตอนการหักเงินนี้</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">ยืนยันรายละเอียดการหักบัญชีอัตโนมัติ</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">แก้ไขรายละเอียด</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">นอกจากนี้ ระบบจะส่งอีเมลเพื่อแจ้งจำนวนเงินที่จะหักจากบัญชีภายใต้วิธีการนี้ให้คุณทราบล่วงหน้า 2 วันอีกด้วย การชำระเงินจะแสดงเป็น \"%s\" ในรายการเดินบัญชีธนาคารของคุณ</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">การชำระเงินของคุณจะได้รับการคุ้มครองโดย %s</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">เลือกวิธีการชำระเงิน</string>
   <string name="stripe_paymentsheet_close">ปิด</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">ยืนยัน</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">ยืนยัน CVC ของคุณ</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">ป้อนที่อยู่ด้วยตนเอง</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">จัดการวิธีการชำระเงินของคุณ</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %s ให้เสร็จสิ้น</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">แก้ไข %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">หรือชำระเงินด้วย</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">หรือชำระเงินด้วยบัตร</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">หรือใช้</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">หรือใช้บัตร</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">ชำระเงิน</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">ชำระโดยใช้</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">ชำระเงินด้วยบัญชีธนาคารภายในไม่กี่ขั้นตอน</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">กำลังประมวลผล...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">นำบัญชีธนาคารออก</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">นำบัตรออก</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">นำ %s ออก</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">บันทึก</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">บันทึกวิธีการชำระเงินใหม่</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">บันทึกข้อมูลบัญชีธนาคารภายในไม่กี่ขั้นตอน</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">บันทึกไว้เพื่อชำระเงินในอนาคต</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -35,4 +87,16 @@
   <string name="stripe_paymentsheet_select_payment_method">เลือกวิธีการชำระเงิน</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">มีข้อผิดพลาดเกิดขึ้น</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">ยกเลิกและชำระเงินด้วยวิธีอื่น</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">อนุมัติการชำระเงิน</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">เปิดแอป UPI เพื่ออนุมัติการชำระเงินของคุณภายใน %s</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">โปรดย้อนกลับและเลือกวิธีการชำระเงินอื่น</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">ชำระเงินไม่สำเร็จ</string>
 </resources>

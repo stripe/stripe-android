@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="stripe_dob_placeholder" translatable="false">MM / DD / YYYY</string>
+    <string name="stripe_verification_success">Verification success</string>
+    <string name="stripe_verification_failure">Verification failure</string>
+    <string name="stripe_verification_success_async">Verification success async</string>
+    <string name="stripe_verification_failure_async">Verification failure async</string>
+    <string name="stripe_submit">SUBMIT</string>
+
+    <string name="stripe_finish_mobile_flow">Terminate mobile SDK flow</string>
+    <string name="stripe_finish_mobile_flow_details">Terminate the mobile SDK flow locally with Cancelled or Failed.</string>
+
+    <string name="stripe_failure_from_test_mode">Failure from test mode</string>
+    <string name="stripe_cancelled">CANCELLED</string>
+    <string name="stripe_failed">FAILED</string>
+
+    <string name="stripe_preview_user_experience">Preview user experience</string>
+    <string name="stripe_preview_user_experience_details">Proceed to preview as an end user. Information provided will not be verified.</string>
+    <string name="stripe_proceed">PROCEED</string>
+</resources>

@@ -1,12 +1,20 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 internal interface CardAccountRangeSource {
     suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange?
+    ): AccountRange? {
+        return getAccountRanges(cardNumber)?.firstOrNull { (binRange) ->
+            binRange.matches(cardNumber)
+        }
+    }
 
-    val loading: Flow<Boolean>
+    suspend fun getAccountRanges(
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange>?
+
+    val loading: StateFlow<Boolean>
 }

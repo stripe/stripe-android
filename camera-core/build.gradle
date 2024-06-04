@@ -1,102 +1,35 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'org.jetbrains.dokka'
-}
-
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
-
-if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
-}
+apply from: configs.androidLibrary
 
 dependencies {
     implementation project(":stripe-core")
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
 
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.annotation
+    implementation libs.kotlin.coroutines
 
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test:runner:$androidTestVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    implementation libs.camera.core
+    implementation libs.camera.camera2
+    implementation libs.camera.lifecycle
+    implementation libs.camera.view
 
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.test
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
+    testImplementation testLibs.robolectric
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-}
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.kotlin.test
+    androidTestImplementation testLibs.kotlin.coroutines
 
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
-    }
-
-    sourceSets {
-        main {
-            res.srcDirs = ['res']
-        }
-    }
-
-    lintOptions {
-        enable "Interoperability"
-        disable "CoroutineCreationDuringComposition"
-        lintConfig file("../settings/lint.xml")
-    }
-
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 ext {

@@ -4,7 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.parcelize.Parcelize
@@ -27,10 +31,10 @@ interface IdentityVerificationSheet {
      */
     sealed class VerificationFlowResult : Parcelable {
         @Parcelize
-        object Completed : VerificationFlowResult()
+        data object Completed : VerificationFlowResult()
 
         @Parcelize
-        object Canceled : VerificationFlowResult()
+        data object Canceled : VerificationFlowResult()
 
         @Parcelize
         class Failed(val throwable: Throwable) : VerificationFlowResult()
@@ -92,5 +96,34 @@ interface IdentityVerificationSheet {
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
             StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+
+        /**
+         * Creates a [IdentityVerificationSheet] instance in a [Composable]. Which would be
+         * recreated if [configuration] or [identityVerificationCallback] changed.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         * The [IdentityVerificationSheet] created is remembered across recompositions.
+         * Recomposition will always return the value produced by composition.
+         */
+        @Composable
+        fun rememberIdentityVerificationSheet(
+            configuration: Configuration,
+            identityVerificationCallback: IdentityVerificationCallback
+        ): IdentityVerificationSheet {
+            val context = LocalContext.current
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                IdentityVerificationSheetContract(),
+                identityVerificationCallback::onVerificationFlowResult
+            )
+            return remember(configuration) {
+                StripeIdentityVerificationSheet(
+                    activityResultLauncher,
+                    context,
+                    configuration
+                )
+            }
+        }
     }
 }
