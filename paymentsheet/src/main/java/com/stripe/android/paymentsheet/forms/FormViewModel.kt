@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -72,13 +71,6 @@ internal class FormViewModel @Inject internal constructor(
         externalHiddenIdentifiers
     ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
         externalHiddenIdentifiers.plus(cardBillingIdentifiers)
-    }
-
-    // Mandate is showing if it is an element of the form and it isn't hidden
-    private val showingMandate = hiddenIdentifiers.map { hiddenIdentifiers ->
-        elements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
-            !hiddenIdentifiers.contains(mandate.identifier)
-        } ?: false
     }
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
