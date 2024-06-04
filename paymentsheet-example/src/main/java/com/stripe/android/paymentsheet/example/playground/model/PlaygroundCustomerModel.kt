@@ -30,27 +30,6 @@ class CustomerEphemeralKeyRequest private constructor(
         Legacy;
     }
 
-    @Serializable
-    enum class FeatureState {
-        @SerialName("enabled")
-        Enabled,
-
-        @SerialName("disabled")
-        Disabled;
-    }
-
-    @Serializable
-    enum class AllowRedisplayFilter {
-        @SerialName("unspecified")
-        Unspecified,
-
-        @SerialName("limited")
-        Limited,
-
-        @SerialName("always")
-        Always;
-    }
-
     class Builder {
         private var customerType: String? = null
         private var merchantCountryCode: String? = null
