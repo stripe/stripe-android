@@ -49,6 +49,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
  * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
  * available content.
  * @param showFooterShadowWhenScrollable whether to show a shadow at the top of the footer when the body is scrollable.
+ * @param applyImePadding whether to apply IME padding. When false, footer will be covered by the keyboard.
  * @param scrollState the [ScrollState] to use for the scrollable body.
  */
 @Composable
