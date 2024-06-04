@@ -99,7 +99,6 @@ internal class FormViewModel @Inject internal constructor(
         CompleteFormFieldValueFilter(
             currentFieldValues().map { it.toMap() },
             hiddenIdentifiers,
-            showingMandate,
             userRequestedReuse,
             defaultValuesToInclude,
         ).filterFlow()

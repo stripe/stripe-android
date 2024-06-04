@@ -50,7 +50,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
-        viewActionRecorder.consume(PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToForm("card"))
+        viewActionRecorder.consume(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected("card"))
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 

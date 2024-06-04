@@ -33,7 +33,6 @@ class CompleteFormFieldValueFilterTest {
     private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
         fieldFlow,
         hiddenIdentifersFlow,
-        showingMandate = MutableStateFlow(true),
         userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
         defaultValues = emptyMap(),
     )
@@ -119,7 +118,6 @@ class CompleteFormFieldValueFilterTest {
         val formFieldValueFilter = CompleteFormFieldValueFilter(
             fieldFlow,
             hiddenIdentifersFlow,
-            showingMandate = MutableStateFlow(true),
             userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
             defaultValues = mapOf(
                 IdentifierSpec.Name to "Jane Doe",
@@ -147,7 +145,6 @@ class CompleteFormFieldValueFilterTest {
         val formFieldValueFilter = CompleteFormFieldValueFilter(
             fieldFlow,
             hiddenIdentifersFlow,
-            showingMandate = MutableStateFlow(true),
             userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
             defaultValues = mapOf(
                 IdentifierSpec.Name to "Jane Doe",

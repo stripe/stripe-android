@@ -52,7 +52,6 @@ class PaymentMethodFormTest {
 
         // PayPalValues should only be associated with the PayPal payment method code, not card.
         val payPalValues = FormFieldValues(
-            showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
         completeFormValuesFlow.value = payPalValues
@@ -91,7 +90,6 @@ class PaymentMethodFormTest {
         assertThat(emissions).containsExactly(null)
 
         val completeValues = FormFieldValues(
-            showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
         completeFormValuesFlow.value = completeValues
