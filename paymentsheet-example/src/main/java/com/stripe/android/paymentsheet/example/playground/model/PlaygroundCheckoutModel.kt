@@ -32,6 +32,14 @@ class CheckoutRequest private constructor(
     val paymentMethodConfigurationId: String?,
     @SerialName("require_cvc_recollection")
     val requireCvcRecollection: Boolean?,
+    @SerialName("customer_session_payment_method_save")
+    val paymentMethodSaveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove")
+    val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_redisplay")
+    val paymentMethodRedisplayFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_allow_redisplay_filters")
+    val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -118,6 +126,14 @@ class CheckoutRequest private constructor(
                 supportedPaymentMethods = supportedPaymentMethods,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
                 requireCvcRecollection = requireCvcRecollection,
+                paymentMethodSaveFeature = FeatureState.Enabled,
+                paymentMethodRemoveFeature = FeatureState.Enabled,
+                paymentMethodRedisplayFeature = FeatureState.Enabled,
+                paymentMethodRedisplayFilters = listOf(
+                    AllowRedisplayFilter.Unspecified,
+                    AllowRedisplayFilter.Limited,
+                    AllowRedisplayFilter.Always,
+                )
             )
         }
     }
