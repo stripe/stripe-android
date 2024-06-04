@@ -88,7 +88,16 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
-                    shippingDetails = AddressDetails(isCheckboxSelected = true),
+                    shippingDetails = AddressDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "354 Oyster Point Blvd",
+                            city = "South San Francisco",
+                            state = "CA",
+                            country = "US",
+                            postalCode = "94080",
+                        ),
+                        isCheckboxSelected = true
+                    ),
                 )
             )
         }
