@@ -1,7 +1,11 @@
 package com.stripe.android.financialconnections.di
 
+import android.app.Application
 import com.stripe.android.core.Logger
+import com.stripe.android.core.error.ErrorReporter
+import com.stripe.android.core.error.SentryErrorReporter
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import dagger.Module

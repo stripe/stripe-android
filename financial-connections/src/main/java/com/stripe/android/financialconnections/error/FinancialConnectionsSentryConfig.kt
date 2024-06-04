@@ -1,12 +1,13 @@
 package com.stripe.android.financialconnections.error
 
 import com.stripe.android.core.error.SentryConfig
+import com.stripe.android.financialconnections.BuildConfig
 import java.util.concurrent.TimeUnit
 
 internal object FinancialConnectionsSentryConfig : SentryConfig {
     override val projectId: String = "826"
-    override val key: String = "ebeff9f19e5648928a7fdd9eba27d456"
-    override val secret: String = "614b2527312a415fad24d1eb6731f935"
+    override val key: String = BuildConfig.FC_SENTRY_KEY
+    override val secret: String = BuildConfig.FC_SENTRY_SECRET
     override val version: String = "7"
 
     /**
