@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,6 +77,11 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             fontSizeSp = 12.0f
         )
     )
+
+    @Before
+    fun skipTestsIfNeeded() {
+        assumeFalse(BuildConfig.IS_BROWSERSTACK_BUILD)
+    }
 
     @Before
     @After
