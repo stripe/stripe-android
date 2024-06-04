@@ -68,9 +68,9 @@ internal class USBankAccountFormArguments(
                 ?.onBehalfOf
             val stripeIntent = paymentMethodMetadata?.stripeIntent
             return USBankAccountFormArguments(
-                showCheckbox = isSaveForFutureUseValueChangeable
+                showCheckbox = isSaveForFutureUseValueChangeable &&
                     // Instant Debits does not support saving for future use
-                    && instantDebits.not(),
+                    instantDebits.not(),
                 instantDebits = instantDebits,
                 onBehalfOf = onBehalfOf,
                 isCompleteFlow = viewModel is PaymentSheetViewModel,
