@@ -85,7 +85,6 @@ internal object CustomerSheetTestHelper {
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
         formFieldValues = FormFieldValues(
-            showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
         formElements = emptyList(),

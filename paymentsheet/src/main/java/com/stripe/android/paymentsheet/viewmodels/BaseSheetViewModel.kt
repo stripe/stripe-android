@@ -458,10 +458,6 @@ internal abstract class BaseSheetViewModel(
         customPrimaryButtonUiState.update(block)
     }
 
-    fun resetUSBankPrimaryButton() {
-        customPrimaryButtonUiState.value = null
-    }
-
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
         _primaryButtonState.value = state
     }
@@ -711,7 +707,7 @@ internal abstract class BaseSheetViewModel(
         linkInlineSignUpState.value = state
     }
 
-    fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
+    private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(
                 code = code,

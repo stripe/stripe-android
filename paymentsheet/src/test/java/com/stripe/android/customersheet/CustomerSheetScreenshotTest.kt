@@ -70,7 +70,6 @@ internal class CustomerSheetScreenshotTest {
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
         formFieldValues = FormFieldValues(
-            showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
         formElements = emptyList(),

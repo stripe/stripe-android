@@ -941,7 +941,6 @@ class CustomerSheetViewModelTest {
                         fieldValuePairs = mapOf(
                             IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
                         ),
-                        showsMandate = false,
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
@@ -2537,7 +2536,6 @@ class CustomerSheetViewModelTest {
                         fieldValuePairs = mapOf(
                             IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
                         ),
-                        showsMandate = false,
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
