@@ -34,8 +34,6 @@ import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlayground
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -923,8 +921,6 @@ internal class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
-            val checkoutMode =
-                testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
             if (testParameters.authorizationAction != null) {
                 if (testParameters.authorizationAction?.requiresBrowser == true) {
                     // If a specific browser is requested we will use it, otherwise, we will
@@ -939,9 +935,7 @@ internal class PlaygroundTestDriver(
 
                     assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
-                    blockUntilAuthorizationPageLoaded(
-                        isSetup = checkoutMode == CheckoutMode.SETUP
-                    )
+                    blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
 
                 if (authorizeAction != null) {
@@ -951,7 +945,7 @@ internal class PlaygroundTestDriver(
                         // Buttons aren't showing the same way each time in the web page.
                         object : UiAutomatorText(
                             label = requireNotNull(testParameters.authorizationAction)
-                                .text(checkoutMode),
+                                .text(testParameters.isSetupMode),
                             className = "android.widget.TextView",
                             device = device
                         ) {}.click()
@@ -961,7 +955,7 @@ internal class PlaygroundTestDriver(
 
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
-                        if (checkoutMode != CheckoutMode.SETUP) {
+                        if (!testParameters.isSetupMode) {
                             closeButton.wait(5000)
                             onView(withText("CLOSE")).perform(click())
                         }

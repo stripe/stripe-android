@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
@@ -155,14 +154,11 @@ internal class Selectors(
         .packageManager
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
-    private val checkoutMode =
-        testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
-
     @OptIn(ExperimentalTestApi::class)
     val authorizeAction = when (testParameters.authorizationAction) {
         is AuthorizeAction.AuthorizePayment -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -182,7 +178,7 @@ internal class Selectors(
 
         is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -194,7 +190,7 @@ internal class Selectors(
 
         is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {}
@@ -202,7 +198,7 @@ internal class Selectors(
 
         is AuthorizeAction.Bacs.Confirm -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -224,7 +220,7 @@ internal class Selectors(
 
         is AuthorizeAction.Bacs.ModifyDetails -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
