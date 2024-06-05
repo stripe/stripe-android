@@ -15,7 +15,6 @@ import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -37,6 +36,7 @@ import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
 
 @Composable

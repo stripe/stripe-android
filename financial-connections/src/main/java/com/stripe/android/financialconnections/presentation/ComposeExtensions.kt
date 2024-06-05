@@ -1,3 +1,5 @@
+@file:Suppress("ComposeCollectAsStateUsageIssue")
+
 package com.stripe.android.financialconnections.presentation
 
 import androidx.compose.runtime.Composable

@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.notice
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -18,6 +17,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun NoticeSheet(

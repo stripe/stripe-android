@@ -2,7 +2,6 @@ package com.stripe.android.identity.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -12,6 +11,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.PhoneParam
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun PhoneNumberSection(
@@ -25,8 +25,8 @@ internal fun PhoneNumberSection(
         )
     }
 
-    val currentPhoneNumber by phoneNumberController.rawFieldValue.collectAsState(initial = "")
-    val isComplete by phoneNumberController.isComplete.collectAsState(initial = false)
+    val currentPhoneNumber by phoneNumberController.rawFieldValue.collectAsState()
+    val isComplete by phoneNumberController.isComplete.collectAsState()
 
     val phoneParam: PhoneParam? by remember(isComplete) {
         derivedStateOf {
