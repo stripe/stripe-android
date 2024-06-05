@@ -788,6 +788,7 @@ internal class CustomerSheetViewModel(
         cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility,
     ) {
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
+            ?: paymentMethodMetadata?.supportedPaymentMethodTypes()?.firstOrNull()
             ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(

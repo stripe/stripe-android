@@ -1871,6 +1871,30 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When 'paymentMethodOrder' is defined, initial shown payment method should be first from 'paymentMethodOrder'`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    isGooglePayAvailable = false,
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
+                    financialConnectionsAvailable = true,
+                ),
+                configuration = CustomerSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    paymentMethodOrder = listOf("us_bank_account", "card")
+                )
+            )
+
+            viewModel.viewState.test {
+                val viewState = awaitViewState<AddPaymentMethod>()
+
+                assertThat(viewState.paymentMethodCode).isEqualTo("us_bank_account")
+            }
+        }
+
+    @Test
     fun `The custom primary button can be updated`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
