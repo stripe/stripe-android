@@ -28,6 +28,7 @@ internal class FakeCustomerSheetLoader(
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    private val financialConnectionsAvailable: Boolean = false,
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -41,6 +42,8 @@ internal class FakeCustomerSheetLoader(
                     PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
                         cbcEligibility = cbcEligibility,
+                        financialConnectionsAvailable = financialConnectionsAvailable,
+                        paymentMethodOrder = configuration.paymentMethodOrder
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
