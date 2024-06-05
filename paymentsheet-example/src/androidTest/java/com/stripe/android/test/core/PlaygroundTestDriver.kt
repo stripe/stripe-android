@@ -23,6 +23,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -720,6 +721,11 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
+    private fun enableDarkMode(enabled: Boolean) {
+        val value = if (enabled) "yes" else "no"
+        device.executeShellCommand("cmd uimode night $value")
+    }
+
     /**
      * This test will open the payment sheet complete flow and take a picture when it has finished
      * opening. The sheet is then closed. We will use the screenshot to compare o a golden value
@@ -729,8 +735,11 @@ internal class PlaygroundTestDriver(
      */
     fun screenshotRegression(
         testParameters: TestParameters,
+        darkMode: Boolean = false,
         customOperations: () -> Unit = {}
     ) {
+        enableDarkMode(darkMode)
+
         setup(testParameters)
         launchComplete()
 
@@ -743,6 +752,13 @@ internal class PlaygroundTestDriver(
         currentActivity?.let {
             compareScreenshot(it)
         }
+
+        // We return to the playground before we switch back to light mode because
+        // we've seen some memory leaks of PaymentSheetActivity on Samsung devices
+        // that happen when you switch modes.
+        pressBack()
+        waitForPlaygroundActivity()
+        enableDarkMode(enabled = false)
 
         teardown()
     }

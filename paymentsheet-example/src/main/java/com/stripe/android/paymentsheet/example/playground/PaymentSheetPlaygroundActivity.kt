@@ -503,7 +503,7 @@ private fun PlaygroundTheme(
     content: @Composable ColumnScope.() -> Unit,
     bottomBarContent: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
+    val colors = if (isSystemInDarkTheme()) {
         darkColors()
     } else {
         lightColors()
