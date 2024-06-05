@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -102,11 +106,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
+            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
+            var showCustomEndpointDialog by remember { mutableStateOf(false) }
+            val endpoint = playgroundState?.endpoint
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
                 customerAdapter?.let { adapter ->
@@ -118,8 +124,30 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 }
             }
 
+            if (showCustomEndpointDialog) {
+                CustomEndpointDialog(
+                    endpoint.orEmpty(),
+                    onConfirm = { backendUrl ->
+                        viewModel.onCustomUrlUpdated(backendUrl)
+                        showCustomEndpointDialog = false
+                    },
+                    onDismiss = {
+                        showCustomEndpointDialog = false
+                    }
+                )
+            }
+
             PlaygroundTheme(
                 content = {
+                    playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
+                        Text(
+                            text = "Using $customEndpoint",
+                            modifier = Modifier
+                                .clickable { showCustomEndpointDialog = true }
+                                .padding(bottom = 16.dp),
+                        )
+                    }
+
                     playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
                         Text(
                             text = stripeIntentId,

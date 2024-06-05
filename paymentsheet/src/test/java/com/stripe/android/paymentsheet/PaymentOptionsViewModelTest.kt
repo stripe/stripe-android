@@ -343,6 +343,72 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
+    fun `currentScreen is Form if payment methods is empty and supportedPaymentMethods contains one`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                )
+            )
+
+            viewModel.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.Form::class.java)
+            }
+        }
+
+    @Test
+    fun `currentScreen is VerticalMode if payment methods is not empty`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                )
+            )
+
+            viewModel.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.VerticalMode::class.java)
+            }
+        }
+
+    @Test
+    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 1`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "cashapp")
+                    ),
+                )
+            )
+
+            viewModel.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.VerticalMode::class.java)
+            }
+        }
+
+    @Test
     fun `onError updates error`() = runTest {
         val viewModel = createViewModel()
 

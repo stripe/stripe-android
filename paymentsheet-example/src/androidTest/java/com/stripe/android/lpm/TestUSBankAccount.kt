@@ -20,6 +20,7 @@ import org.junit.runner.RunWith
 internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
+        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD

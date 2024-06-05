@@ -36,7 +36,6 @@ internal class AddPaymentMethodTest {
                 IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
                 IdentifierSpec.Name to FormFieldEntry(name, true),
             ),
-            showsMandate = false,
             userRequestedReuse = customerRequestedSave,
         )
         val cardPaymentMethod = metadata.supportedPaymentMethodForCode("card")!!
@@ -63,7 +62,6 @@ internal class AddPaymentMethodTest {
                 IdentifierSpec.Name to FormFieldEntry(name, true),
                 IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)
             ),
-            showsMandate = false,
             userRequestedReuse = customerRequestedSave,
         )
         val externalPaymentMethod = metadata.supportedPaymentMethodForCode(paypalSpec.type)!!
@@ -92,7 +90,6 @@ internal class AddPaymentMethodTest {
             fieldValuePairs = mapOf(
                 IdentifierSpec.Name to FormFieldEntry(name, true),
             ),
-            showsMandate = false,
             userRequestedReuse = customerRequestedSave,
         )
         val klarnaPaymentMethod = metadata.supportedPaymentMethodForCode("klarna")!!

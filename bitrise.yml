@@ -350,7 +350,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true
       - script@1:
           timeout: 120
           inputs:

@@ -148,8 +148,9 @@ internal abstract class BaseSheetViewModel(
             currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,
-        ) { screen, walletsState, supportedPaymentMethods ->
-            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods)
+            editing,
+        ) { screen, walletsState, supportedPaymentMethods, editing ->
+            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods, editing)
         }
     }
 
@@ -468,10 +469,6 @@ internal abstract class BaseSheetViewModel(
         customPrimaryButtonUiState.update(block)
     }
 
-    fun resetUSBankPrimaryButton() {
-        customPrimaryButtonUiState.value = null
-    }
-
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
         _primaryButtonState.value = state
     }
@@ -722,11 +719,13 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         walletsState: WalletsState?,
         supportedPaymentMethods: List<PaymentMethodCode>,
+        editing: Boolean,
     ): Int? {
         return headerTextFactory.create(
             screen = screen,
             isWalletEnabled = walletsState != null,
             types = supportedPaymentMethods,
+            isEditing = editing,
         )
     }
 
@@ -746,7 +745,7 @@ internal abstract class BaseSheetViewModel(
         linkInlineSignUpState.value = state
     }
 
-    fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
+    private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(
                 code = code,

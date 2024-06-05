@@ -161,58 +161,57 @@ def uploadEspressoApk(espressoApkFile):
         return None
 
 
+# https://stackoverflow.com/a/59803793
+def runFastScandir(dir, ext):
+    subfolders, files = [], []
+
+    for f in os.scandir(dir):
+        if f.is_dir():
+            subfolders.append(f.path)
+        if f.is_file():
+            if os.path.splitext(f.name)[1].lower() in ext:
+                files.append(f.path)
+
+    for dir in list(subfolders):
+        sf, f = runFastScandir(dir, ext)
+        subfolders.extend(sf)
+        files.extend(f)
+
+    return subfolders, files
+
+
+def testFilesFromKotlinFiles(kotlinFiles):
+    testFiles = []
+
+    for file in kotlinFiles:
+        with open(file) as file_handle:
+            if 'import org.junit.Test' in file_handle.read():
+                testFiles.append(file)
+                continue
+
+    return testFiles
+
+
+def classNamesFromTestFiles(testDirectory, testFileNames):
+    classNames = []
+
+    for fileName in testFileNames:
+        # Removes the prefix of the test directory, then removes the suffix of the '.kt',
+        #   then replaces the directory markers ('/', with their package representation.
+        # Transforms something like:
+        #   paymentsheet-example/src/androidTest/java/com/stripe/android/TestCustomers.kt
+        #   to com.stripe.android.TestCustomers
+        className = (fileName[len(testDirectory):][:-3]).replace('/', '.')
+        classNames.append(className)
+
+    return classNames
+
+
 def getAllTestClassNames():
-    testClassNames = [
-        # Hard coded tests.
-        "com.stripe.android.TestAuthorization",
-        "com.stripe.android.TestBrowsers",
-        "com.stripe.android.TestCustomers",
-        "com.stripe.android.addresselement.AddressElementTest",
-    ]
-
-    # Add LPM tests to testClassNames.
-    lpmFileNames = os.listdir(
-        "paymentsheet-example/src/androidTest/java/com/stripe/android/lpm"
-    )
-    for fileName in lpmFileNames:
-        if not fileName.endswith(".kt"):
-            continue
-        className = fileName[:-3]
-        testClassNames.append(f"com.stripe.android.lpm.{className}")
-
-    return testClassNames
-
-
-def testShards(isNightly, testClassNames):
-    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 8.0 if isNightly else 10.0
-    testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
-
-    shards = []
-    shardValues = []
-
-    for testClass in testClassNames:
-        shardValues.append(testClass)
-        if len(shardValues) == testClassesPerShard:
-            shards.append(
-                {
-                    "name": f"Shard {len(shards) + 1}",
-                    "strategy": "class",
-                    "values": shardValues,
-                },
-            )
-            shardValues = []
-
-    if len(shardValues) > 0:
-        shards.append(
-            {
-                "name": f"Shard {len(shards) + 1}",
-                "strategy": "class",
-                "values": shardValues,
-            },
-        )
-
-    return shards
+    directory = 'paymentsheet-example/src/androidTest/java/'
+    _, kotlinFileNames = runFastScandir(directory, [".kt"])
+    testFileNames = testFilesFromKotlinFiles(kotlinFileNames)
+    return classNamesFromTestFiles(directory, testFileNames)
 
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
@@ -264,22 +263,30 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         )
         return None
 
-def executeTests(appUrl, testUrl, isNightly, testClasses):
-    shards = testShards(isNightly, testClasses)
+def executeTests(appUrl, testUrl, isNightly):
     devices = []
     if isNightly:
         devices = [
+            "Google Pixel 8-14.0",
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
+            "Google Pixel 5-11.0",
+            "Google Pixel 4 XL-10.0",
+            "Google Pixel 3-9.0",
+            "Samsung Galaxy S9-8.0",
+            "Samsung Galaxy S8-7.0",
         ]
     else:
         devices = [
             "Samsung Galaxy S22-12.0",
         ]
+
+    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
+    numberOfShards = 2.0 if isNightly else 10.0
+
     addedParams = {
         "shards": {
-            "numberOfShards": len(shards),
-            "mapping": shards,
+            "numberOfShards": numberOfShards,
         },
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
@@ -387,9 +394,9 @@ def confirm(message):
     return answer == "y"
 
 
-def runTests(appUrl, testUrl, isNightly, testClasses):
-    print("RUNNING " + str(len(testClasses)) + " test cases")
-    buildId = executeTests(appUrl, testUrl, isNightly, testClasses)
+def runTests(appUrl, testUrl, isNightly):
+    print("RUNNING all test cases")
+    buildId = executeTests(appUrl, testUrl, isNightly)
     exitStatus = 1
     if buildId != None:
         exitStatus = waitForBuildComplete(buildId)
@@ -571,10 +578,7 @@ if __name__ == "__main__":
             numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
             exitStatus = 1
-            testClassesToRun = getAllTestClassNames()
-            testResults = runTests(
-                appUrl, testUrl, args.is_nightly, testClassesToRun
-            )
+            testResults = runTests(appUrl, testUrl, args.is_nightly)
             print("-----------------")
             exitStatus = testResults["exitStatus"]
             updateObservabilityWithResults(testResults["buildId"])

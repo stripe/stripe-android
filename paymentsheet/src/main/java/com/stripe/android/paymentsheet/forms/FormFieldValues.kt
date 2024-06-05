@@ -9,6 +9,5 @@ import com.stripe.android.uicore.forms.FormFieldEntry
  */
 internal data class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
-    val showsMandate: Boolean,
     val userRequestedReuse: PaymentSelection.CustomerRequestedSave
 )

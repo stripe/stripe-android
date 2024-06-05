@@ -7,6 +7,8 @@ internal data class CardNumberElement(
     val _identifier: IdentifierSpec,
     override val controller: CardNumberController
 ) : SectionSingleFieldElement(_identifier) {
+    override val allowsUserInteraction: Boolean = true
+
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         // Nothing from FormArguments to populate
     }

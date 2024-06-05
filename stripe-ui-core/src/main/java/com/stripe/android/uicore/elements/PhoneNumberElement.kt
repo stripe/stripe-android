@@ -6,4 +6,6 @@ import androidx.annotation.RestrictTo
 data class PhoneNumberElement(
     override val identifier: IdentifierSpec,
     override val controller: PhoneNumberController
-) : SectionSingleFieldElement(identifier)
+) : SectionSingleFieldElement(identifier) {
+    override val allowsUserInteraction: Boolean = true
+}

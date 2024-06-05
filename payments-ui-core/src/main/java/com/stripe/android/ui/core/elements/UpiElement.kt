@@ -12,5 +12,7 @@ class UpiElement(
         textFieldConfig = UpiConfig()
     )
 ) : SectionSingleFieldElement(identifier = IdentifierSpec.Vpa) {
+    override val allowsUserInteraction: Boolean = true
+
     override val identifier: IdentifierSpec = IdentifierSpec.Vpa
 }

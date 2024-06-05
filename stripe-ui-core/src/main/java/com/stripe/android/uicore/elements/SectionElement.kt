@@ -17,6 +17,8 @@ data class SectionElement(
         controller: SectionController
     ) : this(identifier, listOf(field), controller)
 
+    override val allowsUserInteraction: Boolean = fields.any { it.allowsUserInteraction }
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()

@@ -15,4 +15,6 @@ data class EmailElement(
         EmailConfig(),
         initialValue = initialValue
     )
-) : SectionSingleFieldElement(identifier)
+) : SectionSingleFieldElement(identifier) {
+    override val allowsUserInteraction: Boolean = true
+}

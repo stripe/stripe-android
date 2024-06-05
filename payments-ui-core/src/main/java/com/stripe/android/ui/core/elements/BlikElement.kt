@@ -16,6 +16,7 @@ class BlikElement(
         textFieldConfig = BlikConfig()
     )
 ) : SectionSingleFieldElement(identifier = identifier) {
+    override val allowsUserInteraction: Boolean = true
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.formFieldValue.mapAsStateFlow { entry ->

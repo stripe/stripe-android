@@ -62,6 +62,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.coroutineContext
 import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -940,7 +941,6 @@ class CustomerSheetViewModelTest {
                         fieldValuePairs = mapOf(
                             IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
                         ),
-                        showsMandate = false,
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
@@ -1871,6 +1871,30 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When 'paymentMethodOrder' is defined, initial shown payment method should be first from 'paymentMethodOrder'`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    isGooglePayAvailable = false,
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
+                    financialConnectionsAvailable = true,
+                ),
+                configuration = CustomerSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    paymentMethodOrder = listOf("us_bank_account", "card")
+                )
+            )
+
+            viewModel.viewState.test {
+                val viewState = awaitViewState<AddPaymentMethod>()
+
+                assertThat(viewState.paymentMethodCode).isEqualTo("us_bank_account")
+            }
+        }
+
+    @Test
     fun `The custom primary button can be updated`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -2536,7 +2560,6 @@ class CustomerSheetViewModelTest {
                         fieldValuePairs = mapOf(
                             IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
                         ),
-                        showsMandate = false,
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
@@ -2753,6 +2776,84 @@ class CustomerSheetViewModelTest {
 
                 val finalViewState = awaitViewState<SelectPaymentMethod>()
                 assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+            }
+        }
+
+    @Test
+    fun `Updating original selection then dismissing 'CustomerSheet' should have updated PM in Canceled result`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+
+            val originalPaymentMethod = paymentMethods.first()
+
+            val updatedPaymentMethod = originalPaymentMethod.copy(
+                card = originalPaymentMethod.card?.copy(
+                    networks = PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires"),
+                        preferred = "visa"
+                    )
+                )
+            )
+
+            val viewModel = retrieveViewModelForUpdating(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = PaymentSelection.Saved(originalPaymentMethod),
+                updatedPaymentMethod = updatedPaymentMethod,
+            )
+
+            viewModel.updatePaymentMethod(
+                originalPaymentMethod = originalPaymentMethod,
+                updatedPaymentMethod = updatedPaymentMethod
+            )
+
+            viewModel.result.test {
+                // Skip the initial null item
+                skipItems(1)
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+                val savedPaymentSelection = awaitItem().retrieveCanceledPaymentSelection()
+
+                assertThat(savedPaymentSelection.paymentMethod).isEqualTo(updatedPaymentMethod)
+            }
+        }
+
+    @Test
+    fun `Updating current selection should have updated PM in view state`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+
+            val originalPaymentMethod = paymentMethods.last()
+            val updatedPaymentMethod = originalPaymentMethod.copy(
+                card = originalPaymentMethod.card?.copy(
+                    networks = PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires"),
+                        preferred = "visa"
+                    )
+                )
+            )
+
+            val viewModel = retrieveViewModelForUpdating(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = PaymentSelection.Saved(paymentMethods.first()),
+                updatedPaymentMethod = updatedPaymentMethod,
+            )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Saved(originalPaymentMethod)
+                )
+            )
+
+            viewModel.updatePaymentMethod(
+                originalPaymentMethod = originalPaymentMethod,
+                updatedPaymentMethod = updatedPaymentMethod
+            )
+
+            viewModel.viewState.test {
+                val viewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(viewState.paymentSelection).isEqualTo(PaymentSelection.Saved(updatedPaymentMethod))
             }
         }
 
@@ -3011,6 +3112,75 @@ class CustomerSheetViewModelTest {
                 instantDebitsData = null
             ),
         )
+    }
+
+    private suspend fun retrieveViewModelForUpdating(
+        savedPaymentMethods: List<PaymentMethod>,
+        originalSelection: PaymentSelection.Saved,
+        updatedPaymentMethod: PaymentMethod
+    ): CustomerSheetViewModel {
+        return createViewModel(
+            workContext = coroutineContext,
+            savedPaymentSelection = originalSelection,
+            customerPaymentMethods = savedPaymentMethods,
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.Success(savedPaymentMethods),
+                onUpdatePaymentMethod = { _, _ ->
+                    CustomerAdapter.Result.Success(updatedPaymentMethod)
+                }
+            ),
+            editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
+                workContext = testDispatcher
+            ),
+        )
+    }
+
+    private suspend fun CustomerSheetViewModel.updatePaymentMethod(
+        originalPaymentMethod: PaymentMethod,
+        updatedPaymentMethod: PaymentMethod
+    ) {
+        viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            handleViewAction(CustomerSheetViewAction.OnModifyItem(originalPaymentMethod))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                OnBrandChoiceChanged(
+                    EditPaymentMethodViewState.CardBrandChoice(
+                        brand = CardBrand.Visa
+                    )
+                )
+            )
+            editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
+
+            val updatedViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(updatedViewState.savedPaymentMethods).contains(originalPaymentMethod)
+
+            // Simulate the delay
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val finalViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(finalViewState.savedPaymentMethods).contains(updatedPaymentMethod)
+        }
+    }
+
+    private fun InternalCustomerSheetResult?.retrieveCanceledPaymentSelection(): PaymentSelection.Saved {
+        assertThat(this).isInstanceOf(InternalCustomerSheetResult.Canceled::class.java)
+
+        val cancelled = asCanceled()
+
+        assertThat(cancelled.paymentSelection).isInstanceOf(PaymentSelection::class.java)
+
+        return cancelled.paymentSelection.asSaved()
+    }
+
+    private fun InternalCustomerSheetResult?.asCanceled(): InternalCustomerSheetResult.Canceled {
+        return this as InternalCustomerSheetResult.Canceled
+    }
+
+    private fun PaymentSelection?.asSaved(): PaymentSelection.Saved {
+        return this as PaymentSelection.Saved
     }
 
     private fun CustomerSheetViewState.asAddState(): AddPaymentMethod {
