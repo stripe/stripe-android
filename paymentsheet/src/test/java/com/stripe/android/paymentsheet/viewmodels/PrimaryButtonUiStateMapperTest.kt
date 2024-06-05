@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.CvcConfig
+import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -180,6 +182,109 @@ class PrimaryButtonUiStateMapperTest {
 
         resultWithoutLock.test {
             assertThat(awaitItem()?.lockVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `Disables button if cvc is required and input is incomplete`() = runTest {
+        val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
+        val screen = stateFlowOf(
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
+            )
+        )
+        val selection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.createCard()
+        )
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = screen,
+            buttonsEnabledFlow = stateFlowOf(true),
+            selectionFlow = stateFlowOf(selection),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            assertThat(awaitItem()?.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `Enables button if cvc is required and input is complete`() = runTest {
+        val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
+        val screen = stateFlowOf(
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
+            )
+        )
+        val selection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.createCard()
+        )
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = screen,
+            buttonsEnabledFlow = stateFlowOf(true),
+            selectionFlow = stateFlowOf(selection),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            assertThat(awaitItem()?.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Enables button if cvc is not required and input is incomplete`() = runTest {
+        val screen = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods())
+        val selection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.createCard()
+        )
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = screen,
+            buttonsEnabledFlow = stateFlowOf(true),
+            selectionFlow = stateFlowOf(selection),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            assertThat(awaitItem()?.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Enables button if cvc is required and selection is not saved card`() = runTest {
+        val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
+        val screen = stateFlowOf(
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
+            )
+        )
+        val selection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.PAYPAL_PAYMENT_METHOD
+        )
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = screen,
+            buttonsEnabledFlow = stateFlowOf(true),
+            selectionFlow = stateFlowOf(selection),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            assertThat(awaitItem()?.enabled).isTrue()
         }
     }
 

@@ -40,7 +40,8 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButton ?: PrimaryButton.UIState(
                 label = buyButtonLabel(amount),
                 onClick = onClick,
-                enabled = buttonsEnabled && selection != null && cvcRequired(screen, cvcComplete, selection),
+                enabled = buttonsEnabled && selection != null &&
+                    cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
                 lockVisible = true,
             ).takeIf { screen.showsBuyButton }
         }
@@ -80,7 +81,7 @@ internal class PrimaryButtonUiStateMapper(
         return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 
-    private fun cvcRequired(
+    private fun cvcRecollectionCompleteOrNotRequired(
         screen: PaymentSheetScreen,
         complete: Boolean,
         selection: PaymentSelection

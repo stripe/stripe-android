@@ -19,7 +19,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -434,7 +433,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod", "ComplexCondition")
     private fun checkout(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
@@ -488,17 +486,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         .getString(R.string.stripe_something_went_wrong)
                 )
             }
-        } else if (
-            FeatureFlags.cvcRecollection.isEnabled &&
-            isCvcRecollectionRequired() &&
-            paymentSelection is PaymentSelection.Saved &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
-        ) {
-            confirmPaymentSelection(
-                paymentSelection.copy(
-                    recollectedCvc = cvcControllerFlow.value.fieldValue.value
-                )
-            )
         } else {
             confirmPaymentSelection(paymentSelection)
         }
@@ -611,13 +598,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
+        return if (
+            isCvcRecollectionEnabled() &&
+            paymentSelection is PaymentSelection.Saved &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+        ) {
+            paymentSelection.copy(recollectedCvc = cvcControllerFlow.value.fieldValue.value)
+        } else {
+            paymentSelection
+        }
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
-                paymentSelection = paymentSelection,
+                paymentSelection = paymentSelectionWithCvcIfEnabled(paymentSelection),
                 shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
                 context = getApplication(),
             )

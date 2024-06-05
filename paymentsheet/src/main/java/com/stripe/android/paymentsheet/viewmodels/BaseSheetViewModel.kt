@@ -239,9 +239,6 @@ internal abstract class BaseSheetViewModel(
         }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
-    internal fun isCvcRecollectionRequired() =
-        (paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
-
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
 
     private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
@@ -557,8 +554,12 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    internal fun isCvcRecollectionEnabled() =
+        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
+            FeatureFlags.cvcRecollection.isEnabled
+
     internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
-        return if (isCvcRecollectionRequired() && FeatureFlags.cvcRecollection.isEnabled) {
+        return if (isCvcRecollectionEnabled()) {
             PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
         } else {
             PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
