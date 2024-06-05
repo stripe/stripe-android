@@ -22,6 +22,8 @@ class CardDetailsSectionElement(
         cbcEligibility = cbcEligibility,
     ),
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()
 

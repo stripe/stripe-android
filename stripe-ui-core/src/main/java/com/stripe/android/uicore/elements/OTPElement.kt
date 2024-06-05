@@ -12,6 +12,8 @@ data class OTPElement(
     override val identifier: IdentifierSpec,
     override val controller: OTPController
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.fieldValue.mapAsStateFlow {
             listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))

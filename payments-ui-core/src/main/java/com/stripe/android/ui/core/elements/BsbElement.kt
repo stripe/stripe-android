@@ -21,6 +21,7 @@ class BsbElement(
         get() = null
     override val identifier: IdentifierSpec
         get() = identifierSpec
+    override val allowsUserInteraction: Boolean = true
 
     internal val textElement: SimpleTextElement = SimpleTextElement(
         identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),

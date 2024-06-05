@@ -6,4 +6,6 @@ import androidx.annotation.RestrictTo
 data class CountryElement(
     override val identifier: IdentifierSpec,
     override val controller: DropdownFieldController
-) : SectionSingleFieldElement(identifier)
+) : SectionSingleFieldElement(identifier) {
+    override val allowsUserInteraction: Boolean = true
+}

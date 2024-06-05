@@ -14,6 +14,13 @@ interface FormElement {
     val identifier: IdentifierSpec
     val controller: Controller?
 
+    /**
+     * Whether the form element allows user interaction.
+     *
+     * This is used to determine if vertical mode needs to show the form screen.
+     */
+    val allowsUserInteraction: Boolean
+
     fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         stateFlowOf(emptyList())

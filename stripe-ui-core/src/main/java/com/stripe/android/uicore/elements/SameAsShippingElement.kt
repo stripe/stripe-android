@@ -10,6 +10,8 @@ data class SameAsShippingElement(
     override val shouldRenderOutsideCard: Boolean
         get() = true
 
+    override val allowsUserInteraction: Boolean = true
+
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         rawValuesMap[identifier]?.let {
             controller.onRawValueChange(it)

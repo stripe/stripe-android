@@ -9,6 +9,8 @@ class CheckboxFieldElement(
     override val identifier: IdentifierSpec,
     override val controller: CheckboxFieldController = CheckboxFieldController()
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+
     override fun getFormFieldValueFlow() = controller.isChecked.mapAsStateFlow { isChecked ->
         listOf(
             identifier to FormFieldEntry(isChecked.toString(), isChecked)

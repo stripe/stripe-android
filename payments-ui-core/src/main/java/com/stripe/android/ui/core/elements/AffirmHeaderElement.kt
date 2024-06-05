@@ -13,6 +13,8 @@ data class AffirmHeaderElement(
     override val identifier: IdentifierSpec,
     override val controller: Controller? = null
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = false
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 }

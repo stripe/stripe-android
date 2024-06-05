@@ -16,6 +16,8 @@ data class SaveForFutureUseElement(
     val initialValue: Boolean,
     val merchantName: String?
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+
     override val controller: SaveForFutureUseController = SaveForFutureUseController(
         initialValue
     )

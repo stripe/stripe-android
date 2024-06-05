@@ -9,6 +9,8 @@ data class CvcElement(
     val _identifier: IdentifierSpec,
     override val controller: CvcController
 ) : SectionSingleFieldElement(_identifier) {
+    override val allowsUserInteraction: Boolean = true
+
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         // Nothing from FormArguments to populate
     }

@@ -29,7 +29,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
 
     PaymentMethodVerticalLayoutUI(
         paymentMethods = state.supportedPaymentMethods,
-        selectedIndex = -1,
+        selectedIndex = state.selectedPaymentMethodIndex,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -37,7 +37,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
             )
         },
         onItemSelectedListener = {
-            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToForm(it.code))
+            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected(it.code))
         },
         imageLoader = imageLoader,
         modifier = Modifier.padding(horizontal = 20.dp)
