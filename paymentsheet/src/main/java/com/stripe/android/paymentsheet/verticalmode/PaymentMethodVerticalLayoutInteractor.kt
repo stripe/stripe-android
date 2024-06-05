@@ -102,11 +102,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        val formElements = formElementsForCode(selectedPaymentMethodCode)
-        val userInteractionFormElements = formElements.filter {
-            it.allowsUserInteraction
-        }
-        return userInteractionFormElements.isNotEmpty() ||
+        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
+        return userInteractionAllowed ||
             selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
             selectedPaymentMethodCode == PaymentMethod.Type.Link.code
     }
