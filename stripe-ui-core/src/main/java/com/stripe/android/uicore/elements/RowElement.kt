@@ -11,6 +11,8 @@ class RowElement constructor(
     val fields: List<SectionSingleFieldElement>,
     val controller: RowController
 ) : SectionMultiFieldElement(_identifier) {
+    override val allowsUserInteraction: Boolean = fields.any { it.allowsUserInteraction }
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()

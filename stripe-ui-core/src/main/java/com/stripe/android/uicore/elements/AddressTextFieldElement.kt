@@ -8,6 +8,7 @@ class AddressTextFieldElement(
     config: TextFieldConfig,
     onNavigation: (() -> Unit)? = null
 ) : SectionSingleFieldElement(identifier) {
+    override val allowsUserInteraction: Boolean = true
 
     override val controller: AddressTextFieldController =
         AddressTextFieldController(

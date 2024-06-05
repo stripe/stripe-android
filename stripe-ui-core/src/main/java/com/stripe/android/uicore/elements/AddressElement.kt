@@ -28,6 +28,8 @@ open class AddressElement constructor(
     private val hideCountry: Boolean = false,
 ) : SectionMultiFieldElement(_identifier) {
 
+    override val allowsUserInteraction: Boolean = true
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryElement = CountryElement(
         IdentifierSpec.Country,

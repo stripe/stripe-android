@@ -13,6 +13,8 @@ data class EmptyFormElement(
     override val identifier: IdentifierSpec = IdentifierSpec.Generic("empty_form"),
     override val controller: Controller? = null
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = false
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 }
