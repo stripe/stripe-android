@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -43,6 +44,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
@@ -2776,6 +2778,67 @@ class CustomerSheetViewModelTest {
 
                 val finalViewState = awaitViewState<SelectPaymentMethod>()
                 assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+            }
+        }
+
+    @Test
+    fun `Card Brand Choice should be enabled in 'SelectPaymentMethod' after attaching first payment method`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                stripeRepository = FakeStripeRepository(
+                    createPaymentMethodResult = Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+                ),
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    paymentSelection = null,
+                    isGooglePayAvailable = false,
+                ),
+                customerAdapter = FakeCustomerAdapter(
+                    canCreateSetupIntents = false,
+                    onAttachPaymentMethod = {
+                        CustomerAdapter.Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+                    }
+                )
+            ).apply {
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                        preferredNetworks = listOf(CardBrand.CartesBancaires)
+                    )
+                )
+            }
+
+            viewModel.viewState.test {
+                // Skip initial add state
+                awaitViewState<AddPaymentMethod>()
+
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                        formFieldValues = FormFieldValues(
+                            fieldValuePairs = mapOf(
+                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            ),
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        )
+                    )
+                )
+
+                // Skip updated add state
+                awaitViewState<AddPaymentMethod>()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                // Skip updated add state
+                awaitViewState<AddPaymentMethod>()
+
+                val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(selectPaymentMethodState.cbcEligibility)
+                    .isEqualTo(
+                        CardBrandChoiceEligibility.Eligible(
+                            preferredNetworks = listOf(CardBrand.CartesBancaires)
+                        )
+                    )
             }
         }
 
