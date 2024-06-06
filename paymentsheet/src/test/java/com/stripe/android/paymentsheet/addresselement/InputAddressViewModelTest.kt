@@ -79,7 +79,7 @@ class InputAddressViewModelTest {
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
         val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
         val flow = MutableStateFlow<AddressDetails?>(expectedAddress)
-        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
+        whenever(navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)).thenReturn(flow)
 
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
@@ -89,7 +89,7 @@ class InputAddressViewModelTest {
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
         val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
         val flow = MutableStateFlow<AddressDetails?>(usAddress)
-        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
+        whenever(navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)).thenReturn(flow)
 
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
