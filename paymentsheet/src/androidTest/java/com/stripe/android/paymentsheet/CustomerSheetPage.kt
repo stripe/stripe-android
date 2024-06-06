@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -11,7 +12,11 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.utils.isPlaced
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class CustomerSheetPage(
@@ -19,6 +24,16 @@ internal class CustomerSheetPage(
 ) {
     fun waitForText(text: String, substring: Boolean = false) {
         waitUntil(hasText(text, substring = substring))
+    }
+
+    fun waitUntilRemoved(text: String, substring: Boolean = false) {
+        waitForIdle()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(hasText(text, substring).and(isPlaced()))
+                .fetchSemanticsNodes().isEmpty()
+        }
     }
 
     fun fillOutFullBillingAddress() {
@@ -65,6 +80,28 @@ internal class CustomerSheetPage(
         clickPrimaryButton(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
     }
 
+    fun clickEditButton() {
+        val editButtonMatcher = hasTestTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG)
+
+        waitUntil(editButtonMatcher)
+        click(editButtonMatcher, canScroll = false)
+    }
+
+    fun clickDeleteButton(forEndsWith: String) {
+        val deleteBadgeForSavedPmMatcher = hasTestTag(TEST_TAG_REMOVE_BADGE)
+            .and(hasContentDescription(forEndsWith, substring = true))
+
+        waitUntil(deleteBadgeForSavedPmMatcher)
+        click(deleteBadgeForSavedPmMatcher)
+    }
+
+    fun clickDialogRemoveButton() {
+        val dialogRemoveButtonMatcher = hasTestTag(TEST_TAG_DIALOG_CONFIRM_BUTTON)
+
+        waitUntil(dialogRemoveButtonMatcher)
+        click(dialogRemoveButtonMatcher, canScroll = false)
+    }
+
     fun clickSavedPaymentMethod(endsWith: String) {
         val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText(endsWith, substring = true))
@@ -94,10 +131,14 @@ internal class CustomerSheetPage(
         }
     }
 
-    private fun click(matcher: SemanticsMatcher) {
-        composeTestRule.onNode(matcher)
-            .performScrollTo()
-            .performClick()
+    private fun click(matcher: SemanticsMatcher, canScroll: Boolean = true) {
+        val clickableNode = composeTestRule.onNode(matcher)
+
+        if (canScroll) {
+            clickableNode.performScrollTo()
+        }
+
+        clickableNode.performClick()
     }
 
     private fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
