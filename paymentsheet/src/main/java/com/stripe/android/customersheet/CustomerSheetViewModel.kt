@@ -1229,7 +1229,7 @@ internal class CustomerSheetViewModel(
                 primaryButtonVisible = false,
                 primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                cbcEligibility = paymentMethodMetadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
             )
         )
