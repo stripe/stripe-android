@@ -77,7 +77,11 @@ internal class InputAddressViewModel @Inject constructor(
                     .stripeIntent(null)
                     .merchantName("")
                     .shippingValues(null)
-                    .formSpec(buildFormSpec(!forceExpandedForm && addressDetails?.address?.line1 == null))
+                    .formSpec(
+                        buildFormSpec(
+                            condensedForm = !forceExpandedForm && addressDetails?.address?.line1 == null
+                        )
+                    )
                     .initialValues(initialValues)
                     .build().formController
             }
