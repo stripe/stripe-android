@@ -90,7 +90,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consumersApiService.startConsumerVerification(
                 consumerSessionClientSecret = eq(consumerSessionClientSecret),
                 locale = eq(locale),
-                authSessionCookie = anyOrNull(),
                 requestSurface = eq("android_connections"),
                 type = eq(type),
                 connectionsMerchantName = anyOrNull(),
@@ -113,7 +112,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         verify(consumersApiService).startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale,
-            authSessionCookie = null,
             requestSurface = "android_connections",
             type = type,
             connectionsMerchantName = connectionsMerchantName,
@@ -137,7 +135,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consumersApiService.confirmConsumerVerification(
                 consumerSessionClientSecret = eq(consumerSessionClientSecret),
                 verificationCode = eq(verificationCode),
-                authSessionCookie = anyOrNull(),
                 requestSurface = eq("android_connections"),
                 type = eq(type),
                 requestOptions = eq(apiOptions)
@@ -156,7 +153,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         verify(consumersApiService).confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
-            authSessionCookie = null,
             "android_connections",
             type,
             apiOptions

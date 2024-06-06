@@ -1043,7 +1043,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         country: String,
         name: String?,
         locale: Locale?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerSession> {
@@ -1058,13 +1057,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "phone_number" to phoneNumber,
                     "country" to country,
                     "consent_action" to consentAction.value
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
                 ).plus(
                     locale?.let {
                         mapOf("locale" to it.toLanguageTag())

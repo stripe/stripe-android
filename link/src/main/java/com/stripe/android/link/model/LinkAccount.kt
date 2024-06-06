@@ -28,8 +28,6 @@ internal class LinkAccount(private val consumerSession: ConsumerSession) {
         }
     }
 
-    fun getAuthSessionCookie() = consumerSession.authSessionClientSecret
-
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
             it.state == ConsumerSession.VerificationSession.SessionState.Started

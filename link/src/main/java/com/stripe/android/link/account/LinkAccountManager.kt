@@ -35,10 +35,6 @@ internal class LinkAccountManager @Inject constructor(
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     val linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
-    @Volatile
-    @VisibleForTesting
-    var authSessionCookie: String? = null
-
     /**
      * The publishable key for the signed in Link account.
      */
@@ -61,7 +57,7 @@ internal class LinkAccountManager @Inject constructor(
         email: String,
         startSession: Boolean = true,
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, authSessionCookie)
+        linkRepository.lookupConsumer(email)
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -173,7 +169,7 @@ internal class LinkAccountManager @Inject constructor(
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
+        linkRepository.consumerSignUp(email, phone, country, name, consentAction.consumerAction)
             .map { consumerSession ->
                 setAccount(consumerSession)
             }
@@ -224,7 +220,6 @@ internal class LinkAccountManager @Inject constructor(
         maybeUpdateConsumerPublishableKey(consumerSession)
         val newAccount = LinkAccount(consumerSession)
         _linkAccount.value = newAccount
-        authSessionCookie = newAccount.getAuthSessionCookie()
         return newAccount
     }
 
