@@ -237,7 +237,7 @@ class SentryErrorReporter(
         private const val CONTENT_TYPE = "application/json; charset=utf-8"
 
         private const val HEADER_USER_AGENT = "User-Agent"
-        private const val USER_AGENT = "Android3ds2Sdk $VERSION_NAME"
+        private const val USER_AGENT = "Stripe/v1 android/$VERSION_NAME"
 
         private const val HEADER_SENTRY_AUTH = "X-Sentry-Auth"
 
