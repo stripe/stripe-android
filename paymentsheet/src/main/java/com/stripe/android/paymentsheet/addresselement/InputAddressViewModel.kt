@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcompone
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,6 +25,9 @@ internal class InputAddressViewModel @Inject constructor(
 ) : ViewModel() {
     private val _collectedAddress = MutableStateFlow(args.config?.address)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
+
+    private val _forceExpandedForm = MutableStateFlow<Boolean?>(false)
+    private val forceExpandedForm: StateFlow<Boolean?> = _forceExpandedForm
 
     private val _formController = MutableStateFlow<FormController?>(null)
     val formController: StateFlow<FormController?> = _formController
@@ -50,7 +54,21 @@ internal class InputAddressViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            collectedAddress.collect { addressDetails ->
+            navigator.getResultFlow<Boolean?>(
+                AddressElementNavigator.FORCE_EXPANDED_FORM_KEY
+            )?.collect {
+                _forceExpandedForm.emit(it)
+            }
+        }
+
+        viewModelScope.launch {
+            combineAsStateFlow(collectedAddress, forceExpandedForm) { collectedAddress, forceExpandedForm ->
+                Pair(
+                    collectedAddress,
+                    forceExpandedForm
+                )
+            }.collect { (addressDetails, forceExpandedFormNullable) ->
+                val forceExpandedForm = forceExpandedFormNullable ?: false
                 val initialValues: Map<IdentifierSpec, String?> = addressDetails
                     ?.toIdentifierMap()
                     ?: emptyMap()
@@ -59,7 +77,7 @@ internal class InputAddressViewModel @Inject constructor(
                     .stripeIntent(null)
                     .merchantName("")
                     .shippingValues(null)
-                    .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
+                    .formSpec(buildFormSpec(!forceExpandedForm && addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
                     .build().formController
             }

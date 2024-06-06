@@ -41,4 +41,8 @@ internal class AddressElementNavigator @Inject constructor() {
             }
         }
     }
+
+    companion object {
+        internal const val FORCE_EXPANDED_FORM_KEY = "force_expanded_form"
+    }
 }
