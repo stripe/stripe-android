@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### AddressElement
+* [FIXED][8596](https://github.com/stripe/stripe-android/pull/8596) Fixed issue where "Enter address manually" button only worked the first time it was clicked.
+
 ## 20.44.2 - 2024-06-03
 
 ### Identity
