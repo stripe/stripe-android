@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -15,6 +16,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -54,10 +56,13 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.CvcConfig
+import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -174,6 +179,12 @@ internal abstract class BaseSheetViewModel(
 
     private val linkInlineSignUpState = MutableStateFlow<InlineSignupViewState?>(null)
     protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
+
+    private val _cvcControllerFlow = MutableStateFlow(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
+    internal val cvcControllerFlow: StateFlow<CvcController> = _cvcControllerFlow
+
+    private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
+    internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
     private var previouslySentDeepLinkEvent: Boolean
         get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
@@ -496,6 +507,7 @@ internal abstract class BaseSheetViewModel(
         val showAbove = (selection as? PaymentSelection.Saved?)
             ?.showMandateAbovePrimaryButton == true
 
+        updateCvcFlows(selection)
         updateMandateText(mandateText = mandateText, showAbove = showAbove)
         clearErrorMessages()
     }
@@ -522,6 +534,32 @@ internal abstract class BaseSheetViewModel(
             eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
             previouslySentDeepLinkEvent = true
+        }
+    }
+
+    private fun updateCvcFlows(selection: PaymentSelection?) {
+        if (selection is PaymentSelection.Saved && selection.paymentMethod.type == PaymentMethod.Type.Card) {
+            _cvcControllerFlow.value = CvcController(
+                CvcConfig(),
+                stateFlowOf(selection.paymentMethod.card?.brand ?: CardBrand.Unknown)
+            )
+            viewModelScope.launch {
+                cvcControllerFlow.value.isComplete.collect {
+                    _cvcRecollectionCompleteFlow.value = it
+                }
+            }
+        }
+    }
+
+    internal fun isCvcRecollectionEnabled() =
+        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
+            FeatureFlags.cvcRecollection.isEnabled
+
+    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
+        return if (isCvcRecollectionEnabled()) {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
+        } else {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
         }
     }
 

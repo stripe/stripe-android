@@ -1497,7 +1497,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
     }
 
@@ -1519,7 +1519,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
     }
 
@@ -1735,7 +1735,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
             viewModel.removePaymentMethod(paymentMethods.single())
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }

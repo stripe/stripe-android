@@ -7,17 +7,23 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -39,9 +45,14 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
+import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -327,6 +338,37 @@ private fun SavedPaymentMethodTab(
             onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
             onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
             modifier = modifier,
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>) {
+    val element = CvcElement(
+        IdentifierSpec(),
+        cvcControllerFlow.collectAsState().value
+    )
+
+    Text(
+        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.padding(20.dp, 20.dp, 0.dp, 0.dp)
+    )
+    SectionCard(
+        Modifier
+            .padding(20.dp, 8.dp, 20.dp, 8.dp)
+            .height(IntrinsicSize.Min)
+    ) {
+        element.controller.ComposeUI(
+            enabled = true,
+            field = element,
+            modifier = Modifier
+                .fillMaxWidth(),
+            hiddenIdentifiers = setOf(),
+            lastTextFieldIdentifier = null,
+            nextFocusDirection = FocusDirection.Exit,
+            previousFocusDirection = FocusDirection.Previous
         )
     }
 }

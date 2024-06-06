@@ -133,6 +133,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
             reportConfirmButtonPressed()
             checkout()
@@ -597,13 +598,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
+        return if (
+            isCvcRecollectionEnabled() &&
+            paymentSelection is PaymentSelection.Saved &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+        ) {
+            paymentSelection.copy(recollectedCvc = cvcControllerFlow.value.fieldValue.value)
+        } else {
+            paymentSelection
+        }
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
-                paymentSelection = paymentSelection,
+                paymentSelection = paymentSelectionWithCvcIfEnabled(paymentSelection),
                 shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
                 context = getApplication(),
             )
@@ -818,7 +831,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
-            PaymentSheetScreen.SelectSavedPaymentMethods
+            PaymentSheetScreen.SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
             PaymentSheetScreen.AddFirstPaymentMethod
         }
