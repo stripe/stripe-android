@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -108,14 +110,17 @@ private fun internalRememberPaymentSheetFlowController(
         "PaymentSheet.FlowController must be created in the context of an Activity"
     }
 
-    return remember(paymentOptionCallback, paymentResultCallback) {
+    val currentPaymentOptionCallback by rememberUpdatedState(paymentOptionCallback::onPaymentOption)
+    val currentPaymentResultCallback by rememberUpdatedState(paymentResultCallback::onPaymentSheetResult)
+
+    return remember {
         FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = { activity.window?.statusBarColor },
-            paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback,
+            paymentOptionCallback = currentPaymentOptionCallback,
+            paymentResultCallback = currentPaymentResultCallback,
         ).create()
     }
 }

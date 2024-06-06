@@ -22,7 +22,7 @@ import com.stripe.android.utils.rememberActivity
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
+    val onResult by rememberUpdatedState(paymentResultCallback::onPaymentSheetResult)
 
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = PaymentSheetContractV2(),
@@ -36,13 +36,13 @@ fun rememberPaymentSheet(
         "PaymentSheet must be created in the context of an Activity"
     }
 
-    return remember(paymentResultCallback) {
+    return remember {
         val launcher = DefaultPaymentSheetLauncher(
             activityResultLauncher = activityResultLauncher,
             activity = activity,
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
-            callback = paymentResultCallback,
+            callback = onResult,
         )
         PaymentSheet(launcher)
     }
