@@ -33,29 +33,34 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun state_updatesWhenSelectionUpdates() = runScenario(
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp")
+    fun state_updatesWhenSelectionUpdates() {
+        val paymentMethodTypes = listOf("card", "cashapp")
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = paymentMethodTypes
+                )
             )
-        )
-    ) {
-        interactor.state.test {
-            awaitItem().run {
-                assertThat(supportedPaymentMethods).isNotEmpty()
-                assertThat(selectedPaymentMethodIndex).isEqualTo(-1)
-            }
-            selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
-                labelResource = "CashApp",
-                iconResource = 0,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            )
-            awaitItem().run {
-                assertThat(supportedPaymentMethods).isNotEmpty()
-                assertThat(selectedPaymentMethodIndex).isEqualTo(1)
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(supportedPaymentMethods).isNotEmpty()
+                    assertThat(selectedPaymentMethodIndex).isEqualTo(-1)
+                }
+                selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
+                    labelResource = "CashApp",
+                    iconResource = 0,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                )
+                awaitItem().run {
+                    assertThat(supportedPaymentMethods).isNotEmpty()
+                    val cashAppIndex = paymentMethodTypes.indexOf("cashapp")
+                    assertThat(selectedPaymentMethodIndex).isEqualTo(cashAppIndex)
+                    assertThat(cashAppIndex).isEqualTo(1)
+                }
             }
         }
     }
