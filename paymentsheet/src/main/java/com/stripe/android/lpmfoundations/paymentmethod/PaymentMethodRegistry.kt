@@ -28,6 +28,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
@@ -66,6 +67,7 @@ internal object PaymentMethodRegistry {
         RevolutPayDefinition,
         SepaDebitDefinition,
         SofortDefinition,
+        SunbitDefinition,
         SwishDefinition,
         TwintDefinition,
         UpiDefinition,

@@ -369,6 +369,14 @@ constructor(
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
         ),
+        Sunbit(
+            "sunbit",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
         AmazonPay(
             "amazon_pay",
             isReusable = false,

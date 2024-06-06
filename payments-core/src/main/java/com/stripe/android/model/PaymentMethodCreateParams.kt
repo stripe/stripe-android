@@ -1098,6 +1098,23 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+                /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Sunbit] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createSunbit(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Sunbit,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
         /**
          * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
          * method type.

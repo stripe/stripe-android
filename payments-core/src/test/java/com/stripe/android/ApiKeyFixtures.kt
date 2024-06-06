@@ -39,4 +39,6 @@ internal object ApiKeyFixtures {
         "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
     const val ALMA_PUBLISHABLE_KEY =
         "pk_test_51JtgfQKG6vc7r7YCU0qQNOkDaaHrEgeHgGKrJMNfuWwaKgXMLzPUA1f8ZlCNPonIROLOnzpUnJK1C1xFH3M3Mz8X00Q6O4GfUt"
+    const val SUNBIT_PUBLISHABLE_KEY =
+        "pk_test_51PHAxOEXPZHliQOymEG4f3mVg18FAseUQkcugmWoQ2S7gmAa418zKZTgoBsnaiPRcBrxRpIeTlclfTwm1PwF6ndu00zvHhDWCe"
 }
