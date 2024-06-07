@@ -42,12 +42,13 @@ internal data class TestParameters(
             requiresBrowser: Boolean = true,
             authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
             executeInNightlyRun: Boolean = false,
+            saveForFutureUseCheckboxVisible: Boolean = false,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
                 saveCheckboxValue = false,
-                saveForFutureUseCheckboxVisible = false,
+                saveForFutureUseCheckboxVisible = saveForFutureUseCheckboxVisible,
                 authorizationAction = authorizationAction,
                 executeInNightlyRun = executeInNightlyRun,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
