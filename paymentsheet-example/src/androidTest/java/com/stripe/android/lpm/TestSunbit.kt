@@ -20,7 +20,6 @@ internal class TestSunbit : BasePlaygroundTest() {
         settings[CurrencySettingsDefinition] = Currency.USD
     }
 
-    @Ignore("Complex authorization handling required")
     @Test
     fun testSunbit() {
         testDriver.confirmNewOrGuestComplete(
