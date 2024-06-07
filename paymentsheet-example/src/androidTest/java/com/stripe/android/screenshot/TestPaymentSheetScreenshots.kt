@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -15,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
 import org.junit.Assume.assumeFalse
@@ -27,12 +29,13 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     private val testParams = TestParameters.create(
         paymentMethodCode = "card",
-    ) { settings ->
-        settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna,p24,eps"
-    }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
-    )
+    ) { settings ->
+        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
+        settings[AutomaticPaymentMethodsSettingsDefinition] = false
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,klarna,p24,eps"
+    }
 
     private val colors = PaymentSheet.Colors(
         primary = Color.MAGENTA,
@@ -240,8 +243,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun testPaymentSheetCustomPrimaryButtonLabel() {
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
-                settings[PrimaryButtonLabelSettingsDefinition] =
-                    "Buy this now!"
+                settings[PrimaryButtonLabelSettingsDefinition] = "Buy this now!"
             }
         )
     }
@@ -252,6 +254,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
             },
             customOperations = {
                 testDriver.pressSelection()
