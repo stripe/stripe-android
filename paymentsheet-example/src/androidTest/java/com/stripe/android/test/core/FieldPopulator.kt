@@ -52,19 +52,23 @@ internal class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
-        if (testParameters.saveForFutureUseCheckboxVisible) {
-            selectors.saveForFutureCheckbox.assertExists()
-            if (testParameters.saveCheckboxValue) {
-                if (!isSaveForFutureUseSelected()) {
-                    selectors.saveForFutureCheckbox.performClick()
+        Espresso.onIdle()
+
+        if (testParameters.playgroundSettingsSnapshot.configurationData.integrationType.isPaymentFlow()) {
+            if (testParameters.saveForFutureUseCheckboxVisible) {
+                selectors.saveForFutureCheckbox.assertExists()
+                if (testParameters.saveCheckboxValue) {
+                    if (!isSaveForFutureUseSelected()) {
+                        selectors.saveForFutureCheckbox.performClick()
+                    }
+                } else {
+                    if (isSaveForFutureUseSelected()) {
+                        selectors.saveForFutureCheckbox.performClick()
+                    }
                 }
             } else {
-                if (isSaveForFutureUseSelected()) {
-                    selectors.saveForFutureCheckbox.performClick()
-                }
+                selectors.saveForFutureCheckbox.assertDoesNotExist()
             }
-        } else {
-            selectors.saveForFutureCheckbox.assertDoesNotExist()
         }
     }
 
