@@ -245,11 +245,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             remainingRetries--
         }
 
-        return if (shouldThrowException(stripeIntentResult)) {
-            Result.failure(MaxRetryReachedException())
-        } else {
-            stripeIntentResult
-        }
+        return stripeIntentResult
     }
 
     /**
@@ -274,13 +270,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
         return requiresAction || isCardPaymentProcessing
-    }
-
-    private fun shouldThrowException(stripeIntentResult: Result<StripeIntent>): Boolean {
-        val stripeIntent = stripeIntentResult.getOrNull() ?: return true
-        val requiresAction = stripeIntent.requiresAction()
-        val is3ds2 = stripeIntent.nextActionData is StripeIntent.NextActionData.SdkData.Use3DS2
-        return requiresAction && !is3ds2
     }
 
     internal companion object {

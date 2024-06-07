@@ -471,7 +471,7 @@ internal class CustomerSheetViewModel(
             val result = removePaymentMethod(paymentMethod)
 
             result.fold(
-                onSuccess = ::handlePaymentMethodRemoved,
+                onSuccess = ::removePaymentMethodFromState,
                 onFailure = { _, displayMessage -> handleFailureToRemovePaymentMethod(displayMessage) }
             )
         }
@@ -518,42 +518,10 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun handlePaymentMethodRemoved(paymentMethod: PaymentMethod) {
-        val currentViewState = viewState.value
-        val newSavedPaymentMethods = currentViewState.savedPaymentMethods.filter { it.id != paymentMethod.id!! }
-
-        if (currentViewState is CustomerSheetViewState.SelectPaymentMethod) {
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
-                val originalSelection = originalPaymentSelection
-
-                val didRemoveCurrentSelection = viewState.paymentSelection is PaymentSelection.Saved &&
-                    viewState.paymentSelection.paymentMethod.id == paymentMethod.id
-
-                val didRemoveOriginalSelection = viewState.paymentSelection is PaymentSelection.Saved &&
-                    originalSelection is PaymentSelection.Saved &&
-                    viewState.paymentSelection.paymentMethod.id == originalSelection.paymentMethod.id
-
-                if (didRemoveOriginalSelection) {
-                    originalPaymentSelection = null
-                }
-
-                val updatedStateCanUpdate = canEdit(
-                    viewState.allowsRemovalOfLastSavedPaymentMethod,
-                    newSavedPaymentMethods,
-                    viewState.cbcEligibility
-                )
-                viewState.copy(
-                    savedPaymentMethods = newSavedPaymentMethods,
-                    paymentSelection = viewState.paymentSelection.takeUnless {
-                        didRemoveCurrentSelection
-                    } ?: originalPaymentSelection,
-                    isEditing = viewState.isEditing && updatedStateCanUpdate
-                )
-            }
-        }
-
-        if (newSavedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
-            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
+    private fun handlePaymentMethodRemovedFromEditScreen(paymentMethod: PaymentMethod) {
+        viewModelScope.launch(workContext) {
+            delay(PaymentMethodRemovalDelayMillis)
+            removePaymentMethodFromState(paymentMethod)
         }
     }
 
@@ -603,7 +571,7 @@ internal class CustomerSheetViewModel(
                     removeExecutor = { pm ->
                         removePaymentMethod(pm).onSuccess {
                             onBackPressed()
-                            removePaymentMethodFromState(pm)
+                            handlePaymentMethodRemovedFromEditScreen(pm)
                         }.failureOrNull()?.cause
                     },
                     updateExecutor = { method, brand ->
@@ -623,18 +591,42 @@ internal class CustomerSheetViewModel(
     }
 
     private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
-        viewModelScope.launch(workContext) {
-            delay(PaymentMethodRemovalDelayMillis)
+        val currentViewState = viewState.value
+        val newSavedPaymentMethods = currentViewState.savedPaymentMethods.filter { it.id != paymentMethod.id!! }
 
-            val newSavedPaymentMethods = viewState.value.savedPaymentMethods - paymentMethod
+        if (currentViewState is CustomerSheetViewState.SelectPaymentMethod) {
+            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
+                val originalSelection = originalPaymentSelection
 
-            if (newSavedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
-                transitionToAddPaymentMethod(isFirstPaymentMethod = true)
-            } else {
-                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(savedPaymentMethods = newSavedPaymentMethods)
+                val didRemoveCurrentSelection = viewState.paymentSelection is PaymentSelection.Saved &&
+                    viewState.paymentSelection.paymentMethod.id == paymentMethod.id
+
+                val didRemoveOriginalSelection = viewState.paymentSelection is PaymentSelection.Saved &&
+                    originalSelection is PaymentSelection.Saved &&
+                    viewState.paymentSelection.paymentMethod.id == originalSelection.paymentMethod.id
+
+                if (didRemoveOriginalSelection) {
+                    originalPaymentSelection = null
                 }
+
+                val updatedStateCanUpdate = canEdit(
+                    viewState.allowsRemovalOfLastSavedPaymentMethod,
+                    newSavedPaymentMethods,
+                    viewState.cbcEligibility
+                )
+
+                viewState.copy(
+                    savedPaymentMethods = newSavedPaymentMethods,
+                    paymentSelection = viewState.paymentSelection.takeUnless {
+                        didRemoveCurrentSelection
+                    } ?: originalPaymentSelection,
+                    isEditing = viewState.isEditing && updatedStateCanUpdate
+                )
             }
+        }
+
+        if (newSavedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
+            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
         }
     }
 
@@ -788,6 +780,7 @@ internal class CustomerSheetViewModel(
         cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility,
     ) {
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
+            ?: paymentMethodMetadata?.supportedPaymentMethodTypes()?.firstOrNull()
             ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
@@ -1228,7 +1221,7 @@ internal class CustomerSheetViewModel(
                 primaryButtonVisible = false,
                 primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                cbcEligibility = paymentMethodMetadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
             )
         )

@@ -81,7 +81,7 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = isEditing,
-        screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+        screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     ) {

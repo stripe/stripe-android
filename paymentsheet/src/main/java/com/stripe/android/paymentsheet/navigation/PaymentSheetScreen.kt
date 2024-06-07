@@ -7,7 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
@@ -19,6 +22,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.CvcController
+import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -64,7 +69,14 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data object SelectSavedPaymentMethods : PaymentSheetScreen {
+    data class SelectSavedPaymentMethods(
+        val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
+    ) : PaymentSheetScreen {
+
+        sealed interface CvcRecollectionState {
+            data object NotRequired : CvcRecollectionState
+            class Required(val cvcControllerFlow: StateFlow<CvcController>) : CvcRecollectionState
+        }
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
@@ -90,6 +102,14 @@ internal sealed interface PaymentSheetScreen {
                 onItemRemoved = viewModel::removePaymentMethod,
                 modifier = modifier,
             )
+
+            if (
+                cvcRecollectionState is CvcRecollectionState.Required &&
+                (state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.paymentMethod?.type == PaymentMethod.Type.Card
+            ) {
+                CvcRecollectionField(cvcControllerFlow = cvcRecollectionState.cvcControllerFlow)
+            }
         }
     }
 

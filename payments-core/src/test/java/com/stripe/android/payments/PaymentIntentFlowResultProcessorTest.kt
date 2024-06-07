@@ -7,7 +7,6 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -171,14 +170,12 @@ internal class PaymentIntentFlowResultProcessorTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            val result = processor.processResult(
+            processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
             )
-
-            assertThat(result.exceptionOrNull()).isInstanceOf(MaxRetryReachedException::class.java)
 
             verify(mockStripeRepository).retrievePaymentIntent(
                 eq(clientSecret),

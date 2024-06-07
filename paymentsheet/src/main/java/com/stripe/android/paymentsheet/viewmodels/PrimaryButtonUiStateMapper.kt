@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.content.Context
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.combine
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,7 @@ internal class PrimaryButtonUiStateMapper(
     private val amountFlow: StateFlow<Amount?>,
     private val selectionFlow: StateFlow<PaymentSelection?>,
     private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
+    private val cvcCompleteFlow: StateFlow<Boolean>,
     private val onClick: () -> Unit,
 ) {
 
@@ -31,11 +35,13 @@ internal class PrimaryButtonUiStateMapper(
             amountFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton ->
+            cvcCompleteFlow
+        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
             customPrimaryButton ?: PrimaryButton.UIState(
                 label = buyButtonLabel(amount),
                 onClick = onClick,
-                enabled = buttonsEnabled && selection != null,
+                enabled = buttonsEnabled && selection != null &&
+                    cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
                 lockVisible = true,
             ).takeIf { screen.showsBuyButton }
         }
@@ -73,5 +79,22 @@ internal class PrimaryButtonUiStateMapper(
     private fun continueButtonLabel(): String {
         val customLabel = config.primaryButtonLabel
         return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
+    }
+
+    private fun cvcRecollectionCompleteOrNotRequired(
+        screen: PaymentSheetScreen,
+        complete: Boolean,
+        selection: PaymentSelection
+    ): Boolean {
+        return if (
+            (screen as? PaymentSheetScreen.SelectSavedPaymentMethods)
+                ?.cvcRecollectionState is CvcRecollectionState.Required &&
+            (selection as? PaymentSelection.Saved)
+                ?.paymentMethod?.type == PaymentMethod.Type.Card
+        ) {
+            complete
+        } else {
+            true
+        }
     }
 }

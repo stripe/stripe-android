@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.graphics.Typeface
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -125,6 +126,7 @@ private fun EditButton(
     }
 
     IconButton(
+        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
         enabled = isEnabled,
         onClick = onClick,
     ) {
@@ -185,3 +187,6 @@ internal fun TestModeBadge_Preview() {
         TestModeBadge()
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG = "PaymentSheetEditButton"

@@ -278,6 +278,37 @@ internal object SetupIntentFixtures {
         )
     )
 
+    internal val SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
+        {
+            "id": "seti_1GSmaFCRMbs",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1GSmaFCRMbs6FrXfmjThcHan_secret_H0oC2iSB4FtW4d",
+            "created": 1585670699,
+            "description": null,
+            "last_setup_error": null,
+            "livemode": false,
+            "payment_method": null,
+            "payment_method_types": [
+                "card",
+                "us_bank_account"
+            ],
+            "payment_method_options": {
+                "us_bank_account": {
+                    "verification_method": "automatic"
+                }
+            },
+            "status": "requires_payment_method",
+            "usage": "off_session"
+        }
+                """.trimIndent()
+            )
+        )
+    )
+
     internal val EXPANDED_PAYMENT_METHOD = JSONObject(
         """
         {

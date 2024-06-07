@@ -13,7 +13,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header in complete flow and showing wallets`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -70,7 +70,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when displaying saved payment methods in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
             isWalletEnabled = true,
             types = emptyList(),
         )

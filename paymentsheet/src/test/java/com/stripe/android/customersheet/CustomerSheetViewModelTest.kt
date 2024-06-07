@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -43,6 +44,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
@@ -1871,6 +1873,30 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When 'paymentMethodOrder' is defined, initial shown payment method should be first from 'paymentMethodOrder'`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    isGooglePayAvailable = false,
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
+                    financialConnectionsAvailable = true,
+                ),
+                configuration = CustomerSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    paymentMethodOrder = listOf("us_bank_account", "card")
+                )
+            )
+
+            viewModel.viewState.test {
+                val viewState = awaitViewState<AddPaymentMethod>()
+
+                assertThat(viewState.paymentMethodCode).isEqualTo("us_bank_account")
+            }
+        }
+
+    @Test
     fun `The custom primary button can be updated`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -2646,6 +2672,8 @@ class CustomerSheetViewModelTest {
             // Simulate the delay
             testDispatcher.scheduler.advanceUntilIdle()
 
+            // Show users that the payment method was removed briefly
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
             assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
@@ -2752,6 +2780,67 @@ class CustomerSheetViewModelTest {
 
                 val finalViewState = awaitViewState<SelectPaymentMethod>()
                 assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+            }
+        }
+
+    @Test
+    fun `Card Brand Choice should be enabled in 'SelectPaymentMethod' after attaching first payment method`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                stripeRepository = FakeStripeRepository(
+                    createPaymentMethodResult = Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+                ),
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    paymentSelection = null,
+                    isGooglePayAvailable = false,
+                ),
+                customerAdapter = FakeCustomerAdapter(
+                    canCreateSetupIntents = false,
+                    onAttachPaymentMethod = {
+                        CustomerAdapter.Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+                    }
+                )
+            ).apply {
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                        preferredNetworks = listOf(CardBrand.CartesBancaires)
+                    )
+                )
+            }
+
+            viewModel.viewState.test {
+                // Skip initial add state
+                awaitViewState<AddPaymentMethod>()
+
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                        formFieldValues = FormFieldValues(
+                            fieldValuePairs = mapOf(
+                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            ),
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        )
+                    )
+                )
+
+                // Skip updated add state
+                awaitViewState<AddPaymentMethod>()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                // Skip updated add state
+                awaitViewState<AddPaymentMethod>()
+
+                val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(selectPaymentMethodState.cbcEligibility)
+                    .isEqualTo(
+                        CardBrandChoiceEligibility.Eligible(
+                            preferredNetworks = listOf(CardBrand.CartesBancaires)
+                        )
+                    )
             }
         }
 
@@ -3053,6 +3142,68 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Removing original selection from edit screen then dismissing 'CustomerSheet' should have null Canceled result`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val paymentMethodToRemove = paymentMethods.first()
+
+            val viewModel = retrieveViewModelForRemoving(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = PaymentSelection.Saved(paymentMethodToRemove),
+                paymentMethodToRemove = paymentMethodToRemove
+            )
+
+            viewModel.removePaymentMethodFromEditScreen(paymentMethodToRemove)
+
+            viewModel.result.test {
+                // Skip the initial null item
+                skipItems(1)
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+                val canceledResult = awaitItem().asCanceled()
+
+                assertThat(canceledResult.paymentSelection).isNull()
+            }
+        }
+
+    @Test
+    fun `Removing current selection from edit screen should update editable state if last PM cannot be removed`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 2)
+            val paymentMethodToRemove = paymentMethods.last()
+
+            val viewModel = retrieveViewModelForRemoving(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = PaymentSelection.Saved(paymentMethodToRemove),
+                paymentMethodToRemove = paymentMethodToRemove,
+                allowsRemovalOfLastSavedPaymentMethod = false
+            )
+
+            viewModel.viewState.test {
+                val viewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(viewState.topBarState.showEditMenu).isTrue()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+                val viewStateAfterClickingEdit = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(viewStateAfterClickingEdit.isEditing).isTrue()
+                assertThat(viewStateAfterClickingEdit.topBarState.showEditMenu).isTrue()
+            }
+
+            viewModel.removePaymentMethodFromEditScreen(paymentMethodToRemove)
+
+            viewModel.viewState.test {
+                val viewStateAfterRemoval = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(viewStateAfterRemoval.isEditing).isFalse()
+                assertThat(viewStateAfterRemoval.topBarState.showEditMenu).isFalse()
+            }
+        }
+
+    @Test
     fun `When card number input is completed, should report event`() = runTest(testDispatcher) {
         val eventReporter = mock<CustomerSheetEventReporter>()
 
@@ -3111,6 +3262,33 @@ class CustomerSheetViewModelTest {
         )
     }
 
+    private suspend fun retrieveViewModelForRemoving(
+        savedPaymentMethods: List<PaymentMethod>,
+        originalSelection: PaymentSelection.Saved,
+        paymentMethodToRemove: PaymentMethod,
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+    ): CustomerSheetViewModel {
+        return createViewModel(
+            workContext = coroutineContext,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
+            ),
+            savedPaymentSelection = originalSelection,
+            customerPaymentMethods = savedPaymentMethods,
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.Success(savedPaymentMethods),
+                onDetachPaymentMethod = { _ ->
+                    CustomerAdapter.Result.Success(paymentMethodToRemove)
+                }
+            ),
+            editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
+                workContext = testDispatcher
+            ),
+        )
+    }
+
     private suspend fun CustomerSheetViewModel.updatePaymentMethod(
         originalPaymentMethod: PaymentMethod,
         updatedPaymentMethod: PaymentMethod
@@ -3138,6 +3316,28 @@ class CustomerSheetViewModelTest {
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).contains(updatedPaymentMethod)
+        }
+    }
+
+    private suspend fun CustomerSheetViewModel.removePaymentMethodFromEditScreen(
+        paymentMethodToRemove: PaymentMethod,
+    ) {
+        viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethodToRemove))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(OnRemoveConfirmed)
+
+            val updatedViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(updatedViewState.savedPaymentMethods).contains(paymentMethodToRemove)
+
+            // Simulate the delay
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val finalViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(finalViewState.savedPaymentMethods).doesNotContain(paymentMethodToRemove)
         }
     }
 

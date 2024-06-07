@@ -83,6 +83,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
             reportConfirmButtonPressed()
             onUserSelection()
@@ -329,7 +330,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods
+            SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
             AddFirstPaymentMethod
         }

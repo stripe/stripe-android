@@ -41,6 +41,7 @@ fun SimpleDialogElementUI(
             },
             confirmButton = {
                 TextButton(
+                    modifier = Modifier.testTag(TEST_TAG_DIALOG_CONFIRM_BUTTON),
                     onClick = {
                         onConfirmListener()
                     }
@@ -52,8 +53,6 @@ fun SimpleDialogElementUI(
                         } else {
                             Color.Unspecified
                         },
-                        modifier = Modifier
-                            .testTag(TEST_TAG_DIALOG_CONFIRM_BUTTON),
                     )
                 }
             },
