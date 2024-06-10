@@ -5,8 +5,12 @@
 ### AddressElement
 * [FIXED][8596](https://github.com/stripe/stripe-android/pull/8596) Fixed issue where "Enter address manually" button only worked the first time it was clicked.
 
+### PaymentSheet
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Sunbit to PaymentSheet.
+
 ### Payments
 * [FIXED][8590](https://github.com/stripe/stripe-android/pull/8590) Fix an issue where cancelling payment for Amazon Pay and Cash App Pay would show an error
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Sunbit to API bindings.
 
 ## 20.44.2 - 2024-06-03
 

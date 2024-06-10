@@ -3760,6 +3760,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sofort Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Sunbit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Swish Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Twint Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;
@@ -4018,6 +4019,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createRevolutPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createRevolutPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createRevolutPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createSunbit ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createSunbit (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createSunbit (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createSwish ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createSwish (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createSwish (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -4278,6 +4282,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createRevolutPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createRevolutPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createRevolutPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createSunbit ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createSunbit (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createSunbit (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createSunbit$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createSwish ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createSwish (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createSwish (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;

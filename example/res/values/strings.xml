@@ -36,6 +36,7 @@
     <string name="amazon_pay_example">Amazon Pay</string>
     <string name="revolut_pay_example">Revolut Pay</string>
     <string name="alma_example">Alma</string>
+    <string name="sunbit_example">Sunbit</string>
     <string name="swish_example">Swish</string>
     <string name="mobilepay_example">MobilePay</string>
     <string name="card_brands">Card Brands</string>
