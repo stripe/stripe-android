@@ -3,13 +3,15 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CollectBankAccountForInstantDebitsLauncher(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+    private val hostedSurface: String?
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(
@@ -24,6 +26,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -41,6 +44,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -80,12 +84,15 @@ class CollectBankAccountForInstantDebitsLauncher(
         private const val LAUNCHER_KEY = "CollectBankAccountForInstantDebitsLauncher"
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun create(
+        fun createForPaymentSheet(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForInstantDebitsLauncher(
-                activityResultRegistryOwner.activityResultRegistry.register(
+                // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
+                //  ensure the correct hostedSurface is set.
+                hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+                hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract()
                 ) {

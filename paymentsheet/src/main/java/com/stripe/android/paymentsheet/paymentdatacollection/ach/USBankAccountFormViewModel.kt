@@ -253,12 +253,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = if (args.instantDebits) {
-            CollectBankAccountForInstantDebitsLauncher.create(
+            CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleInstantDebitsResult,
             )
         } else {
-            CollectBankAccountLauncher.create(
+            CollectBankAccountLauncher.createForPaymentSheet(
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleCollectBankAccountResult,
             )

@@ -60,6 +60,7 @@ interface CollectBankAccountLauncher {
 
     companion object {
 
+        internal const val HOSTED_SURFACE_PAYMENT_ELEMENT = "payment_element"
         private const val LAUNCHER_KEY = "CollectBankAccountLauncher"
 
         /**
@@ -73,7 +74,9 @@ interface CollectBankAccountLauncher {
             callback: (CollectBankAccountResult) -> Unit
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
-                activity.registerForActivityResult(CollectBankAccountContract()) {
+                // L1 (public standalone) integration is not hosted by any Stripe surface.
+                hostedSurface = null,
+                hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 }
             )
@@ -90,7 +93,9 @@ interface CollectBankAccountLauncher {
             callback: (CollectBankAccountResult) -> Unit
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
-                fragment.registerForActivityResult(CollectBankAccountContract()) {
+                // L1 (public standalone) integration is not hosted by any Stripe surface.
+                hostedSurface = null,
+                hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 }
             )
@@ -100,12 +105,13 @@ interface CollectBankAccountLauncher {
         // However, CollectBankAccountResult currently does not support nullable intents, a requirement
         // for deferred payment flows. Updating that implies a breaking change.
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun create(
+        fun createForPaymentSheet(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
-                activityResultRegistryOwner.activityResultRegistry.register(
+                hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+                hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),
                     callback,
