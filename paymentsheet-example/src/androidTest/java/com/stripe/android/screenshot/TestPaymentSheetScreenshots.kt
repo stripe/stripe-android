@@ -255,6 +255,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
+                settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
             },
             customOperations = {
                 testDriver.pressSelection()
