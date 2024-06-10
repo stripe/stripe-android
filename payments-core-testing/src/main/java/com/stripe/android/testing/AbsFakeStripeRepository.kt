@@ -294,7 +294,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         country: String,
         name: String?,
         locale: Locale?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerSession> {

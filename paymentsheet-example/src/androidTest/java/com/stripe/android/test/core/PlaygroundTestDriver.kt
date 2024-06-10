@@ -10,7 +10,6 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -30,6 +29,7 @@ import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.example.BuildConfig
+import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -347,7 +347,7 @@ internal class PlaygroundTestDriver(
 
         pressCustomerSheetSave()
 
-        waitForManageSavedPaymentMethods()
+        waitForCustomerSheetConfirmButton()
 
         pressCustomerSheetConfirm()
 
@@ -1143,12 +1143,13 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag(ADD_PAYMENT_METHOD_NODE_TAG), 5000L)
     }
 
-    @OptIn(ExperimentalTestApi::class)
-    private fun waitForManageSavedPaymentMethods() {
-        composeTestRule.waitUntilAtLeastOneExists(
-            hasText("Manage your payment methods"),
-            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
-        )
+    private fun waitForCustomerSheetConfirmButton() {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
     }
 
     private companion object {

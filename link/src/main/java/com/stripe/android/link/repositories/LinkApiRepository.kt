@@ -39,14 +39,12 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
-        email: String?,
-        authSessionCookie: String?
+        email: String,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
                     requestOptions = buildRequestOptions(),
                 )
@@ -59,7 +57,6 @@ internal class LinkApiRepository @Inject constructor(
         phone: String,
         country: String,
         name: String?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession> = withContext(workContext) {
         stripeRepository.consumerSignUp(
@@ -68,7 +65,6 @@ internal class LinkApiRepository @Inject constructor(
             country = country,
             name = name,
             locale = locale,
-            authSessionCookie = authSessionCookie,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
         )

@@ -83,7 +83,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumersApiService.startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale ?: Locale.getDefault(),
-            authSessionCookie = null,
             connectionsMerchantName = connectionsMerchantName,
             requestSurface = CONSUMER_SURFACE,
             type = type,
@@ -101,7 +100,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSession = mutex.withLock {
         return consumersApiService.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
-            authSessionCookie = null,
             verificationCode = verificationCode,
             type = type,
             requestSurface = CONSUMER_SURFACE,

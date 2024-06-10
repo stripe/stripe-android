@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### AddressElement
+* [FIXED][8596](https://github.com/stripe/stripe-android/pull/8596) Fixed issue where "Enter address manually" button only worked the first time it was clicked.
+
 ### PaymentSheet
 * [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Sunbit to PaymentSheet.
 

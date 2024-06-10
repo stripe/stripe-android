@@ -62,12 +62,10 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer sends correct parameters`() = runTest {
         val email = "email@example.com"
-        val cookie = "cookie1"
-        linkRepository.lookupConsumer(email, cookie)
+        linkRepository.lookupConsumer(email)
 
         verify(consumersApiService).lookupConsumerSession(
             eq(email),
-            eq(cookie),
             eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
@@ -81,12 +79,11 @@ class LinkApiRepositoryTest {
                 any(),
                 any(),
                 any(),
-                any()
             )
         )
             .thenReturn(consumerSessionLookup)
 
-        val result = linkRepository.lookupConsumer("email", "cookie")
+        val result = linkRepository.lookupConsumer("email")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSessionLookup)
@@ -99,12 +96,11 @@ class LinkApiRepositoryTest {
                 any(),
                 any(),
                 any(),
-                any()
             )
         )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.lookupConsumer("email", "cookie")
+        val result = linkRepository.lookupConsumer("email")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -115,13 +111,11 @@ class LinkApiRepositoryTest {
         val phone = "phone"
         val country = "US"
         val name = "name"
-        val cookie = "cookie2"
         linkRepository.consumerSignUp(
             email,
             phone,
             country,
             name,
-            cookie,
             ConsumerSignUpConsentAction.Checkbox
         )
 
@@ -131,7 +125,6 @@ class LinkApiRepositoryTest {
             eq(country),
             eq(name),
             eq(Locale.US),
-            eq(cookie),
             eq(ConsumerSignUpConsentAction.Checkbox),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
@@ -147,7 +140,6 @@ class LinkApiRepositoryTest {
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
-                authSessionCookie = anyOrNull(),
                 consentAction = any(),
                 requestOptions = any()
             )
@@ -158,7 +150,6 @@ class LinkApiRepositoryTest {
             "phone",
             "country",
             "name",
-            "cookie",
             ConsumerSignUpConsentAction.Checkbox
         )
 
@@ -175,7 +166,6 @@ class LinkApiRepositoryTest {
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
-                authSessionCookie = anyOrNull(),
                 consentAction = any(),
                 requestOptions = any()
             )
@@ -186,7 +176,6 @@ class LinkApiRepositoryTest {
             "phone",
             "country",
             "name",
-            "cookie",
             ConsumerSignUpConsentAction.Implied
         )
 

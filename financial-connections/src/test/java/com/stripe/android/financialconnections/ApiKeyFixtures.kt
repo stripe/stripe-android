@@ -133,7 +133,6 @@ internal object ApiKeyFixtures {
         redactedPhoneNumber = "+1********12",
         redactedFormattedPhoneNumber = "(***) *** **12",
         verificationSessions = emptyList(),
-        authSessionClientSecret = null,
         publishableKey = null
     )
 }

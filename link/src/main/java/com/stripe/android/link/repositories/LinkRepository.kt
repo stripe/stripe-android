@@ -16,8 +16,7 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String?,
-        authSessionCookie: String?
+        email: String,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -28,7 +27,6 @@ internal interface LinkRepository {
         phone: String,
         country: String,
         name: String?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession>
 
