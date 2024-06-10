@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -150,6 +151,7 @@ internal class AutocompleteViewModel @Inject constructor(
     }
 
     fun onEnterAddressManually() {
+        navigator.setResult(FORCE_EXPANDED_FORM_KEY, true)
         setResultAndGoBack(
             AddressDetails(
                 address = PaymentSheet.Address(
