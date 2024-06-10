@@ -17,7 +17,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,6 +47,7 @@ import com.stripe.android.identity.viewmodel.OTPViewState.RequestingError
 import com.stripe.android.identity.viewmodel.OTPViewState.RequestingOTP
 import com.stripe.android.identity.viewmodel.OTPViewState.SubmittingOTP
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 /**

@@ -6,7 +6,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.R as UiCoreR
 
 /**
@@ -52,7 +52,7 @@ internal fun AddressSection(
             )
         )
     }
-    val selectedCountryCode by controller.rawFieldValue.collectAsState(addressCountries[0].code.value)
+    val selectedCountryCode by controller.rawFieldValue.collectAsState()
     val addressDetailSectionElements = remember(selectedCountryCode) {
         requireNotNull(
             AddressSchemaRegistry.get(selectedCountryCode)
@@ -70,9 +70,9 @@ internal fun AddressSection(
         SectionElement.wrap(sectionList, UiCoreR.string.stripe_address_label_address)
     }
     val formFieldValues by sectionElement.getFormFieldValueFlow()
-        .collectAsState(initial = emptyList())
+        .collectAsState()
     val textIdentifiers by sectionElement.getTextFieldIdentifiers()
-        .collectAsState(initial = emptyList())
+        .collectAsState()
     val currentAddress: RequiredInternationalAddress? by remember {
         derivedStateOf {
             val addressMap = formFieldValues.toMap()

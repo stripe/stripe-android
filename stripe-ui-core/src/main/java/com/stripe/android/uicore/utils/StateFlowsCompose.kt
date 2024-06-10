@@ -40,7 +40,7 @@ private fun <T> produceState(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun <T> StateFlow<T>.collectAsStateSafely(): State<T> = produceState(
+fun <T> StateFlow<T>.collectAsState(): State<T> = produceState(
     produceInitialValue = remember { { value } },
     key = this
 ) {

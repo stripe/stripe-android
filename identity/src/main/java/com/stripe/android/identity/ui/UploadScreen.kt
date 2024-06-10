@@ -25,7 +25,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -56,6 +55,7 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 import com.google.android.material.R as MaterialR
 
