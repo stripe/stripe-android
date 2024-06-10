@@ -49,10 +49,7 @@ class LinkAccountManagerTest {
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
         val accountManager = accountManager(EMAIL)
-        accountManager.authSessionCookie = "cookie"
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
-
+        whenever(linkRepository.lookupConsumer(anyOrNull())).thenReturn(Result.failure(Exception()))
         assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
@@ -60,12 +57,12 @@ class LinkAccountManagerTest {
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
-        verify(linkRepository).lookupConsumer(EMAIL, null)
+        verify(linkRepository).lookupConsumer(EMAIL)
     }
 
     @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+        whenever(linkRepository.lookupConsumer(anyOrNull()))
             .thenReturn(Result.failure(Exception()))
 
         assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
@@ -113,7 +110,7 @@ class LinkAccountManagerTest {
 
     @Test
     fun `lookupConsumer sends analytics event when call fails`() = runSuspendTest {
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+        whenever(linkRepository.lookupConsumer(anyOrNull()))
             .thenReturn(Result.failure(Exception()))
 
         accountManager().lookupConsumer(EMAIL, false)
@@ -128,7 +125,7 @@ class LinkAccountManagerTest {
 
             accountManager.signInWithUserInput(UserInput.SignIn(EMAIL))
 
-            verify(linkRepository).lookupConsumer(eq(EMAIL), anyOrNull())
+            verify(linkRepository).lookupConsumer(eq(EMAIL))
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
@@ -155,7 +152,6 @@ class LinkAccountManagerTest {
                 phone = eq(phone),
                 country = eq(country),
                 name = eq(name),
-                authSessionCookie = anyOrNull(),
                 consentAction = eq(ConsumerSignUpConsentAction.Checkbox)
             )
             assertThat(accountManager.linkAccount.value).isNotNull()
@@ -281,7 +277,6 @@ class LinkAccountManagerTest {
                     phone = anyOrNull(),
                     country = anyOrNull(),
                     name = anyOrNull(),
-                    authSessionCookie = anyOrNull(),
                     consentAction = anyOrNull()
                 )
             ).thenReturn(Result.failure(Exception()))
@@ -330,7 +325,7 @@ class LinkAccountManagerTest {
                     anyOrNull(),
                     anyOrNull(),
                 )
-            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
+            verify(linkRepository, times(0)).lookupConsumer(anyOrNull())
         }
 
     @Test
@@ -395,7 +390,7 @@ class LinkAccountManagerTest {
         val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
             whenever(consumerSession).thenReturn(mockConsumerSession)
         }
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+        whenever(linkRepository.lookupConsumer(anyOrNull()))
             .thenReturn(Result.success(consumerSessionLookup))
         whenever(
             linkRepository.consumerSignUp(
@@ -403,7 +398,6 @@ class LinkAccountManagerTest {
                 phone = anyOrNull(),
                 country = anyOrNull(),
                 name = anyOrNull(),
-                authSessionCookie = anyOrNull(),
                 consentAction = any()
             )
         ).thenReturn(Result.success(mockConsumerSession))
@@ -471,7 +465,6 @@ class LinkAccountManagerTest {
             phone = any(),
             country = any(),
             name = anyOrNull(),
-            authSessionCookie = anyOrNull(),
             consentAction = eq(consumerAction)
         )
     }

@@ -24,8 +24,6 @@ data class ConsumerSession(
     val redactedPhoneNumber: String,
     @SerialName("verification_sessions")
     val verificationSessions: List<VerificationSession> = emptyList(),
-    @SerialName("auth_session_client_secret")
-    val authSessionClientSecret: String? = null,
     @SerialName("publishable_key")
     val publishableKey: String? = null
 ) : StripeModel {

@@ -36,7 +36,6 @@ class ConsumersApiServiceImplTest {
     @Test
     fun `lookupConsumerSession() sends all parameters`() = runTest {
         val email = "email@example.com"
-        val cookie = "cookie1"
         val requestSurface = "android_payment_element"
 
         networkRule.enqueue(
@@ -45,7 +44,6 @@ class ConsumersApiServiceImplTest {
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
-            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
             bodyPart("request_surface", requestSurface),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
@@ -53,14 +51,12 @@ class ConsumersApiServiceImplTest {
 
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
-            authSessionCookie = cookie,
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS
         )
 
         assertThat(lookup.exists).isTrue()
         assertThat(lookup.errorMessage).isNull()
-        assertThat(lookup.consumerSession?.authSessionClientSecret).isNull()
         assertThat(lookup.consumerSession?.publishableKey).isNull()
         assertThat(lookup.consumerSession?.verificationSessions).isEmpty()
         assertThat(lookup.consumerSession?.emailAddress).isEqualTo(email)
@@ -71,7 +67,6 @@ class ConsumersApiServiceImplTest {
     @Test
     fun `lookupConsumerSession() returns error message with invalid json`() = runTest {
         val email = "email@example.com"
-        val cookie = "cookie1"
         val requestSurface = "android_payment_element"
 
         networkRule.enqueue(
@@ -85,7 +80,6 @@ class ConsumersApiServiceImplTest {
         assertFailsWith<APIException> {
             consumersApiService.lookupConsumerSession(
                 email = email,
-                authSessionCookie = cookie,
                 requestSurface = requestSurface,
                 requestOptions = DEFAULT_OPTIONS
             )
@@ -96,7 +90,6 @@ class ConsumersApiServiceImplTest {
     fun `startConsumerVerification() sends all parameters`() = runTest {
         val clientSecret = "secret"
         val locale = Locale.US
-        val cookie = "cookie2"
 
         networkRule.enqueue(
             method("POST"),
@@ -107,7 +100,6 @@ class ConsumersApiServiceImplTest {
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
             bodyPart("type", "SMS"),
             bodyPart("locale", locale.toLanguageTag()),
-            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
         }
@@ -115,7 +107,6 @@ class ConsumersApiServiceImplTest {
         val consumerSession = consumersApiService.startConsumerVerification(
             consumerSessionClientSecret = clientSecret,
             locale = locale,
-            authSessionCookie = cookie,
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
             customEmailType = null,
@@ -136,7 +127,6 @@ class ConsumersApiServiceImplTest {
     fun `confirmConsumerVerification() sends all parameters`() = runTest {
         val clientSecret = "secret"
         val verificationCode = "1234"
-        val cookie = "cookie2"
 
         networkRule.enqueue(
             method("POST"),
@@ -147,7 +137,6 @@ class ConsumersApiServiceImplTest {
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
             bodyPart("type", "SMS"),
             bodyPart("code", verificationCode),
-            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString())
         }
@@ -155,7 +144,6 @@ class ConsumersApiServiceImplTest {
         val consumerSession = consumersApiService.confirmConsumerVerification(
             consumerSessionClientSecret = clientSecret,
             verificationCode = verificationCode,
-            authSessionCookie = cookie,
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
             requestOptions = DEFAULT_OPTIONS

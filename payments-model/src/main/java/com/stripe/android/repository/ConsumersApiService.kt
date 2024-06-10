@@ -19,8 +19,7 @@ import java.util.Locale
 interface ConsumersApiService {
 
     suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
+        email: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
@@ -28,7 +27,6 @@ interface ConsumersApiService {
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
         customEmailType: CustomEmailType?,
@@ -39,7 +37,6 @@ interface ConsumersApiService {
     suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
         requestOptions: ApiRequest.Options
@@ -66,8 +63,7 @@ class ConsumersApiServiceImpl(
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
      */
     override suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
+        email: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup {
@@ -78,20 +74,8 @@ class ConsumersApiServiceImpl(
                 consumerSessionLookupUrl,
                 requestOptions,
                 mapOf(
-                    "request_surface" to requestSurface
-                ).plus(
-                    email?.let {
-                        mapOf(
-                            "email_address" to it.lowercase()
-                        )
-                    } ?: emptyMap()
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
+                    "request_surface" to requestSurface,
+                    "email_address" to email.lowercase()
                 )
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -104,7 +88,6 @@ class ConsumersApiServiceImpl(
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
         customEmailType: CustomEmailType?,
@@ -126,16 +109,7 @@ class ConsumersApiServiceImpl(
                     "custom_email_type" to customEmailType?.value,
                     "connections_merchant_name" to connectionsMerchantName,
                     "locale" to locale.toLanguageTag()
-                )
-                    .filterValues { it != null }
-                    .plus(
-                        authSessionCookie?.let {
-                            mapOf(
-                                "cookies" to
-                                    mapOf("verification_session_client_secrets" to listOf(it))
-                            )
-                        } ?: emptyMap()
-                    )
+                ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )
@@ -147,7 +121,6 @@ class ConsumersApiServiceImpl(
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
         requestOptions: ApiRequest.Options
@@ -164,13 +137,6 @@ class ConsumersApiServiceImpl(
                 ),
                 "type" to type.value,
                 "code" to verificationCode
-            ).plus(
-                authSessionCookie?.let {
-                    mapOf(
-                        "cookies" to
-                            mapOf("verification_session_client_secrets" to listOf(it))
-                    )
-                } ?: emptyMap()
             )
         ),
         responseJsonParser = ConsumerSessionJsonParser()
