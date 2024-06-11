@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -154,6 +155,7 @@ class ManageScreenUITest {
             ManageScreenInteractor.ViewAction.DeletePaymentMethod(displayableSavedPaymentMethods[0])
         )
         assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
     @Test
@@ -170,6 +172,7 @@ class ManageScreenUITest {
         composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
 
         assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
     private fun getDeleteIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
