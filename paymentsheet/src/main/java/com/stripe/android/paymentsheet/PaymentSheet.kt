@@ -183,7 +183,7 @@ class PaymentSheet internal constructor(
     /**
      * Builder to add optional callbacks to [PaymentSheet].
      *
-     * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+     * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
     class Builder(internal val resultCallback: PaymentSheetResultCallback) {
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
@@ -195,14 +195,14 @@ class PaymentSheet internal constructor(
          * @param handler Called when a user confirms payment for an external payment method.
          */
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
-            this.externalPaymentMethodConfirmHandler = handler
+            externalPaymentMethodConfirmHandler = handler
         }
 
         /**
-         * @param createIntentCallback Called when the customer confirms the payment or setup.
+         * @param intentCallback Called when the customer confirms the payment or setup.
          */
-        fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
-            this.createIntentCallback = createIntentCallback
+        fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
+            createIntentCallback = intentCallback
         }
 
         /**
@@ -212,7 +212,7 @@ class PaymentSheet internal constructor(
          */
         fun build(activity: ComponentActivity): PaymentSheet {
             initializeCallbacks()
-            return PaymentSheet(DefaultPaymentSheetLauncher(activity, this.resultCallback))
+            return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
         }
 
         /**
@@ -222,7 +222,7 @@ class PaymentSheet internal constructor(
          */
         fun build(fragment: Fragment): PaymentSheet {
             initializeCallbacks()
-            return PaymentSheet(DefaultPaymentSheetLauncher(fragment, this.resultCallback))
+            return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
         }
 
         /**
@@ -233,10 +233,10 @@ class PaymentSheet internal constructor(
         fun build(): PaymentSheet = rememberPaymentSheet(this)
 
         private fun initializeCallbacks() {
-            this.createIntentCallback?.let {
+            createIntentCallback?.let {
                 IntentConfirmationInterceptor.createIntentCallback = it
             }
-            this.externalPaymentMethodConfirmHandler?.let {
+            externalPaymentMethodConfirmHandler?.let {
                 ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
             }
         }
@@ -1705,14 +1705,14 @@ class PaymentSheet internal constructor(
              * external payment method.
              */
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
-                this.externalPaymentMethodConfirmHandler = handler
+                externalPaymentMethodConfirmHandler = handler
             }
 
             /**
-             * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
+             * @param intentCallback If specified, called when the customer confirms the payment or setup.
              */
-            fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
-                this.createIntentCallback = createIntentCallback
+            fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
+                createIntentCallback = intentCallback
             }
 
             /**
@@ -1745,10 +1745,10 @@ class PaymentSheet internal constructor(
             fun build(): FlowController = rememberPaymentSheetFlowController(this)
 
             private fun initializeCallbacks() {
-                this.createIntentCallback?.let {
+                createIntentCallback?.let {
                     IntentConfirmationInterceptor.createIntentCallback = it
                 }
-                this.externalPaymentMethodConfirmHandler?.let {
+                externalPaymentMethodConfirmHandler?.let {
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
                 }
             }
