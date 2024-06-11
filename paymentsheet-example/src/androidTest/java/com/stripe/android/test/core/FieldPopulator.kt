@@ -245,10 +245,20 @@ internal class FieldPopulator(
     }
 
     fun populateBacs() {
-        selectors.getBacsAccountNumber()
-            .performTextInput(values.bacsAccountNumber)
         selectors.getBacsSortCode()
+            .performScrollTo()
             .performTextInput(values.bacsSortCode)
+
+        selectors.composeTestRule.waitForIdle()
+
+        selectors.getBacsAccountNumber()
+            .performScrollTo()
+            .performTextInput(values.bacsAccountNumber)
+
+        selectors.composeTestRule.waitForIdle()
+
+        Espresso.closeSoftKeyboard()
+        Espresso.onIdle()
 
         selectors.getBacsConfirmed()
             .performScrollTo()
