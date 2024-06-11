@@ -112,8 +112,8 @@ private fun DeleteIcon(paymentMethod: DisplayableSavedPaymentMethod, interactor:
             openRemoveDialog.value = false
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod))
         }, onDismissListener = {
-            openRemoveDialog.value = false
-        })
+                openRemoveDialog.value = false
+            })
     }
 }
 
