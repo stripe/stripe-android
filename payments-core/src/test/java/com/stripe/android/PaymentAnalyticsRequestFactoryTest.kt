@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.HEADER_X_STRIPE_USER_AGENT
@@ -34,6 +35,44 @@ class PaymentAnalyticsRequestFactoryTest {
         context,
         API_KEY
     )
+
+    private object TestEvent : AnalyticsEvent {
+        override val eventName: String = "TestEvent"
+    }
+
+    @Test
+    fun `createRequest creates params with default product usage tokens`() {
+        val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKey = API_KEY,
+            defaultProductUsageTokens = setOf("ProductOne")
+        )
+
+        val params = analyticsRequestFactory.createRequest(
+            TestEvent,
+            mapOf("attributeOne" to "one")
+        ).params
+
+        assertThat(params).containsEntry("attributeOne", "one")
+        assertThat(params).containsEntry("product_usage", listOf("ProductOne"))
+    }
+
+    @Test
+    fun `createRequest does not override 'product_usage' params from additional event params`() {
+        val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKey = API_KEY,
+            defaultProductUsageTokens = setOf("ProductOne")
+        )
+
+        val params = analyticsRequestFactory.createRequest(
+            TestEvent,
+            mapOf("attributeOne" to "one", "product_usage" to listOf("ProductTwo")),
+        ).params
+
+        assertThat(params).containsEntry("attributeOne", "one")
+        assertThat(params).containsEntry("product_usage", listOf("ProductTwo"))
+    }
 
     @Test
     fun getTokenCreationParams_withValidInput_createsCorrectMap() {
