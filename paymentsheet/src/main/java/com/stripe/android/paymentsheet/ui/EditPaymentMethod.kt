@@ -125,7 +125,7 @@ internal fun EditPaymentMethodUi(
         }
 
         PrimaryButton(
-            label = stringResource(id = StripeR.string.stripe_title_update_card),
+            label = stringResource(id = StripeR.string.stripe_update),
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
             isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
