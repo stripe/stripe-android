@@ -306,11 +306,6 @@ private fun SavedPaymentMethodTab(
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(context.resources) ?: return
 
-    val removeTitle = stringResource(
-        R.string.stripe_paymentsheet_remove_pm,
-        paymentMethod.displayName,
-    )
-
     Box(
         modifier = Modifier.semantics {
             testTag = SAVED_PAYMENT_OPTION_TEST_TAG
@@ -330,8 +325,8 @@ private fun SavedPaymentMethodTab(
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
             labelIcon = labelIcon,
             labelText = labelText,
-            removePmDialogTitle = removeTitle,
-            description = paymentMethod.getDescription(context.resources),
+            paymentMethod = paymentMethod.displayableSavedPaymentMethod,
+            description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
             onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },

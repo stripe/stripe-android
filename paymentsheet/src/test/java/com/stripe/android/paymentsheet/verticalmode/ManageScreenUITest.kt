@@ -12,6 +12,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -133,6 +136,43 @@ class ManageScreenUITest {
         getEditIcon(displayableSavedPaymentMethods[0]).assertDoesNotExist()
         getEditIcon(displayableSavedPaymentMethods[1]).assertDoesNotExist()
         getEditIcon(displayableSavedPaymentMethods[2]).assertExists()
+    }
+
+    @Test
+    fun clickingDeleteIcon_displaysDialog_deletesOnConfirm() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = true,
+        )
+    ) {
+        getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
+        getDeleteIcon(displayableSavedPaymentMethods[0]).performClick()
+
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
+
+        viewActionRecorder.consume(
+            ManageScreenInteractor.ViewAction.DeletePaymentMethod(displayableSavedPaymentMethods[0])
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingDeleteIcon_displaysDialog_doesNothingOnDismiss() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = true,
+        )
+    ) {
+        getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
+        getDeleteIcon(displayableSavedPaymentMethods[0]).performClick()
+
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
+
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
     private fun getDeleteIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {

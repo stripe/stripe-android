@@ -24,6 +24,7 @@ internal interface ManageScreenInteractor {
 
     sealed class ViewAction {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
+        data class DeletePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
     }
 }
 
@@ -47,6 +48,8 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
         when (viewAction) {
             is ManageScreenInteractor.ViewAction.SelectPaymentMethod ->
                 handlePaymentMethodSelected(viewAction.paymentMethod)
+            is ManageScreenInteractor.ViewAction.DeletePaymentMethod ->
+                viewModel.removePaymentMethod(paymentMethod = viewAction.paymentMethod.paymentMethod)
         }
     }
 
