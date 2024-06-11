@@ -104,7 +104,7 @@ private fun DeleteIcon(paymentMethod: DisplayableSavedPaymentMethod, interactor:
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_DELETE_ICON}_$paymentMethodId"),
         onClick = {
             openRemoveDialog.value = true
-        }
+        },
     )
 
     if (openRemoveDialog.value) {
@@ -112,8 +112,8 @@ private fun DeleteIcon(paymentMethod: DisplayableSavedPaymentMethod, interactor:
             openRemoveDialog.value = false
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod))
         }, onDismissListener = {
-                openRemoveDialog.value = false
-            })
+            openRemoveDialog.value = false
+        })
     }
 }
 
@@ -125,7 +125,7 @@ private fun EditIcon(paymentMethod: DisplayableSavedPaymentMethod) {
         backgroundColor = Color.Gray,
         icon = Icons.Filled.Edit,
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
-        onClick = {}
+        onClick = {},
     )
 }
 
