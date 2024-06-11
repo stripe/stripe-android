@@ -14,7 +14,10 @@ class CollectBankAccountForACHLauncherTest {
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
-    private val launcher = CollectBankAccountForACHLauncher(mockHostActivityLauncher)
+    private val launcher = CollectBankAccountForACHLauncher(
+        mockHostActivityLauncher,
+        hostedSurface = null
+    )
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
@@ -31,7 +34,8 @@ class CollectBankAccountForACHLauncherTest {
                 stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = true,
+                hostedSurface = HOSTED_SURFACE
             )
         )
     }
@@ -51,7 +55,8 @@ class CollectBankAccountForACHLauncherTest {
                 stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = true,
+                hostedSurface = HOSTED_SURFACE
             )
         )
     }
@@ -78,7 +83,8 @@ class CollectBankAccountForACHLauncherTest {
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
-                currency = "usd"
+                currency = "usd",
+                hostedSurface = HOSTED_SURFACE
             )
         )
     }
@@ -102,6 +108,7 @@ class CollectBankAccountForACHLauncherTest {
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
+                hostedSurface = HOSTED_SURFACE
             )
         )
     }
@@ -110,6 +117,7 @@ class CollectBankAccountForACHLauncherTest {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"
         private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
+        private const val HOSTED_SURFACE = "payment_element"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null
