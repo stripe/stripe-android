@@ -60,7 +60,11 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                         isEditing = state.isEditing,
                         isModifiable = it.isModifiable(),
                         paymentMethod = it,
-                        interactor = interactor,
+                        deletePaymentMethod = { paymentMethod ->
+                            interactor.handleViewAction(
+                                ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod)
+                            )
+                        },
                     )
                 },
                 onClick = {
@@ -79,22 +83,25 @@ private fun TrailingContent(
     isEditing: Boolean,
     isModifiable: Boolean,
     paymentMethod: DisplayableSavedPaymentMethod,
-    interactor: ManageScreenInteractor,
+    deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             EditIcon(paymentMethod)
-            DeleteIcon(paymentMethod, interactor)
+            DeleteIcon(paymentMethod, deletePaymentMethod)
         }
     } else if (isEditing) {
-        DeleteIcon(paymentMethod, interactor)
+        DeleteIcon(paymentMethod, deletePaymentMethod)
     } else if (isSelected) {
         SelectedBadge()
     }
 }
 
 @Composable
-private fun DeleteIcon(paymentMethod: DisplayableSavedPaymentMethod, interactor: ManageScreenInteractor) {
+private fun DeleteIcon(
+    paymentMethod: DisplayableSavedPaymentMethod,
+    deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit
+) {
     val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
     val paymentMethodId = paymentMethod.paymentMethod.id
 
@@ -110,7 +117,7 @@ private fun DeleteIcon(paymentMethod: DisplayableSavedPaymentMethod, interactor:
     if (openRemoveDialog.value) {
         RemovePaymentMethodDialogUI(paymentMethod = paymentMethod, onConfirmListener = {
             openRemoveDialog.value = false
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod))
+            deletePaymentMethod(paymentMethod)
         }, onDismissListener = {
                 openRemoveDialog.value = false
             })
