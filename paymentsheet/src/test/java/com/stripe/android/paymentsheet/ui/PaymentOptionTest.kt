@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import org.junit.Rule
@@ -55,6 +57,7 @@ class PaymentOptionTest {
                 viewWidth = 100.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.Removable,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 description = label,

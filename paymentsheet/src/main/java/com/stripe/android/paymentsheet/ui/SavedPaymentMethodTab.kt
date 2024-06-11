@@ -35,18 +35,16 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.R as StripeR
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
@@ -74,7 +72,7 @@ internal fun SavedPaymentMethodTab(
     iconTint: Color? = null,
     @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
-    removePmDialogTitle: String = "",
+    paymentMethod: DisplayableSavedPaymentMethod? = null,
     description: String,
     shouldOpenRemoveDialog: Boolean = false,
     onRemoveListener: (() -> Unit)? = null,
@@ -129,13 +127,10 @@ internal fun SavedPaymentMethodTab(
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )
 
-    if (openRemoveDialog.value && editState == PaymentOptionEditState.Removable && onRemoveListener != null) {
-        SimpleDialogElementUI(
-            titleText = removePmDialogTitle,
-            messageText = description,
-            confirmText = stringResource(StripeR.string.stripe_remove),
-            dismissText = stringResource(StripeR.string.stripe_cancel),
-            destructive = true,
+    val displayRemoveDialog = openRemoveDialog.value && editState == PaymentOptionEditState.Removable
+    if (displayRemoveDialog && onRemoveListener != null && paymentMethod != null) {
+        RemovePaymentMethodDialogUI(
+            paymentMethod = paymentMethod,
             onConfirmListener = {
                 openRemoveDialog.value = false
                 onRemoveListener()

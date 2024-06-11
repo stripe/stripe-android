@@ -15,6 +15,9 @@ import com.stripe.android.uicore.elements.H6Text
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_DIALOG_CONFIRM_BUTTON = "simple_dialog_confirm_button"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_DIALOG_DISMISS_BUTTON = "simple_dialog_dismiss_button"
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
@@ -58,6 +61,7 @@ fun SimpleDialogElementUI(
             },
             dismissButton = {
                 TextButton(
+                    modifier = Modifier.testTag(TEST_TAG_DIALOG_DISMISS_BUTTON),
                     onClick = {
                         onDismissListener()
                     }
