@@ -131,14 +131,14 @@ class HeaderTextFactoryTest {
     fun `Shows correct header for manage saved PMs screen when editing`() {
         val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = true, isEditing = true)
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods)
     }
 
     @Test
     fun `Shows correct header for manage saved PMs screen when editing - FlowController`() {
         val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = false, isEditing = true)
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods)
     }
 
     private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean, isEditing: Boolean): Int? {
