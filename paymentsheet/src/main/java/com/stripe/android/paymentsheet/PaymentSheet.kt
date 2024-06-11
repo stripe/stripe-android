@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -177,6 +178,68 @@ class PaymentSheet internal constructor(
     ) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Builder to add optional callbacks to [PaymentSheet].
+     *
+     * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+     */
+    class Builder(internal val resultCallback: PaymentSheetResultCallback) {
+        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+            private set
+        internal var createIntentCallback: CreateIntentCallback? = null
+            private set
+
+        /**
+         * @param handler Called when a user confirms payment for an external payment method.
+         */
+        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+            this.externalPaymentMethodConfirmHandler = handler
+        }
+
+        /**
+         * @param createIntentCallback Called when the customer confirms the payment or setup.
+         */
+        fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
+            this.createIntentCallback = createIntentCallback
+        }
+
+        /**
+         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set
+         *
+         * @param activity The Activity that is presenting [PaymentSheet].
+         */
+        fun build(activity: ComponentActivity): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(activity, this.resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         */
+        fun build(fragment: Fragment): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(fragment, this.resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet] composable attached to the [Activity] that owns the calling context
+         * and initializes callback handlers if respective callbacks are set
+         */
+        @Composable
+        fun build(): PaymentSheet = rememberPaymentSheet(this)
+
+        private fun initializeCallbacks() {
+            this.createIntentCallback?.let {
+                IntentConfirmationInterceptor.createIntentCallback = it
+            }
+            this.externalPaymentMethodConfirmHandler?.let {
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+            }
+        }
     }
 
     /**
@@ -1621,6 +1684,75 @@ class PaymentSheet internal constructor(
          * Complete the payment or setup.
          */
         fun confirm()
+
+        /**
+         * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
+         *
+         * @param resultCallback Called when a [PaymentSheetResult] is available.
+         * @param paymentOptionCallback Called when the customer's desired payment method changes.
+         */
+        class Builder(
+            internal val resultCallback: PaymentSheetResultCallback,
+            internal val paymentOptionCallback: PaymentOptionCallback
+        ) {
+            internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+                private set
+            internal var createIntentCallback: CreateIntentCallback? = null
+                private set
+
+            /**
+             * @param handler Called when a user confirms payment for an
+             * external payment method.
+             */
+            fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+                this.externalPaymentMethodConfirmHandler = handler
+            }
+
+            /**
+             * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
+             */
+            fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
+                this.createIntentCallback = createIntentCallback
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
+             * if respective callbacks are set
+             *
+             * @param activity The Activity that is presenting [PaymentSheet.FlowController].
+             */
+            fun build(activity: ComponentActivity): FlowController {
+                initializeCallbacks()
+                return FlowControllerFactory(activity, paymentOptionCallback, resultCallback).create()
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
+             * if respective callbacks are set
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
+             */
+            fun build(fragment: Fragment): FlowController {
+                initializeCallbacks()
+                return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController] composable an initializes callback handlers
+             * if respective callbacks are set
+             */
+            @Composable
+            fun build(): FlowController = rememberPaymentSheetFlowController(this)
+
+            private fun initializeCallbacks() {
+                this.createIntentCallback?.let {
+                    IntentConfirmationInterceptor.createIntentCallback = it
+                }
+                this.externalPaymentMethodConfirmHandler?.let {
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+                }
+            }
+        }
 
         sealed class Result {
             object Success : Result()

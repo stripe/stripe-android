@@ -84,6 +84,25 @@ fun rememberPaymentSheetFlowController(
     )
 }
 
+/**
+ * Creates a [PaymentSheet.FlowController] that is remembered across compositions and initializes optional
+ * callbacks if set
+ *
+ * @param builder which contains required [PaymentOptionCallback] and [PaymentSheetResultCallback] as well as
+ * other optional callbacks
+ */
+@Composable
+internal fun rememberPaymentSheetFlowController(
+    builder: PaymentSheet.FlowController.Builder
+): PaymentSheet.FlowController {
+    return internalRememberPaymentSheetFlowController(
+        createIntentCallback = builder.createIntentCallback,
+        externalPaymentMethodConfirmHandler = builder.externalPaymentMethodConfirmHandler,
+        paymentOptionCallback = builder.paymentOptionCallback,
+        paymentResultCallback = builder.resultCallback
+    )
+}
+
 @Composable
 private fun internalRememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback?,
