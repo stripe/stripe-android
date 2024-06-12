@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -20,6 +21,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -65,8 +67,11 @@ internal fun PaymentMethodVerticalLayoutUI(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        val textStyle = MaterialTheme.typography.subtitle1
+        val textColor = MaterialTheme.stripeColors.onComponent
+
         if (displayedSavedPaymentMethod != null) {
-            Text(stringResource(id = R.string.stripe_paymentsheet_saved))
+            Text(stringResource(id = R.string.stripe_paymentsheet_saved), style = textStyle, color = textColor)
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 resources = LocalContext.current.resources,
@@ -76,7 +81,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                     ViewMoreButton(onViewMorePaymentMethods = onViewMorePaymentMethods)
                 }
             )
-            Text(stringResource(id = R.string.stripe_paymentsheet_new_pm))
+            Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
 
         NewPaymentMethodVerticalLayoutUI(

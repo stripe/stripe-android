@@ -106,6 +106,16 @@ internal class PaymentMethodVerticalLayoutUITest {
             TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
         ).assertExists()
             .onChildren().assertAny(isSelected())
+
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
     }
 
     @Test

@@ -157,8 +157,10 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    internal val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> =
-        savedStateHandle.getStateFlow(SAVED_PM_SELECTION, null)
+    internal val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
+        SAVED_PM_SELECTION,
+        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+    )
 
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
