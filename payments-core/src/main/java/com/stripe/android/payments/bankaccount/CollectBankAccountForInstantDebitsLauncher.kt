@@ -3,7 +3,6 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
@@ -85,13 +84,14 @@ class CollectBankAccountForInstantDebitsLauncher(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
+            hostedSurface: String,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForInstantDebitsLauncher(
                 // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
-                //  ensure the correct hostedSurface is set.
-                hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+                // use a separate method and ensure the correct hostedSurface is set.
+                hostedSurface = hostedSurface,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract()

@@ -60,7 +60,11 @@ interface CollectBankAccountLauncher {
 
     companion object {
 
-        internal const val HOSTED_SURFACE_PAYMENT_ELEMENT = "payment_element"
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val HOSTED_SURFACE_PAYMENT_ELEMENT = "payment_element"
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val HOSTED_SURFACE_CUSTOMER_SHEET = "customer_sheet"
+
         private const val LAUNCHER_KEY = "CollectBankAccountLauncher"
 
         /**
@@ -106,11 +110,12 @@ interface CollectBankAccountLauncher {
         // for deferred payment flows. Updating that implies a breaking change.
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
+            hostedSurface: String,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
-                hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+                hostedSurface = hostedSurface,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),
