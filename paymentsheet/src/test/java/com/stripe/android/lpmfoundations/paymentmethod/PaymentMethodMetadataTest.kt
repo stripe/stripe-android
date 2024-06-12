@@ -11,6 +11,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
@@ -503,6 +504,43 @@ internal class PaymentMethodMetadataTest {
         val addressIdentifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element doesn't contain country.
         assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val headerInformation = metadata.formHeaderInformationForCode(code = "card")!!
+        assertThat(headerInformation.displayName).isEqualTo(resolvableString(R.string.stripe_paymentsheet_add_new_card))
+        assertThat(headerInformation.shouldShowIcon).isFalse()
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "bancontact")
+            ),
+        )
+        val headerInformation = metadata.formHeaderInformationForCode(code = "bancontact")!!
+        assertThat(headerInformation.displayName)
+            .isEqualTo(resolvableString(R.string.stripe_paymentsheet_payment_method_bancontact))
+        assertThat(headerInformation.shouldShowIcon).isTrue()
+        assertThat(headerInformation.iconResource).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is constructed correctly for external payment method`() = runTest {
+        val paypalSpec = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+        val metadata = PaymentMethodMetadataFactory.create(externalPaymentMethodSpecs = listOf(paypalSpec))
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = paypalSpec.type,
+        )!!
+        assertThat(headerInformation.displayName).isEqualTo(resolvableString(paypalSpec.label))
+        assertThat(headerInformation.shouldShowIcon).isTrue()
+        assertThat(headerInformation.iconResource).isEqualTo(0)
+        assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
+        assertThat(headerInformation.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
+        assertThat(headerInformation.iconRequiresTinting).isFalse()
     }
 
     @Test

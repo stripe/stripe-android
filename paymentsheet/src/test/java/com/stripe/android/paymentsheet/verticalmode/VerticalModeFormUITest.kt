@@ -2,13 +2,19 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.FormPage
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -60,6 +66,20 @@ internal class VerticalModeFormUITest {
         assertThat(viewAction.formValues).isNotNull()
     }
 
+    @Test
+    fun testCardShowsHeader() = runScenario(createCardState()) {
+        formPage.headerIcon.assertDoesNotExist()
+        formPage.title.assertExists()
+        formPage.title.assert(hasText("Add new card"))
+    }
+
+    @Test
+    fun testLpmShowsHeader() = runScenario(createKlarnaState()) {
+        formPage.headerIcon.assertExists()
+        formPage.title.assertExists()
+        formPage.title.assert(hasText("Klarna"))
+    }
+
     private fun runScenario(
         initialState: VerticalModeFormInteractor.State,
         block: Scenario.() -> Unit
@@ -95,6 +115,8 @@ internal class VerticalModeFormUITest {
     }
 
     private fun createCardState(): VerticalModeFormInteractor.State {
+        val headerInformation =
+            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation()
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
             isProcessing = false,
@@ -111,10 +133,19 @@ internal class VerticalModeFormUITest {
             formElements = CardDefinition.formElements(),
             linkSignupMode = null,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            headerInformation = headerInformation,
         )
     }
 
     private fun createCashAppPayState(): VerticalModeFormInteractor.State {
+        val headerInformation = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf(
+                    "card",
+                    "cashapp"
+                )
+            )
+        ).formHeaderInformationForCode("cashapp")
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.CashAppPay.code,
             isProcessing = false,
@@ -131,6 +162,37 @@ internal class VerticalModeFormUITest {
             formElements = emptyList(),
             linkSignupMode = null,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            headerInformation = headerInformation,
+        )
+    }
+
+    private fun createKlarnaState(): VerticalModeFormInteractor.State {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf(
+                    "card",
+                    "klarna"
+                )
+            )
+        )
+        val headerInformation = paymentMethodMetadata.formHeaderInformationForCode("klarna")
+        return VerticalModeFormInteractor.State(
+            selectedPaymentMethodCode = PaymentMethod.Type.Klarna.code,
+            isProcessing = false,
+            usBankAccountFormArguments = mock(),
+            formArguments = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Klarna.code,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                merchantName = "Example, Inc.",
+                amount = Amount(1000, "USD"),
+                billingDetails = null,
+                shippingDetails = null,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            ),
+            formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
+            linkSignupMode = null,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            headerInformation = headerInformation,
         )
     }
 
