@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -192,7 +191,8 @@ class PaymentSheet internal constructor(
             private set
 
         /**
-         * @param handler Called when a user confirms payment for an external payment method.
+         * @param handler Called when a user confirms payment for an external payment method. Use with
+         * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
          */
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
             externalPaymentMethodConfirmHandler = handler
@@ -200,13 +200,14 @@ class PaymentSheet internal constructor(
 
         /**
          * @param intentCallback Called when the customer confirms the payment or setup.
+         * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
          */
         fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
             createIntentCallback = intentCallback
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set
+         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
          *
          * @param activity The Activity that is presenting [PaymentSheet].
          */
@@ -216,7 +217,7 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set
+         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
          *
          * @param fragment the Fragment that is presenting the payment sheet.
          */
@@ -224,13 +225,6 @@ class PaymentSheet internal constructor(
             initializeCallbacks()
             return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
         }
-
-        /**
-         * Returns a [PaymentSheet] composable attached to the [Activity] that owns the calling context
-         * and initializes callback handlers if respective callbacks are set
-         */
-        @Composable
-        fun build(): PaymentSheet = rememberPaymentSheet(this)
 
         private fun initializeCallbacks() {
             createIntentCallback?.let {
@@ -1701,15 +1695,16 @@ class PaymentSheet internal constructor(
                 private set
 
             /**
-             * @param handler Called when a user confirms payment for an
-             * external payment method.
+             * @param handler Called when a user confirms payment for an external payment method. Use with
+             * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
              */
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
                 externalPaymentMethodConfirmHandler = handler
             }
 
             /**
-             * @param intentCallback If specified, called when the customer confirms the payment or setup.
+             * @param intentCallback If specified, called when the customer confirms the payment or setup. Use with
+             * [configureWithIntentConfiguration] for deferred flow.
              */
             fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
                 createIntentCallback = intentCallback
@@ -1717,7 +1712,7 @@ class PaymentSheet internal constructor(
 
             /**
              * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set
+             * if respective callbacks are set.
              *
              * @param activity The Activity that is presenting [PaymentSheet.FlowController].
              */
@@ -1728,7 +1723,7 @@ class PaymentSheet internal constructor(
 
             /**
              * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set
+             * if respective callbacks are set.
              *
              * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
              */
@@ -1736,13 +1731,6 @@ class PaymentSheet internal constructor(
                 initializeCallbacks()
                 return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
             }
-
-            /**
-             * Returns a [PaymentSheet.FlowController] composable an initializes callback handlers
-             * if respective callbacks are set
-             */
-            @Composable
-            fun build(): FlowController = rememberPaymentSheetFlowController(this)
 
             private fun initializeCallbacks() {
                 createIntentCallback?.let {

@@ -85,14 +85,13 @@ fun rememberPaymentSheetFlowController(
 }
 
 /**
- * Creates a [PaymentSheet.FlowController] that is remembered across compositions and initializes optional
- * callbacks if set
+ * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
  *
  * @param builder which contains required [PaymentOptionCallback] and [PaymentSheetResultCallback] as well as
- * other optional callbacks
+ * other optional callbacks.
  */
 @Composable
-internal fun rememberPaymentSheetFlowController(
+fun rememberPaymentSheetFlowController(
     builder: PaymentSheet.FlowController.Builder
 ): PaymentSheet.FlowController {
     return internalRememberPaymentSheetFlowController(

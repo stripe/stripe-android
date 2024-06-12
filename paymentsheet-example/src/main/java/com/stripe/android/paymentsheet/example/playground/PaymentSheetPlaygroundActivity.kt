@@ -62,6 +62,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.rememberPaymentSheet
+import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -89,15 +91,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         super.onCreate(savedInstanceState)
 
         setContent {
-            val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
-                .externalPaymentMethodConfirmHandler(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .build()
-            val flowController = PaymentSheet.FlowController
-                .Builder(viewModel::onPaymentSheetResult, viewModel::onPaymentOptionSelected)
-                .externalPaymentMethodConfirmHandler(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .build()
+            val paymentSheet = rememberPaymentSheet(
+                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                    .externalPaymentMethodConfirmHandler(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+            )
+            val flowController = rememberPaymentSheetFlowController(
+                PaymentSheet.FlowController.Builder(viewModel::onPaymentSheetResult, viewModel::onPaymentOptionSelected)
+                    .externalPaymentMethodConfirmHandler(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+            )
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
