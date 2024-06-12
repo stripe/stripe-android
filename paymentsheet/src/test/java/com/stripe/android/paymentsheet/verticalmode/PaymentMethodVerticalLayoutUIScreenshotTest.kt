@@ -14,7 +14,7 @@ import org.mockito.kotlin.mock
 
 internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule(
+    val paparazziRule = PaparazziRule()
         listOf(SystemAppearance.LightTheme),
         listOf(PaymentSheetAppearance.DefaultAppearance),
         listOf(FontSize.LargeFont),
