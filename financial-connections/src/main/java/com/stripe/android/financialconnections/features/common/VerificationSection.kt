@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.LocalTestMode
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -99,7 +98,7 @@ private fun VerificationErrorText(
             textAlign = TextAlign.Center
         ),
         onClickableTextClick = {
-            uriHandler.openUri(FinancialConnectionsUrlResolver.linkVerificationSupportUrl)
+            uriHandler.openUri(error.supportUrl)
         },
         annotationStyles = mapOf(
             StringAnnotation.CLICKABLE to typography.labelMedium.copy(
