@@ -117,7 +117,6 @@ class CollectBankAccountForACHLauncherTest {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"
         private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
-        private const val HOSTED_SURFACE = "payment_element"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null
