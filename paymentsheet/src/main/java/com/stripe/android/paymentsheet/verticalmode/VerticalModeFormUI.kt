@@ -42,12 +42,13 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
 
     Column {
         val headerInformation = state.headerInformation
+        val enabled = !state.isProcessing
         if (headerInformation != null) {
-            VerticalModeFormHeaderUI(isEnabled = !state.isProcessing, formHeaderInformation = headerInformation)
+            VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }
 
         FormElement(
-            enabled = !state.isProcessing,
+            enabled = enabled,
             selectedPaymentMethodCode = state.selectedPaymentMethodCode,
             formElements = state.formElements,
             formArguments = state.formArguments,
@@ -69,7 +70,7 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
         LinkElement(
             linkConfigurationCoordinator = state.linkConfigurationCoordinator,
             linkSignupMode = state.linkSignupMode,
-            enabled = !state.isProcessing,
+            enabled = enabled,
             horizontalPadding = horizontalPadding,
             onLinkSignupStateChanged = {
                 interactor.handleViewAction(VerticalModeFormInteractor.ViewAction.LinkSignupStateChanged(it))
