@@ -62,6 +62,7 @@ interface CollectBankAccountLauncher {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         const val HOSTED_SURFACE_PAYMENT_ELEMENT = "payment_element"
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         const val HOSTED_SURFACE_CUSTOMER_SHEET = "customer_sheet"
 

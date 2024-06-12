@@ -35,7 +35,7 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = HOSTED_SURFACE
+                hostedSurface = null
             )
         )
     }
@@ -46,7 +46,7 @@ class CollectBankAccountForACHLauncherTest {
             publishableKey = PUBLISHABLE_KEY,
             stripeAccountId = STRIPE_ACCOUNT_ID,
             clientSecret = CLIENT_SECRET,
-            configuration = CONFIGURATION
+            configuration = CONFIGURATION,
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -56,7 +56,7 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = HOSTED_SURFACE
+                hostedSurface = null
             )
         )
     }
@@ -84,7 +84,7 @@ class CollectBankAccountForACHLauncherTest {
                 onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
                 currency = "usd",
-                hostedSurface = HOSTED_SURFACE
+                hostedSurface = null
             )
         )
     }
@@ -108,7 +108,7 @@ class CollectBankAccountForACHLauncherTest {
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
-                hostedSurface = HOSTED_SURFACE
+                hostedSurface = null
             )
         )
     }
