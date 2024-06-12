@@ -134,15 +134,24 @@ private fun NetworkingLinkSignupLoaded(
 ) {
     val scrollState = rememberScrollState()
     val phoneNumberFocusRequester = remember { FocusRequester() }
+    val emailFocusRequester = remember { FocusRequester() }
 
+    // When pane loads, focus on email field if it's empty
+    LaunchedEffect(true) {
+        if (payload.emailController.fieldValue.value.isEmpty()) {
+            emailFocusRequester.requestFocus()
+        }
+    }
+    // Everytime full form is shown, scroll to bottom and focus on phone number field (if not empty)
     LaunchedEffect(showFullForm) {
-        if (showFullForm) {
+        if (showFullForm && payload.phoneController.fieldValue.value.isEmpty()) {
             scrollState.animateScrollToBottom()
             phoneNumberFocusRequester.requestFocus()
         }
     }
 
     Layout(
+        applyImePadding = false,
         scrollState = scrollState,
         body = {
             Title(payload.content.title)
@@ -158,6 +167,7 @@ private fun NetworkingLinkSignupLoaded(
 
             EmailSection(
                 showFullForm = showFullForm,
+                focusRequester = emailFocusRequester,
                 loading = lookupAccountSync is Loading,
                 emailController = payload.emailController,
                 enabled = true,
@@ -272,7 +282,8 @@ internal fun EmailSection(
     enabled: Boolean,
     emailController: TextFieldController,
     showFullForm: Boolean,
-    loading: Boolean
+    loading: Boolean,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     var focused by remember { mutableStateOf(false) }
     StripeThemeForConnections {
@@ -284,6 +295,7 @@ internal fun EmailSection(
         ) {
             TextFieldSection(
                 modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                focusRequester = focusRequester,
                 isSelected = focused,
                 textFieldController = emailController,
                 imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
