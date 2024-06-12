@@ -29,7 +29,7 @@ internal fun StyledClickableText(
     fontFamily: FontFamily? = null,
     letterSpacing: TextUnit = TextUnit.Unspecified,
     textDecoration: TextDecoration? = null,
-    textAlign: TextAlign? = null,
+    textAlign: TextAlign = TextAlign.Unspecified,
     lineHeight: TextUnit = TextUnit.Unspecified,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
