@@ -14,7 +14,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 
@@ -29,7 +28,6 @@ internal fun StyledClickableText(
     fontFamily: FontFamily? = null,
     letterSpacing: TextUnit = TextUnit.Unspecified,
     textDecoration: TextDecoration? = null,
-    textAlign: TextAlign? = null,
     lineHeight: TextUnit = TextUnit.Unspecified,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
@@ -49,7 +47,6 @@ internal fun StyledClickableText(
             color = textColor,
             fontSize = fontSize,
             fontWeight = fontWeight,
-            textAlign = textAlign,
             lineHeight = lineHeight,
             fontFamily = fontFamily,
             textDecoration = textDecoration,
