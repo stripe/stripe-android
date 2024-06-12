@@ -65,6 +65,11 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                                 ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod)
                             )
                         },
+                        editPaymentMethod = { paymentMethod ->
+                            interactor.handleViewAction(
+                                ManageScreenInteractor.ViewAction.EditPaymentMethod(paymentMethod)
+                            )
+                        }
                     )
                 },
                 onClick = {
@@ -84,10 +89,11 @@ private fun TrailingContent(
     isModifiable: Boolean,
     paymentMethod: DisplayableSavedPaymentMethod,
     deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            EditIcon(paymentMethod)
+            EditIcon(paymentMethod, editPaymentMethod)
             DeleteIcon(paymentMethod, deletePaymentMethod)
         }
     } else if (isEditing) {
@@ -125,14 +131,17 @@ private fun DeleteIcon(
 }
 
 @Composable
-private fun EditIcon(paymentMethod: DisplayableSavedPaymentMethod) {
+private fun EditIcon(
+    paymentMethod: DisplayableSavedPaymentMethod,
+    editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+) {
     val paymentMethodId = paymentMethod.paymentMethod.id
 
     TrailingIcon(
         backgroundColor = Color.Gray,
         icon = Icons.Filled.Edit,
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
-        onClick = {},
+        onClick = { editPaymentMethod(paymentMethod) }
     )
 }
 

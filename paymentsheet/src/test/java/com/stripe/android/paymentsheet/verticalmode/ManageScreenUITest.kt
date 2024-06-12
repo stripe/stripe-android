@@ -175,6 +175,24 @@ class ManageScreenUITest {
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
+    @Test
+    fun clickingEditDialog_editsPaymentMethod() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = true,
+        )
+    ) {
+        val editablePaymentMethod = displayableSavedPaymentMethods[2]
+        getEditIcon(editablePaymentMethod).assertExists()
+        getEditIcon(editablePaymentMethod).performClick()
+
+        viewActionRecorder.consume(
+            ManageScreenInteractor.ViewAction.EditPaymentMethod(editablePaymentMethod)
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
     private fun getDeleteIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
         return composeRule.onNodeWithTag(
             "${TEST_TAG_MANAGE_SCREEN_DELETE_ICON}_${paymentMethod.paymentMethod.id}",
