@@ -86,7 +86,7 @@ internal class HeaderTextFactory(
 
     private fun getHeaderTextForManageScreen(isEditing: Boolean): Int {
         return if (isEditing) {
-            R.string.stripe_paymentsheet_manage_your_payment_methods
+            R.string.stripe_paymentsheet_manage_payment_methods
         } else {
             R.string.stripe_paymentsheet_select_payment_method
         }
