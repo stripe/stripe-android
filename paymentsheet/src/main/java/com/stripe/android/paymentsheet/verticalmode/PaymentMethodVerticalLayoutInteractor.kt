@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,6 +23,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val isProcessing: Boolean,
         val selectedPaymentMethodIndex: Int,
+        val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     )
 
     sealed interface ViewAction {
@@ -38,6 +41,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val manageScreenFactory: () -> PaymentSheetScreen,
     private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
+    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
+    private val providePaymentMethodName: (PaymentMethodCode?) -> String,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -61,6 +67,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 )
             )
         },
+        paymentMethods = viewModel.paymentMethods,
+        mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
+        providePaymentMethodName = viewModel::providePaymentMethodName,
     )
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -68,11 +77,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         processing,
         selection,
-    ) { isProcessing, selection ->
+        paymentMethods,
+        mostRecentlySelectedSavedPaymentMethod,
+    ) { isProcessing, selection, paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = supportedPaymentMethods,
             isProcessing = isProcessing,
             selectedPaymentMethodIndex = selectedPaymentMethodIndex(selection),
+            displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
+                paymentMethods,
+                paymentMethodMetadata,
+                mostRecentlySelectedSavedPaymentMethod
+            ),
         )
     }
 
@@ -84,6 +100,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         val selectedPaymentMethodCode = selection.code()
         return supportedPaymentMethods.indexOfFirst { it.code == selectedPaymentMethodCode }
+    }
+
+    private fun getDisplayedSavedPaymentMethod(
+        paymentMethods: List<PaymentMethod>?,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
+    ): DisplayableSavedPaymentMethod? {
+        val paymentMethodToDisplay = mostRecentlySelectedSavedPaymentMethod ?: paymentMethods?.firstOrNull()
+        return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
     }
 
     override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {

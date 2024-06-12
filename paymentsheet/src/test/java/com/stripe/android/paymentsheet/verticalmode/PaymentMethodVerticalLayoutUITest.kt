@@ -12,6 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,15 +29,16 @@ internal class PaymentMethodVerticalLayoutUITest {
     val composeRule = createComposeRule()
 
     @Test
-    fun clickingOnManageScreen_transitionsToManageScreen() = runScenario(
+    fun clickingOnViewMore_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = emptyList(),
             isProcessing = false,
             selectedPaymentMethodIndex = -1,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN).performClick()
+        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
         viewActionRecorder.consume(
             PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
         )
@@ -51,6 +53,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             ),
             isProcessing = false,
             selectedPaymentMethodIndex = -1,
+            displayedSavedPaymentMethod = null,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -60,7 +63,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun allSupportedPaymentMethodsAreShown() = runScenario(
+    fun allPaymentMethodsAreShown() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
@@ -69,6 +72,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             ).sortedSupportedPaymentMethods(),
             isProcessing = false,
             selectedPaymentMethodIndex = -1,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         )
     ) {
         assertThat(
@@ -79,6 +83,29 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").assertExists()
+
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
+    }
+
+    @Test
+    fun savedPaymentMethodIsSelected_whenSelectedIndexIsSavedPmIndex() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
+                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
+                )
+            ).sortedSupportedPaymentMethods(),
+            isProcessing = false,
+            selectedPaymentMethodIndex = -1,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        )
+    ) {
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
+            .onChildren().assertAny(isSelected())
     }
 
     @Test
@@ -91,6 +118,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             ).sortedSupportedPaymentMethods(),
             isProcessing = false,
             selectedPaymentMethodIndex = 1,
+            displayedSavedPaymentMethod = null,
         )
     ) {
         assertThat(

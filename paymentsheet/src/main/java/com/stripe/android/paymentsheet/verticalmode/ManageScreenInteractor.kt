@@ -6,7 +6,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.annotations.VisibleForTesting
@@ -68,11 +67,7 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
             isEditing: Boolean,
         ): ManageScreenInteractor.State {
             val displayablePaymentMethods = paymentMethods?.map {
-                DisplayableSavedPaymentMethod(
-                    displayName = providePaymentMethodName(it.type?.code),
-                    paymentMethod = it,
-                    isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
-                )
+                it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
             } ?: emptyList()
             val currentSelection = if (isEditing) {
                 null
