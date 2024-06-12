@@ -26,6 +26,7 @@ internal fun PaymentMethodIcon(
     imageLoader: StripeImageLoader,
     iconRequiresTinting: Boolean,
     modifier: Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
 ) {
     val color = MaterialTheme.stripeColors.onComponent
     val colorFilter = remember(iconRequiresTinting) {
@@ -38,7 +39,7 @@ internal fun PaymentMethodIcon(
 
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        contentAlignment = contentAlignment,
     ) {
         if (iconUrl != null) {
             StripeImage(
