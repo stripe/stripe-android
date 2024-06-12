@@ -91,15 +91,44 @@ fun rememberPaymentSheetFlowController(
  * other optional callbacks.
  */
 @Composable
-fun rememberPaymentSheetFlowController(
+internal fun rememberPaymentSheetFlowController(
     builder: PaymentSheet.FlowController.Builder
 ): PaymentSheet.FlowController {
     return internalRememberPaymentSheetFlowController(
-        createIntentCallback = builder.createIntentCallback,
-        externalPaymentMethodConfirmHandler = builder.externalPaymentMethodConfirmHandler,
         paymentOptionCallback = builder.paymentOptionCallback,
         paymentResultCallback = builder.resultCallback
     )
+}
+
+@Composable
+private fun internalRememberPaymentSheetFlowController(
+    paymentOptionCallback: PaymentOptionCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet.FlowController {
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
+        "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
+    }
+
+    val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
+        "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val activity = rememberActivity {
+        "PaymentSheet.FlowController must be created in the context of an Activity"
+    }
+
+    return remember(paymentOptionCallback, paymentResultCallback) {
+        FlowControllerFactory(
+            viewModelStoreOwner = viewModelStoreOwner,
+            lifecycleOwner = lifecycleOwner,
+            activityResultRegistryOwner = activityResultRegistryOwner,
+            statusBarColor = { activity.window?.statusBarColor },
+            paymentOptionCallback = paymentOptionCallback,
+            paymentResultCallback = paymentResultCallback,
+        ).create()
+    }
 }
 
 @Composable

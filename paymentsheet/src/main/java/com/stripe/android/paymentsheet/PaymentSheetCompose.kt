@@ -94,22 +94,6 @@ fun rememberPaymentSheet(
     }
 }
 
-/**
- * Creates a [PaymentSheet] that is remembered across compositions.
- *
- * @param builder which contains required [PaymentSheetResultCallback] as well as other optional callbacks.
- */
-@Composable
-fun rememberPaymentSheet(builder: PaymentSheet.Builder): PaymentSheet {
-    builder.createIntentCallback?.let {
-        UpdateIntentConfirmationInterceptor(it)
-    }
-    builder.externalPaymentMethodConfirmHandler?.let {
-        UpdateExternalPaymentMethodConfirmHandler(it)
-    }
-    return rememberPaymentSheet(builder.resultCallback)
-}
-
 @Composable
 private fun UpdateIntentConfirmationInterceptor(
     createIntentCallback: CreateIntentCallback,

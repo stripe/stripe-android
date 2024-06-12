@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -224,6 +225,15 @@ class PaymentSheet internal constructor(
         fun build(fragment: Fragment): PaymentSheet {
             initializeCallbacks()
             return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet] composable.
+         */
+        @Composable
+        fun build(): PaymentSheet {
+            initializeCallbacks()
+            return rememberPaymentSheet(resultCallback)
         }
 
         private fun initializeCallbacks() {
@@ -1730,6 +1740,15 @@ class PaymentSheet internal constructor(
             fun build(fragment: Fragment): FlowController {
                 initializeCallbacks()
                 return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController] composable.
+             */
+            @Composable
+            fun build(): FlowController {
+                initializeCallbacks()
+                return rememberPaymentSheetFlowController(this)
             }
 
             private fun initializeCallbacks() {

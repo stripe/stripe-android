@@ -91,16 +91,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         super.onCreate(savedInstanceState)
 
         setContent {
-            val paymentSheet = rememberPaymentSheet(
-                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+            val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .createIntentCallback(viewModel::createIntentCallback)
+                    .build()
+            val flowController = PaymentSheet.FlowController.Builder(
+                viewModel::onPaymentSheetResult,
+                viewModel::onPaymentOptionSelected
             )
-            val flowController = rememberPaymentSheetFlowController(
-                PaymentSheet.FlowController.Builder(viewModel::onPaymentSheetResult, viewModel::onPaymentOptionSelected)
-                    .externalPaymentMethodConfirmHandler(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
-            )
+                .externalPaymentMethodConfirmHandler(this)
+                .createIntentCallback(viewModel::createIntentCallback)
+                .build()
+
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
