@@ -2,12 +2,10 @@ package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.net.HttpURLConnection
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class ErrorsKtTest {
 
     @Test
@@ -15,7 +13,7 @@ internal class ErrorsKtTest {
         val testResult = kotlin.runCatching {
             retryOnException(
                 PollTimingOptions(
-                    maxNumberOfRetries = 5,
+                    attempts = 5,
                     initialDelayMs = 0,
                     retryInterval = 1000
                 ),
@@ -34,7 +32,7 @@ internal class ErrorsKtTest {
         var counter = 0
         val result = retryOnException(
             PollTimingOptions(
-                maxNumberOfRetries = 5,
+                attempts = 5,
                 initialDelayMs = 0,
                 retryInterval = 1000
             ),
@@ -70,15 +68,16 @@ internal class ErrorsKtTest {
             var counter = 0
             retryOnException(
                 PollTimingOptions(
-                    maxNumberOfRetries = 2,
+                    attempts = 2,
                     initialDelayMs = 0,
                     retryInterval = 1000
                 ),
-                retryCondition = { exception -> exception.shouldRetry }
-            ) {
-                counter++
-                if (counter == 3) true else throw retryException()
-            }
+                retryCondition = { exception -> exception.shouldRetry },
+                action = {
+                    counter++
+                    if (counter == 3) true else throw retryException()
+                }
+            )
         }
         assertThat(testResult.exceptionOrNull()!!).isInstanceOf(PollingReachedMaxRetriesException::class.java)
     }
