@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -66,6 +67,7 @@ internal fun NewPaymentMethodRowButton(
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
                 modifier = Modifier.size(20.dp),
+                contentAlignment = Alignment.Center,
             )
         },
         title = title,
