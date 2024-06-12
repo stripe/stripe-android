@@ -255,6 +255,20 @@ class InlineSignupViewModelTest {
         }
 
     @Test
+    fun `Sign up not attempted if phone number is too short`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(countryCode = CountryCode.US)
+
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+            viewModel.phoneController.onRawValueChange("800867530")
+
+            assertThat(viewModel.viewState.value.userInput).isNull()
+        }
+
+
+
+    @Test
     fun `Prefilled values are handled correctly`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             countryCode = CountryCode.GB,

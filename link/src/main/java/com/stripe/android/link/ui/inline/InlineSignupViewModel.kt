@@ -185,9 +185,10 @@ internal class InlineSignupViewModel @Inject constructor(
     ): UserInput? {
         val signUpMode = initialViewState.signupMode
 
-        return if (email != null && phoneNumber != null && signUpMode != null) {
-            val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
+        val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
+        val isPhoneNumberValid = phoneController.isComplete.value
 
+        return if (email != null && phoneNumber != null && signUpMode != null && isNameValid && isPhoneNumberValid) {
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
@@ -200,7 +201,7 @@ internal class InlineSignupViewModel @Inject constructor(
                     hasPrefilledEmail = prefilledEmail != null,
                     hasPrefilledPhone = prefilledPhone.isNotBlank(),
                 )
-            ).takeIf { isNameValid }
+            )
         } else {
             null
         }
