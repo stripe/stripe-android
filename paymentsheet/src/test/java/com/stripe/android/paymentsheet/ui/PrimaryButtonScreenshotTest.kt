@@ -29,9 +29,6 @@ class PrimaryButtonScreenshotTest {
 
     @get:Rule
     val customThemePaparazziRule = PaparazziRule(
-        listOf(SystemAppearance.LightTheme),
-        listOf(PaymentSheetAppearance.DefaultAppearance),
-        listOf(FontSize.DefaultFont),
         boxModifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(vertical = 16.dp)

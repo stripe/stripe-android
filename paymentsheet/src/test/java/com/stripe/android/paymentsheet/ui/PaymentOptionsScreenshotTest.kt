@@ -6,21 +6,14 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
 class PaymentOptionsScreenshotTest {
 
     @get:Rule
-    val paparazziRule = PaparazziRule(
-        listOf(SystemAppearance.LightTheme),
-        listOf(PaymentSheetAppearance.DefaultAppearance),
-        listOf(FontSize.DefaultFont),
-    )
+    val paparazziRule = PaparazziRule()
 
     @Test
     fun testWidthLessThanScreen() {
