@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentIntent
@@ -144,6 +145,22 @@ internal data class PaymentMethodMetadata(
             )
         }
         return null
+    }
+
+    fun formHeaderInformationForCode(
+        code: String,
+    ): FormHeaderInformation? {
+        return if (isExternalPaymentMethod(code)) {
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation()
+        } else {
+            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+
+            definition.uiDefinitionFactory().formHeaderInformation(
+                metadata = this,
+                definition = definition,
+                sharedDataSpecs = sharedDataSpecs,
+            )
+        }
     }
 
     fun formElementsForCode(

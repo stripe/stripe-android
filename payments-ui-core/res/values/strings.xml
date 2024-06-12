@@ -93,4 +93,8 @@
   <string name="stripe_setup_button_label">Set up</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
+  <!-- Title for credit card screen -->
+  <string name="stripe_paymentsheet_add_new_card">Add new card</string>
+  <!-- Title for US Bank Account Screen -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Add US bank account</string>
 </resources>

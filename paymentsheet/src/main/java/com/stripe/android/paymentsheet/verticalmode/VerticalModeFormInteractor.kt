@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -25,6 +26,7 @@ internal interface VerticalModeFormInteractor {
         val formElements: List<FormElement>,
         val linkSignupMode: LinkSignupMode?,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+        val headerInformation: FormHeaderInformation?,
     )
 
     sealed interface ViewAction {
@@ -46,7 +48,8 @@ internal class DefaultVerticalModeFormInteractor(
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
         viewModel.processing,
         viewModel.linkSignupMode,
-    ) { isProcessing, linkSignupMode ->
+        viewModel.paymentMethodMetadata,
+    ) { isProcessing, linkSignupMode, paymentMethodMetadata ->
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
@@ -55,6 +58,7 @@ internal class DefaultVerticalModeFormInteractor(
             formElements = formElements,
             linkSignupMode = linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code },
             linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
+            headerInformation = paymentMethodMetadata?.formHeaderInformationForCode(selectedPaymentMethodCode),
         )
     }
 

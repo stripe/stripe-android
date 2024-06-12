@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -67,4 +68,15 @@ internal data class SupportedPaymentMethod(
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
     )
+
+    fun asFormHeaderInformation(): FormHeaderInformation {
+        return FormHeaderInformation(
+            displayName = displayName,
+            shouldShowIcon = true,
+            iconResource = iconResource,
+            lightThemeIconUrl = lightThemeIconUrl,
+            darkThemeIconUrl = darkThemeIconUrl,
+            iconRequiresTinting = iconRequiresTinting,
+        )
+    }
 }

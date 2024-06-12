@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -66,6 +67,10 @@ internal sealed interface UiDefinitionFactory {
             sharedDataSpec: SharedDataSpec,
         ): SupportedPaymentMethod
 
+        fun createFormHeaderInformation(sharedDataSpec: SharedDataSpec): FormHeaderInformation {
+            return createSupportedPaymentMethod(sharedDataSpec).asFormHeaderInformation()
+        }
+
         fun createFormElements(
             metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
@@ -79,6 +84,11 @@ internal sealed interface UiDefinitionFactory {
 
     interface Simple : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
+
+        fun createFormHeaderInformation(): FormHeaderInformation {
+            return createSupportedPaymentMethod().asFormHeaderInformation()
+        }
+
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
     }
 
@@ -107,6 +117,25 @@ internal sealed interface UiDefinitionFactory {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
                 createSupportedPaymentMethod(sharedDataSpec)
+            } else {
+                null
+            }
+        }
+    }
+
+    fun formHeaderInformation(
+        definition: PaymentMethodDefinition,
+        metadata: PaymentMethodMetadata,
+        sharedDataSpecs: List<SharedDataSpec>,
+    ): FormHeaderInformation? = when (this) {
+        is Simple -> {
+            createFormHeaderInformation()
+        }
+
+        is RequiresSharedDataSpec -> {
+            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
+            if (sharedDataSpec != null) {
+                createFormHeaderInformation(sharedDataSpec)
             } else {
                 null
             }
