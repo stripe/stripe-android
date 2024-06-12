@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsState
+import org.jetbrains.annotations.VisibleForTesting
 
 internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
 
@@ -51,6 +52,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
     )
 }
 
+@VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
     paymentMethods: List<SupportedPaymentMethod>,
@@ -71,9 +73,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                 isEnabled = isEnabled,
                 isSelected = selectedIndex == -1,
                 trailingContent = {
-                    ViewMoreButton {
-                        onViewMorePaymentMethods()
-                    }
+                    ViewMoreButton(onViewMorePaymentMethods = onViewMorePaymentMethods)
                 }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm))

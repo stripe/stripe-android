@@ -214,7 +214,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_PaymentMethodSelected_doesNotChangeDisplayedSavedPaymentMethod() {
         val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
-        val displayedPaymentMethod = savedPaymentMethods[0]
+        val displayedPaymentMethod = savedPaymentMethods[2]
         runScenario(
             initialPaymentMethods = savedPaymentMethods,
             initialMostRecentlySelectedSavedPaymentMethod = displayedPaymentMethod,
