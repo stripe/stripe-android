@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +38,7 @@ internal fun PaymentMethodIcon(
 
     Box(
         modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
         if (iconUrl != null) {
             StripeImage(
