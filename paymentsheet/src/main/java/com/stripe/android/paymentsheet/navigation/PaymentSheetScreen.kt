@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.CvcRecollectionField
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
@@ -125,7 +126,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            AddPaymentMethod(viewModel, modifier)
+            AddPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(viewModel), modifier)
         }
     }
 
@@ -141,7 +142,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            AddPaymentMethod(viewModel, modifier)
+            AddPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(viewModel), modifier)
         }
     }
 

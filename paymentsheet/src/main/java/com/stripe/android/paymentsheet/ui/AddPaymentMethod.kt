@@ -27,58 +27,74 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun AddPaymentMethod(
-    sheetViewModel: BaseSheetViewModel,
+    interactor: AddPaymentMethodInteractor,
     modifier: Modifier = Modifier,
 ) {
+    val state by interactor.state.collectAsState()
+
     var selectedPaymentMethodCode: String by rememberSaveable {
-        mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
+        mutableStateOf(state.selectedPaymentMethodCode)
     }
-    val supportedPaymentMethods: List<SupportedPaymentMethod> = sheetViewModel.supportedPaymentMethods
+    val supportedPaymentMethods: List<SupportedPaymentMethod> = state.supportedPaymentMethods
     val arguments = remember(selectedPaymentMethodCode) {
-        sheetViewModel.createFormArguments(selectedPaymentMethodCode)
+        interactor.createFormArguments(selectedPaymentMethodCode)
     }
 
-    val paymentSelection by sheetViewModel.selection.collectAsState()
-
-    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
-    val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
-        linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
+    val linkInlineSignupMode = remember(state.linkSignupMode, selectedPaymentMethodCode) {
+        state.linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
     }
 
-    LaunchedEffect(paymentSelection) {
-        sheetViewModel.clearErrorMessages()
+    LaunchedEffect(state.paymentSelection) {
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ClearErrorMessages)
     }
 
-    val processing by sheetViewModel.processing.collectAsState()
     val formElements = remember(selectedPaymentMethodCode) {
-        sheetViewModel.formElementsForCode(selectedPaymentMethodCode)
+        interactor.formElementsForCode(selectedPaymentMethodCode)
     }
+
     val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-        USBankAccountFormArguments.create(sheetViewModel, selectedPaymentMethodCode)
+        interactor.createUsBankAccountFormElements(selectedPaymentMethodCode)
     }
 
     PaymentElement(
-        enabled = !processing,
+        enabled = !state.processing,
         supportedPaymentMethods = supportedPaymentMethods,
         selectedItemCode = selectedPaymentMethodCode,
         formElements = formElements,
         linkSignupMode = linkInlineSignupMode,
-        linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
+        linkConfigurationCoordinator = state.linkConfigurationCoordinator,
         onItemSelectedListener = { selectedLpm ->
             if (selectedPaymentMethodCode != selectedLpm.code) {
                 selectedPaymentMethodCode = selectedLpm.code
-                sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.ReportPaymentMethodTypeSelected(
+                        selectedLpm.code
+                    )
+                )
             }
         },
-        onLinkSignupStateChanged = sheetViewModel::onLinkSignUpStateUpdated,
+        onLinkSignupStateChanged = {
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(it)
+            )
+        },
         formArguments = arguments,
         usBankAccountFormArguments = usBankAccountFormArguments,
         onFormFieldValuesChanged = { formValues ->
-            sheetViewModel.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                    formValues,
+                    selectedPaymentMethodCode
+                )
+            )
         },
         modifier = modifier,
         onInteractionEvent = {
-            sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction(
+                    selectedPaymentMethodCode
+                )
+            )
         },
     )
 }
