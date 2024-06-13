@@ -158,6 +158,11 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
+    internal val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
+        SAVED_PM_SELECTION,
+        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+    )
+
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
 
@@ -484,12 +489,10 @@ internal abstract class BaseSheetViewModel(
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
-            is PaymentSelection.New -> {
-                newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
-            }
-            is PaymentSelection.ExternalPaymentMethod -> {
+            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.ExternalPaymentMethod ->
                 newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
-            }
+            is PaymentSelection.Saved -> savedStateHandle[SAVED_PM_SELECTION] = selection.paymentMethod
             else -> Unit
         }
 
@@ -932,6 +935,7 @@ internal abstract class BaseSheetViewModel(
     companion object {
         internal const val SAVED_CUSTOMER = "customer_info"
         internal const val SAVE_SELECTION = "selection"
+        internal const val SAVED_PM_SELECTION = "saved_selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"

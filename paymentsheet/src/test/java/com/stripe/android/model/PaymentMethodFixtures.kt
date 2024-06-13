@@ -516,6 +516,10 @@ internal object PaymentMethodFixtures {
         }
     }
 
+    fun displayableCard(): DisplayableSavedPaymentMethod {
+        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+    }
+
     fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
         return DisplayableSavedPaymentMethod(
             displayName = this.card?.last4 ?: this.usBankAccount?.last4 ?: "",
