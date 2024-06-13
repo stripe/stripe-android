@@ -30,6 +30,23 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun clearCard() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("4242 4242 4242 4242")
+
+        replaceText("4242 4242 4242 4242", "")
+    }
+
+    fun fillCard() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Card number")
+        replaceText("Card number", "4242424242424242")
+    }
+
     fun fillOutLink() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()

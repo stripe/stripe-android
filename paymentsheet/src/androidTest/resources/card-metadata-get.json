@@ -1,0 +1,11 @@
+{
+  "data": [
+    {
+      "account_range_high": "4242999999999999",
+      "account_range_low": "4242420000000000",
+      "pan_length": 16,
+      "brand": "VISA",
+      "country": "US"
+    }
+  ]
+}
