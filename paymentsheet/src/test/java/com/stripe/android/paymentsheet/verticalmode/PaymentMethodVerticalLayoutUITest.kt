@@ -8,12 +8,16 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -33,7 +37,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = emptyList(),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         )
     ) {
@@ -52,7 +56,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!,
             ),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
             displayedSavedPaymentMethod = null,
         )
     ) {
@@ -71,7 +75,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 )
             ).sortedSupportedPaymentMethods(),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         )
     ) {
@@ -90,7 +94,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun savedPaymentMethodIsSelected_whenSelectedIndexIsSavedPmIndex() = runScenario(
+    fun savedPaymentMethodIsSelected_whenSelectionIsSavedPm() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
@@ -98,7 +102,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 )
             ).sortedSupportedPaymentMethods(),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         )
     ) {
@@ -119,32 +123,43 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun correctIndexIsSelected() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
-                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
-                )
-            ).sortedSupportedPaymentMethods(),
-            isProcessing = false,
-            selectedPaymentMethodIndex = 1,
-            displayedSavedPaymentMethod = null,
+    fun correctLPMIsSelected() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
+            )
         )
-    ) {
-        assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-                .onChildren().fetchSemanticsNodes().size
-        ).isEqualTo(3)
+        val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
+        val selection = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        ).transformToPaymentSelection(
+            context = ApplicationProvider.getApplicationContext(),
+            paymentMethod = supportedPaymentMethods[1],
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                supportedPaymentMethods = supportedPaymentMethods,
+                isProcessing = false,
+                selection = selection,
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(
+                composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+                    .onChildren().fetchSemanticsNodes().size
+            ).isEqualTo(3)
 
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
-            .assertExists()
-            .onChildren().assertAll(isSelected().not())
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
-            .assertExists()
-            .onChildren().assertAny(isSelected())
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
-            .assertExists()
-            .onChildren().assertAll(isSelected().not())
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
+                .assertExists()
+                .onChildren().assertAll(isSelected().not())
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
+                .assertExists()
+                .onChildren().assertAny(isSelected())
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
+                .assertExists()
+                .onChildren().assertAll(isSelected().not())
+        }
     }
 
     private fun runScenario(

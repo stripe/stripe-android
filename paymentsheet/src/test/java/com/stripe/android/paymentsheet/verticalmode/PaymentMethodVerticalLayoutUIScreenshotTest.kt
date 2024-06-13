@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import org.junit.Rule
@@ -25,7 +26,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 displayedSavedPaymentMethod = savedPaymentMethod,
-                selectedIndex = 0,
+                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},

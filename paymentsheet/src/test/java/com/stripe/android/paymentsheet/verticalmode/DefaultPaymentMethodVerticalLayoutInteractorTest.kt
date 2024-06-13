@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -47,7 +48,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(supportedPaymentMethods).isNotEmpty()
-                    assertThat(selectedPaymentMethodIndex).isEqualTo(-1)
+                    assertThat(selection).isNull()
                 }
                 selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
                     labelResource = "CashApp",
@@ -59,25 +60,23 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
                 awaitItem().run {
                     assertThat(supportedPaymentMethods).isNotEmpty()
-                    val cashAppIndex = paymentMethodTypes.indexOf("cashapp")
-                    assertThat(selectedPaymentMethodIndex).isEqualTo(cashAppIndex)
-                    assertThat(cashAppIndex).isEqualTo(1)
+                    assertThat(selection?.code()).isEqualTo("cashapp")
                 }
             }
         }
     }
 
     @Test
-    fun state_returnsCorrectSelectedPaymentMethodIndexWhenSelectionIsSaved() = runScenario {
+    fun state_returnsCorrectSelectionForSavedPM() = runScenario {
+        val savedSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+        selectionSource.value = savedSelection
         interactor.state.test {
             awaitItem().run {
                 assertThat(supportedPaymentMethods).isNotEmpty()
-                assertThat(selectedPaymentMethodIndex).isEqualTo(-1)
+                assertThat(selection).isEqualTo(savedSelection)
             }
-            selectionSource.value = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            )
-            // No value produced, since the state is the same.
         }
     }
 
