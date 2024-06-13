@@ -90,11 +90,11 @@ internal fun PaymentMethodVerticalLayoutUI(
         }
 
         val selectedIndex = remember(selection, paymentMethods) {
-            if (selection?.isSaved == false) {
+            if (selection == null || selection.isSaved) {
+                -1
+            } else {
                 val code = selection.code()
                 paymentMethods.indexOfFirst { it.code == code }
-            } else {
-                -1
             }
         }
 
