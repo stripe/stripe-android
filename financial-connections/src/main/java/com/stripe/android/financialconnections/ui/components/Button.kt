@@ -23,11 +23,7 @@ import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.ButtonElevation
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +49,6 @@ import com.stripe.android.financialconnections.ui.theme.Brand400
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
 
 private val DefaultSpinnerHeight = 24.dp
@@ -89,7 +84,7 @@ internal fun FinancialConnectionsButton(
         }
     }
 
-    CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
+//    CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
                 multipleEventsCutter.processEvent {
@@ -136,21 +131,7 @@ internal fun FinancialConnectionsButton(
                 }
             }
         )
-    }
-}
-
-private fun Type.rippleTheme() = object : RippleTheme {
-    @Composable
-    override fun defaultColor() = when (this@rippleTheme) {
-        Primary -> Neutral0
-        Secondary -> colors.textDefault
-    }
-
-    @Composable
-    override fun rippleAlpha(): RippleAlpha = RippleTheme.defaultRippleAlpha(
-        buttonColors().contentColor(enabled = true).value,
-        lightTheme = true
-    )
+//    }
 }
 
 internal object FinancialConnectionsButton {
