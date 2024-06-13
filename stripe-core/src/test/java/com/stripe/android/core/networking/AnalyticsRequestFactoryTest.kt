@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestFactoryTest : TestCase() {
@@ -101,9 +102,18 @@ class AnalyticsRequestFactoryTest : TestCase() {
     }
 
     @Test
-    fun getAnalyticsUa_returnsExpectedValue() {
-        assertThat(AnalyticsRequestFactory.ANALYTICS_UA)
-            .isEqualTo("analytics.stripe_android-1.0")
+    fun getPluginType_returnsExpectedValue() {
+        val factory = createFakeAnalyticsRequestFactory(
+            pluginTypeProvider = { "react-native" }
+        )
+
+        val request = factory.createRequest(
+            mockEvent,
+            mapOf()
+        )
+
+        assertThat(request.params[AnalyticsFields.PLUGIN_TYPE])
+            .isEqualTo("react-native")
     }
 
     @Test
@@ -131,6 +141,19 @@ class AnalyticsRequestFactoryTest : TestCase() {
                 assertThat(request.params).containsEntry("locale", locale.toString())
             }
         }
+    }
+
+    private fun createFakeAnalyticsRequestFactory(
+        pluginTypeProvider: Provider<String?> = Provider { null }
+    ): AnalyticsRequestFactory {
+        return AnalyticsRequestFactory(
+            mock(),
+            null,
+            "fake_package",
+            { apiKey },
+            { "5G" },
+            pluginTypeProvider,
+        )
     }
 }
 

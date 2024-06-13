@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
 import java.util.UUID
@@ -17,6 +18,7 @@ open class AnalyticsRequestFactory(
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
     private val networkTypeProvider: Provider<String?>,
+    private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER
 ) {
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
@@ -59,11 +61,17 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.SESSION_ID to sessionId,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
-    ) + networkType()
+    ) + networkType() + pluginType()
 
     private fun networkType(): Map<String, String> {
         val networkType = networkTypeProvider.get() ?: return emptyMap()
         return mapOf(AnalyticsFields.NETWORK_TYPE to networkType)
+    }
+
+    private fun pluginType(): Map<String, String> {
+        return pluginTypeProvider.get()?.let { pluginType ->
+            mapOf(AnalyticsFields.PLUGIN_TYPE to pluginType)
+        } ?: emptyMap()
     }
 
     internal fun appDataParams(): Map<String, Any> {
@@ -103,6 +111,10 @@ open class AnalyticsRequestFactory(
 
         fun setSessionId(id: UUID) {
             sessionId = id
+        }
+
+        private val PLUGIN_TYPE_PROVIDER = Provider {
+            PluginDetector.pluginType
         }
     }
 }

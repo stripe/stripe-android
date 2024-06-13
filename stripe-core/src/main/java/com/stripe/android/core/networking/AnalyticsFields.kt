@@ -16,6 +16,7 @@ object AnalyticsFields {
     const val IS_DEVELOPMENT = "is_development"
     const val DEVICE_TYPE = "device_type"
     const val EVENT = "event"
+    const val PLUGIN_TYPE = "plugin_type"
     const val OS_NAME = "os_name"
     const val OS_RELEASE = "os_release"
     const val OS_VERSION = "os_version"
