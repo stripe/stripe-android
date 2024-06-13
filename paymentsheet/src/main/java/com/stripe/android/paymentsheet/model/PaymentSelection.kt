@@ -269,3 +269,9 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
     }
+
+internal val PaymentSelection.isSaved: Boolean
+    get() = when (this) {
+        is PaymentSelection.Saved -> true
+        else -> false
+    }

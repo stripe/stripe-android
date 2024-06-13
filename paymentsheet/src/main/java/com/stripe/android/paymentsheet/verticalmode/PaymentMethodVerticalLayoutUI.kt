@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.code
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -41,7 +44,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
     PaymentMethodVerticalLayoutUI(
         paymentMethods = state.supportedPaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
-        selectedIndex = state.selectedPaymentMethodIndex,
+        selection = state.selection,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -61,7 +64,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
 internal fun PaymentMethodVerticalLayoutUI(
     paymentMethods: List<SupportedPaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
-    selectedIndex: Int,
+    selection: PaymentSelection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
@@ -78,12 +81,21 @@ internal fun PaymentMethodVerticalLayoutUI(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 resources = LocalContext.current.resources,
                 isEnabled = isEnabled,
-                isSelected = selectedIndex == -1,
+                isSelected = selection?.isSaved == true,
                 trailingContent = {
                     ViewMoreButton(onViewMorePaymentMethods = onViewMorePaymentMethods)
                 }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
+        }
+
+        val selectedIndex = remember(selection, paymentMethods) {
+            if (selection?.isSaved == false) {
+                val code = selection.code()
+                paymentMethods.indexOfFirst { it.code == code }
+            } else {
+                -1
+            }
         }
 
         NewPaymentMethodVerticalLayoutUI(
