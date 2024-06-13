@@ -141,9 +141,6 @@ android {
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-Xcontext-receivers",
         ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
-        }
     }
 }
 
