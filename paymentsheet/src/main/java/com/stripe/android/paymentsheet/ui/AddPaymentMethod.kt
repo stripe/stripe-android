@@ -36,9 +36,9 @@ internal fun AddPaymentMethod(
         mutableStateOf(state.selectedPaymentMethodCode)
     }
     val supportedPaymentMethods: List<SupportedPaymentMethod> = state.supportedPaymentMethods
-    val arguments = remember(selectedPaymentMethodCode) {
-        interactor.createFormArguments(selectedPaymentMethodCode)
-    }
+//    val arguments = remember(selectedPaymentMethodCode) {
+//        interactor.createFormArguments(selectedPaymentMethodCode)
+//    }
 
     val linkInlineSignupMode = remember(state.linkSignupMode, selectedPaymentMethodCode) {
         state.linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
@@ -78,7 +78,7 @@ internal fun AddPaymentMethod(
                 AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(it)
             )
         },
-        formArguments = arguments,
+        formArguments = state.arguments, // TODO: figure out why this doesn't work
         usBankAccountFormArguments = usBankAccountFormArguments,
         onFormFieldValuesChanged = { formValues ->
             interactor.handleViewAction(

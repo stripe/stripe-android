@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.runtime.mutableStateOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal interface AddPaymentMethodInteractor {
@@ -46,12 +48,15 @@ internal interface AddPaymentMethodInteractor {
 }
 
 internal class DefaultAddPaymentMethodInteractor(private val sheetViewModel: BaseSheetViewModel): AddPaymentMethodInteractor {
+
+    private val selectedPaymentMethodCode = MutableStateFlow(sheetViewModel.initiallySelectedPaymentMethodType)
+
     override val state = combineAsStateFlow(
-       sheetViewModel.selection,
+        selectedPaymentMethodCode,
+        sheetViewModel.selection,
         sheetViewModel.linkSignupMode,
         sheetViewModel.processing,
-    ) { selection, linkSignupMode, processing ->
-        val selectedPaymentMethodCode = sheetViewModel.initiallySelectedPaymentMethodType
+    ) { selectedPaymentMethodCode, selection, linkSignupMode, processing ->
 
         AddPaymentMethodInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
