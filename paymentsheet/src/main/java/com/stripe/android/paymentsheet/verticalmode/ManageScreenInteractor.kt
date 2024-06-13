@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.jetbrains.annotations.VisibleForTesting
 
 internal interface ManageScreenInteractor {
     val state: StateFlow<State>
@@ -28,57 +27,61 @@ internal interface ManageScreenInteractor {
     }
 }
 
-internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetViewModel) : ManageScreenInteractor {
+internal class DefaultManageScreenInteractor(
+    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val selection: StateFlow<PaymentSelection?>,
+    private val editing: StateFlow<Boolean>,
+    private val providePaymentMethodName: (PaymentMethodCode?) -> String,
+    private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val navigateBack: () -> Unit,
+) : ManageScreenInteractor {
+
+    constructor(viewModel: BaseSheetViewModel) : this(
+        paymentMethods = viewModel.paymentMethods,
+        paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+        selection = viewModel.selection,
+        editing = viewModel.editing,
+        providePaymentMethodName = viewModel::providePaymentMethodName,
+        onSelectPaymentMethod = { viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod)) },
+        onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod) },
+        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+        navigateBack = viewModel::handleBackPressed
+    )
+
     override val state = combineAsStateFlow(
-        viewModel.paymentMethods,
-        viewModel.paymentMethodMetadata,
-        viewModel.selection,
-        viewModel.editing,
-    ) { paymentMethods, paymentMethodMetadata, paymentSelection, editing ->
-        computeInitialState(
-            paymentMethods,
-            paymentMethodMetadata,
-            paymentSelection,
-            viewModel::providePaymentMethodName,
-            editing,
-        )
+        paymentMethods,
+        selection,
+        editing,
+    ) { paymentMethods, paymentSelection, editing ->
+        val displayablePaymentMethods = paymentMethods?.map {
+            it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
+        } ?: emptyList()
+        val currentSelection = if (editing) {
+            null
+        } else {
+            paymentSelectionToDisplayableSavedPaymentMethod(paymentSelection, displayablePaymentMethods)
+        }
+        ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, editing)
     }
 
     override fun handleViewAction(viewAction: ManageScreenInteractor.ViewAction) {
         when (viewAction) {
             is ManageScreenInteractor.ViewAction.SelectPaymentMethod ->
                 handlePaymentMethodSelected(viewAction.paymentMethod)
-            is ManageScreenInteractor.ViewAction.DeletePaymentMethod ->
-                viewModel.removePaymentMethod(paymentMethod = viewAction.paymentMethod.paymentMethod)
-            is ManageScreenInteractor.ViewAction.EditPaymentMethod ->
-                viewModel.modifyPaymentMethod(paymentMethod = viewAction.paymentMethod.paymentMethod)
+            is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
+            is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
         }
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(paymentMethod.paymentMethod))
-        viewModel.handleBackPressed()
+        onSelectPaymentMethod(paymentMethod)
+        navigateBack()
     }
 
     companion object {
-        @VisibleForTesting
-        internal fun computeInitialState(
-            paymentMethods: List<PaymentMethod>?,
-            paymentMethodMetadata: PaymentMethodMetadata?,
-            selection: PaymentSelection?,
-            providePaymentMethodName: (PaymentMethodCode?) -> String,
-            isEditing: Boolean,
-        ): ManageScreenInteractor.State {
-            val displayablePaymentMethods = paymentMethods?.map {
-                it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
-            } ?: emptyList()
-            val currentSelection = if (isEditing) {
-                null
-            } else {
-                paymentSelectionToDisplayableSavedPaymentMethod(selection, displayablePaymentMethods)
-            }
-            return ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, isEditing)
-        }
 
         private fun paymentSelectionToDisplayableSavedPaymentMethod(
             selection: PaymentSelection?,
