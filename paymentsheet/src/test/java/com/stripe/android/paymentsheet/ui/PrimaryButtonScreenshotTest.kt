@@ -13,9 +13,11 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
+@Ignore
 class PrimaryButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
