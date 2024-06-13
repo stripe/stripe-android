@@ -1231,6 +1231,7 @@ public class StripeTest {
         assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
     }
 
+    @Ignore("Issue with card metadata endpoint")
     @Test
     public void retrievePossibleBrands_forVisaAndCartesBancaires_shouldReturnMultipleCardBrands() {
         final Stripe stripe = createStripe(testDispatcher);
