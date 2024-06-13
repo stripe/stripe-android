@@ -182,7 +182,7 @@ class PrimaryButtonScreenshotTest {
                         id = R.color.stripe_paymentsheet_googlepay_primary_button_tint_color
                     ),
                     border = colorResource(
-                        id = R.color.stripe_paymentsheet_card_stroke
+                        id = R.color.stripe_paymentsheet_payment_option_unselected_stroke
                     )
                 ),
                 shape = PrimaryButtonShape(
