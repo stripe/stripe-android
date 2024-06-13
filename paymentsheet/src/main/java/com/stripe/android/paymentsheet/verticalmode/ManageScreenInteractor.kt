@@ -70,7 +70,7 @@ internal class DefaultManageScreenInteractor(
             safeNavigateBack()
         }
 
-        val canDelete = displayablePaymentMethods.size != 1 || allowsRemovalOfLastSavedPaymentMethod
+        val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
 
         val currentSelection = if (editing) {
             null
