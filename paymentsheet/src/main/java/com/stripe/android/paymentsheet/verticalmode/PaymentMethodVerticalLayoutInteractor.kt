@@ -5,7 +5,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -22,7 +21,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     data class State(
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val isProcessing: Boolean,
-        val selectedPaymentMethodIndex: Int,
+        val selection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     )
 
@@ -41,7 +40,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val manageScreenFactory: () -> PaymentSheetScreen,
     private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
-    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -83,23 +82,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = supportedPaymentMethods,
             isProcessing = isProcessing,
-            selectedPaymentMethodIndex = selectedPaymentMethodIndex(selection),
+            selection = selection,
             displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
                 paymentMethods,
                 paymentMethodMetadata,
                 mostRecentlySelectedSavedPaymentMethod
             ),
         )
-    }
-
-    private fun selectedPaymentMethodIndex(
-        selection: PaymentSelection?,
-    ): Int {
-        if (selection is PaymentSelection.Saved) {
-            return -1
-        }
-        val selectedPaymentMethodCode = selection.code()
-        return supportedPaymentMethods.indexOfFirst { it.code == selectedPaymentMethodCode }
     }
 
     private fun getDisplayedSavedPaymentMethod(
