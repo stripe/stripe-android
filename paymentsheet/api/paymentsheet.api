@@ -554,6 +554,16 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCo
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
+	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -745,6 +755,16 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 	public abstract fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public abstract fun presentPaymentOptions ()V
 	public abstract fun setShippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;)V
+	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
+	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion {
