@@ -84,54 +84,52 @@ internal fun FinancialConnectionsButton(
         }
     }
 
-//    CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
-        Button(
-            onClick = {
-                multipleEventsCutter.processEvent {
-                    if (loading.not()) {
-                        if (SDK_INT >= R) view.performHapticFeedback(CONFIRM)
-                        onClick()
-                    }
-                }
-            },
-            modifier = modifier,
-            elevation = type.elevation(),
-            enabled = enabled,
-            shape = RoundedCornerShape(size = size.radius),
-            contentPadding = PaddingValues(0.dp),
-            colors = type.buttonColors(),
-            content = {
-                ProvideTextStyle(
-                    value = typography.labelLargeEmphasized.copy(
-                        // material button adds letter spacing internally, this removes it.
-                        letterSpacing = 0.sp
-                    )
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Row(
-                            modifier = Modifier
-                                .alpha(1f - loadingIndicatorAlpha)
-                                .padding(size.paddingValues())
-                                .onSizeChanged {
-                                    // Set the spinner to the same height as the label,
-                                    // so we avoid visual jitter.
-                                    spinnerHeight = with(density) { it.height.toDp() }
-                                },
-                            content = content,
-                        )
-
-                        LoadingSpinner(
-                            gradient = spinnerBrush,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier
-                                .size(spinnerHeight)
-                                .alpha(loadingIndicatorAlpha),
-                        )
-                    }
+    Button(
+        onClick = {
+            multipleEventsCutter.processEvent {
+                if (loading.not()) {
+                    if (SDK_INT >= R) view.performHapticFeedback(CONFIRM)
+                    onClick()
                 }
             }
-        )
-//    }
+        },
+        modifier = modifier,
+        elevation = type.elevation(),
+        enabled = enabled,
+        shape = RoundedCornerShape(size = size.radius),
+        contentPadding = PaddingValues(0.dp),
+        colors = type.buttonColors(),
+        content = {
+            ProvideTextStyle(
+                value = typography.labelLargeEmphasized.copy(
+                    // material button adds letter spacing internally, this removes it.
+                    letterSpacing = 0.sp
+                )
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Row(
+                        modifier = Modifier
+                            .alpha(1f - loadingIndicatorAlpha)
+                            .padding(size.paddingValues())
+                            .onSizeChanged {
+                                // Set the spinner to the same height as the label,
+                                // so we avoid visual jitter.
+                                spinnerHeight = with(density) { it.height.toDp() }
+                            },
+                        content = content,
+                    )
+
+                    LoadingSpinner(
+                        gradient = spinnerBrush,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier
+                            .size(spinnerHeight)
+                            .alpha(loadingIndicatorAlpha),
+                    )
+                }
+            }
+        }
+    )
 }
 
 internal object FinancialConnectionsButton {
