@@ -80,7 +80,7 @@ class PaparazziRule(
                         }
                     },
                     description = newDescription,
-                )
+                ).evaluate()
             } finally {
                 testCase.reset()
             }
