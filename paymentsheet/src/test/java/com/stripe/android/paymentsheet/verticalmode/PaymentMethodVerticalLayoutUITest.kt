@@ -52,6 +52,26 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
+    fun clickingOnNewPaymentMethod_callsOnClick() {
+        var onClickCalled = false
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = listOf(
+                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
+                        .asDisplayablePaymentMethod { onClickCalled = true },
+                ),
+                isProcessing = false,
+                selection = null,
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+
+        @Test
     fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             supportedPaymentMethods = emptyList(),
