@@ -95,7 +95,9 @@ internal class DefaultManageScreenInteractor(
         safeNavigateBack()
     }
 
-    private fun noPaymentMethodsAvailableToManage(displayableSavedPaymentMethods: List<DisplayableSavedPaymentMethod>): Boolean {
+    private fun noPaymentMethodsAvailableToManage(
+        displayableSavedPaymentMethods: List<DisplayableSavedPaymentMethod>
+    ): Boolean {
         val onlyOneNotModifiablePm = displayableSavedPaymentMethods.size == 1 &&
             !allowsRemovalOfLastSavedPaymentMethod &&
             !displayableSavedPaymentMethods.first().isModifiable()
