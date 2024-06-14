@@ -91,7 +91,7 @@ internal class DefaultManageScreenInteractor(
         selection,
         editing,
     ) { displayablePaymentMethods, paymentSelection, editing ->
-      val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
+        val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
 
         val currentSelection = if (editing) {
             null

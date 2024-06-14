@@ -22,5 +22,7 @@ internal class FakeManageScreenInteractor(
         viewActionRecorder?.record(viewAction)
     }
 
-    override fun close() { }
+    override fun close() {
+        /* Do nothing. */
+    }
 }
