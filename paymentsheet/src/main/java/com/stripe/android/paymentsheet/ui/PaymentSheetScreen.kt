@@ -212,15 +212,17 @@ private fun PaymentSheetContent(
             )
         }
 
-        walletsState?.let { state ->
-            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
-            Wallet(
-                state = state,
-                processingState = walletsProcessingState,
-                onGooglePayPressed = state.onGooglePayPressed,
-                onLinkPressed = state.onLinkPressed,
-                modifier = Modifier.padding(bottom = bottomSpacing),
-            )
+        if (currentScreen.showsWalletsHeader(type == Complete)) {
+            walletsState?.let { state ->
+                val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
+                Wallet(
+                    state = state,
+                    processingState = walletsProcessingState,
+                    onGooglePayPressed = state.onGooglePayPressed,
+                    onLinkPressed = state.onLinkPressed,
+                    modifier = Modifier.padding(bottom = bottomSpacing),
+                )
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {

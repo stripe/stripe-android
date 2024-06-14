@@ -7,7 +7,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Billi
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
 internal data class WalletsState(
     val link: Link?,
@@ -38,16 +37,10 @@ internal data class WalletsState(
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
-            screen: PaymentSheetScreen,
-            isCompleteFlow: Boolean,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
             isSetupIntent: Boolean
         ): WalletsState? {
-            if (!screen.showsWalletsHeader(isCompleteFlow)) {
-                return null
-            }
-
             val link = Link(email = linkEmail).takeIf { isLinkAvailable == true }
 
             val googlePay = GooglePay(
