@@ -77,7 +77,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod {  } },
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -104,7 +104,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod {  } },
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -143,7 +143,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         )
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
-                displayablePaymentMethods = supportedPaymentMethods.map { it.asDisplayablePaymentMethod {  } },
+                displayablePaymentMethods = supportedPaymentMethods.map { it.asDisplayablePaymentMethod { } },
                 isProcessing = false,
                 selection = selection,
                 displayedSavedPaymentMethod = null,
