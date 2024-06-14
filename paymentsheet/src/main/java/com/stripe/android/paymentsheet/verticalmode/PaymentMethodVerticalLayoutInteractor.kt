@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -7,7 +8,6 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -19,15 +19,24 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     data class State(
-        val displayablePaymentMethods: List<DisplayablePaymentMethod>,
+        val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val isProcessing: Boolean,
         val selection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+        val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
     )
 
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
+        data class EditPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
+    }
+
+    enum class SavedPaymentMethodAction {
+        NONE,
+        EDIT_CARD_BRAND,
+        MANAGE_ONE,
+        MANAGE_ALL,
     }
 }
 
@@ -43,6 +52,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
+    private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -69,6 +80,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods = viewModel.paymentMethods,
         mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
+        allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
+        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) }
     )
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -79,24 +92,23 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
     ) { isProcessing, selection, paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
+        val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
+            paymentMethods,
+            paymentMethodMetadata,
+            mostRecentlySelectedSavedPaymentMethod
+        )
+
         PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = getDisplayablePaymentMethods(),
+            supportedPaymentMethods = supportedPaymentMethods,
             isProcessing = isProcessing,
             selection = selection,
-            displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            availableSavedPaymentMethodAction = getAvailableSavedPaymentMethodAction(
                 paymentMethods,
-                paymentMethodMetadata,
-                mostRecentlySelectedSavedPaymentMethod
-            ),
+                displayedSavedPaymentMethod,
+                allowsRemovalOfLastSavedPaymentMethod
+            )
         )
-    }
-
-    private fun getDisplayablePaymentMethods(): List<DisplayablePaymentMethod> {
-        return supportedPaymentMethods.map { supportedPaymentMethod ->
-            supportedPaymentMethod.asDisplayablePaymentMethod {
-                handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
-            }
-        }
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -108,17 +120,40 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
     }
 
-    override fun handleViewAction(viewAction: ViewAction) {
+    private fun getAvailableSavedPaymentMethodAction(
+        paymentMethods: List<PaymentMethod>?,
+        savedPaymentMethod: DisplayableSavedPaymentMethod?,
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
+        if (paymentMethods == null || savedPaymentMethod == null) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+        }
+
+        return if (paymentMethods.size > 1) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
+        } else if (paymentMethods.size == 1 && allowsRemovalOfLastSavedPaymentMethod) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+        } else if (paymentMethods.size == 1 && savedPaymentMethod.isModifiable()) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
+        } else {
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+        }
+    }
+
+    override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         when (viewAction) {
-            is ViewAction.PaymentMethodSelected -> {
+            is PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected -> {
                 if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
                     transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
                 }
             }
-            ViewAction.TransitionToManageSavedPaymentMethods -> {
+            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionTo(manageScreenFactory())
+            }
+            is PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod -> {
+                onEditPaymentMethod(viewAction.savedPaymentMethod)
             }
         }
     }

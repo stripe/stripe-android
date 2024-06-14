@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
@@ -30,6 +31,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
 internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
+internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
 
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayoutInteractor) {
@@ -41,14 +43,23 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
     val state by interactor.state.collectAsState()
 
     PaymentMethodVerticalLayoutUI(
-        paymentMethods = state.displayablePaymentMethods,
+        paymentMethods = state.supportedPaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
+        savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
+        },
+        onEditPaymentMethod = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
+            )
+        },
+        onItemSelectedListener = {
+            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected(it.code))
         },
         imageLoader = imageLoader,
         modifier = Modifier.padding(horizontal = 20.dp)
@@ -58,11 +69,14 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
-    paymentMethods: List<DisplayablePaymentMethod>,
+    paymentMethods: List<SupportedPaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentSelection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
+    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
@@ -78,7 +92,12 @@ internal fun PaymentMethodVerticalLayoutUI(
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
                 trailingContent = {
-                    ViewMoreButton(onViewMorePaymentMethods = onViewMorePaymentMethods)
+                    SavedPaymentMethodTrailingContent(
+                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+                        savedPaymentMethodAction = savedPaymentMethodAction,
+                        onViewMorePaymentMethods = onViewMorePaymentMethods,
+                        onEditPaymentMethod = onEditPaymentMethod
+                    )
                 }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
@@ -97,7 +116,45 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
+            onItemSelectedListener = onItemSelectedListener,
             imageLoader = imageLoader
+        )
+    }
+}
+
+@Composable
+private fun SavedPaymentMethodTrailingContent(
+    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    onViewMorePaymentMethods: () -> Unit,
+    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+) {
+    when (savedPaymentMethodAction) {
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND -> {
+            EditButton(onClick = { onEditPaymentMethod(displayedSavedPaymentMethod) })
+        }
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
+            EditButton(onClick = onViewMorePaymentMethods)
+        }
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
+            ViewMoreButton(
+                onViewMorePaymentMethods = onViewMorePaymentMethods
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditButton(onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.testTag(TEST_TAG_EDIT_SAVED_CARD),
+    ) {
+        Text(
+            stringResource(id = com.stripe.android.R.string.stripe_edit),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.button
         )
     }
 }
