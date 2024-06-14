@@ -59,7 +59,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -78,7 +78,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -99,7 +99,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
         )
     ) {
         composeRule.onNodeWithTag(

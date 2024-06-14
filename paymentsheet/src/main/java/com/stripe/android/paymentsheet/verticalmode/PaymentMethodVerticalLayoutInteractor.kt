@@ -149,6 +149,27 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     override fun handleViewAction(viewAction: ViewAction) {
+    private fun getAvailableSavedPaymentMethodAction(
+        paymentMethods: List<PaymentMethod>?,
+        savedPaymentMethod: DisplayableSavedPaymentMethod?,
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
+        if (paymentMethods == null || savedPaymentMethod == null) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+        }
+
+        return if (paymentMethods.size > 1) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
+        } else if (paymentMethods.size == 1 && allowsRemovalOfLastSavedPaymentMethod) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+        } else if (paymentMethods.size == 1 && savedPaymentMethod.isModifiable()) {
+            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
+        } else {
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+        }
+    }
+
+    override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
                 if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
