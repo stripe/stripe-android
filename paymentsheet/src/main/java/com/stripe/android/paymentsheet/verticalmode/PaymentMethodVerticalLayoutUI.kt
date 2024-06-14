@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
@@ -42,7 +41,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
     val state by interactor.state.collectAsState()
 
     PaymentMethodVerticalLayoutUI(
-        paymentMethods = state.supportedPaymentMethods,
+        paymentMethods = state.displayablePaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         selection = state.selection,
         isEnabled = !state.isProcessing,
@@ -50,9 +49,6 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
-        },
-        onItemSelectedListener = {
-            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected(it.code))
         },
         imageLoader = imageLoader,
         modifier = Modifier.padding(horizontal = 20.dp)
@@ -62,12 +58,11 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
-    paymentMethods: List<SupportedPaymentMethod>,
+    paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     selection: PaymentSelection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
@@ -102,7 +97,6 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
-            onItemSelectedListener = onItemSelectedListener,
             imageLoader = imageLoader
         )
     }
