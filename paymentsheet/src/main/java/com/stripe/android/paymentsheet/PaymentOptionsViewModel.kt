@@ -103,8 +103,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkEmailFlow,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
-        backStack,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, stack ->
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -113,8 +112,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = null,
             googlePayButtonType = GooglePayButtonType.Pay,
-            screen = stack.last(),
-            isCompleteFlow = false,
             onGooglePayPressed = {
                 error("Google Pay shouldn't be enabled in the custom flow.")
             },

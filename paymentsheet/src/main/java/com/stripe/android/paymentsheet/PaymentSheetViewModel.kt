@@ -219,8 +219,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         googlePayState,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
-        backStack,
-    ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes, stack ->
+    ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -229,8 +228,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
-            screen = stack.last(),
-            isCompleteFlow = true,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
             isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
