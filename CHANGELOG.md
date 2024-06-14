@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.46.0 - 2024-06-14
+
 ### PaymentSheet
 * [ADDED][8607](https://github.com/stripe/stripe-android/pull/8607) Add builder pattern for constructing instances of `PaymentSheet` and `PaymentSheet.FlowController`.
 
