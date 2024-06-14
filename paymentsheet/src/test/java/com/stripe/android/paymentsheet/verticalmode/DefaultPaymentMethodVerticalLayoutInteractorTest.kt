@@ -99,7 +99,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `state has manage_one saved payment method action when one modifiable saved PM and allowsRemovalOfLast is true`() {
+    fun `state has manage_one SPM action when one modifiable saved PM and allowsRemovalOfLast is true`() {
         runScenario(
             initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD),
             allowsRemovalOfLastSavedPaymentMethod = true,
