@@ -291,7 +291,9 @@ internal class PaymentSheetPlaygroundViewModel(
 
         val statusMessage = when (paymentResult) {
             is PaymentSheetResult.Canceled -> {
-                "Canceled"
+                // We don't show the toast in tests so that we don't
+                // pollute the screenshots with those overlays.
+                "Canceled".takeUnless { runningInTest }
             }
 
             is PaymentSheetResult.Completed -> {
@@ -503,6 +505,9 @@ internal class PaymentSheetPlaygroundViewModel(
             return PaymentSheetPlaygroundViewModel(applicationSupplier(), uriSupplier()) as T
         }
     }
+
+    private val runningInTest: Boolean
+        get() = runCatching { Class.forName("androidx.test.espresso.Espresso") }.isSuccess
 }
 
 class ConfirmIntentEndpointException : Exception()
