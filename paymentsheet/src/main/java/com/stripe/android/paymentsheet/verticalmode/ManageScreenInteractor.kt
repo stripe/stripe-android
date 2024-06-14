@@ -10,6 +10,8 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -19,6 +21,8 @@ internal interface ManageScreenInteractor {
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
+
+    fun close()
 
     data class State(
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
@@ -47,7 +51,7 @@ internal class DefaultManageScreenInteractor(
     private val navigateBack: () -> Unit,
 ) : ManageScreenInteractor, CoroutineScope {
 
-    override val coroutineContext: CoroutineContext = Dispatchers.Default
+    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
 
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethods = viewModel.paymentMethods,
@@ -104,6 +108,10 @@ internal class DefaultManageScreenInteractor(
             is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
         }
+    }
+
+    override fun close() {
+        cancel()
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {

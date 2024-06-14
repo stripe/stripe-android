@@ -21,4 +21,6 @@ internal class FakeManageScreenInteractor(
     override fun handleViewAction(viewAction: ManageScreenInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
     }
+
+    override fun close() { }
 }

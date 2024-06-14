@@ -202,7 +202,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen {
+    class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen, Closeable {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
@@ -212,6 +212,10 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
             ManageScreenUI(interactor = interactor)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 }
