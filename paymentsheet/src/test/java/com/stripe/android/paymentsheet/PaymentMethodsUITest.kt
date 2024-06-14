@@ -59,7 +59,7 @@ class PaymentMethodsUITest {
         )
     }
 
-    suspend fun testIcons(
+    private suspend fun testIcons(
         iconRes: Int?,
         iconUrl: String?,
         expectedTestTag: String,

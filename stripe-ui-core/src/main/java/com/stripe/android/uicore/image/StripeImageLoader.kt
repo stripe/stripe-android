@@ -47,6 +47,7 @@ class StripeImageLoader(
         width: Int,
         height: Int
     ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+        Thread.sleep(2000)
         withMutexByUrlLock(url) {
             loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url, width, height)
         }
