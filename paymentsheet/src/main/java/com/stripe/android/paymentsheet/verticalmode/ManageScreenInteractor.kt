@@ -7,8 +7,13 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
 
 internal interface ManageScreenInteractor {
     val state: StateFlow<State>
@@ -40,7 +45,9 @@ internal class DefaultManageScreenInteractor(
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
-) : ManageScreenInteractor {
+) : ManageScreenInteractor, CoroutineScope {
+
+    override val coroutineContext: CoroutineContext = Dispatchers.Default
 
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethods = viewModel.paymentMethods,
@@ -55,22 +62,31 @@ internal class DefaultManageScreenInteractor(
         navigateBack = viewModel::handleBackPressed
     )
 
+    init {
+        launch {
+            displayableSavedPaymentMethods.collect {
+                if (noPaymentMethodsAvailableToManage(it)) {
+                    safeNavigateBack()
+                }
+            }
+        }
+    }
+
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
-    override val state = combineAsStateFlow(
-        paymentMethods,
-        selection,
-        editing,
-    ) { paymentMethods, paymentSelection, editing ->
-        val displayablePaymentMethods = paymentMethods?.map {
-            it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
-        } ?: emptyList()
-
-        if (noPaymentMethodsAvailableToManage(displayablePaymentMethods)) {
-            safeNavigateBack()
+    private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
+        paymentMethods.mapAsStateFlow { paymentMethods ->
+            paymentMethods?.map {
+                it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
+            } ?: emptyList()
         }
 
-        val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
+    override val state = combineAsStateFlow(
+        displayableSavedPaymentMethods,
+        selection,
+        editing,
+    ) { displayablePaymentMethods, paymentSelection, editing ->
+      val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
 
         val currentSelection = if (editing) {
             null
