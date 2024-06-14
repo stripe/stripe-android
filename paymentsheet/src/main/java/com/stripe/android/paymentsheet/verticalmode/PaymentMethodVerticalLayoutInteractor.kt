@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -8,6 +7,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -19,7 +19,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     data class State(
-        val supportedPaymentMethods: List<SupportedPaymentMethod>,
+        val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
         val selection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
@@ -99,7 +99,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
 
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = supportedPaymentMethods,
+            displayablePaymentMethods = getDisplayablePaymentMethods(),
             isProcessing = isProcessing,
             selection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
@@ -109,6 +109,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 allowsRemovalOfLastSavedPaymentMethod
             )
         )
+    }
+
+    private fun getDisplayablePaymentMethods(): List<DisplayablePaymentMethod> {
+        return supportedPaymentMethods.map { supportedPaymentMethod ->
+            supportedPaymentMethod.asDisplayablePaymentMethod {
+                handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
+            }
+        }
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -140,19 +148,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
+    override fun handleViewAction(viewAction: ViewAction) {
         when (viewAction) {
-            is PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected -> {
+            is ViewAction.PaymentMethodSelected -> {
                 if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
                     transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
                 }
             }
-            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods -> {
+            ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionTo(manageScreenFactory())
             }
-            is PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod -> {
+            is ViewAction.EditPaymentMethod -> {
                 onEditPaymentMethod(viewAction.savedPaymentMethod)
             }
         }
