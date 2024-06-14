@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -14,8 +13,8 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
-    private val paymentMethods: List<SupportedPaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create()
+    private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
+        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod {  } }
     }
 
     private val savedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
@@ -29,7 +28,6 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }

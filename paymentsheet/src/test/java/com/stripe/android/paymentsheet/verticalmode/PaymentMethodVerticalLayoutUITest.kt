@@ -35,7 +35,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun clickingOnViewMore_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = emptyList(),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -50,30 +50,34 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun clickingOnNewPaymentMethod_transitionsToForm() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = listOf(
-                CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!,
-            ),
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = null,
-        )
-    ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
-        viewActionRecorder.consume(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected("card"))
-        assertThat(viewActionRecorder.viewActions).isEmpty()
+    fun clickingOnNewPaymentMethod_callsOnClick() {
+        var onClickCalled = false
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = listOf(
+                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
+                        .asDisplayablePaymentMethod { onClickCalled = true },
+                ),
+                isProcessing = false,
+                selection = null,
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
     }
 
     @Test
     fun allPaymentMethodsAreShown() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods(),
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod {  } },
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -96,11 +100,11 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun savedPaymentMethodIsSelected_whenSelectionIsSavedPm() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods(),
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod {  } },
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -139,7 +143,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         )
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
-                supportedPaymentMethods = supportedPaymentMethods,
+                displayablePaymentMethods = supportedPaymentMethods.map { it.asDisplayablePaymentMethod {  } },
                 isProcessing = false,
                 selection = selection,
                 displayedSavedPaymentMethod = null,

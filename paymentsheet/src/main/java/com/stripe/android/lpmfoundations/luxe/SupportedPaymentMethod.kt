@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal data class SupportedPaymentMethod(
@@ -77,6 +78,19 @@ internal data class SupportedPaymentMethod(
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
+        )
+    }
+
+    fun asDisplayablePaymentMethod(onClick: () -> Unit): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = code,
+            displayName = displayName,
+            iconResource = iconResource,
+            lightThemeIconUrl = lightThemeIconUrl,
+            darkThemeIconUrl = darkThemeIconUrl,
+            iconRequiresTinting = iconRequiresTinting,
+            subtitle = subtitle,
+            onClick = onClick,
         )
     }
 }

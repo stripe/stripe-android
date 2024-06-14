@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -14,8 +14,8 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
-    private val paymentMethods: List<SupportedPaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create()
+    private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
+        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod {  } }
     }
 
     @Test
@@ -25,7 +25,6 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }
@@ -38,7 +37,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true
-        )
+        ).asDisplayablePaymentMethod {  }
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
         paparazziRule.snapshot {
@@ -46,7 +45,6 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }
@@ -60,7 +58,6 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }
@@ -71,14 +68,13 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod()
+            ).createSupportedPaymentMethod().asDisplayablePaymentMethod {  }
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }
@@ -87,13 +83,14 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @Test
     fun testInvalidIconUrlAndInvalidResourceForVerticalMode() {
         val paymentMethods = listOf(
-            SupportedPaymentMethod(
+            DisplayablePaymentMethod(
                 code = "example_pm",
-                displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
+                displayName = resolvableString(R.string.stripe_paymentsheet_payment_method_affirm),
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 iconRequiresTinting = false,
+                onClick = {},
             )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
@@ -101,7 +98,6 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {},
                 imageLoader = mock(),
             )
         }

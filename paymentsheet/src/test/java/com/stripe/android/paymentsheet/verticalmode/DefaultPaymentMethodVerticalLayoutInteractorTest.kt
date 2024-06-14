@@ -47,7 +47,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(supportedPaymentMethods).isNotEmpty()
+                    assertThat(displayablePaymentMethods).isNotEmpty()
                     assertThat(selection).isNull()
                 }
                 selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
@@ -59,7 +59,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                 )
                 awaitItem().run {
-                    assertThat(supportedPaymentMethods).isNotEmpty()
+                    assertThat(displayablePaymentMethods).isNotEmpty()
                     assertThat(selection?.code()).isEqualTo("cashapp")
                 }
             }
@@ -74,7 +74,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         selectionSource.value = savedSelection
         interactor.state.test {
             awaitItem().run {
-                assertThat(supportedPaymentMethods).isNotEmpty()
+                assertThat(displayablePaymentMethods).isNotEmpty()
                 assertThat(selection).isEqualTo(savedSelection)
             }
         }
@@ -136,6 +136,33 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(newDisplayedSavedPm)
                 }
             }
+        }
+    }
+
+    @Test
+    fun `calling state_displayablePaymentMethods_onClick calls ViewAction_PaymentMethodSelected`() {
+        var onFormFieldValuesChangedCalled = false
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp")
+                )
+            ),
+            formElementsForCode = {
+                listOf()
+            },
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            }
+        ) {
+            val paymentMethod = interactor.state.value.displayablePaymentMethods.first { it.code == "cashapp" }
+            paymentMethod.onClick()
+            assertThat(onFormFieldValuesChangedCalled).isTrue()
         }
     }
 
