@@ -14,10 +14,15 @@ internal class FakeManageScreenInteractor(
                 emptyList(),
                 currentSelection = null,
                 isEditing = false,
+                canDelete = true,
             )
         )
 
     override fun handleViewAction(viewAction: ManageScreenInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
+    }
+
+    override fun close() {
+        /* Do nothing. */
     }
 }

@@ -28,6 +28,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = false,
+                        canDelete = true,
                     )
                 ),
             )
@@ -43,6 +44,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = savedPaymentMethods[1],
                         isEditing = false,
+                        canDelete = true,
                     )
                 ),
             )
@@ -58,6 +60,25 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = true,
+                        canDelete = true,
+                    )
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testManageUIScreen_withoutDeleteIcon() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+                        ),
+                        currentSelection = null,
+                        isEditing = true,
+                        canDelete = false,
                     )
                 ),
             )
