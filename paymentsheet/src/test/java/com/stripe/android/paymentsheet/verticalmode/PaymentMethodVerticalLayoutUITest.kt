@@ -131,6 +131,65 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
+    fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            supportedPaymentMethods = emptyList(),
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+        )
+    ) {
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        viewActionRecorder.consume(
+            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
+    fun oneSavedPm_canBeModified_buttonIsEdit_editsPaymentMethod() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            supportedPaymentMethods = emptyList(),
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
+        )
+    ) {
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        viewActionRecorder.consume(
+            PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(
+                PaymentMethodFixtures.displayableCard()
+            )
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
+    fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            supportedPaymentMethods = emptyList(),
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+        )
+    ) {
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
+
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).assertDoesNotExist()
+        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).assertDoesNotExist()
+    }
+
+    @Test
     fun clickingOnNewPaymentMethod_callsOnClick() {
         var onClickCalled = false
         runScenario(
@@ -191,8 +250,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         composeRule.onNodeWithTag(
