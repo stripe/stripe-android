@@ -49,9 +49,10 @@ internal class DefaultManageScreenInteractor(
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
+    val dispatcher: CoroutineContext = Dispatchers.Default
 ) : ManageScreenInteractor, CoroutineScope {
 
-    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
+    override val coroutineContext: CoroutineContext = dispatcher + SupervisorJob()
 
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethods = viewModel.paymentMethods,

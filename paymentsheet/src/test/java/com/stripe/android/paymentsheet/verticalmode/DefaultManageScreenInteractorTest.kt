@@ -9,6 +9,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -80,11 +83,8 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = emptyList()
 
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(backPressed).isTrue()
-                }
-            }
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isTrue()
         }
     }
 
@@ -107,11 +107,8 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(backPressed).isTrue()
-                }
-            }
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isTrue()
         }
     }
 
@@ -136,9 +133,11 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(cbcCard)
 
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(backPressed).isFalse()
                     assertThat(canDelete).isFalse()
                 }
             }
@@ -164,9 +163,11 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(backPressed).isFalse()
                     assertThat(canDelete).isTrue()
                 }
             }
@@ -186,6 +187,7 @@ class DefaultManageScreenInteractorTest {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
         val selection = MutableStateFlow(currentSelection)
         val editing = MutableStateFlow(isEditing)
+        val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -201,9 +203,14 @@ class DefaultManageScreenInteractorTest {
             onDeletePaymentMethod = { notImplemented() },
             onEditPaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
+            dispatcher = dispatcher,
         )
 
-        TestParams(interactor = interactor, paymentMethodsSource = paymentMethods).apply {
+        TestParams(
+            interactor = interactor,
+            paymentMethodsSource = paymentMethods,
+            dispatcher = dispatcher
+        ).apply {
             runTest {
                 testBlock()
             }
@@ -212,6 +219,7 @@ class DefaultManageScreenInteractorTest {
 
     private data class TestParams(
         val interactor: ManageScreenInteractor,
+        val dispatcher: TestDispatcher,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>
     )
 }
