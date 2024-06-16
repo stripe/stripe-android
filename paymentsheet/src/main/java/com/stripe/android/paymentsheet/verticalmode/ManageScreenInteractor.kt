@@ -50,9 +50,9 @@ internal class DefaultManageScreenInteractor(
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default
-) : ManageScreenInteractor, CoroutineScope {
+) : ManageScreenInteractor {
 
-    override val coroutineContext: CoroutineContext = dispatcher + SupervisorJob()
+    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethods = viewModel.paymentMethods,
@@ -68,7 +68,7 @@ internal class DefaultManageScreenInteractor(
     )
 
     init {
-        launch {
+        coroutineScope.launch {
             displayableSavedPaymentMethods.collect {
                 if (noPaymentMethodsAvailableToManage(it)) {
                     safeNavigateBack()
@@ -112,7 +112,7 @@ internal class DefaultManageScreenInteractor(
     }
 
     override fun close() {
-        cancel()
+        coroutineScope.cancel()
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
