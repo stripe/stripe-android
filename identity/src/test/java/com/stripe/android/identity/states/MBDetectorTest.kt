@@ -44,9 +44,9 @@ class MBDetectorTest {
             argWhere {
                 it.eventName == EVENT_MB_STATUS &&
                     (
-                    it.params.toMap()[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
-                        as Map<*, *>
-                    )[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == "false"
+                        it.params.toMap()[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
+                            as Map<*, *>
+                        )[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == "false"
             }
         )
     }

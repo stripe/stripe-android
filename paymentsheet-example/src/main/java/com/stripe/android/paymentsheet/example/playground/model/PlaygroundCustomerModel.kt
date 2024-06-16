@@ -27,7 +27,7 @@ class CustomerEphemeralKeyRequest private constructor(
         CustomerSession,
 
         @SerialName("legacy")
-        Legacy;
+        Legacy
     }
 
     class Builder {

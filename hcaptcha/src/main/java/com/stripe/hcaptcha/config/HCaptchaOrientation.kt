@@ -14,5 +14,5 @@ enum class HCaptchaOrientation {
     PORTRAIT,
 
     @SerialName("landscape")
-    LANDSCAPE;
+    LANDSCAPE
 }
