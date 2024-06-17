@@ -122,7 +122,8 @@ internal class PaymentMethodVerticalLayoutUITest {
                 isProcessing = false,
                 selection = null,
                 displayedSavedPaymentMethod = null,
-                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             )
         ) {
             assertThat(onClickCalled).isFalse()
@@ -143,7 +144,8 @@ internal class PaymentMethodVerticalLayoutUITest {
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         assertThat(
@@ -171,7 +173,8 @@ internal class PaymentMethodVerticalLayoutUITest {
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -211,7 +214,8 @@ internal class PaymentMethodVerticalLayoutUITest {
                 isProcessing = false,
                 selection = selection,
                 displayedSavedPaymentMethod = null,
-                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             )
         ) {
             assertThat(
