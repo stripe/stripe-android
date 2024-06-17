@@ -170,6 +170,8 @@
   <string name="stripe_title_select_shipping_method">Selecciona el método de envío</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Actualizar la tarjeta</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Actualizar</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifica tu pago</string>
 </resources>

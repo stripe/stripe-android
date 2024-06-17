@@ -170,6 +170,8 @@
   <string name="stripe_title_select_shipping_method">Selectare metodă de plată</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Actualizare card</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Actualizare</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verificați-vă plata</string>
 </resources>

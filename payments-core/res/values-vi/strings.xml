@@ -170,6 +170,8 @@
   <string name="stripe_title_select_shipping_method">Chọn phương thức vận chuyển</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Cập nhật thẻ</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Cập nhật</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Xác minh thanh toán của quý vị</string>
 </resources>

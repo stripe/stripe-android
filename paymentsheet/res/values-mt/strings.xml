@@ -45,12 +45,16 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Ikkonferma l-kodiċi CVC tiegħek</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Ikteb l-indirizz int stess</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Ħu ħsieb il-metodi tal-pagament</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Ħu ħsieb il-metodi tal-pagament tiegħek</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe se tiddepożita $0.01 fil-kont tiegħek fi żmien jum/jumejn tax-xogħol. Imbagħad se tirċievi email bl-istruzzjonijiet biex tagħmel il-pagament lil %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Ibdel %s</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">Metodu tal-pagament ġdid</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Jew ħallas bil-</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -83,6 +87,8 @@
   <string name="stripe_paymentsheet_save_for_future_payments">Erfa\' għall-pagamenti fil-ġejjieni</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-kard għal pagamenti futuri %s</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Merfugħ</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Agħżel il-metodu tal-ħlas tiegħek</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
@@ -99,4 +105,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Il-pagament ma rnexxiex</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">Uri iktar</string>
 </resources>

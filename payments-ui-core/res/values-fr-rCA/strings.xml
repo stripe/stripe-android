@@ -65,6 +65,8 @@
   <string name="stripe_pay_button_amount">Payer %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Institution financière</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">Ajouter une carte</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informations de la carte</string>
   <!-- Header text shown above a UPI ID text field -->
