@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -13,21 +15,13 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
-
-    fun close()
 
     data class State(
         val selectedPaymentMethodCode: PaymentMethodCode,
@@ -43,6 +37,7 @@ internal interface AddPaymentMethodInteractor {
     )
 
     sealed class ViewAction {
+        data object ClearErrorMessages : ViewAction()
         data class OnPaymentMethodSelected(val code: PaymentMethodCode) : ViewAction()
         data class OnLinkSignUpStateUpdated(val state: InlineSignupViewState) : ViewAction()
         data class OnFormFieldValuesChanged(val formValues: FormFieldValues?, val selectedPaymentMethodCode: String) : ViewAction()
@@ -65,8 +60,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
-    dispatcher: CoroutineContext = Dispatchers.Default,
-) : AddPaymentMethodInteractor {
+): AddPaymentMethodInteractor {
 
     constructor(sheetViewModel: BaseSheetViewModel) : this(
         initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
@@ -85,10 +79,11 @@ internal class DefaultAddPaymentMethodInteractor(
         createUSBankAccountFormArguments = { USBankAccountFormArguments.create(sheetViewModel, it) }
     )
 
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
-
-    private val _selectedPaymentMethodCode: MutableStateFlow<String> = MutableStateFlow(initiallySelectedPaymentMethodType)
-    private val selectedPaymentMethodCode: StateFlow<String> = _selectedPaymentMethodCode
+    // TODO: current issue is that the AddPaymentMethodInteractor is recreated when you click on a form field, which
+    // recreates with the original initially selected PM type, which breaks everything.
+    private val selectedPaymentMethodCode: String by rememberSaveable {
+        mutableStateOf(initiallySelectedPaymentMethodType)
+    }
 
     override val state = combineAsStateFlow(
         selectedPaymentMethodCode,
@@ -111,16 +106,9 @@ internal class DefaultAddPaymentMethodInteractor(
         )
     }
 
-    init {
-        coroutineScope.launch {
-            selection.collect {
-                clearErrorMessages()
-            }
-        }
-    }
-
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         when (viewAction) {
+            AddPaymentMethodInteractor.ViewAction.ClearErrorMessages -> clearErrorMessages()
             is AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated -> onLinkSignUpStateUpdated(
                 viewAction.state
             )
@@ -138,24 +126,5 @@ internal class DefaultAddPaymentMethodInteractor(
                 }
             }
         }
-    }
-
-    override fun close() {
-        coroutineScope.cancel()
-    }
-}
-
-internal object UnsupportedAddPaymentMethodInteractor : AddPaymentMethodInteractor {
-    override val state: StateFlow<AddPaymentMethodInteractor.State>
-        get() {
-            throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
-        }
-
-    override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
-        throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
-    }
-
-    override fun close() {
-        throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
     }
 }
