@@ -40,11 +40,13 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.test.core.ui.clickTextInWebView
+import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -784,6 +786,7 @@ internal class PlaygroundTestDriver(
      */
     fun screenshotRegression(
         testParameters: TestParameters,
+        numExpectedPaymentMethodIcons: Int = 0,
         customOperations: () -> Unit = {}
     ) {
         setup(testParameters)
@@ -795,11 +798,22 @@ internal class PlaygroundTestDriver(
         waitForScreenToLoad(testParameters)
         customOperations()
 
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            val numIconsFromUrl = getNumIconsWithTag(TEST_TAG_IMAGE_FROM_URL)
+            val numIconsFromResource = getNumIconsWithTag(TEST_TAG_ICON_FROM_RES)
+
+            (numIconsFromUrl + numIconsFromResource) == numExpectedPaymentMethodIcons
+        }
+
         currentActivity?.let {
             compareScreenshot(it)
         }
 
         teardown()
+    }
+
+    private fun getNumIconsWithTag(testTag: String): Int {
+        return composeTestRule.onAllNodesWithTag(testTag, useUnmergedTree = true).fetchSemanticsNodes().size
     }
 
     private fun waitForScreenToLoad(testParameters: TestParameters) {
