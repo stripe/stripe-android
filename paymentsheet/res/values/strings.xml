@@ -77,7 +77,7 @@
   <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
-  <!-- Title for a screen which allows you to delete your only saved payment method. -->
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Remove payment method</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Save</string>
