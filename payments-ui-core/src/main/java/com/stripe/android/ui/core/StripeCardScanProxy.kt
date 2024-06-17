@@ -53,12 +53,11 @@ internal interface StripeCardScanProxy {
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
-            return UnsupportedStripeCardScanProxy(errorReporter)
-//            return if (isStripeCardScanAvailable()) {
-//                provider()
-//            } else {
-//                UnsupportedStripeCardScanProxy(errorReporter)
-//            }
+            return if (isStripeCardScanAvailable()) {
+                provider()
+            } else {
+                UnsupportedStripeCardScanProxy(errorReporter)
+            }
         }
 
         fun removeCardScanFragment(
