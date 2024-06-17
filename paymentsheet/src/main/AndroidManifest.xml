@@ -5,22 +5,18 @@
         <activity
             android:name=".PaymentSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".PaymentOptionsActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name="com.stripe.android.customersheet.CustomerSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".addresselement.AddressElementActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".paymentdatacollection.bacs.BacsMandateConfirmationActivity"
@@ -39,7 +35,6 @@
             android:exported="false" />
         <activity
             android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:windowSoftInputMode="adjustResize"/>
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
     </application>
 </manifest>
