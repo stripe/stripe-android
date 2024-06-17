@@ -45,12 +45,16 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Confirm your CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Manage your payment methods</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe will deposit $0.01 to your account in 1-2 business days. Then you’ll get an email with instructions to complete payment to %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">New payment method</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -83,6 +87,8 @@
   <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Saved</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
@@ -99,4 +105,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">View more</string>
 </resources>

@@ -170,6 +170,8 @@
   <string name="stripe_title_select_shipping_method">Piliin ang Paraan ng Pagpapadala</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">I-update ang kard</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">I-update</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Patunayan ang iyong pagbabayad</string>
 </resources>
