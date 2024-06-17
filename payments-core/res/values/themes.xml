@@ -2,6 +2,7 @@
 <resources>
 
     <style name="StripeBaseTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="colorAccent">@color/stripe_accent_color_default</item>
         <item name="colorControlNormal">@color/stripe_control_normal_color_default</item>
         <item name="colorPrimary">@color/stripe_toolbar_color_default</item>
@@ -14,6 +15,7 @@
 
     <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
     <style name="StripeTransparentTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -23,6 +25,7 @@
     </style>
 
     <style name="StripePaymentSheetBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -41,6 +44,7 @@
     </style>
 
     <style name="StripePayLauncherDefaultTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
