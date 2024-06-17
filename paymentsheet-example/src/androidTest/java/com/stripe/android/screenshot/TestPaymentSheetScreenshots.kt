@@ -96,7 +96,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -104,7 +105,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun testPaymentSheetNewCustomerAppearance() {
         AppearanceStore.state = appearance
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -112,7 +114,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun testPaymentSheetNewCustomerDark() {
         forceDarkMode()
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -121,7 +124,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         AppearanceStore.state = appearance
         forceDarkMode()
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -224,7 +228,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             primaryButton = primaryButton
         )
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -235,7 +240,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         )
         forceDarkMode()
         testDriver.screenshotRegression(
-            testParams
+            testParams,
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -244,7 +250,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
                 settings[PrimaryButtonLabelSettingsDefinition] = "Buy this now!"
-            }
+            },
+            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -257,6 +264,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
                 settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
             },
+            numExpectedPaymentMethodIcons = 3,
             customOperations = {
                 testDriver.pressSelection()
                 testDriver.scrollToBottom()
