@@ -47,7 +47,7 @@ class CheckoutRequest private constructor(
         CustomerSession,
 
         @SerialName("legacy")
-        Legacy;
+        Legacy
     }
 
     class Builder {

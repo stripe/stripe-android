@@ -103,8 +103,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic

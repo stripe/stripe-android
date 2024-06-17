@@ -223,11 +223,11 @@ internal class IDDetectorAnalyzer(
         private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
         private val identityRepository: IdentityRepository
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(
                 modelFile,

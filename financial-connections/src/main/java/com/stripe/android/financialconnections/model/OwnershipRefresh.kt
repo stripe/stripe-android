@@ -38,6 +38,6 @@ data class OwnershipRefresh(
         @SerialName("succeeded")
         SUCCEEDED("succeeded"),
 
-        UNKNOWN("unknown");
+        UNKNOWN("unknown")
     }
 }

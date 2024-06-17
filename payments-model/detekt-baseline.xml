@@ -15,6 +15,5 @@
     <ID>MagicNumber:CardJsonParser.kt$CardJsonParser$12</ID>
     <ID>MagicNumber:CardUtils.kt$CardUtils$10</ID>
     <ID>MagicNumber:CardUtils.kt$CardUtils$9</ID>
-    <ID>MaxLineLength:BankAccount.kt$BankAccount$*</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -160,10 +160,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.status.postValue(
             viewModel.status.value +
                 "\n\nStarting PaymentIntent confirmation" + (
-                stripeAccountId?.let {
-                    " for $it"
-                } ?: ""
-                )
+                    stripeAccountId?.let {
+                        " for $it"
+                    } ?: ""
+                    )
         )
         val confirmPaymentIntentParams = if (existingPaymentMethodId == null) {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -204,10 +204,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.status.postValue(
             viewModel.status.value +
                 "\n\nStarting SetupIntent confirmation" + (
-                stripeAccountId?.let {
-                    " for $it"
-                } ?: ""
-                )
+                    stripeAccountId?.let {
+                        " for $it"
+                    } ?: ""
+                    )
         )
         confirmSetupIntent(
             ConfirmSetupIntentParams.create(
