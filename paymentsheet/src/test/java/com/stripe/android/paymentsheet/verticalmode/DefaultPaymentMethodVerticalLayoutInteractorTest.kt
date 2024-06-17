@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -314,6 +315,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        var selectedSavedPaymentMethod: DisplayableSavedPaymentMethod? = null
+        runScenario(
+            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it }
+        ) {
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod))
+            assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod)
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -329,6 +342,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod>? = null,
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
+        onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -348,7 +362,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formScreenFactory = formScreenFactory,
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            providePaymentMethodName = { it!! }
+            providePaymentMethodName = { it!! },
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
         )
 
         TestParams(
