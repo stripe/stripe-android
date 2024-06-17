@@ -26,5 +26,5 @@ enum class HCaptchaTheme {
      * Contrast theme
      */
     @SerialName("contrast")
-    CONTRAST;
+    CONTRAST
 }

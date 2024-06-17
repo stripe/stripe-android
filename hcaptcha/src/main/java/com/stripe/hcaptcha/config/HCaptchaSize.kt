@@ -27,5 +27,5 @@ enum class HCaptchaSize {
      * Checkbox has a 'compact' size and user must press it to show the challenge.
      */
     @SerialName("compact")
-    COMPACT;
+    COMPACT
 }

@@ -211,7 +211,7 @@ internal class AutocompleteViewModel @Inject constructor(
 
     internal class Factory(
         private val autoCompleteViewModelSubcomponentBuilderProvider:
-            Provider<AutocompleteViewModelSubcomponent.Builder>,
+        Provider<AutocompleteViewModelSubcomponent.Builder>,
         private val args: Args,
         private val applicationSupplier: () -> Application
     ) : ViewModelProvider.Factory {

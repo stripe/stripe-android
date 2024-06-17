@@ -175,8 +175,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         fadeOut()
     }
 
-    private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int):
-        @GooglePayPaymentMethodLauncher.ErrorCode Int {
+    private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int): @GooglePayPaymentMethodLauncher.ErrorCode Int {
         return when (googlePayStatusCode) {
             CommonStatusCodes.NETWORK_ERROR -> GooglePayPaymentMethodLauncher.NETWORK_ERROR
             CommonStatusCodes.DEVELOPER_ERROR -> GooglePayPaymentMethodLauncher.DEVELOPER_ERROR

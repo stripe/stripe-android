@@ -32,7 +32,7 @@ internal enum class CardImageVerificationDetailsFormat {
     JPEG,
 
     @SerialName("webp")
-    WEBP;
+    WEBP
 }
 
 @Serializable
@@ -49,8 +49,10 @@ internal data class CardImageVerificationDetailsAcceptedImageConfigs(
 
     @SerialName("format_settings")
     val formatSettings:
-        HashMap<CardImageVerificationDetailsFormat,
-            CardImageVerificationDetailsImageSettings?>? = null,
+    HashMap<
+        CardImageVerificationDetailsFormat,
+        CardImageVerificationDetailsImageSettings?
+        >? = null,
 
     @SerialName("preferred_formats")
     val preferredFormats: List<CardImageVerificationDetailsFormat>? = null

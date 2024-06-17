@@ -269,7 +269,9 @@ internal fun TextFieldUi(
             }
         },
         placeholder = placeholder?.let {
-            { Placeholder(text = it) }
+            {
+                Placeholder(text = it)
+            }
         },
         trailingIcon = trailingIcon?.let {
             {

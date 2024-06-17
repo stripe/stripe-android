@@ -157,8 +157,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
         }
     }
 
-    override suspend fun retrieveSelectedPaymentOption():
-        CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
+    override suspend fun retrieveSelectedPaymentOption(): CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(

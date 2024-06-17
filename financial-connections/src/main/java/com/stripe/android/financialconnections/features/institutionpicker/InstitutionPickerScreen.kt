@@ -373,7 +373,9 @@ private fun SearchRow(
             trailingIcon = query
                 .takeIf { it.isNotEmpty() }
                 ?.let {
-                    { ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors) }
+                    {
+                        ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors)
+                    }
                 },
             placeholder = {
                 Text(

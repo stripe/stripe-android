@@ -9,7 +9,7 @@ enum class FeatureState {
     Enabled,
 
     @SerialName("disabled")
-    Disabled;
+    Disabled
 }
 
 @Serializable
@@ -21,5 +21,5 @@ enum class AllowRedisplayFilter {
     Limited,
 
     @SerialName("always")
-    Always;
+    Always
 }

@@ -73,7 +73,7 @@ internal data class VerificationPage(
         REQUIRESINPUT,
 
         @SerialName("verified")
-        VERIFIED;
+        VERIFIED
     }
 
     internal companion object {

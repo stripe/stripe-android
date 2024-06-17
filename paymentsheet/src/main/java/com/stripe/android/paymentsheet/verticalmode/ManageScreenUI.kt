@@ -129,8 +129,8 @@ private fun DeleteIcon(
             openRemoveDialog.value = false
             deletePaymentMethod(paymentMethod)
         }, onDismissListener = {
-                openRemoveDialog.value = false
-            })
+            openRemoveDialog.value = false
+        })
     }
 }
 
