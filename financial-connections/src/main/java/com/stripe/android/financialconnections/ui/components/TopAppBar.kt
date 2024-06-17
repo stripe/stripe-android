@@ -2,7 +2,11 @@ package com.stripe.android.financialconnections.ui.components
 
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -188,13 +192,18 @@ private fun Title(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (hideStripeLogo.not()) {
-            Image(
+        AnimatedVisibility(
+            visible = !hideStripeLogo,
+            enter = fadeIn(animationSpec = tween()),
+            exit = fadeOut(animationSpec = tween()),
+        ) {
+            Icon(
                 modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
                 painter = painterResource(id = theme.icon),
                 contentDescription = null // decorative element
             )
         }
+
         // show a test mode pill if in test mode
         if (testmode) {
             Text(
