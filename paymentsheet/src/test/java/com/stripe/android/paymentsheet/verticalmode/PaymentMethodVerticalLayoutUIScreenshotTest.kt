@@ -26,7 +26,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
-                    PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
                 isEnabled = true,
                 onEditPaymentMethod = {},

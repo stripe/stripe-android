@@ -40,7 +40,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -54,12 +54,12 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = emptyList(),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -73,12 +73,12 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun oneSavedPm_canBeModified_buttonIsEdit_editsPaymentMethod() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = emptyList(),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -94,12 +94,12 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = emptyList(),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -122,6 +122,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 isProcessing = false,
                 selection = null,
                 displayedSavedPaymentMethod = null,
+                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             )
         ) {
             assertThat(onClickCalled).isFalse()

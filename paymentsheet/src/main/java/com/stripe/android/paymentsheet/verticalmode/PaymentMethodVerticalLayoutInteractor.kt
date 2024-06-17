@@ -137,12 +137,27 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
         }
 
-        return if (paymentMethods.size > 1) {
-            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
-        } else if (paymentMethods.size == 1 && allowsRemovalOfLastSavedPaymentMethod) {
-            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
-        } else if (paymentMethods.size == 1 && savedPaymentMethod.isModifiable()) {
-            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
+        return when (paymentMethods.size) {
+            0 -> PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+            1 -> {
+                getSavedPaymentMethodActionForOnePaymentMethod(
+                    savedPaymentMethod,
+                    allowsRemovalOfLastSavedPaymentMethod
+                )
+            }
+            else ->
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
+        }
+    }
+
+    private fun getSavedPaymentMethodActionForOnePaymentMethod(
+        paymentMethod: DisplayableSavedPaymentMethod,
+        allowsRemovalOfLastSavedPaymentMethod: Boolean
+    ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
+        return if (allowsRemovalOfLastSavedPaymentMethod) {
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+        } else if (paymentMethod.isModifiable()) {
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
         }
