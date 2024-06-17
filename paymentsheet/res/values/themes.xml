@@ -15,6 +15,7 @@
     <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
 
     <style name="StripePaymentSheetBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

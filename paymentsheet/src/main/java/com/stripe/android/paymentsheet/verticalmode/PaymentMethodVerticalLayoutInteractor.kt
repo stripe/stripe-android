@@ -29,6 +29,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
+        data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class EditPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
     }
 
@@ -54,6 +55,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -82,6 +84,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         providePaymentMethodName = viewModel::providePaymentMethodName,
         allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
         onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) }
+        onSelectSavedPaymentMethod = {
+            viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
+        }
     )
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -171,6 +176,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
                 }
+            }
+            is ViewAction.SavedPaymentMethodSelected -> {
+                onSelectSavedPaymentMethod(viewAction.savedPaymentMethod)
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionTo(manageScreenFactory())

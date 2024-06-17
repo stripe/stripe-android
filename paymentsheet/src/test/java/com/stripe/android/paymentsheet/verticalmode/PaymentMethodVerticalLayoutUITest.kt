@@ -134,6 +134,30 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
+    fun clickingSavedPaymentMethod_callsSelectSavedPaymentMethod() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = emptyList(),
+                isProcessing = false,
+                selection = null,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+            )
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithTag(
+                TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${savedPaymentMethod.paymentMethod.id}"
+            ).performClick()
+            viewActionRecorder.consume(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
+                    savedPaymentMethod.paymentMethod
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
     fun allPaymentMethodsAreShown() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = PaymentMethodMetadataFactory.create(

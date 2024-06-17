@@ -14,19 +14,16 @@ internal class CardScanActivity : AppCompatActivity() {
         StripeActivityCardScanBinding.inflate(layoutInflater)
     }
 
-    private lateinit var stripeCardScanProxy: StripeCardScanProxy
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        stripeCardScanProxy = StripeCardScanProxy.create(
+        StripeCardScanProxy.create(
             this,
             PaymentConfiguration.getInstance(this).publishableKey,
             this::onScanFinished,
             ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
-        )
-        stripeCardScanProxy.present()
+        ).present()
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {

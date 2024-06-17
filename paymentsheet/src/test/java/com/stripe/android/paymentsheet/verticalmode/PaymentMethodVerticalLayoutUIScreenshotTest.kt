@@ -31,6 +31,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 isEnabled = true,
                 onEditPaymentMethod = {},
                 onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
                 imageLoader = mock(),
             )
         }

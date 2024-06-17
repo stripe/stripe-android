@@ -55,6 +55,9 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
         onEditPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
+        onSelectSavedPaymentMethod = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
             )
         },
         imageLoader = imageLoader,
@@ -72,6 +75,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
@@ -93,7 +97,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onEditPaymentMethod = onEditPaymentMethod
                     )
-                }
+                },
+                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
