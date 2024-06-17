@@ -37,6 +37,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
@@ -389,9 +391,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else if (
-            FeatureFlags.cvcRecollection.isEnabled &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card &&
-            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
+            isCvcRecollectionEnabled(state) &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
             CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
                 cvcRecollectionLauncher.launch(
@@ -403,6 +404,11 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmPaymentSelection(paymentSelection, state)
         }
     }
+
+    private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean =
+        FeatureFlags.cvcRecollection.isEnabled &&
+            ((state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent())
 
     private fun confirmGenericPaymentMethod(
         paymentSelection: PaymentSelection.New.GenericPaymentMethod,

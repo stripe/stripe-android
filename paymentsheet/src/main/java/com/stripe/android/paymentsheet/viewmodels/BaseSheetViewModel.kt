@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -561,8 +562,13 @@ internal abstract class BaseSheetViewModel(
         ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
             FeatureFlags.cvcRecollection.isEnabled
 
+    internal fun isCvcRecollectionForDeferred(): Boolean {
+        return CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
+            FeatureFlags.cvcRecollection.isEnabled
+    }
+
     internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
-        return if (isCvcRecollectionEnabled()) {
+        return if ((isCvcRecollectionEnabled() || isCvcRecollectionForDeferred())) {
             PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
         } else {
             PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired

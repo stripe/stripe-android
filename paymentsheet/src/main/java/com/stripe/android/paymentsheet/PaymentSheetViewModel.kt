@@ -597,7 +597,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         return if (
-            isCvcRecollectionEnabled() &&
+            (isCvcRecollectionEnabled() || isCvcRecollectionForDeferred()) &&
             paymentSelection is PaymentSelection.Saved &&
             paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
