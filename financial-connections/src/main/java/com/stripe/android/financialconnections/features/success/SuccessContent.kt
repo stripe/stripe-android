@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.success
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Spring
@@ -12,7 +13,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -87,8 +88,6 @@ internal fun SuccessContent(
     onDoneClick: () -> Unit,
 ) {
     SuccessContentInternal(
-        // Just enabled on Compose Previews: allows to preview the post-animation state.
-        overrideAnimationForPreview = false,
         payloadAsync = payloadAsync,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
@@ -97,7 +96,8 @@ internal fun SuccessContent(
 
 @Composable
 private fun SuccessContentInternal(
-    overrideAnimationForPreview: Boolean,
+    overrideAnimationForPreview: Boolean = false,
+    overrideSuccessBodyHeightForPreview: Dp? = null,
     payloadAsync: Async<Payload>,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
@@ -128,6 +128,7 @@ private fun SuccessContentInternal(
             customSuccessMessage = payload?.customSuccessMessage,
             accountsCount = payload?.accountsCount ?: 0,
             showSpinner = showSpinner || payload == null,
+            initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
         )
 
         SuccessFooter(
@@ -147,6 +148,7 @@ private fun SuccessContentInternal(
 @Composable
 private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
+    initialSuccessBodyHeight: Dp?,
     accountsCount: Int,
     customSuccessMessage: TextResource?,
     modifier: Modifier = Modifier,
@@ -155,12 +157,12 @@ private fun SpinnerToSuccessAnimation(
     val scope = rememberCoroutineScope()
 
     var targetCheckmarkScale by rememberSaveable {
-        mutableFloatStateOf(0f)
+        mutableFloatStateOf(if (showSpinner) 0f else 1f)
     }
 
-    var successBodyHeight by remember { mutableStateOf(0.dp) }
+    var successBodyHeight by remember { mutableStateOf(initialSuccessBodyHeight ?: 0.dp) }
 
-    BoxWithConstraints(
+    Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
@@ -340,8 +342,20 @@ internal fun SuccessScreenAnimationCompletedPreview(
     @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
 ) {
     FinancialConnectionsPreview {
+        val configuration = LocalConfiguration.current
+        val isPhone = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+        val payload = state.payload()
+
+        val successBodyHeight = if (payload?.customSuccessMessage != null && isPhone) {
+            120.dp
+        } else {
+            72.dp
+        }
+
         SuccessContentInternal(
             overrideAnimationForPreview = true,
+            overrideSuccessBodyHeightForPreview = successBodyHeight,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
             onDoneClick = {},
