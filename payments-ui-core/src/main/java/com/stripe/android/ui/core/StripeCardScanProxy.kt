@@ -53,11 +53,12 @@ internal interface StripeCardScanProxy {
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
-            return if (isStripeCardScanAvailable()) {
-                provider()
-            } else {
-                UnsupportedStripeCardScanProxy(errorReporter)
-            }
+            return UnsupportedStripeCardScanProxy(errorReporter)
+//            return if (isStripeCardScanAvailable()) {
+//                provider()
+//            } else {
+//                UnsupportedStripeCardScanProxy(errorReporter)
+//            }
         }
 
         fun removeCardScanFragment(
@@ -96,9 +97,14 @@ internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorRe
         if (BuildConfig.DEBUG) {
             throw illegalStateException
         } else {
+            // Instrumentation signals penetration testing.
+            val hasInstrumentation = runCatching {
+                Class.forName("androidx.test.InstrumentationRegistry")
+            }.isSuccess
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_CARDSCAN_DEPENDENCY,
-                StripeException.create(illegalStateException)
+                StripeException.create(illegalStateException),
+                additionalNonPiiParams = mapOf("has_instrumentation" to hasInstrumentation.toString()),
             )
         }
     }
