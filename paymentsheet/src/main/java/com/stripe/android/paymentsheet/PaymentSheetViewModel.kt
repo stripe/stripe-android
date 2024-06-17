@@ -595,6 +595,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         return if (
             (isCvcRecollectionEnabled() || isCvcRecollectionForDeferred()) &&

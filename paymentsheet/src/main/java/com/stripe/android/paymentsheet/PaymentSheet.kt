@@ -211,17 +211,17 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * @param cvcCallback Called when presenting [PaymentSheet] to determine whether to display a
-         * CVC recollection field
+         * @param callback Called when presenting [PaymentSheet] to determine whether to display a
+         * CVC recollection field.
          *
          */
         @ExperimentalCvcRecollectionApi
-        fun cvcRecollectionEnabledCallback(cvcCallback: CvcRecollectionEnabledCallback) = apply {
-            cvcRecollectionEnabledCallback = cvcCallback
+        fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+            cvcRecollectionEnabledCallback = callback
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
+         * Returns a [PaymentSheet].
          *
          * @param activity The Activity that is presenting [PaymentSheet].
          */
@@ -231,7 +231,7 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
+         * Returns a [PaymentSheet].
          *
          * @param fragment the Fragment that is presenting the payment sheet.
          */
@@ -1705,21 +1705,6 @@ class PaymentSheet internal constructor(
          */
         fun confirm()
 
-        sealed class Result {
-            object Success : Result()
-
-            class Failure(
-                val error: Throwable
-            ) : Result()
-        }
-
-        fun interface ConfigCallback {
-            fun onConfigured(
-                success: Boolean,
-                error: Throwable?
-            )
-        }
-
         /**
          * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
          *
@@ -1763,8 +1748,7 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set
+             * Returns a [PaymentSheet.FlowController].
              *
              * @param activity The Activity that is presenting [PaymentSheet.FlowController].
              */
@@ -1774,8 +1758,7 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set
+             * Returns a [PaymentSheet.FlowController].
              *
              * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
              */
@@ -1785,8 +1768,7 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Returns a [PaymentSheet.FlowController] composable an initializes callback handlers
-             * if respective callbacks are set
+             * Returns a [PaymentSheet.FlowController] composable.
              */
             @Composable
             fun build(): FlowController {
@@ -1795,16 +1777,31 @@ class PaymentSheet internal constructor(
             }
 
             private fun initializeCallbacks() {
-                this.createIntentCallback?.let {
+                createIntentCallback?.let {
                     IntentConfirmationInterceptor.createIntentCallback = it
                 }
-                this.externalPaymentMethodConfirmHandler?.let {
+                externalPaymentMethodConfirmHandler?.let {
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
                 }
-                this.cvcRecollectionEnabledCallback?.let {
+                cvcRecollectionEnabledCallback?.let {
                     CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
                 }
             }
+        }
+
+        sealed class Result {
+            object Success : Result()
+
+            class Failure(
+                val error: Throwable
+            ) : Result()
+        }
+
+        fun interface ConfigCallback {
+            fun onConfigured(
+                success: Boolean,
+                error: Throwable?
+            )
         }
 
         companion object {

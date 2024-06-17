@@ -67,6 +67,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
+
     @OptIn(ExperimentalCvcRecollectionApi::class)
     val cvcCallback = CvcRecollectionEnabledCallback { true }
 
