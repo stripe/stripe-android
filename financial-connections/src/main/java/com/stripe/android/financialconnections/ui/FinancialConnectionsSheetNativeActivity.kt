@@ -204,6 +204,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = initialDestination.fullRoute,
+                        enterTransition = enterTransition(),
+                        exitTransition = pauseTransition(),
+                        popEnterTransition = resumeTransition(),
+                        popExitTransition = exitTransition(),
                     ) {
                         composable(Destination.Consent)
                         composable(Destination.ManualEntry)
