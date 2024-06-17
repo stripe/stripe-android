@@ -314,6 +314,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        var selectedSavedPaymentMethod: PaymentMethod? = null
+        runScenario(
+            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it }
+        ) {
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -329,6 +341,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod>? = null,
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
+        onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -348,7 +361,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formScreenFactory = formScreenFactory,
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            providePaymentMethodName = { it!! }
+            providePaymentMethodName = { it!! },
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
         )
 
         TestParams(
