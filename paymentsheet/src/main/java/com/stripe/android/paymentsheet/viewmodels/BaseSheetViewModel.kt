@@ -605,6 +605,14 @@ internal abstract class BaseSheetViewModel(
             }
         )
 
+        if (mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
+            savedStateHandle[SAVED_PM_SELECTION] = null
+        }
+
+        if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
+            savedStateHandle[SAVE_SELECTION] = null
+        }
+
         val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
