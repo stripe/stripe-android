@@ -158,11 +158,6 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    internal val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
-        SAVED_PM_SELECTION,
-        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
-    )
-
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
 
@@ -218,6 +213,9 @@ internal abstract class BaseSheetViewModel(
      * the user returns to that payment method type.
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
+
+    private val _newPaymentSelectionFlow = MutableStateFlow<NewOrExternalPaymentSelection?>(null)
+    internal val newPaymentSelectionFlow: StateFlow<NewOrExternalPaymentSelection?> = _newPaymentSelectionFlow
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -280,6 +278,12 @@ internal abstract class BaseSheetViewModel(
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
 
+    val selectedPaymentMethodCode: StateFlow<PaymentMethodCode> = combineAsStateFlow(
+        newPaymentSelectionFlow, supportedPaymentMethodsFlow
+    ) { newPaymentSelection, supportedPaymentMethods ->
+        newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethods.first()
+    }
+
     init {
         viewModelScope.launch {
             canEdit.collect { canEdit ->
@@ -309,9 +313,8 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
-                    is PaymentSheetScreen.Form,
-                    is PaymentSheetScreen.ManageSavedPaymentMethods,
-                    is PaymentSheetScreen.ManageOneSavedPaymentMethod -> {}
+                    is PaymentSheetScreen.Form, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+                    }
                 }
             }
         }
@@ -384,7 +387,6 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.Loading,
             is PaymentSheetScreen.EditPaymentMethod,
             is PaymentSheetScreen.Form,
-            is PaymentSheetScreen.ManageOneSavedPaymentMethod,
             is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                 // Nothing to do here
             }
@@ -491,10 +493,14 @@ internal abstract class BaseSheetViewModel(
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
-            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
-            is PaymentSelection.ExternalPaymentMethod ->
+            is PaymentSelection.New -> {
+                newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.New(selection)
+            }
+            is PaymentSelection.ExternalPaymentMethod -> {
                 newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
-            is PaymentSelection.Saved -> savedStateHandle[SAVED_PM_SELECTION] = selection.paymentMethod
+                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.External(selection)
+            }
             else -> Unit
         }
 
@@ -607,14 +613,6 @@ internal abstract class BaseSheetViewModel(
                 it.id != paymentMethodId
             }
         )
-
-        if (mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
-            savedStateHandle[SAVED_PM_SELECTION] = null
-        }
-
-        if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            savedStateHandle[SAVE_SELECTION] = null
-        }
 
         val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
@@ -945,7 +943,6 @@ internal abstract class BaseSheetViewModel(
     companion object {
         internal const val SAVED_CUSTOMER = "customer_info"
         internal const val SAVE_SELECTION = "selection"
-        internal const val SAVED_PM_SELECTION = "saved_selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
