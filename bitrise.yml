@@ -441,7 +441,7 @@ workflows:
             - file_path: ./scripts/download_robolectric.sh
       - set-java-version@1:
           inputs:
-            - set_java_version: 17
+            - set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
