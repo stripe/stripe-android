@@ -62,6 +62,11 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
             )
         },
+        onManageOneSavedPaymentMethod = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageOneSavedPaymentMethod
+            )
+        },
         imageLoader = imageLoader,
         modifier = Modifier.padding(horizontal = 20.dp)
     )
@@ -76,6 +81,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     selection: PaymentSelection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: () -> Unit,
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
@@ -97,7 +103,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                         displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onEditPaymentMethod = onEditPaymentMethod
+                        onEditPaymentMethod = onEditPaymentMethod,
+                        onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -128,6 +135,7 @@ private fun SavedPaymentMethodTrailingContent(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: () -> Unit,
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     when (savedPaymentMethodAction) {
@@ -136,7 +144,7 @@ private fun SavedPaymentMethodTrailingContent(
             EditButton(onClick = { onEditPaymentMethod(displayedSavedPaymentMethod) })
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onViewMorePaymentMethods)
+            EditButton(onClick = onManageOneSavedPaymentMethod)
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
