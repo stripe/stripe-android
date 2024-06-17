@@ -28,7 +28,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
-        data class SavedPaymentMethodSelected(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
+        data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
     }
 }
 
@@ -44,7 +44,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
-    private val onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -72,7 +72,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
         onSelectSavedPaymentMethod = {
-            viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod))
+            viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
         }
     )
 

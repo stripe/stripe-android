@@ -87,7 +87,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             ).performClick()
             viewActionRecorder.consume(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
-                    savedPaymentMethod
+                    savedPaymentMethod.paymentMethod
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()

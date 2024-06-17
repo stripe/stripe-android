@@ -52,7 +52,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
         },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it)
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
             )
         },
         imageLoader = imageLoader,

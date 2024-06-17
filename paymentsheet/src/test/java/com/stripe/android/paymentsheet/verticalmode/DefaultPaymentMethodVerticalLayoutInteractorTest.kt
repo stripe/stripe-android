@@ -9,7 +9,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -318,12 +317,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        var selectedSavedPaymentMethod: DisplayableSavedPaymentMethod? = null
+        var selectedSavedPaymentMethod: PaymentMethod? = null
         runScenario(
             onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it }
         ) {
-            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod))
-            assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod)
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
         }
     }
 
@@ -342,7 +341,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod>? = null,
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
+        onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
