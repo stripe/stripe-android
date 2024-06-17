@@ -142,6 +142,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 isProcessing = false,
                 selection = null,
                 displayedSavedPaymentMethod = savedPaymentMethod,
+                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
