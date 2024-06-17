@@ -32,59 +32,36 @@ internal fun AddPaymentMethod(
 ) {
     val state by interactor.state.collectAsState()
 
-    var selectedPaymentMethodCode: String by rememberSaveable {
-        mutableStateOf(state.selectedPaymentMethodCode)
-    }
-    val supportedPaymentMethods: List<SupportedPaymentMethod> = state.supportedPaymentMethods
-//    val arguments = remember(selectedPaymentMethodCode) {
-//        interactor.createFormArguments(selectedPaymentMethodCode)
-//    }
-
-    val linkInlineSignupMode = remember(state.linkSignupMode, selectedPaymentMethodCode) {
-        state.linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
-    }
-
     LaunchedEffect(state.paymentSelection) {
         interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ClearErrorMessages)
     }
 
-    val formElements = remember(selectedPaymentMethodCode) {
-        interactor.formElementsForCode(selectedPaymentMethodCode)
-    }
-
-    val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-        interactor.createUsBankAccountFormElements(selectedPaymentMethodCode)
-    }
-
     PaymentElement(
         enabled = !state.processing,
-        supportedPaymentMethods = supportedPaymentMethods,
-        selectedItemCode = selectedPaymentMethodCode,
-        formElements = formElements,
-        linkSignupMode = linkInlineSignupMode,
+        supportedPaymentMethods = state.supportedPaymentMethods,
+        selectedItemCode = state.selectedPaymentMethodCode,
+        formElements = state.formElements,
+        linkSignupMode = state.linkInlineSignupMode,
         linkConfigurationCoordinator = state.linkConfigurationCoordinator,
         onItemSelectedListener = { selectedLpm ->
-            if (selectedPaymentMethodCode != selectedLpm.code) {
-                selectedPaymentMethodCode = selectedLpm.code
                 interactor.handleViewAction(
-                    AddPaymentMethodInteractor.ViewAction.ReportPaymentMethodTypeSelected(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
                         selectedLpm.code
                     )
                 )
-            }
         },
         onLinkSignupStateChanged = {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(it)
             )
         },
-        formArguments = state.arguments, // TODO: figure out why this doesn't work
-        usBankAccountFormArguments = usBankAccountFormArguments,
+        formArguments = state.arguments,
+        usBankAccountFormArguments = state.usBankAccountFormArguments,
         onFormFieldValuesChanged = { formValues ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
                     formValues,
-                    selectedPaymentMethodCode
+                    state.selectedPaymentMethodCode
                 )
             )
         },
@@ -92,7 +69,7 @@ internal fun AddPaymentMethod(
         onInteractionEvent = {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction(
-                    selectedPaymentMethodCode
+                    state.selectedPaymentMethodCode
                 )
             )
         },

@@ -213,6 +213,9 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
+    private val _newPaymentSelectionFlow = MutableStateFlow<NewOrExternalPaymentSelection?>(null)
+    internal val newPaymentSelectionFlow: StateFlow<NewOrExternalPaymentSelection?> = _newPaymentSelectionFlow
+
     abstract fun onFatal(throwable: Throwable)
 
     protected val buttonsEnabled = combineAsStateFlow(
@@ -273,6 +276,12 @@ internal abstract class BaseSheetViewModel(
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
+
+    val selectedPaymentMethodCode: StateFlow<PaymentMethodCode> = combineAsStateFlow(
+        newPaymentSelectionFlow, supportedPaymentMethodsFlow
+    ) { newPaymentSelection, supportedPaymentMethods ->
+        newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethods.first()
+    }
 
     init {
         viewModelScope.launch {
@@ -483,9 +492,14 @@ internal abstract class BaseSheetViewModel(
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
-            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
-            is PaymentSelection.ExternalPaymentMethod ->
+            is PaymentSelection.New -> {
+                newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.New(selection)
+            }
+            is PaymentSelection.ExternalPaymentMethod -> {
                 newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
+                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.External(selection)
+            }
             else -> Unit
         }
 
