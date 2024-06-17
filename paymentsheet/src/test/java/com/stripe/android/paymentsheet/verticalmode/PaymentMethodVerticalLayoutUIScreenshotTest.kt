@@ -25,8 +25,11 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
                 isEnabled = true,
+                onEditPaymentMethod = {},
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
                 imageLoader = mock(),

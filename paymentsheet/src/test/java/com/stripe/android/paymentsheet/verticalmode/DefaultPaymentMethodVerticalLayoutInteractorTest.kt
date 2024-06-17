@@ -9,11 +9,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +78,86 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             awaitItem().run {
                 assertThat(displayablePaymentMethods).isNotEmpty()
                 assertThat(selection).isEqualTo(savedSelection)
+            }
+        }
+    }
+
+    @Test
+    fun `state has manage_all saved payment method action when multiple saved PMs are available`() {
+        runScenario(
+            initialPaymentMethods = PaymentMethodFixtures.createCards(3),
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `state has manage_one saved PM action when one modifiable saved PM and allowsRemovalOfLast is true`() {
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD),
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `state has manage_one saved payment method action when one saved PM and allowsRemovalOfLast is true`() {
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `state has edit card brand saved payment method action when one saved PM and allowsRemovalOfLast is false`() {
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD),
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `state has no saved payment method action when one unmodifiable saved PM and allowsRemovalOfLast is false`() {
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
+                    )
+                }
             }
         }
     }
@@ -329,7 +411,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = true,
+                preferredNetworks = emptyList()
+            )
+        ),
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,
         formElementsForCode: (code: String) -> List<FormElement> = { notImplemented() },
@@ -341,6 +428,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod>? = null,
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -362,6 +451,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = { it!! },
+            allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+            onEditPaymentMethod = onEditPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
         )
 
