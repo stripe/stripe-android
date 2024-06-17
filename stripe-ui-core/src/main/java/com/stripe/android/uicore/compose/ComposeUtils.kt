@@ -1,6 +1,6 @@
 @file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 
-package com.stripe.android.utils
+package com.stripe.android.uicore.compose
 
 import android.app.Activity
 import android.content.Context
@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun rememberActivity(
     errorMessage: () -> String,
 ): Activity {
@@ -21,6 +22,7 @@ fun rememberActivity(
 }
 
 @Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun rememberActivityOrNull(): Activity? {
     val context = LocalContext.current
     return remember(context) {
