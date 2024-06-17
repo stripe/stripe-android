@@ -55,6 +55,8 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
         onEditPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
+            )
+        },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)

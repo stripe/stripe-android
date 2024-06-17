@@ -83,7 +83,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
         allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
-        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) }
+        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
         onSelectSavedPaymentMethod = {
             viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
         }
