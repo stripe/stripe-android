@@ -7,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -16,7 +15,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -24,7 +22,6 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -555,23 +552,6 @@ internal abstract class BaseSheetViewModel(
                     _cvcRecollectionCompleteFlow.value = it
                 }
             }
-        }
-    }
-
-    internal fun isCvcRecollectionEnabled() =
-        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
-            FeatureFlags.cvcRecollection.isEnabled
-
-    internal fun isCvcRecollectionForDeferred(): Boolean {
-        return CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
-            FeatureFlags.cvcRecollection.isEnabled
-    }
-
-    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
-        return if ((isCvcRecollectionEnabled() || isCvcRecollectionForDeferred())) {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
-        } else {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
         }
     }
 

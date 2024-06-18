@@ -57,6 +57,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -2783,12 +2784,12 @@ internal class PaymentSheetViewModelTest {
     fun `isCvcRecollectionEnabledForDeferred returns callback value or false if null`() = runTest {
         var enabled = false
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { enabled }
-        val viewModel = createViewModel()
-        assertThat(viewModel.isCvcRecollectionForDeferred()).isFalse()
+        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isFalse()
         enabled = true
-        assertThat(viewModel.isCvcRecollectionForDeferred()).isTrue()
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isTrue()
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
-        assertThat(viewModel.isCvcRecollectionForDeferred()).isFalse()
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isFalse()
     }
 
     @Test
@@ -2839,7 +2840,7 @@ internal class PaymentSheetViewModelTest {
     fun `getCvcRecollectionState returns correct screen for deferred flow`() = runTest {
         var enabled = false
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { enabled }
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
 
         assertThat(viewModel.getCvcRecollectionState())
             .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
