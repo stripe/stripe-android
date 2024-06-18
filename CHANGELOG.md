@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Billie to PaymentSheet.
+
+### Payments
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Billie to API bindings.
+
 ## 20.46.0 - 2024-06-14
 
 ### PaymentSheet
