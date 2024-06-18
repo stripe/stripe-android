@@ -309,8 +309,9 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
-                    is PaymentSheetScreen.Form, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
-                    }
+                    is PaymentSheetScreen.Form,
+                    is PaymentSheetScreen.ManageSavedPaymentMethods,
+                    is PaymentSheetScreen.ManageOneSavedPaymentMethod -> {}
                 }
             }
         }
@@ -383,6 +384,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.Loading,
             is PaymentSheetScreen.EditPaymentMethod,
             is PaymentSheetScreen.Form,
+            is PaymentSheetScreen.ManageOneSavedPaymentMethod,
             is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                 // Nothing to do here
             }

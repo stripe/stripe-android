@@ -397,6 +397,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_TransitionToManageOneSavedPaymentMethod_transitionsToManageOnSavedPMScreen() {
+        var calledManageOneSavedPaymentMethodScreenFactory = false
+        var calledTransitionTo = false
+        runScenario(
+            manageOneSavedPaymentMethodFactory = {
+                calledManageOneSavedPaymentMethodScreenFactory = true
+                mock()
+            },
+            transitionTo = {
+                calledTransitionTo = true
+            }
+        ) {
+            interactor.handleViewAction(ViewAction.TransitionToManageOneSavedPaymentMethod)
+            assertThat(calledManageOneSavedPaymentMethodScreenFactory).isTrue()
+            assertThat(calledTransitionTo).isTrue()
+        }
+    }
+
+    @Test
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
         var selectedSavedPaymentMethod: PaymentMethod? = null
@@ -425,6 +444,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             notImplemented()
         },
         manageScreenFactory: () -> PaymentSheetScreen = { notImplemented() },
+        manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen = { notImplemented() },
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod>? = null,
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
@@ -447,6 +467,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             transitionTo = transitionTo,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             manageScreenFactory = manageScreenFactory,
+            manageOneSavedPaymentMethodFactory = manageOneSavedPaymentMethodFactory,
             formScreenFactory = formScreenFactory,
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
