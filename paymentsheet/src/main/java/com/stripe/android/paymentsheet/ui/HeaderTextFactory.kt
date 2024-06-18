@@ -43,6 +43,7 @@ internal class HeaderTextFactory(
         is PaymentSheetScreen.EditPaymentMethod -> {
             StripeR.string.stripe_title_update_card
         }
+        is PaymentSheetScreen.ManageOneSavedPaymentMethod -> R.string.stripe_paymentsheet_remove_pm_title
         is PaymentSheetScreen.ManageSavedPaymentMethods -> getHeaderTextForManageScreen(isEditing)
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
@@ -64,6 +65,7 @@ internal class HeaderTextFactory(
         is PaymentSheetScreen.SelectSavedPaymentMethods -> {
             R.string.stripe_paymentsheet_select_payment_method
         }
+        is PaymentSheetScreen.ManageOneSavedPaymentMethod -> R.string.stripe_paymentsheet_remove_pm_title
         is PaymentSheetScreen.ManageSavedPaymentMethods -> getHeaderTextForManageScreen(isEditing)
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,

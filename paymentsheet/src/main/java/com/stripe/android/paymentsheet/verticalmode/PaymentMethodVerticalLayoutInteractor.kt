@@ -28,6 +28,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
+        data object TransitionToManageOneSavedPaymentMethod : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class EditPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
@@ -49,6 +50,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val manageScreenFactory: () -> PaymentSheetScreen,
+    private val manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen,
     private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
     paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
@@ -69,6 +71,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 interactor = DefaultManageScreenInteractor(
                     viewModel
                 )
+            )
+        },
+        manageOneSavedPaymentMethodFactory = {
+            PaymentSheetScreen.ManageOneSavedPaymentMethod(
+                interactor = DefaultManageOneSavedPaymentMethodInteractor(viewModel)
             )
         },
         formScreenFactory = { selectedPaymentMethodCode ->
@@ -182,6 +189,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionTo(manageScreenFactory())
+            }
+            ViewAction.TransitionToManageOneSavedPaymentMethod -> {
+                transitionTo(manageOneSavedPaymentMethodFactory())
             }
             is ViewAction.EditPaymentMethod -> {
                 onEditPaymentMethod(viewAction.savedPaymentMethod)

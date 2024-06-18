@@ -14,6 +14,8 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -37,6 +39,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.ManageSavedPaymentMethods,
+        is PaymentSheetScreen.ManageOneSavedPaymentMethod,
         is PaymentSheetScreen.EditPaymentMethod -> {
             0.dp
         }
@@ -216,6 +219,20 @@ internal sealed interface PaymentSheetScreen {
 
         override fun close() {
             interactor.close()
+        }
+    }
+
+    class ManageOneSavedPaymentMethod(private val interactor: ManageOneSavedPaymentMethodInteractor) :
+        PaymentSheetScreen {
+        override val showsBuyButton: Boolean = false
+        override val showsContinueButton: Boolean = false
+        override val canNavigateBack: Boolean = true
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean = false
+
+        @Composable
+        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+            ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
     }
 }
