@@ -44,7 +44,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     suspend fun existing(
         consumerSessionClientSecret: String,
-        selectedAccounts: List<CachedPartnerAccount>,
+        selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
@@ -62,27 +62,38 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
-        partnerAccounts: List<CachedPartnerAccount>,
-        action: suspend (Set<String>) -> FinancialConnectionsSessionManifest,
+        partnerAccounts: List<CachedPartnerAccount>?,
+        action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
-        val selectedAccountIds = partnerAccounts.map { it.id }.toSet()
-        val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
-
-        val pollingResult = if (shouldPollAccountNumbers) {
-            runCatching { awaitAccountNumbersReady(linkedAccountIds) }
+        if (partnerAccounts == null) {
+            // TODO handle manual entry networking case
+            // if (!selected_accounts || selected_accounts.length === 0) {
+            //            invariant(
+            //              alreadyAttachedPaymentAccount?.type === 'bank_account',
+            //              'Must have a bank account attached if no accounts are selected'
+            //            );
+            //          }
+            return action(null)
         } else {
-            Result.success(Unit)
-        }
+            val selectedAccountIds = partnerAccounts.map { it.id }.toSet()
+            val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
 
-        return pollingResult.onFailure {
-            disableNetworking()
-        }.mapCatching {
-            action(selectedAccountIds)
-        }.onSuccess { manifest ->
-            storeSavedToLinkMessage(manifest, selectedAccountIds.size)
-        }.onFailure {
-            storeFailedToSaveToLinkMessage(selectedAccountIds.size)
-        }.getOrThrow()
+            val pollingResult = if (shouldPollAccountNumbers) {
+                runCatching { awaitAccountNumbersReady(linkedAccountIds) }
+            } else {
+                Result.success(Unit)
+            }
+
+            return pollingResult.onFailure {
+                disableNetworking()
+            }.mapCatching {
+                action(selectedAccountIds)
+            }.onSuccess { manifest ->
+                storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+            }.onFailure {
+                storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+            }.getOrThrow()
+        }
     }
 
     private suspend fun awaitAccountNumbersReady(linkedAccountIds: Set<String>) {
