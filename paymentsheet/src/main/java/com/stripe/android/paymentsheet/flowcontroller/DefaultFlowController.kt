@@ -38,7 +38,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
@@ -409,10 +408,12 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
-           return FeatureFlags.cvcRecollection.isEnabled &&
-               (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
-               (CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
-                   initializationMode is PaymentSheet.InitializationMode.DeferredIntent)
+        return FeatureFlags.cvcRecollection.isEnabled &&
+            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
+            (
+                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
+                    initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+                )
     }
 
     private fun confirmGenericPaymentMethod(
