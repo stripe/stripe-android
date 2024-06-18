@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -60,7 +58,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
-): AddPaymentMethodInteractor {
+) : AddPaymentMethodInteractor {
 
     constructor(sheetViewModel: BaseSheetViewModel) : this(
         initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
@@ -79,11 +77,8 @@ internal class DefaultAddPaymentMethodInteractor(
         createUSBankAccountFormArguments = { USBankAccountFormArguments.create(sheetViewModel, it) }
     )
 
-    // TODO: current issue is that the AddPaymentMethodInteractor is recreated when you click on a form field, which
-    // recreates with the original initially selected PM type, which breaks everything.
-    private val selectedPaymentMethodCode: String by rememberSaveable {
-        mutableStateOf(initiallySelectedPaymentMethodType)
-    }
+    private val _selectedPaymentMethodCode: MutableStateFlow<String> = MutableStateFlow(initiallySelectedPaymentMethodType)
+    private val selectedPaymentMethodCode: StateFlow<String> = _selectedPaymentMethodCode
 
     override val state = combineAsStateFlow(
         selectedPaymentMethodCode,
