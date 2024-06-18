@@ -9,8 +9,8 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.CvcRecollectionField
-import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
@@ -115,7 +115,7 @@ internal sealed interface PaymentSheetScreen {
     }
 
     data class AddAnotherPaymentMethod(
-        val interactor: DefaultAddPaymentMethodInteractor?,
+        val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
@@ -128,14 +128,12 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            if (interactor != null) {
-                AddPaymentMethod(interactor = interactor, modifier)
-            }
+            AddPaymentMethod(interactor = interactor, modifier)
         }
     }
 
     data class AddFirstPaymentMethod(
-        val interactor: DefaultAddPaymentMethodInteractor?,
+        val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
@@ -148,9 +146,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            if (interactor != null) {
-                AddPaymentMethod(interactor = interactor, modifier)
-            }
+            AddPaymentMethod(interactor = interactor, modifier)
         }
     }
 

@@ -123,3 +123,14 @@ internal class DefaultAddPaymentMethodInteractor(
         }
     }
 }
+
+internal object UnsupportedAddPaymentMethodInteractor : AddPaymentMethodInteractor {
+    override val state: StateFlow<AddPaymentMethodInteractor.State>
+        get() {
+            throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
+        }
+
+    override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
+        throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
+    }
+}
