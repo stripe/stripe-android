@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
@@ -22,6 +23,7 @@ internal class CompleteVerification @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
+    private val handleError: HandleError,
     private val markLinkVerified: MarkLinkVerified,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
 ) {
@@ -54,27 +56,26 @@ internal class CompleteVerification @Inject constructor(
         } else {
             // if the user is verifying at the beginning of the flow and hasn't connected accounts yet,
             // we just markLinkVerified and move onto returning user account picker.
-            runCatching { markLinkVerified() }
-                .fold(
-                    // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
-                    onSuccess = {
-                        analyticsTracker.track(VerificationSuccess(pane))
-                        navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = pane))
-                    },
-                    onFailure = {
-                        val nextPaneOnFailure = manifest.initialInstitution
-                            ?.let { Pane.PARTNER_AUTH }
-                            ?: Pane.INSTITUTION_PICKER
-                        analyticsTracker.logError(
-                            extraMessage = "Error confirming verification or marking link as verified",
-                            error = it,
-                            logger = logger,
-                            pane = pane
-                        )
-                        analyticsTracker.track(VerificationError(pane, MarkLinkVerifiedError))
-                        navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = pane))
-                    }
-                )
+            runCatching { markLinkVerified() }.fold(
+                // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
+                onSuccess = {
+                    analyticsTracker.track(VerificationSuccess(pane))
+                    navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = pane))
+                },
+                onFailure = {
+                    val nextPaneOnFailure = manifest.initialInstitution
+                        ?.let { Pane.PARTNER_AUTH }
+                        ?: Pane.INSTITUTION_PICKER
+                    analyticsTracker.logError(
+                        extraMessage = "Error confirming verification or marking link as verified",
+                        error = it,
+                        logger = logger,
+                        pane = pane
+                    )
+                    analyticsTracker.track(VerificationError(pane, MarkLinkVerifiedError))
+                    navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = pane))
+                }
+            )
         }
     }
 
@@ -93,6 +94,7 @@ internal class CompleteVerification @Inject constructor(
         }.onSuccess {
             analyticsTracker.track(VerificationSuccess(pane))
         }.onFailure {
+            logger.error("Error saving account to Link", it)
             analyticsTracker.track(VerificationError(pane, VerificationError.Error.SaveToLinkError))
         }
 
@@ -101,13 +103,16 @@ internal class CompleteVerification @Inject constructor(
                 // navigate to success regardless of save result.
                 // the save use case takes care of updating the success screen message (that will be a failure in case
                 // of something going wrong)
-                navigationManager.tryNavigateTo(Destination.Success(referrer = pane))
+                navigationManager.tryNavigateTo(Success(referrer = pane))
             }.onFailure {
                 // mimicking behavior from v2 where if this request fails we use default error handling
                 // we don't do this in the query definition because the call below does not use the default
-                logger.error("Error marking link as verified", it)
-                // TODO!
-                navigationManager.tryNavigateTo(Destination.Error(referrer = pane))
+                handleError(
+                    extraMessage = "Error marking link as verified",
+                    error = it,
+                    pane = pane,
+                    displayErrorScreen = true
+                )
             }
     }
 }
