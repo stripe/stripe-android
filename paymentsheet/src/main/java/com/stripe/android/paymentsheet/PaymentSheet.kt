@@ -215,6 +215,7 @@ class PaymentSheet internal constructor(
          * CVC recollection field.
          *
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalCvcRecollectionApi
         fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
             cvcRecollectionEnabledCallback = callback
@@ -1742,6 +1743,7 @@ class PaymentSheet internal constructor(
              * CVC recollection field.
              *
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalCvcRecollectionApi
             fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
                 cvcRecollectionEnabledCallback = callback
