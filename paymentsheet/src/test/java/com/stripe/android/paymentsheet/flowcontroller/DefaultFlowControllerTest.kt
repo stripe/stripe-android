@@ -16,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
@@ -43,8 +44,11 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
+import com.stripe.android.paymentsheet.CvcRecollectionEnabledCallback
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
@@ -70,7 +74,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -79,6 +86,7 @@ import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -119,6 +127,12 @@ internal class DefaultFlowControllerTest {
 
     @get:Rule
     val intentConfirmationInterceptorRule = IntentConfirmationInterceptorTestRule()
+
+    @get:Rule
+    val cvcRecollectionFeatureRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cvcRecollection,
+        isEnabled = true
+    )
 
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -1655,6 +1669,61 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `Launches CVC Recollection & succeeds payment`() = runTest {
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+        val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
+        val launcher = mock<CvcRecollectionLauncher> {
+            on { launch(any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
+            }
+        }
+        val launcherFactory = mock<CvcRecollectionLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<CvcRecollectionContract>(),
+                onResult.capture()
+            )
+        ).thenReturn(mock())
+
+        val flowController = createFlowController(
+            cvcRecollectionLauncherFactory = launcherFactory,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+        )
+
+        verify(launcherFactory).create(any())
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
+        )
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+
+        flowController.confirm()
+
+        verify(launcher).launch(
+            eq(
+                CvcRecollectionData(
+                    lastFour = "4242",
+                    brand = CardBrand.Visa
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+    }
+
+    @Test
     fun `On complete internal payment result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -1880,6 +1949,24 @@ internal class DefaultFlowControllerTest {
         assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
     }
 
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Clears out isCvcRecollectionEnabledCallback when lifecycle owner is destroyed`() {
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback =
+            CvcRecollectionEnabledCallback { true }
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNull()
+    }
+
     private suspend fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -1958,7 +2045,8 @@ internal class DefaultFlowControllerTest {
             loginState = LinkState.LoginState.LoggedIn,
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
-        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock()
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -1968,7 +2056,8 @@ internal class DefaultFlowControllerTest {
                 linkState = linkState,
             ),
             viewModel,
-            bacsMandateConfirmationLauncherFactory
+            bacsMandateConfirmationLauncherFactory,
+            cvcRecollectionLauncherFactory
         )
     }
 

@@ -134,6 +134,32 @@ class DefaultPaymentSheetLauncherTest {
         assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
     }
 
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Clears out isCvcRecollectionEnabledCallback when lifecycle owner is destroyed`() {
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback =
+            CvcRecollectionEnabledCallback { true }
+
+        val lifecycleOwner = TestLifecycleOwner()
+
+        DefaultPaymentSheetLauncher(
+            activityResultLauncher = mock(),
+            activity = mock(),
+            lifecycleOwner = lifecycleOwner,
+            application = ApplicationProvider.getApplicationContext(),
+            callback = mock(),
+        )
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNull()
+    }
+
     private class FakeActivityResultRegistry(
         private val result: PaymentSheetResult? = null,
         private val error: Throwable? = null
