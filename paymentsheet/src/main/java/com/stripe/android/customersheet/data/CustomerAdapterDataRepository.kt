@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCustomerSheetApi::class)

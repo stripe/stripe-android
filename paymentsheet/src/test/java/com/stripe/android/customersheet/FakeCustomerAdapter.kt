@@ -18,21 +18,29 @@ internal class FakeCustomerAdapter(
     private val onDetachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onUpdatePaymentMethod:
     ((paymentMethodId: String, params: PaymentMethodUpdateParams) -> CustomerAdapter.Result<PaymentMethod>)? = null,
-    private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null
+    private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null,
+    private val onRetrievePaymentMethods: (() -> CustomerAdapter.Result<List<PaymentMethod>>) =
+        { paymentMethods },
+    private val onGetSelectedPaymentOption: (() -> CustomerAdapter.Result<CustomerAdapter.PaymentOption?>) =
+        { selectedPaymentOption }
 ) : CustomerAdapter {
 
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
-        return paymentMethods
+        return onRetrievePaymentMethods()
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onAttachPaymentMethod?.invoke(paymentMethodId)
-            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(
+                retrievePaymentMethods().getOrNull()?.find { it.id!! == paymentMethodId }!!
+            )
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onDetachPaymentMethod?.invoke(paymentMethodId)
-            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(
+                retrievePaymentMethods().getOrNull()?.find { it.id!! == paymentMethodId }!!
+            )
     }
 
     override suspend fun updatePaymentMethod(
@@ -41,7 +49,7 @@ internal class FakeCustomerAdapter(
     ): CustomerAdapter.Result<PaymentMethod> {
         return onUpdatePaymentMethod?.invoke(paymentMethodId, params)
             ?: CustomerAdapter.Result.success(
-                paymentMethods.getOrNull()?.find {
+                retrievePaymentMethods().getOrNull()?.find {
                     it.id!! == paymentMethodId
                 }!!
             )
@@ -57,7 +65,7 @@ internal class FakeCustomerAdapter(
     }
 
     override suspend fun retrieveSelectedPaymentOption(): CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
-        return selectedPaymentOption
+        return onGetSelectedPaymentOption()
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): CustomerAdapter.Result<String> {
