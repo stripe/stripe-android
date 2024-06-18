@@ -45,7 +45,7 @@ internal interface FinancialConnectionsAccountsRepository {
         consumerSessionClientSecret: String,
     ): NetworkedAccountsList
 
-    suspend fun postLinkAccountSessionPaymentAccount(
+    suspend fun postAttachPaymentAccountToLinkAccountSession(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
         consumerSessionClientSecret: String?
@@ -166,7 +166,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         )
     }
 
-    override suspend fun postLinkAccountSessionPaymentAccount(
+    override suspend fun postAttachPaymentAccountToLinkAccountSession(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
         consumerSessionClientSecret: String?
