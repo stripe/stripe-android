@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpoin
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.CvcRecollectionEnabledCallbackValue
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -69,7 +70,9 @@ internal class PaymentSheetPlaygroundViewModel(
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
 
     @OptIn(ExperimentalCvcRecollectionApi::class)
-    val cvcCallback = CvcRecollectionEnabledCallback { true }
+    val cvcCallback = CvcRecollectionEnabledCallback {
+        playgroundSettingsFlow.value?.get(CvcRecollectionEnabledCallbackValue)?.value == true
+    }
 
     private val baseUrl: String
         get() {

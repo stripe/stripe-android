@@ -203,11 +203,11 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * @param intentCallback Called when the customer confirms the payment or setup.
+         * @param callback Called when the customer confirms the payment or setup.
          * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
          */
-        fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
-            createIntentCallback = intentCallback
+        fun createIntentCallback(callback: CreateIntentCallback) = apply {
+            createIntentCallback = callback
         }
 
         /**
@@ -1731,20 +1731,20 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
+             * @param callback If specified, called when the customer confirms the payment or setup.
              */
-            fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
-                createIntentCallback = createIntentCallback
+            fun createIntentCallback(callback: CreateIntentCallback) = apply {
+                createIntentCallback = callback
             }
 
             /**
-             * @param cvcCallback Invoked when when [confirm] is called to determine whether to display a
+             * @param callback Invoked when when [confirm] is called to determine whether to display a
              * CVC recollection field.
              *
              */
             @ExperimentalCvcRecollectionApi
-            fun cvcRecollectionEnabledCallback(cvcCallback: CvcRecollectionEnabledCallback) = apply {
-                cvcRecollectionEnabledCallback = cvcCallback
+            fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+                cvcRecollectionEnabledCallback = callback
             }
 
             /**
