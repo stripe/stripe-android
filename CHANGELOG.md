@@ -4,9 +4,11 @@
 
 ### PaymentSheet
 * [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to PaymentSheet.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to PaymentSheet.
 
 ### Payments
 * [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to API bindings.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to API bindings.
 
 ## 20.46.0 - 2024-06-14
 
