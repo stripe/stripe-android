@@ -165,7 +165,7 @@ internal class SaveAccountToLinkTest {
                 locale: String?,
                 phoneNumber: String?,
                 consumerSessionClientSecret: String?,
-                selectedAccounts: Set<String>
+                selectedAccounts: Set<String>?
             ): FinancialConnectionsSessionManifest {
                 return sessionManifest()
             }
