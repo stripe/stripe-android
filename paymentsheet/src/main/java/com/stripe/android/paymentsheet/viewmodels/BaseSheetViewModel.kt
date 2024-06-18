@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -213,9 +214,6 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
-    private val _newPaymentSelectionFlow = MutableStateFlow<NewOrExternalPaymentSelection?>(null)
-    internal val newPaymentSelectionFlow: StateFlow<NewOrExternalPaymentSelection?> = _newPaymentSelectionFlow
-
     abstract fun onFatal(throwable: Throwable)
 
     protected val buttonsEnabled = combineAsStateFlow(
@@ -277,12 +275,6 @@ internal abstract class BaseSheetViewModel(
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
 
-    val selectedPaymentMethodCode: StateFlow<PaymentMethodCode> = combineAsStateFlow(
-        newPaymentSelectionFlow, supportedPaymentMethodsFlow
-    ) { newPaymentSelection, supportedPaymentMethods ->
-        newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethods.first()
-    }
-
     init {
         viewModelScope.launch {
             canEdit.collect { canEdit ->
@@ -303,7 +295,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             currentScreen.collectLatest { screen ->
                 when (screen) {
-                    is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+                    is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
                     }
                     is PaymentSheetScreen.EditPaymentMethod,
@@ -373,7 +365,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(AddAnotherPaymentMethod)
+        transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
     }
 
     fun transitionTo(target: PaymentSheetScreen) {
@@ -392,7 +384,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+            is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }
@@ -494,11 +486,9 @@ internal abstract class BaseSheetViewModel(
         when (selection) {
             is PaymentSelection.New -> {
                 newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
-                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.New(selection)
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
-                _newPaymentSelectionFlow.value = NewOrExternalPaymentSelection.External(selection)
             }
             else -> Unit
         }
@@ -617,7 +607,7 @@ internal abstract class BaseSheetViewModel(
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
-            resetTo(listOf(AddFirstPaymentMethod))
+            resetTo(listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))))
         }
     }
 

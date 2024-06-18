@@ -115,10 +115,12 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = false,
+        // TODO: discuss improving this with team -- there should be a better way to do this so that we don't need to
+        // actually create a screen here
         screen = if (isFirstPaymentMethod) {
-            PaymentSheetScreen.AddFirstPaymentMethod
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = null)
         } else {
-            PaymentSheetScreen.AddAnotherPaymentMethod
+            PaymentSheetScreen.AddAnotherPaymentMethod(interactor = null)
         },
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,
