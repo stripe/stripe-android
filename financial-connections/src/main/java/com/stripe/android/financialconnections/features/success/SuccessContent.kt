@@ -75,9 +75,11 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 private const val ICON_SIZE = 56
 private const val SUCCESS_BODY_OFFSET = ICON_SIZE + 32
 
-private val SUCCESS_SLIDE_IN_ANIMATION = fadeIn(
+private val FADE_IN_ANIMATION = fadeIn(
     animationSpec = tween(ENTER_TRANSITION_DURATION_MS),
-) + slideInVertically(
+)
+
+private val SUCCESS_SLIDE_IN_ANIMATION = FADE_IN_ANIMATION + slideInVertically(
     initialOffsetY = { fullHeight -> fullHeight / SLIDE_IN_ANIMATION_FRACTION },
 )
 
@@ -105,11 +107,6 @@ private fun SuccessContentInternal(
     var showSpinner by rememberSaveable { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
 
-    val doneButtonAlpha by animateFloatAsState(
-        targetValue = if (showSpinner) 0f else 1f,
-        label = "SuccessSpinnerAlpha",
-    )
-
     payload?.let {
         if (it.skipSuccessPane.not()) {
             LaunchedEffect(true) {
@@ -131,17 +128,19 @@ private fun SuccessContentInternal(
             initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
         )
 
-        SuccessFooter(
-            merchantName = payload?.businessName,
-            loading = completeSessionAsync is Loading,
-            enabled = !showSpinner,
-            onDoneClick = onDoneClick,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .graphicsLayer {
-                    alpha = doneButtonAlpha
-                },
-        )
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            AnimatedVisibility(
+                visible = !showSpinner,
+                enter = FADE_IN_ANIMATION,
+            ) {
+                SuccessFooter(
+                    merchantName = payload?.businessName,
+                    loading = completeSessionAsync is Loading,
+                    enabled = !showSpinner,
+                    onDoneClick = onDoneClick,
+                )
+            }
+        }
     }
 }
 
@@ -221,23 +220,21 @@ private fun SuccessFooter(
     merchantName: String?,
     onDoneClick: () -> Unit
 ) {
-    Box(modifier) {
-        FinancialConnectionsButton(
-            loading = loading,
-            enabled = enabled,
-            onClick = onDoneClick,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("done_button")
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = when (merchantName) {
-                    null -> stringResource(id = R.string.stripe_success_pane_done)
-                    else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
-                }
-            )
-        }
+    FinancialConnectionsButton(
+        loading = loading,
+        enabled = enabled,
+        onClick = onDoneClick,
+        modifier = modifier
+            .semantics { testTagsAsResourceId = true }
+            .testTag("done_button")
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = when (merchantName) {
+                null -> stringResource(id = R.string.stripe_success_pane_done)
+                else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
+            }
+        )
     }
 }
 
