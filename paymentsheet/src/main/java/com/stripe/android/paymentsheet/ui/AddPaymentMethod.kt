@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -25,10 +24,6 @@ internal fun AddPaymentMethod(
     modifier: Modifier = Modifier,
 ) {
     val state by interactor.state.collectAsState()
-
-    LaunchedEffect(state.paymentSelection) {
-        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ClearErrorMessages)
-    }
 
     PaymentElement(
         enabled = !state.processing,

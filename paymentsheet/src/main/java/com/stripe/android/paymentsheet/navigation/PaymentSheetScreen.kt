@@ -116,7 +116,7 @@ internal sealed interface PaymentSheetScreen {
 
     data class AddAnotherPaymentMethod(
         val interactor: AddPaymentMethodInteractor,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -130,11 +130,15 @@ internal sealed interface PaymentSheetScreen {
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
+
+        override fun close() {
+            interactor.close()
+        }
     }
 
     data class AddFirstPaymentMethod(
         val interactor: AddPaymentMethodInteractor,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -147,6 +151,10 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 
