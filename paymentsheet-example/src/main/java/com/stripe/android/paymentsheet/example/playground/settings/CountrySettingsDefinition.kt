@@ -65,7 +65,7 @@ internal object CountrySettingsDefinition :
             Country.CN to Currency.CNY,
             Country.DE to Currency.EUR,
         )
-        
+
         countriesToCurrencyMap[value]?.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
