@@ -502,6 +502,15 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withSatispay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SATISPAY
+        val stripe = Stripe(context, ApiKeyFixtures.SATISPAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Satispay)
+    }
+
+    @Test
     fun createPaymentMethod_withMultibanco_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.MULTIBANCO
         val stripe = Stripe(context, ApiKeyFixtures.MULTIBANCO_PUBLISHABLE_KEY)

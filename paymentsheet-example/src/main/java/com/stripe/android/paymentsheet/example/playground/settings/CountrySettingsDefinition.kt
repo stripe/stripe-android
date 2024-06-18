@@ -64,6 +64,7 @@ internal object CountrySettingsDefinition :
             Country.JP to Currency.JPY,
             Country.CN to Currency.CNY,
             Country.DE to Currency.EUR,
+            Country.IT to Currency.EUR,
         )
 
         countriesToCurrencyMap[value]?.let { currency ->
@@ -90,4 +91,5 @@ enum class Country(override val value: String) : ValueEnum {
     JP("JP"),
     CN("CN"),
     DE("DE"),
+    IT("IT"),
 }
