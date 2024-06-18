@@ -51,19 +51,22 @@ internal object CountrySettingsDefinition :
     override fun valueUpdated(value: Country, playgroundSettings: PlaygroundSettings) {
         // When the country changes via the UI, update the currency to be the default currency for
         // that country.
-        when (value) {
-            Country.GB -> Currency.GBP
-            Country.FR -> Currency.EUR
-            Country.AU -> Currency.AUD
-            Country.US -> Currency.USD
-            Country.IN -> Currency.INR
-            Country.SG -> Currency.SGD
-            Country.MY -> Currency.MYR
-            Country.MX -> Currency.MXN
-            Country.BR -> Currency.BRL
-            Country.JP -> Currency.JPY
-            Country.CN -> Currency.CNY
-        }.let { currency ->
+        val countriesToCurrencyMap: Map<Country, Currency> = mapOf(
+            Country.GB to Currency.GBP,
+            Country.FR to Currency.EUR,
+            Country.AU to Currency.AUD,
+            Country.US to Currency.USD,
+            Country.IN to Currency.INR,
+            Country.SG to Currency.SGD,
+            Country.MY to Currency.MYR,
+            Country.MX to Currency.MXN,
+            Country.BR to Currency.BRL,
+            Country.JP to Currency.JPY,
+            Country.CN to Currency.CNY,
+            Country.DE to Currency.EUR,
+        )
+
+        countriesToCurrencyMap[value]?.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
 
@@ -86,4 +89,5 @@ enum class Country(override val value: String) : ValueEnum {
     BR("BR"),
     JP("JP"),
     CN("CN"),
+    DE("DE"),
 }
