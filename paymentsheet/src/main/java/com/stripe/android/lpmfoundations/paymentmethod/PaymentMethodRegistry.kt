@@ -27,6 +27,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
@@ -67,6 +68,7 @@ internal object PaymentMethodRegistry {
         P24Definition,
         PayPalDefinition,
         RevolutPayDefinition,
+        SatispayDefinition,
         SepaDebitDefinition,
         SofortDefinition,
         SunbitDefinition,
