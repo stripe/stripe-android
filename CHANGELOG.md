@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED] Add `cvcRecollectionEnabledCallback` to `PaymentSheet.Builder` and `PaymentSheet.FlowController.Builder`
+
 ## 20.46.0 - 2024-06-14
 
 ### PaymentSheet
