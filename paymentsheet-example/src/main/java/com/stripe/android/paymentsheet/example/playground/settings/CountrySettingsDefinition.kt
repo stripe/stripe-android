@@ -63,6 +63,7 @@ internal object CountrySettingsDefinition :
             Country.BR -> Currency.BRL
             Country.JP -> Currency.JPY
             Country.CN -> Currency.CNY
+            Country.DE -> Currency.EUR
         }.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
@@ -86,4 +87,5 @@ enum class Country(override val value: String) : ValueEnum {
     BR("BR"),
     JP("JP"),
     CN("CN"),
+    DE("DE"),
 }
