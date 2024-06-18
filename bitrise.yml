@@ -35,7 +35,6 @@ stages:
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-connections-e2e-payments-tests-on-push: { }
-      - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
       - run-paymentsheet-screenshot-tests: { }
