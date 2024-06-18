@@ -86,6 +86,7 @@
         <activity android:name=".activity.MobilePayExampleActivity"/>
         <activity android:name=".activity.AlmaActivity"/>
         <activity android:name=".activity.SunbitActivity"/>
+        <activity android:name=".activity.BillieActivity"/>
         <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
     </application>
 
