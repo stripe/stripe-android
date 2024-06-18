@@ -1727,14 +1727,14 @@ class PaymentSheet internal constructor(
              * @param handler Called when a user confirms payment for an external payment method.
              */
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
-                this.externalPaymentMethodConfirmHandler = handler
+                externalPaymentMethodConfirmHandler = handler
             }
 
             /**
              * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
              */
             fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
-                this.createIntentCallback = createIntentCallback
+                createIntentCallback = createIntentCallback
             }
 
             /**
