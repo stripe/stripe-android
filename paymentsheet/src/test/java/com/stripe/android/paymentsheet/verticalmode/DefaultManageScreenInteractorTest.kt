@@ -184,6 +184,68 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
+    fun removeSecondToLastPaymentMethod_canRemoveLastPm_cbcEligible_doesNotNavBackWhenEditingFinishes() {
+        var backPressed = false
+        fun handleBackPressed() {
+            backPressed = true
+        }
+
+        val nonCbcCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val cbcCard = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+        val initialPaymentMethods = listOf(nonCbcCard, cbcCard)
+        runScenario(
+            initialPaymentMethods = initialPaymentMethods,
+            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
+            onSelectPaymentMethod = {},
+            isEditing = true,
+            allowsRemovalOfLastSavedPaymentMethod = true,
+            handleBackPressed = ::handleBackPressed,
+        ) {
+            assertThat(backPressed).isFalse()
+
+            paymentMethodsSource.value = listOf(nonCbcCard)
+
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+
+            editingSource.value = false
+
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+        }
+    }
+
+    @Test
+    fun removeThirdToLastPaymentMethod_doesNotNavBackWhenEditingFinishes() {
+        var backPressed = false
+        fun handleBackPressed() {
+            backPressed = true
+        }
+
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(3)
+        runScenario(
+            initialPaymentMethods = initialPaymentMethods,
+            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
+            isEditing = true,
+            onSelectPaymentMethod = {},
+            allowsRemovalOfLastSavedPaymentMethod = false,
+            handleBackPressed = ::handleBackPressed,
+        ) {
+            assertThat(backPressed).isFalse()
+
+            paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
+
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+
+            editingSource.value = false
+
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(backPressed).isFalse()
+        }
+    }
+
+    @Test
     fun removeSecondToLastPaymentMethod_canRemoveLastPm_doesntNavigateBackOrHideButtons() {
         var backPressed = false
         fun handleBackPressed() {
@@ -192,7 +254,7 @@ class DefaultManageScreenInteractorTest {
 
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
         runScenario(
-            initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+            initialPaymentMethods = initialPaymentMethods,
             currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
             isEditing = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
