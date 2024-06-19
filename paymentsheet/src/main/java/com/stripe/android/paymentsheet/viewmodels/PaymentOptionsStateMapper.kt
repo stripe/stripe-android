@@ -30,6 +30,8 @@ internal class PaymentOptionsStateMapper(
                 paymentMethods = paymentMethods,
                 currentSelection = currentSelection,
                 isLinkEnabled = isLinkEnabled,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
                 googlePayState = googlePayState,
             ) ?: PaymentOptionsState()
         }
@@ -40,6 +42,7 @@ internal class PaymentOptionsStateMapper(
         paymentMethods: List<PaymentMethod>?,
         currentSelection: PaymentSelection?,
         isLinkEnabled: Boolean?,
+        canRemovePaymentMethods: Boolean?,
         googlePayState: GooglePayState,
     ): PaymentOptionsState? {
         if (paymentMethods == null) return null
@@ -51,7 +54,8 @@ internal class PaymentOptionsStateMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             currentSelection = currentSelection,
             nameProvider = nameProvider,
-            isCbcEligible = isCbcEligible()
+            isCbcEligible = isCbcEligible(),
+            canRemovePaymentMethods = canRemovePaymentMethods ?: false
         )
     }
 }
