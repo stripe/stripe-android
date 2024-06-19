@@ -60,8 +60,43 @@ data class ElementsSession(
             val liveMode: Boolean,
             val apiKey: String,
             val apiKeyExpiry: Int,
-            val customerId: String
+            val customerId: String,
+            val components: Components,
         ) : StripeModel
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Components(
+            val paymentSheet: PaymentSheetComponent,
+            val customerSheet: CustomerSheetComponent,
+        ) : StripeModel
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed interface PaymentSheetComponent : StripeModel {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data object Disabled : PaymentSheetComponent
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class Enabled(
+                val isPaymentMethodSaveEnabled: Boolean,
+                val isPaymentMethodRemoveEnabled: Boolean,
+            ) : PaymentSheetComponent
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed interface CustomerSheetComponent : StripeModel {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data object Disabled : CustomerSheetComponent
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class Enabled(
+                val isPaymentMethodRemoveEnabled: Boolean,
+            ) : CustomerSheetComponent
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

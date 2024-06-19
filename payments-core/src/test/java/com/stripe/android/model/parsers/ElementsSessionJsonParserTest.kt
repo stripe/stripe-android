@@ -485,7 +485,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `has customer session information in the response`() {
+    fun `ElementsSession has expected customer session information in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -506,6 +506,75 @@ class ElementsSessionJsonParserTest {
                     apiKeyExpiry = 1713890664,
                     customerId = "cus_1",
                     liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Enabled(
+                            isPaymentMethodSaveEnabled = false,
+                            isPaymentMethodRemoveEnabled = true,
+                        ),
+                        customerSheet = ElementsSession.Customer.CustomerSheetComponent.Disabled
+                    )
+                ),
+                defaultPaymentMethod = "pm_123",
+                paymentMethods = listOf(
+                    PaymentMethod(
+                        id = "pm_123",
+                        customerId = "cus_1",
+                        type = PaymentMethod.Type.Card,
+                        code = "card",
+                        created = 1550757934255,
+                        liveMode = false,
+                        billingDetails = null,
+                        card = PaymentMethod.Card(
+                            brand = CardBrand.Visa,
+                            last4 = "4242",
+                            expiryMonth = 8,
+                            expiryYear = 2032,
+                            country = "US",
+                            funding = "credit",
+                            fingerprint = "fingerprint123",
+                            checks = PaymentMethod.Card.Checks(
+                                addressLine1Check = "unchecked",
+                                cvcCheck = "unchecked",
+                                addressPostalCodeCheck = null,
+                            ),
+                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                                isSupported = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer session information with customer sheet component in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_CUSTOMER_SESSION_AND_CUSTOMER_SHEET_COMPONENT
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Disabled,
+                        customerSheet = ElementsSession.Customer.CustomerSheetComponent.Enabled(
+                            isPaymentMethodRemoveEnabled = true
+                        ),
+                    )
                 ),
                 defaultPaymentMethod = "pm_123",
                 paymentMethods = listOf(
