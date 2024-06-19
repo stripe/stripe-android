@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.PaymentAccountParams.BankAccount
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -17,6 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class SaveAccountToLink @Inject constructor(
     private val locale: Locale?,
     private val configuration: FinancialConnectionsSheet.Configuration,
+    private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,
     private val accountsRepository: FinancialConnectionsAccountsRepository,
@@ -65,35 +68,31 @@ internal class SaveAccountToLink @Inject constructor(
         partnerAccounts: List<CachedPartnerAccount>?,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
-        if (partnerAccounts == null) {
-            // TODO handle manual entry networking case
-            // if (!selected_accounts || selected_accounts.length === 0) {
-            //            invariant(
-            //              alreadyAttachedPaymentAccount?.type === 'bank_account',
-            //              'Must have a bank account attached if no accounts are selected'
-            //            );
-            //          }
-            return action(null)
-        } else {
-            val selectedAccountIds = partnerAccounts.map { it.id }.toSet()
-            val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
 
-            val pollingResult = if (shouldPollAccountNumbers) {
-                runCatching { awaitAccountNumbersReady(linkedAccountIds) }
-            } else {
-                Result.success(Unit)
+        val selectedAccountIds = partnerAccounts?.map { it.id }?.toSet() ?: emptySet()
+        val linkedAccountIds = partnerAccounts?.mapNotNull { it.linkedAccountId }?.toSet() ?: emptySet()
+
+        val pollingResult = when {
+            partnerAccounts.isNullOrEmpty() -> when (attachedPaymentAccountRepository.get()?.attachedPaymentAccount) {
+                is BankAccount -> Result.success(Unit)
+                else -> Result.failure(IllegalStateException(
+                    "Must have a bank account attached if no accounts are selected")
+                )
             }
-
-            return pollingResult.onFailure {
-                disableNetworking()
-            }.mapCatching {
-                action(selectedAccountIds)
-            }.onSuccess { manifest ->
-                storeSavedToLinkMessage(manifest, selectedAccountIds.size)
-            }.onFailure {
-                storeFailedToSaveToLinkMessage(selectedAccountIds.size)
-            }.getOrThrow()
+            shouldPollAccountNumbers -> runCatching { awaitAccountNumbersReady(linkedAccountIds) }
+            else -> Result.success(Unit)
         }
+
+        return pollingResult.onFailure {
+            disableNetworking()
+        }.mapCatching {
+            action(selectedAccountIds)
+        }.onSuccess { manifest ->
+            storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+        }.onFailure {
+            storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+        }.getOrThrow()
+
     }
 
     private suspend fun awaitAccountNumbersReady(linkedAccountIds: Set<String>) {
@@ -122,7 +121,7 @@ internal class SaveAccountToLink @Inject constructor(
             customSuccessMessage = manifest.displayText?.successPane?.subCaption
                 // If backend returns a custom success message, use it
                 ?.let { TextResource.Text(it) }
-                // If not, build a Link success message locally
+            // If not, build a Link success message locally
                 ?: TextResource.PluralId(
                     R.plurals.stripe_success_pane_desc_link_success,
                     selectedAccounts

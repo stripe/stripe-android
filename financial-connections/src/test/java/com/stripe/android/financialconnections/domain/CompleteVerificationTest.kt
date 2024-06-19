@@ -159,9 +159,9 @@ internal class CompleteVerificationTest {
         whenever(cachedAccounts()).thenReturn(emptyList())
         whenever(getOrFetchSync()).thenReturn(syncResponse)
         whenever(attachedPaymentAccountRepository.get()).thenReturn(
-            AttachedPaymentAccountRepository.State(attachedBankAccount))
+            AttachedPaymentAccountRepository.State(attachedBankAccount)
+        )
         whenever(saveAccountToLink.existing(any(), anyOrNull(), any())).thenThrow(RuntimeException())
-
 
         completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
 
@@ -184,11 +184,13 @@ internal class CompleteVerificationTest {
         val linkVerifiedError = RuntimeException()
         whenever(cachedAccounts()).thenReturn(emptyList())
         whenever(markLinkVerified()).thenThrow(linkVerifiedError)
-        whenever(getOrFetchSync()).thenReturn(syncResponse.copy(
-            manifest = syncResponse.manifest.copy(
-                initialInstitution = null
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse.copy(
+                manifest = syncResponse.manifest.copy(
+                    initialInstitution = null
+                )
             )
-        ))
+        )
         whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException())
 
         completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
@@ -204,11 +206,13 @@ internal class CompleteVerificationTest {
         val linkVerifiedError = RuntimeException()
         whenever(cachedAccounts()).thenReturn(emptyList())
         whenever(markLinkVerified()).thenThrow(linkVerifiedError)
-        whenever(getOrFetchSync()).thenReturn(syncResponse.copy(
-            manifest = syncResponse.manifest.copy(
-                initialInstitution = institution()
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse.copy(
+                manifest = syncResponse.manifest.copy(
+                    initialInstitution = institution()
+                )
             )
-        ))
+        )
         whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException())
 
         completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
