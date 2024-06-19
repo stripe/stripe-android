@@ -208,7 +208,7 @@ internal class ElementsSessionJsonParser(
         )
     }
 
-    private fun parsePaymentSheetComponent(json: JSONObject?): ElementsSession.Customer.PaymentSheetComponent? {
+    private fun parsePaymentSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.PaymentSheet? {
         if (json == null) {
             return null
         }
@@ -221,16 +221,16 @@ internal class ElementsSessionJsonParser(
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
 
-            ElementsSession.Customer.PaymentSheetComponent.Enabled(
+            ElementsSession.Customer.Components.PaymentSheet.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
             )
         } else {
-            ElementsSession.Customer.PaymentSheetComponent.Disabled
+            ElementsSession.Customer.Components.PaymentSheet.Disabled
         }
     }
 
-    private fun parseCustomerSheetComponent(json: JSONObject?): ElementsSession.Customer.CustomerSheetComponent? {
+    private fun parseCustomerSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.CustomerSheet? {
         if (json == null) {
             return null
         }
@@ -242,11 +242,11 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
 
-            ElementsSession.Customer.CustomerSheetComponent.Enabled(
+            ElementsSession.Customer.Components.CustomerSheet.Enabled(
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
             )
         } else {
-            ElementsSession.Customer.CustomerSheetComponent.Disabled
+            ElementsSession.Customer.Components.CustomerSheet.Disabled
         }
     }
 

@@ -1066,8 +1066,8 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Disabled,
-                            customerSheet = ElementsSession.Customer.CustomerSheetComponent.Disabled,
+                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
                     defaultPaymentMethod = null,
@@ -1233,8 +1233,8 @@ internal class DefaultPaymentSheetLoaderTest {
                     apiKey = "ek_123",
                     apiKeyExpiry = 555555555,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Disabled,
-                        customerSheet = ElementsSession.Customer.CustomerSheetComponent.Disabled,
+                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                     ),
                 ),
                 defaultPaymentMethod = null,
@@ -1282,8 +1282,8 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Disabled,
-                            customerSheet = ElementsSession.Customer.CustomerSheetComponent.Disabled,
+                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
                     defaultPaymentMethod = null,

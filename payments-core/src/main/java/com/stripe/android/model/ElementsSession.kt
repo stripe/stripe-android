@@ -67,35 +67,35 @@ data class ElementsSession(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Components(
-            val paymentSheet: PaymentSheetComponent,
-            val customerSheet: CustomerSheetComponent,
-        ) : StripeModel
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        sealed interface PaymentSheetComponent : StripeModel {
+            val paymentSheet: PaymentSheet,
+            val customerSheet: CustomerSheet,
+        ) : StripeModel {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data object Disabled : PaymentSheetComponent
+            sealed interface PaymentSheet : StripeModel {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data object Disabled : PaymentSheet
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data class Enabled(
-                val isPaymentMethodSaveEnabled: Boolean,
-                val isPaymentMethodRemoveEnabled: Boolean,
-            ) : PaymentSheetComponent
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        sealed interface CustomerSheetComponent : StripeModel {
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data object Disabled : CustomerSheetComponent
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class Enabled(
+                    val isPaymentMethodSaveEnabled: Boolean,
+                    val isPaymentMethodRemoveEnabled: Boolean,
+                ) : PaymentSheet
+            }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data class Enabled(
-                val isPaymentMethodRemoveEnabled: Boolean,
-            ) : CustomerSheetComponent
+            sealed interface CustomerSheet : StripeModel {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data object Disabled : CustomerSheet
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class Enabled(
+                    val isPaymentMethodRemoveEnabled: Boolean,
+                ) : CustomerSheet
+            }
         }
     }
 

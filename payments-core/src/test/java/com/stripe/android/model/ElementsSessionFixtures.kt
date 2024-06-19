@@ -247,7 +247,7 @@ internal object ElementsSessionFixtures {
                   "enabled": true,
                   "features": {
                     "payment_method_remove": "enabled",
-                    "payment_method_save": "disabled",
+                    "payment_method_save": "disabled"
                   }
                 },
                 "customer_sheet": {

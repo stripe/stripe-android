@@ -507,11 +507,11 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Enabled(
+                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             isPaymentMethodRemoveEnabled = true,
                         ),
-                        customerSheet = ElementsSession.Customer.CustomerSheetComponent.Disabled
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled
                     )
                 ),
                 defaultPaymentMethod = "pm_123",
@@ -570,8 +570,8 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.PaymentSheetComponent.Disabled,
-                        customerSheet = ElementsSession.Customer.CustomerSheetComponent.Enabled(
+                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true
                         ),
                     )
