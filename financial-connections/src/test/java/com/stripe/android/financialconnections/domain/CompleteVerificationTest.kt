@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
@@ -13,6 +14,7 @@ import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -127,7 +129,7 @@ internal class CompleteVerificationTest {
         }
 
     @Test
-    fun `invoke with non-empty accounts and markLinkVerified throws exception`() = runTest {
+    fun `invoke with non-empty accounts and markLinkVerified throws exception navigates to generic error`() = runTest {
         val cachedAccounts = listOf(CachedPartnerAccount("id", "linked_account_id"))
         whenever(cachedAccounts()).thenReturn(cachedAccounts)
         whenever(getOrFetchSync()).thenReturn(syncResponse)
@@ -149,7 +151,71 @@ internal class CompleteVerificationTest {
             error = linkVerifiedError,
             pane = NETWORKING_LINK_VERIFICATION,
             displayErrorScreen = true
+        )
+    }
 
+    @Test
+    fun `invoke with empty accounts, attached bank account and saveAccountToLink fails navigates to SUCCESS`() = runTest {
+        whenever(cachedAccounts()).thenReturn(emptyList())
+        whenever(getOrFetchSync()).thenReturn(syncResponse)
+        whenever(attachedPaymentAccountRepository.get()).thenReturn(
+            AttachedPaymentAccountRepository.State(attachedBankAccount))
+        whenever(saveAccountToLink.existing(any(), anyOrNull(), any())).thenThrow(RuntimeException())
+
+
+        completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
+
+        analyticsTracker.assertContainsEvent(
+            "linked_accounts.networking.verification.error",
+            mapOf(
+                "pane" to "networking_link_verification",
+                "error" to "SaveToLinkError"
+            )
+        )
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.Success,
+            pane = NETWORKING_LINK_VERIFICATION
+        )
+    }
+
+    @Test
+    fun `invoke with empty accounts, verifying fails navigates to INSTITUTION_PICKER`() = runTest {
+        val linkVerifiedError = RuntimeException()
+        whenever(cachedAccounts()).thenReturn(emptyList())
+        whenever(markLinkVerified()).thenThrow(linkVerifiedError)
+        whenever(getOrFetchSync()).thenReturn(syncResponse.copy(
+            manifest = syncResponse.manifest.copy(
+                initialInstitution = null
+            )
+        ))
+        whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException())
+
+        completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            pane = NETWORKING_LINK_VERIFICATION
+        )
+    }
+
+    @Test
+    fun `invoke with empty accounts, verifying fails with initial institution navigates to PARTNER_AUTH`() = runTest {
+        val linkVerifiedError = RuntimeException()
+        whenever(cachedAccounts()).thenReturn(emptyList())
+        whenever(markLinkVerified()).thenThrow(linkVerifiedError)
+        whenever(getOrFetchSync()).thenReturn(syncResponse.copy(
+            manifest = syncResponse.manifest.copy(
+                initialInstitution = institution()
+            )
+        ))
+        whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException())
+
+        completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.PartnerAuth,
+            pane = NETWORKING_LINK_VERIFICATION
         )
     }
 }

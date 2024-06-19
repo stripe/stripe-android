@@ -106,7 +106,6 @@ internal class CompleteVerification @Inject constructor(
                 navigationManager.tryNavigateTo(Success(referrer = pane))
             }.onFailure {
                 // mimicking behavior from v2 where if this request fails we use default error handling
-                // we don't do this in the query definition because the call below does not use the default
                 handleError(
                     extraMessage = "Error marking link as verified",
                     error = it,
