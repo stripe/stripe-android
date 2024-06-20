@@ -111,7 +111,7 @@ internal sealed interface PaymentSheetScreen {
                 (state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
                     ?.paymentMethod?.type == PaymentMethod.Type.Card
             ) {
-                CvcRecollectionField(cvcControllerFlow = cvcRecollectionState.cvcControllerFlow)
+                CvcRecollectionField(cvcControllerFlow = cvcRecollectionState.cvcControllerFlow, isProcessing)
             }
         }
     }
