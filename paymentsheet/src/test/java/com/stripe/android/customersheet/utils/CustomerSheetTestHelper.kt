@@ -80,6 +80,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(

@@ -586,6 +586,8 @@ internal class CustomerSheetViewModel(
                 cbcEligibility = currentViewState.cbcEligibility,
                 savedPaymentMethods = currentViewState.savedPaymentMethods,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
             )
         )
     }
@@ -1223,6 +1225,8 @@ internal class CustomerSheetViewModel(
                 errorMessage = null,
                 cbcEligibility = paymentMethodMetadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
             )
         )
     }

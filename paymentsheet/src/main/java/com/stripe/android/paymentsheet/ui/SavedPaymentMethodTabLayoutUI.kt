@@ -210,6 +210,7 @@ private fun SavedPaymentMethodTab(
                 isEnabled = isEnabled,
                 isEditing = isEditing,
                 isModifiable = item.isModifiable,
+                isRemovable = item.isRemovable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
@@ -296,6 +297,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isModifiable: Boolean,
+    isRemovable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (PaymentMethod) -> Unit,
@@ -317,7 +319,7 @@ private fun SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
                 isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEditing && isRemovable -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,

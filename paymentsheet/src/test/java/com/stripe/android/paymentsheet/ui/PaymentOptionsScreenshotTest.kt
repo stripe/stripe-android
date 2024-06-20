@@ -115,6 +115,55 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
+    @Test
+    fun testItemsNotRemovableWhileEditing() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                state = PaymentOptionsState(
+                    items = listOf(
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4242"),
+                                isRemovable = false,
+                            )
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4000").run {
+                                    copy(
+                                        card = card?.copy(
+                                            networks = PaymentMethod.Card.Networks(
+                                                available = setOf("visa", "cartes_bancaires")
+                                            )
+                                        )
+                                    )
+                                },
+                                isRemovable = false,
+                                isCbcEligible = true,
+                            )
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("1234"),
+                                isRemovable = false,
+                            )
+                        ),
+                    ),
+                    selectedIndex = 1,
+                ),
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+            )
+        }
+    }
+
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
         return original.copy(
