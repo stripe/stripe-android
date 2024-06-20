@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR
@@ -24,7 +25,11 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header on AddAnotherPaymentMethod screen`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
+            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(
+                    errorReporter = FakeErrorReporter()
+                )
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -48,7 +53,11 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header if adding the first payment method in complete flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(
+                    errorReporter = FakeErrorReporter()
+                )
+            ),
             isWalletEnabled = false,
             types = emptyList(),
         )
@@ -59,7 +68,11 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header if adding the first payment method and wallets are available`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(
+                    errorReporter = FakeErrorReporter()
+                )
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -81,7 +94,11 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when only credit card form is shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(
+                    errorReporter = FakeErrorReporter()
+                )
+            ),
             isWalletEnabled = false,
             types = listOf("card"),
         )
@@ -105,7 +122,11 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when multiple LPMs are shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(
+                    errorReporter = FakeErrorReporter()
+                )
+            ),
             isWalletEnabled = false,
             types = listOf("card", "not_card"),
         )
