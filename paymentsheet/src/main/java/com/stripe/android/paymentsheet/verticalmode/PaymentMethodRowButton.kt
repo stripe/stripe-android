@@ -66,7 +66,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean,) 
             val subtitleTextColor = MaterialTheme.stripeColors.subtitle
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
+                style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }
