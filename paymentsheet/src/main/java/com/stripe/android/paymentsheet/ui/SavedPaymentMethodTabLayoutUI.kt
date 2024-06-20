@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -357,14 +358,18 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
     }
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(key1 = controller) {
-        controller.onFocusChange(true)
-        focusRequester.requestFocus()
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(controller) {
+            controller.onFocusChange(true)
+            focusRequester.requestFocus()
+        }
     }
 
-    // Clear focus once primary button is clicked
-    if (isProcessing) {
-        focusManager.clearFocus()
+    LaunchedEffect(isProcessing) {
+        // Clear focus once primary button is clicked
+        if (isProcessing) {
+            focusManager.clearFocus()
+        }
     }
 
     Text(
@@ -378,7 +383,7 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
             .height(IntrinsicSize.Min)
     ) {
         element.controller.ComposeUI(
-            enabled = true,
+            enabled = !isProcessing,
             field = element,
             modifier = Modifier
                 .fillMaxWidth()

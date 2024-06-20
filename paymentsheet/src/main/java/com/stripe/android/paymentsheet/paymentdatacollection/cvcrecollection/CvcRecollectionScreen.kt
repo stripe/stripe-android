@@ -31,6 +31,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -100,8 +101,10 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
         FocusRequester()
     }
 
-    LaunchedEffect(key1 = element) {
-        focusRequester.requestFocus()
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(element) {
+            focusRequester.requestFocus()
+        }
     }
 
     return SectionCard {
