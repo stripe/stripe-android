@@ -15,7 +15,7 @@ import com.stripe.android.link.ui.signup.SignUpState
  * @param signUpState The stage of the sign in or sign up flow.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class InlineSignupViewState internal constructor(
+data class InlineSignupViewState constructor(
     val userInput: UserInput?,
     val merchantName: String,
     val signupMode: LinkSignupMode?,

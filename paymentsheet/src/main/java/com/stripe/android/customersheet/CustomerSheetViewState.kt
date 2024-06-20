@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UnsupportedAddPaymentMethodInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -120,9 +121,9 @@ internal sealed class CustomerSheetViewState(
         isProcessing = isProcessing,
         isEditing = false,
         screen = if (isFirstPaymentMethod) {
-            PaymentSheetScreen.AddFirstPaymentMethod
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor)
         } else {
-            PaymentSheetScreen.AddAnotherPaymentMethod
+            PaymentSheetScreen.AddAnotherPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor)
         },
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,

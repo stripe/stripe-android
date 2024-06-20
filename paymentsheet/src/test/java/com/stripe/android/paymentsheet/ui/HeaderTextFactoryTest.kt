@@ -24,7 +24,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header on AddAnotherPaymentMethod screen`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod,
+            screen = PaymentSheetScreen.AddAnotherPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -48,7 +48,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header if adding the first payment method in complete flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
             isWalletEnabled = false,
             types = emptyList(),
         )
@@ -59,7 +59,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header if adding the first payment method and wallets are available`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -81,7 +81,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when only credit card form is shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
             isWalletEnabled = false,
             types = listOf("card"),
         )
@@ -105,7 +105,7 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when multiple LPMs are shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor),
             isWalletEnabled = false,
             types = listOf("card", "not_card"),
         )
