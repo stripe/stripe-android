@@ -72,7 +72,6 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
-            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -80,6 +79,7 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
+            containsEntry("compose", false)
         }
     }
 
@@ -134,7 +134,6 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to listOf("external_paypal", "external_fawry"),
-            "compose" to true,
         )
 
         assertThat(event.params).run {
@@ -142,6 +141,7 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
+            containsEntry("compose", true)
         }
     }
 
@@ -196,7 +196,6 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
-            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -204,6 +203,7 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
+            containsEntry("compose", false)
         }
     }
 
@@ -260,7 +260,6 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to "cartes_bancaires, visa",
             "external_payment_methods" to null,
-            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -268,6 +267,7 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
+            containsEntry("compose", false)
         }
     }
 
@@ -1125,7 +1125,6 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
-            "compose" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1142,6 +1141,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "compose" to false,
             )
         )
     }
@@ -1185,7 +1185,6 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
-            "compose" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1202,6 +1201,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "compose" to false,
             )
         )
     }
