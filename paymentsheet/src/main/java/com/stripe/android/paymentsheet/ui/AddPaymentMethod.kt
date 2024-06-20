@@ -38,11 +38,11 @@ internal fun AddPaymentMethod(
         linkSignupMode = state.linkInlineSignupMode,
         linkConfigurationCoordinator = state.linkConfigurationCoordinator,
         onItemSelectedListener = { selectedLpm ->
-                interactor.handleViewAction(
-                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
-                        selectedLpm.code
-                    )
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
+                    selectedLpm.code
                 )
+            )
         },
         onLinkSignupStateChanged = {
             interactor.handleViewAction(
