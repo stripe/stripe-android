@@ -120,10 +120,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
-                    FIELD_COMPOSE to initializedViaCompose,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
+                    FIELD_COMPOSE to initializedViaCompose,
                 )
             }
     }
