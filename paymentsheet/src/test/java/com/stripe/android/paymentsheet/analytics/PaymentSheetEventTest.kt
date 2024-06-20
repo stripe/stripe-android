@@ -29,7 +29,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
-            initializedViaCompose = false,
         )
 
         assertThat(
@@ -79,7 +78,6 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
-            containsEntry("compose", false)
         }
     }
 
@@ -91,7 +89,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
-            initializedViaCompose = true,
         )
 
         assertThat(
@@ -141,7 +138,6 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
-            containsEntry("compose", true)
         }
     }
 
@@ -153,7 +149,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
-            initializedViaCompose = false,
         )
 
         assertThat(
@@ -203,7 +198,6 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
-            containsEntry("compose", false)
         }
     }
 
@@ -217,7 +211,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
-            initializedViaCompose = false,
         )
 
         assertThat(
@@ -267,7 +260,6 @@ class PaymentSheetEventTest {
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
-            containsEntry("compose", false)
         }
     }
 
@@ -1133,7 +1125,6 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                initializedViaCompose = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1141,7 +1132,6 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
-                "compose" to false,
             )
         )
     }
@@ -1193,7 +1183,6 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                initializedViaCompose = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1201,7 +1190,6 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
-                "compose" to false,
             )
         )
     }

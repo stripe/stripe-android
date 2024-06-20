@@ -15,13 +15,12 @@ internal interface EventReporter {
     fun onInit(
         configuration: PaymentSheet.Configuration,
         isDeferred: Boolean,
-        initializedViaCompose: Boolean,
     )
 
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted()
+    fun onLoadStarted(initializedViaCompose: Boolean)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be

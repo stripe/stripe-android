@@ -181,7 +181,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
             isDeferred = eq(false),
-            initializedViaCompose = eq(false),
         )
 
         // Creating the view model should regenerate the analytics sessionId.
@@ -1951,7 +1950,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDeferred = eq(false),
-            initializedViaCompose = eq(false),
         )
     }
 
@@ -1966,7 +1964,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDeferred = eq(true),
-            initializedViaCompose = eq(false),
         )
     }
 
@@ -1982,7 +1979,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDeferred = eq(true),
-            initializedViaCompose = eq(false),
         )
     }
 

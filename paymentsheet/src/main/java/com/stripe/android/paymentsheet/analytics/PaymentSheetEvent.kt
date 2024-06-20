@@ -28,9 +28,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        initializedViaCompose: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_started"
-        override val additionalParams: Map<String, Any?> = emptyMap()
+        override val additionalParams: Map<String, Any?> = mapOf(FIELD_COMPOSE to initializedViaCompose)
     }
 
     class LoadSucceeded(
@@ -87,7 +88,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
-        private val initializedViaCompose: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -123,7 +123,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
-                    FIELD_COMPOSE to initializedViaCompose,
                 )
             }
     }

@@ -87,13 +87,18 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         viewModel.resetSession()
 
-        paymentSheetLoader.load(initializationMode, configuration).fold(
+        paymentSheetLoader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = configuration,
+            isReloadingAfterProcessDeath = false,
+            initializedViaCompose = initializedViaCompose,
+        ).fold(
             onSuccess = { state ->
                 if (state.validationError != null) {
                     onConfigured(state.validationError)
                 } else {
                     viewModel.previousConfigureRequest = configureRequest
-                    onInitSuccess(state, configureRequest, initializedViaCompose)
+                    onInitSuccess(state, configureRequest)
                     onConfigured()
                 }
             },
@@ -106,14 +111,12 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
-        initializedViaCompose: Boolean,
     ) {
         val isDecoupling = configureRequest.initializationMode is DeferredIntent
 
         eventReporter.onInit(
             configuration = state.config,
             isDeferred = isDecoupling,
-            initializedViaCompose = initializedViaCompose,
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(

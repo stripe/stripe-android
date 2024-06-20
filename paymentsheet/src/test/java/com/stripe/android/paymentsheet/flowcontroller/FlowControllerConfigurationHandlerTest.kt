@@ -101,7 +101,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
-            initializedViaCompose = false,
         )
         // Configure should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -141,7 +140,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
-            initializedViaCompose = false,
         )
 
         // Configure should not regenerate the analytics sessionId when using the same configuration.
@@ -183,7 +181,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
-            initializedViaCompose = false,
         )
     }
 
@@ -223,7 +220,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
-            initializedViaCompose = false,
         )
     }
 
@@ -449,7 +445,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(false),
-            initializedViaCompose = eq(false),
         )
     }
 
@@ -483,7 +478,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(true),
-            initializedViaCompose = eq(false),
         )
     }
 
@@ -518,7 +512,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(true),
-            initializedViaCompose = eq(false),
         )
     }
 

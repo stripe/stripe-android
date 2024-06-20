@@ -32,7 +32,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onInit(
         configuration: PaymentSheet.Configuration,
         isDeferred: Boolean,
-        initializedViaCompose: Boolean,
     ) {
         this.isDeferred = isDeferred
 
@@ -43,14 +42,13 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
-                initializedViaCompose = initializedViaCompose,
             )
         )
     }
 
-    override fun onLoadStarted() {
+    override fun onLoadStarted(initializedViaCompose: Boolean) {
         durationProvider.start(DurationProvider.Key.Loading)
-        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled, googlePaySupported))
+        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled, googlePaySupported, initializedViaCompose))
     }
 
     override fun onLoadSucceeded(

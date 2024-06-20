@@ -46,6 +46,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> {
         return results.receive()
     }
