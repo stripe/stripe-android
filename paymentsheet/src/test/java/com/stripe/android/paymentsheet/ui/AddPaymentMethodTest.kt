@@ -1,22 +1,45 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
+import android.os.Build
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.CheckboxFieldElement
+import com.stripe.android.uicore.elements.DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class AddPaymentMethodTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
 
     val context: Context = getApplicationContext()
     val metadata = PaymentMethodMetadataFactory.create(
@@ -107,4 +130,116 @@ internal class AddPaymentMethodTest {
         assertThat(klarnaPaymentSelection.iconResource).isEqualTo(klarnaPaymentMethod.iconResource)
         assertThat(getNameFromParams(klarnaPaymentSelection.paymentMethodCreateParams)).isEqualTo(name)
     }
+
+    @Test
+    fun `selecting a new payment method starts an OnPaymentMethodSelected ViewAction`() = runTest {
+        runScenario {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag("PaymentMethodsUITestTagcard", useUnmergedTree = true).performClick()
+            composeRule.waitForIdle()
+
+            viewActionRecorder.consume(
+                AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected("card")
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun `interacting with a form field sends form events`() = runTest {
+        runScenario {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag(DEFAULT_CHECKBOX_TEST_TAG, useUnmergedTree = true).performClick()
+            composeRule.waitForIdle()
+
+            viewActionRecorder.consume(
+                AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("card")
+            )
+            viewActionRecorder.consume(
+                AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                    formValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.SameAsShipping to FormFieldEntry(
+                                value = "true",
+                                isComplete = true
+                            )
+                        ),
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    ),
+                    selectedPaymentMethodCode = "card",
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    private fun runScenario(
+        initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
+        block: Scenario.() -> Unit
+    ) {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+        )
+        val initialState = AddPaymentMethodInteractor.State(
+            selectedPaymentMethodCode = initiallySelectedPaymentMethodType,
+            supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
+            arguments = FormArguments(
+                paymentMethodCode = initiallySelectedPaymentMethodType,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                merchantName = "Example, Inc.",
+            ),
+            formElements = listOf(
+                CheckboxFieldElement(
+                    identifier = IdentifierSpec.SameAsShipping,
+                )
+            ),
+            paymentSelection = null,
+            linkSignupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            linkInlineSignupMode = null,
+            processing = false,
+            usBankAccountFormArguments = mock(),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        )
+
+        val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()
+
+        val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(viewActionRecorder, initialState)
+
+        composeRule.setContent {
+            AddPaymentMethod(interactor = addPaymentMethodInteractor)
+        }
+
+        viewActionRecorder.consume(
+            AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
+                formValues = null,
+                selectedPaymentMethodCode = initiallySelectedPaymentMethodType
+            )
+        )
+
+        Scenario(viewActionRecorder).apply(block)
+    }
+
+    class FakeAddPaymentMethodInteractor(
+        private val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>,
+        initialState: AddPaymentMethodInteractor.State,
+    ) : AddPaymentMethodInteractor {
+
+        override val state: StateFlow<AddPaymentMethodInteractor.State> = MutableStateFlow(initialState)
+
+        override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
+            viewActionRecorder.record(viewAction)
+        }
+
+        override fun close() {
+            // Do nothing.
+        }
+    }
+
+    private data class Scenario(
+        val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>,
+    )
 }

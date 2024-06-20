@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckboxFieldController constructor(
     val labelResource: LabelResource? = null,
-    val debugTag: String = "",
+    val debugTag: String = DEFAULT_CHECKBOX_TEST_TAG,
     initialValue: Boolean = false,
 ) : SectionFieldErrorController, SectionFieldComposable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -57,3 +57,6 @@ class CheckboxFieldController constructor(
         CheckboxFieldUI(modifier = modifier, controller = this, enabled = enabled)
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val DEFAULT_CHECKBOX_TEST_TAG = "CHECKBOX_FIELD"
