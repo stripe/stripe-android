@@ -21,6 +21,7 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> String,
+        canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): PaymentOptionsState {
         val items = listOfNotNull(
@@ -32,6 +33,7 @@ internal object PaymentOptionsStateFactory {
                 DisplayableSavedPaymentMethod(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
+                    isRemovable = canRemovePaymentMethods,
                     isCbcEligible = isCbcEligible
                 )
             )

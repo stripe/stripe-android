@@ -65,6 +65,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -289,6 +290,7 @@ internal class CustomerSheetScreenshotTest {
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
@@ -323,6 +325,7 @@ internal class CustomerSheetScreenshotTest {
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
