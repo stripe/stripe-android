@@ -2011,6 +2011,7 @@ internal class DefaultFlowControllerTest {
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
         errorReporter = FakeErrorReporter(),
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
+        initializedViaCompose = false,
     )
 
     private fun createViewModel(): FlowControllerViewModel {

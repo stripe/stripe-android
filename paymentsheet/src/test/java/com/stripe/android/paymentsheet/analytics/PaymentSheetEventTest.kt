@@ -29,6 +29,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            initializedViaCompose = false,
         )
 
         assertThat(
@@ -71,6 +72,7 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -82,13 +84,14 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `Init event with external payment methdos should return expected params`() {
+    fun `Init event with external payment methods should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            initializedViaCompose = true,
         )
 
         assertThat(
@@ -131,6 +134,7 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to listOf("external_paypal", "external_fawry"),
+            "compose" to true,
         )
 
         assertThat(event.params).run {
@@ -149,6 +153,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            initializedViaCompose = false,
         )
 
         assertThat(
@@ -191,6 +196,7 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -211,6 +217,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            initializedViaCompose = false,
         )
 
         assertThat(
@@ -253,6 +260,7 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to "cartes_bancaires, visa",
             "external_payment_methods" to null,
+            "compose" to false,
         )
 
         assertThat(event.params).run {
@@ -1117,6 +1125,7 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "compose" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1125,6 +1134,7 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
+                initializedViaCompose = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1175,6 +1185,7 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "compose" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1183,6 +1194,7 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
+                initializedViaCompose = false,
             ).params
         ).isEqualTo(
             mapOf(

@@ -87,7 +87,8 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
         }
@@ -100,6 +101,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
+            initializedViaCompose = false,
         )
         // Configure should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -124,7 +126,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = initializationMode,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
         }
@@ -138,6 +141,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
+            initializedViaCompose = false,
         )
 
         // Configure should not regenerate the analytics sessionId when using the same configuration.
@@ -165,6 +169,7 @@ class FlowControllerConfigurationHandlerTest {
             scope = this,
             initializationMode = newConfigureRequest.initializationMode,
             configuration = newConfigureRequest.configuration,
+            initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
         }
@@ -178,6 +183,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
+            initializedViaCompose = false,
         )
     }
 
@@ -203,6 +209,7 @@ class FlowControllerConfigurationHandlerTest {
             scope = this,
             initializationMode = newConfigureRequest.initializationMode,
             configuration = newConfigureRequest.configuration,
+            initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
         }
@@ -216,6 +223,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
+            initializedViaCompose = false,
         )
     }
 
@@ -227,7 +235,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(" "),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
         }
@@ -248,7 +257,8 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
                 merchantDisplayName = "",
-            )
+            ),
+            initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
         }
@@ -271,7 +281,8 @@ class FlowControllerConfigurationHandlerTest {
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     id = " "
                 )
-            )
+            ),
+            initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
         }
@@ -294,7 +305,8 @@ class FlowControllerConfigurationHandlerTest {
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     ephemeralKeySecret = " "
                 )
-            )
+            ),
+            initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
         }
@@ -321,6 +333,7 @@ class FlowControllerConfigurationHandlerTest {
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
                     configuration = PaymentSheet.Configuration("Some name"),
+                    initializedViaCompose = false,
                 ) { _, _ ->
                     onInitCallbacks++
                 }
@@ -355,6 +368,7 @@ class FlowControllerConfigurationHandlerTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration("Some name"),
+                initializedViaCompose = false,
                 callback = { _, _ ->
                     resultTurbine.add(amount)
                 },
@@ -382,6 +396,7 @@ class FlowControllerConfigurationHandlerTest {
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
+            initializedViaCompose = false,
             callback = { _, _ ->
                 resultTurbine.add(Unit)
             },
@@ -406,6 +421,7 @@ class FlowControllerConfigurationHandlerTest {
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
+            initializedViaCompose = false,
         ) { _, exception ->
             resultTurbine.add(exception)
         }
@@ -423,6 +439,7 @@ class FlowControllerConfigurationHandlerTest {
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
             configuration = PaymentSheet.Configuration("Some name"),
+            initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -432,6 +449,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(false),
+            initializedViaCompose = eq(false),
         )
     }
 
@@ -455,6 +473,7 @@ class FlowControllerConfigurationHandlerTest {
                 ),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
+            initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -464,6 +483,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(true),
+            initializedViaCompose = eq(false),
         )
     }
 
@@ -488,6 +508,7 @@ class FlowControllerConfigurationHandlerTest {
                 ),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
+            initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -497,6 +518,7 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = any(),
             isDeferred = eq(true),
+            initializedViaCompose = eq(false),
         )
     }
 

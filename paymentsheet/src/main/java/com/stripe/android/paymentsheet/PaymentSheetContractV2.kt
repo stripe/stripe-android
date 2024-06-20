@@ -36,6 +36,7 @@ internal class PaymentSheetContractV2 :
         internal val initializationMode: PaymentSheet.InitializationMode,
         internal val config: PaymentSheet.Configuration,
         @ColorInt internal val statusBarColor: Int?,
+        val initializedViaCompose: Boolean = false,
     ) : ActivityStarter.Args {
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config.googlePay

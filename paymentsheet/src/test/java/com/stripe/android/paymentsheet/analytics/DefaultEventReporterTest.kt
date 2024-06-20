@@ -52,6 +52,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onInit(
             configuration = configuration,
             isDeferred = false,
+            initializedViaCompose = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -674,7 +675,7 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateInit() {
-        onInit(configuration, isDeferred = false)
+        onInit(configuration, isDeferred = false, initializedViaCompose = false)
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
@@ -683,7 +684,7 @@ class DefaultEventReporterTest {
         googlePayReady: Boolean = true,
         currency: String? = "usd",
     ) {
-        onInit(configuration, isDeferred = false)
+        onInit(configuration, isDeferred = false, initializedViaCompose = false)
         onLoadStarted()
         onLoadSucceeded(
             paymentSelection = paymentSelection,

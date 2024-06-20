@@ -263,6 +263,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         eventReporter.onInit(
             configuration = config,
             isDeferred = isDeferred,
+            initializedViaCompose = args.initializedViaCompose,
         )
 
         viewModelScope.launch(workContext) {

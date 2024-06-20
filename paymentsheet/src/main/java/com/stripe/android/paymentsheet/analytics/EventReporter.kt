@@ -15,6 +15,7 @@ internal interface EventReporter {
     fun onInit(
         configuration: PaymentSheet.Configuration,
         isDeferred: Boolean,
+        initializedViaCompose: Boolean,
     )
 
     /**

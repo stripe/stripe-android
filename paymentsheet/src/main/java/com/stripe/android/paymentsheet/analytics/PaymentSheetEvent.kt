@@ -87,6 +87,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        private val initializedViaCompose: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -119,6 +120,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
+                    FIELD_COMPOSE to initializedViaCompose,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -463,6 +465,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
+        const val FIELD_COMPOSE = "compose"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

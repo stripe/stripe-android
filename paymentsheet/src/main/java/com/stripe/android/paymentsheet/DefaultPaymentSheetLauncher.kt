@@ -22,6 +22,7 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
+    private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -91,6 +92,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = activity.window?.statusBarColor,
+            initializedViaCompose = initializedViaCompose,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
