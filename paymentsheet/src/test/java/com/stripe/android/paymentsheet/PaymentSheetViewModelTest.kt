@@ -43,7 +43,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -1469,7 +1468,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem() is AddFirstPaymentMethod).isTrue()
             viewModel.handleBackPressed()
         }
     }
@@ -1478,7 +1477,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem() is AddFirstPaymentMethod).isTrue()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled)
@@ -1495,7 +1494,7 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.transitionToAddPaymentScreen()
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+            assertThat(awaitItem() is AddAnotherPaymentMethod).isTrue()
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
@@ -1506,7 +1505,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem() is AddFirstPaymentMethod).isTrue()
         }
     }
 
@@ -1737,7 +1736,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
             viewModel.removePaymentMethod(paymentMethods.single())
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem() is AddFirstPaymentMethod).isTrue()
         }
     }
 
