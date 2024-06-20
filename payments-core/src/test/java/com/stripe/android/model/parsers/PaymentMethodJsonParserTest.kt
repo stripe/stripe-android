@@ -55,6 +55,33 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withAllowRedisplayUnspecified_shouldCreateExpectedObject() {
+        val parsedPaymentMethod = PaymentMethodJsonParser()
+            .parse(PaymentMethodFixtures.ALLOW_REDISPLAY_UNSPECIFIED_JSON)
+
+        assertThat(parsedPaymentMethod.allowRedisplay)
+            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+    }
+
+    @Test
+    fun parse_withAllowRedisplayLimited_shouldCreateExpectedObject() {
+        val parsedPaymentMethod = PaymentMethodJsonParser()
+            .parse(PaymentMethodFixtures.ALLOW_REDISPLAY_LIMITED_JSON)
+
+        assertThat(parsedPaymentMethod.allowRedisplay)
+            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+    }
+
+    @Test
+    fun parse_withAllowRedisplayAlways_shouldCreateExpectedObject() {
+        val parsedPaymentMethod = PaymentMethodJsonParser()
+            .parse(PaymentMethodFixtures.ALLOW_REDISPLAY_ALWAYS_JSON)
+
+        assertThat(parsedPaymentMethod.allowRedisplay)
+            .isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+    }
+
+    @Test
     fun parse_withFpx_shouldCreateExpectedObject() {
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.FPX_JSON))
             .isEqualTo(PaymentMethodFixtures.FPX_PAYMENT_METHOD)

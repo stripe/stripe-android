@@ -14,6 +14,7 @@ sealed class PaymentMethodUpdateParams(
     internal val type: PaymentMethod.Type,
 ) : StripeParamsModel, Parcelable {
 
+    internal abstract val allowRedisplay: PaymentMethod.AllowRedisplay?
     internal abstract val billingDetails: PaymentMethod.BillingDetails?
     internal abstract val productUsageTokens: Set<String>
 
@@ -26,7 +27,11 @@ sealed class PaymentMethodUpdateParams(
             mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
         }.orEmpty()
 
-        return billingInfo + typeParams
+        val allowRedisplayInfo = allowRedisplay?.let {
+            mapOf(PARAM_ALLOW_REDISPLAY to it.value)
+        }.orEmpty()
+
+        return billingInfo + allowRedisplayInfo + typeParams
     }
 
     @Parcelize
@@ -36,6 +41,7 @@ sealed class PaymentMethodUpdateParams(
         val networks: Networks? = null,
         override val billingDetails: PaymentMethod.BillingDetails?,
         override val productUsageTokens: Set<String> = emptySet(),
+        override val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     ) : PaymentMethodUpdateParams(PaymentMethod.Type.Card) {
 
         override fun generateTypeParams(): Map<String, Any> {
@@ -110,6 +116,7 @@ sealed class PaymentMethodUpdateParams(
 
     companion object {
 
+        private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_BILLING_DETAILS = "billing_details"
 
         @JvmStatic
@@ -119,8 +126,9 @@ sealed class PaymentMethodUpdateParams(
             expiryYear: Int? = null,
             networks: Card.Networks? = null,
             billingDetails: PaymentMethod.BillingDetails? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodUpdateParams {
-            return Card(expiryMonth, expiryYear, networks, billingDetails)
+            return Card(expiryMonth, expiryYear, networks, billingDetails, emptySet(), allowRedisplay)
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -131,9 +139,10 @@ sealed class PaymentMethodUpdateParams(
             expiryYear: Int? = null,
             networks: Card.Networks? = null,
             billingDetails: PaymentMethod.BillingDetails? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
             productUsageTokens: Set<String>,
         ): PaymentMethodUpdateParams {
-            return Card(expiryMonth, expiryYear, networks, billingDetails, productUsageTokens)
+            return Card(expiryMonth, expiryYear, networks, billingDetails, productUsageTokens, allowRedisplay)
         }
     }
 }

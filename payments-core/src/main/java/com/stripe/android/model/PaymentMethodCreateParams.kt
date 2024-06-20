@@ -36,6 +36,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
+    private val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
@@ -68,6 +69,7 @@ data class PaymentMethodCreateParams internal constructor(
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
+        allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
         overrideParamMap: Map<String, @RawValue Any>? = null
@@ -88,6 +90,7 @@ data class PaymentMethodCreateParams internal constructor(
         cashAppPay,
         swish,
         billingDetails,
+        allowRedisplay,
         metadata,
         productUsage,
         overrideParamMap
@@ -108,11 +111,13 @@ data class PaymentMethodCreateParams internal constructor(
 
     private constructor(
         card: Card,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
+        metadata: Map<String, String>?,
     ) : this(
         type = PaymentMethod.Type.Card,
         card = card,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
@@ -250,6 +255,10 @@ data class PaymentMethodCreateParams internal constructor(
             ).plus(
                 billingDetails?.let {
                     mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
+                }.orEmpty()
+            ).plus(
+                allowRedisplay?.let {
+                    mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
                 }.orEmpty()
             ).plus(typeParams).plus(
                 metadata?.let {
@@ -666,6 +675,7 @@ data class PaymentMethodCreateParams internal constructor(
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
+        private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_METADATA = "metadata"
 
         /**
@@ -700,9 +710,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             card: Card,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(card, billingDetails, metadata)
+            return PaymentMethodCreateParams(card, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -1025,12 +1036,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createUSBankAccount(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.USBankAccount,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
