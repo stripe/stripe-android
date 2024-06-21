@@ -354,6 +354,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
             val primaryButton = binding.primaryButton
             button = primaryButton
+            @Suppress("DEPRECATION")
             primaryButton.setAppearanceConfiguration(
                 StripeTheme.primaryButtonStyle,
                 tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
