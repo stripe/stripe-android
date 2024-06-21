@@ -96,7 +96,7 @@ class DocumentScanScreenTest {
         testDocumentScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(),
         ) {
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -114,7 +114,7 @@ class DocumentScanScreenTest {
                 eq(IdentityScanState.ScanType.DOC_FRONT),
                 any()
             )
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -133,7 +133,7 @@ class DocumentScanScreenTest {
                 eq(IdentityScanState.ScanType.DOC_BACK),
                 any()
             )
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -148,7 +148,7 @@ class DocumentScanScreenTest {
             messageId = R.string.stripe_scanned
         ) {
             verify(mockDocumentScanViewModel).stopScan(any())
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_scanned))
             onNodeWithTag(CHECK_MARK_TAG).assertExists()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
