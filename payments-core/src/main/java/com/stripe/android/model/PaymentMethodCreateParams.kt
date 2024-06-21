@@ -113,7 +113,7 @@ data class PaymentMethodCreateParams internal constructor(
         card: Card,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?,
+        metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Card,
         card = card,
@@ -124,121 +124,143 @@ data class PaymentMethodCreateParams internal constructor(
 
     private constructor(
         ideal: Ideal,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Ideal,
         ideal = ideal,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         fpx: Fpx,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Fpx,
         fpx = fpx,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         sepaDebit: SepaDebit,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.SepaDebit,
         sepaDebit = sepaDebit,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         auBecsDebit: AuBecsDebit,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.AuBecsDebit,
         auBecsDebit = auBecsDebit,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         bacsDebit: BacsDebit,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.BacsDebit,
         bacsDebit = bacsDebit,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         sofort: Sofort,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Sofort,
         sofort = sofort,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         upi: Upi,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Upi,
         upi = upi,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         netbanking: Netbanking,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.Netbanking,
         netbanking = netbanking,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         usBankAccount: USBankAccount,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
         type = PaymentMethod.Type.USBankAccount,
         usBankAccount = usBankAccount,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
     )
 
     private constructor(
         cashAppPay: CashAppPay,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?,
     ) : this(
         type = PaymentMethod.Type.CashAppPay,
         cashAppPay = cashAppPay,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata,
     )
 
     private constructor(
         swish: Swish,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?,
     ) : this(
         type = PaymentMethod.Type.Swish,
         swish = swish,
+        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata,
     )
@@ -724,9 +746,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             ideal: Ideal,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(ideal, billingDetails, metadata)
+            return PaymentMethodCreateParams(ideal, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -737,9 +760,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             fpx: Fpx,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(fpx, billingDetails, metadata)
+            return PaymentMethodCreateParams(fpx, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -750,9 +774,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             sepaDebit: SepaDebit,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(sepaDebit, billingDetails, metadata)
+            return PaymentMethodCreateParams(sepaDebit, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -763,9 +788,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             auBecsDebit: AuBecsDebit,
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(auBecsDebit, billingDetails, metadata)
+            return PaymentMethodCreateParams(auBecsDebit, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -776,9 +802,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             bacsDebit: BacsDebit,
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(bacsDebit, billingDetails, metadata)
+            return PaymentMethodCreateParams(bacsDebit, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -789,9 +816,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             sofort: Sofort,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(sofort, billingDetails, metadata)
+            return PaymentMethodCreateParams(sofort, allowRedisplay, billingDetails, metadata)
         }
 
         @JvmStatic
@@ -799,9 +827,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             upi: Upi,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(upi, billingDetails, metadata)
+            return PaymentMethodCreateParams(upi, allowRedisplay, billingDetails, metadata)
         }
 
         @JvmStatic
@@ -809,9 +838,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             usBankAccount: USBankAccount,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(usBankAccount, billingDetails, metadata)
+            return PaymentMethodCreateParams(usBankAccount, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -822,9 +852,10 @@ data class PaymentMethodCreateParams internal constructor(
         fun create(
             netbanking: Netbanking,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(netbanking, billingDetails, metadata)
+            return PaymentMethodCreateParams(netbanking, allowRedisplay, billingDetails, metadata)
         }
 
         /**
@@ -834,12 +865,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createP24(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.P24,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -850,12 +883,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createBancontact(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Bancontact,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -866,12 +901,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createGiropay(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Giropay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -882,12 +919,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createGrabPay(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.GrabPay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -898,12 +937,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createEps(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Eps,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -911,34 +952,40 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createOxxo(
             billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Oxxo,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
         @JvmStatic
         @JvmOverloads
         fun createAlipay(
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Alipay,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
         @JvmStatic
         @JvmOverloads
         fun createPayPal(
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.PayPal,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -946,12 +993,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createAfterpayClearpay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.AfterpayClearpay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -984,12 +1033,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createBlik(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Blik,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -997,12 +1048,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createWeChatPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.WeChatPay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1010,12 +1063,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createKlarna(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Klarna,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1023,12 +1078,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createAffirm(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Affirm,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1055,9 +1112,16 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createCashAppPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
+            return PaymentMethodCreateParams(
+                cashAppPay = CashAppPay(),
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+
+            )
         }
 
         /**
@@ -1068,12 +1132,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createAmazonPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.AmazonPay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1085,12 +1151,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createMultibanco(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Multibanco,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1102,12 +1170,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createAlma(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Alma,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1119,12 +1189,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createSunbit(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Sunbit,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1136,12 +1208,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createBillie(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Billie,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1153,12 +1227,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createSatispay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Satispay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1170,21 +1246,24 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createSwish(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(Swish(), billingDetails, metadata)
+            return PaymentMethodCreateParams(Swish(), allowRedisplay, billingDetails, metadata)
         }
 
         @JvmStatic
         @JvmOverloads
         fun createRevolutPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.RevolutPay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
@@ -1192,12 +1271,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmOverloads
         fun createMobilePay(
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.MobilePay,
                 billingDetails = billingDetails,
-                metadata = metadata
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 

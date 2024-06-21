@@ -755,7 +755,7 @@ constructor(
     }
 
     @Parcelize
-    enum class AllowRedisplay(val value: String) : StripeModel {
+    enum class AllowRedisplay(internal val value: String) : StripeModel {
         // Default value for payment methods where `allow_redisplay` was not set.
         UNSPECIFIED("unspecified"),
 
