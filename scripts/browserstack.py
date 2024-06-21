@@ -267,6 +267,7 @@ def executeTests(appUrl, testUrl, isNightly):
     devices = []
     if isNightly:
         devices = [
+            "Google Pixel 6 Pro-15.0",
             "Google Pixel 8-14.0",
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
