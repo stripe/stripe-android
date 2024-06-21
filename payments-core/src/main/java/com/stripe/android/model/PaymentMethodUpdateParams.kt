@@ -128,7 +128,14 @@ sealed class PaymentMethodUpdateParams(
             billingDetails: PaymentMethod.BillingDetails? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodUpdateParams {
-            return Card(expiryMonth, expiryYear, networks, billingDetails, emptySet(), allowRedisplay)
+            return Card(
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                networks = networks,
+                billingDetails = billingDetails,
+                productUsageTokens = emptySet(),
+                allowRedisplay = allowRedisplay
+            )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -142,7 +149,14 @@ sealed class PaymentMethodUpdateParams(
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
             productUsageTokens: Set<String>,
         ): PaymentMethodUpdateParams {
-            return Card(expiryMonth, expiryYear, networks, billingDetails, productUsageTokens, allowRedisplay)
+            return Card(
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                networks = networks,
+                billingDetails = billingDetails,
+                productUsageTokens = productUsageTokens,
+                allowRedisplay = allowRedisplay
+            )
         }
     }
 }
