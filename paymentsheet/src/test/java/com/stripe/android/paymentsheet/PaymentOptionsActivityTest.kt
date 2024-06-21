@@ -194,6 +194,8 @@ internal class PaymentOptionsActivityTest {
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
+                composeTestRule.waitForIdle()
+
                 assertThat(activity.continueButton.isVisible).isTrue()
 
                 // Navigate back to payment options list
