@@ -66,7 +66,9 @@ import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -372,7 +374,9 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
-            button?.updateState(state?.convert())
+            withContext(Dispatchers.Main) {
+                button?.updateState(state?.convert())
+            }
         }
     }
 }
