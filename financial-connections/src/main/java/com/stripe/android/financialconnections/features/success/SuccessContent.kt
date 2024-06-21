@@ -352,15 +352,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
 ) {
     FinancialConnectionsPreview {
         val configuration = LocalConfiguration.current
-        val isPhone = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-
-        val payload = state.payload()
-
-        val successBodyHeight = if (payload?.customSuccessMessage != null && isPhone) {
-            120.dp
-        } else {
-            72.dp
-        }
+        val successBodyHeight = calculateBodyHeightForPreview(configuration, state)
 
         SuccessContentInternal(
             overrideAnimationForPreview = true,
@@ -369,6 +361,17 @@ internal fun SuccessScreenAnimationCompletedPreview(
             payloadAsync = state.payload,
             onDoneClick = {},
         )
+    }
+}
+
+private fun calculateBodyHeightForPreview(config: Configuration, state: SuccessState): Dp {
+    // We need to manually calculate this for our screenshot tests, as we've been unable to
+    // delay the capture until the offset animation finishes.
+    val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
+    return if (state.payload()?.customSuccessMessage != null && isPhone) {
+        120.dp
+    } else {
+        72.dp
     }
 }
 
