@@ -38,9 +38,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -153,13 +155,23 @@ private fun SpinnerToSuccessAnimation(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val hapticFeedback = LocalHapticFeedback.current
+
     val scope = rememberCoroutineScope()
+    var didPerformHaptics = rememberSaveable { false }
 
     var targetCheckmarkScale by rememberSaveable {
         mutableFloatStateOf(if (showSpinner) 0f else 1f)
     }
 
     var successBodyHeight by remember { mutableStateOf(initialSuccessBodyHeight ?: 0.dp) }
+
+    if (!showSpinner && !didPerformHaptics) {
+        LaunchedEffect(Unit) {
+            hapticFeedback.performHapticFeedback(LongPress)
+            didPerformHaptics = true
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
