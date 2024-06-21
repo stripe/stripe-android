@@ -43,6 +43,7 @@ fun rememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
+            initializedViaCompose = true,
         )
         PaymentSheet(launcher)
     }

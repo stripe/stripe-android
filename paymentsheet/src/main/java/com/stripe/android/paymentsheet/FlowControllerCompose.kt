@@ -163,6 +163,7 @@ private fun internalRememberPaymentSheetFlowController(
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
+            initializedViaCompose = true,
         ).create()
     }
 }

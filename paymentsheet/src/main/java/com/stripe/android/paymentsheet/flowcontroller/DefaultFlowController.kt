@@ -40,6 +40,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -112,6 +113,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val errorReporter: ErrorReporter,
+    @InitializedViaCompose private val initializedViaCompose: Boolean,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -276,6 +278,7 @@ internal class DefaultFlowController @Inject internal constructor(
             initializationMode = mode,
             configuration = configuration,
             callback = callback,
+            initializedViaCompose = initializedViaCompose,
         )
     }
 
@@ -917,7 +920,8 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback
+            paymentResultCallback: PaymentSheetResultCallback,
+            initializedViaCompose: Boolean,
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
@@ -933,6 +937,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
+                    .initializedViaCompose(initializedViaCompose)
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
