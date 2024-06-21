@@ -168,14 +168,14 @@ internal class UnsupportedAddPaymentMethodInteractor(private val errorReporter: 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         errorReporter.report(
             ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED,
-            additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "handleViewAction_${viewAction}")
+            additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "handleViewAction_$viewAction")
         )
     }
 
     override fun close() {
         errorReporter.report(
-            ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED, additionalNonPiiParams =
-            mapOf(errorFieldFunctionAccessed to "close")
+            ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED,
+            additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "close")
         )
     }
 }

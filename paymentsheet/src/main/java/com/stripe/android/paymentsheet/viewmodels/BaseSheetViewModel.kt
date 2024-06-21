@@ -141,6 +141,12 @@ internal abstract class BaseSheetViewModel(
     val currentScreen: StateFlow<PaymentSheetScreen> = backStack
         .mapAsStateFlow { it.last() }
 
+    private val addPaymentMethodInteractor: DefaultAddPaymentMethodInteractor by lazy {
+        DefaultAddPaymentMethodInteractor(
+            this
+        )
+    }
+
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
@@ -371,7 +377,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
+        transitionTo(AddAnotherPaymentMethod(interactor = addPaymentMethodInteractor))
     }
 
     fun transitionTo(target: PaymentSheetScreen) {
@@ -620,7 +626,7 @@ internal abstract class BaseSheetViewModel(
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
-            resetTo(listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))))
+            resetTo(listOf(AddFirstPaymentMethod(interactor = addPaymentMethodInteractor)))
         }
     }
 

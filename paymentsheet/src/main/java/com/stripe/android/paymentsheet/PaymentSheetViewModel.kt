@@ -250,6 +250,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
+    private val addPaymentMethodInteractor: DefaultAddPaymentMethodInteractor by lazy {
+        DefaultAddPaymentMethodInteractor(
+            this
+        )
+    }
+
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
@@ -831,7 +837,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
-            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = addPaymentMethodInteractor)
         }
         return listOf(target)
     }

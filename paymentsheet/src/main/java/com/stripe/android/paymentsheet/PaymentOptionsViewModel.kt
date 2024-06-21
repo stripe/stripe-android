@@ -138,6 +138,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         initialValue = null,
     )
 
+    private val addPaymentMethodInteractor: DefaultAddPaymentMethodInteractor by lazy {
+        DefaultAddPaymentMethodInteractor(
+            this
+        )
+    }
+
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
@@ -330,10 +336,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
-            AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
+            AddFirstPaymentMethod(interactor = addPaymentMethodInteractor)
         }
 
-        val sheetViewModel = this
         return buildList {
             add(target)
 
@@ -343,9 +348,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // form again.
                 add(
                     PaymentSheetScreen.AddAnotherPaymentMethod(
-                        interactor = DefaultAddPaymentMethodInteractor(
-                            sheetViewModel
-                        )
+                        interactor = addPaymentMethodInteractor
                     )
                 )
             }
