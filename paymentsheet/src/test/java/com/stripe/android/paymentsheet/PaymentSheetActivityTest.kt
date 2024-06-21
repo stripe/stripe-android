@@ -175,7 +175,6 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             viewModel.toggleEditing()
-            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -507,8 +506,6 @@ internal class PaymentSheetActivityTest {
 
             activity.buyButton.performClick()
 
-            composeTestRule.waitForIdle()
-
             assertThat(activity.buyButton.isEnabled)
                 .isFalse()
         }
@@ -539,8 +536,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
-
-            composeTestRule.waitForIdle()
 
             assertThat(activity.buyButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
@@ -942,7 +937,6 @@ internal class PaymentSheetActivityTest {
             testDispatcher.scheduler.advanceTimeBy(50)
             assertThat(activity.buyButton.externalLabel).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
-            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
         }
     }
