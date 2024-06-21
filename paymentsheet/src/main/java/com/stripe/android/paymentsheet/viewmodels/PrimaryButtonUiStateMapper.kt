@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.content.Context
+import androidx.core.content.ContextCompat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -69,16 +70,16 @@ internal class PrimaryButtonUiStateMapper(
         return if (config.primaryButtonLabel != null) {
             config.primaryButtonLabel
         } else if (isProcessingPayment) {
-            val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
-            amount?.buildPayButtonLabel(context.resources) ?: fallback
+            val fallback = context.forLanguage().getString(R.string.stripe_paymentsheet_pay_button_label)
+            amount?.buildPayButtonLabel(context.forLanguage().resources) ?: fallback
         } else {
-            context.getString(StripeUiCoreR.string.stripe_setup_button_label)
+            context.forLanguage().getString(StripeUiCoreR.string.stripe_setup_button_label)
         }
     }
 
     private fun continueButtonLabel(): String {
         val customLabel = config.primaryButtonLabel
-        return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
+        return customLabel ?: context.forLanguage().getString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 
     private fun cvcRecollectionCompleteOrNotRequired(
@@ -97,4 +98,6 @@ internal class PrimaryButtonUiStateMapper(
             true
         }
     }
+
+    private fun Context.forLanguage() = ContextCompat.getContextForLanguage(this)
 }
