@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.47.0 - 2024-06-24
+
 ### PaymentSheet
 * [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to PaymentSheet.
 * [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to PaymentSheet.
