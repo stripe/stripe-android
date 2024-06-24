@@ -127,10 +127,10 @@ internal abstract class BaseSheetViewModel(
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
+    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
         .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
         .mapAsStateFlow { state ->
-            state?.paymentMethods
+            state?.paymentMethods ?: emptyList()
         }
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(

@@ -29,7 +29,7 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
 ) : ManageOneSavedPaymentMethodInteractor {
 
     constructor(sheetViewModel: BaseSheetViewModel) : this(
-        paymentMethod = sheetViewModel.paymentMethods.value!!.first(),
+        paymentMethod = sheetViewModel.paymentMethods.value.first(),
         paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
         providePaymentMethodName = sheetViewModel::providePaymentMethodName,
         onDeletePaymentMethod = { sheetViewModel.removePaymentMethod(it) },
