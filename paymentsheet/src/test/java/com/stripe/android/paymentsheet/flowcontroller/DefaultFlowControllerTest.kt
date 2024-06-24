@@ -1724,6 +1724,62 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `Does not launch CVC Recollection if feature flag is false`() = runTest {
+        cvcRecollectionFeatureRule.setEnabled(false)
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+        val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
+        val launcher = mock<CvcRecollectionLauncher> {
+            on { launch(any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
+            }
+        }
+        val launcherFactory = mock<CvcRecollectionLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<CvcRecollectionContract>(),
+                onResult.capture()
+            )
+        ).thenReturn(mock())
+
+        val flowController = createFlowController(
+            cvcRecollectionLauncherFactory = launcherFactory,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+        )
+
+        verify(launcherFactory).create(any())
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
+        )
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+
+        flowController.confirm()
+
+        verify(launcher, never()).launch(
+            eq(
+                CvcRecollectionData(
+                    lastFour = "4242",
+                    brand = CardBrand.Visa
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+    }
+
+    @Test
     fun `On complete internal payment result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
