@@ -69,6 +69,8 @@
   <string name="stripe_paymentsheet_add_new_card">Magdagdag ng bagong kard</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Impormasyon ng kard</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Magdagdag ng account sa bangko ng US</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">Bumili gamit ang isang UPI ID</string>
   <!-- Payment Method type brand name. -->

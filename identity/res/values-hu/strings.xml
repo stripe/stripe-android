@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Vezetői engedély hátlapja ki van választva</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Személyazonosító igazolvány hátlapja</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Személyazonosító okmány hátulja</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Személyazonosító igazolvány hátlapja ki van választva</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Vezetői engedély előlapja ki van választva</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Személyazonosító igazolvány előlapja</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Személyazonosító okmány eleje</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Személyazonosító igazolvány előlapja ki van választva</string>
   <!-- Button to go back to the previous screen -->

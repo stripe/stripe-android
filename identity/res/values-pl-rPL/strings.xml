@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Wybrano tył prawa jazdy</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Tylna strona dokumentu tożsamości</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Tylna strona dokumentu tożsamości</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Wybrano tył dokumentu tożsamości</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Wybrano przód prawa jazdy</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Przednia strona dokumentu tożsamości</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Przednia strona dokumentu tożsamości</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Wybrano przód dokumentu tożsamości</string>
   <!-- Button to go back to the previous screen -->

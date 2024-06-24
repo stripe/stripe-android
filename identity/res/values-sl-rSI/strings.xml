@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Izbrana je zadnja stran vozniškega dovoljenja</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Hrbtna stran osebne izkaznice</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Hrbtna stran osebnega dokumenta</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Izbrana je zadnja stran osebnega dokumenta</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Izbrana je sprednja stran vozniškega dovoljenja</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Sprednja stran osebne izkaznice</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Sprednja stran osebnega dokumenta</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Izbrana je sprednja stran osebnega dokumenta</string>
   <!-- Button to go back to the previous screen -->

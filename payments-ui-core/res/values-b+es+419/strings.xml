@@ -69,6 +69,8 @@
   <string name="stripe_paymentsheet_add_new_card">Agrega una nueva tarjeta</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Información de la tarjeta</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Agrega una cuenta bancaria de EE. UU.</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">Comprar con un ID de UPI</string>
   <!-- Payment Method type brand name. -->
