@@ -327,7 +327,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods(getCvcRecollectionState())
+            SelectSavedPaymentMethods()
         } else {
             AddFirstPaymentMethod
         }

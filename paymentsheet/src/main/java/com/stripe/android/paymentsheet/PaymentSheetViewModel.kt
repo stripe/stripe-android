@@ -19,6 +19,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -596,9 +597,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         return if (
-            isCvcRecollectionEnabled() &&
+            (isCvcRecollectionEnabled() || isCvcRecollectionEnabledForDeferred()) &&
             paymentSelection is PaymentSelection.Saved &&
             paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
@@ -854,6 +856,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private suspend fun awaitStripeIntent(): StripeIntent {
         return paymentMethodMetadata.filterNotNull().first().stripeIntent
     }
+
+    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
+        return if ((isCvcRecollectionEnabled() || isCvcRecollectionEnabledForDeferred())) {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
+        } else {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
+        }
+    }
+
+    internal fun isCvcRecollectionEnabled(): Boolean = FeatureFlags.cvcRecollection.isEnabled &&
+        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true)
+
+    internal fun isCvcRecollectionEnabledForDeferred(): Boolean = FeatureFlags.cvcRecollection.isEnabled &&
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
+        args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
 
     private fun mapViewStateToCheckoutIdentifier(
         viewState: PaymentSheetViewState?,

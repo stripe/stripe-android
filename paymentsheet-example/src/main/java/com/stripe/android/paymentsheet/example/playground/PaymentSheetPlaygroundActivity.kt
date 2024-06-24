@@ -44,6 +44,7 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -83,7 +84,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCvcRecollectionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +93,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
+                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
                 viewModel::onPaymentSheetResult,
@@ -99,6 +101,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             )
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
+                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
 
             val addressLauncher = rememberAddressLauncher(

@@ -191,6 +191,20 @@ internal object PaymentSheetFixtures {
             )
         )
 
+    internal val ARGS_DEFERRED_INTENT
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    )
+                )
+            ),
+            CONFIG_CUSTOMER,
+            STATUS_BAR_COLOR
+        )
+
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,

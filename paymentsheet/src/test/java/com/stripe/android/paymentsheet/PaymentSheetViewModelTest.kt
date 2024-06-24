@@ -19,6 +19,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
@@ -43,6 +44,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -55,6 +57,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -91,6 +94,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SessionTestRule
@@ -139,6 +143,12 @@ internal class PaymentSheetViewModelTest {
 
     @get:Rule
     val sessionRule = SessionTestRule()
+
+    @get:Rule
+    val cvcRecollectionFeatureRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cvcRecollection,
+        isEnabled = true
+    )
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
@@ -2740,6 +2750,129 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `isCvcRecollectionEnabled returns paymentMethodOptionsJsonString value or false if null`() = runTest {
+        var viewModel = createViewModel()
+        assertThat(viewModel.isCvcRecollectionEnabled()).isFalse()
+
+        var stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
+        )
+
+        viewModel = createViewModel(stripeIntent = stripeIntent)
+        assertThat(viewModel.isCvcRecollectionEnabled()).isTrue()
+
+        stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(false)
+        )
+
+        viewModel = createViewModel(stripeIntent = stripeIntent)
+        assertThat(viewModel.isCvcRecollectionEnabled()).isFalse()
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `isCvcRecollectionEnabledForDeferred returns callback value or false if null`() = runTest {
+        var enabled = false
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { enabled }
+        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isFalse()
+        enabled = true
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isTrue()
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
+        assertThat(viewModel.isCvcRecollectionEnabledForDeferred()).isFalse()
+    }
+
+    @Test
+    fun `CurrentScreen is SelectSavedPaymentMethods with correct CVC Recollection State`() = runTest {
+        val stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
+        )
+        val viewModel = createViewModel(
+            customer = EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = listOf(CARD_PAYMENT_METHOD)
+            ),
+            stripeIntent = stripeIntent
+        )
+        viewModel.currentScreen.test {
+            val screen = awaitItem()
+            assertThat(screen).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(
+                (screen as SelectSavedPaymentMethods).cvcRecollectionState
+            ).isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+        }
+    }
+
+    @Test
+    fun `getCvcRecollectionState returns correct screen for complete flow`() = runTest {
+        var stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
+        )
+        var viewModel = createViewModel(
+            stripeIntent = stripeIntent
+        )
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+
+        stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(false)
+        )
+        viewModel = createViewModel(
+            stripeIntent = stripeIntent
+        )
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `getCvcRecollectionState returns correct screen for deferred flow`() = runTest {
+        var enabled = false
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { enabled }
+        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+
+        enabled = true
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+    }
+
+    @Test
+    fun `getCvcRecollectionState returns NotRequired for deferred when feature flag is false`() = runTest {
+        cvcRecollectionFeatureRule.setEnabled(false)
+
+        val stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
+        )
+        val viewModel = createViewModel(
+            stripeIntent = stripeIntent
+        )
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `getCvcRecollectionState returns NotRequired for complete flow when feature flag is false`() = runTest {
+        cvcRecollectionFeatureRule.setEnabled(false)
+        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { true }
+        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+    }
+
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
         val savedStateHandle = SavedStateHandle(initialState = mapOf("AwaitingPaymentResult" to true))
@@ -2997,6 +3130,10 @@ internal class PaymentSheetViewModelTest {
         )
 
         return paymentResultListenerCaptor.firstValue
+    }
+
+    private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {
+        return "{\"card\":{\"require_cvc_recollection\":$enabled}}"
     }
 
     private companion object {

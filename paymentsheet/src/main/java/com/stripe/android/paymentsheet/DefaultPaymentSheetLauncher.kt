@@ -16,6 +16,7 @@ import org.jetbrains.annotations.TestOnly
  * This is used internally for integrations that don't use Jetpack Compose and are
  * able to pass in an activity.
  */
+@OptIn(ExperimentalCvcRecollectionApi::class)
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     private val activity: Activity,
@@ -30,6 +31,7 @@ internal class DefaultPaymentSheetLauncher(
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
                     super.onDestroy(owner)
                 }
             }

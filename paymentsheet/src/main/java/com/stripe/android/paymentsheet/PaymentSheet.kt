@@ -185,10 +185,13 @@ class PaymentSheet internal constructor(
      *
      * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
+    @OptIn(ExperimentalCvcRecollectionApi::class)
     class Builder(internal val resultCallback: PaymentSheetResultCallback) {
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
         internal var createIntentCallback: CreateIntentCallback? = null
+            private set
+        internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
             private set
 
         /**
@@ -200,15 +203,26 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * @param intentCallback Called when the customer confirms the payment or setup.
+         * @param callback Called when the customer confirms the payment or setup.
          * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
          */
-        fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
-            createIntentCallback = intentCallback
+        fun createIntentCallback(callback: CreateIntentCallback) = apply {
+            createIntentCallback = callback
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
+         * @param callback Called when presenting [PaymentSheet] to determine whether to display a
+         * CVC recollection field.
+         *
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalCvcRecollectionApi
+        fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+            cvcRecollectionEnabledCallback = callback
+        }
+
+        /**
+         * Returns a [PaymentSheet].
          *
          * @param activity The Activity that is presenting [PaymentSheet].
          */
@@ -218,7 +232,7 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * Returns a [PaymentSheet] and initializes callback handlers if respective callbacks are set.
+         * Returns a [PaymentSheet].
          *
          * @param fragment the Fragment that is presenting the payment sheet.
          */
@@ -242,6 +256,9 @@ class PaymentSheet internal constructor(
             }
             externalPaymentMethodConfirmHandler?.let {
                 ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+            }
+            cvcRecollectionEnabledCallback?.let {
+                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
             }
         }
     }
@@ -1695,6 +1712,7 @@ class PaymentSheet internal constructor(
          * @param resultCallback Called when a [PaymentSheetResult] is available.
          * @param paymentOptionCallback Called when the customer's desired payment method changes.
          */
+        @OptIn(ExperimentalCvcRecollectionApi::class)
         class Builder(
             internal val resultCallback: PaymentSheetResultCallback,
             internal val paymentOptionCallback: PaymentOptionCallback
@@ -1703,26 +1721,36 @@ class PaymentSheet internal constructor(
                 private set
             internal var createIntentCallback: CreateIntentCallback? = null
                 private set
+            internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
+                private set
 
             /**
-             * @param handler Called when a user confirms payment for an external payment method. Use with
-             * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
+             * @param handler Called when a user confirms payment for an external payment method.
              */
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
                 externalPaymentMethodConfirmHandler = handler
             }
 
             /**
-             * @param intentCallback If specified, called when the customer confirms the payment or setup. Use with
-             * [configureWithIntentConfiguration] for deferred flow.
+             * @param callback If specified, called when the customer confirms the payment or setup.
              */
-            fun createIntentCallback(intentCallback: CreateIntentCallback) = apply {
-                createIntentCallback = intentCallback
+            fun createIntentCallback(callback: CreateIntentCallback) = apply {
+                createIntentCallback = callback
             }
 
             /**
-             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set.
+             * @param callback Invoked when when [confirm] is called to determine whether to display a
+             * CVC recollection field.
+             *
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalCvcRecollectionApi
+            fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+                cvcRecollectionEnabledCallback = callback
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController].
              *
              * @param activity The Activity that is presenting [PaymentSheet.FlowController].
              */
@@ -1732,8 +1760,7 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Returns a [PaymentSheet.FlowController] and initializes callback handlers
-             * if respective callbacks are set.
+             * Returns a [PaymentSheet.FlowController].
              *
              * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
              */
@@ -1757,6 +1784,9 @@ class PaymentSheet internal constructor(
                 }
                 externalPaymentMethodConfirmHandler?.let {
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+                }
+                cvcRecollectionEnabledCallback?.let {
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
                 }
             }
         }
