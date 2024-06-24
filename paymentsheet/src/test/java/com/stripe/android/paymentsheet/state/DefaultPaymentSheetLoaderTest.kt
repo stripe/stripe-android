@@ -1356,6 +1356,104 @@ internal class DefaultPaymentSheetLoaderTest {
             )
         }
 
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
+        runTest {
+            prefsRepository.savePaymentSelection(
+                PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1234321"),
+                )
+            )
+
+            val repository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                linkSettings = null,
+                error = null,
+            )
+
+            val loader = createPaymentSheetLoader(
+                elementsSessionRepository = repository,
+            )
+
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "id",
+                        clientSecret = "cuss_1",
+                    ),
+                ),
+                initializedViaCompose = false,
+            )
+
+            assertThat(repository.lastParams?.defaultPaymentMethodId)
+                .isEqualTo("pm_1234321")
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession' & has a default Google Pay payment method, should not call 'ElementsSessionRepository' with default id`() =
+        runTest {
+            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+
+            val repository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                linkSettings = null,
+                error = null,
+            )
+
+            val loader = createPaymentSheetLoader(
+                elementsSessionRepository = repository,
+            )
+
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "id",
+                        clientSecret = "cuss_1",
+                    ),
+                ),
+                initializedViaCompose = false,
+            )
+
+            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+        }
+
+    @Test
+    fun `When using 'LegacyEphemeralKey' & has a default saved Stripe payment method, should not call 'ElementsSessionRepository' with default id`() =
+        runTest {
+            prefsRepository.savePaymentSelection(
+                PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1234321"),
+                )
+            )
+
+            val repository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                linkSettings = null,
+                error = null,
+            )
+
+            val loader = createPaymentSheetLoader(
+                elementsSessionRepository = repository,
+            )
+
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "id",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                ),
+                initializedViaCompose = false,
+            )
+
+            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+        }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
