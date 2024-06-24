@@ -1465,15 +1465,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `paymentMethods is null if payment sheet state is not loaded`() = runTest {
-        val viewModel = createViewModel(delay = Duration.INFINITE)
-
-        viewModel.paymentMethods.test {
-            assertThat(awaitItem()).isNull()
-        }
-    }
-
-    @Test
     fun `handleBackPressed is consumed when processing is true`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true

@@ -830,6 +830,24 @@ internal class PaymentOptionsViewModelTest {
             )
         }
 
+    @Test
+    fun `paymentMethods is not null when loading is complete`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            isGooglePayReady = true,
+        ).run {
+            copy(state = state.copy(customer = null))
+        }
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+        }
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_NEW_PAYMENT_DETAILS),
