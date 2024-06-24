@@ -95,7 +95,7 @@ internal sealed class CustomerSheetViewState(
             get() = !isProcessing
     }
 
-    data class AddPaymentMethod constructor(
+    data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val formFieldValues: FormFieldValues?,
