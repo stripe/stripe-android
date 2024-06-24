@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Se ha seleccionado el dorso de la licencia de conducir.</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Dorso del documento de identidad</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Reverso del documento de identidad</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Se ha seleccionado el dorso del documento de identidad.</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Se ha seleccionado el frente de la licencia de conducir.</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Frente del documento de identidad</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Anverso del documento de identidad</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Se ha seleccionado el frente del documento de identidad.</string>
   <!-- Button to go back to the previous screen -->

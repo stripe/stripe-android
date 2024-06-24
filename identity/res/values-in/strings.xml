@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Bagian belakang surat izin mengemudi dipilih</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Bagian belakang kartu identitas</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Bagian belakang dokumen identitas</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Bagian belakang identitas dipilih</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Bagian depan surat izin mengemudi dipilih</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Bagian depan kartu identitas</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Bagian depan dokumen identitas</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Bagian depan identitas dipilih</string>
   <!-- Button to go back to the previous screen -->
