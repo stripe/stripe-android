@@ -7,6 +7,7 @@
 ### PaymentSheet
 * [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to PaymentSheet.
 * [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to PaymentSheet.
+* [FIXED][8672](https://github.com/stripe/stripe-android/pull/8672) Fixed a bug where [FlowController] would show a blank screen when Google Pay was enabled without a customer attached.π
 
 ### Payments
 * [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to API bindings.
