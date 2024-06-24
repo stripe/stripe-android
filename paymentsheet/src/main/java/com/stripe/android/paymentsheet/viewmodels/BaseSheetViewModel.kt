@@ -806,6 +806,12 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onUserCancel()
 
+    internal fun closeScreens() {
+        backStack.value.forEach {
+            it.onClose()
+        }
+    }
+
     private fun onUserBack() {
         clearErrorMessages()
         backStack.update { screens ->
