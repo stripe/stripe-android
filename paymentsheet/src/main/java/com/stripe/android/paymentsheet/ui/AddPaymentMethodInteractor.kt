@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -96,22 +95,26 @@ internal class DefaultAddPaymentMethodInteractor(
         MutableStateFlow(initiallySelectedPaymentMethodType)
     private val selectedPaymentMethodCode: StateFlow<String> = _selectedPaymentMethodCode
 
-    override val state = combineAsStateFlow(
-        selectedPaymentMethodCode,
-        selection,
-        linkSignupMode,
-        processing,
-    ) { selectedPaymentMethodCode, selection, linkSignupMode, processing ->
+    private val _state: MutableStateFlow<AddPaymentMethodInteractor.State> = MutableStateFlow(
+        getInitialState()
+    )
+    override val state: StateFlow<AddPaymentMethodInteractor.State> = _state
 
-        AddPaymentMethodInteractor.State(
+    private fun getInitialState(): AddPaymentMethodInteractor.State {
+        val selectedPaymentMethodCode = selectedPaymentMethodCode.value
+        val linkSignupMode = linkSignupMode.value
+
+        return AddPaymentMethodInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             supportedPaymentMethods = supportedPaymentMethods,
             arguments = createFormArguments(selectedPaymentMethodCode),
             formElements = formElementsForCode(selectedPaymentMethodCode),
-            paymentSelection = selection,
+            paymentSelection = selection.value,
             linkSignupMode = linkSignupMode,
-            linkInlineSignupMode = linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code },
-            processing = processing,
+            linkInlineSignupMode = linkSignupMode.takeIf {
+                shouldHaveLinkInlineSignup(selectedPaymentMethodCode)
+            },
+            processing = processing.value,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
             linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
@@ -121,6 +124,52 @@ internal class DefaultAddPaymentMethodInteractor(
         coroutineScope.launch {
             selection.collect {
                 clearErrorMessages()
+            }
+        }
+
+        coroutineScope.launch {
+            selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
+                val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
+                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
+                val newLinkInlineSignupMode = linkSignupMode.value.takeIf {
+                    shouldHaveLinkInlineSignup(newSelectedPaymentMethodCode)
+                }
+                val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
+
+                _state.value = _state.value.copy(
+                    selectedPaymentMethodCode = newSelectedPaymentMethodCode,
+                    arguments = newFormArguments,
+                    formElements = newFormElements,
+                    linkInlineSignupMode = newLinkInlineSignupMode,
+                    usBankAccountFormArguments = newUsBankAccountFormArguments
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            selection.collect {
+                _state.value = _state.value.copy(
+                    paymentSelection = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            linkSignupMode.collect {
+                _state.value = _state.value.copy(
+                    linkSignupMode = it,
+                    linkInlineSignupMode = it.takeIf {
+                        shouldHaveLinkInlineSignup(_state.value.selectedPaymentMethodCode)
+                    }
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            processing.collect {
+                _state.value = _state.value.copy(
+                    processing = it
+                )
             }
         }
     }
@@ -148,6 +197,10 @@ internal class DefaultAddPaymentMethodInteractor(
 
     override fun close() {
         coroutineScope.cancel()
+    }
+
+    private fun shouldHaveLinkInlineSignup(selectedPaymentMethodCode: PaymentMethodCode): Boolean {
+        return selectedPaymentMethodCode == PaymentMethod.Type.Card.code
     }
 }
 

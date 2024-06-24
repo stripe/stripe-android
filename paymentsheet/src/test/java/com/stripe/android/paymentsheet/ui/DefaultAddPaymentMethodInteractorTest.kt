@@ -107,10 +107,13 @@ class DefaultAddPaymentMethodInteractorTest {
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
             reportPaymentMethodTypeSelected = ::reportPaymentMethodSelected,
+            clearErrorMessages = {},
         ) {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(expectedCode)
             )
+
+            dispatcher.scheduler.advanceUntilIdle()
 
             assertThat(reportedSelectedPaymentMethodCode).isEqualTo(expectedCode)
             interactor.state.test {

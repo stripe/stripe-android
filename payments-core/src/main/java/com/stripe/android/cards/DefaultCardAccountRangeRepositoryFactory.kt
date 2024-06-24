@@ -26,18 +26,6 @@ class DefaultCardAccountRangeRepositoryFactory(
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
 
-    private val store: CardAccountRangeStore by lazy {
-        InMemoryCardAccountRangeStore()
-    }
-
-    private val inMemoryCardAccountRangeSource by lazy {
-        InMemoryCardAccountRangeSource(store)
-    }
-
-    private val defaultRemoteCardAccountRangeSource by lazy {
-        createRemoteCardAccountRangeSource(store)
-    }
-
     constructor(context: Context) : this(
         context,
         DefaultAnalyticsRequestExecutor()
@@ -45,9 +33,10 @@ class DefaultCardAccountRangeRepositoryFactory(
 
     @Throws(IllegalStateException::class)
     override fun create(): CardAccountRangeRepository {
+        val store = InMemoryCardAccountRangeStore()
         return DefaultCardAccountRangeRepository(
-            inMemorySource = inMemoryCardAccountRangeSource,
-            remoteSource = defaultRemoteCardAccountRangeSource,
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(store),
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )
@@ -57,8 +46,9 @@ class DefaultCardAccountRangeRepositoryFactory(
         stripeRepository: StripeRepository,
         publishableKey: String
     ): CardAccountRangeRepository {
+        val store = InMemoryCardAccountRangeStore()
         return DefaultCardAccountRangeRepository(
-            inMemorySource = inMemoryCardAccountRangeSource,
+            inMemorySource = InMemoryCardAccountRangeSource(store),
             remoteSource = RemoteCardAccountRangeSource(
                 stripeRepository,
                 ApiRequest.Options(
