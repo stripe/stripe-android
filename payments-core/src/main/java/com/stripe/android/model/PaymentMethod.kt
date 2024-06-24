@@ -377,6 +377,22 @@ constructor(
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
         ),
+        Billie(
+            "billie",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Satispay(
+            "satispay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
         AmazonPay(
             "amazon_pay",
             isReusable = false,

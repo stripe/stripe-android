@@ -19,11 +19,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -210,6 +216,7 @@ private fun SavedPaymentMethodTab(
                 isEnabled = isEnabled,
                 isEditing = isEditing,
                 isModifiable = item.isModifiable,
+                isRemovable = item.isRemovable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
@@ -296,6 +303,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isModifiable: Boolean,
+    isRemovable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (PaymentMethod) -> Unit,
@@ -317,7 +325,7 @@ private fun SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
                 isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEditing && isRemovable -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,
@@ -339,11 +347,30 @@ private fun SavedPaymentMethodTab(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>) {
+internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
+    val controller by cvcControllerFlow.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
-        cvcControllerFlow.collectAsState().value
+        controller
     )
+    val focusRequester = remember {
+        FocusRequester()
+    }
+    val focusManager = LocalFocusManager.current
+
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(controller) {
+            controller.onFocusChange(true)
+            focusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(isProcessing) {
+        // Clear focus once primary button is clicked
+        if (isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
 
     Text(
         text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
@@ -356,10 +383,11 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>) {
             .height(IntrinsicSize.Min)
     ) {
         element.controller.ComposeUI(
-            enabled = true,
+            enabled = !isProcessing,
             field = element,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             hiddenIdentifiers = setOf(),
             lastTextFieldIdentifier = null,
             nextFocusDirection = FocusDirection.Exit,

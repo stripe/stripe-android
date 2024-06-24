@@ -49,6 +49,7 @@ internal interface PaymentSheetLoader {
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean = false,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full>
 }
 
@@ -79,8 +80,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        eventReporter.onLoadStarted()
+        eventReporter.onLoadStarted(initializedViaCompose)
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,

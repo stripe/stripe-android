@@ -311,6 +311,7 @@ internal class CustomerSheetActivityTest {
             primaryButtonLabel = primaryButtonLabel,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemovePaymentMethods = true,
         )
     }
 

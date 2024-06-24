@@ -2,6 +2,9 @@
 
 package com.stripe.android.paymentsheet.ui
 
+import android.content.res.ColorStateList
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -29,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.platform.testTag
@@ -42,25 +46,29 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
 import com.stripe.android.paymentsheet.model.MandateText
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -254,7 +262,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel, type)
+    PrimaryButton(viewModel)
 
     Box(modifier = Modifier.animateContentSize()) {
         if (mandateText?.showAbovePrimaryButton == false) {
@@ -320,7 +328,7 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowType) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState = viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
@@ -335,18 +343,54 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowT
             }
         }
 
-    when (type) {
-        Complete -> {
-            AndroidViewBinding(
-                factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
-                modifier = modifier,
+    var button by remember {
+        mutableStateOf<PrimaryButton?>(null)
+    }
+
+    val context = LocalContext.current
+
+    AndroidViewBinding(
+        factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
+            val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
+            val primaryButton = binding.primaryButton
+            button = primaryButton
+            @Suppress("DEPRECATION")
+            primaryButton.setAppearanceConfiguration(
+                StripeTheme.primaryButtonStyle,
+                tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
+                    StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                )
             )
+            binding
+        },
+        modifier = modifier,
+    )
+
+    LaunchedEffect(viewModel, button) {
+        viewModel.primaryButtonUiState.collect { uiState ->
+            button?.updateUiState(uiState)
         }
-        Custom -> {
-            AndroidViewBinding(
-                factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
-                modifier = modifier,
-            )
+    }
+
+    LaunchedEffect(viewModel, button) {
+        (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
+            withContext(Dispatchers.Main) {
+                button?.updateState(state?.convert())
+            }
+        }
+    }
+}
+
+internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
+    return when (this) {
+        is PaymentSheetViewState.Reset -> {
+            PrimaryButton.State.Ready
+        }
+        is PaymentSheetViewState.StartProcessing -> {
+            PrimaryButton.State.StartProcessing
+        }
+        is PaymentSheetViewState.FinishProcessing -> {
+            PrimaryButton.State.FinishProcessing(this.onComplete)
         }
     }
 }

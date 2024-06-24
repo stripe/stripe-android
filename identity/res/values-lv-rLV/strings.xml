@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Autovadītāja apliecības aizmugure ir atlasīta</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Identifikācijas kartes aizmugure</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Identifikācijas dokumenta aizmugure</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">ID dokumenta aizmugure ir atlasīta</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Autovadītāja apliecības priekšpuse ir atlasīta</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Identifikācijas kartes priekšpuse</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Identifikācijas dokumenta priekšpuse</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">ID dokumenta priekšpuse ir atlasīta</string>
   <!-- Button to go back to the previous screen -->

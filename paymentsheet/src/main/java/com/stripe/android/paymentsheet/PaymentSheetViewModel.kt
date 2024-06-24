@@ -329,6 +329,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 initializationMode = args.initializationMode,
                 paymentSheetConfiguration = args.config,
                 isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+                initializedViaCompose = args.initializedViaCompose,
             )
         }
 

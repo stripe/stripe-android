@@ -15,7 +15,8 @@ internal class FlowControllerFactory(
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionCallback: PaymentOptionCallback,
-    private val paymentResultCallback: PaymentSheetResultCallback
+    private val paymentResultCallback: PaymentSheetResultCallback,
+    private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
         activity: ComponentActivity,
@@ -50,6 +51,7 @@ internal class FlowControllerFactory(
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = statusBarColor,
             paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback
+            paymentResultCallback = paymentResultCallback,
+            initializedViaCompose = initializedViaCompose,
         )
 }
