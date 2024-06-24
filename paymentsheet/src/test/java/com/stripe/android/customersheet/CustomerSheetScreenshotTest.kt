@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -95,6 +96,7 @@ internal class CustomerSheetScreenshotTest {
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     @Test
