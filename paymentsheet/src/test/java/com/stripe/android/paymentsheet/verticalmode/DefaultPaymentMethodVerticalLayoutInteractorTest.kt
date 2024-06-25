@@ -326,6 +326,40 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun walletDisplayablePaymentMethodsUpdateWalletSelection() {
+        var selectedWallet: PaymentSelection? = null
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp")
+                )
+            ),
+            isFlowController = true,
+            onWalletSelected = { selectedWallet = it },
+        ) {
+            walletsState.value = WalletsState(
+                link = WalletsState.Link("email@email.com"),
+                googlePay = WalletsState.GooglePay(
+                    buttonType = GooglePayButtonType.Pay,
+                    allowCreditCards = true,
+                    billingAddressParameters = null,
+                ),
+                buttonsEnabled = true,
+                dividerTextResource = 0,
+                onGooglePayPressed = {},
+                onLinkPressed = {},
+            )
+            assertThat(selectedWallet).isNull()
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "link" }.onClick()
+            assertThat(selectedWallet).isEqualTo(PaymentSelection.Link)
+            displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+            assertThat(selectedWallet).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
     fun stateDoesNotReturnWalletPaymentMethodsWhenInFlowControllerAndGooglePayIsNotAvailable() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
