@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -297,7 +298,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             currentScreen.collectLatest { screen ->
                 when (screen) {
-                    is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+                    is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
                     }
                     is PaymentSheetScreen.EditPaymentMethod,
@@ -368,7 +369,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(AddAnotherPaymentMethod)
+        transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
     }
 
     fun transitionTo(target: PaymentSheetScreen) {
@@ -388,7 +389,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+            is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }
@@ -605,7 +606,7 @@ internal abstract class BaseSheetViewModel(
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
-            resetTo(listOf(AddFirstPaymentMethod))
+            resetTo(listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))))
         }
     }
 
@@ -790,6 +791,12 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun onUserCancel()
+
+    internal fun closeScreens() {
+        backStack.value.forEach {
+            it.onClose()
+        }
+    }
 
     private fun onUserBack() {
         clearErrorMessages()

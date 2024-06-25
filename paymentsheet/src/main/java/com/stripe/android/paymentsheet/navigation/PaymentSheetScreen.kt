@@ -9,6 +9,7 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -117,7 +118,9 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    object AddAnotherPaymentMethod : PaymentSheetScreen {
+    data class AddAnotherPaymentMethod(
+        val interactor: AddPaymentMethodInteractor,
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -129,11 +132,17 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            AddPaymentMethod(viewModel, modifier)
+            AddPaymentMethod(interactor = interactor, modifier)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 
-    object AddFirstPaymentMethod : PaymentSheetScreen {
+    data class AddFirstPaymentMethod(
+        val interactor: AddPaymentMethodInteractor,
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -145,7 +154,11 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            AddPaymentMethod(viewModel, modifier)
+            AddPaymentMethod(interactor = interactor, modifier)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 

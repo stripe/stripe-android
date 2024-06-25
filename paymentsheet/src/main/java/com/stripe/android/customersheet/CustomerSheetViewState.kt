@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UnsupportedAddPaymentMethodInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -114,15 +116,18 @@ internal sealed class CustomerSheetViewState(
         val displayDismissConfirmationModal: Boolean = false,
         val bankAccountResult: CollectBankAccountResultInternal?,
         override val cbcEligibility: CardBrandChoiceEligibility,
+        val errorReporter: ErrorReporter,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = false,
         screen = if (isFirstPaymentMethod) {
-            PaymentSheetScreen.AddFirstPaymentMethod
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor(errorReporter))
         } else {
-            PaymentSheetScreen.AddAnotherPaymentMethod
+            PaymentSheetScreen.AddAnotherPaymentMethod(
+                interactor = UnsupportedAddPaymentMethodInteractor(errorReporter)
+            )
         },
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,
