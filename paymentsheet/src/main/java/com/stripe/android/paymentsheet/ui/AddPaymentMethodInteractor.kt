@@ -211,10 +211,6 @@ internal class UnsupportedAddPaymentMethodInteractor(private val errorReporter: 
 
     override val state: StateFlow<AddPaymentMethodInteractor.State>
         get() {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED,
-                additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "state")
-            )
             throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
         }
 
