@@ -59,7 +59,6 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
@@ -204,22 +203,12 @@ internal class IdentityViewModelTest {
 
     @Test
     fun `legacy uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
-        testUploadDocumentScanSuccessResult(isFront = true, isLegacy = true)
+        testUploadDocumentScanSuccessResult(isFront = true)
     }
 
     @Test
     fun `legacy uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
-        testUploadDocumentScanSuccessResult(isFront = false, isLegacy = true)
-    }
-
-    @Test
-    fun `modern uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
-        testUploadDocumentScanSuccessResult(isFront = true, isLegacy = false)
-    }
-
-    @Test
-    fun `modern uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
-        testUploadDocumentScanSuccessResult(isFront = false, isLegacy = false)
+        testUploadDocumentScanSuccessResult(isFront = false)
     }
 
     @Test
@@ -926,29 +915,27 @@ internal class IdentityViewModelTest {
         }
     }
 
-    private fun testUploadDocumentScanSuccessResult(isFront: Boolean, isLegacy: Boolean) {
+    private fun testUploadDocumentScanSuccessResult(isFront: Boolean) {
         mockUploadSuccess()
 
         viewModel.uploadScanResult(
             if (isFront) {
-                if (isLegacy) FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT else FINAL_ID_DETECTOR_MODERN_RESULT_FRONT
+                FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT
             } else {
-                if (isLegacy) FINAL_ID_DETECTOR_LEGACY_RESULT_BACK else FINAL_ID_DETECTOR_MODERN_RESULT_BACK
+                FINAL_ID_DETECTOR_LEGACY_RESULT_BACK
             },
             mockVerificationPage
         )
 
         // high res upload
-        if (isLegacy) {
-            verify(mockIdentityIO).cropAndPadBitmap(
-                same(INPUT_BITMAP),
-                same(BOUNDING_BOX),
-                any()
-            )
-        }
+        verify(mockIdentityIO).cropAndPadBitmap(
+            same(INPUT_BITMAP),
+            same(BOUNDING_BOX),
+            any()
+        )
 
         verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
-            if (isLegacy) same(CROPPED_BITMAP) else same(EXTRACTED_BITMAP),
+            same(CROPPED_BITMAP),
             eq(VERIFICATION_SESSION_ID),
             eq(
                 if (isFront) {
@@ -1236,51 +1223,6 @@ internal class IdentityViewModelTest {
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
                 blurScore = 1.0f
-            ),
-            identityState = mock<IdentityScanState.Finished>()
-        )
-
-        val FINAL_ID_DETECTOR_MODERN_RESULT_FRONT = IdentityAggregator.FinalResult(
-            frame = AnalyzerInput(
-                CameraPreviewImage(
-                    INPUT_BITMAP,
-                    mock()
-                ),
-                mock()
-            ),
-            result = IDDetectorOutput.Modern(
-                boundingBox = BOUNDING_BOX,
-                category = Category.ID_FRONT,
-                resultScore = 0.8f,
-                allScores = ALL_SCORES,
-                blurScore = 1.0f,
-                mbOutput = MBDetector.DetectorResult.Captured(
-                    INPUT_BITMAP,
-                    EXTRACTED_BITMAP,
-                    isFront = true
-                )
-            ),
-            identityState = mock<IdentityScanState.Finished>()
-        )
-        val FINAL_ID_DETECTOR_MODERN_RESULT_BACK = IdentityAggregator.FinalResult(
-            frame = AnalyzerInput(
-                CameraPreviewImage(
-                    INPUT_BITMAP,
-                    mock()
-                ),
-                mock()
-            ),
-            result = IDDetectorOutput.Modern(
-                boundingBox = BOUNDING_BOX,
-                category = Category.ID_BACK,
-                resultScore = 0.8f,
-                allScores = ALL_SCORES,
-                blurScore = 1.0f,
-                mbOutput = MBDetector.DetectorResult.Captured(
-                    INPUT_BITMAP,
-                    EXTRACTED_BITMAP,
-                    isFront = false
-                )
             ),
             identityState = mock<IdentityScanState.Finished>()
         )

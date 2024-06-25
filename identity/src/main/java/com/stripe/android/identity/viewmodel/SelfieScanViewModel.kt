@@ -1,7 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,7 +10,6 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
-import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,11 +58,9 @@ internal class SelfieScanViewModel(
         )
 
     internal class SelfieScanViewModelFactory @Inject constructor(
-        private val context: Context,
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val fpsTracker: FPSTracker,
-        private val identityRepository: IdentityRepository,
         private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
