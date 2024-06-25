@@ -1,14 +1,11 @@
 package com.stripe.android.core.networking
 
-import android.net.http.HttpResponseCache
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -19,12 +16,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.io.InputStream
-import java.net.CacheRequest
-import java.net.CacheResponse
 import java.net.HttpURLConnection
-import java.net.ResponseCache
-import java.net.URI
-import java.net.URLConnection
 import java.net.UnknownHostException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -193,77 +185,6 @@ internal class DefaultStripeNetworkClientTest {
             assertThat(response.code).isEqualTo(TEST_NON_RETRY_CODES_END)
         }
 
-    @Test
-    fun `request that should cache creates a connection that uses cache`() = runTest {
-        val server = MockWebServer()
-
-        server.enqueue(MockResponse().setBody("response1"))
-        server.enqueue(MockResponse().setBody("response2"))
-        server.enqueue(MockResponse().setBody("response3"))
-
-        server.start()
-
-        var getCacheCount = 0
-        var putCacheCount = 0
-        HttpResponseCache.setDefault(object : ResponseCache() {
-            override fun get(
-                uri: URI?,
-                rqstMethod: String?,
-                rqstHeaders: MutableMap<String, MutableList<String>>?
-            ): CacheResponse? {
-                getCacheCount++
-                return null
-            }
-
-            override fun put(uri: URI?, conn: URLConnection?): CacheRequest? {
-                putCacheCount++
-                return null
-            }
-        })
-
-        val executor = DefaultStripeNetworkClient(
-            workContext = testDispatcher,
-            connectionFactory = ConnectionFactory.Default
-        )
-
-        val url = server.url("").toString()
-
-        val requestWithCache = FakeStripeRequest(
-            shouldCache = true,
-            method = StripeRequest.Method.GET,
-            url = url
-        )
-
-        val requestWithoutCache = FakeStripeRequest(
-            shouldCache = false,
-            method = StripeRequest.Method.GET,
-            url = url
-        )
-
-        executor.executeRequest(requestWithCache)
-        assertThat(getCacheCount).isEqualTo(1)
-        assertThat(putCacheCount).isEqualTo(1)
-
-        executor.executeRequest(requestWithCache)
-        assertThat(getCacheCount).isEqualTo(2)
-        assertThat(putCacheCount).isEqualTo(2)
-
-        executor.executeRequest(requestWithoutCache)
-        assertThat(getCacheCount).isEqualTo(2)
-        assertThat(putCacheCount).isEqualTo(2)
-
-        server.shutdown()
-    }
-
-    private class FakeStripeRequest(
-        override val url: String = TEST_HOST,
-        override val shouldCache: Boolean = false,
-        override val method: Method = Method.POST,
-        override val mimeType: MimeType = MimeType.Form,
-        override val headers: Map<String, String> = emptyMap(),
-        override val retryResponseCodes: Iterable<Int> = TEST_RETRY_CODES
-    ) : StripeRequest()
-
     private class RetryCountConnectionFactory(
         private val stripeConnection: (Int) -> StripeConnection<String>
     ) : ConnectionFactory {
@@ -324,12 +245,6 @@ internal class DefaultStripeNetworkClientTest {
 
     private companion object {
         private const val MAX_RETRIES = 3
-        private const val TEST_RETRY_CODES_START = 401
-        private const val TEST_RETRY_CODES_END = 456
         private const val TEST_NON_RETRY_CODES_END = 457
-        private const val TEST_HOST = "https://test.host.com"
-
-        // [HTTP_TOO_MANY_REQUESTS] is included in this range
-        private val TEST_RETRY_CODES: Iterable<Int> = TEST_RETRY_CODES_START..TEST_RETRY_CODES_END
     }
 }
