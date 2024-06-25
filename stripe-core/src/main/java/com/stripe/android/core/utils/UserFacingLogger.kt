@@ -24,17 +24,3 @@ class RealUserFacingLogger @Inject constructor(context: Context) : UserFacingLog
         logger.warning(message)
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FakeUserFacingLogger : UserFacingLogger {
-
-    private val loggedMessages: MutableList<String> = mutableListOf()
-
-    override fun logWarningWithoutPii(message: String) {
-        loggedMessages.add(message)
-    }
-
-    fun getLoggedMessages(): List<String> {
-        return loggedMessages.toList()
-    }
-}
