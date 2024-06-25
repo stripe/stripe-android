@@ -148,13 +148,13 @@ internal fun PaymentSheetScreenContent(
     val error by viewModel.error.collectAsState()
     val currentScreen by viewModel.currentScreen.collectAsState()
     val mandateText by viewModel.mandateText.collectAsState()
+    val showsWalletsHeader by currentScreen.showsWalletsHeader(type == Complete).collectAsState()
 
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            type = type,
             headerText = headerText,
-            walletsState = walletsState,
+            walletsState = walletsState.takeIf { showsWalletsHeader },
             walletsProcessingState = walletsProcessingState,
             error = error,
             currentScreen = currentScreen,
@@ -200,7 +200,6 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
     headerText: Int?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
@@ -220,17 +219,15 @@ private fun PaymentSheetContent(
             )
         }
 
-        if (currentScreen.showsWalletsHeader(type == Complete)) {
-            walletsState?.let { state ->
-                val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
-                Wallet(
-                    state = state,
-                    processingState = walletsProcessingState,
-                    onGooglePayPressed = state.onGooglePayPressed,
-                    onLinkPressed = state.onLinkPressed,
-                    modifier = Modifier.padding(bottom = bottomSpacing),
-                )
-            }
+        walletsState?.let { state ->
+            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
+            Wallet(
+                state = state,
+                processingState = walletsProcessingState,
+                onGooglePayPressed = state.onGooglePayPressed,
+                onLinkPressed = state.onLinkPressed,
+                modifier = Modifier.padding(bottom = bottomSpacing),
+            )
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
