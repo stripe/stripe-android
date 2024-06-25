@@ -190,7 +190,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem() is PaymentSheetScreen.AddAnotherPaymentMethod).isTrue()
+            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.AddAnotherPaymentMethod::class.java)
 
             verify(eventReporter).onShowNewPaymentOptionForm()
 
@@ -320,7 +320,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem() is AddFirstPaymentMethod).isTrue()
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
         }
     }
 
