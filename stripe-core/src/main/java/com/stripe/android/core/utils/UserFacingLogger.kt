@@ -29,6 +29,7 @@ class RealUserFacingLogger @Inject constructor(context: Context) : UserFacingLog
 class FakeUserFacingLogger : UserFacingLogger {
 
     private val loggedMessages: MutableList<String> = mutableListOf()
+
     override fun logWarningWithoutPii(message: String) {
         loggedMessages.add(message)
     }

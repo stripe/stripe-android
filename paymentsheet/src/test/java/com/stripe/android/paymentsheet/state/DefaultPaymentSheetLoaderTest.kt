@@ -1035,7 +1035,9 @@ internal class DefaultPaymentSheetLoaderTest {
             externalPaymentMethodData = null,
             expectedExternalPaymentMethods = emptyList(),
             expectedLogMessages = listOf(
-                "Requested external payment method external_paypal is not supported."
+                "Requested external payment method external_paypal is not supported. View all available external " +
+                    "payment methods here: https://docs.stripe.com/payments/external-payment-methods?" +
+                    "platform=android#available-external-payment-methods"
             ),
         )
     }

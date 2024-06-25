@@ -474,7 +474,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             ) {
                 userFacingLogger.logWarningWithoutPii(
-                    "Requested external payment method $requestedExternalPaymentMethod is not supported."
+                    "Requested external payment method $requestedExternalPaymentMethod is not supported. View all " +
+                        "available external payment methods here: " +
+                        "https://docs.stripe.com/payments/external-payment-methods?platform=android#" +
+                        "available-external-payment-methods"
                 )
             }
         }
