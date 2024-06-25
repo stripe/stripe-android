@@ -434,8 +434,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration,
     ): SavedSelection.PaymentMethod? {
         /*
-         * We only care is the `SavedSelection` is a `PaymentMethod` type and not `Google Pay` or `Link`. Therefore
-         * we don't need to know if `Google Pay` or `Link` is ready and set them to `false`.
+         * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment method
+         * ID to ensure it is properly returned by the API when performing payment method deduping. We only care
+         * about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are locally defined
+         * LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know if they are ready and
+         * can safely set them to `false`.
          */
         return retrieveSavedSelection(
             config = config,
