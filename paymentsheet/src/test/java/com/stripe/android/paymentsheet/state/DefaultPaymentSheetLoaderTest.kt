@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.utils.FakeUserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
@@ -1033,6 +1034,9 @@ internal class DefaultPaymentSheetLoaderTest {
             requestedExternalPaymentMethods = listOf("external_paypal"),
             externalPaymentMethodData = null,
             expectedExternalPaymentMethods = emptyList(),
+            expectedLogMessages = listOf(
+                "Requested external payment method external_paypal is not supported."
+            ),
         )
     }
 
@@ -1043,7 +1047,8 @@ internal class DefaultPaymentSheetLoaderTest {
         testExternalPaymentMethods(
             requestedExternalPaymentMethods,
             externalPaymentMethodData = PaymentSheetFixtures.PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA,
-            expectedExternalPaymentMethods = requestedExternalPaymentMethods
+            expectedExternalPaymentMethods = requestedExternalPaymentMethods,
+            expectedLogMessages = emptyList(),
         )
     }
 
@@ -1359,9 +1364,14 @@ internal class DefaultPaymentSheetLoaderTest {
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
-        expectedExternalPaymentMethods: List<String>?
+        expectedExternalPaymentMethods: List<String>?,
+        expectedLogMessages: List<String>,
     ) {
-        val loader = createPaymentSheetLoader(externalPaymentMethodData = externalPaymentMethodData)
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentSheetLoader(
+            externalPaymentMethodData = externalPaymentMethodData,
+            userFacingLogger = userFacingLogger
+        )
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -1374,6 +1384,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val actualExternalPaymentMethods = result.paymentMethodMetadata.externalPaymentMethodSpecs.map { it.type }
         assertThat(actualExternalPaymentMethods).isEqualTo(expectedExternalPaymentMethods)
+        assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
     }
 
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
@@ -1426,6 +1437,7 @@ internal class DefaultPaymentSheetLoaderTest {
             isCbcEligible = isCbcEligible,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
+        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -1442,6 +1454,7 @@ internal class DefaultPaymentSheetLoaderTest {
             accountStatusProvider = { linkAccountState },
             linkStore = linkStore,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
+            userFacingLogger = userFacingLogger,
         )
     }
 
