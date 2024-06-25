@@ -107,9 +107,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         },
         walletsState = viewModel.walletsState,
         isFlowController = viewModel is PaymentOptionsViewModel,
-        onWalletSelected = {
-            viewModel.updateSelection(it)
-        },
+        onWalletSelected = viewModel::updateSelection,
     )
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
