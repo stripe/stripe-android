@@ -32,7 +32,4 @@ internal data class VerificationPageStaticContentDocumentCapturePage(
     val motionBlurMinIou: Float,
     @SerialName("blur_threshold")
     val blurThreshold: Float? = null,
-    @SerialName("mb_settings")
-    val mbSettings: VerificationPageStaticContentDocumentCaptureMBSettings? = null
-
 ) : Parcelable

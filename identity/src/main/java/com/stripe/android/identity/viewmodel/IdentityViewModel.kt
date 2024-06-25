@@ -82,7 +82,6 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
@@ -428,14 +427,6 @@ internal class IdentityViewModel constructor(
                 )
             }
 
-            is IDDetectorOutput.Modern -> {
-                uploadModernIDDetectorOutput(
-                    result.frame.cameraPreviewImage.image,
-                    result.result,
-                    verificationPage
-                )
-            }
-
             is FaceDetectorOutput -> {
                 uploadFaceDetectorOutput(
                     result,
@@ -501,81 +492,6 @@ internal class IdentityViewModel constructor(
         // upload low res
         processAndUploadBitmap(
             bitmapToUpload = originalBitmap,
-            docCapturePage = verificationPage.documentCapture,
-            isHighRes = false,
-            isFront = isFront,
-            scores = scores,
-            targetScanType = targetScanType
-        )
-    }
-
-    private fun uploadModernIDDetectorOutput(
-        originalBitmap: Bitmap,
-        modernOutput: IDDetectorOutput.Modern,
-        verificationPage: VerificationPage
-    ) {
-        val scores = modernOutput.allScores
-        val isFront: Boolean
-        val targetScanType: IdentityScanState.ScanType
-
-        when (modernOutput.category) {
-            Category.PASSPORT -> {
-                isFront = true
-                targetScanType = IdentityScanState.ScanType.DOC_FRONT
-            }
-
-            Category.ID_FRONT -> {
-                isFront = true
-                targetScanType = IdentityScanState.ScanType.DOC_FRONT
-            }
-
-            Category.ID_BACK -> {
-                isFront = false
-                targetScanType = IdentityScanState.ScanType.DOC_BACK
-            }
-
-            else -> {
-                Log.e(TAG, "incorrect category: ${modernOutput.category}")
-                isFront = true
-                targetScanType = IdentityScanState.ScanType.DOC_FRONT
-                logError(
-                    IllegalStateException(
-                        "incorrect modern targetScanType: ${modernOutput.category}, " +
-                            "upload as DOC_FRONT"
-                    )
-                )
-            }
-        }
-
-        val hasMBDetectorOutput = modernOutput.mbOutput is MBDetector.DetectorResult.Captured
-
-        identityAnalyticsRequestFactory.mbCaptureStatus(capturedByMb = hasMBDetectorOutput)
-
-        processAndUploadBitmap(
-            bitmapToUpload =
-            if (hasMBDetectorOutput) {
-                (modernOutput.mbOutput as MBDetector.DetectorResult.Captured).transformed
-            } else {
-                cropBitmapToUpload(
-                    originalBitmap,
-                    modernOutput.boundingBox,
-                    verificationPage
-                )
-            },
-            docCapturePage = verificationPage.documentCapture,
-            isHighRes = true,
-            isFront = isFront,
-            scores = scores,
-            targetScanType = targetScanType
-        )
-
-        processAndUploadBitmap(
-            bitmapToUpload =
-            if (hasMBDetectorOutput) {
-                (modernOutput.mbOutput as MBDetector.DetectorResult.Captured).original
-            } else {
-                originalBitmap
-            },
             docCapturePage = verificationPage.documentCapture,
             isHighRes = false,
             isFront = isFront,

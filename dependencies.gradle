@@ -72,7 +72,6 @@ ext.versions = [
         uiAutomator                 : '2.2.0',
         workManager                 : '2.9.0',
         zxing                       : '3.5.2',
-        microblinkCapture           : '1.2.0',
 ]
 
 ext.buildLibs = [
@@ -167,7 +166,6 @@ ext.libs = [
         leakCanary                          : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
         loggingInterceptor                  : "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         material                            : "com.google.android.material:material:${versions.material}",
-        microblinkCapture                   : "com.microblink:capture-core:${versions.microblinkCapture}",
         okio                                : "com.squareup.okio:okio:${versions.okio}",
         payButtonCompose                    : "com.google.pay.button:compose-pay-button:${versions.payButtonCompose}",
         places                              : "com.google.android.libraries.places:places:${versions.places}",

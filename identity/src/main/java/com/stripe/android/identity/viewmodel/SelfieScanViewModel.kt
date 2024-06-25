@@ -24,14 +24,12 @@ import javax.inject.Inject
 internal class SelfieScanViewModel(
     applicationContext: Application,
     override val fpsTracker: FPSTracker,
-    override val identityRepository: IdentityRepository,
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
 ) : IdentityScanViewModel(
     applicationContext,
     fpsTracker,
-    identityRepository,
     identityAnalyticsRequestFactory,
     modelPerformanceTracker,
     laplacianBlurDetector
@@ -74,7 +72,6 @@ internal class SelfieScanViewModel(
             return SelfieScanViewModel(
                 extras.requireApplication(),
                 fpsTracker,
-                identityRepository,
                 identityAnalyticsRequestFactory,
                 modelPerformanceTracker,
                 laplacianBlurDetector
