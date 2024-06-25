@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 
@@ -51,7 +52,7 @@ internal sealed interface PaymentSheetScreen {
     val showsContinueButton: Boolean
     val canNavigateBack: Boolean
 
-    fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean
+    fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
     @Composable
     fun Content(viewModel: BaseSheetViewModel, modifier: Modifier)
@@ -62,8 +63,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return false
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(false)
         }
 
         @Composable
@@ -85,8 +86,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return isCompleteFlow
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(isCompleteFlow)
         }
 
         @Composable
@@ -122,8 +123,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return isCompleteFlow
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(isCompleteFlow)
         }
 
         @Composable
@@ -138,8 +139,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = false
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return true
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(true)
         }
 
         @Composable
@@ -156,8 +157,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return false
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(false)
         }
 
         @Composable
@@ -176,8 +177,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = false
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return true
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return interactor.showsWalletsHeader
         }
 
         @Composable
@@ -195,8 +196,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return showsWalletHeader
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(showsWalletHeader)
         }
 
         @Composable
@@ -210,7 +211,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean = false
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -228,7 +229,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean = false
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
