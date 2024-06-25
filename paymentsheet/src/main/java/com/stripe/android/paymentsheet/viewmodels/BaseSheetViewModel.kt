@@ -793,6 +793,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun onUserBack() {
         clearErrorMessages()
+
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 
@@ -800,14 +801,16 @@ internal abstract class BaseSheetViewModel(
 
             lastScreen.onClose()
 
+            if (lastScreen is AddFirstPaymentMethod || lastScreen is AddAnotherPaymentMethod) {
+                // Reset the selection to the one from before opening the add payment method screen
+                val paymentOptionsState = paymentOptionsState.value
+                updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+            }
+
             reportPaymentSheetHidden(lastScreen)
 
             modifiableScreens.toList()
         }
-
-        // Reset the selection to the one from before opening the add payment method screen
-        val paymentOptionsState = paymentOptionsState.value
-        updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
     }
 
     private fun resetTo(screens: List<PaymentSheetScreen>) {

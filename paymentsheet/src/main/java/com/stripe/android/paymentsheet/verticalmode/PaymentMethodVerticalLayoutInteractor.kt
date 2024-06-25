@@ -16,7 +16,13 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
@@ -68,7 +74,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
     private val isFlowController: Boolean,
-    private val onWalletSelected: (PaymentSelection) -> Unit,
+    private val updateSelection: (PaymentSelection?) -> Unit,
+    private val currentScreen: StateFlow<PaymentSheetScreen>,
+    dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -107,18 +115,24 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         },
         walletsState = viewModel.walletsState,
         isFlowController = viewModel is PaymentOptionsViewModel,
-        onWalletSelected = viewModel::updateSelection,
+        updateSelection = viewModel::updateSelection,
+        currentScreen = viewModel.currentScreen,
     )
+
+    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
+
+    private val _mostRecentSelection = MutableStateFlow(selection.value)
+    private val mostRecentSelection = _mostRecentSelection
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         processing,
-        selection,
+        mostRecentSelection,
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
         walletsState,
-    ) { isProcessing, selection, paymentMethods, mostRecentlySelectedSavedPaymentMethod, walletsState ->
+    ) { isProcessing, mostRecentSelection, paymentMethods, mostRecentlySelectedSavedPaymentMethod, walletsState ->
         val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
             paymentMethods,
             paymentMethodMetadata,
@@ -128,7 +142,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = getDisplayablePaymentMethods(walletsState),
             isProcessing = isProcessing,
-            selection = selection,
+            selection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = getAvailableSavedPaymentMethodAction(
                 paymentMethods,
@@ -140,6 +154,24 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
         !showsWalletsInline(walletsState)
+    }
+
+    init {
+        coroutineScope.launch {
+            selection.collect {
+                if (it != null) {
+                    _mostRecentSelection.value = it
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            currentScreen.collect {
+                if (it is PaymentSheetScreen.VerticalMode) {
+                    updateSelection(mostRecentSelection.value)
+                }
+            }
+        }
     }
 
     private fun getDisplayablePaymentMethods(walletsState: WalletsState?): List<DisplayablePaymentMethod> {
@@ -161,7 +193,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = null,
                     onClick = {
-                        onWalletSelected(PaymentSelection.Link)
+                        updateSelection(PaymentSelection.Link)
                     },
                 )
             }
@@ -176,7 +208,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = null,
                     onClick = {
-                        onWalletSelected(PaymentSelection.GooglePay)
+                        updateSelection(PaymentSelection.GooglePay)
                     },
                 )
             }

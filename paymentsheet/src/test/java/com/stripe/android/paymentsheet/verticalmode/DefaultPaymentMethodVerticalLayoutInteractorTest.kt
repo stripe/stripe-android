@@ -611,7 +611,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         isFlowController: Boolean = false,
-        onWalletSelected: (PaymentSelection) -> Unit = { notImplemented() },
+        onWalletSelected: (PaymentSelection?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -620,6 +620,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow<WalletsState?>(null)
+        val currentScreen: MutableStateFlow<PaymentSheetScreen> = MutableStateFlow(PaymentSheetScreen.Loading)
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -639,7 +640,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
             isFlowController = isFlowController,
-            onWalletSelected = onWalletSelected,
+            updateSelection = onWalletSelected,
+            currentScreen = currentScreen,
         )
 
         TestParams(
