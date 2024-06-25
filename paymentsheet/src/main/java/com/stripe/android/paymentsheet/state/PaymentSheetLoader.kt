@@ -433,6 +433,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveSavedPaymentMethodSelection(
         config: PaymentSheet.Configuration,
     ): SavedSelection.PaymentMethod? {
+        /*
+         * We only care is the `SavedSelection` is a `PaymentMethod` type and not `Google Pay` or `Link`. Therefore
+         * we don't need to know if `Google Pay` or `Link` is ready and set them to `false`.
+         */
         return retrieveSavedSelection(
             config = config,
             isGooglePayReady = false,
