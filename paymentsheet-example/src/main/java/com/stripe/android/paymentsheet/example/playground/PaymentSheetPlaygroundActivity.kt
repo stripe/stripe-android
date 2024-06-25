@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -88,6 +90,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val appLocales = LocaleListCompat.forLanguageTags("fr")
+        AppCompatDelegate.setApplicationLocales(appLocales)
 
         setContent {
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
