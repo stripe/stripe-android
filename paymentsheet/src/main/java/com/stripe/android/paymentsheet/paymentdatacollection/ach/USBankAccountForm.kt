@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -40,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.networking.Bank
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -111,6 +111,7 @@ internal fun USBankAccountForm(
                     formArgs = formArgs,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
+                    isTestMode = false,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -131,6 +132,7 @@ internal fun USBankAccountForm(
                     instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                    isTestMode = false,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -151,6 +153,7 @@ internal fun USBankAccountForm(
                     instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                    isTestMode = false,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -171,6 +174,7 @@ internal fun USBankAccountForm(
                     instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                    isTestMode = false,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -192,6 +196,7 @@ internal fun BillingDetailsCollectionScreen(
     instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
+    isTestMode: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -208,6 +213,7 @@ internal fun BillingDetailsCollectionScreen(
             formArgs = formArgs,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
+            isTestMode = isTestMode,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -230,6 +236,7 @@ internal fun AccountPreviewScreen(
     instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
+    isTestMode: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -246,6 +253,7 @@ internal fun AccountPreviewScreen(
             instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
+            isTestMode = isTestMode,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -273,6 +281,7 @@ internal fun BillingDetailsForm(
     formArgs: FormArguments,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
+    isTestMode: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -356,6 +365,7 @@ internal fun BillingDetailsForm(
         EmbeddedBankPicker(
             imageLoader = imageLoader,
             featuredInstitutions = featuredInstitutions,
+            isTestMode = isTestMode,
             onBankSelected = onBankSelected,
         )
     }
@@ -367,6 +377,7 @@ private fun EmbeddedBankPickerPreview() {
     StripeTheme {
         EmbeddedBankPicker(
             imageLoader = StripeImageLoader(LocalContext.current),
+            isTestMode = false,
             featuredInstitutions = listOf(
                 BankViewState(
                     Bank(
@@ -416,6 +427,7 @@ private fun EmbeddedBankPickerPreview_Loading() {
     StripeTheme {
         EmbeddedBankPicker(
             imageLoader = StripeImageLoader(LocalContext.current),
+            isTestMode = false,
             featuredInstitutions = listOf(
                 BankViewState(bank = null),
                 BankViewState(bank = null),
@@ -437,6 +449,7 @@ internal data class BankViewState(
 @Composable
 internal fun RowScope.EmbeddedBankPickerCard(
     bankViewState: BankViewState,
+    isTestMode: Boolean,
     imageLoader: StripeImageLoader,
     onBankSelected: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -444,18 +457,21 @@ internal fun RowScope.EmbeddedBankPickerCard(
     Card(
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
+            color = MaterialTheme.stripeColors.componentBorder,
         ),
         modifier = Modifier
             .weight(1f)
-            .height(56.dp),
+            .height(64.dp),
     ) {
         if (bankViewState.bank != null) {
             EmbeddedBankPickerCardContent(
                 institution = bankViewState.bank,
+                isTestMode = isTestMode,
                 imageLoader = imageLoader,
                 onBankSelected = onBankSelected,
             )
+        } else {
+            LoadingIndicator()
         }
     }
 }
@@ -464,34 +480,35 @@ internal fun RowScope.EmbeddedBankPickerCard(
 private fun EmbeddedBankPickerCardContent(
     institution: Bank,
     imageLoader: StripeImageLoader,
+    isTestMode: Boolean,
     onBankSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
             .clickable { onBankSelected(institution.id) }
             .padding(10.dp),
     ) {
-        StripeImage(
-            url = institution.icon.orEmpty(),
-            imageLoader = imageLoader,
-            contentDescription = null,
-            debugPainter = painterResource(R.drawable.stripe_ic_paymentsheet_bank),
-            modifier = Modifier.size(20.dp),
-            loadingContent = {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .background(Color.LightGray),
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Text(text = institution.name)
+        if (isTestMode) {
+            Text(text = institution.name)
+        } else {
+            StripeImage(
+                url = institution.icon.orEmpty(),
+                imageLoader = imageLoader,
+                contentDescription = null,
+                debugPainter = painterResource(R.drawable.stripe_ic_paymentsheet_bank),
+                modifier = Modifier.height(48.dp),
+                loadingContent = {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .background(Color.LightGray),
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -499,6 +516,7 @@ private fun EmbeddedBankPickerCardContent(
 private fun EmbeddedBankPicker(
     imageLoader: StripeImageLoader,
     featuredInstitutions: List<BankViewState>,
+    isTestMode: Boolean,
     modifier: Modifier = Modifier,
     onBankSelected: (String) -> Unit,
 ) {
@@ -510,7 +528,7 @@ private fun EmbeddedBankPicker(
         featuredInstitutions.chunked(2)
     }
 
-    val spacing = remember { Arrangement.spacedBy(8.dp) }
+    val spacing = remember { Arrangement.spacedBy(10.dp) }
 
     Column(
         verticalArrangement = spacing,
@@ -521,6 +539,7 @@ private fun EmbeddedBankPicker(
                 for (item in row) {
                     EmbeddedBankPickerCard(
                         bankViewState = item,
+                        isTestMode = isTestMode,
                         imageLoader = imageLoader,
                         onBankSelected = onBankSelected,
                     )

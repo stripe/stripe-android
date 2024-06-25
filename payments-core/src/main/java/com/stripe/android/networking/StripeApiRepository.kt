@@ -28,6 +28,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -141,8 +142,8 @@ internal object FeaturedInstitutionsJsonParser : ModelJsonParser<FeaturedInstitu
             Bank(
                 id = obj.getString("id"),
                 name = obj.getString("name"),
-                icon = obj.getJSONObject("icon").getString("default"),
-                featuredOrder = obj.getInt("featured_order"),
+                icon = obj.getJSONObject("logo").getString("3x"),
+                featuredOrder = StripeJsonUtils.optInteger(obj, "featured_order"),
                 url = obj.getString("url"),
             )
         }

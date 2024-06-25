@@ -255,6 +255,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
                     screenState.copy(
                         featuredInstitutions = featuredInstitutions,
+                        primaryButtonText = "Select another bank",
                     )
                 } else {
                     screenState
@@ -452,11 +453,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 ?.featuredInstitutions
                 .orEmpty()
 
+            val primaryButtonText = if (featuredInstitutions.isNotEmpty()) {
+                "Select another bank"
+            } else {
+                application.getString(
+                    StripeUiCoreR.string.stripe_continue_button_label
+                )
+            }
+
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
-                primaryButtonText = application.getString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = primaryButtonText,
                 isProcessing = false,
                 featuredInstitutions = featuredInstitutions,
             )
@@ -482,12 +489,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = application.getString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = "Select another bank",
                 isProcessing = false,
-                featuredInstitutions = buildList(FeaturedBanks) {
-                    BankViewState(bank = null)
+                featuredInstitutions = buildList {
+                    repeat(FeaturedBanks) {
+                        add(BankViewState(bank = null))
+                    }
                 },
             )
         }
