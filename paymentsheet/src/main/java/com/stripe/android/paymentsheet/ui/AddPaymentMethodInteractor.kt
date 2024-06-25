@@ -47,7 +47,7 @@ internal interface AddPaymentMethodInteractor {
         data class OnLinkSignUpStateUpdated(val state: InlineSignupViewState) : ViewAction()
         data class OnFormFieldValuesChanged(
             val formValues: FormFieldValues?,
-            val selectedPaymentMethodCode: String
+            val selectedPaymentMethodCode: PaymentMethodCode
         ) : ViewAction()
 
         data class ReportFieldInteraction(val code: PaymentMethodCode) : ViewAction()

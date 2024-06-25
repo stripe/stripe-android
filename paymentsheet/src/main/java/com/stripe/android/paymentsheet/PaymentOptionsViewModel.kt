@@ -333,7 +333,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
         }
 
-        val sheetViewModel = this
         return buildList {
             add(target)
 
@@ -343,7 +342,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // form again.
                 add(
                     PaymentSheetScreen.AddAnotherPaymentMethod(
-                        interactor = DefaultAddPaymentMethodInteractor(sheetViewModel)
+                        interactor = DefaultAddPaymentMethodInteractor(this@PaymentOptionsViewModel)
                     )
                 )
             }
