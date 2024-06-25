@@ -60,6 +60,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -832,7 +833,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
-            PaymentSheetScreen.SelectSavedPaymentMethods(getCvcRecollectionState())
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                DefaultSelectSavedPaymentMethodsInteractor(
+                    this
+                ),
+                getCvcRecollectionState()
+            )
         } else {
             PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
         }

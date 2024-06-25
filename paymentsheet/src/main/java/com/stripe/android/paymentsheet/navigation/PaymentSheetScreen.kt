@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SheetScreen
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -77,7 +78,8 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data class SelectSavedPaymentMethods(
+    data class SelectSavedPaymentMethods constructor(
+        val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
         val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
     ) : PaymentSheetScreen {
 
@@ -97,27 +99,46 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val state by viewModel.paymentOptionsState.collectAsState()
-            val isEditing by viewModel.editing.collectAsState()
-            val isProcessing by viewModel.processing.collectAsState()
+            val state by selectSavedPaymentMethodsInteractor.state.collectAsState()
 
             SavedPaymentMethodTabLayoutUI(
-                state = state,
-                isEditing = isEditing,
-                isProcessing = isProcessing,
-                onAddCardPressed = viewModel::transitionToAddPaymentScreen,
-                onItemSelected = viewModel::handlePaymentMethodSelected,
-                onModifyItem = viewModel::modifyPaymentMethod,
-                onItemRemoved = viewModel::removePaymentMethod,
+                state = state.paymentOptionsState,
+                isEditing = state.isEditing,
+                isProcessing = state.isProcessing,
+                onAddCardPressed = {
+                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                        SelectSavedPaymentMethodsInteractor.ViewAction.OnAddCardPressed
+                    )
+                },
+                onItemSelected = {
+                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                        SelectSavedPaymentMethodsInteractor.ViewAction.HandlePaymentMethodSelected(
+                            it
+                        )
+                    )
+                },
+                onModifyItem = {
+                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                        SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
+                    )
+                },
+                onItemRemoved = {
+                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                        SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
+                    )
+                },
                 modifier = modifier,
             )
 
             if (
                 cvcRecollectionState is CvcRecollectionState.Required &&
-                (state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
+                (state.paymentOptionsState.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
                     ?.paymentMethod?.type == PaymentMethod.Type.Card
             ) {
-                CvcRecollectionField(cvcControllerFlow = cvcRecollectionState.cvcControllerFlow, isProcessing)
+                CvcRecollectionField(
+                    cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
+                    state.isProcessing
+                )
             }
         }
     }

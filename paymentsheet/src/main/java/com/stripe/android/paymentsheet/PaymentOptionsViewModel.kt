@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -330,7 +331,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods()
+            SelectSavedPaymentMethods(DefaultSelectSavedPaymentMethodsInteractor(this))
         } else {
             AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
         }
