@@ -100,7 +100,7 @@ internal fun Layout(
 @Composable
 internal fun LazyLayout(
     modifier: Modifier = Modifier,
-    bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
+    bodyPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     inModal: Boolean = false,
     loading: Boolean = false,
     showPillOnSlowLoad: Boolean = false,
@@ -180,9 +180,9 @@ private fun LayoutScaffold(
                 Box(
                     modifier = Modifier.padding(
                         top = 16.dp,
-                        bottom = 24.dp,
-                        start = 24.dp,
-                        end = 24.dp,
+                        bottom = 16.dp,
+                        start = 16.dp,
+                        end = 16.dp,
                     ),
                     content = { it() }
                 )
@@ -192,7 +192,7 @@ private fun LayoutScaffold(
                 // Loading pill if things take too long
                 LoadingPillContainer(
                     canShowPill = loading,
-                    modifier = Modifier.padding(bottom = 24.dp),
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
             }
         }
