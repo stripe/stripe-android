@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.ui.SheetScreen
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -52,6 +53,7 @@ internal sealed interface PaymentSheetScreen {
     val showsBuyButton: Boolean
     val showsContinueButton: Boolean
     val canNavigateBack: Boolean
+    val sheetScreen: SheetScreen
 
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
@@ -63,6 +65,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
+        override val sheetScreen: SheetScreen = SheetScreen.LOADING
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(false)
@@ -86,6 +89,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
+        override val sheetScreen: SheetScreen = SheetScreen.SELECT_SAVED_PAYMENT_METHODS
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(isCompleteFlow)
@@ -125,6 +129,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
+        override val sheetScreen: SheetScreen = SheetScreen.ADD_ANOTHER_PAYMENT_METHOD
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(isCompleteFlow)
@@ -147,6 +152,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = false
+        override val sheetScreen: SheetScreen = SheetScreen.ADD_FIRST_PAYMENT_METHOD
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(true)
@@ -169,6 +175,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
+        override val sheetScreen: SheetScreen = SheetScreen.EDIT_PAYMENT_METHOD
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(false)
@@ -189,6 +196,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = false
+        override val sheetScreen: SheetScreen = SheetScreen.VERTICAL_MODE
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return interactor.showsWalletsHeader
@@ -208,6 +216,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
+        override val sheetScreen: SheetScreen = SheetScreen.FORM
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(showsWalletHeader)
@@ -223,6 +232,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
+        override val sheetScreen: SheetScreen = SheetScreen.MANAGE_SAVED_PAYMENT_METHODS
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
 
@@ -241,6 +251,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
+        override val sheetScreen: SheetScreen = SheetScreen.MANAGE_ONE_SAVED_PAYMENT_METHOD
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
 
