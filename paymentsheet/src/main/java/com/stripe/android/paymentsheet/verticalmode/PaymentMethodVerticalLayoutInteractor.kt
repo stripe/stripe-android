@@ -124,8 +124,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
-    private val _mostRecentSelection = MutableStateFlow(selection.value)
-    private val mostRecentSelection = _mostRecentSelection
+    private val _mostRecentSelectionWithoutFormFields = MutableStateFlow(selection.value)
+    private val mostRecentSelection = _mostRecentSelectionWithoutFormFields
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
@@ -170,7 +170,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
                 val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
                 if (!requiresFormScreen) {
-                    _mostRecentSelection.value = it
+                    _mostRecentSelectionWithoutFormFields.value = it
                 }
             }
         }
