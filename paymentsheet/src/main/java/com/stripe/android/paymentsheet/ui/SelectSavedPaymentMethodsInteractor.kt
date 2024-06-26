@@ -28,9 +28,9 @@ internal interface SelectSavedPaymentMethodsInteractor {
     )
 
     sealed class ViewAction {
-        data object OnAddCardPressed : ViewAction()
+        data object AddCardPressed : ViewAction()
 
-        data class HandlePaymentMethodSelected(val selection: PaymentSelection?) : ViewAction()
+        data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
 
         data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
         data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
@@ -107,11 +107,11 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 viewAction.paymentMethod
             )
 
-            is SelectSavedPaymentMethodsInteractor.ViewAction.HandlePaymentMethodSelected -> onPaymentMethodSelected(
+            is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> onPaymentMethodSelected(
                 viewAction.selection
             )
 
-            SelectSavedPaymentMethodsInteractor.ViewAction.OnAddCardPressed -> onAddCardPressed()
+            SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed -> onAddCardPressed()
         }
     }
 

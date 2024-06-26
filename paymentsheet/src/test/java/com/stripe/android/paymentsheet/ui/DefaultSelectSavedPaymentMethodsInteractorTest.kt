@@ -114,6 +114,83 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         }
     }
 
+    @Test
+    fun handleViewAction_DeletePaymentMethod_deletesPaymentMethod() {
+        var deletedPaymentMethod: PaymentMethod? = null
+        fun onDeletePaymentMethod(paymentMethod: PaymentMethod) {
+            deletedPaymentMethod = paymentMethod
+        }
+
+        runScenario(onDeletePaymentMethod = ::onDeletePaymentMethod) {
+            val paymentMethodToDelete = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(
+                    paymentMethodToDelete
+                )
+            )
+
+            assertThat(deletedPaymentMethod).isEqualTo(paymentMethodToDelete)
+        }
+    }
+
+    @Test
+    fun handleViewAction_EditPaymentMethod_editsPaymentMethod() {
+        var editedPaymentMethod: PaymentMethod? = null
+        fun onEditPaymentMethod(paymentMethod: PaymentMethod) {
+            editedPaymentMethod = paymentMethod
+        }
+
+        runScenario(onEditPaymentMethod = ::onEditPaymentMethod) {
+            val paymentMethodToEdit = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(
+                    paymentMethodToEdit
+                )
+            )
+
+            assertThat(editedPaymentMethod).isEqualTo(paymentMethodToEdit)
+        }
+    }
+
+    @Test
+    fun handleViewAction_SelectPaymentMethod_selectsPaymentMethod() {
+        var paymentSelection: PaymentSelection? = null
+        fun onSelectPaymentMethod(selection: PaymentSelection?) {
+            paymentSelection = selection
+        }
+
+        runScenario(onPaymentMethodSelected = ::onSelectPaymentMethod) {
+            val newPaymentSelection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
+                    newPaymentSelection
+                )
+            )
+
+            assertThat(paymentSelection).isEqualTo(newPaymentSelection)
+        }
+    }
+
+    @Test
+    fun handleViewAction_AddCardPressed_callsOnAddCardPressed() {
+        var addCardPressed = false
+        fun onAddCardPressed() {
+            addCardPressed = true
+        }
+
+        runScenario(
+            onAddCardPressed = ::onAddCardPressed
+        ) {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
+            )
+
+            assertThat(addCardPressed).isTrue()
+        }
+    }
+
     private fun createPaymentOptionsState(paymentMethods: List<PaymentMethod>): PaymentOptionsState {
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,

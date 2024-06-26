@@ -107,12 +107,12 @@ internal sealed interface PaymentSheetScreen {
                 isProcessing = state.isProcessing,
                 onAddCardPressed = {
                     selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.OnAddCardPressed
+                        SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
                     )
                 },
                 onItemSelected = {
                     selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.HandlePaymentMethodSelected(
+                        SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
                             it
                         )
                     )
