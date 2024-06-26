@@ -55,9 +55,9 @@ private fun ExitModalContent(
         inModal = true,
         bodyPadding = PaddingValues(
             top = 0.dp,
-            start = 24.dp,
-            end = 24.dp,
-            bottom = 24.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp,
         ),
     ) {
         ShapedIcon(
