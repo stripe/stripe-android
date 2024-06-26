@@ -86,11 +86,6 @@ internal class ConfirmPaymentIntentParamsFactory(
                     } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                 )
             }
-            PaymentMethod.Type.USBankAccount -> {
-                PaymentMethodOptionsParams.USBankAccount(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                )
-            }
             else -> {
                 null
             }
