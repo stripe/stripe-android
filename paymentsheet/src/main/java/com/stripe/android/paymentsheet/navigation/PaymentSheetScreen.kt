@@ -81,7 +81,7 @@ internal sealed interface PaymentSheetScreen {
     data class SelectSavedPaymentMethods constructor(
         val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
         val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
 
         sealed interface CvcRecollectionState {
             data object NotRequired : CvcRecollectionState
@@ -140,6 +140,10 @@ internal sealed interface PaymentSheetScreen {
                     state.isProcessing
                 )
             }
+        }
+
+        override fun close() {
+            selectSavedPaymentMethodsInteractor.close()
         }
     }
 
