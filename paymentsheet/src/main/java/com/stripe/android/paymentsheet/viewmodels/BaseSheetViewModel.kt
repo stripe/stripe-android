@@ -229,7 +229,14 @@ internal abstract class BaseSheetViewModel(
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
             paymentMethods = paymentMethods,
-            currentSelection = selection,
+            currentSelection = mostRecentlySelectedSavedPaymentMethod
+                .mapAsStateFlow { paymentMethod ->
+                    paymentMethod?.let {
+                        PaymentSelection.Saved(
+                            it
+                        )
+                    }
+                },
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
