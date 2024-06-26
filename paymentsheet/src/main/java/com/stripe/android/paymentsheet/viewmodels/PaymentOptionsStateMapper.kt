@@ -13,7 +13,7 @@ internal class PaymentOptionsStateMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val googlePayState: StateFlow<GooglePayState>,
     private val isLinkEnabled: StateFlow<Boolean?>,
-    private val currentSelection: StateFlow<PaymentSelection?>,
+    private val currentSelection: StateFlow<PaymentSelection.Saved?>,
     private val nameProvider: (PaymentMethodCode?) -> String,
     private val isNotPaymentFlow: Boolean,
     private val isCbcEligible: () -> Boolean
