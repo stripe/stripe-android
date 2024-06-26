@@ -124,14 +124,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
-    private val _mostRecentSelectionWithoutFormFields = MutableStateFlow(selection.value)
-    private val mostRecentSelection = _mostRecentSelectionWithoutFormFields
+    private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
+    private val verticalModeScreenSelection = _verticalModeScreenSelection
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         processing,
-        mostRecentSelection,
+        verticalModeScreenSelection,
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
         walletsState,
@@ -170,7 +170,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
                 val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
                 if (!requiresFormScreen) {
-                    _mostRecentSelectionWithoutFormFields.value = it
+                    _verticalModeScreenSelection.value = it
                 }
             }
         }
@@ -178,7 +178,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         coroutineScope.launch {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
-                    updateSelection(mostRecentSelection.value)
+                    updateSelection(verticalModeScreenSelection.value)
                 }
             }
         }
