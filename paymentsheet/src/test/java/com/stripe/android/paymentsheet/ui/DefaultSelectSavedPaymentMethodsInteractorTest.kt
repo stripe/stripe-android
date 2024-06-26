@@ -42,16 +42,16 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun updatingIsEditing_updatesState() {
         val initialIsEditingValue = false
-        val isEditing = MutableStateFlow(initialIsEditingValue)
+        val isEditingFlow = MutableStateFlow(initialIsEditingValue)
 
-        runScenario(editing = isEditing) {
+        runScenario(editing = isEditingFlow) {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(isEditing).isEqualTo(initialIsEditingValue)
                 }
             }
 
-            isEditing.value = !initialIsEditingValue
+            isEditingFlow.value = !initialIsEditingValue
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -66,22 +66,22 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun updatingIsProcessing_updatesState() {
         val initialIsProcessingValue = false
-        val isProcessing = MutableStateFlow(initialIsProcessingValue)
+        val isProcessingFlow = MutableStateFlow(initialIsProcessingValue)
 
-        runScenario(isProcessing = isProcessing) {
+        runScenario(isProcessing = isProcessingFlow) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(isEditing).isEqualTo(initialIsProcessingValue)
+                    assertThat(isProcessing).isEqualTo(initialIsProcessingValue)
                 }
             }
 
-            isProcessing.value = !initialIsProcessingValue
+            isProcessingFlow.value = !initialIsProcessingValue
 
             dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(isEditing).isEqualTo(!initialIsProcessingValue)
+                    assertThat(isProcessing).isEqualTo(!initialIsProcessingValue)
                 }
             }
         }
@@ -91,9 +91,9 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     fun updatingPaymentOptionsState_updatesState() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val initialPaymentOptionsState = createPaymentOptionsState(paymentMethods)
-        val paymentOptionsState = MutableStateFlow(initialPaymentOptionsState)
+        val paymentOptionsStateFlow = MutableStateFlow(initialPaymentOptionsState)
 
-        runScenario(paymentOptionsState) {
+        runScenario(paymentOptionsStateFlow) {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(paymentOptionsState).isEqualTo(initialPaymentOptionsState)
@@ -102,7 +102,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
             val newPaymentMethods = PaymentMethodFixtures.createCards(2)
             val newPaymentOptionsState = createPaymentOptionsState(newPaymentMethods)
-            paymentOptionsState.value = newPaymentOptionsState
+            paymentOptionsStateFlow.value = newPaymentOptionsState
 
             dispatcher.scheduler.advanceUntilIdle()
 
