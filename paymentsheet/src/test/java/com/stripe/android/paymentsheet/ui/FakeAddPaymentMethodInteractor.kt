@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.ui
 
 import kotlinx.coroutines.flow.StateFlow
-import org.mockito.Mockito
 
 internal object FakeAddPaymentMethodInteractor : AddPaymentMethodInteractor {
     override val state: StateFlow<AddPaymentMethodInteractor.State>
-        get() = Mockito.mock()
+        get() = throw NotImplementedError(
+            "State has not been implemented for FakeAddPaymentMethodInteractor"
+        )
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         // Do nothing.
