@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
-import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.junit.runner.RunWith
 import com.stripe.android.R as StripeR
@@ -43,9 +42,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `AddFirstPaymentMethod shows correct navigation icon`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddFirstPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -60,9 +57,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `AddAnotherPaymentMethod shows correct navigation icon`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -77,9 +72,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Shows test mode badge if not running in live mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -94,9 +87,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Hide test mode badge if running in live mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = true,
@@ -163,9 +154,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Hides edit menu if not on the saved payment methods screen`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = true,
             isLiveMode = false,
@@ -180,9 +169,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Shows correct edit menu label when not in editing mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -197,9 +184,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Shows correct edit menu label when in editing mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = true,
@@ -227,9 +212,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Enables menu when not processing`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -244,9 +227,7 @@ class PaymentSheetTopBarStateFactoryTest {
     fun `Disables menu when processing`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(
-                    errorReporter = FakeErrorReporter()
-                )
+                interactor = FakeAddPaymentMethodInteractor
             ),
             canEdit = false,
             isLiveMode = false,
@@ -265,7 +246,8 @@ class PaymentSheetTopBarStateFactoryTest {
         canEdit: Boolean,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarStateFactory.create(
-            screen = screen,
+            screen = screen.sheetScreen,
+            hasBackStack = screen.canNavigateBack,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,

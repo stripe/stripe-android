@@ -6,7 +6,6 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -201,30 +200,5 @@ internal class DefaultAddPaymentMethodInteractor(
 
     private fun shouldHaveLinkInlineSignup(selectedPaymentMethodCode: PaymentMethodCode): Boolean {
         return selectedPaymentMethodCode == PaymentMethod.Type.Card.code
-    }
-}
-
-internal class UnsupportedAddPaymentMethodInteractor(private val errorReporter: ErrorReporter) :
-    AddPaymentMethodInteractor {
-
-    private val errorFieldFunctionAccessed = "function_accessed"
-
-    override val state: StateFlow<AddPaymentMethodInteractor.State>
-        get() {
-            throw UnsupportedOperationException("Attempting to use UnsupportedAddPaymentMethodInteractor")
-        }
-
-    override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
-        errorReporter.report(
-            ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED,
-            additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "handleViewAction_$viewAction")
-        )
-    }
-
-    override fun close() {
-        errorReporter.report(
-            ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED,
-            additionalNonPiiParams = mapOf(errorFieldFunctionAccessed to "close")
-        )
     }
 }

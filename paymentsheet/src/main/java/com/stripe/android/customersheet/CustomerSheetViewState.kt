@@ -10,14 +10,13 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.UnsupportedAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.SheetScreen
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -26,7 +25,7 @@ internal sealed class CustomerSheetViewState(
     open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
-    open val screen: PaymentSheetScreen,
+    open val screen: SheetScreen,
     open val cbcEligibility: CardBrandChoiceEligibility,
     open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     open val canRemovePaymentMethods: Boolean,
@@ -34,6 +33,7 @@ internal sealed class CustomerSheetViewState(
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
             screen = screen,
+            hasBackStack = false,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
@@ -59,7 +59,7 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.Loading,
+        screen = SheetScreen.LOADING,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
         canRemovePaymentMethods = false,
@@ -86,7 +86,7 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = isEditing,
-        screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+        screen = SheetScreen.SELECT_SAVED_PAYMENT_METHODS,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,
@@ -123,11 +123,9 @@ internal sealed class CustomerSheetViewState(
         isProcessing = isProcessing,
         isEditing = false,
         screen = if (isFirstPaymentMethod) {
-            PaymentSheetScreen.AddFirstPaymentMethod(interactor = UnsupportedAddPaymentMethodInteractor(errorReporter))
+            SheetScreen.ADD_FIRST_PAYMENT_METHOD
         } else {
-            PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = UnsupportedAddPaymentMethodInteractor(errorReporter)
-            )
+            SheetScreen.ADD_ANOTHER_PAYMENT_METHOD
         },
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,
@@ -146,7 +144,7 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.EditPaymentMethod(editPaymentMethodInteractor),
+        screen = SheetScreen.EDIT_PAYMENT_METHOD,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,

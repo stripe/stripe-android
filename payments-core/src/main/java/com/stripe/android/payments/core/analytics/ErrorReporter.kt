@@ -187,9 +187,6 @@ interface ErrorReporter {
         CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
             partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
         ),
-        UNSUPPORTED_ADD_PAYMENT_METHOD_INTERACTOR_USED(
-            partialEventName = "add_payment_method_interactor.unsupported_implementation.used"
-        )
         ;
 
         override val eventName: String
