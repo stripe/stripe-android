@@ -77,10 +77,29 @@ internal class ConfirmPaymentIntentParamsFactory(
         requiresSaveOnConfirmation: Boolean,
         recollectedCvc: String?
     ): ConfirmPaymentIntentParams {
+        val fallbackOptions = when (paymentMethodType) {
+            PaymentMethod.Type.Card -> {
+                PaymentMethodOptionsParams.Card(
+                    cvc = recollectedCvc,
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                        requiresSaveOnConfirmation
+                    } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
+            }
+            PaymentMethod.Type.USBankAccount -> {
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
+            }
+            else -> {
+                null
+            }
+        }
+
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            paymentMethodOptions = optionsParams,
+            paymentMethodOptions = optionsParams ?: fallbackOptions,
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                 .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
