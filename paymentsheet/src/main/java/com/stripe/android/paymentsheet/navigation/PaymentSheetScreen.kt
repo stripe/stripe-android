@@ -15,8 +15,8 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
-import com.stripe.android.paymentsheet.ui.SheetScreen
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.SheetScreen
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
