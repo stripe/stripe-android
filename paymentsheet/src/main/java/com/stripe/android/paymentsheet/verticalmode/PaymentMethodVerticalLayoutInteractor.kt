@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -161,7 +162,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     init {
         coroutineScope.launch {
             selection.collect {
-                if (it != null) {
+                if (it == null) {
+                    return@collect
+                }
+
+                val paymentMethodCode = (it as? PaymentSelection.New).code()
+                    ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
+                val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
+                if (!requiresFormScreen) {
                     _mostRecentSelection.value = it
                 }
             }
