@@ -4,9 +4,13 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +25,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -29,7 +35,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -58,6 +63,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
 
@@ -345,6 +351,7 @@ private fun SavedPaymentMethodTab(
     }
 }
 
+@Suppress("MagicNumber")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
@@ -353,18 +360,11 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
         IdentifierSpec(),
         controller
     )
-    val focusRequester = remember {
-        FocusRequester()
-    }
+    val focusRequester = remember { FocusRequester() }
+    var visible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-
-    if (!LocalInspectionMode.current) {
-        LaunchedEffect(controller) {
-            controller.onFocusChange(true)
-            focusRequester.requestFocus()
-        }
-    }
-
+    val animationDelay = 400
+    val animationDuration = 500
     LaunchedEffect(isProcessing) {
         // Clear focus once primary button is clicked
         if (isProcessing) {
@@ -372,27 +372,41 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
         }
     }
 
-    Text(
-        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-        style = MaterialTheme.typography.body1,
-        modifier = Modifier.padding(20.dp, 20.dp, 0.dp, 0.dp)
-    )
-    SectionCard(
-        Modifier
-            .padding(20.dp, 8.dp, 20.dp, 8.dp)
-            .height(IntrinsicSize.Min)
+    LaunchedEffect(key1 = Unit) {
+        delay(animationDelay.toLong())
+        visible = true
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(tween(animationDuration, animationDelay)) {
+            it
+        }
     ) {
-        element.controller.ComposeUI(
-            enabled = !isProcessing,
-            field = element,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-            hiddenIdentifiers = setOf(),
-            lastTextFieldIdentifier = null,
-            nextFocusDirection = FocusDirection.Exit,
-            previousFocusDirection = FocusDirection.Previous
-        )
+        Column(
+            Modifier.padding(20.dp, 20.dp, 20.dp, 0.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+                style = MaterialTheme.typography.body1
+            )
+            SectionCard(
+                Modifier
+                    .padding(0.dp, 8.dp, 0.dp, 8.dp)
+                    .height(IntrinsicSize.Min)
+            ) {
+                element.controller.ComposeUI(
+                    enabled = !isProcessing,
+                    field = element,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    hiddenIdentifiers = setOf(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Exit,
+                    previousFocusDirection = FocusDirection.Previous
+                )
+            }
+        }
     }
 }
 
