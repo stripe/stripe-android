@@ -351,7 +351,6 @@ private fun SavedPaymentMethodTab(
     }
 }
 
-@Suppress("MagicNumber")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
@@ -363,8 +362,6 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
     val focusRequester = remember { FocusRequester() }
     var visible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    val animationDelay = 400
-    val animationDuration = 500
     LaunchedEffect(isProcessing) {
         // Clear focus once primary button is clicked
         if (isProcessing) {
@@ -373,12 +370,12 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
     }
 
     LaunchedEffect(key1 = Unit) {
-        delay(animationDelay.toLong())
+        delay(ANIMATION_DELAY.toLong())
         visible = true
     }
     AnimatedVisibility(
         visible = visible,
-        enter = expandVertically(tween(animationDuration, animationDelay)) {
+        enter = expandVertically(tween(ANIMATION_DURATION, ANIMATION_DELAY)) {
             it
         }
     ) {
@@ -413,3 +410,5 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
 @VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
+private const val ANIMATION_DELAY = 400
+private const val ANIMATION_DURATION = 500
