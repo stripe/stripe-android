@@ -22,6 +22,7 @@ class CvcRecollectionScreenScreenshotTest {
             CvcRecollectionScreen(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
+                isTestMode = false,
                 viewActionHandler = {}
             )
         }
@@ -33,6 +34,19 @@ class CvcRecollectionScreenScreenshotTest {
             CvcRecollectionScreen(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
+                isTestMode = false,
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
+    fun testFilledTestMode() {
+        paparazziRule.snapshot {
+            CvcRecollectionScreen(
+                cardBrand = CardBrand.Visa,
+                lastFour = "4242",
+                isTestMode = true,
                 viewActionHandler = {}
             )
         }

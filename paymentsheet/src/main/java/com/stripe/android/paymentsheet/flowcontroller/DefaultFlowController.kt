@@ -402,7 +402,8 @@ internal class DefaultFlowController @Inject internal constructor(
             CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
                 cvcRecollectionLauncher.launch(
                     data = it,
-                    appearance = getPaymentAppearance()
+                    appearance = getPaymentAppearance(),
+                    state.stripeIntent.isLiveMode
                 )
             }
         } else {
