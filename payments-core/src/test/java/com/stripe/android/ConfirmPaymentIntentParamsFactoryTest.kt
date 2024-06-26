@@ -90,7 +90,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             shipping = shippingDetails,
         )
 
-        val result = factoryWithConfig.create(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val result = factoryWithConfig.create(PaymentMethodFixtures.CARD_PAYMENT_METHOD, optionsParams = null)
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
 
@@ -126,6 +126,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
             requiresSaveOnConfirmation = false
         )
 
@@ -145,6 +146,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
             requiresSaveOnConfirmation = true
         )
 

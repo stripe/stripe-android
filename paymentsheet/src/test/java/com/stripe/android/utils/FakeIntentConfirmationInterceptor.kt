@@ -56,6 +56,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     override suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         requiresSaveOnConfirmation: Boolean,
         recollectedCvc: String?

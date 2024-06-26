@@ -69,6 +69,7 @@ internal interface IntentConfirmationInterceptor {
     suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         requiresSaveOnConfirmation: Boolean,
         recollectedCvc: String? = null
@@ -117,6 +118,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     customerRequestedSave = customerRequestedSave,
                 )
             }
@@ -143,6 +145,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     override suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         requiresSaveOnConfirmation: Boolean,
         recollectedCvc: String?
@@ -152,6 +155,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = requiresSaveOnConfirmation,
                     recollectedCvc = recollectedCvc
@@ -163,6 +167,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     requiresSaveOnConfirmation = requiresSaveOnConfirmation,
                     isDeferred = false,
                     recollectedCvc = recollectedCvc
@@ -174,6 +179,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     requiresSaveOnConfirmation = requiresSaveOnConfirmation,
                     isDeferred = false,
                 )
@@ -184,6 +190,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private suspend fun handleDeferredIntent(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep {
@@ -203,6 +210,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 handleDeferredIntent(
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = customerRequestedSave,
                 )
@@ -219,6 +227,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private suspend fun handleDeferredIntent(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
         recollectedCvc: String? = null
@@ -229,6 +238,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     createIntentCallback = callback,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     shippingValues = shippingValues,
                     recollectedCvc = recollectedCvc
@@ -257,6 +267,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         createIntentCallback: CreateIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         recollectedCvc: String?
@@ -275,6 +286,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         clientSecret = result.clientSecret,
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
                         shippingValues = shippingValues,
                         recollectedCvc = recollectedCvc
                     )
@@ -294,6 +306,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         clientSecret: String,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         recollectedCvc: String?
     ): NextStep {
@@ -308,6 +321,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     clientSecret,
                     shippingValues,
                     paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     requiresSaveOnConfirmation = false,
                     isDeferred = true,
                     recollectedCvc = recollectedCvc
@@ -332,6 +346,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         clientSecret: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         requiresSaveOnConfirmation: Boolean,
         isDeferred: Boolean,
         recollectedCvc: String? = null
@@ -341,7 +356,12 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             shipping = shippingValues,
         )
 
-        val confirmParams = factory.create(paymentMethod, requiresSaveOnConfirmation, recollectedCvc)
+        val confirmParams = factory.create(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
+            recollectedCvc = recollectedCvc,
+        )
         return NextStep.Confirm(
             confirmParams = confirmParams,
             isDeferred = isDeferred,
@@ -366,6 +386,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paramsFactory.create(
                 paymentMethodId = instantDebitsPaymentMethodId,
                 paymentMethodType = PaymentMethod.Type.Link,
+                optionsParams = paymentMethodOptionsParams,
             )
         } else {
             paramsFactory.create(

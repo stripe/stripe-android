@@ -54,6 +54,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -139,6 +140,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                paymentMethodOptionsParams = null,
                 shippingValues = null,
                 requiresSaveOnConfirmation = false,
             )
@@ -249,6 +251,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -278,6 +281,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -305,6 +309,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -353,6 +358,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
             ),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -392,6 +398,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
             ),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -437,6 +444,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
             ),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
@@ -486,6 +494,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
                 paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = null,
                 shippingValues = null,
                 requiresSaveOnConfirmation = input,
             )
@@ -521,6 +530,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
             ),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
             requiresSaveOnConfirmation = false,
         )
