@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -75,6 +76,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
     private val isFlowController: Boolean,
+    private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     dispatcher: CoroutineContext = Dispatchers.Default,
@@ -119,6 +121,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         updateSelection = viewModel::updateSelection,
         isCurrentScreen = viewModel.currentScreen.mapAsStateFlow {
             it is PaymentSheetScreen.VerticalMode
+        },
+        onMandateTextUpdated = {
+            viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
         },
     )
 
@@ -286,6 +291,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
+
+                    formElementsForCode(viewAction.selectedPaymentMethodCode)
+                        .firstNotNullOfOrNull { it.mandateText }?.let {
+                            onMandateTextUpdated(it)
+                        }
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {

@@ -6,16 +6,17 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SheetScreen
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -24,7 +25,8 @@ internal sealed class CustomerSheetViewState(
     open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
-    open val screen: PaymentSheetScreen,
+    open val screen: SheetScreen,
+    open val canNavigateBack: Boolean,
     open val cbcEligibility: CardBrandChoiceEligibility,
     open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     open val canRemovePaymentMethods: Boolean,
@@ -32,6 +34,7 @@ internal sealed class CustomerSheetViewState(
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
             screen = screen,
+            hasBackStack = canNavigateBack,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
@@ -57,7 +60,8 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.Loading,
+        screen = SheetScreen.LOADING,
+        canNavigateBack = false,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
         canRemovePaymentMethods = false,
@@ -84,7 +88,8 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = isEditing,
-        screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+        screen = SheetScreen.SELECT_SAVED_PAYMENT_METHODS,
+        canNavigateBack = false,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,
@@ -114,16 +119,18 @@ internal sealed class CustomerSheetViewState(
         val displayDismissConfirmationModal: Boolean = false,
         val bankAccountResult: CollectBankAccountResultInternal?,
         override val cbcEligibility: CardBrandChoiceEligibility,
+        val errorReporter: ErrorReporter,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = false,
         screen = if (isFirstPaymentMethod) {
-            PaymentSheetScreen.AddFirstPaymentMethod
+            SheetScreen.ADD_FIRST_PAYMENT_METHOD
         } else {
-            PaymentSheetScreen.AddAnotherPaymentMethod
+            SheetScreen.ADD_ANOTHER_PAYMENT_METHOD
         },
+        canNavigateBack = !isFirstPaymentMethod,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,
         canRemovePaymentMethods = false,
@@ -141,7 +148,8 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.EditPaymentMethod(editPaymentMethodInteractor),
+        screen = SheetScreen.EDIT_PAYMENT_METHOD,
+        canNavigateBack = true,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,

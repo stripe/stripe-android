@@ -476,7 +476,7 @@ internal class PaymentSheetActivityTest {
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
 
             pressBack()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())

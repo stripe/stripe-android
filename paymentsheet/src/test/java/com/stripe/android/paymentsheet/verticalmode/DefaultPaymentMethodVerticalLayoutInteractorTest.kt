@@ -2,13 +2,17 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -17,6 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
@@ -520,6 +525,49 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_PaymentMethodSelected_updatesSelectedLPMAndMandate() {
+        var onFormFieldValuesChangedCalled = false
+        var mostRecentMandate: ResolvableString? = null
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            )
+        )
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formElementsForCode = {
+                val uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                    cardAccountRangeRepositoryFactory = mock(),
+                    paymentMethodCreateParams = null,
+                    paymentMethodExtraParams = null,
+                )
+                paymentMethodMetadata.formElementsForCode(it, uiDefinitionFactoryArgumentsFactory)!!
+            },
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+            onMandateTextUpdated = { mostRecentMandate = it },
+        ) {
+            assertThat(mostRecentMandate).isNull()
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+            assertThat(onFormFieldValuesChangedCalled).isTrue()
+            assertThat(mostRecentMandate).isEqualTo(
+                resolvableString(
+                    R.string.stripe_cash_app_pay_mandate,
+                    paymentMethodMetadata.merchantName,
+                    paymentMethodMetadata.merchantName
+                )
+            )
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_sameSavedPaymentMethodIsDisplayed() {
         val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
         val displayedPaymentMethod = savedPaymentMethods[2]
@@ -794,6 +842,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         isFlowController: Boolean = false,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
+        onMandateTextUpdated: (ResolvableString?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -823,6 +872,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
             isFlowController = isFlowController,
+            onMandateTextUpdated = onMandateTextUpdated,
             updateSelection = updateSelection,
             isCurrentScreen = isCurrentScreen,
             dispatcher = dispatcher,

@@ -1469,7 +1469,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
             viewModel.handleBackPressed()
         }
     }
@@ -1478,7 +1478,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled)
@@ -1495,7 +1495,7 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.transitionToAddPaymentScreen()
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
@@ -1506,7 +1506,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
         }
     }
 
@@ -1737,7 +1737,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
             viewModel.removePaymentMethod(paymentMethods.single())
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
         }
     }
 
