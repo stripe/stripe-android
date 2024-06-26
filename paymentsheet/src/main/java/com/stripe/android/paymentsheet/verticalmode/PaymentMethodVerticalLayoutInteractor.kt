@@ -75,7 +75,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val isFlowController: Boolean,
     private val updateSelection: (PaymentSelection?) -> Unit,
-    private val currentScreen: StateFlow<PaymentSheetScreen>,
+    private val isCurrentScreen: StateFlow<Boolean>,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
@@ -116,7 +116,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState = viewModel.walletsState,
         isFlowController = viewModel is PaymentOptionsViewModel,
         updateSelection = viewModel::updateSelection,
-        currentScreen = viewModel.currentScreen,
+        isCurrentScreen = viewModel.currentScreen.mapAsStateFlow {
+            it is PaymentSheetScreen.VerticalMode
+        },
     )
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
@@ -166,8 +168,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         coroutineScope.launch {
-            currentScreen.collect {
-                if (it is PaymentSheetScreen.VerticalMode) {
+            isCurrentScreen.collect { isCurrentScreen ->
+                if (isCurrentScreen) {
                     updateSelection(mostRecentSelection.value)
                 }
             }
