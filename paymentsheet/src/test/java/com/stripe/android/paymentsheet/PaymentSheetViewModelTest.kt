@@ -2497,8 +2497,13 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem()?.enabled).isFalse()
             }
 
-            // TODO:
-//            verify(interceptor).intercept(any(), any(), any(), isNull(), isNull(), eq(false))
+            verify(interceptor).intercept(
+                initializationMode = any(),
+                paymentMethodCreateParams = any(),
+                paymentMethodOptionsParams = isNull(),
+                shippingValues = isNull(),
+                customerRequestedSave = eq(false),
+            )
         }
 
     @Test
