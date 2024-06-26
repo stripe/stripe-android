@@ -24,8 +24,6 @@
     <ID>FunctionOnlyReturningConstant:AppDetails.kt$private fun getApplicationId(): String</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$@SuppressLint("HardwareIds") private fun getAndroidId()</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$internal fun getPlatform()</ID>
-    <ID>FunctionReturnTypeSpacing:StripeNetwork.kt$StripeNetwork$private suspend fun executeAndConvertToNetworkResult(request: StripeRequest): NetworkResult&lt;out String, out String></ID>
-    <ID>Indentation:CardImageVerificationDetails.kt$CardImageVerificationDetailsAcceptedImageConfigs$ </ID>
     <ID>LongMethod:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
     <ID>MagicNumber:BitmapExtensions.kt$100.0</ID>
     <ID>MagicNumber:CardExpiry.kt$100</ID>
@@ -63,7 +61,6 @@
     <ID>NestedBlockDepth:Network.kt$@Throws(IOException::class) private fun downloadFile( url: URL, outputFile: File )</ID>
     <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
     <ID>NestedBlockDepth:Yolo.kt$internal fun processYoloLayer( layer: Array&lt;Array&lt;FloatArray>>, anchors: Array&lt;Pair&lt;Int, Int>>, imageSize: Size, numClasses: Int, confidenceThreshold: Float ): List&lt;DetectionBox></ID>
-    <ID>NoSemicolons:CardImageVerificationDetails.kt$CardImageVerificationDetailsFormat.WEBP$;</ID>
     <ID>SwallowedException:Device.kt$t: Throwable</ID>
     <ID>SwallowedException:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>SwallowedException:File.kt$t: Throwable</ID>
@@ -98,12 +95,5 @@
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$@CheckResult private fun jaccardIndex(string1: String, string2: String): Double</ID>
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$private fun String.isDigitsOnly()</ID>
     <ID>UnusedPrivateProperty:ScanActivity.kt$ScanActivity$private val permissionStat = Stats.trackTask("camera_permission")</ID>
-    <ID>Wrapping:CardImageVerificationDetails.kt$CardImageVerificationDetailsAcceptedImageConfigs$&lt; CardImageVerificationDetailsFormat, CardImageVerificationDetailsImageSettings?></ID>
-    <ID>Wrapping:CardImageVerificationDetails.kt$CardImageVerificationDetailsAcceptedImageConfigs$&lt;CardImageVerificationDetailsFormat, CardImageVerificationDetailsImageSettings?></ID>
-    <ID>Wrapping:CardImageVerificationFlow.kt$CardImageVerificationFlow$&lt; MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction></ID>
-    <ID>Wrapping:CardScanFlow.kt$CardScanFlow$&lt; SSDOcr.Input, Any, SSDOcr.Prediction></ID>
-    <ID>Wrapping:CardScanFlow.kt$CardScanFlow$&lt; SSDOcr.Input, MainLoopState, SSDOcr.Prediction></ID>
-    <ID>Wrapping:MainLoopAnalyzer.kt$MainLoopAnalyzer.Factory$&lt; CardDetect.Input, Any, CardDetect.Prediction, out Analyzer&lt;CardDetect.Input, Any, CardDetect.Prediction>></ID>
-    <ID>Wrapping:MainLoopAnalyzer.kt$MainLoopAnalyzer.Factory$&lt; SSDOcr.Input, Any, SSDOcr.Prediction, out Analyzer&lt;SSDOcr.Input, Any, SSDOcr.Prediction>></ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
@@ -16,6 +18,7 @@ data class MandateTextElement(
     override val controller: InputController? = null
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
+    override val mandateText: ResolvableString = resolvableString(stringResId, *args.toTypedArray())
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())

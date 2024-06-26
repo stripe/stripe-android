@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.intl.Locale
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
@@ -20,6 +21,7 @@ data class AfterpayClearpayHeaderElement(
     override val controller: Controller? = null
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
+    override val mandateText: ResolvableString? = null
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())

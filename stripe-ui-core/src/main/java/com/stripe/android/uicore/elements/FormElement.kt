@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,13 @@ interface FormElement {
      * This is used to determine if vertical mode needs to show the form screen.
      */
     val allowsUserInteraction: Boolean
+
+    /**
+     * The mandate text, if any.
+     *
+     * This is used to determine if vertical mode needs to show mandates for LPMs with no fields, only a mandate.
+     */
+    val mandateText: ResolvableString?
 
     fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =

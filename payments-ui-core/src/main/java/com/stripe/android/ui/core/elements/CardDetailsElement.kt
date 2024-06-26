@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,6 +34,7 @@ internal class CardDetailsElement(
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
 
     override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
 
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
