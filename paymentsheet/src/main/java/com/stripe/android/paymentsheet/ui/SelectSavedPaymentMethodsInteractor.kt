@@ -119,17 +119,3 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         coroutineScope.cancel()
     }
 }
-
-internal class UnsupportedSelectSavedPaymentMethodsInteractor : SelectSavedPaymentMethodsInteractor {
-        override val state: StateFlow<SelectSavedPaymentMethodsInteractor.State>
-                get() = TODO("Not yet implemented")
-
-        override fun handleViewAction(viewAction: SelectSavedPaymentMethodsInteractor.ViewAction) {
-                TODO("Not yet implemented")
-        }
-
-        override fun close() {
-                TODO("Not yet implemented")
-        }
-
-}

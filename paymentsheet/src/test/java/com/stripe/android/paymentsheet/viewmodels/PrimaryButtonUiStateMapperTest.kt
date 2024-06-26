@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.UnsupportedSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -35,7 +35,11 @@ class PrimaryButtonUiStateMapperTest {
 
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(null),
@@ -54,7 +58,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Enables button if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(cardSelection()),
@@ -73,7 +81,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if selection is null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(null),
@@ -92,7 +104,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if editing or processing, even if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(false),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(cardSelection()),
@@ -130,7 +146,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Hides button in custom flow if on a screen that isn't supposed to show it`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(false),
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
@@ -148,7 +168,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows button in custom flow if selected payment method requires confirmation`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(false),
             selectionFlow = stateFlowOf(usBankAccountSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
@@ -166,7 +190,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows lock icon correctly based on the flow type`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor())),
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor
+                )
+            ),
             buttonsEnabledFlow = stateFlowOf(false),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(usBankAccountSelection()),
@@ -191,7 +219,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                UnsupportedSelectSavedPaymentMethodsInteractor(),
+                FakeSelectSavedPaymentMethodsInteractor,
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -219,7 +247,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                UnsupportedSelectSavedPaymentMethodsInteractor(),
+                FakeSelectSavedPaymentMethodsInteractor,
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -244,7 +272,9 @@ class PrimaryButtonUiStateMapperTest {
 
     @Test
     fun `Enables button if cvc is not required and input is incomplete`() = runTest {
-        val screen = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods(UnsupportedSelectSavedPaymentMethodsInteractor()))
+        val screen = stateFlowOf(
+            PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+        )
         val selection = PaymentSelection.Saved(
             paymentMethod = PaymentMethodFixtures.createCard()
         )
@@ -269,7 +299,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                UnsupportedSelectSavedPaymentMethodsInteractor(),
+                FakeSelectSavedPaymentMethodsInteractor,
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
