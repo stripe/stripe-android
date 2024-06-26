@@ -26,6 +26,7 @@ internal sealed class CustomerSheetViewState(
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
     open val screen: SheetScreen,
+    open val canNavigateBack: Boolean,
     open val cbcEligibility: CardBrandChoiceEligibility,
     open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     open val canRemovePaymentMethods: Boolean,
@@ -33,7 +34,7 @@ internal sealed class CustomerSheetViewState(
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
             screen = screen,
-            hasBackStack = false,
+            hasBackStack = canNavigateBack,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
@@ -60,6 +61,7 @@ internal sealed class CustomerSheetViewState(
         isProcessing = false,
         isEditing = false,
         screen = SheetScreen.LOADING,
+        canNavigateBack = false,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
         canRemovePaymentMethods = false,
@@ -87,6 +89,7 @@ internal sealed class CustomerSheetViewState(
         isProcessing = isProcessing,
         isEditing = isEditing,
         screen = SheetScreen.SELECT_SAVED_PAYMENT_METHODS,
+        canNavigateBack = false,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,
@@ -127,6 +130,7 @@ internal sealed class CustomerSheetViewState(
         } else {
             SheetScreen.ADD_ANOTHER_PAYMENT_METHOD
         },
+        canNavigateBack = !isFirstPaymentMethod,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = true,
         canRemovePaymentMethods = false,
@@ -145,6 +149,7 @@ internal sealed class CustomerSheetViewState(
         isProcessing = false,
         isEditing = false,
         screen = SheetScreen.EDIT_PAYMENT_METHOD,
+        canNavigateBack = true,
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         canRemovePaymentMethods = canRemovePaymentMethods,
