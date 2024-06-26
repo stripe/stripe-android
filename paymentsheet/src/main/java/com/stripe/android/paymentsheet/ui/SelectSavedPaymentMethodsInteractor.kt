@@ -47,15 +47,15 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : SelectSavedPaymentMethodsInteractor {
-        constructor(viewModel: BaseSheetViewModel) : this(
-                paymentOptionsState = viewModel.paymentOptionsState,
-                editing = viewModel.editing,
-                isProcessing = viewModel.processing,
-                onAddCardPressed = viewModel::transitionToAddPaymentScreen,
-                onEditPaymentMethod = viewModel::modifyPaymentMethod,
-                onDeletePaymentMethod = viewModel::removePaymentMethod,
-                onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
-        )
+    constructor(viewModel: BaseSheetViewModel) : this(
+        paymentOptionsState = viewModel.paymentOptionsState,
+        editing = viewModel.editing,
+        isProcessing = viewModel.processing,
+        onAddCardPressed = viewModel::transitionToAddPaymentScreen,
+        onEditPaymentMethod = viewModel::modifyPaymentMethod,
+        onDeletePaymentMethod = viewModel::removePaymentMethod,
+        onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
+    )
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
