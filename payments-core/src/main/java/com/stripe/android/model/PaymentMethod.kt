@@ -476,7 +476,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true, 
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Twint(
             code = "twint",
