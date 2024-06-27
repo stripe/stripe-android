@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,6 +61,7 @@ import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -355,6 +357,7 @@ private fun SavedPaymentMethodTab(
 @Composable
 internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
     val controller by cvcControllerFlow.collectAsState()
+    val error = controller.error.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
         controller
@@ -402,6 +405,11 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
                     nextFocusDirection = FocusDirection.Exit,
                     previousFocusDirection = FocusDirection.Previous
                 )
+            }
+            error.value?.errorMessage?.let {
+                Row {
+                    SectionError(error = stringResource(id = it))
+                }
             }
         }
     }
