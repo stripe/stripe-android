@@ -81,8 +81,6 @@ internal class CardWidgetViewModel(
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
             )
 
-            SavedStateHandle()
-
             @Suppress("UNCHECKED_CAST")
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
