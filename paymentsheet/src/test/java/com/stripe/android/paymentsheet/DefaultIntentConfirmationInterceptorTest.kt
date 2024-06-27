@@ -56,7 +56,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -101,7 +100,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    requiresSaveOnConfirmation = true
+                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
                 ),
                 shippingValues = null,
                 context = context,
@@ -142,7 +143,6 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 paymentMethodOptionsParams = null,
                 shippingValues = null,
-                requiresSaveOnConfirmation = false,
             )
         }
 
@@ -253,7 +253,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -283,7 +282,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -311,7 +309,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -360,7 +357,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
@@ -400,7 +396,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -446,7 +441,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -494,9 +488,10 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
                 paymentMethod = paymentMethod,
-                paymentMethodOptionsParams = null,
+                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                ).takeIf { input },
                 shippingValues = null,
-                requiresSaveOnConfirmation = input,
             )
         }
 
@@ -532,7 +527,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = false,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())

@@ -126,8 +126,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            optionsParams = null,
-            requiresSaveOnConfirmation = false
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            ),
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -146,8 +147,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            optionsParams = null,
-            requiresSaveOnConfirmation = true
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(

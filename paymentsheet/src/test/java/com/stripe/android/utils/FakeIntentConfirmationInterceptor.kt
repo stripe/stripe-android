@@ -58,8 +58,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }

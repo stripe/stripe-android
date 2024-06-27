@@ -991,7 +991,6 @@ internal class CustomerSheetViewModel(
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = true,
         )
 
         unconfirmedPaymentMethod = paymentMethod

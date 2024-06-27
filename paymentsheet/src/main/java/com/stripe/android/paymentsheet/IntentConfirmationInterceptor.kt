@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
@@ -71,8 +72,6 @@ internal interface IntentConfirmationInterceptor {
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String? = null
     ): NextStep
 
     companion object {
@@ -147,18 +146,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
+                val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = requiresSaveOnConfirmation,
-                    recollectedCvc = recollectedCvc
+                    shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
                 )
             }
 
@@ -168,9 +165,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    requiresSaveOnConfirmation = requiresSaveOnConfirmation,
                     isDeferred = false,
-                    recollectedCvc = recollectedCvc
                 )
             }
 
@@ -180,7 +175,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    requiresSaveOnConfirmation = requiresSaveOnConfirmation,
                     isDeferred = false,
                 )
             }
@@ -230,7 +224,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
-        recollectedCvc: String? = null
     ): NextStep {
         return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
             is CreateIntentCallback -> {
@@ -241,7 +234,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     shippingValues = shippingValues,
-                    recollectedCvc = recollectedCvc
                 )
             }
 
@@ -270,7 +262,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        recollectedCvc: String?
     ): NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
@@ -288,7 +279,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethod = paymentMethod,
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
                         shippingValues = shippingValues,
-                        recollectedCvc = recollectedCvc
                     )
                 }
             }
@@ -308,7 +298,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        recollectedCvc: String?
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
             if (intent.isConfirmed) {
@@ -322,9 +311,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues,
                     paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    requiresSaveOnConfirmation = false,
                     isDeferred = true,
-                    recollectedCvc = recollectedCvc
                 )
             }
         }.getOrElse { error ->
@@ -347,9 +334,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        requiresSaveOnConfirmation: Boolean,
         isDeferred: Boolean,
-        recollectedCvc: String? = null
     ): NextStep.Confirm {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -359,8 +344,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val confirmParams = factory.create(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
-            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
-            recollectedCvc = recollectedCvc,
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,

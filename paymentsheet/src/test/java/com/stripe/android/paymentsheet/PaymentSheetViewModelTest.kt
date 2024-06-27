@@ -869,10 +869,8 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
-                paymentMethodOptionsParams = isNull(),
+                paymentMethodOptionsParams = any(),
                 shippingValues = isNull(),
-                requiresSaveOnConfirmation = eq(true),
-                recollectedCvc = isNull(),
             )
         }
 
@@ -894,10 +892,8 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
-                paymentMethodOptionsParams = isNull(),
+                paymentMethodOptionsParams = any(),
                 shippingValues = isNull(),
-                requiresSaveOnConfirmation = eq(false),
-                recollectedCvc = isNull(),
             )
         }
 

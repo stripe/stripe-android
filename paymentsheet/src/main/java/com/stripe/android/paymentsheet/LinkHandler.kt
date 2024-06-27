@@ -13,10 +13,12 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -207,8 +209,12 @@ internal class LinkHandler @Inject constructor(
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
-                        requiresSaveOnConfirmation = customerRequestedSave ==
-                            PaymentSelection.CustomerRequestedSave.RequestReuse,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                                customerRequestedSave ==
+                                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                            } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        )
                     )
                 }
                 null -> null

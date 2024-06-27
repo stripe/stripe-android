@@ -21,8 +21,6 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
-        requiresSaveOnConfirmation: Boolean = false,
-        recollectedCvc: String? = null
     ): T
 
     abstract fun create(
@@ -33,15 +31,11 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     fun create(
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
-        requiresSaveOnConfirmation: Boolean = false,
-        recollectedCvc: String? = null
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = paymentMethod.type,
             optionsParams = optionsParams,
-            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
-            recollectedCvc = recollectedCvc
         )
     }
 
@@ -74,27 +68,11 @@ internal class ConfirmPaymentIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
     ): ConfirmPaymentIntentParams {
-        val fallbackOptions = when (paymentMethodType) {
-            PaymentMethod.Type.Card -> {
-                PaymentMethodOptionsParams.Card(
-                    cvc = recollectedCvc,
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
-                        requiresSaveOnConfirmation
-                    } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                )
-            }
-            else -> {
-                null
-            }
-        }
-
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            paymentMethodOptions = optionsParams ?: fallbackOptions,
+            paymentMethodOptions = optionsParams,
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                 .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
@@ -122,8 +100,6 @@ internal class ConfirmSetupIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethodId,
