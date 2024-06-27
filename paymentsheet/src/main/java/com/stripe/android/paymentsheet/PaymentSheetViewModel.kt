@@ -31,6 +31,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -605,7 +606,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentSelection is PaymentSelection.Saved &&
             paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
-            paymentSelection.copy(recollectedCvc = cvcControllerFlow.value.fieldValue.value)
+            val paymentMethodOptionsParams =
+                (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
+                    ?: PaymentMethodOptionsParams.Card()
+            paymentSelection.copy(
+                paymentMethodOptionsParams = paymentMethodOptionsParams.copy(
+                    cvc = cvcControllerFlow.value.fieldValue.value
+                )
+            )
         } else {
             paymentSelection
         }

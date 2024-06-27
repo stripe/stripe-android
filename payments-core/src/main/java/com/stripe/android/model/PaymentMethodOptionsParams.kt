@@ -130,3 +130,15 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.SetupFutureUsage? {
+    return when (this) {
+        is PaymentMethodOptionsParams.Blik -> null
+        is PaymentMethodOptionsParams.Card -> setupFutureUsage
+        is PaymentMethodOptionsParams.Konbini -> null
+        is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
+        is PaymentMethodOptionsParams.WeChatPay -> null
+        PaymentMethodOptionsParams.WeChatPayH5 -> null
+    }
+}
