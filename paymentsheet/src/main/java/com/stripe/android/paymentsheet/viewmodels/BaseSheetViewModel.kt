@@ -24,7 +24,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -44,7 +43,6 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
@@ -68,8 +66,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -226,10 +222,9 @@ internal abstract class BaseSheetViewModel(
         !isProcessing && !isEditing
     }
 
-    private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
-        PaymentOptionsStateMapper(
+    private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
+        PaymentOptionsItemsMapper(
             paymentMethods = paymentMethods,
-            currentSelection = selection,
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
@@ -244,10 +239,10 @@ internal abstract class BaseSheetViewModel(
         }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
-    val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
+    val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = paymentOptionsItemsMapper()
 
-    private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
-        val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+    private val canEdit: StateFlow<Boolean> = paymentOptionsItems.mapAsStateFlow { items ->
+        val paymentMethods = items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
         if (config.allowsRemovalOfLastSavedPaymentMethod) {
             paymentMethods.isNotEmpty()
         } else {
@@ -345,19 +340,6 @@ internal abstract class BaseSheetViewModel(
                     updatePrimaryButtonForLinkInline()
                 }
             }
-        }
-
-        viewModelScope.launch {
-            // If the currently selected payment option has been removed, we set it to the one
-            // determined in the payment options state.
-            paymentOptionsState
-                .mapNotNull {
-                    it.selectedItem?.toPaymentSelection()
-                }
-                .filter {
-                    it != selection.value
-                }
-                .collect { updateSelection(it) }
         }
     }
 
@@ -617,7 +599,7 @@ internal abstract class BaseSheetViewModel(
         val canRemove = if (config.allowsRemovalOfLastSavedPaymentMethod) {
             true
         } else {
-            paymentOptionsState.value.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
+            paymentOptionsItems.value.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
         }
 
         transitionTo(
@@ -814,10 +796,6 @@ internal abstract class BaseSheetViewModel(
 
             modifiableScreens.toList()
         }
-
-        // Reset the selection to the one from before opening the add payment method screen
-        val paymentOptionsState = paymentOptionsState.value
-        updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
     }
 
     private fun resetTo(screens: List<PaymentSheetScreen>) {

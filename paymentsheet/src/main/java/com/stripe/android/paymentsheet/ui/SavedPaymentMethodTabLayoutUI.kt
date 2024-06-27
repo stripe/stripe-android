@@ -50,7 +50,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -70,7 +69,8 @@ import com.stripe.android.R as StripeR
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun SavedPaymentMethodTabLayoutUI(
-    state: PaymentOptionsState,
+    paymentOptionsItems: List<PaymentOptionsItem>,
+    selectedPaymentOptionsItem: PaymentOptionsItem?,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -89,11 +89,11 @@ internal fun SavedPaymentMethodTabLayoutUI(
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
             items(
-                items = state.items,
+                items = paymentOptionsItems,
                 key = { it.key },
             ) { item ->
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
-                val isSelected = item == state.selectedItem && !isEditing
+                val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
                     item = item,
@@ -120,42 +120,40 @@ internal fun SavedPaymentMethodTabLayoutUI(
 private fun SavedPaymentMethodsTabLayoutPreview() {
     DefaultStripeTheme {
         SavedPaymentMethodTabLayoutUI(
-            state = PaymentOptionsState(
-                items = listOf(
-                    PaymentOptionsItem.AddCard,
-                    PaymentOptionsItem.Link,
-                    PaymentOptionsItem.GooglePay,
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "001",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.Card.code,
-                                type = PaymentMethod.Type.Card,
-                                card = PaymentMethod.Card(
-                                    brand = CardBrand.Visa,
-                                    last4 = "4242",
-                                )
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link,
+                PaymentOptionsItem.GooglePay,
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "001",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Card.code,
+                            type = PaymentMethod.Type.Card,
+                            card = PaymentMethod.Card(
+                                brand = CardBrand.Visa,
+                                last4 = "4242",
                             )
                         )
-                    ),
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "002",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.SepaDebit.code,
-                                type = PaymentMethod.Type.SepaDebit,
-                            )
-                        )
-                    ),
+                    )
                 ),
-                selectedIndex = 1
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "002",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.SepaDebit.code,
+                            type = PaymentMethod.Type.SepaDebit,
+                        )
+                    )
+                ),
             ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },

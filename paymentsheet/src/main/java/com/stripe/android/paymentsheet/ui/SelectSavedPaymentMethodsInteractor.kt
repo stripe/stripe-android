@@ -1,15 +1,19 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -22,7 +26,8 @@ internal interface SelectSavedPaymentMethodsInteractor {
     fun close()
 
     data class State(
-        val paymentOptionsState: PaymentOptionsState,
+        val paymentOptionsItems: List<PaymentOptionsItem>,
+        val selectedPaymentOptionsItem: PaymentOptionsItem?,
         val isEditing: Boolean,
         val isProcessing: Boolean,
     )
@@ -38,9 +43,11 @@ internal interface SelectSavedPaymentMethodsInteractor {
 }
 
 internal class DefaultSelectSavedPaymentMethodsInteractor(
-    private val paymentOptionsState: StateFlow<PaymentOptionsState>,
+    private val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>,
     private val editing: StateFlow<Boolean>,
     private val isProcessing: StateFlow<Boolean>,
+    private val currentSelection: StateFlow<PaymentSelection?>,
+    private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val onAddCardPressed: () -> Unit,
     private val onEditPaymentMethod: (PaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
@@ -48,9 +55,11 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : SelectSavedPaymentMethodsInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
-        paymentOptionsState = viewModel.paymentOptionsState,
+        paymentOptionsItems = viewModel.paymentOptionsItems,
         editing = viewModel.editing,
         isProcessing = viewModel.processing,
+        currentSelection = viewModel.selection,
+        mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
         onAddCardPressed = viewModel::transitionToAddPaymentScreen,
         onEditPaymentMethod = viewModel::modifyPaymentMethod,
         onDeletePaymentMethod = viewModel::removePaymentMethod,
@@ -59,13 +68,22 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
+    private val _displayedSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(currentSelection.value)
+    private val displayedSelection: StateFlow<PaymentSelection?> = _displayedSelection
+
     private val _state: MutableStateFlow<SelectSavedPaymentMethodsInteractor.State> =
         MutableStateFlow(getInitialState())
     override val state: StateFlow<SelectSavedPaymentMethodsInteractor.State> = _state
 
     private fun getInitialState(): SelectSavedPaymentMethodsInteractor.State {
+        val paymentOptionsItems = paymentOptionsItems.value
+
         return SelectSavedPaymentMethodsInteractor.State(
-            paymentOptionsState = paymentOptionsState.value,
+            paymentOptionsItems = paymentOptionsItems,
+            selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
+                paymentOptionsItems,
+                currentSelection.value,
+            ),
             isEditing = editing.value,
             isProcessing = isProcessing.value,
         )
@@ -73,9 +91,13 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
     init {
         coroutineScope.launch {
-            paymentOptionsState.collect {
+            paymentOptionsItems.collect {
                 _state.value = _state.value.copy(
-                    paymentOptionsState = it
+                    paymentOptionsItems = it,
+                    selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
+                        it,
+                        displayedSelection.value,
+                    )
                 )
             }
         }
@@ -92,6 +114,40 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             isProcessing.collect {
                 _state.value = _state.value.copy(
                     isProcessing = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            val paymentOptionsRelevantSelection = currentSelection.filter { selection ->
+                selection is PaymentSelection.Saved ||
+                    selection == PaymentSelection.Link ||
+                    selection == PaymentSelection.GooglePay
+            }.stateIn(this)
+
+            combineAsStateFlow(
+                paymentOptionsRelevantSelection,
+                mostRecentlySelectedSavedPaymentMethod
+            ) { selection, savedSelection ->
+                when (selection) {
+                    is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
+
+                    is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+            }.collect { newSelection ->
+                _displayedSelection.value = newSelection
+            }
+        }
+
+        coroutineScope.launch {
+            displayedSelection.collect {
+                _state.value = _state.value.copy(
+                    selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
+                        paymentOptionsItems.value,
+                        it,
+                    )
                 )
             }
         }

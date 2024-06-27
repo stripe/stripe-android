@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,18 +20,23 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun initialState_isCorrect() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val expectedPaymentOptionsState = createPaymentOptionsState(paymentMethods)
+        val expectedPaymentOptionsItems = createPaymentOptionsItems(paymentMethods)
+        val expectedSelectedPaymentMethod = paymentMethods[1]
         val expectedIsEditing = true
         val expectedIsProcessing = false
 
         runScenario(
-            paymentOptionsState = MutableStateFlow(expectedPaymentOptionsState),
+            paymentOptionsItems = MutableStateFlow(expectedPaymentOptionsItems),
+            currentSelection = MutableStateFlow(PaymentSelection.Saved(expectedSelectedPaymentMethod)),
             editing = MutableStateFlow(expectedIsEditing),
             isProcessing = MutableStateFlow(expectedIsProcessing),
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(paymentOptionsState).isEqualTo(expectedPaymentOptionsState)
+                    assertThat(paymentOptionsItems).isEqualTo(expectedPaymentOptionsItems)
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(expectedSelectedPaymentMethod)
                     assertThat(isEditing).isEqualTo(expectedIsEditing)
                     assertThat(isProcessing).isEqualTo(expectedIsProcessing)
                 }
@@ -90,25 +95,25 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun updatingPaymentOptionsState_updatesState() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val initialPaymentOptionsState = createPaymentOptionsState(paymentMethods)
+        val initialPaymentOptionsState = createPaymentOptionsItems(paymentMethods)
         val paymentOptionsStateFlow = MutableStateFlow(initialPaymentOptionsState)
 
         runScenario(paymentOptionsStateFlow) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(paymentOptionsState).isEqualTo(initialPaymentOptionsState)
+                    assertThat(paymentOptionsItems).isEqualTo(initialPaymentOptionsState)
                 }
             }
 
             val newPaymentMethods = PaymentMethodFixtures.createCards(2)
-            val newPaymentOptionsState = createPaymentOptionsState(newPaymentMethods)
+            val newPaymentOptionsState = createPaymentOptionsItems(newPaymentMethods)
             paymentOptionsStateFlow.value = newPaymentOptionsState
 
             dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(paymentOptionsState).isEqualTo(newPaymentOptionsState)
+                    assertThat(paymentOptionsItems).isEqualTo(newPaymentOptionsState)
                 }
             }
         }
@@ -191,28 +196,26 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         }
     }
 
-    private fun createPaymentOptionsState(paymentMethods: List<PaymentMethod>): PaymentOptionsState {
+    private fun createPaymentOptionsItems(paymentMethods: List<PaymentMethod>): List<PaymentOptionsItem> {
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             nameProvider = { it!! },
-            canRemovePaymentMethods = false,
-            isCbcEligible = false,
-        )
+            canRemovePaymentMethods = true,
+            isCbcEligible = true,
+        ).items
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
-        paymentOptionsState: StateFlow<PaymentOptionsState> = MutableStateFlow(
-            PaymentOptionsState(
-                items = emptyList(),
-            )
-        ),
+        paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = MutableStateFlow(emptyList()),
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
+        currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
+        mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = MutableStateFlow(null),
         onAddCardPressed: () -> Unit = { notImplemented() },
         onEditPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         onDeletePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
@@ -222,9 +225,11 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
 
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
-            paymentOptionsState,
+            paymentOptionsItems,
             editing,
             isProcessing,
+            currentSelection,
+            mostRecentlySelectedSavedPaymentMethod,
             onAddCardPressed,
             onEditPaymentMethod,
             onDeletePaymentMethod,
