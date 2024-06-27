@@ -35,6 +35,7 @@ com.stripe.android.link.injection
 com.stripe.android.link.model
 com.stripe.android.link.ui
 com.stripe.android.link.ui.inline
+com.stripe.android.link.ui.signup
 module:network-testing
 com.stripe.android.networktesting
 module:payments-core
