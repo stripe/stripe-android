@@ -47,7 +47,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -221,7 +221,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     var onBehalfOf: String? = null
         set(value) {
             if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
                     viewModel.onBehalfOf = value
                 }
             }
@@ -470,7 +470,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
 
-        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+        doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }

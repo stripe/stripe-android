@@ -60,7 +60,7 @@ class CardInputWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),
@@ -356,7 +356,7 @@ class CardInputWidget @JvmOverloads constructor(
     var onBehalfOf: String? = null
         set(value) {
             if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
                     viewModel.onBehalfOf = value
                 }
             }
@@ -408,7 +408,7 @@ class CardInputWidget @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+        doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }
@@ -585,7 +585,8 @@ class CardInputWidget @JvmOverloads constructor(
         return bundleOf(
             STATE_SUPER_STATE to super.onSaveInstanceState(),
             STATE_CARD_VIEWED to isShowingFullCard,
-            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled
+            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
+            //"HANDLE" to SavedStateHandle() // add tag so we can look up
         )
     }
 

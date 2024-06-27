@@ -251,7 +251,7 @@ private fun CardBrand(
         }
     }
 
-    val showDropdown = remember(possibleBrands, shouldShowCvc, shouldShowErrorIcon) {
+    val showDropdown = remember(isCbcEligible, possibleBrands, shouldShowCvc, shouldShowErrorIcon) {
         isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
     }
 

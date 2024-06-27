@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -17,7 +18,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,21 +71,23 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(val application: Context? = null) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = extras.requireApplication()
+            val context = application
 
             val stripeRepository = StripeApiRepository(
-                context = context,
+                context = context!!,
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
             )
+
+            SavedStateHandle()
 
             @Suppress("UNCHECKED_CAST")
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
                 stripeRepository = stripeRepository,
-                handle = extras.createSavedStateHandle()
+                handle = SavedStateHandle()
             ) as T
         }
     }
@@ -97,6 +99,7 @@ internal class CardWidgetViewModel(
 
 internal fun View.doWithCardWidgetViewModel(
     viewModelStoreOwner: ViewModelStoreOwner? = null,
+    application: Context? = null,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
     val lifecycleOwner = findViewTreeLifecycleOwner()
@@ -113,7 +116,7 @@ internal fun View.doWithCardWidgetViewModel(
         return
     }
 
-    val factory = CardWidgetViewModel.Factory()
+    val factory = CardWidgetViewModel.Factory(application)
 
     val viewModel = ViewModelProvider(
         owner = storeOwner,
