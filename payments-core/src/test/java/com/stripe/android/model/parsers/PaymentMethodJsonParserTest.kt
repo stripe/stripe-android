@@ -82,6 +82,14 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withAllowRedisplayFoobar_shouldCreateExpectedObject() {
+        val parsedPaymentMethod = PaymentMethodJsonParser()
+            .parse(PaymentMethodFixtures.ALLOW_REDISPLAY_FOOBAR_JSON)
+
+        assertThat(parsedPaymentMethod.allowRedisplay).isNull()
+    }
+
+    @Test
     fun parse_withFpx_shouldCreateExpectedObject() {
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.FPX_JSON))
             .isEqualTo(PaymentMethodFixtures.FPX_PAYMENT_METHOD)

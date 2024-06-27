@@ -417,6 +417,36 @@ class PaymentMethodCreateParamsTest {
         ).containsEntry("allow_redisplay", "always")
     }
 
+    @Test
+    fun `create() with 'allow_redisplay' set for SEPA Debit returns expected values`() {
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "unspecified")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "limited")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "always")
+    }
+
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Fpx(bank = "hsbc"),

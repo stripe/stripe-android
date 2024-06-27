@@ -181,6 +181,25 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    val ALLOW_REDISPLAY_FOOBAR_JSON = JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": null,
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": null,
+          "allow_redisplay": "foobar",
+          "link": {
+            "email": "email@email.com"
+          },
+          "type": "link"
+        }
+        """.trimIndent()
+    )
+
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {
