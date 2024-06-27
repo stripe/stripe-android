@@ -81,7 +81,7 @@ internal object PaymentOptionsStateFactory {
  * Find the item matching [paymentSelection] in the current items. Return -1 if not found.
  */
 private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentSelection): PaymentOptionsItem? {
-    return first { item ->
+    return firstOrNull { item ->
         when (paymentSelection) {
             is PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
             is PaymentSelection.Link -> item is PaymentOptionsItem.Link
