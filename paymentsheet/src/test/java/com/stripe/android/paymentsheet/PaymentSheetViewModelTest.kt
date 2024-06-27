@@ -852,7 +852,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On inline link payment with save requested, should set with 'requireSaveOnConfirmation' set to 'true'`() =
+    fun `On inline link payment with save requested, should set 'paymentMethodOptionsParams' SFU to off_session`() =
         runTest {
             val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
 
@@ -869,13 +869,15 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
-                paymentMethodOptionsParams = any(),
+                paymentMethodOptionsParams = eq(PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )),
                 shippingValues = isNull(),
             )
         }
 
     @Test
-    fun `On inline link payment with save not requested, should set with 'requireSaveOnConfirmation' set to 'false'`() =
+    fun `On inline link payment with save not requested, should set 'paymentMethodOptionsParams' SFU to blank`() =
         runTest {
             val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
 
@@ -892,7 +894,9 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
-                paymentMethodOptionsParams = any(),
+                paymentMethodOptionsParams = eq(PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )),
                 shippingValues = isNull(),
             )
         }
