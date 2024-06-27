@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -11,7 +12,9 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -27,6 +30,7 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
+import kotlin.coroutines.coroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerRepositoryTest {
@@ -350,11 +354,12 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.detachPaymentMethod(
-                CustomerRepository.CustomerInfo(
+                customerInfo = CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
-                "payment_method_id"
+                paymentMethodId = "payment_method_id",
+                canRemoveDuplicates = false,
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -368,14 +373,181 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.detachPaymentMethod(
-                CustomerRepository.CustomerInfo(
+                customerInfo = CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
-                "payment_method_id"
+                paymentMethodId = "payment_method_id",
+                canRemoveDuplicates = false,
             )
 
             assertThat(result.isFailure).isTrue()
+        }
+
+    @Test
+    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'true' should remove duplicate payment methods and remove provided payment method ID last`() =
+        runTest {
+            val paymentMethodsToRemove = createCardsWithSameFingerprint(count = 5)
+            val removedPaymentMethods = mutableListOf<PaymentMethod>()
+
+            val repository = createCustomerRepository(
+                stripeRepository = FakeStripeRepository(
+                    onGetPaymentMethods = { _, _, _ -> Result.success(paymentMethodsToRemove) },
+                    onDetach = { _, paymentMethodId, _ ->
+                        val paymentMethod = paymentMethodsToRemove.first { paymentMethod ->
+                            paymentMethod.id == paymentMethodId
+                        }
+
+                        removedPaymentMethods.add(paymentMethod)
+
+                        Result.success(paymentMethod)
+                    }
+                )
+            )
+
+            val paymentMethodToRemove = paymentMethodsToRemove.first()
+
+            repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key"
+                ),
+                paymentMethodId = paymentMethodToRemove.id!!,
+                canRemoveDuplicates = true,
+            )
+
+            assertThat(removedPaymentMethods).containsExactlyElementsIn(paymentMethodsToRemove)
+            assertThat(removedPaymentMethods.last()).isEqualTo(paymentMethodToRemove)
+        }
+
+    @Test
+    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'true' still removes payment method even if not a card`() =
+        runTest {
+            val usBankAccount = PaymentMethodFactory.usBankAccount()
+            val cards = PaymentMethodFactory.cards(2)
+
+            val paymentMethods = listOf(usBankAccount) + cards
+
+            val removedPaymentMethods = mutableListOf<PaymentMethod>()
+
+            val repository = createCustomerRepository(
+                stripeRepository = FakeStripeRepository(
+                    onGetPaymentMethods = { _, _, _ -> Result.success(cards) },
+                    onDetach = { _, paymentMethodId, _ ->
+                        val paymentMethod = paymentMethods.first { paymentMethod ->
+                            paymentMethod.id == paymentMethodId
+                        }
+
+                        removedPaymentMethods.add(paymentMethod)
+
+                        Result.success(paymentMethod)
+                    }
+                )
+            )
+
+            val usBankAccountToRemove = paymentMethods.first()
+
+            repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key"
+                ),
+                paymentMethodId = usBankAccountToRemove.id!!,
+                canRemoveDuplicates = true,
+            )
+
+            assertThat(removedPaymentMethods).containsExactlyElementsIn(listOf(usBankAccount))
+        }
+
+    @Test
+    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'false' should not remove duplicate payment methods`() =
+        runTest {
+            val paymentMethods = createCardsWithSameFingerprint(count = 5)
+            val removedPaymentMethods = mutableListOf<PaymentMethod>()
+
+            val repository = createCustomerRepository(
+                stripeRepository = FakeStripeRepository(
+                    onGetPaymentMethods = { _, _, _ -> Result.success(paymentMethods) },
+                    onDetach = { _, paymentMethodId, _ ->
+                        val paymentMethod = paymentMethods.first { paymentMethod ->
+                            paymentMethod.id == paymentMethodId
+                        }
+
+                        removedPaymentMethods.add(paymentMethod)
+
+                        Result.success(paymentMethod)
+                    }
+                )
+            )
+
+            val paymentMethodToRemove = paymentMethods.first()
+
+            repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key"
+                ),
+                paymentMethodId = paymentMethodToRemove.id!!,
+                canRemoveDuplicates = false,
+            )
+
+            val duplicates = paymentMethods.filter { paymentMethod ->
+                paymentMethod.id != paymentMethodToRemove.id
+            }
+
+            assertThat(removedPaymentMethods).containsNoneIn(duplicates)
+        }
+
+    @Test
+    fun `detachPaymentMethod() with removing duplicates enabled should return failure if duplicate failure occurs`() =
+        runTest {
+            val paymentMethods = createCardsWithSameFingerprint(count = 5)
+            val removedPaymentMethods = mutableListOf<PaymentMethod>()
+
+            val failToRemovePaymentMethods = paymentMethods.subList(3, 5)
+
+            val repository = createCustomerRepository(
+                stripeRepository = FakeStripeRepository(
+                    onGetPaymentMethods = { _, _, _ -> Result.success(paymentMethods) },
+                    onDetach = { _, paymentMethodId, _ ->
+                        if (failToRemovePaymentMethods.any { it.id == paymentMethodId }) {
+                            return@FakeStripeRepository Result.failure<PaymentMethod>(
+                                exception = IllegalStateException("Failed to remove!")
+                            )
+                        }
+
+                        val paymentMethod = paymentMethods.first { paymentMethod ->
+                            paymentMethod.id == paymentMethodId
+                        }
+
+                        removedPaymentMethods.add(paymentMethod)
+
+                        Result.success(paymentMethod)
+                    }
+                )
+            )
+
+            val result = repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key"
+                ),
+                paymentMethodId = paymentMethods.first().id!!,
+                canRemoveDuplicates = true,
+            )
+
+            assertThat(result.isFailure)
+                .isTrue()
+
+            val exception = result.exceptionOrNull().asDuplicateFailureException()
+
+            val hasFailedPaymentMethodIds = exception.failures.all { failure ->
+                failToRemovePaymentMethods.any { paymentMethod ->
+                    paymentMethod.id == failure.paymentMethodId
+                }
+            }
+
+            assertThat(hasFailedPaymentMethodIds).isTrue()
         }
 
     @Test
@@ -453,6 +625,18 @@ internal class CustomerRepositoryTest {
             assertThat(result).isEqualTo(error)
         }
 
+    private suspend fun createCustomerRepository(
+        stripeRepository: StripeRepository,
+    ): CustomerApiRepository {
+        return CustomerApiRepository(
+            workContext = coroutineContext,
+            errorReporter = errorReporter,
+            stripeRepository = stripeRepository,
+            lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+            logger = Logger.getInstance(false),
+        )
+    }
+
     private suspend fun failsOnceStripeRepository(): StripeRepository {
         val repository = mock<StripeRepository>()
         whenever(
@@ -521,6 +705,57 @@ internal class CustomerRepositoryTest {
                     options = any(),
                 )
             }.doReturn(result)
+        }
+    }
+
+    private fun Throwable?.asDuplicateFailureException(): DuplicatePaymentMethodDetachFailureException {
+        return this as DuplicatePaymentMethodDetachFailureException
+    }
+
+    private fun createCardsWithSameFingerprint(count: Int): List<PaymentMethod> {
+        return PaymentMethodFactory.cards(count).map { paymentMethod ->
+            paymentMethod.copy(
+                card = paymentMethod.card?.copy(
+                    fingerprint = "1234567890"
+                )
+            )
+        }
+    }
+
+    private class FakeStripeRepository(
+        val onGetPaymentMethods: suspend (
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ) -> Result<List<PaymentMethod>>,
+        val onDetach: suspend (
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ) -> Result<PaymentMethod>
+    ) : AbsFakeStripeRepository() {
+        override suspend fun detachPaymentMethod(
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethod> {
+            return onDetach(
+                productUsageTokens,
+                paymentMethodId,
+                requestOptions,
+            )
+        }
+
+        override suspend fun getPaymentMethods(
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ): Result<List<PaymentMethod>> {
+            return onGetPaymentMethods(
+                listPaymentMethodsParams,
+                productUsageTokens,
+                requestOptions,
+            )
         }
     }
 }

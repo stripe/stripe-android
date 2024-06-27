@@ -208,7 +208,8 @@ internal class PaymentSheetViewModelTest {
 
         verify(customerRepository).detachPaymentMethod(
             any(),
-            eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
+            eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!),
+            eq(false),
         )
     }
 
@@ -310,6 +311,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(customerRepository).detachPaymentMethod(
             customerInfoCaptor.capture(),
+            any(),
             any(),
         )
 
@@ -2727,7 +2729,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.removePaymentMethod(PAYMENT_METHODS.first())
 
-        verify(customerRepository, never()).detachPaymentMethod(any(), any())
+        verify(customerRepository, never()).detachPaymentMethod(any(), any(), any())
     }
 
     @Test
