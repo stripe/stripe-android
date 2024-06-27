@@ -1674,7 +1674,7 @@ internal class DefaultFlowControllerTest {
 
         val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
         val launcher = mock<CvcRecollectionLauncher> {
-            on { launch(any(), any()) } doAnswer {
+            on { launch(any(), any(), any()) } doAnswer {
                 onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
             }
         }
@@ -1717,7 +1717,8 @@ internal class DefaultFlowControllerTest {
                     brand = CardBrand.Visa
                 )
             ),
-            eq(PaymentSheet.Appearance())
+            eq(PaymentSheet.Appearance()),
+            eq(false)
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
@@ -1730,7 +1731,7 @@ internal class DefaultFlowControllerTest {
 
         val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
         val launcher = mock<CvcRecollectionLauncher> {
-            on { launch(any(), any()) } doAnswer {
+            on { launch(any(), any(), any()) } doAnswer {
                 onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
             }
         }
@@ -1773,7 +1774,8 @@ internal class DefaultFlowControllerTest {
                     brand = CardBrand.Visa
                 )
             ),
-            eq(PaymentSheet.Appearance())
+            eq(PaymentSheet.Appearance()),
+            eq(false)
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
