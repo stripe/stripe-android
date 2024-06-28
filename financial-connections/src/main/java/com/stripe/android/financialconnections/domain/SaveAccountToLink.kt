@@ -68,15 +68,16 @@ internal class SaveAccountToLink @Inject constructor(
         partnerAccounts: List<CachedPartnerAccount>?,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
-
         val selectedAccountIds = partnerAccounts?.map { it.id }?.toSet() ?: emptySet()
         val linkedAccountIds = partnerAccounts?.mapNotNull { it.linkedAccountId }?.toSet() ?: emptySet()
 
         val pollingResult = when {
             partnerAccounts.isNullOrEmpty() -> when (attachedPaymentAccountRepository.get()?.attachedPaymentAccount) {
                 is BankAccount -> Result.success(Unit)
-                else -> Result.failure(IllegalStateException(
-                    "Must have a bank account attached if no accounts are selected")
+                else -> Result.failure(
+                    IllegalStateException(
+                        "Must have a bank account attached if no accounts are selected"
+                    )
                 )
             }
             shouldPollAccountNumbers -> runCatching { awaitAccountNumbersReady(linkedAccountIds) }
@@ -92,7 +93,6 @@ internal class SaveAccountToLink @Inject constructor(
         }.onFailure {
             storeFailedToSaveToLinkMessage(selectedAccountIds.size)
         }.getOrThrow()
-
     }
 
     private suspend fun awaitAccountNumbersReady(linkedAccountIds: Set<String>) {
@@ -121,7 +121,7 @@ internal class SaveAccountToLink @Inject constructor(
             customSuccessMessage = manifest.displayText?.successPane?.subCaption
                 // If backend returns a custom success message, use it
                 ?.let { TextResource.Text(it) }
-            // If not, build a Link success message locally
+                // If not, build a Link success message locally
                 ?: TextResource.PluralId(
                     R.plurals.stripe_success_pane_desc_link_success,
                     selectedAccounts
