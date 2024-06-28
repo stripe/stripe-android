@@ -355,7 +355,11 @@ private fun SavedPaymentMethodTab(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
+internal fun CvcRecollectionField(
+    cvcControllerFlow: StateFlow<CvcController>,
+    isProcessing: Boolean,
+    expanded: Boolean = false
+) {
     val controller by cvcControllerFlow.collectAsState()
     val error = controller.error.collectAsState()
     val element = CvcElement(
@@ -363,7 +367,7 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
         controller
     )
     val focusRequester = remember { FocusRequester() }
-    var visible by remember { mutableStateOf(false) }
+    var visible by remember { mutableStateOf(expanded) }
     val focusManager = LocalFocusManager.current
     LaunchedEffect(isProcessing) {
         // Clear focus once primary button is clicked
@@ -387,7 +391,8 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.stripeColors.subtitle
             )
             SectionCard(
                 Modifier
