@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat

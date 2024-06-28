@@ -324,7 +324,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 bankName = result.bankName,
                 last4 = result.last4,
                 intentId = result.intent.id,
-                primaryButtonText = buildPrimaryButtonText().resolve(application),
+                primaryButtonText = buildPrimaryButtonText(),
                 mandateText = buildMandateText(),
             )
         }

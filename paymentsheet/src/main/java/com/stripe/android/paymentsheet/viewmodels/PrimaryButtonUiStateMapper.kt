@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
