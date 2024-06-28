@@ -1,7 +1,9 @@
 package com.stripe.android.lpm
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,6 +15,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import org.junit.Test
@@ -130,7 +133,12 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         )
     }
 
+    @OptIn(ExperimentalTestApi::class)
     private fun fillOutIban() {
+        rules.compose.waitUntilAtLeastOneExists(
+            hasText("IBAN"),
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        )
         rules.compose.onNodeWithText("IBAN").apply {
             performTextInput(
                 "DE89370400440532013000"

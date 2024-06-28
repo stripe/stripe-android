@@ -1,20 +1,29 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
     val state: StateFlow<State>
+
+    val showsWalletsHeader: StateFlow<Boolean>
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -58,6 +67,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
+    private val walletsState: StateFlow<WalletsState?>,
+    private val isFlowController: Boolean,
+    private val onWalletSelected: (PaymentSelection) -> Unit,
+    private val onMandateTextUpdated: (ResolvableString?) -> Unit,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -93,7 +106,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
         onSelectSavedPaymentMethod = {
             viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
-        }
+        },
+        walletsState = viewModel.walletsState,
+        isFlowController = viewModel is PaymentOptionsViewModel,
+        onWalletSelected = viewModel::updateSelection,
+        onMandateTextUpdated = {
+            viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
+        },
     )
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -103,7 +122,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         selection,
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
-    ) { isProcessing, selection, paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
+        walletsState,
+    ) { isProcessing, selection, paymentMethods, mostRecentlySelectedSavedPaymentMethod, walletsState ->
         val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
             paymentMethods,
             paymentMethodMetadata,
@@ -111,7 +131,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
 
         PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = getDisplayablePaymentMethods(),
+            displayablePaymentMethods = getDisplayablePaymentMethods(walletsState),
             isProcessing = isProcessing,
             selection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
@@ -123,12 +143,59 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    private fun getDisplayablePaymentMethods(): List<DisplayablePaymentMethod> {
-        return supportedPaymentMethods.map { supportedPaymentMethod ->
+    override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
+        !showsWalletsInline(walletsState)
+    }
+
+    private fun getDisplayablePaymentMethods(walletsState: WalletsState?): List<DisplayablePaymentMethod> {
+        val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             supportedPaymentMethod.asDisplayablePaymentMethod {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
+
+        val wallets = mutableListOf<DisplayablePaymentMethod>()
+        if (showsWalletsInline(walletsState)) {
+            walletsState?.link?.let {
+                wallets += DisplayablePaymentMethod(
+                    code = PaymentMethod.Type.Link.code,
+                    displayName = resolvableString(PaymentsCoreR.string.stripe_link),
+                    iconResource = R.drawable.stripe_ic_paymentsheet_link,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    iconRequiresTinting = false,
+                    subtitle = null,
+                    onClick = {
+                        onWalletSelected(PaymentSelection.Link)
+                    },
+                )
+            }
+
+            walletsState?.googlePay?.let {
+                wallets += DisplayablePaymentMethod(
+                    code = "google_pay",
+                    displayName = resolvableString(PaymentsCoreR.string.stripe_google_pay),
+                    iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    iconRequiresTinting = false,
+                    subtitle = null,
+                    onClick = {
+                        onWalletSelected(PaymentSelection.GooglePay)
+                    },
+                )
+            }
+        }
+
+        val cardIndex = lpms.indexOfFirst { it.code == PaymentMethod.Type.Card.code }
+        val result = lpms.toMutableList()
+        // Add wallets after cards, if cards don't exist, add wallets first.
+        result.addAll(cardIndex + 1, wallets)
+        return result
+    }
+
+    private fun showsWalletsInline(walletsState: WalletsState?): Boolean {
+        return isFlowController && walletsState != null && walletsState.googlePay != null
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -182,6 +249,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
+
+                    formElementsForCode(viewAction.selectedPaymentMethodCode)
+                        .firstNotNullOfOrNull { it.mandateText }?.let {
+                            onMandateTextUpdated(it)
+                        }
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {

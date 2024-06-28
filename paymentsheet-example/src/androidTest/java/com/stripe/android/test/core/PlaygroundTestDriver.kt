@@ -1157,7 +1157,7 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("Agree and continue")
                 .fetchSemanticsNodes()

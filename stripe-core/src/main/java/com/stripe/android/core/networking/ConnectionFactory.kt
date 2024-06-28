@@ -7,9 +7,10 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HttpsURLConnection
 
 /**
- * Factory to create [StripeConnection], which encapsulates an [HttpURLConnection], triggers the
+ * Factory to create [StripeConnection], which encapsulates an [HttpsURLConnection], triggers the
  * request and parses the response with different body type as [StripeResponse].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -31,15 +32,15 @@ interface ConnectionFactory {
         fun open(
             request: StripeRequest,
             callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpURLConnection
+        ): HttpsURLConnection
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object Default : ConnectionOpener {
             override fun open(
                 request: StripeRequest,
                 callback: HttpURLConnection.(request: StripeRequest) -> Unit
-            ): HttpURLConnection {
-                return (URL(request.url).openConnection() as HttpURLConnection).apply {
+            ): HttpsURLConnection {
+                return (URL(request.url).openConnection() as HttpsURLConnection).apply {
                     callback(request)
                 }
             }
@@ -69,7 +70,7 @@ interface ConnectionFactory {
 
         private fun openConnectionAndApplyFields(
             originalRequest: StripeRequest
-        ): HttpURLConnection {
+        ): HttpsURLConnection {
             return connectionOpener.open(originalRequest) { request ->
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT

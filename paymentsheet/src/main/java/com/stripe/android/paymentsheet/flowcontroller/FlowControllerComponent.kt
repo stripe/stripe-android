@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import dagger.BindsInstance
@@ -31,6 +32,9 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
+
+        @BindsInstance
+        fun initializedViaCompose(@InitializedViaCompose initializedViaCompose: Boolean): Builder
 
         fun build(): FlowControllerComponent
     }

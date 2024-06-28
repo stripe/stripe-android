@@ -67,16 +67,6 @@ internal class DefaultManageScreenInteractor(
         navigateBack = viewModel::handleBackPressed
     )
 
-    init {
-        coroutineScope.launch {
-            displayableSavedPaymentMethods.collect {
-                if (noPaymentMethodsAvailableToManage(it)) {
-                    safeNavigateBack()
-                }
-            }
-        }
-    }
-
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
@@ -100,6 +90,28 @@ internal class DefaultManageScreenInteractor(
         }
 
         ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, editing, canDelete = canDelete)
+    }
+
+    init {
+        coroutineScope.launch {
+            displayableSavedPaymentMethods.collect {
+                if (noPaymentMethodsAvailableToManage(it)) {
+                    safeNavigateBack()
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            editing.collect { editing ->
+                val savedPaymentMethods = displayableSavedPaymentMethods.value
+                val oneModifiablePmRemaining =
+                    savedPaymentMethods.size == 1 && savedPaymentMethods.first().isModifiable()
+                if (!editing && oneModifiablePmRemaining && !allowsRemovalOfLastSavedPaymentMethod) {
+                    handlePaymentMethodSelected(savedPaymentMethods.first())
+                    safeNavigateBack()
+                }
+            }
+        }
     }
 
     override fun handleViewAction(viewAction: ManageScreenInteractor.ViewAction) {

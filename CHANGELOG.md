@@ -2,6 +2,28 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.47.4 - 2024-06-27
+
+### PaymentSheet
+
+* [FIXED][8697](https://github.com/stripe/stripe-android/pull/8697) Fixed a bug where payment methods using `payment_method_options` were not saved properly when using the deferred client-side confirmation flow.
+
+## 20.47.3 - 2024-06-25
+
+### Identity
+* [FIXED][8683](https://github.com/stripe/stripe-android/pull/8683) Removed the `usesCleartextTraffic` flag, which was enabled in the Stripe Identity SDK manifest. This flag was unnecessary as the Stripe API enforces HTTPS on all connections.
+
+## 20.47.0 - 2024-06-24
+
+### PaymentSheet
+* [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to PaymentSheet.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to PaymentSheet.
+* [FIXED][8672](https://github.com/stripe/stripe-android/pull/8672) Fixed a bug where [FlowController] would show a blank screen when Google Pay was enabled without a customer attached.
+
+### Payments
+* [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to API bindings.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to API bindings.
+
 ## 20.46.0 - 2024-06-14
 
 ### PaymentSheet

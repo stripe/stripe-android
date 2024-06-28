@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -80,6 +81,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -109,6 +111,7 @@ internal object CustomerSheetTestHelper {
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     internal fun createViewModel(
@@ -181,6 +184,7 @@ internal object CustomerSheetTestHelper {
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
+            errorReporter = FakeErrorReporter(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 

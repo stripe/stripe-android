@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ml
 
-import android.content.Context
 import android.graphics.Bitmap
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
@@ -9,11 +8,8 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
-import com.stripe.android.identity.networking.IdentityRepository
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
-import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -33,9 +29,7 @@ internal class IDDetectorAnalyzer(
     private val idDetectorMinScore: Float,
     private val modelPerformanceTracker: ModelPerformanceTracker,
     private val laplacianBlurDetector: LaplacianBlurDetector,
-    private val mbDetector: MBDetector?,
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    private val identityRepository: IdentityRepository
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
@@ -43,8 +37,6 @@ internal class IDDetectorAnalyzer(
         modelFile,
         InterpreterOptionsWrapper.Builder().build()
     )
-
-    private var hasSeenMBRunnerError = false
 
     override suspend fun analyze(
         data: AnalyzerInput,
@@ -113,60 +105,12 @@ internal class IDDetectorAnalyzer(
             categories[bestIndex][it].roundToMaxDecimals(2)
         }
 
-        val shouldTryReturnModern = mbDetector != null && hasSeenMBRunnerError.not()
-
-        return if (shouldTryReturnModern) {
-            try {
-                val mbOutput = requireNotNull(mbDetector).analyze(data)
-                if (mbOutput is MBDetector.DetectorResult.Error) {
-                    // MB throws AnalysisError, log it and fallback to legacy
-                    hasSeenMBRunnerError = true
-                    logMBError(mbOutput.message, mbOutput.reason?.stackTraceToString())
-                    buildLegacyOutput(
-                        bestBoundingBox,
-                        bestCategory,
-                        bestScore,
-                        categoriesMapping,
-                        croppedImage
-                    )
-                } else {
-                    // MB executed successfully, return Modern result
-                    buildModernOutput(
-                        bestBoundingBox,
-                        bestCategory,
-                        bestScore,
-                        categoriesMapping,
-                        croppedImage,
-                        mbOutput
-                    )
-                }
-            } catch (e: Exception) {
-                // MB throws an exception during analysis, log it and fallback to legacy
-                hasSeenMBRunnerError = true
-                logMBError(e.message, e.stackTraceToString())
-                buildLegacyOutput(
-                    bestBoundingBox,
-                    bestCategory,
-                    bestScore,
-                    categoriesMapping,
-                    croppedImage
-                )
-            }
-        } else {
-            buildLegacyOutput(
-                bestBoundingBox,
-                bestCategory,
-                bestScore,
-                categoriesMapping,
-                croppedImage
-            )
-        }
-    }
-
-    private suspend fun logMBError(message: String?, stackTrace: String?) {
-        identityAnalyticsRequestFactory.mbError(
-            message,
-            stackTrace
+        return buildLegacyOutput(
+            bestBoundingBox,
+            bestCategory,
+            bestScore,
+            categoriesMapping,
+            croppedImage
         )
     }
 
@@ -191,37 +135,12 @@ internal class IDDetectorAnalyzer(
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
 
-    private fun buildModernOutput(
-        bestBoundingBox: FloatArray,
-        bestCategory: Category,
-        bestScore: Float,
-        categoriesMapping: List<Float>,
-        croppedImage: Bitmap,
-        mbOutput: MBDetector.DetectorResult
-    ) = IDDetectorOutput.Modern(
-        // Return Legacy output if mbDetector is not available
-        BoundingBox(
-            bestBoundingBox[0],
-            bestBoundingBox[1],
-            bestBoundingBox[2],
-            bestBoundingBox[3]
-        ),
-        bestCategory,
-        bestScore,
-        categoriesMapping,
-        laplacianBlurDetector.calculateBlurOutput(croppedImage),
-        mbOutput
-    )
-
     internal class Factory(
-        private val context: Context,
         private val modelFile: File,
         private val idDetectorMinScore: Float,
-        private val mbSettings: VerificationPageStaticContentDocumentCaptureMBSettings?,
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-        private val identityRepository: IdentityRepository
     ) : AnalyzerFactory<
         AnalyzerInput,
         IdentityScanState,
@@ -234,13 +153,7 @@ internal class IDDetectorAnalyzer(
                 idDetectorMinScore,
                 modelPerformanceTracker,
                 laplacianBlurDetector,
-                MBDetector.maybeCreateMBInstance(
-                    context,
-                    mbSettings,
-                    identityAnalyticsRequestFactory,
-                ),
                 identityAnalyticsRequestFactory,
-                identityRepository
             )
         }
     }

@@ -7,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -16,7 +15,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -47,6 +45,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -127,10 +126,10 @@ internal abstract class BaseSheetViewModel(
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
+    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
         .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
         .mapAsStateFlow { state ->
-            state?.paymentMethods
+            state?.paymentMethods ?: emptyList()
         }
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
@@ -262,7 +261,8 @@ internal abstract class BaseSheetViewModel(
     }
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combineAsStateFlow(
-        currentScreen,
+        currentScreen.mapAsStateFlow { it.sheetScreen },
+        currentScreen.mapAsStateFlow { it.canNavigateBack },
         paymentMethodMetadata.mapAsStateFlow { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
@@ -299,7 +299,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             currentScreen.collectLatest { screen ->
                 when (screen) {
-                    is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+                    is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
                     }
                     is PaymentSheetScreen.EditPaymentMethod,
@@ -370,7 +370,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(AddAnotherPaymentMethod)
+        transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
     }
 
     fun transitionTo(target: PaymentSheetScreen) {
@@ -390,7 +390,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod, AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+            is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }
@@ -559,18 +559,6 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    internal fun isCvcRecollectionEnabled() =
-        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
-            FeatureFlags.cvcRecollection.isEnabled
-
-    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
-        return if (isCvcRecollectionEnabled()) {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
-        } else {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
-        }
-    }
-
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
         val currentCustomer = customer ?: return Result.failure(
@@ -619,7 +607,7 @@ internal abstract class BaseSheetViewModel(
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
-            resetTo(listOf(AddFirstPaymentMethod))
+            resetTo(listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))))
         }
     }
 
@@ -805,8 +793,16 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onUserCancel()
 
+    internal fun closeScreens() {
+        backStack.value.forEach {
+            it.onClose()
+        }
+    }
+
     private fun onUserBack() {
         clearErrorMessages()
+        _mandateText.value = null
+
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 

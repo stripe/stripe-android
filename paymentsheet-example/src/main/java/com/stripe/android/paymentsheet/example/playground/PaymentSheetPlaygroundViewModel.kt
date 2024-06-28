@@ -17,7 +17,9 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.CvcRecollectionEnabledCallback
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
@@ -36,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpoin
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.CvcRecollectionEnabledCallbackValue
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -65,6 +68,11 @@ internal class PaymentSheetPlaygroundViewModel(
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    val cvcCallback = CvcRecollectionEnabledCallback {
+        playgroundSettingsFlow.value?.get(CvcRecollectionEnabledCallbackValue)?.value == true
+    }
 
     private val baseUrl: String
         get() {

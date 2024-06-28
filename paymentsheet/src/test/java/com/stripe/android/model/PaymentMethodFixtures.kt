@@ -520,11 +520,14 @@ internal object PaymentMethodFixtures {
         return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
     }
 
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(
+        isRemovable: Boolean = true,
+    ): DisplayableSavedPaymentMethod {
         return DisplayableSavedPaymentMethod(
             displayName = this.card?.last4 ?: this.usBankAccount?.last4 ?: "",
             paymentMethod = this,
             isCbcEligible = true,
+            isRemovable = isRemovable,
         )
     }
 

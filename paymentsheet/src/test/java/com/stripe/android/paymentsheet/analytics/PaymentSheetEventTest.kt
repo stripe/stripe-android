@@ -82,7 +82,7 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `Init event with external payment methdos should return expected params`() {
+    fun `Init event with external payment methods should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS,

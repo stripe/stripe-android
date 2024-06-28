@@ -110,13 +110,6 @@ internal class IDDetectorTransitioner(
                     analyzerOutput
                 )
             }
-
-            is IDDetectorOutput.Modern -> {
-                transitionFromFoundModern(
-                    foundState,
-                    analyzerOutput
-                )
-            }
         }
     }
 
@@ -155,80 +148,6 @@ internal class IDDetectorTransitioner(
         moreResultsRequired(foundState) -> foundState
         else -> {
             Satisfied(foundState.type, foundState.transitioner)
-        }
-    }
-
-    private fun transitionFromFoundModern(
-        foundState: Found,
-        analyzerOutput: IDDetectorOutput.Modern
-    ): IdentityScanState {
-        // Call iOUCheckPass to update its internal state
-        val iOUCheckPassed = iOUCheckPass(analyzerOutput.boundingBox)
-        val feedbackIntRes =
-            if (analyzerOutput.mbOutput is MBDetector.DetectorResult.Capturing) {
-                analyzerOutput.mbOutput.feedback.stringResource
-            } else {
-                null
-            }
-        return when {
-            foundState.isFromLegacyDetector == true -> Unsatisfied(
-                "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
-                foundState.type,
-                foundState.transitioner
-            )
-            timeoutAt.hasPassedNow() -> {
-                IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
-            }
-
-            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
-                "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-                foundState.type,
-                foundState.transitioner
-            )
-
-            analyzerOutput.mbOutput is MBDetector.DetectorResult.Error -> Unsatisfied(
-                "MB detector error",
-                foundState.type,
-                foundState.transitioner
-            )
-
-            !iOUCheckPassed -> {
-                // reset timer of the foundState
-                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-                foundState.withFeedback(feedbackIntRes)
-            }
-
-            isBlurry(analyzerOutput.blurScore) -> {
-                // reset timer of the foundState
-                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-                foundState.withFeedback(feedbackIntRes)
-            }
-
-            moreResultsRequired(foundState) -> foundState
-
-            // Transition to Finished state if either the modern or legacy logic would have transitioned to Finished
-            analyzerOutput.mbOutput is MBDetector.DetectorResult.Captured -> {
-                IdentityScanState.Finished(
-                    foundState.type,
-                    foundState.transitioner
-                )
-            }
-
-            !isBlurry(analyzerOutput.blurScore) -> {
-                IdentityScanState.Finished(
-                    foundState.type,
-                    foundState.transitioner
-                )
-            }
-
-            else -> {
-                // This should never occur
-                Unsatisfied(
-                    "Unknown state! ",
-                    foundState.type,
-                    foundState.transitioner
-                )
-            }
         }
     }
 

@@ -17,6 +17,7 @@
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
+    <ID>LargeClass:DefaultPaymentMethodVerticalLayoutInteractorTest.kt$DefaultPaymentMethodVerticalLayoutInteractorTest</ID>
     <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
@@ -33,7 +34,7 @@
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, metadata: PaymentMethodMetadata, ): PaymentSheetState.Full</ID>
-    <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, type: PaymentSheetFlowType, headerText: Int?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: String?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, )</ID>
+    <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
     <ID>LongMethod:USBankAccountEmitters.kt$@Composable internal fun USBankAccountEmitters( viewModel: USBankAccountFormViewModel, usBankAccountFormArgs: USBankAccountFormArguments, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>

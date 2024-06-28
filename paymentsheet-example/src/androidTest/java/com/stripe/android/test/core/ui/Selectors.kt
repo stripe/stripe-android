@@ -2,6 +2,7 @@ package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
@@ -290,13 +292,25 @@ internal class Selectors(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
-    fun getBacsSortCode() = composeTestRule.onNodeWithText(
-        getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
-    )
+    fun getBacsSortCode(): SemanticsNodeInteraction {
+        val bacsSortCodeString = getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodes(hasText(bacsSortCodeString)).fetchSemanticsNodes().isNotEmpty()
+        }
+        return composeTestRule.onNodeWithText(
+            bacsSortCodeString
+        )
+    }
 
-    fun getBacsAccountNumber() = composeTestRule.onNodeWithText(
-        getResourceString(StripeR.string.stripe_becs_widget_account_number)
-    )
+    fun getBacsAccountNumber(): SemanticsNodeInteraction {
+        val bacsAccountNumber = getResourceString(StripeR.string.stripe_becs_widget_account_number)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodes(hasText(bacsAccountNumber)).fetchSemanticsNodes().isNotEmpty()
+        }
+        return composeTestRule.onNodeWithText(
+            bacsAccountNumber
+        )
+    }
 
     fun getBacsConfirmed() = composeTestRule.onNode(
         isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))

@@ -473,19 +473,19 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             scenario.launch(intent)
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
 
             pressBack()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             viewModel.modifyPaymentMethod(card)
             assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
 
             pressBack()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             pressBack()
             expectNoEvents()
@@ -537,6 +537,7 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
 
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }

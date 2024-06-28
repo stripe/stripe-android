@@ -66,6 +66,7 @@ class PaymentSheetContract :
                 },
                 config = config ?: PaymentSheet.Configuration.default(context),
                 statusBarColor = statusBarColor,
+                initializedViaCompose = false,
             )
         }
 

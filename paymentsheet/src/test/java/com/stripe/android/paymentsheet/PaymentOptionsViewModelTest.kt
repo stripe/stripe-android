@@ -174,7 +174,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
     }
 
@@ -190,12 +190,12 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.AddAnotherPaymentMethod::class.java)
 
             verify(eventReporter).onShowNewPaymentOptionForm()
 
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
     }
 
@@ -320,7 +320,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
         }
     }
 
@@ -336,7 +336,7 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.currentScreen.test {
-                assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+                assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
                 verify(eventReporter).onShowExistingPaymentOptions()
             }
@@ -686,7 +686,7 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(screenTurbine.awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
@@ -698,7 +698,7 @@ internal class PaymentOptionsViewModelTest {
             screenTurbine.expectNoEvents()
             editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(screenTurbine.awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             // The list of payment methods should not be updated until we're back on the SPM screen
             paymentMethodsTurbine.expectNoEvents()
@@ -738,7 +738,7 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(screenTurbine.awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
@@ -829,6 +829,24 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
         }
+
+    @Test
+    fun `paymentMethods is not null when loading is complete`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            isGooglePayReady = true,
+        ).run {
+            copy(state = state.copy(customer = null))
+        }
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+        }
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(

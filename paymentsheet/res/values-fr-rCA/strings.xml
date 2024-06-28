@@ -77,6 +77,8 @@
   <string name="stripe_paymentsheet_remove_card">Retirer la carte</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Supprimer %s</string>
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
+  <string name="stripe_paymentsheet_remove_pm_title">Supprimer le moyen de paiement</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Enregistrer</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->

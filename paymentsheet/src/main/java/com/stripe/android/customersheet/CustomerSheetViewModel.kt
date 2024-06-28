@@ -37,6 +37,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -94,6 +95,7 @@ internal class CustomerSheetViewModel(
     private val customerSheetLoader: CustomerSheetLoader,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
 
     @Inject constructor(
@@ -114,6 +116,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader: CustomerSheetLoader,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+        errorReporter: ErrorReporter,
     ) : this(
         application = application,
         initialBackStack = initialBackStack,
@@ -133,6 +136,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader = customerSheetLoader,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         editInteractorFactory = editInteractorFactory,
+        errorReporter = errorReporter,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
@@ -586,6 +590,8 @@ internal class CustomerSheetViewModel(
                 cbcEligibility = currentViewState.cbcEligibility,
                 savedPaymentMethods = currentViewState.savedPaymentMethods,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
             )
         )
     }
@@ -847,6 +853,7 @@ internal class CustomerSheetViewModel(
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
                 cbcEligibility = cbcEligibility,
+                errorReporter = errorReporter,
             ),
             reset = isFirstPaymentMethod
         )
@@ -982,8 +989,8 @@ internal class CustomerSheetViewModel(
                 clientSecret = clientSecret,
             ),
             paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
             shippingValues = null,
-            requiresSaveOnConfirmation = true,
         )
 
         unconfirmedPaymentMethod = paymentMethod
@@ -1223,6 +1230,8 @@ internal class CustomerSheetViewModel(
                 errorMessage = null,
                 cbcEligibility = paymentMethodMetadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible,
                 allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
             )
         )
     }
