@@ -71,19 +71,18 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory(val application: Context? = null) : ViewModelProvider.Factory {
+    class Factory(val application: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = application
 
             val stripeRepository = StripeApiRepository(
-                context = context!!,
-                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                context = application,
+                publishableKeyProvider = { PaymentConfiguration.getInstance(application).publishableKey },
             )
 
             @Suppress("UNCHECKED_CAST")
             return CardWidgetViewModel(
-                paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+                paymentConfigProvider = { PaymentConfiguration.getInstance(application) },
                 stripeRepository = stripeRepository,
                 handle = SavedStateHandle()
             ) as T
@@ -97,7 +96,6 @@ internal class CardWidgetViewModel(
 
 internal fun View.doWithCardWidgetViewModel(
     viewModelStoreOwner: ViewModelStoreOwner? = null,
-    application: Context? = null,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
     val lifecycleOwner = findViewTreeLifecycleOwner()
@@ -114,7 +112,7 @@ internal fun View.doWithCardWidgetViewModel(
         return
     }
 
-    val factory = CardWidgetViewModel.Factory(application)
+    val factory = CardWidgetViewModel.Factory(context.applicationContext)
 
     val viewModel = ViewModelProvider(
         owner = storeOwner,

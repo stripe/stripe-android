@@ -356,7 +356,7 @@ class CardInputWidget @JvmOverloads constructor(
     var onBehalfOf: String? = null
         set(value) {
             if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
+                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
                     viewModel.onBehalfOf = value
                 }
             }
@@ -408,7 +408,7 @@ class CardInputWidget @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }

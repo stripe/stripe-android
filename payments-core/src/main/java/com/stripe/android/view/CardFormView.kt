@@ -192,7 +192,7 @@ class CardFormView @JvmOverloads constructor(
     var onBehalfOf: String? = null
         set(value) {
             if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner, context.applicationContext) { viewModel ->
+                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
                     viewModel.onBehalfOf = value
                 }
             }
