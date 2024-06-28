@@ -9,15 +9,21 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
+import javax.inject.Inject
 
 private val json = Json {
     ignoreUnknownKeys = true
 }
 
-internal class GenericScreenPresenter {
+// TODO: Needed?
+internal class GenericScreenPresenter @Inject constructor() {
 
     private val _screenState = MutableStateFlow<ScreenState?>(null)
     val screenState: StateFlow<ScreenState?> = _screenState.asStateFlow()
+
+    var onPrimaryButtonClick: () -> Unit = {}
+    var onSecondaryButtonClick: () -> Unit = {}
+    var onClickableTextClick: (uri: String) -> Unit = {}
 
     fun initialize(payload: JsonElement, scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
@@ -27,5 +33,11 @@ internal class GenericScreenPresenter {
                 screen = screenPayload.screen,
             )
         }
+    }
+
+    suspend fun initialize(screen: Screen) {
+        _screenState.value = ScreenState(
+            screen = screen,
+        )
     }
 }

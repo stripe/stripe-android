@@ -47,6 +47,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val presentNoticeSheet: PresentNoticeSheet,
+    private val genericScreenPresenter: GenericScreenPresenter,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -54,16 +55,32 @@ internal class ConsentViewModel @AssistedInject constructor(
         suspend {
             val sync = getOrFetchSync()
             val manifest = sync.manifest
-            val shouldShowMerchantLogos: Boolean = manifest
-                .experimentAssignment(CONNECTIONS_CONSENT_COMBINED_LOGO) == "treatment"
+
+            val shouldShowMerchantLogos = manifest.experimentAssignment(
+                experiment = CONNECTIONS_CONSENT_COMBINED_LOGO
+            ) == "treatment"
+
             eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
+
+//            sync.text?.streamlinedConsentPane?.let { pane ->
+//                initializeGenericScreenPresenter(pane.screen)
+//            }
+
             ConsentState.Payload(
                 consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
-                merchantLogos = sync.visual.merchantLogos
+                merchantLogos = sync.visual.merchantLogos,
+                genericScreen = sync.text.streamlinedConsentPane?.screen,
             )
         }.execute { copy(consent = it) }
     }
+
+//    private suspend fun initializeGenericScreenPresenter(screen: Screen) {
+//        genericScreenPresenter.initialize(screen)
+//
+//        genericScreenPresenter.onPrimaryButtonClick = ::onContinueClick
+//        genericScreenPresenter.onClickableTextClick = ::onClickableTextClick
+//    }
 
     override fun updateTopAppBar(state: ConsentState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
@@ -100,27 +117,29 @@ internal class ConsentViewModel @AssistedInject constructor(
         }.execute { copy(acceptConsent = it) }
     }
 
-    fun onClickableTextClick(uri: String) = viewModelScope.launch {
-        val date = Date()
-        handleClickableUrl(
-            currentPane = Pane.CONSENT,
-            uri = uri,
-            onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
-            knownDeeplinkActions = mapOf(
-                // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
-                ConsentClickableText.DATA.value to {
-                    presentDataAccessBottomSheet()
-                },
-                // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
-                ConsentClickableText.LEGAL_DETAILS.value to {
-                    presentLegalDetailsBottomSheet()
-                },
-                // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
-                ConsentClickableText.MANUAL_ENTRY.value to {
-                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
-                },
+    fun onClickableTextClick(uri: String) {
+        viewModelScope.launch {
+            val date = Date()
+            handleClickableUrl(
+                currentPane = Pane.CONSENT,
+                uri = uri,
+                onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
+                knownDeeplinkActions = mapOf(
+                    // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
+                    ConsentClickableText.DATA.value to {
+                        presentDataAccessBottomSheet()
+                    },
+                    // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
+                    ConsentClickableText.LEGAL_DETAILS.value to {
+                        presentLegalDetailsBottomSheet()
+                    },
+                    // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
+                    ConsentClickableText.MANUAL_ENTRY.value to {
+                        navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                    },
+                )
             )
-        )
+        }
     }
 
     private fun presentDataAccessBottomSheet() {

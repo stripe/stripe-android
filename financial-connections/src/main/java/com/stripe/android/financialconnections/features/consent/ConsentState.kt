@@ -14,7 +14,8 @@ internal data class ConsentState(
     data class Payload(
         val consent: ConsentPane,
         val merchantLogos: List<String>,
-        val shouldShowMerchantLogos: Boolean
+        val shouldShowMerchantLogos: Boolean,
+        val genericScreen: Screen? = null,
     )
 
     sealed class ViewEffect {

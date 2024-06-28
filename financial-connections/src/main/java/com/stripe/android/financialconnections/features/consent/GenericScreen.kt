@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.consent
 
+import android.os.Parcelable
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -51,6 +52,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -352,15 +354,17 @@ internal data class ScreenState(
 )
 
 @Serializable
+@Parcelize
 internal data class Screen(
     @SerialName("id") val id: String,
     @SerialName("header") val header: Header,
     @SerialName("body") val body: Body,
     @SerialName("footer") val footer: Footer?,
     @SerialName("options") val options: Options?,
-) {
+) : Parcelable {
 
     @Serializable
+    @Parcelize
     internal data class Header(
         @SerialName("alignment")
         val alignment: ContentAlignment = Center,
@@ -371,13 +375,14 @@ internal data class Screen(
         @SerialName("subtitle")
         @Serializable(with = MarkdownToHtmlSerializer::class)
         val subtitle: String? = null,
-    )
+    ) : Parcelable
 
     @Serializable
+    @Parcelize
     internal data class Body(
 //        @SerialName("items") val items: List<Item>,
         @SerialName("entries") val entries: List<Entry>,
-    ) {
+    ) : Parcelable {
 
         @Serializable(with = Item.Serializer::class)
         sealed interface Item {
@@ -422,6 +427,7 @@ internal data class Screen(
     }
 
     @Serializable
+    @Parcelize
     internal data class Footer(
         @SerialName("alignment")
         val alignment: ContentAlignment = Center,
@@ -435,13 +441,14 @@ internal data class Screen(
         @SerialName("below_cta")
         @Serializable(with = MarkdownToHtmlSerializer::class)
         val belowCta: String? = null,
-    )
+    ) : Parcelable
 
     @Serializable
+    @Parcelize
     internal data class Options(
         @SerialName("vertical_alignment")
         val verticalAlignment: VerticalAlignment = Centered,
-    )
+    ) : Parcelable
 }
 
 @Serializable(with = ContentAlignment.Serializer::class)
@@ -487,12 +494,14 @@ internal enum class ContentSize {
 }
 
 @Serializable
+@Parcelize
 internal data class PrimaryButton(
     @SerialName("icon") val icon: Image? = null,
     @SerialName("label") val label: String,
-)
+) : Parcelable
 
 @Serializable
+@Parcelize
 internal data class SecondaryButton(
     @SerialName("label") val label: String,
-)
+) : Parcelable

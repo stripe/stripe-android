@@ -86,12 +86,25 @@ private fun ConsentContent(
         Uninitialized,
         is Loading -> ConsentLoadingContent()
 
-        is Success -> LoadedContent(
-            payload = result(),
-            acceptConsent = state.acceptConsent,
-            onClickableTextClick = onClickableTextClick,
-            onContinueClick = onContinueClick,
-        )
+        is Success -> {
+            val genericScreen = remember(result) {
+                result().genericScreen
+            }
+
+            if (genericScreen != null) {
+                GenericScreen(
+                    state = ScreenState(genericScreen),
+                    onPrimaryButtonClick = onContinueClick,
+                )
+            } else {
+                LoadedContent(
+                    payload = result(),
+                    acceptConsent = state.acceptConsent,
+                    onClickableTextClick = onClickableTextClick,
+                    onContinueClick = onContinueClick,
+                )
+            }
+        }
 
         is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(result.error) }
     }

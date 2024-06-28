@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.model
 import android.os.Parcelable
 import com.stripe.android.financialconnections.features.consent.ContentAlignment
 import com.stripe.android.financialconnections.features.consent.ContentSize
+import com.stripe.android.financialconnections.features.consent.Screen
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
@@ -22,6 +23,15 @@ internal data class TextUpdate(
     val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null,
     @SerialName("success_pane")
     val successPane: SuccessPane? = null,
+    @SerialName("streamlined_consent_pane")
+    val streamlinedConsentPane: StreamlinedConsentPane? = null,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class StreamlinedConsentPane(
+    @SerialName("screen")
+    val screen: Screen,
 ) : Parcelable
 
 @Serializable
