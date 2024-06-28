@@ -2,6 +2,17 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.47.4 - 2024-06-27
+
+### PaymentSheet
+
+* [FIXED][8697](https://github.com/stripe/stripe-android/pull/8697) Fixed a bug where payment methods using `payment_method_options` were not saved properly when using the deferred client-side confirmation flow.
+
+## 20.47.3 - 2024-06-25
+
+### Identity
+* [FIXED][8683](https://github.com/stripe/stripe-android/pull/8683) Removed the `usesCleartextTraffic` flag, which was enabled in the Stripe Identity SDK manifest. This flag was unnecessary as the Stripe API enforces HTTPS on all connections.
+
 ## 20.47.0 - 2024-06-24
 
 ### PaymentSheet

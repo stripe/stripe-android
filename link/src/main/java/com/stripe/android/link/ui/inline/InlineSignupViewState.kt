@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
@@ -15,7 +16,9 @@ import com.stripe.android.link.ui.signup.SignUpState
  * @param signUpState The stage of the sign in or sign up flow.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class InlineSignupViewState internal constructor(
+data class InlineSignupViewState
+@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+constructor(
     val userInput: UserInput?,
     val merchantName: String,
     val signupMode: LinkSignupMode?,

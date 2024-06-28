@@ -27,6 +27,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -328,9 +330,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods()
+            SelectSavedPaymentMethods(DefaultSelectSavedPaymentMethodsInteractor(this))
         } else {
-            AddFirstPaymentMethod
+            AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
         }
 
         return buildList {
@@ -340,7 +342,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // The user has previously selected a new payment method. Instead of sending them
                 // to the payment methods screen, we directly launch them into the payment method
                 // form again.
-                add(PaymentSheetScreen.AddAnotherPaymentMethod)
+                add(
+                    PaymentSheetScreen.AddAnotherPaymentMethod(
+                        interactor = DefaultAddPaymentMethodInteractor(this@PaymentOptionsViewModel)
+                    )
+                )
             }
         }
     }

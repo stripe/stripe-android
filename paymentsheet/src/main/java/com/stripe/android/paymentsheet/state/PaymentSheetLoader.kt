@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -74,6 +75,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
+    private val userFacingLogger: UserFacingLogger,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -526,8 +528,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     requestedExternalPaymentMethod
                 )
             ) {
-                logger.warning(
-                    "Requested external payment method $requestedExternalPaymentMethod is not supported."
+                userFacingLogger.logWarningWithoutPii(
+                    "Requested external payment method $requestedExternalPaymentMethod is not supported. View all " +
+                        "available external payment methods here: " +
+                        "https://docs.stripe.com/payments/external-payment-methods?platform=android#" +
+                        "available-external-payment-methods"
                 )
             }
         }

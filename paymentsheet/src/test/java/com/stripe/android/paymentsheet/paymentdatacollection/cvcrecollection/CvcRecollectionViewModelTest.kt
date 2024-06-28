@@ -28,7 +28,8 @@ class CvcRecollectionViewModelTest {
             CvcRecollectionViewModel.Args(
                 lastFour = "4242",
                 cardBrand = CardBrand.Visa,
-                cvc = null
+                cvc = null,
+                isLiveMode = false
             )
         )
     }
@@ -41,7 +42,8 @@ class CvcRecollectionViewModelTest {
             CvcRecollectionViewState(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
-                cvc = null
+                cvc = null,
+                isLiveMode = false
             )
         )
     }

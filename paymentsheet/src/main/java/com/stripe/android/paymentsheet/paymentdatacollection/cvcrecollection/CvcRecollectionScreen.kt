@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.H4Text
@@ -53,6 +55,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 internal fun CvcRecollectionScreen(
     cardBrand: CardBrand,
     lastFour: String,
+    isTestMode: Boolean,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     val element = remember {
@@ -68,11 +71,7 @@ internal fun CvcRecollectionScreen(
                 .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
-            CvcRecollectionHeader(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .offset(16.dp)
-            ) {
+            CvcRecollectionHeader(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
@@ -162,13 +161,24 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionHeader(modifier: Modifier, onClosePressed: () -> Unit) {
-    IconButton(
-        onClick = { onClosePressed.invoke() },
-        modifier = modifier
+private fun CvcRecollectionHeader(testMode: Boolean, onClosePressed: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(0.dp, 16.dp, 0.dp, 0.dp)
+            .height(32.dp)
     ) {
-        Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+        if (testMode) {
+            TestModeBadge()
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = { onClosePressed.invoke() },
+            Modifier.offset(16.dp, -8.dp)
+        ) {
+            Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+        }
     }
+
     H4Text(
         text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
         modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
@@ -200,6 +210,7 @@ private fun CvcRecollectionFieldPreview() {
         CvcRecollectionScreen(
             cardBrand = CardBrand.Visa,
             lastFour = "4242",
+            isTestMode = true,
             viewActionHandler = { }
         )
     }

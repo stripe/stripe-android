@@ -471,6 +471,10 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            // We are intentionally polling for Swish even though it uses the redirect trampoline.
+            // About 50% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
             shouldRefreshIfIntentRequiresAction = true,
         ),
         Twint(
