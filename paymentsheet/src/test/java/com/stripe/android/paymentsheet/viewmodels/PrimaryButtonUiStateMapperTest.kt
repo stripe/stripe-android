@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -26,7 +27,7 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `Chooses custom button over default one`() = runTest {
         val usBankButton = PrimaryButton.UIState(
-            label = "US Bank Account FTW",
+            label = resolvableString("US Bank Account FTW"),
             onClick = {},
             enabled = false,
             lockVisible = true,
@@ -299,7 +300,6 @@ class PrimaryButtonUiStateMapperTest {
         cvcFlow: StateFlow<Boolean>,
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
-            context = ApplicationProvider.getApplicationContext(),
             config = config,
             isProcessingPayment = isProcessingPayment,
             currentScreenFlow = currentScreenFlow,

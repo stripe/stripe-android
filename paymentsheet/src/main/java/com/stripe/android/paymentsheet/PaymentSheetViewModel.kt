@@ -126,7 +126,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
-        context = getApplication(),
         config = config,
         isProcessingPayment = isProcessingPaymentIntent,
         currentScreenFlow = currentScreen,

@@ -1914,7 +1914,7 @@ class CustomerSheetViewModelTest {
                 CustomerSheetViewAction.OnUpdateCustomButtonUIState(
                     callback = {
                         PrimaryButton.UIState(
-                            label = "Continue",
+                            label = resolvableString("Continue"),
                             enabled = true,
                             lockVisible = false,
                             onClick = {}

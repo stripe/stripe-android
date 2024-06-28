@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.combine
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
-    private val context: Context,
     private val config: PaymentSheet.Configuration,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
