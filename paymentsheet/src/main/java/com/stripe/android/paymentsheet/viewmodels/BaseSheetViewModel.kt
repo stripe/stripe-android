@@ -7,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -16,7 +15,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -127,10 +125,10 @@ internal abstract class BaseSheetViewModel(
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
+    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
         .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
         .mapAsStateFlow { state ->
-            state?.paymentMethods
+            state?.paymentMethods ?: emptyList()
         }
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
@@ -556,18 +554,6 @@ internal abstract class BaseSheetViewModel(
                     _cvcRecollectionCompleteFlow.value = it
                 }
             }
-        }
-    }
-
-    internal fun isCvcRecollectionEnabled() =
-        ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) &&
-            FeatureFlags.cvcRecollection.isEnabled
-
-    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
-        return if (isCvcRecollectionEnabled()) {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
-        } else {
-            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
         }
     }
 

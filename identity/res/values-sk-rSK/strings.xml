@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Zadná strana vodičského preukazu je zvolená</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Zadná strana preukazu totožnosti</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Zadná strana dokladu totožnosti</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Zadná strana dokladu totožnosti je zvolená</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Predná strana vodičského preukazu je zvolená</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Predná strana preukazu totožnosti</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Predná strana dokladu totožnosti</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Predná strana dokladu totožnosti je zvolená</string>
   <!-- Button to go back to the previous screen -->
