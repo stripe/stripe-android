@@ -142,28 +142,11 @@ internal object FeaturedInstitutionsJsonParser : ModelJsonParser<FeaturedInstitu
             Bank(
                 id = obj.getString("id"),
                 name = obj.getString("name"),
-                icon = obj.getJSONObject("logo").getString("3x"),
+                icon = runCatching { obj.getJSONObject("logo").getString("3x") }.getOrNull(),
                 featuredOrder = StripeJsonUtils.optInteger(obj, "featured_order"),
                 url = obj.getString("url"),
             )
         }
-
-//        val banks = listOf(
-//            Bank(
-//                id = "bcinst_Jg18xEfPHevfHP",
-//                name = "Test Institution",
-//                icon = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
-//                featuredOrder = 1,
-//                url = "https://stripe.com",
-//            ),
-//            Bank(
-//                id = "bcinst_LLQZzmKZMjl0j0",
-//                name = "Test OAuth Institution",
-//                icon = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
-//                featuredOrder = 2,
-//                url = "https://stripe.com",
-//            ),
-//        )
 
         return FeaturedInstitutions(banks)
     }

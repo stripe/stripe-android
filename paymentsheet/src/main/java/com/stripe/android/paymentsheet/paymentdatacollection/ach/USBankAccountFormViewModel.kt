@@ -49,6 +49,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -239,7 +240,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val response = stripeRepository.retrieveFeaturedInstitutions(
                 options = ApiRequest.Options(
                     apiKey = lazyPaymentConfig.get().publishableKey,

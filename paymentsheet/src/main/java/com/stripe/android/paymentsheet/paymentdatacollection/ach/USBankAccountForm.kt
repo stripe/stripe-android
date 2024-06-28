@@ -365,9 +365,10 @@ internal fun BillingDetailsForm(
         EmbeddedBankPicker(
             imageLoader = imageLoader,
             featuredInstitutions = featuredInstitutions,
-            isTestMode = isTestMode,
             onBankSelected = onBankSelected,
         )
+
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -377,7 +378,6 @@ private fun EmbeddedBankPickerPreview() {
     StripeTheme {
         EmbeddedBankPicker(
             imageLoader = StripeImageLoader(LocalContext.current),
-            isTestMode = false,
             featuredInstitutions = listOf(
                 BankViewState(
                     Bank(
@@ -427,7 +427,6 @@ private fun EmbeddedBankPickerPreview_Loading() {
     StripeTheme {
         EmbeddedBankPicker(
             imageLoader = StripeImageLoader(LocalContext.current),
-            isTestMode = false,
             featuredInstitutions = listOf(
                 BankViewState(bank = null),
                 BankViewState(bank = null),
@@ -449,7 +448,6 @@ internal data class BankViewState(
 @Composable
 internal fun RowScope.EmbeddedBankPickerCard(
     bankViewState: BankViewState,
-    isTestMode: Boolean,
     imageLoader: StripeImageLoader,
     onBankSelected: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -466,7 +464,6 @@ internal fun RowScope.EmbeddedBankPickerCard(
         if (bankViewState.bank != null) {
             EmbeddedBankPickerCardContent(
                 institution = bankViewState.bank,
-                isTestMode = isTestMode,
                 imageLoader = imageLoader,
                 onBankSelected = onBankSelected,
             )
@@ -480,7 +477,6 @@ internal fun RowScope.EmbeddedBankPickerCard(
 private fun EmbeddedBankPickerCardContent(
     institution: Bank,
     imageLoader: StripeImageLoader,
-    isTestMode: Boolean,
     onBankSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -491,9 +487,7 @@ private fun EmbeddedBankPickerCardContent(
             .clickable { onBankSelected(institution.id) }
             .padding(10.dp),
     ) {
-        if (isTestMode) {
-            Text(text = institution.name)
-        } else {
+        if (institution.icon != null) {
             StripeImage(
                 url = institution.icon.orEmpty(),
                 imageLoader = imageLoader,
@@ -508,6 +502,8 @@ private fun EmbeddedBankPickerCardContent(
                     )
                 }
             )
+        } else {
+            Text(text = institution.name)
         }
     }
 }
@@ -516,7 +512,6 @@ private fun EmbeddedBankPickerCardContent(
 private fun EmbeddedBankPicker(
     imageLoader: StripeImageLoader,
     featuredInstitutions: List<BankViewState>,
-    isTestMode: Boolean,
     modifier: Modifier = Modifier,
     onBankSelected: (String) -> Unit,
 ) {
@@ -532,14 +527,13 @@ private fun EmbeddedBankPicker(
 
     Column(
         verticalArrangement = spacing,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         for (row in rows) {
             Row(horizontalArrangement = spacing) {
                 for (item in row) {
                     EmbeddedBankPickerCard(
                         bankViewState = item,
-                        isTestMode = isTestMode,
                         imageLoader = imageLoader,
                         onBankSelected = onBankSelected,
                     )
@@ -547,89 +541,6 @@ private fun EmbeddedBankPicker(
             }
         }
     }
-
-//    if (featuredInstitutions == null) {
-//        Column(
-//            verticalArrangement = Arrangement.spacedBy(8.dp),
-//            modifier = Modifier.fillMaxWidth(),
-//        ) {
-//            repeat(3) {
-//                Row(
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                ) {
-//                    repeat(2) {
-//                        Card(
-//                            border = BorderStroke(
-//                                width = 1.dp,
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
-//                            ),
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .height(56.dp),
-//                        ) {
-//                            // Nothing
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    } else if (featuredInstitutions.isNotEmpty()) {
-//        Column(
-//            verticalArrangement = Arrangement.spacedBy(8.dp),
-//            modifier = Modifier.fillMaxWidth(),
-//        ) {
-//            val chunks = remember(featuredInstitutions) {
-//                featuredInstitutions.chunked(2)
-//            }
-//
-//            for (chunk in chunks) {
-//                Row(
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                ) {
-//                    for (institution in chunk) {
-//                        Card(
-//                            border = BorderStroke(
-//                                width = 1.dp,
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
-//                            ),
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .height(56.dp),
-//                        ) {
-//                            Row(
-//                                verticalAlignment = Alignment.CenterVertically,
-//                                modifier = Modifier
-//                                    .fillMaxSize()
-//                                    .clickable { onBankSelected(institution.id) }
-//                                    .padding(10.dp),
-//                            ) {
-//                                StripeImage(
-//                                    url = institution.icon.orEmpty(),
-//                                    imageLoader = imageLoader,
-//                                    contentDescription = null,
-//                                    debugPainter = painterResource(R.drawable.stripe_ic_paymentsheet_bank),
-//                                    modifier = Modifier.size(20.dp),
-//                                    loadingContent = {
-//                                        Box(
-//                                            modifier = Modifier
-//                                                .size(20.dp)
-//                                                .background(Color.LightGray),
-//                                        )
-//                                    }
-//                                )
-//
-//                                Spacer(modifier = Modifier.width(10.dp))
-//
-//                                Text(
-//                                    text = institution.name,
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 }
 
 @Suppress("SpreadOperator")

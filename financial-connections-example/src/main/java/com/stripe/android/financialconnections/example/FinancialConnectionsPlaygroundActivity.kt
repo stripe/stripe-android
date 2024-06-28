@@ -108,7 +108,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             clientSecret = it.paymentIntentSecret,
                             configuration = CollectBankAccountConfiguration.USBankAccount(
                                 name = "Sample name",
-                                email = "sampleEmail@test.com"
+                                email = "sampleEmail@test.com",
+                                initialInstitution = null,
                             )
                         )
                     }
