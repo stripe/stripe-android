@@ -528,8 +528,11 @@ internal abstract class BaseSheetViewModel(
         _contentVisible.value = visible
     }
 
-    fun removePaymentMethod(paymentMethod: PaymentMethod) {
-        val paymentMethodId = paymentMethod.id ?: return
+    fun removePaymentMethod(paymentMethodId: String?) {
+        // TODO(samer-stripe): We should guarantee a payment method ID is available with data modeling updates to UI
+        if (paymentMethodId == null) {
+            return
+        }
 
         viewModelScope.launch(workContext) {
             removeDeletedPaymentMethodFromState(paymentMethodId)
@@ -611,8 +614,19 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
+    fun modifyPaymentMethod(paymentMethodId: String?) {
+        // TODO(samer-stripe): We should guarantee a payment method ID is available with data modeling updates to UI
+        if (paymentMethodId == null) {
+            return
+        }
+
         eventReporter.onShowEditablePaymentOption()
+
+        val paymentOption = paymentOptionsState.value.items
+            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+            .find { item ->
+                item.paymentMethod.id == paymentMethodId
+            } ?: return
 
         val canRemove = if (config.allowsRemovalOfLastSavedPaymentMethod) {
             true
@@ -623,7 +637,7 @@ internal abstract class BaseSheetViewModel(
         transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
-                    initialPaymentMethod = paymentMethod,
+                    initialPaymentMethod = paymentOption.paymentMethod,
                     eventHandler = { event ->
                         when (event) {
                             is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
@@ -640,7 +654,7 @@ internal abstract class BaseSheetViewModel(
                             }
                         }
                     },
-                    displayName = providePaymentMethodName(paymentMethod.type?.code),
+                    displayName = providePaymentMethodName(paymentOption.paymentMethod.type?.code),
                     removeExecutor = { method ->
                         removePaymentMethodInEditScreen(method)
                     },

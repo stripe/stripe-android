@@ -206,7 +206,7 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
-        viewModel.removePaymentMethod(cards[1])
+        viewModel.removePaymentMethod(cards[1].id)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value)
@@ -224,7 +224,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.updateSelection(selection)
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
-        viewModel.removePaymentMethod(selection.paymentMethod)
+        viewModel.removePaymentMethod(selection.paymentMethod.id)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.selection.value).isNull()
@@ -239,7 +239,7 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.removePaymentMethod(paymentMethod)
+        viewModel.removePaymentMethod(paymentMethod.id)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
@@ -557,7 +557,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.paymentOptionResult.test {
             // Simulate user removing the selected payment method
-            viewModel.removePaymentMethod(selection.paymentMethod)
+            viewModel.removePaymentMethod(selection.paymentMethod.id)
             testDispatcher.scheduler.advanceUntilIdle()
 
             viewModel.onUserCancel()
@@ -690,7 +690,7 @@ internal class PaymentOptionsViewModelTest {
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
-            viewModel.modifyPaymentMethod(paymentMethodToRemove)
+            viewModel.modifyPaymentMethod(paymentMethodToRemove.id)
 
             val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
             editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
@@ -742,7 +742,7 @@ internal class PaymentOptionsViewModelTest {
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
-            viewModel.modifyPaymentMethod(paymentMethodToRemove)
+            viewModel.modifyPaymentMethod(paymentMethodToRemove.id)
 
             val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
             editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
