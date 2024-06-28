@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -413,8 +412,7 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
-        return FeatureFlags.cvcRecollection.isEnabled &&
-            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
+        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
             (
                 CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
                     initializationMode is PaymentSheet.InitializationMode.DeferredIntent

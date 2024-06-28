@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object RequireCvcRecollectionDefinition : BooleanSettingsDefinition(
@@ -14,6 +13,5 @@ internal object RequireCvcRecollectionDefinition : BooleanSettingsDefinition(
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.requireCvcRecollection(value)
-        FeatureFlags.cvcRecollection.setEnabled(value)
     }
 }
