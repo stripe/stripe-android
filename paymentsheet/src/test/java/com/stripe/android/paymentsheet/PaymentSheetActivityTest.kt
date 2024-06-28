@@ -538,7 +538,7 @@ internal class PaymentSheetActivityTest {
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
 
             composeTestRule.waitForIdle()
-            assertThat(activity.buyButton.externalLabel)
+            assertThat(activity.buyButton.externalLabel?.resolve(context))
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
     }
@@ -917,7 +917,7 @@ internal class PaymentSheetActivityTest {
         )
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
 
@@ -936,9 +936,9 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay")
+            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
 
