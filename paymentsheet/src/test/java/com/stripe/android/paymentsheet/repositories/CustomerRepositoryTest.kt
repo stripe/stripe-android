@@ -67,7 +67,8 @@ internal class CustomerRepositoryTest {
                 listPaymentMethodsParams = eq(
                     ListPaymentMethodsParams(
                         customerId = "customer_id",
-                        paymentMethodType = PaymentMethod.Type.Card
+                        paymentMethodType = PaymentMethod.Type.Card,
+                        limit = 100,
                     )
                 ),
                 productUsageTokens = any(),
@@ -97,7 +98,8 @@ internal class CustomerRepositoryTest {
                 listPaymentMethodsParams = eq(
                     ListPaymentMethodsParams(
                         customerId = "customer_id",
-                        paymentMethodType = PaymentMethod.Type.Card
+                        paymentMethodType = PaymentMethod.Type.Card,
+                        limit = 100,
                     )
                 ),
                 productUsageTokens = any(),
@@ -148,7 +150,8 @@ internal class CustomerRepositoryTest {
                         listPaymentMethodsParams = eq(
                             ListPaymentMethodsParams(
                                 customerId = "customer_id",
-                                paymentMethodType = PaymentMethod.Type.Card
+                                paymentMethodType = PaymentMethod.Type.Card,
+                                limit = 100,
                             )
                         ),
                         productUsageTokens = any(),
@@ -206,7 +209,8 @@ internal class CustomerRepositoryTest {
                     listPaymentMethodsParams = eq(
                         ListPaymentMethodsParams(
                             customerId = "customer_id",
-                            paymentMethodType = PaymentMethod.Type.Card
+                            paymentMethodType = PaymentMethod.Type.Card,
+                            limit = 100,
                         )
                     ),
                     productUsageTokens = any(),
