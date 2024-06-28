@@ -540,10 +540,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private fun ElementsSession.toCustomerState(): CustomerState? {
         return customer?.let { customer ->
+            val canRemovePaymentMethods = when (
+                val paymentSheetComponent = customer.session.components.paymentSheet
+            ) {
+                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
+                    paymentSheetComponent.isPaymentMethodRemoveEnabled
+                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
+            }
+
             CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
                 paymentMethods = customer.paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = canRemovePaymentMethods,
+                    // Should always remove duplicates when using `customer_session`
+                    canRemoveDuplicates = true,
+                )
             )
         } ?: run {
             val exception = IllegalStateException(
@@ -574,6 +587,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             paymentMethods = retrieveCustomerPaymentMethods(
                 metadata = metadata,
                 customerConfig = this,
+            ),
+            permissions = CustomerState.Permissions(
+                /*
+                 * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should always be
+                 * set to true.
+                 */
+                canRemovePaymentMethods = true,
+                /*
+                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
+                 * un-scoped ephemeral keys.
+                 */
+                canRemoveDuplicates = false,
             )
         )
     }

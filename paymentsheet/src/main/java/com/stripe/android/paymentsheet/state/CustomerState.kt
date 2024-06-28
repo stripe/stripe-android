@@ -9,4 +9,11 @@ internal data class CustomerState(
     val id: String,
     val ephemeralKeySecret: String,
     val paymentMethods: List<PaymentMethod>,
-) : Parcelable
+    val permissions: Permissions,
+) : Parcelable {
+    @Parcelize
+    data class Permissions(
+        val canRemovePaymentMethods: Boolean,
+        val canRemoveDuplicates: Boolean,
+    ) : Parcelable
+}
