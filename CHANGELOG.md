@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][8717](https://github.com/stripe/stripe-android/pull/8717) Add CVC Recollection functionality to `PaymentSheet` and `PaymentSheet.FlowController`
+
 ## 20.47.4 - 2024-06-27
 
 ### PaymentSheet
