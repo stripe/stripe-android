@@ -260,6 +260,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "account_update_required")
         ACCOUNT_UPDATE_REQUIRED("account_update_required"),
 
+        @SerialName(value = "streamlined_consent")
+        STREAMLINED_CONSENT("streamlined_consent"),
+
         @SerialName(value = "exit")
         EXIT("exit");
 

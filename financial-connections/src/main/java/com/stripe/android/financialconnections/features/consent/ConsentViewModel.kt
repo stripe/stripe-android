@@ -47,7 +47,6 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val presentNoticeSheet: PresentNoticeSheet,
-    private val genericScreenPresenter: GenericScreenPresenter,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -61,10 +60,6 @@ internal class ConsentViewModel @AssistedInject constructor(
             ) == "treatment"
 
             eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
-
-//            sync.text?.streamlinedConsentPane?.let { pane ->
-//                initializeGenericScreenPresenter(pane.screen)
-//            }
 
             ConsentState.Payload(
                 consent = sync.text!!.consent!!,
