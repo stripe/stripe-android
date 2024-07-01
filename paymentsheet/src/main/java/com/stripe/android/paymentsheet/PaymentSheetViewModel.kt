@@ -19,7 +19,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -880,12 +879,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun isCvcRecollectionEnabled(): Boolean = FeatureFlags.cvcRecollection.isEnabled &&
+    internal fun isCvcRecollectionEnabled(): Boolean =
         ((paymentMethodMetadata.value?.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true)
 
-    internal fun isCvcRecollectionEnabledForDeferred(): Boolean = FeatureFlags.cvcRecollection.isEnabled &&
+    internal fun isCvcRecollectionEnabledForDeferred(): Boolean =
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
-        args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+            args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
 
     private fun mapViewStateToCheckoutIdentifier(
         viewState: PaymentSheetViewState?,

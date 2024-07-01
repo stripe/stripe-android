@@ -16,7 +16,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
@@ -86,7 +85,6 @@ import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -127,12 +125,6 @@ internal class DefaultFlowControllerTest {
 
     @get:Rule
     val intentConfirmationInterceptorRule = IntentConfirmationInterceptorTestRule()
-
-    @get:Rule
-    val cvcRecollectionFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cvcRecollection,
-        isEnabled = true
-    )
 
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -1711,63 +1703,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirm()
 
         verify(launcher).launch(
-            eq(
-                CvcRecollectionData(
-                    lastFour = "4242",
-                    brand = CardBrand.Visa
-                )
-            ),
-            eq(PaymentSheet.Appearance()),
-            eq(false)
-        )
-
-        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
-    }
-
-    @Test
-    fun `Does not launch CVC Recollection if feature flag is false`() = runTest {
-        cvcRecollectionFeatureRule.setEnabled(false)
-        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
-
-        val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
-        val launcher = mock<CvcRecollectionLauncher> {
-            on { launch(any(), any(), any()) } doAnswer {
-                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
-            }
-        }
-        val launcherFactory = mock<CvcRecollectionLauncherFactory> {
-            on { create(any()) } doReturn launcher
-        }
-
-        whenever(
-            activityResultRegistry.register(
-                any(),
-                any<CvcRecollectionContract>(),
-                onResult.capture()
-            )
-        ).thenReturn(mock())
-
-        val flowController = createFlowController(
-            cvcRecollectionLauncherFactory = launcherFactory,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        )
-
-        verify(launcherFactory).create(any())
-
-        flowController.configureExpectingSuccess(
-            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
-        )
-
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val savedSelection = PaymentSelection.Saved(paymentMethod)
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(savedSelection)
-        )
-
-        flowController.confirm()
-
-        verify(launcher, never()).launch(
             eq(
                 CvcRecollectionData(
                     lastFour = "4242",

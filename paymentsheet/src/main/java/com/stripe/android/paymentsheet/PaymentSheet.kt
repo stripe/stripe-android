@@ -215,7 +215,6 @@ class PaymentSheet internal constructor(
          * CVC recollection field.
          *
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalCvcRecollectionApi
         fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
             cvcRecollectionEnabledCallback = callback
@@ -851,7 +850,6 @@ class PaymentSheet internal constructor(
                 this.externalPaymentMethods = externalPaymentMethods
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalPaymentMethodLayoutApi
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
                 this.paymentMethodLayout = paymentMethodLayout
@@ -1743,7 +1741,6 @@ class PaymentSheet internal constructor(
              * CVC recollection field.
              *
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalCvcRecollectionApi
             fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
                 cvcRecollectionEnabledCallback = callback
