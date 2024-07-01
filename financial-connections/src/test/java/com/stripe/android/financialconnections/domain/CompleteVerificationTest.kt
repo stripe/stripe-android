@@ -155,29 +155,30 @@ internal class CompleteVerificationTest {
     }
 
     @Test
-    fun `invoke with empty accounts, attached bank account and saveAccountToLink fails navigates to SUCCESS`() = runTest {
-        whenever(cachedAccounts()).thenReturn(emptyList())
-        whenever(getOrFetchSync()).thenReturn(syncResponse)
-        whenever(attachedPaymentAccountRepository.get()).thenReturn(
-            AttachedPaymentAccountRepository.State(attachedBankAccount)
-        )
-        whenever(saveAccountToLink.existing(any(), anyOrNull(), any())).thenThrow(RuntimeException())
-
-        completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
-
-        analyticsTracker.assertContainsEvent(
-            "linked_accounts.networking.verification.error",
-            mapOf(
-                "pane" to "networking_link_verification",
-                "error" to "SaveToLinkError"
+    fun `invoke with empty accounts, attached bank account and saveAccountToLink fails navigates to SUCCESS`() =
+        runTest {
+            whenever(cachedAccounts()).thenReturn(emptyList())
+            whenever(getOrFetchSync()).thenReturn(syncResponse)
+            whenever(attachedPaymentAccountRepository.get()).thenReturn(
+                AttachedPaymentAccountRepository.State(attachedBankAccount)
             )
-        )
+            whenever(saveAccountToLink.existing(any(), anyOrNull(), any())).thenThrow(RuntimeException())
 
-        navigationManager.assertNavigatedTo(
-            destination = Destination.Success,
-            pane = NETWORKING_LINK_VERIFICATION
-        )
-    }
+            completeVerification.invoke(NETWORKING_LINK_VERIFICATION, "secret")
+
+            analyticsTracker.assertContainsEvent(
+                "linked_accounts.networking.verification.error",
+                mapOf(
+                    "pane" to "networking_link_verification",
+                    "error" to "SaveToLinkError"
+                )
+            )
+
+            navigationManager.assertNavigatedTo(
+                destination = Destination.Success,
+                pane = NETWORKING_LINK_VERIFICATION
+            )
+        }
 
     @Test
     fun `invoke with empty accounts, verifying fails navigates to INSTITUTION_PICKER`() = runTest {

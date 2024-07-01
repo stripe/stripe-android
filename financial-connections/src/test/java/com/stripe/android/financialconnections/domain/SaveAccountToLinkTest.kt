@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -17,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.Mockito.mock
 import java.util.Locale
 import kotlin.test.assertFails
 
@@ -140,6 +142,7 @@ internal class SaveAccountToLinkTest {
         repository: FinancialConnectionsManifestRepository = mockManifestRepository(),
         accountsRepository: FinancialConnectionsAccountsRepository = mockAccountsRepository(),
         successRepository: SuccessContentRepository = SuccessContentRepository(SavedStateHandle()),
+        attachedPaymentAccountRepository: AttachedPaymentAccountRepository = mock(),
     ): SaveAccountToLink {
         return SaveAccountToLink(
             locale = Locale.getDefault(),
@@ -149,6 +152,7 @@ internal class SaveAccountToLinkTest {
             ),
             successContentRepository = successRepository,
             repository = repository,
+            attachedPaymentAccountRepository = attachedPaymentAccountRepository,
             accountsRepository = accountsRepository,
         )
     }
