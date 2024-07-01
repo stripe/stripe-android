@@ -5,6 +5,7 @@ import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.CardNumberFixtures
 import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 import com.stripe.android.R as StripeR
 
@@ -51,7 +52,7 @@ class CardNumberConfigTest {
     fun `card brand is invalid`() {
         val state = cardNumberConfig.determineState(CardBrand.Unknown, "0", CardBrand.Unknown.getMaxLengthForCardNumber("0"))
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(StripeR.string.stripe_invalid_card_number)
@@ -61,7 +62,7 @@ class CardNumberConfigTest {
     fun `incomplete number is in incomplete state`() {
         val state = cardNumberConfig.determineState(CardBrand.Visa, "12", CardBrand.Visa.getMaxLengthForCardNumber("12"))
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(StripeR.string.stripe_invalid_card_number)
@@ -71,7 +72,7 @@ class CardNumberConfigTest {
     fun `card number is too long`() {
         val state = cardNumberConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789"))
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(StripeR.string.stripe_invalid_card_number)
@@ -81,7 +82,7 @@ class CardNumberConfigTest {
     fun `card number has invalid luhn`() {
         val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(StripeR.string.stripe_invalid_card_number)
@@ -91,6 +92,6 @@ class CardNumberConfigTest {
     fun `card number is valid`() {
         val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 }

@@ -10,6 +10,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -627,17 +628,17 @@ class CustomerAdapterTest {
         )
         val savedSelection = savedPaymentOption.toPaymentSelection(paymentMethodProvider)
         assertThat(savedSelection)
-            .isInstanceOf(PaymentSelection.Saved::class.java)
+            .isInstanceOf<PaymentSelection.Saved>()
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
         val googleSelection = googlePaymentOption.toPaymentSelection(paymentMethodProvider)
         assertThat(googleSelection)
-            .isInstanceOf(PaymentSelection.GooglePay::class.java)
+            .isInstanceOf<PaymentSelection.GooglePay>()
 
         val linkPaymentOption = CustomerAdapter.PaymentOption.Link
         val linkSelection = linkPaymentOption.toPaymentSelection(paymentMethodProvider)
         assertThat(linkSelection)
-            .isInstanceOf(PaymentSelection.Link::class.java)
+            .isInstanceOf<PaymentSelection.Link>()
 
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
         val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(paymentMethodProvider)
