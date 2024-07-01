@@ -53,20 +53,14 @@ internal object PaymentOptionsStateFactory {
         canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): PaymentOptionsState {
-        val items = listOfNotNull(
-            PaymentOptionsItem.AddCard,
-            PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
-            PaymentOptionsItem.Link.takeIf { showLink }
-        ) + paymentMethods.map {
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = nameProvider(it.type?.code),
-                    paymentMethod = it,
-                    isRemovable = canRemovePaymentMethods,
-                    isCbcEligible = isCbcEligible
-                )
-            )
-        }
+        val items = createPaymentOptionsList(
+            paymentMethods = paymentMethods,
+            showGooglePay = showGooglePay,
+            showLink = showLink,
+            nameProvider = nameProvider,
+            canRemovePaymentMethods = canRemovePaymentMethods,
+            isCbcEligible = isCbcEligible,
+        )
 
         val selectedItem = getSelectedItem(items, currentSelection)
 
