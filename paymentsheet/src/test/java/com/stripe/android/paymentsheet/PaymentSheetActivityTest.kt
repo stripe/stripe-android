@@ -473,19 +473,19 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             scenario.launch(intent)
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
 
             pressBack()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             viewModel.modifyPaymentMethod(card)
             assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
 
             pressBack()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
 
             pressBack()
             expectNoEvents()

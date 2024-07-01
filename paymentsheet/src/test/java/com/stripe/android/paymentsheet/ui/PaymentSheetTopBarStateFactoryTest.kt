@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -15,7 +16,9 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `SelectSavedPaymentMethods shows correct navigation icon`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             canEdit = false,
             isLiveMode = false,
             isProcessing = false,
@@ -101,7 +104,9 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `Shows edit menu if displaying customer payment methods`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             canEdit = true,
             isLiveMode = false,
             isProcessing = false,
@@ -127,7 +132,9 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `Hides edit menu if customer has no payment methods`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             canEdit = false,
             isLiveMode = false,
             isProcessing = false,
