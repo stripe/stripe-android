@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -46,6 +47,7 @@ internal class CustomerSheetScreenshotTest {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },
