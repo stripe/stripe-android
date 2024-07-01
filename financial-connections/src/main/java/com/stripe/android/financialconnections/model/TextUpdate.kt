@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.model
 
+import FinancialConnectionsGenericInfoScreen
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
@@ -270,6 +271,8 @@ internal data class NetworkedAccount(
     @SerialName("selection_cta") val selectionCta: String? = null,
     @SerialName("icon") val icon: Image? = null,
     @SerialName("selection_cta_icon") val selectionCtaIcon: Image? = null,
+    @SerialName("account_icon") val accountIcon: Image? = null,
+    @SerialName("drawer_on_selection") val drawerOnSelection: FinancialConnectionsGenericInfoScreen? = null
 ) : Parcelable
 
 @Serializable
