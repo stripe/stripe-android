@@ -67,6 +67,8 @@ internal data class FinancialConnectionsGenericInfoScreen(
                     val content: String? = null
                 ) : Parcelable
             }
+
+            // TODO@carlosmuvi: Add missing body items: prepane, forms.
         }
     }
 
