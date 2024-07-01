@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -463,7 +464,14 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun updateMandateText(mandateText: String?, showAbove: Boolean) {
-        _mandateText.value = if (mandateText != null) MandateText(mandateText, showAbove) else null
+        _mandateText.value = if (mandateText != null) {
+            MandateText(
+                text = mandateText,
+                showAbovePrimaryButton = showAbove || config.paymentMethodLayout == PaymentMethodLayout.Vertical
+            )
+        } else {
+            null
+        }
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)

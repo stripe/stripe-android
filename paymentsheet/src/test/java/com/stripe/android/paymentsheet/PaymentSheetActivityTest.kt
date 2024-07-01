@@ -853,6 +853,34 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `mandate text is shown above primary button when in vertical mode`() {
+        val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
+        val viewModel = createViewModel(args = args)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            val text = "some text"
+            val mandateNode = composeTestRule.onNode(hasText(text))
+            val primaryButtonNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+            viewModel.updateMandateText(text, false)
+            mandateNode.assertIsDisplayed()
+
+            val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+            val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+            assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+            viewModel.updateMandateText(null, false)
+            mandateNode.assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun `Handles missing arguments correctly`() {
         val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
 
@@ -1015,6 +1043,7 @@ internal class PaymentSheetActivityTest {
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
+        args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
@@ -1024,7 +1053,7 @@ internal class PaymentSheetActivityTest {
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentSheetViewModel(
                 application = ApplicationProvider.getApplicationContext(),
-                args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                args = args,
                 eventReporter = eventReporter,
                 lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 paymentSheetLoader = FakePaymentSheetLoader(

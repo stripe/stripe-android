@@ -142,7 +142,7 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                 modifier = Modifier
                     .width(1.dp)
                     .fillMaxHeight(),
-                color = MaterialTheme.stripeColors.componentDivider
+                color = MaterialTheme.stripeColors.componentBorder
             )
             element.controller.ComposeUI(
                 enabled = true,

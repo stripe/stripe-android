@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -59,6 +60,7 @@ import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -351,8 +353,14 @@ private fun SavedPaymentMethodTab(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, isProcessing: Boolean) {
+internal fun CvcRecollectionField(
+    cvcControllerFlow: StateFlow<CvcController>,
+    isProcessing: Boolean,
+    animationDuration: Int = ANIMATION_DURATION,
+    animationDelay: Int = ANIMATION_DELAY
+) {
     val controller by cvcControllerFlow.collectAsState()
+    val error = controller.error.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
         controller
@@ -368,12 +376,12 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
     }
 
     LaunchedEffect(key1 = Unit) {
-        delay(ANIMATION_DELAY.toLong())
+        delay(animationDelay.toLong())
         visible = true
     }
     AnimatedVisibility(
         visible = visible,
-        enter = expandVertically(tween(ANIMATION_DURATION, ANIMATION_DELAY)) {
+        enter = expandVertically(tween(animationDuration, animationDelay)) {
             it
         }
     ) {
@@ -382,7 +390,8 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.stripeColors.subtitle
             )
             SectionCard(
                 Modifier
@@ -400,6 +409,11 @@ internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>, i
                     nextFocusDirection = FocusDirection.Exit,
                     previousFocusDirection = FocusDirection.Previous
                 )
+            }
+            error.value?.errorMessage?.let {
+                Row {
+                    SectionError(error = stringResource(id = it))
+                }
             }
         }
     }

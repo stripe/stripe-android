@@ -405,6 +405,35 @@ internal class PaymentOptionsActivityTest {
         }
     }
 
+    @Test
+    fun `mandate text is shown above primary button when in vertical mode`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.state.config.copy(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.updateMandateText(text, false)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+                viewModel.updateMandateText(null, false)
+                mandateNode.assertDoesNotExist()
+            }
+        }
+    }
+
     private fun runActivityScenario(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
         block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
