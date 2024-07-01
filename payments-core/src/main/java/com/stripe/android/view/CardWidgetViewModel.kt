@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -17,7 +18,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,21 +71,20 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(val application: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = extras.requireApplication()
 
             val stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                context = application,
+                publishableKeyProvider = { PaymentConfiguration.getInstance(application).publishableKey },
             )
 
             @Suppress("UNCHECKED_CAST")
             return CardWidgetViewModel(
-                paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+                paymentConfigProvider = { PaymentConfiguration.getInstance(application) },
                 stripeRepository = stripeRepository,
-                handle = extras.createSavedStateHandle()
+                handle = SavedStateHandle()
             ) as T
         }
     }
@@ -113,7 +112,7 @@ internal fun View.doWithCardWidgetViewModel(
         return
     }
 
-    val factory = CardWidgetViewModel.Factory()
+    val factory = CardWidgetViewModel.Factory(context.applicationContext)
 
     val viewModel = ViewModelProvider(
         owner = storeOwner,

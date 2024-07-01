@@ -221,6 +221,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 "Card Input Widget Compose Example",
                 CardInputWidgetComposeExampleActivity::class.java
+            ),
+            Item(
+                "Test Activity",
+                ComposeLifecycleOwnerActivity::class.java
             )
         )
 
