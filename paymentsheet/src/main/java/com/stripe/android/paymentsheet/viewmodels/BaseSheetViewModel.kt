@@ -801,7 +801,6 @@ internal abstract class BaseSheetViewModel(
 
     private fun onUserBack() {
         clearErrorMessages()
-
         _mandateText.value = null
 
         backStack.update { screens ->
