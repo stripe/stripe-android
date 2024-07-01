@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -14,6 +15,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class DefaultSelectSavedPaymentMethodsInteractorTest {
 
@@ -196,7 +198,95 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         }
     }
 
-    private fun createPaymentOptionsItems(paymentMethods: List<PaymentMethod>): List<PaymentOptionsItem> {
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsLink() {
+        val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link)
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(
+                    paymentMethods = PaymentMethodFixtures.createCards(2),
+                ).plus(PaymentOptionsItem.Link)
+            ),
+            currentSelection = currentSelectionFlow,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsLink_canBeChangedToGooglePay() {
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
+            MutableStateFlow(PaymentSelection.Link)
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(
+                    paymentMethods = PaymentMethodFixtures.createCards(2),
+                ).plus(PaymentOptionsItem.Link)
+            ),
+            currentSelection = currentSelectionFlow,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+
+            currentSelectionFlow.value = PaymentSelection.GooglePay
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.GooglePay)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsLink_doesNotChangeWhenSelectionBecomesNew() {
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
+            MutableStateFlow(PaymentSelection.Link)
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(
+                    paymentMethods = PaymentMethodFixtures.createCards(2),
+                ).plus(PaymentOptionsItem.Link)
+            ),
+            currentSelection = currentSelectionFlow,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+
+            currentSelectionFlow.value = newPaymentSelection()
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+        }
+    }
+
+    private fun createPaymentOptionsItems(
+        paymentMethods: List<PaymentMethod>,
+    ): List<PaymentOptionsItem> {
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
@@ -206,6 +296,31 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             canRemovePaymentMethods = true,
             isCbcEligible = true,
         ).items
+    }
+
+    private fun newPaymentSelection(): PaymentSelection.New {
+        return PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            instantDebits = null,
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+        )
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
