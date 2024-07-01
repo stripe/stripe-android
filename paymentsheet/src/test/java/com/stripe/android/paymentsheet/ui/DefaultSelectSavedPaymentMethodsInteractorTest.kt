@@ -229,7 +229,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = MutableStateFlow(
                 createPaymentOptionsItems(
                     paymentMethods = PaymentMethodFixtures.createCards(2),
-                ).plus(PaymentOptionsItem.Link)
+                ).plus(PaymentOptionsItem.Link).plus(PaymentOptionsItem.GooglePay)
             ),
             currentSelection = currentSelectionFlow,
         ) {
@@ -284,6 +284,154 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         }
     }
 
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsNull_usesMostRecentlySavedSelection() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectedSavedPaymentMethod = paymentMethods[1]
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+        val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(
+            selectedSavedPaymentMethod
+        )
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(createPaymentOptionsItems(paymentMethods = paymentMethods)),
+            currentSelection = currentSelectionFlow,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(
+                        selectedSavedPaymentMethod
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsNull_respondsToChangesToMostRecentlySavedSelection() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectedSavedPaymentMethod = paymentMethods[1]
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+        val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(
+            selectedSavedPaymentMethod
+        )
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(createPaymentOptionsItems(paymentMethods = paymentMethods)),
+            currentSelection = currentSelectionFlow,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(
+                        selectedSavedPaymentMethod
+                    )
+                }
+            }
+
+            mostRecentlySelectedSavedPaymentMethod.value = paymentMethods[0]
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(
+                        paymentMethods[0]
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_canChangeFromSaved_toLink() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectedSavedPaymentMethod = paymentMethods[1]
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+        val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(
+            selectedSavedPaymentMethod
+        )
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(paymentMethods = paymentMethods).plus(
+                    PaymentOptionsItem.Link
+                )
+            ),
+            currentSelection = currentSelectionFlow,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(
+                        selectedSavedPaymentMethod
+                    )
+                }
+            }
+
+            currentSelectionFlow.value = PaymentSelection.Link
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(
+                        PaymentOptionsItem.Link
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_savedPaymentSelectionRemoved_newSelectionIsNull() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectedSavedPaymentMethod: PaymentMethod = paymentMethods[1]
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+        val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(
+            selectedSavedPaymentMethod
+        )
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(createPaymentOptionsItems(paymentMethods = paymentMethods)),
+            currentSelection = currentSelectionFlow,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(selectedSavedPaymentMethod)
+                }
+            }
+
+            currentSelectionFlow.value = null
+            mostRecentlySelectedSavedPaymentMethod.value = null
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isNull()
+                }
+            }
+        }
+    }
+
     private fun createPaymentOptionsItems(
         paymentMethods: List<PaymentMethod>,
     ): List<PaymentOptionsItem> {
@@ -330,7 +478,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
-        mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = MutableStateFlow(null),
+        mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
         onAddCardPressed: () -> Unit = { notImplemented() },
         onEditPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         onDeletePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
@@ -342,9 +490,9 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
             paymentOptionsItems,
             editing,
-            isProcessing,
-            currentSelection,
-            mostRecentlySelectedSavedPaymentMethod,
+            isProcessing = isProcessing,
+            currentSelection = currentSelection,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             onAddCardPressed,
             onEditPaymentMethod,
             onDeletePaymentMethod,

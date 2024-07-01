@@ -12,6 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -68,8 +69,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
-    private val _displayedSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(currentSelection.value)
-    private val displayedSelection: StateFlow<PaymentSelection?> = _displayedSelection
+    private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
 
     private val _state: MutableStateFlow<SelectSavedPaymentMethodsInteractor.State> =
         MutableStateFlow(getInitialState())
@@ -80,9 +80,10 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
         return SelectSavedPaymentMethodsInteractor.State(
             paymentOptionsItems = paymentOptionsItems,
-            selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
-                paymentOptionsItems,
+            selectedPaymentOptionsItem = getSelectedPaymentOptionsItem(
                 currentSelection.value,
+                mostRecentlySelectedSavedPaymentMethod.value,
+                paymentOptionsItems,
             ),
             isEditing = editing.value,
             isProcessing = isProcessing.value,
@@ -94,10 +95,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             paymentOptionsItems.collect {
                 _state.value = _state.value.copy(
                     paymentOptionsItems = it,
-                    selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
-                        it,
-                        displayedSelection.value,
-                    )
                 )
             }
         }
@@ -119,38 +116,47 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         }
 
         coroutineScope.launch {
-            val paymentOptionsRelevantSelection = currentSelection.filter { selection ->
+            currentSelection.filter { selection ->
                 selection is PaymentSelection.Saved ||
                     selection == PaymentSelection.Link ||
                     selection == PaymentSelection.GooglePay
-            }.stateIn(this)
-
-            combineAsStateFlow(
-                paymentOptionsRelevantSelection,
-                mostRecentlySelectedSavedPaymentMethod
-            ) { selection, savedSelection ->
-                when (selection) {
-                    is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
-
-                    is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
-                        PaymentSelection.Saved(it)
-                    }
-                }
-            }.collect { newSelection ->
-                _displayedSelection.value = newSelection
+            }.stateIn(this).collect {
+                _paymentOptionsRelevantSelection.value = it
             }
         }
 
         coroutineScope.launch {
-            displayedSelection.collect {
+            combineAsStateFlow(
+                _paymentOptionsRelevantSelection,
+                mostRecentlySelectedSavedPaymentMethod,
+                paymentOptionsItems,
+            ) { selection, savedSelection, paymentOptionsItems ->
+                getSelectedPaymentOptionsItem(selection, savedSelection, paymentOptionsItems)
+            }.collect { selectedPaymentOptionsItem ->
                 _state.value = _state.value.copy(
-                    selectedPaymentOptionsItem = PaymentOptionsStateFactory.getSelectedItem(
-                        paymentOptionsItems.value,
-                        it,
-                    )
+                    selectedPaymentOptionsItem = selectedPaymentOptionsItem
                 )
             }
         }
+    }
+
+    private fun getSelectedPaymentOptionsItem(
+        selection: PaymentSelection?,
+        savedSelection: PaymentMethod?,
+        paymentOptionsItems: List<PaymentOptionsItem>,
+    ): PaymentOptionsItem? {
+        val paymentSelection = when (selection) {
+            is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
+
+            is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
+                PaymentSelection.Saved(it)
+            }
+        }
+
+        return PaymentOptionsStateFactory.getSelectedItem(
+            paymentOptionsItems,
+            paymentSelection,
+        )
     }
 
     override fun handleViewAction(viewAction: SelectSavedPaymentMethodsInteractor.ViewAction) {
