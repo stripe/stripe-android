@@ -11,6 +11,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -322,7 +324,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 bankName = result.bankName,
                 last4 = result.last4,
                 intentId = result.intent.id,
-                primaryButtonText = buildPrimaryButtonText(),
+                primaryButtonText = buildPrimaryButtonText().resolve(application),
                 mandateText = buildMandateText(),
             )
         }
@@ -339,7 +341,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         paymentAccount = paymentAccount,
                         financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                         intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText(),
+                        primaryButtonText = buildPrimaryButtonText().resolve(application),
                         mandateText = buildMandateText(),
                     )
                 }
@@ -354,7 +356,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         bankName = paymentAccount.institutionName,
                         last4 = paymentAccount.last4,
                         intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText(),
+                        primaryButtonText = buildPrimaryButtonText().resolve(application),
                         mandateText = buildMandateText(),
                     )
                 }
@@ -605,19 +607,19 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    private fun buildPrimaryButtonText(): String {
+    private fun buildPrimaryButtonText(): ResolvableString {
         return when {
             args.isCompleteFlow -> {
                 if (args.isPaymentFlow) {
-                    args.formArgs.amount!!.buildPayButtonLabel(application.resources)
+                    args.formArgs.amount!!.buildPayButtonLabel()
                 } else {
-                    application.getString(
+                    resolvableString(
                         StripeUiCoreR.string.stripe_setup_button_label
                     )
                 }
             }
 
-            else -> application.getString(
+            else -> resolvableString(
                 StripeUiCoreR.string.stripe_continue_button_label
             )
         }

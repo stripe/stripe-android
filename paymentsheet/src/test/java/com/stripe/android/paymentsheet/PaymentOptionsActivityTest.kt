@@ -213,7 +213,7 @@ internal class PaymentOptionsActivityTest {
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
-                assertThat(activity.continueButton.externalLabel)
+                assertThat(activity.continueButton.externalLabel?.resolve(context))
                     .isEqualTo("Continue")
 
                 activity.finish()

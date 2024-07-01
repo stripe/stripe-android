@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.view.ActivityScenarioFactory
@@ -77,7 +78,7 @@ class PrimaryButtonTest {
     fun `onReadyState() should update label`() {
         primaryButton.updateUiState(
             PrimaryButton.UIState(
-                label = "Pay $10.99",
+                label = resolvableString("Pay $10.99"),
                 onClick = {},
                 enabled = true,
                 lockVisible = true,
@@ -88,7 +89,7 @@ class PrimaryButtonTest {
 
         primaryButton.updateState(PrimaryButton.State.StartProcessing)
         assertThat(
-            primaryButton.externalLabel
+            primaryButton.externalLabel?.resolve(context)
         ).isEqualTo(
             "Processing…"
         )
@@ -98,7 +99,7 @@ class PrimaryButtonTest {
         )
 
         assertThat(
-            primaryButton.externalLabel
+            primaryButton.externalLabel?.resolve(context)
         ).isEqualTo(
             "Pay $10.99"
         )
@@ -110,7 +111,7 @@ class PrimaryButtonTest {
             PrimaryButton.State.StartProcessing
         )
         assertThat(
-            primaryButton.externalLabel
+            primaryButton.externalLabel?.resolve(context)
         ).isEqualTo(
             "Processing…"
         )
