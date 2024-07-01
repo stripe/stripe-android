@@ -28,6 +28,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -402,7 +403,8 @@ internal class DefaultFlowController @Inject internal constructor(
             CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
                 cvcRecollectionLauncher.launch(
                     data = it,
-                    appearance = getPaymentAppearance()
+                    appearance = getPaymentAppearance(),
+                    state.stripeIntent.isLiveMode
                 )
             }
         } else {
@@ -613,7 +615,9 @@ internal class DefaultFlowController @Inject internal constructor(
                             val selection = PaymentSelection.Saved(
                                 paymentMethod = it.paymentMethod,
                                 walletType = it.walletType,
-                                recollectedCvc = result.cvc
+                                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                                    cvc = result.cvc,
+                                )
                             )
                             confirmPaymentSelection(selection, state)
                         } ?: paymentResultCallback.onPaymentSheetResult(

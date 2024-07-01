@@ -21,7 +21,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         CvcRecollectionViewState(
             cardBrand = args.cardBrand,
             lastFour = args.lastFour,
-            cvc = null
+            cvc = null,
+            isLiveMode = args.isLiveMode
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState> = _viewState.asStateFlow()
@@ -48,7 +49,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
     data class Args(
         val lastFour: String,
         val cardBrand: CardBrand,
-        val cvc: String? = null
+        val cvc: String? = null,
+        val isLiveMode: Boolean
     )
 
     class Factory(private val args: CvcRecollectionContract.Args) : ViewModelProvider.Factory {
@@ -58,7 +60,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                 Args(
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
-                    cvc = null
+                    cvc = null,
+                    isLiveMode = args.isLiveMode
                 )
             ) as T
         }

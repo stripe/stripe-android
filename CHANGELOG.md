@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.47.4 - 2024-06-27
+
+### PaymentSheet
+
+* [FIXED][8697](https://github.com/stripe/stripe-android/pull/8697) Fixed a bug where payment methods using `payment_method_options` were not saved properly when using the deferred client-side confirmation flow.
+
 ## 20.47.3 - 2024-06-25
 
 ### Identity

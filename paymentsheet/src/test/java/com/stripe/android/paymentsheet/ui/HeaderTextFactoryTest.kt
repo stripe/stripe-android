@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -13,7 +14,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header in complete flow and showing wallets`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -76,7 +79,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when displaying saved payment methods in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )

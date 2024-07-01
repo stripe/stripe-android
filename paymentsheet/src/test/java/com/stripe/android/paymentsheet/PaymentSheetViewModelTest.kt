@@ -852,7 +852,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On inline link payment with save requested, should set with 'requireSaveOnConfirmation' set to 'true'`() =
+    fun `On inline link payment with save requested, should set 'paymentMethodOptionsParams' SFU to off_session`() =
         runTest {
             val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
 
@@ -869,14 +869,17 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
+                paymentMethodOptionsParams = eq(
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
+                ),
                 shippingValues = isNull(),
-                requiresSaveOnConfirmation = eq(true),
-                recollectedCvc = isNull(),
             )
         }
 
     @Test
-    fun `On inline link payment with save not requested, should set with 'requireSaveOnConfirmation' set to 'false'`() =
+    fun `On inline link payment with save not requested, should set 'paymentMethodOptionsParams' SFU to blank`() =
         runTest {
             val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
 
@@ -893,9 +896,12 @@ internal class PaymentSheetViewModelTest {
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
                 paymentMethod = any(),
+                paymentMethodOptionsParams = eq(
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
+                ),
                 shippingValues = isNull(),
-                requiresSaveOnConfirmation = eq(false),
-                recollectedCvc = isNull(),
             )
         }
 
@@ -1497,7 +1503,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
     }
 
@@ -1519,7 +1525,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
     }
 
@@ -1735,7 +1741,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
             viewModel.removePaymentMethod(paymentMethods.single())
             assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
         }
@@ -2495,7 +2501,13 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem()?.enabled).isFalse()
             }
 
-            verify(interceptor).intercept(any(), any(), isNull(), isNull(), eq(false))
+            verify(interceptor).intercept(
+                initializationMode = any(),
+                paymentMethodCreateParams = any(),
+                paymentMethodOptionsParams = isNull(),
+                shippingValues = isNull(),
+                customerRequestedSave = eq(false),
+            )
         }
 
     @Test
