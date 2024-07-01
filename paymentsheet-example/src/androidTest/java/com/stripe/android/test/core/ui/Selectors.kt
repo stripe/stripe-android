@@ -213,7 +213,7 @@ internal class Selectors(
                         )
                     )
 
-                    composeTestRule.onNodeWithText(
+                    composeTestRule.onNodeWithTextAfterWaiting(
                         getResourceString(PaymentSheetR.string.stripe_paymentsheet_confirm)
                     ).performClick()
                 }
@@ -231,7 +231,7 @@ internal class Selectors(
                         hasText(getResourceString(PaymentSheetR.string.stripe_paymentsheet_bacs_mandate_title))
                     )
 
-                    composeTestRule.onNodeWithText(
+                    composeTestRule.onNodeWithTextAfterWaiting(
                         getResourceString(
                             PaymentSheetR
                                 .string
@@ -249,74 +249,62 @@ internal class Selectors(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(id)
 
     // Note: Compose will take care of scrolling to the field if not in view.
-    fun getEmail() = composeTestRule.onNodeWithText(
+    fun getEmail() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(UiCoreR.string.stripe_email)
     )
 
-    fun getName(labelText: String) = composeTestRule.onNodeWithText(labelText)
+    fun getName(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
 
-    fun getLine1() = composeTestRule.onNodeWithText(
+    fun getLine1() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(CoreR.string.stripe_address_label_address_line1)
     )
 
-    fun getCity() = composeTestRule.onNodeWithText(
+    fun getCity() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(CoreR.string.stripe_address_label_city)
     )
 
-    fun getState() = composeTestRule.onNodeWithText(
+    fun getState() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(CoreR.string.stripe_address_label_state)
     )
 
     fun selectState(value: String) {
-        composeTestRule.onNodeWithText(getResourceString(CoreR.string.stripe_address_label_state))
+        composeTestRule.onNodeWithTextAfterWaiting(getResourceString(CoreR.string.stripe_address_label_state))
             .performClick()
-        composeTestRule.onNodeWithText(value)
+        composeTestRule.onNodeWithTextAfterWaiting(value)
             .performClick()
     }
 
-    fun getZip() = composeTestRule.onNodeWithText(
+    fun getZip() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
-    fun getPostalCode() = composeTestRule.onNodeWithText(
+    fun getPostalCode() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(CoreR.string.stripe_address_label_postal_code)
     )
 
-    fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithText(labelText)
+    fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
 
-    fun getAuBsb() = composeTestRule.onNodeWithText(
+    fun getAuBsb() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
-    fun getAuAccountNumber() = composeTestRule.onNodeWithText(
+    fun getAuAccountNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
-    fun getBacsSortCode(): SemanticsNodeInteraction {
-        val bacsSortCodeString = getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            composeTestRule.onAllNodes(hasText(bacsSortCodeString)).fetchSemanticsNodes().isNotEmpty()
-        }
-        return composeTestRule.onNodeWithText(
-            bacsSortCodeString
-        )
-    }
+    fun getBacsSortCode() = composeTestRule.onNodeWithTextAfterWaiting(
+        getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
+    )
 
-    fun getBacsAccountNumber(): SemanticsNodeInteraction {
-        val bacsAccountNumber = getResourceString(StripeR.string.stripe_becs_widget_account_number)
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            composeTestRule.onAllNodes(hasText(bacsAccountNumber)).fetchSemanticsNodes().isNotEmpty()
-        }
-        return composeTestRule.onNodeWithText(
-            bacsAccountNumber
-        )
-    }
+    fun getBacsAccountNumber() = composeTestRule.onNodeWithTextAfterWaiting(
+        getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
 
     fun getBacsConfirmed() = composeTestRule.onNode(
         isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))
     )
 
-    fun getBoletoTaxId() = composeTestRule.onNodeWithText(
+    fun getBoletoTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
@@ -326,23 +314,32 @@ internal class Selectors(
         useUnmergedTree = true
     )
 
-    fun getCardNumber() = composeTestRule.onNodeWithText(
+    fun getCardNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             StripeR.string.stripe_acc_label_card_number
         )
     )
 
-    fun getCardExpiration() = composeTestRule.onNodeWithText(
+    fun getCardExpiration() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             UiCoreR.string.stripe_expiration_date_hint
         )
     )
 
-    fun getCardCvc() = composeTestRule.onNodeWithText(
+    fun getCardCvc() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             StripeR.string.stripe_cvc_number_hint
         )
     )
+
+    private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
+        this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            this.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
+        }
+        return this.onNodeWithText(
+            text
+        )
+    }
 
     companion object {
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
