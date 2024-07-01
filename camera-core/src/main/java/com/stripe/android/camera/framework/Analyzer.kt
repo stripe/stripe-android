@@ -22,8 +22,13 @@ interface Analyzer<Input, State, Output> {
  * A factory to create analyzers.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AnalyzerFactory<Input, State, Output, AnalyzerType :
-        Analyzer<Input, State, Output>> {
+interface AnalyzerFactory<
+    Input,
+    State,
+    Output,
+    AnalyzerType :
+    Analyzer<Input, State, Output>
+    > {
     suspend fun newInstance(): AnalyzerType?
 }
 
@@ -37,8 +42,12 @@ data class AnalyzerPool<DataFrame, State, Output>(
 ) {
     companion object {
         suspend fun <DataFrame, State, Output> of(
-            analyzerFactory: AnalyzerFactory<DataFrame, State, Output,
-                out Analyzer<DataFrame, State, Output>>,
+            analyzerFactory: AnalyzerFactory<
+                DataFrame,
+                State,
+                Output,
+                out Analyzer<DataFrame, State, Output>
+                >,
             desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT
         ) = AnalyzerPool(
             desiredAnalyzerCount = desiredAnalyzerCount,

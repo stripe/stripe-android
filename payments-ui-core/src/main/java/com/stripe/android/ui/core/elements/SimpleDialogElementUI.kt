@@ -15,6 +15,12 @@ import com.stripe.android.uicore.elements.H6Text
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_DIALOG_CONFIRM_BUTTON = "simple_dialog_confirm_button"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_DIALOG_DISMISS_BUTTON = "simple_dialog_dismiss_button"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_SIMPLE_DIALOG = "simple_dialog"
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
@@ -28,6 +34,7 @@ fun SimpleDialogElementUI(
 ) {
     StripeTheme {
         AlertDialog(
+            modifier = Modifier.testTag(TEST_TAG_SIMPLE_DIALOG),
             onDismissRequest = {
                 onDismissListener()
             },
@@ -58,6 +65,7 @@ fun SimpleDialogElementUI(
             },
             dismissButton = {
                 TextButton(
+                    modifier = Modifier.testTag(TEST_TAG_DIALOG_DISMISS_BUTTON),
                     onClick = {
                         onDismissListener()
                     }

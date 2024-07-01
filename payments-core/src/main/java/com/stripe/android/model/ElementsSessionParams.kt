@@ -14,6 +14,7 @@ sealed interface ElementsSessionParams : Parcelable {
     val customerSessionClientSecret: String?
     val locale: String?
     val expandFields: List<String>
+    val defaultPaymentMethodId: String?
     val externalPaymentMethods: List<String>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -22,6 +23,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
+        override val defaultPaymentMethodId: String? = null,
         override val externalPaymentMethods: List<String>,
     ) : ElementsSessionParams {
 
@@ -38,6 +40,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
+        override val defaultPaymentMethodId: String? = null,
         override val externalPaymentMethods: List<String>,
     ) : ElementsSessionParams {
 
@@ -54,6 +57,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         val deferredIntentParams: DeferredIntentParams,
         override val externalPaymentMethods: List<String>,
+        override val defaultPaymentMethodId: String? = null,
         override val customerSessionClientSecret: String? = null,
     ) : ElementsSessionParams {
 

@@ -30,6 +30,7 @@ import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
+import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -39,11 +40,13 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.test.core.ui.clickTextInWebView
+import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -347,12 +350,62 @@ internal class PlaygroundTestDriver(
 
         pressCustomerSheetSave()
 
-        waitForCustomerSheetConfirmButton()
+        doAuthorization()
 
         pressCustomerSheetConfirm()
 
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
+        teardown()
+
+        return result
+    }
+
+    fun saveUsBankAccountInCustomerSheet(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.CustomerSheet
+                    )
+                }
+            }
+        )
+
+        launchCustomerSheet()
+
+        clickPaymentSelection()
+
+        val fieldPopulator = FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            {},
+            values,
+        )
+        fieldPopulator.populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        pressCustomerSheetSave()
+
+        executeUsBankAccountFlow()
+
+        waitForCustomerSheetSaveButton()
+
+        pressCustomerSheetSave()
+
+        waitForCustomerSheetConfirmButton()
+
+        pressCustomerSheetConfirm()
 
         teardown()
 
@@ -376,6 +429,9 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         selectors.customerSheetSaveButton.click()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     private fun pressCustomerSheetConfirm() {
@@ -383,6 +439,9 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         selectors.customerSheetConfirmButton.click()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     /**
@@ -727,6 +786,7 @@ internal class PlaygroundTestDriver(
      */
     fun screenshotRegression(
         testParameters: TestParameters,
+        numExpectedPaymentMethodIcons: Int = 0,
         customOperations: () -> Unit = {}
     ) {
         setup(testParameters)
@@ -738,11 +798,22 @@ internal class PlaygroundTestDriver(
         waitForScreenToLoad(testParameters)
         customOperations()
 
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            val numIconsFromUrl = getNumIconsWithTag(TEST_TAG_IMAGE_FROM_URL)
+            val numIconsFromResource = getNumIconsWithTag(TEST_TAG_ICON_FROM_RES)
+
+            (numIconsFromUrl + numIconsFromResource) == numExpectedPaymentMethodIcons
+        }
+
         currentActivity?.let {
             compareScreenshot(it)
         }
 
         teardown()
+    }
+
+    private fun getNumIconsWithTag(testTag: String): Int {
+        return composeTestRule.onAllNodesWithTag(testTag, useUnmergedTree = true).fetchSemanticsNodes().size
     }
 
     private fun waitForScreenToLoad(testParameters: TestParameters) {
@@ -1022,8 +1093,14 @@ internal class PlaygroundTestDriver(
         val isDone = authAction == null || authAction.isConsideredDone
 
         if (isDone) {
-            waitForPlaygroundActivity()
-            assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
+            playgroundState?.integrationType?.let { integrationType ->
+                if (integrationType.isPaymentFlow()) {
+                    waitForPlaygroundActivity()
+                    assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
+                } else if (integrationType.isCustomerFlow()) {
+                    waitForCustomerSheetConfirmButton()
+                }
+            }
         }
     }
 
@@ -1046,6 +1123,22 @@ internal class PlaygroundTestDriver(
         Espresso.pressBack()
     }
 
+    private fun executeUsBankAccountFlow() {
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        clickButton("Agree and continue")
+        clickButton("Test Institution")
+
+        // Verifies bank in web view so Compose hierarchy can detach. Button should be available
+        // after web view verification.
+        clickButton("Connect account", composeCanDetach = true)
+
+        clickButton("Not now")
+        clickButton("Back to Mobile Example Account")
+    }
+
     private fun executeEntireInstantDebitsFlow() = with(device) {
         clickTextInWebView(label = "Agree and continue")
         clickTextInWebView(
@@ -1064,7 +1157,7 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("Agree and continue")
                 .fetchSemanticsNodes()
@@ -1074,6 +1167,17 @@ internal class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
         }
+    }
+
+    private fun clickButton(text: String, composeCanDetach: Boolean = false) {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText(text)
+                .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithText(text).performClick()
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1141,6 +1245,14 @@ internal class PlaygroundTestDriver(
     @OptIn(ExperimentalTestApi::class)
     private fun waitForAddPaymentMethodNode() {
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag(ADD_PAYMENT_METHOD_NODE_TAG), 5000L)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForCustomerSheetSaveButton() {
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasTestTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG),
+            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+        )
     }
 
     private fun waitForCustomerSheetConfirmButton() {

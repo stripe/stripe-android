@@ -93,8 +93,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
-        val requiresSaveOnConfirmation: Boolean = false,
-        val recollectedCvc: String? = null
+        val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
@@ -268,4 +267,10 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
+    }
+
+internal val PaymentSelection.isSaved: Boolean
+    get() = when (this) {
+        is PaymentSelection.Saved -> true
+        else -> false
     }

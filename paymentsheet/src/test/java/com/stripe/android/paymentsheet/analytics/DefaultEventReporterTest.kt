@@ -684,7 +684,7 @@ class DefaultEventReporterTest {
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
-        onLoadStarted()
+        onLoadStarted(initializedViaCompose = false)
         onLoadSucceeded(
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,

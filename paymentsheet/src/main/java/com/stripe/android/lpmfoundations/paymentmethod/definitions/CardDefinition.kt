@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -44,6 +46,13 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
         iconRequiresTinting = true,
     )
+
+    override fun createFormHeaderInformation(): FormHeaderInformation {
+        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+            displayName = resolvableString(R.string.stripe_paymentsheet_add_new_card),
+            shouldShowIcon = false,
+        )
+    }
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
@@ -94,8 +103,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic

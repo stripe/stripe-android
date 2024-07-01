@@ -10,7 +10,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class PaymentOptionsStateMapper(
-    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val googlePayState: StateFlow<GooglePayState>,
     private val isLinkEnabled: StateFlow<Boolean?>,
     private val currentSelection: StateFlow<PaymentSelection?>,
@@ -30,6 +30,8 @@ internal class PaymentOptionsStateMapper(
                 paymentMethods = paymentMethods,
                 currentSelection = currentSelection,
                 isLinkEnabled = isLinkEnabled,
+                // TODO(samer-stripe): Set this based on customer_session permissions
+                canRemovePaymentMethods = true,
                 googlePayState = googlePayState,
             ) ?: PaymentOptionsState()
         }
@@ -37,12 +39,12 @@ internal class PaymentOptionsStateMapper(
 
     @Suppress("ReturnCount")
     private fun createPaymentOptionsState(
-        paymentMethods: List<PaymentMethod>?,
+        paymentMethods: List<PaymentMethod>,
         currentSelection: PaymentSelection?,
         isLinkEnabled: Boolean?,
+        canRemovePaymentMethods: Boolean?,
         googlePayState: GooglePayState,
     ): PaymentOptionsState? {
-        if (paymentMethods == null) return null
         if (isLinkEnabled == null) return null
 
         return PaymentOptionsStateFactory.create(
@@ -51,7 +53,8 @@ internal class PaymentOptionsStateMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             currentSelection = currentSelection,
             nameProvider = nameProvider,
-            isCbcEligible = isCbcEligible()
+            isCbcEligible = isCbcEligible(),
+            canRemovePaymentMethods = canRemovePaymentMethods ?: false
         )
     }
 }

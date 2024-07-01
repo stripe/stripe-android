@@ -27,7 +27,7 @@ import kotlin.test.Test
 class PaymentMethodsViewModelTest {
     private val listenerArgumentCaptor:
         KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalWithExceptionListener> =
-            argumentCaptor()
+        argumentCaptor()
 
     @Test
     fun init_loadStartedEvent_shouldTrigger() {

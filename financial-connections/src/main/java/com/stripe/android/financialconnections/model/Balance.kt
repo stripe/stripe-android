@@ -35,7 +35,7 @@ data class Balance(
      in lowercase. Each value is a integer amount.
      A positive amount indicates money owed to the account holder.
      A negative amount indicates money owed by the account holder.
-    */
+     */
     @SerialName("current")
     val current: Map<String, Int>,
 
@@ -58,6 +58,6 @@ data class Balance(
         @SerialName("credit")
         CREDIT("credit"),
 
-        UNKNOWN("unknown");
+        UNKNOWN("unknown")
     }
 }

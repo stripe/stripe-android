@@ -1116,6 +1116,40 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Billie] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createBillie(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Billie,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Satispay] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createSatispay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Satispay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
          * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
          * method type.
          */

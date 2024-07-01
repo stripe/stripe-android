@@ -7,6 +7,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import org.junit.Rule
@@ -81,6 +83,62 @@ class PaymentOptionsTest {
             .performClick()
 
         assertThat(didCallOnItemSelected).isTrue()
+    }
+
+    @Test
+    fun `When items are removable & editing, should show removable badge`() {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                state = PaymentOptionsState(
+                    items = listOf(
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                                .copy(id = "pm_123")
+                                .toDisplayableSavedPaymentMethod(isRemovable = true),
+                        ),
+                    ),
+                    selectedIndex = 1,
+                ),
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_REMOVE_BADGE)
+            .assertExists()
+    }
+
+    @Test
+    fun `When items are not removable & editing, should show removable badge`() {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                state = PaymentOptionsState(
+                    items = listOf(
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                                .copy(id = "pm_123")
+                                .toDisplayableSavedPaymentMethod(isRemovable = false),
+                        ),
+                    ),
+                    selectedIndex = 1,
+                ),
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_REMOVE_BADGE)
+            .assertDoesNotExist()
     }
 
     @Test

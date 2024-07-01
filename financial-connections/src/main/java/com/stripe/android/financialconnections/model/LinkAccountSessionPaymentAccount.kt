@@ -35,6 +35,6 @@ internal data class LinkAccountSessionPaymentAccount(
         DESCRIPTOR_CODE("descriptor_code"),
 
         @SerialName(value = "unknown")
-        UNKNOWN("unknown");
+        UNKNOWN("unknown")
     }
 }

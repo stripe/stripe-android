@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -13,7 +14,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header in complete flow and showing wallets`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -24,7 +27,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header on AddAnotherPaymentMethod screen`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod,
+            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
+                interactor = FakeAddPaymentMethodInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -48,7 +53,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header if adding the first payment method in complete flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = FakeAddPaymentMethodInteractor
+            ),
             isWalletEnabled = false,
             types = emptyList(),
         )
@@ -59,7 +66,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Does not show a header if adding the first payment method and wallets are available`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = FakeAddPaymentMethodInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -70,7 +79,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when displaying saved payment methods in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
+                FakeSelectSavedPaymentMethodsInteractor
+            ),
             isWalletEnabled = true,
             types = emptyList(),
         )
@@ -81,7 +92,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when only credit card form is shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = FakeAddPaymentMethodInteractor
+            ),
             isWalletEnabled = false,
             types = listOf("card"),
         )
@@ -105,7 +118,9 @@ class HeaderTextFactoryTest {
     @Test
     fun `Shows the correct header when multiple LPMs are shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                interactor = FakeAddPaymentMethodInteractor
+            ),
             isWalletEnabled = false,
             types = listOf("card", "not_card"),
         )
@@ -131,14 +146,14 @@ class HeaderTextFactoryTest {
     fun `Shows correct header for manage saved PMs screen when editing`() {
         val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = true, isEditing = true)
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods)
     }
 
     @Test
     fun `Shows correct header for manage saved PMs screen when editing - FlowController`() {
         val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = false, isEditing = true)
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_your_payment_methods)
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods)
     }
 
     private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean, isEditing: Boolean): Int? {

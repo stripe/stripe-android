@@ -11,6 +11,8 @@ import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -74,6 +76,9 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
+
+    @Binds
+    abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @Binds
     abstract fun bindsLinkAccountStatusProvider(

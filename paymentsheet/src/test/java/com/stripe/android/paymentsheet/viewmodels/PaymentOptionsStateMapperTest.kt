@@ -20,7 +20,7 @@ class PaymentOptionsStateMapperTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>?>(null)
+    private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>>(emptyList())
     private val currentSelectionFlow = MutableStateFlow<PaymentSelection?>(null)
     private val googlePayStateFlow = MutableStateFlow<GooglePayState>(GooglePayState.Indeterminate)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)

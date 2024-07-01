@@ -38,6 +38,7 @@ internal class FakePaymentSheetLoader(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> {
         delay(delay)
         return if (shouldFail) {

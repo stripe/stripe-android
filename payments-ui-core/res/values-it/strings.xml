@@ -65,8 +65,12 @@
   <string name="stripe_pay_button_amount">Paga %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banca</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">Aggiungi carta</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Dati della carta</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Aggiungi un conto bancario degli Stati Uniti</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">Acquista utilizzando un ID UPI</string>
   <!-- Payment Method type brand name. -->

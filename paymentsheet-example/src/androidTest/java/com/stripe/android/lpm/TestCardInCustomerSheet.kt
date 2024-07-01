@@ -15,6 +15,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
+import com.stripe.android.test.core.AuthorizeAction
+import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,6 +67,22 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
             populateCustomLpmFields = {
                 populateCardDetails()
             },
+        )
+    }
+
+    @Test
+    fun testCardWith3ds2() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+            }.copy(
+                authorizationAction = AuthorizeAction.Authorize3ds2,
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+            values = FieldPopulator.Values(cardNumber = "4000000000003220")
         )
     }
 

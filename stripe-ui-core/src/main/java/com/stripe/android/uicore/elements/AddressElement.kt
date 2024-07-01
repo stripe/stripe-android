@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-open class AddressElement constructor(
+open class AddressElement(
     _identifier: IdentifierSpec,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     private val addressType: AddressType = AddressType.Normal(),
@@ -29,6 +30,7 @@ open class AddressElement constructor(
 ) : SectionMultiFieldElement(_identifier) {
 
     override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryElement = CountryElement(

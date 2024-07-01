@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Napili ang likod ng lisensya sa pagmamaneho</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Likod ng kard ng pagkakakilanlan</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Likod ng dokumento ng pagkakakilanlan</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Napili ang likod ng ID</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Napili ang harap ng lisensya sa pagmamaneho</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Harap ng card ng pagkakakilanlan</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Harap ng dokumento ng pagkakakilanlan</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Napili ang harap ng ID</string>
   <!-- Button to go back to the previous screen -->

@@ -1,0 +1,39 @@
+{
+  "account_id": null,
+  "apple_pay_preference": "enabled",
+  "business_name": "Mobile Example Account",
+  "flags": {
+  },
+  "google_pay_preference": "enabled",
+  "link_consumer_info": null,
+  "link_settings": {
+  },
+  "merchant_country": "US",
+  "merchant_currency": "usd",
+  "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+  "meta_pay_signed_container_context": null,
+  "order": null,
+  "ordered_payment_method_types_and_wallets": [
+    "card",
+    "konbini"
+  ],
+  "payment_method_preference": {
+    "object": "payment_method_preference",
+    "country_code": "US",
+    "ordered_payment_method_types": [
+      "card",
+      "konbini"
+    ],
+    "type": "deferred_intent"
+  },
+  "payment_method_specs": [],
+  "paypal_express_config": {
+    "client_id": null,
+    "paypal_merchant_id": null
+  },
+  "session_id": "elements_session_1BnAKVw0pn9",
+  "shipping_address_settings": {
+    "autocomplete_allowed": true
+  },
+  "unactivated_payment_method_types": []
+}

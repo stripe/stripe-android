@@ -75,6 +75,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     viewModel.paymentSheetResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
+                        viewModel.closeScreens()
                         finish()
                     }
                 }

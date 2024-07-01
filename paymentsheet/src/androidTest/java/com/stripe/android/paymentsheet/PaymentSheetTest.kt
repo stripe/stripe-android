@@ -6,7 +6,6 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -206,163 +205,6 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testDeferredIntentCardPayment() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 5099,
-                        currency = "usd"
-                    )
-                ),
-                configuration = null,
-            )
-        }
-
-        page.fillOutCardDetails()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            bodyPart(
-                "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-            ),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-            not(
-                bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-                )
-            ),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
-    @Test
-    fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Failure(
-                cause = Exception("We don't accept visa"),
-                displayMessage = "We don't accept visa"
-            )
-        },
-        resultCallback = ::expectNoResult,
-    ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 2000,
-                        currency = "usd"
-                    )
-                ),
-                configuration = null,
-            )
-        }
-
-        page.fillOutCardDetails()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            bodyPart(
-                "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-            ),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
-
-        page.clickPrimaryButton()
-
-        page.waitForText("We don't accept visa")
-        testContext.markTestSucceeded()
-    }
-
-    @OptIn(DelicatePaymentSheetApi::class)
-    @Test
-    fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
-        },
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 2000,
-                        currency = "usd"
-                    )
-                ),
-                configuration = null,
-            )
-        }
-
-        page.fillOutCardDetails()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            bodyPart(
-                "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-            ),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
-    @Test
     fun testPaymentIntentWithCardBrandChoiceSuccess() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -418,6 +260,54 @@ internal class PaymentSheetTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = null,
             )
+        }
+    }
+
+    @Test
+    fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
+        repeat(2) {
+            runPaymentSheetTest(
+                networkRule = networkRule,
+                integrationType = integrationType,
+                resultCallback = ::assertCompleted,
+            ) { testContext ->
+                networkRule.enqueue(
+                    host("api.stripe.com"),
+                    method("GET"),
+                    path("/v1/elements/sessions"),
+                ) { response ->
+                    response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+                }
+
+                testContext.presentPaymentSheet {
+                    presentWithPaymentIntent(
+                        paymentIntentClientSecret = "pi_example_secret_example",
+                        configuration = null,
+                    )
+                }
+
+                networkRule.enqueue(
+                    method("GET"),
+                    path("edge-internal/card-metadata")
+                ) { response ->
+                    response.testBodyFromFile("card-metadata-get.json")
+                }
+
+                page.fillOutCardDetails()
+                page.clearCard()
+                page.fillCard()
+                page.clearCard()
+                page.fillCard()
+
+                networkRule.enqueue(
+                    method("POST"),
+                    path("/v1/payment_intents/pi_example/confirm")
+                ) { response ->
+                    response.testBodyFromFile("payment-intent-confirm.json")
+                }
+
+                page.clickPrimaryButton()
+            }
         }
     }
 }

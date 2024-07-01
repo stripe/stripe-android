@@ -45,12 +45,16 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Подтвердить код CVV карты</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Введите адрес вручную</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Управление способами оплаты</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Управление способами оплаты</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Через 1-2 рабочих дня Stripe положит вам на счет сумму $0,01. После этого вы получите электронное письмо с инструкциями по завершению платежа в адрес %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Редактировать%s</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">Новый способ оплаты</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Или оплатить с помощью</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -73,6 +77,8 @@
   <string name="stripe_paymentsheet_remove_card">Удалить карту</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Удалить %s</string>
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
+  <string name="stripe_paymentsheet_remove_pm_title">Удалить способ оплаты</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Сохранить</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -83,6 +89,8 @@
   <string name="stripe_paymentsheet_save_for_future_payments">Сохранить данные для будущих платежей</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Сохранить данные этой карты для будущих платежей %s</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Сохранено</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Выберите способ оплаты</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
@@ -99,4 +107,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Вернитесь назад и выберите другой способ оплаты</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Выполнить платеж не удалось</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">Показать ещё</string>
 </resources>

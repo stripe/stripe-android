@@ -45,12 +45,16 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Vahvista CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Syötä osoite manuaalisesti</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Hallitse maksutapoja</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Hallitse maksutapojasi</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe tallettaa 0,01 dollaria tilillesi 1–2 arkipäivän kuluessa. Saat myös sähköpostiisi ohjeet maksun suorittamiseksi loppuun yritykselle %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Muokkaa %s</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">Uusi maksutapa</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Tai käytä maksutapaa</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -73,6 +77,8 @@
   <string name="stripe_paymentsheet_remove_card">Poista kortti</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Poista %s</string>
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
+  <string name="stripe_paymentsheet_remove_pm_title">Poista maksutapa</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Tallenna</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -83,6 +89,8 @@
   <string name="stripe_paymentsheet_save_for_future_payments">Tallenna tulevia maksuja varten</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Tallenna tämä kortti tulevia maksuja (%s) varten</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Tallennettu</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
@@ -99,4 +107,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Palaa takaisin ja valitse toinen maksutapa</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Maksu epäonnistui</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">Näytä lisää</string>
 </resources>

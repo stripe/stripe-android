@@ -25,6 +25,15 @@ class DefaultCardAccountRangeRepositoryFactory(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
+    private val cardAccountRangeRepository = lazy {
+        val store = InMemoryCardAccountRangeStore()
+        DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(store),
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
+        )
+    }
 
     constructor(context: Context) : this(
         context,
@@ -33,20 +42,14 @@ class DefaultCardAccountRangeRepositoryFactory(
 
     @Throws(IllegalStateException::class)
     override fun create(): CardAccountRangeRepository {
-        val store = DefaultCardAccountRangeStore(appContext)
-        return DefaultCardAccountRangeRepository(
-            inMemorySource = InMemoryCardAccountRangeSource(store),
-            remoteSource = createRemoteCardAccountRangeSource(),
-            staticSource = StaticCardAccountRangeSource(),
-            store = store
-        )
+        return cardAccountRangeRepository.value
     }
 
     override fun createWithStripeRepository(
         stripeRepository: StripeRepository,
         publishableKey: String
     ): CardAccountRangeRepository {
-        val store = DefaultCardAccountRangeStore(appContext)
+        val store = InMemoryCardAccountRangeStore()
         return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
             remoteSource = RemoteCardAccountRangeSource(
@@ -54,7 +57,7 @@ class DefaultCardAccountRangeRepositoryFactory(
                 ApiRequest.Options(
                     publishableKey
                 ),
-                DefaultCardAccountRangeStore(appContext),
+                store,
                 DefaultAnalyticsRequestExecutor(),
                 PaymentAnalyticsRequestFactory(appContext, publishableKey)
             ),
@@ -63,7 +66,9 @@ class DefaultCardAccountRangeRepositoryFactory(
         )
     }
 
-    private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
+    private fun createRemoteCardAccountRangeSource(
+        store: CardAccountRangeStore
+    ): CardAccountRangeSource {
         return runCatching {
             PaymentConfiguration.getInstance(
                 appContext
@@ -88,7 +93,7 @@ class DefaultCardAccountRangeRepositoryFactory(
                     ApiRequest.Options(
                         publishableKey
                     ),
-                    DefaultCardAccountRangeStore(appContext),
+                    store,
                     DefaultAnalyticsRequestExecutor(),
                     PaymentAnalyticsRequestFactory(appContext, publishableKey)
                 )

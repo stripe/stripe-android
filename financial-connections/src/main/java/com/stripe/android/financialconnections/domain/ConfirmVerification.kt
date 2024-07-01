@@ -63,6 +63,10 @@ internal class ConfirmVerification @Inject constructor(
         message: String,
         val type: Type
     ) : Throwable(message = message) {
+
+        val supportUrl: String
+            get() = "https://support.link.co/contact/email?skipVerification=true"
+
         enum class Type {
             EMAIL_CODE_EXPIRED,
             SMS_CODE_EXPIRED,

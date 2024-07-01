@@ -65,8 +65,12 @@
   <string name="stripe_pay_button_amount">ชำระ %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">ธนาคาร</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">เพิ่มบัตรใหม่</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">เพิ่มบัญชีธนาคารในสหรัฐอเมริกา</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">ซื้อโดยใช้ UPI ID</string>
   <!-- Payment Method type brand name. -->

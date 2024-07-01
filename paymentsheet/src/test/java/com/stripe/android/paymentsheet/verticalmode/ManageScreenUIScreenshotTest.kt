@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -27,6 +28,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = false,
+                        canDelete = true,
                     )
                 ),
             )
@@ -42,6 +44,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = savedPaymentMethods[1],
                         isEditing = false,
+                        canDelete = true,
                     )
                 ),
             )
@@ -57,6 +60,25 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = true,
+                        canDelete = true,
+                    )
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testManageUIScreen_withoutDeleteIcon() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+                        ),
+                        currentSelection = null,
+                        isEditing = true,
+                        canDelete = false,
                     )
                 ),
             )
@@ -68,13 +90,7 @@ internal class ManageScreenUIScreenshotTest {
         createCard("4000"),
         createUsBank("1001"),
         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
-    ).map {
-        DisplayableSavedPaymentMethod(
-            displayName = it.card?.last4 ?: it.usBankAccount?.last4 ?: "",
-            paymentMethod = it,
-            isCbcEligible = true,
-        )
-    }
+    ).map { it.toDisplayableSavedPaymentMethod() }
 
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()

@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -15,8 +17,9 @@ import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @VisibleForTesting
-internal const val TEST_TAG_ICON_FROM_RES = "PaymentMethodIconFomRes"
+const val TEST_TAG_ICON_FROM_RES = "PaymentMethodIconFomRes"
 
 @Composable
 internal fun PaymentMethodIcon(
@@ -25,6 +28,7 @@ internal fun PaymentMethodIcon(
     imageLoader: StripeImageLoader,
     iconRequiresTinting: Boolean,
     modifier: Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
 ) {
     val color = MaterialTheme.stripeColors.onComponent
     val colorFilter = remember(iconRequiresTinting) {
@@ -37,6 +41,7 @@ internal fun PaymentMethodIcon(
 
     Box(
         modifier = modifier,
+        contentAlignment = contentAlignment,
     ) {
         if (iconUrl != null) {
             StripeImage(

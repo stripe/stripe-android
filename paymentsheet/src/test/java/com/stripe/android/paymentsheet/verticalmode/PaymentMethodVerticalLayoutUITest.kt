@@ -8,11 +8,17 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -28,15 +34,18 @@ internal class PaymentMethodVerticalLayoutUITest {
     val composeRule = createComposeRule()
 
     @Test
-    fun clickingOnManageScreen_transitionsToManageScreen() = runScenario(
+    fun clickingOnViewMore_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = emptyList(),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN).performClick()
+        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
         viewActionRecorder.consume(
             PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
         )
@@ -44,31 +53,125 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun clickingOnNewPaymentMethod_transitionsToForm() = runScenario(
+    fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = listOf(
-                CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!,
-            ),
+            displayablePaymentMethods = emptyList(),
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
-        viewActionRecorder.consume(PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected("card"))
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        viewActionRecorder.consume(
+            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageOneSavedPaymentMethod
+        )
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 
     @Test
-    fun allSupportedPaymentMethodsAreShown() = runScenario(
+    fun oneSavedPm_canBeModified_buttonIsEdit_editsPaymentMethod() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
+            displayablePaymentMethods = emptyList(),
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
+        )
+    ) {
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        viewActionRecorder.consume(
+            PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(
+                PaymentMethodFixtures.displayableCard()
+            )
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
+    fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            displayablePaymentMethods = emptyList(),
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+        )
+    ) {
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
+
+        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).assertDoesNotExist()
+        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingOnNewPaymentMethod_callsOnClick() {
+        var onClickCalled = false
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = listOf(
+                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
+                        .asDisplayablePaymentMethod { onClickCalled = true },
+                ),
+                isProcessing = false,
+                selection = null,
+                displayedSavedPaymentMethod = null,
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun clickingSavedPaymentMethod_callsSelectSavedPaymentMethod() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = emptyList(),
+                isProcessing = false,
+                selection = null,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+            )
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithTag(
+                TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${savedPaymentMethod.paymentMethod.id}"
+            ).performClick()
+            viewActionRecorder.consume(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
+                    savedPaymentMethod.paymentMethod
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun allPaymentMethodsAreShown() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods(),
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
             isProcessing = false,
-            selectedPaymentMethodIndex = -1,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
         assertThat(
@@ -79,34 +182,83 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").assertExists()
+
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
     }
 
     @Test
-    fun correctIndexIsSelected() = runScenario(
+    fun savedPaymentMethodIsSelected_whenSelectionIsSavedPm() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
-            supportedPaymentMethods = PaymentMethodMetadataFactory.create(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods(),
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
             isProcessing = false,
-            selectedPaymentMethodIndex = 1,
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
+            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
         )
     ) {
-        assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-                .onChildren().fetchSemanticsNodes().size
-        ).isEqualTo(3)
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
+        ).assertExists()
+            .onChildren().assertAny(isSelected())
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
             .assertExists()
             .onChildren().assertAll(isSelected().not())
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
             .assertExists()
-            .onChildren().assertAny(isSelected())
+            .onChildren().assertAll(isSelected().not())
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
             .assertExists()
             .onChildren().assertAll(isSelected().not())
+    }
+
+    @Test
+    fun correctLPMIsSelected() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
+            )
+        )
+        val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
+        val selection = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        ).transformToPaymentSelection(
+            context = ApplicationProvider.getApplicationContext(),
+            paymentMethod = supportedPaymentMethods[1],
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+        runScenario(
+            PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = supportedPaymentMethods.map { it.asDisplayablePaymentMethod { } },
+                isProcessing = false,
+                selection = selection,
+                displayedSavedPaymentMethod = null,
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            )
+        ) {
+            assertThat(
+                composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+                    .onChildren().fetchSemanticsNodes().size
+            ).isEqualTo(3)
+
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
+                .assertExists()
+                .onChildren().assertAll(isSelected().not())
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
+                .assertExists()
+                .onChildren().assertAny(isSelected())
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
+                .assertExists()
+                .onChildren().assertAll(isSelected().not())
+        }
     }
 
     private fun runScenario(
@@ -130,6 +282,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     ): PaymentMethodVerticalLayoutInteractor {
         return object : PaymentMethodVerticalLayoutInteractor {
             override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlow
+            override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(false)
 
             override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
                 viewActionRecorder.record(viewAction)

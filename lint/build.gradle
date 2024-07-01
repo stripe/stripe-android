@@ -7,11 +7,6 @@ apply from: rootProject.file('build-configuration/ktlint.gradle')
 
 check.dependsOn('ktlint')
 
-java {
-    sourceCompatibility JavaVersion.VERSION_17
-    targetCompatibility JavaVersion.VERSION_17
-}
-
 dependencies {
     compileOnly libs.lint
     compileOnly libs.lintChecks

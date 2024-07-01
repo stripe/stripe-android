@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -177,6 +178,89 @@ class PaymentSheet internal constructor(
     ) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    /**
+     * Builder to add optional callbacks to [PaymentSheet].
+     *
+     * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+     */
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    class Builder(internal val resultCallback: PaymentSheetResultCallback) {
+        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+            private set
+        internal var createIntentCallback: CreateIntentCallback? = null
+            private set
+        internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
+            private set
+
+        /**
+         * @param handler Called when a user confirms payment for an external payment method. Use with
+         * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
+         */
+        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+            externalPaymentMethodConfirmHandler = handler
+        }
+
+        /**
+         * @param callback Called when the customer confirms the payment or setup.
+         * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
+         */
+        fun createIntentCallback(callback: CreateIntentCallback) = apply {
+            createIntentCallback = callback
+        }
+
+        /**
+         * @param callback Called when presenting [PaymentSheet] to determine whether to display a
+         * CVC recollection field.
+         *
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalCvcRecollectionApi
+        fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+            cvcRecollectionEnabledCallback = callback
+        }
+
+        /**
+         * Returns a [PaymentSheet].
+         *
+         * @param activity The Activity that is presenting [PaymentSheet].
+         */
+        fun build(activity: ComponentActivity): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet].
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         */
+        fun build(fragment: Fragment): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet] composable.
+         */
+        @Composable
+        fun build(): PaymentSheet {
+            initializeCallbacks()
+            return rememberPaymentSheet(resultCallback)
+        }
+
+        private fun initializeCallbacks() {
+            createIntentCallback?.let {
+                IntentConfirmationInterceptor.createIntentCallback = it
+            }
+            externalPaymentMethodConfirmHandler?.let {
+                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+            }
+            cvcRecollectionEnabledCallback?.let {
+                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
+            }
+        }
     }
 
     /**
@@ -1621,6 +1705,91 @@ class PaymentSheet internal constructor(
          * Complete the payment or setup.
          */
         fun confirm()
+
+        /**
+         * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
+         *
+         * @param resultCallback Called when a [PaymentSheetResult] is available.
+         * @param paymentOptionCallback Called when the customer's desired payment method changes.
+         */
+        @OptIn(ExperimentalCvcRecollectionApi::class)
+        class Builder(
+            internal val resultCallback: PaymentSheetResultCallback,
+            internal val paymentOptionCallback: PaymentOptionCallback
+        ) {
+            internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+                private set
+            internal var createIntentCallback: CreateIntentCallback? = null
+                private set
+            internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
+                private set
+
+            /**
+             * @param handler Called when a user confirms payment for an external payment method.
+             */
+            fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+                externalPaymentMethodConfirmHandler = handler
+            }
+
+            /**
+             * @param callback If specified, called when the customer confirms the payment or setup.
+             */
+            fun createIntentCallback(callback: CreateIntentCallback) = apply {
+                createIntentCallback = callback
+            }
+
+            /**
+             * @param callback Invoked when when [confirm] is called to determine whether to display a
+             * CVC recollection field.
+             *
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalCvcRecollectionApi
+            fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
+                cvcRecollectionEnabledCallback = callback
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController].
+             *
+             * @param activity The Activity that is presenting [PaymentSheet.FlowController].
+             */
+            fun build(activity: ComponentActivity): FlowController {
+                initializeCallbacks()
+                return FlowControllerFactory(activity, paymentOptionCallback, resultCallback).create()
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController].
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
+             */
+            fun build(fragment: Fragment): FlowController {
+                initializeCallbacks()
+                return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+            }
+
+            /**
+             * Returns a [PaymentSheet.FlowController] composable.
+             */
+            @Composable
+            fun build(): FlowController {
+                initializeCallbacks()
+                return rememberPaymentSheetFlowController(this)
+            }
+
+            private fun initializeCallbacks() {
+                createIntentCallback?.let {
+                    IntentConfirmationInterceptor.createIntentCallback = it
+                }
+                externalPaymentMethodConfirmHandler?.let {
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+                }
+                cvcRecollectionEnabledCallback?.let {
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
+                }
+            }
+        }
 
         sealed class Result {
             object Success : Result()

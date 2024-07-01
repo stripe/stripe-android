@@ -16,7 +16,6 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
@@ -35,14 +34,13 @@ import java.io.File
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener:
-        AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
+    AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,
     private val modelPerformanceTracker: ModelPerformanceTracker,
     private val laplacianBlurDetector: LaplacianBlurDetector,
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    private val identityRepository: IdentityRepository
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -108,14 +106,11 @@ internal class IdentityScanFlow(
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
-                            context,
                             idDetectorModelFile,
                             verificationPage.documentCapture.models.idDetectorMinScore,
-                            verificationPage.documentCapture.mbSettings,
                             modelPerformanceTracker,
                             laplacianBlurDetector,
                             identityAnalyticsRequestFactory,
-                            identityRepository
                         )
                     }
                 )

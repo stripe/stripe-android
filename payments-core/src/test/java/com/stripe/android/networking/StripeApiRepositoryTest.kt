@@ -2599,6 +2599,72 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `Verify 'client_default_payment_method' is in params when provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                defaultPaymentMethodId = "pm_123",
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isEqualTo("pm_123")
+        }
+    }
+
+    @Test
+    fun `Verify 'client_default_payment_method' not in params when not provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                defaultPaymentMethodId = null,
+                externalPaymentMethods = emptyList(),
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isNull()
+        }
+    }
+
+    @Test
     fun `Verify that the elements session endpoint has the right query params for deferred intents`() = runTest {
         val stripeResponse = StripeResponse(
             200,
