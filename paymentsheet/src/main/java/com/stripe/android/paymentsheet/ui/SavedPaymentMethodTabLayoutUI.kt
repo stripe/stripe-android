@@ -358,7 +358,8 @@ private fun SavedPaymentMethodTab(
 internal fun CvcRecollectionField(
     cvcControllerFlow: StateFlow<CvcController>,
     isProcessing: Boolean,
-    expanded: Boolean = false
+    animationDuration: Int = ANIMATION_DURATION,
+    animationDelay: Int = ANIMATION_DELAY
 ) {
     val controller by cvcControllerFlow.collectAsState()
     val error = controller.error.collectAsState()
@@ -367,7 +368,7 @@ internal fun CvcRecollectionField(
         controller
     )
     val focusRequester = remember { FocusRequester() }
-    var visible by remember { mutableStateOf(expanded) }
+    var visible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     LaunchedEffect(isProcessing) {
         // Clear focus once primary button is clicked
@@ -377,12 +378,12 @@ internal fun CvcRecollectionField(
     }
 
     LaunchedEffect(key1 = Unit) {
-        delay(ANIMATION_DELAY.toLong())
+        delay(animationDelay.toLong())
         visible = true
     }
     AnimatedVisibility(
         visible = visible,
-        enter = expandVertically(tween(ANIMATION_DURATION, ANIMATION_DELAY)) {
+        enter = expandVertically(tween(animationDuration, animationDelay)) {
             it
         }
     ) {

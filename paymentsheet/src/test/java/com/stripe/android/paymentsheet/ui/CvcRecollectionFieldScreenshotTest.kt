@@ -26,7 +26,8 @@ class CvcRecollectionFieldScreenshotTest {
             CvcRecollectionField(
                 cvcControllerFlow = cvcControllerFlowWithValue(),
                 isProcessing = false,
-                expanded = true
+                animationDuration = 0,
+                animationDelay = 0
             )
         }
     }
@@ -37,7 +38,8 @@ class CvcRecollectionFieldScreenshotTest {
             CvcRecollectionField(
                 cvcControllerFlow = cvcControllerFlowWithValue("12"),
                 isProcessing = false,
-                expanded = true
+                animationDuration = 0,
+                animationDelay = 0
             )
         }
     }
