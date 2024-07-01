@@ -33,6 +33,8 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             editing = MutableStateFlow(expectedIsEditing),
             isProcessing = MutableStateFlow(expectedIsProcessing),
         ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
             interactor.state.test {
                 awaitItem().run {
                     assertThat(paymentOptionsItems).isEqualTo(expectedPaymentOptionsItems)
@@ -97,13 +99,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun updatingPaymentOptionsState_updatesState() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val initialPaymentOptionsState = createPaymentOptionsItems(paymentMethods)
-        val paymentOptionsStateFlow = MutableStateFlow(initialPaymentOptionsState)
+        val initialPaymentOptionsItems = createPaymentOptionsItems(paymentMethods)
+        val paymentOptionsStateFlow = MutableStateFlow(initialPaymentOptionsItems)
 
         runScenario(paymentOptionsStateFlow) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(paymentOptionsItems).isEqualTo(initialPaymentOptionsState)
+                    assertThat(paymentOptionsItems).isEqualTo(initialPaymentOptionsItems)
                 }
             }
 
@@ -215,6 +217,38 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun selectedPaymentOptionItem_currentSelectionIsLink_canBeChangedToGooglePay() {
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
+            MutableStateFlow(PaymentSelection.Link)
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(
+                    paymentMethods = PaymentMethodFixtures.createCards(2),
+                ).plus(PaymentOptionsItem.Link).plus(PaymentOptionsItem.GooglePay)
+            ),
+            currentSelection = currentSelectionFlow,
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                }
+            }
+
+            currentSelectionFlow.value = PaymentSelection.GooglePay
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.GooglePay)
                 }
             }
         }
@@ -464,7 +498,8 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             onAddCardPressed,
             onEditPaymentMethod,
             onDeletePaymentMethod,
-            onPaymentMethodSelected
+            onPaymentMethodSelected,
+            dispatcher = dispatcher,
         )
 
         TestParams(
