@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -54,6 +55,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -389,6 +391,33 @@ internal class PaymentSheetActivityTest {
             composeTestRule
                 .onNodeWithText(error)
                 .assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `selected saved PM does not change after selecting a new non-saved PM`() {
+        val paymentMethods = PAYMENT_METHODS.take(1)
+        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
+
+            composeTestRule.onNodeWithTag(
+                PaymentOptionsItem.AddCard.viewType.name
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                SHEET_NAVIGATION_BUTTON_TAG
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
         }
     }
 

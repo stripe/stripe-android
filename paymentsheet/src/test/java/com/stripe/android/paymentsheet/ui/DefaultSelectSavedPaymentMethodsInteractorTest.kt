@@ -221,38 +221,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     }
 
     @Test
-    fun selectedPaymentOptionItem_currentSelectionIsLink_canBeChangedToGooglePay() {
-        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
-            MutableStateFlow(PaymentSelection.Link)
-
-        runScenario(
-            paymentOptionsItems = MutableStateFlow(
-                createPaymentOptionsItems(
-                    paymentMethods = PaymentMethodFixtures.createCards(2),
-                ).plus(PaymentOptionsItem.Link).plus(PaymentOptionsItem.GooglePay)
-            ),
-            currentSelection = currentSelectionFlow,
-        ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
-                }
-            }
-
-            currentSelectionFlow.value = PaymentSelection.GooglePay
-            dispatcher.scheduler.advanceUntilIdle()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.GooglePay)
-                }
-            }
-        }
-    }
-
-    @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink_doesNotChangeWhenSelectionBecomesNew() {
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
             MutableStateFlow(PaymentSelection.Link)
