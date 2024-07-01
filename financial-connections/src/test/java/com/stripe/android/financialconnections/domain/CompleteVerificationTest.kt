@@ -110,7 +110,7 @@ internal class CompleteVerificationTest {
     }
 
     @Test
-    fun `invoke with non-empty accounts and saveAccountToLink fails still marks link verified and navigates to success`() =
+    fun `invoke with accounts and saveAccountToLink fails still marks link verified and navigates to success`() =
         runTest {
             val cachedAccounts = listOf(CachedPartnerAccount("id", "linked_account_id"))
             whenever(cachedAccounts()).thenReturn(cachedAccounts)
