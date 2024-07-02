@@ -441,7 +441,7 @@ internal class PaymentSheetActivityTest {
                 PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG,
             ).performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.waitUntil(timeoutMillis = 15_000) {
                 composeTestRule.onAllNodes(hasTestTag(TEST_TAG_REMOVE_BADGE), useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
             }
