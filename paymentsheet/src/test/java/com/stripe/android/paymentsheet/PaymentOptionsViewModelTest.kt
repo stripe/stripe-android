@@ -669,7 +669,7 @@ internal class PaymentOptionsViewModelTest {
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
 
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!), eq(false))).thenReturn(
             Result.success(paymentMethodToRemove)
         )
 
@@ -721,7 +721,7 @@ internal class PaymentOptionsViewModelTest {
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
 
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!), eq(false))).thenReturn(
             Result.failure(APIConnectionException())
         )
 

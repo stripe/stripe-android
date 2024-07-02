@@ -586,11 +586,13 @@ internal abstract class BaseSheetViewModel(
         }
 
         return customerRepository.detachPaymentMethod(
-            CustomerRepository.CustomerInfo(
+            customerInfo = CustomerRepository.CustomerInfo(
                 id = currentCustomer.id,
                 ephemeralKeySecret = currentCustomer.ephemeralKeySecret
             ),
-            paymentMethodId
+            paymentMethodId = paymentMethodId,
+            // TODO(samer-stripe): Set this based on usage of `customer_session`
+            canRemoveDuplicates = false,
         )
     }
 

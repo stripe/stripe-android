@@ -29,7 +29,8 @@ internal interface CustomerRepository {
      */
     suspend fun detachPaymentMethod(
         customerInfo: CustomerInfo,
-        paymentMethodId: String
+        paymentMethodId: String,
+        canRemoveDuplicates: Boolean
     ): Result<PaymentMethod>
 
     /**
