@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.content.Context
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
@@ -35,14 +36,14 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
 }
 
 private fun USBankAccountFormArguments.updatePrimaryButton(
-    text: String,
+    text: ResolvableString,
     onClick: () -> Unit,
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
     onUpdatePrimaryButtonUIState {
         PrimaryButton.UIState(
-            label = resolvableString(text),
+            label = text,
             onClick = {
                 if (shouldShowProcessingWhenClicked) {
                     onUpdatePrimaryButtonState(PrimaryButton.State.StartProcessing)

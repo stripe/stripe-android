@@ -326,7 +326,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 bankName = result.bankName,
                 last4 = result.last4,
                 intentId = result.intent.id,
-                primaryButtonText = buildPrimaryButtonText().resolve(application),
+                primaryButtonText = buildPrimaryButtonText(),
                 mandateText = buildMandateText(),
             )
         }
@@ -343,7 +343,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         paymentAccount = paymentAccount,
                         financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                         intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText().resolve(application),
+                        primaryButtonText = buildPrimaryButtonText(),
                         mandateText = buildMandateText(),
                     )
                 }
@@ -358,7 +358,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         bankName = paymentAccount.institutionName,
                         last4 = paymentAccount.last4,
                         intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText().resolve(application),
+                        primaryButtonText = buildPrimaryButtonText(),
                         mandateText = buildMandateText(),
                     )
                 }
@@ -417,7 +417,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
-                primaryButtonText = application.getString(
+                primaryButtonText = resolvableString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
                 isProcessing = false,
@@ -444,7 +444,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = application.getString(
+                primaryButtonText = resolvableString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
                 isProcessing = false,
