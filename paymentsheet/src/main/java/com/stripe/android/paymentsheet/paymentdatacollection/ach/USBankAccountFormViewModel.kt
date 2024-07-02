@@ -255,12 +255,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = if (args.instantDebits) {
-            CollectBankAccountForInstantDebitsLauncher.create(
+            CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+                hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleInstantDebitsResult,
             )
         } else {
-            CollectBankAccountLauncher.create(
+            CollectBankAccountLauncher.createForPaymentSheet(
+                hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleCollectBankAccountResult,
             )
@@ -663,6 +665,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
+        val hostedSurface: String,
     )
 
     private companion object {

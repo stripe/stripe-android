@@ -33,7 +33,7 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
-    override suspend fun postLinkAccountSessionPaymentAccount(
+    override suspend fun postAttachPaymentAccountToLinkAccountSession(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
         consumerSessionClientSecret: String?

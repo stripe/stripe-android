@@ -365,6 +365,88 @@ class PaymentMethodCreateParamsTest {
         ).isEqualTo("johndoe@email.com")
     }
 
+    @Test
+    fun `create() with 'allow_redisplay' set for card returns expected values`() {
+        val card = PaymentMethodCreateParams.Card(
+            number = CardNumberFixtures.VISA_NO_SPACES,
+            expiryMonth = 12,
+            expiryYear = 2025,
+            cvc = "123",
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                card = card,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "unspecified")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                card = card,
+                allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "limited")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                card = card,
+                allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "always")
+    }
+
+    @Test
+    fun `create() with 'allow_redisplay' set for US Bank Account returns expected values`() {
+        assertThat(
+            PaymentMethodCreateParams.createUSBankAccount(
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "unspecified")
+
+        assertThat(
+            PaymentMethodCreateParams.createUSBankAccount(
+                allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "limited")
+
+        assertThat(
+            PaymentMethodCreateParams.createUSBankAccount(
+                allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "always")
+    }
+
+    @Test
+    fun `create() with 'allow_redisplay' set for SEPA Debit returns expected values`() {
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "unspecified")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "limited")
+
+        assertThat(
+            PaymentMethodCreateParams.create(
+                sepaDebit = PaymentMethodCreateParams.SepaDebit(
+                    iban = "12345678901234556"
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+            ).toParamMap()
+        ).containsEntry("allow_redisplay", "always")
+    }
+
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Fpx(bank = "hsbc"),

@@ -5,6 +5,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -43,7 +44,11 @@ internal class DefaultVerticalModeFormInteractor(
     private val formArguments: FormArguments = viewModel.createFormArguments(selectedPaymentMethodCode)
     private val formElements: List<FormElement> = viewModel.formElementsForCode(selectedPaymentMethodCode)
     private val usBankAccountArguments: USBankAccountFormArguments =
-        USBankAccountFormArguments.create(viewModel, selectedPaymentMethodCode)
+        USBankAccountFormArguments.create(
+            viewModel = viewModel,
+            hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+            selectedPaymentMethodCode = selectedPaymentMethodCode
+        )
 
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
         viewModel.processing,

@@ -20,6 +20,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -114,9 +115,7 @@ class CustomerSheetViewModelTest {
             ),
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(
-                AddPaymentMethod::class.java
-            )
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
         }
     }
 
@@ -127,9 +126,7 @@ class CustomerSheetViewModelTest {
             isGooglePayAvailable = true
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(
-                SelectPaymentMethod::class.java
-            )
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
         }
     }
 
@@ -139,9 +136,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(
-                SelectPaymentMethod::class.java
-            )
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
         }
     }
 
@@ -259,7 +254,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
-                .isInstanceOf(PaymentSelection.Saved::class.java)
+                .isInstanceOf<PaymentSelection.Saved>()
             assertThat(viewState.errorMessage)
                 .isEqualTo(null)
         }
@@ -406,7 +401,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
@@ -424,7 +419,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
@@ -460,18 +455,18 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem())
-                .isInstanceOf(SelectPaymentMethod::class.java)
+                .isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             val item = awaitItem()
-            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
 
             val formElements = item.asAddState().formElements
 
-            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
-            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            assertThat(formElements[1]).isInstanceOf<SectionElement>()
             assertThat(formElements[1].asSectionElement().fields[0])
-                .isInstanceOf(CardBillingAddressElement::class.java)
+                .isInstanceOf<CardBillingAddressElement>()
         }
     }
 
@@ -633,12 +628,12 @@ class CustomerSheetViewModelTest {
             val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
             val resultTurbine = viewModel.result.testIn(backgroundScope)
 
-            assertThat(viewStateTurbine.awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(viewStateTurbine.awaitItem()).isInstanceOf<SelectPaymentMethod>()
             assertThat(resultTurbine.awaitItem()).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            assertThat(resultTurbine.awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
+            assertThat(resultTurbine.awaitItem()).isInstanceOf<InternalCustomerSheetResult.Selected>()
         }
     }
 
@@ -714,12 +709,12 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             assertThat(viewState.enabled).isFalse()
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
         }
     }
 
@@ -1008,7 +1003,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
@@ -1116,7 +1111,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
@@ -1177,7 +1172,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             assertThat(awaitItem())
-                .isInstanceOf(AddPaymentMethod::class.java)
+                .isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
 
@@ -1836,7 +1831,7 @@ class CustomerSheetViewModelTest {
 
             assertThat(
                 awaitViewState<SelectPaymentMethod>()
-            ).isInstanceOf(SelectPaymentMethod::class.java)
+            ).isInstanceOf<SelectPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
@@ -2003,7 +1998,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnConfirmUSBankAccount(usBankAccount)
@@ -2554,7 +2549,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
@@ -2569,8 +2564,8 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
@@ -2655,7 +2650,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -2673,8 +2668,8 @@ class CustomerSheetViewModelTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Show users that the payment method was removed briefly
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
-            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
         }
     }
 
@@ -2693,7 +2688,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.first()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -2755,7 +2750,7 @@ class CustomerSheetViewModelTest {
             )
 
             viewModel.viewState.test {
-                assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+                assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
                 viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
 
                 val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -2955,7 +2950,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -2997,7 +2992,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -3029,7 +3024,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -3061,7 +3056,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -3095,7 +3090,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
@@ -3294,7 +3289,7 @@ class CustomerSheetViewModelTest {
         updatedPaymentMethod: PaymentMethod
     ) {
         viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
             handleViewAction(CustomerSheetViewAction.OnModifyItem(originalPaymentMethod))
 
@@ -3323,7 +3318,7 @@ class CustomerSheetViewModelTest {
         paymentMethodToRemove: PaymentMethod,
     ) {
         viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
             handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethodToRemove))
 
@@ -3342,11 +3337,11 @@ class CustomerSheetViewModelTest {
     }
 
     private fun InternalCustomerSheetResult?.retrieveCanceledPaymentSelection(): PaymentSelection.Saved {
-        assertThat(this).isInstanceOf(InternalCustomerSheetResult.Canceled::class.java)
+        assertThat(this).isInstanceOf<InternalCustomerSheetResult.Canceled>()
 
         val cancelled = asCanceled()
 
-        assertThat(cancelled.paymentSelection).isInstanceOf(PaymentSelection::class.java)
+        assertThat(cancelled.paymentSelection).isInstanceOf<PaymentSelection>()
 
         return cancelled.paymentSelection.asSaved()
     }

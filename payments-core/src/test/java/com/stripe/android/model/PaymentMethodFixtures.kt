@@ -5,6 +5,7 @@ import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
+@Suppress("LargeClass")
 internal object PaymentMethodFixtures {
     val CARD = PaymentMethod.Card(
         brand = CardBrand.Visa,
@@ -121,6 +122,82 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.Oxxo,
         billingDetails = BILLING_DETAILS,
         code = "oxxo"
+    )
+
+    val ALLOW_REDISPLAY_UNSPECIFIED_JSON = JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": null,
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": null,
+          "allow_redisplay": "unspecified",
+          "link": {
+            "email": "email@email.com"
+          },
+          "type": "link"
+        }
+        """.trimIndent()
+    )
+
+    val ALLOW_REDISPLAY_LIMITED_JSON = JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": null,
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": null,
+          "allow_redisplay": "limited",
+          "link": {
+            "email": "email@email.com"
+          },
+          "type": "link"
+        }
+        """.trimIndent()
+    )
+
+    val ALLOW_REDISPLAY_ALWAYS_JSON = JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": null,
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": null,
+          "allow_redisplay": "always",
+          "link": {
+            "email": "email@email.com"
+          },
+          "type": "link"
+        }
+        """.trimIndent()
+    )
+
+    val ALLOW_REDISPLAY_FOOBAR_JSON = JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": null,
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": null,
+          "allow_redisplay": "foobar",
+          "link": {
+            "email": "email@email.com"
+          },
+          "type": "link"
+        }
+        """.trimIndent()
     )
 
     val SEPA_DEBIT_JSON = JSONObject(

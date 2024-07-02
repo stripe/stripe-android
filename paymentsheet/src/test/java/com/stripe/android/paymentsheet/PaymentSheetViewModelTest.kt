@@ -19,9 +19,9 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -94,7 +94,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SessionTestRule
@@ -143,12 +142,6 @@ internal class PaymentSheetViewModelTest {
 
     @get:Rule
     val sessionRule = SessionTestRule()
-
-    @get:Rule
-    val cvcRecollectionFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cvcRecollection,
-        isEnabled = true
-    )
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
@@ -227,7 +220,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -259,7 +252,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -299,7 +292,11 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ephemeral_key_2",
-                paymentMethods = paymentMethods
+                paymentMethods = paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = false,
+                ),
             ),
             customerRepository = customerRepository
         )
@@ -336,7 +333,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -378,7 +375,11 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ephemeral_key_2",
-                paymentMethods = paymentMethods
+                paymentMethods = paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = false,
+                ),
             ),
             customerRepository = customerRepository
         )
@@ -390,7 +391,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -404,7 +405,7 @@ internal class PaymentSheetViewModelTest {
                 interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
             }
 
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
         val customerInfoCaptor = argumentCaptor<CustomerRepository.CustomerInfo>()
@@ -456,7 +457,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -470,7 +471,7 @@ internal class PaymentSheetViewModelTest {
                 interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
             }
 
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
         verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
@@ -526,7 +527,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -842,9 +843,9 @@ internal class PaymentSheetViewModelTest {
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(buyButtonStateTurbine.awaitItem()).isInstanceOf(
-                PaymentSheetViewState.FinishProcessing::class.java
-            )
+            assertThat(buyButtonStateTurbine.awaitItem()).isInstanceOf<
+                PaymentSheetViewState.FinishProcessing
+                >()
 
             buyButtonStateTurbine.cancel()
             walletsProcessingStateTurbine.cancel()
@@ -951,9 +952,9 @@ internal class PaymentSheetViewModelTest {
                 )
             )
 
-            assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf(
-                WalletsProcessingState.Completed::class.java
-            )
+            assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf<
+                WalletsProcessingState.Completed
+                >()
 
             buyButtonStateTurbine.cancel()
             walletsProcessingStateTurbine.cancel()
@@ -979,7 +980,7 @@ internal class PaymentSheetViewModelTest {
 
                 val finishedProcessingState = viewStateTurbine.awaitItem()
                 assertThat(finishedProcessingState)
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                    .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
 
                 (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
@@ -1030,7 +1031,7 @@ internal class PaymentSheetViewModelTest {
 
                 val finishedProcessingState = viewStateTurbine.awaitItem()
                 assertThat(finishedProcessingState)
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                    .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
 
                 (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
@@ -1137,7 +1138,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(shouldFailLoad = true)
         viewModel.paymentSheetResult.test {
             assertThat(awaitItem())
-                .isInstanceOf(PaymentSheetResult.Failed::class.java)
+                .isInstanceOf<PaymentSheetResult.Failed>()
         }
     }
 
@@ -1475,7 +1476,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.handleBackPressed()
         }
     }
@@ -1484,7 +1485,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled)
@@ -1501,9 +1502,9 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.transitionToAddPaymentScreen()
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddAnotherPaymentMethod>()
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
     }
 
@@ -1512,7 +1513,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
 
@@ -1525,7 +1526,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
     }
 
@@ -1741,9 +1742,9 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             viewModel.removePaymentMethod(paymentMethods.single())
-            assertThat(awaitItem()).isInstanceOf(AddFirstPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
 
@@ -2305,7 +2306,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitItem()
 
-            assertThat(viewState).isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+            assertThat(viewState).isInstanceOf<PaymentSheetViewState.FinishProcessing>()
         }
     }
 
@@ -2746,7 +2747,7 @@ internal class PaymentSheetViewModelTest {
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
                 val interactor = currentScreen.interactor
@@ -2808,15 +2809,15 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.currentScreen.test {
             val screen = awaitItem()
-            assertThat(screen).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(screen).isInstanceOf<SelectSavedPaymentMethods>()
             assertThat(
                 (screen as SelectSavedPaymentMethods).cvcRecollectionState
-            ).isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+            ).isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.Required>()
         }
     }
 
     @Test
-    fun `getCvcRecollectionState returns correct screen for complete flow`() = runTest {
+    fun `getCvcRecollectionState returns correct state for complete flow`() = runTest {
         var stripeIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
         )
@@ -2825,7 +2826,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.Required>()
 
         stripeIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(false)
@@ -2835,54 +2836,28 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
     }
 
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
-    fun `getCvcRecollectionState returns correct screen for deferred flow`() = runTest {
+    fun `getCvcRecollectionState returns correct state for deferred flow`() = runTest {
         var enabled = false
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { enabled }
         val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
 
         assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
 
         enabled = true
 
         assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.Required::class.java)
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.Required>()
 
         CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
 
         assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
-    }
-
-    @Test
-    fun `getCvcRecollectionState returns NotRequired for deferred when feature flag is false`() = runTest {
-        cvcRecollectionFeatureRule.setEnabled(false)
-
-        val stripeIntent = PaymentIntentFactory.create(
-            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
-        )
-        val viewModel = createViewModel(
-            stripeIntent = stripeIntent
-        )
-
-        assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
-    }
-
-    @OptIn(ExperimentalCvcRecollectionApi::class)
-    @Test
-    fun `getCvcRecollectionState returns NotRequired for complete flow when feature flag is false`() = runTest {
-        cvcRecollectionFeatureRule.setEnabled(false)
-        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = CvcRecollectionEnabledCallback { true }
-        val viewModel = createViewModel(args = ARGS_DEFERRED_INTENT)
-
-        assertThat(viewModel.getCvcRecollectionState())
-            .isInstanceOf(SelectSavedPaymentMethods.CvcRecollectionState.NotRequired::class.java)
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
     }
 
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {

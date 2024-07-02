@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Incomplete
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 
 class UpiConfigTest {
@@ -24,18 +25,18 @@ class UpiConfigTest {
     @Test
     fun `Treats input without @ sign as incomplete`() {
         val state = config.determineState("a")
-        assertThat(state).isInstanceOf(Incomplete::class.java)
+        assertThat(state).isInstanceOf<Incomplete>()
     }
 
     @Test
     fun `Treats input not matching VPA format as incomplete`() {
         val state = config.determineState("abc@abc.de")
-        assertThat(state).isInstanceOf(Incomplete::class.java)
+        assertThat(state).isInstanceOf<Incomplete>()
     }
 
     @Test
     fun `Treats valid input as valid and limitless`() {
         val state = config.determineState("payment.success@stripeupi")
-        assertThat(state).isInstanceOf(Limitless::class.java)
+        assertThat(state).isInstanceOf<Limitless>()
     }
 }

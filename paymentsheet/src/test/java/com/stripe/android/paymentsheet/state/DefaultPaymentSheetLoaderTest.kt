@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
@@ -114,7 +115,11 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = CustomerState(
                     id = config.customer!!.id,
                     ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
-                    paymentMethods = PAYMENT_METHODS
+                    paymentMethods = PAYMENT_METHODS,
+                    permissions = CustomerState.Permissions(
+                        canRemovePaymentMethods = true,
+                        canRemoveDuplicates = false,
+                    ),
                 ),
                 isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
@@ -1143,6 +1148,154 @@ internal class DefaultPaymentSheetLoaderTest {
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
                     paymentMethods = cards,
+                    permissions = CustomerState.Permissions(
+                        canRemovePaymentMethods = false,
+                        canRemoveDuplicates = true,
+                    ),
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customer state`() =
+        runTest {
+            val loader = createPaymentSheetLoader(
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(4),
+                    session = createElementsSessionCustomerSession(
+                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = true,
+                            isPaymentMethodSaveEnabled = false,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = true,
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customer state`() =
+        runTest {
+            val loader = createPaymentSheetLoader(
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(4),
+                    session = createElementsSessionCustomerSession(
+                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = false,
+                    canRemoveDuplicates = true,
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customer state`() =
+        runTest {
+            val loader = createPaymentSheetLoader(
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(4),
+                    session = createElementsSessionCustomerSession(
+                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = false,
+                    canRemoveDuplicates = true,
+                )
+            )
+        }
+
+    @Test
+    fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates should be disabled`() =
+        runTest {
+            val loader = createPaymentSheetLoader()
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ephemeral_key",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = false,
                 )
             )
         }
@@ -1174,7 +1327,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializedViaCompose = false,
             ).exceptionOrNull()
 
-            assertThat(exception).isInstanceOf(IllegalStateException::class.java)
+            assertThat(exception).isInstanceOf<IllegalStateException>()
 
             assertThat(errorReporter.getLoggedErrors())
                 .contains(
@@ -1263,6 +1416,10 @@ internal class DefaultPaymentSheetLoaderTest {
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
                     paymentMethods = cards,
+                    permissions = CustomerState.Permissions(
+                        canRemovePaymentMethods = true,
+                        canRemoveDuplicates = false,
+                    ),
                 )
             )
         }
@@ -1510,6 +1667,22 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+        )
+    }
+
+    private fun createElementsSessionCustomerSession(
+        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet,
+    ): ElementsSession.Customer.Session {
+        return ElementsSession.Customer.Session(
+            id = "cuss_1",
+            customerId = "cus_1",
+            liveMode = false,
+            apiKey = "ek_123",
+            apiKeyExpiry = 555555555,
+            components = ElementsSession.Customer.Components(
+                paymentSheet = paymentSheetComponent,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            ),
         )
     }
 
