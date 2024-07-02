@@ -41,6 +41,7 @@ internal class USBankAccountFormArguments(
     val isPaymentFlow: Boolean,
     val stripeIntentId: String?,
     val clientSecret: String?,
+    val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
     val onMandateTextChanged: (mandate: String?, showAbove: Boolean) -> Unit,
@@ -51,7 +52,11 @@ internal class USBankAccountFormArguments(
     val onError: (String?) -> Unit,
 ) {
     companion object {
-        fun create(viewModel: BaseSheetViewModel, selectedPaymentMethodCode: String): USBankAccountFormArguments {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            hostedSurface: String,
+            selectedPaymentMethodCode: String,
+        ): USBankAccountFormArguments {
             val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
             val isSaveForFutureUseValueChangeable = paymentMethodMetadata?.let {
                 isSaveForFutureUseValueChangeable(
@@ -71,6 +76,7 @@ internal class USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable &&
                     // Instant Debits does not support saving for future use
                     instantDebits.not(),
+                hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 onBehalfOf = onBehalfOf,
                 isCompleteFlow = viewModel is PaymentSheetViewModel,

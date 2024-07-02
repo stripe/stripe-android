@@ -6,6 +6,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -85,7 +86,13 @@ internal class DefaultAddPaymentMethodInteractor(
         reportFieldInteraction = sheetViewModel::reportFieldInteraction,
         onFormFieldValuesChanged = sheetViewModel::onFormFieldValuesChanged,
         reportPaymentMethodTypeSelected = sheetViewModel::reportPaymentMethodTypeSelected,
-        createUSBankAccountFormArguments = { USBankAccountFormArguments.create(sheetViewModel, it) }
+        createUSBankAccountFormArguments = {
+            USBankAccountFormArguments.create(
+                viewModel = sheetViewModel,
+                hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+                selectedPaymentMethodCode = it
+            )
+        }
     )
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
