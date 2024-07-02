@@ -1,4 +1,3 @@
-
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.serializer.BodyEntrySerializer
@@ -68,6 +67,12 @@ internal data class FinancialConnectionsGenericInfoScreen(
                 ) : Parcelable
             }
 
+            @Serializable
+            @Parcelize
+            internal data class Unknown(
+                override val id: String
+            ) : BodyEntry()
+
             // TODO@carlosmuvi: Add missing body items: prepane, forms.
         }
     }
@@ -102,28 +107,33 @@ internal data class FinancialConnectionsGenericInfoScreen(
         val fullWidthContent: Boolean? = null,
         @SerialName("vertical_alignment")
         val verticalAlignment: VerticalAlignment? = null
-    ) : Parcelable {
-
-    }
+    ) : Parcelable
 }
 
 @Serializable
 internal enum class Alignment {
-    @SerialName("left") LEFT,
-    @SerialName("center") CENTER,
-    @SerialName("right") RIGHT
+    @SerialName("left")
+    LEFT,
+    @SerialName("center")
+    CENTER,
+    @SerialName("right")
+    RIGHT
 }
 
 @Serializable
 internal enum class VerticalAlignment {
-    @SerialName("default") DEFAULT,
-    @SerialName("centered") CENTERED
+    @SerialName("default")
+    DEFAULT,
+    @SerialName("centered")
+    CENTERED
 }
 
 @Serializable
 internal enum class Size {
-    @SerialName("x-small") X_SMALL,
-    @SerialName("small") SMALL,
-    @SerialName("medium") MEDIUM
+    @SerialName("x-small")
+    X_SMALL,
+    @SerialName("small")
+    SMALL,
+    @SerialName("medium")
+    MEDIUM
 }
-

@@ -147,11 +147,9 @@ class BodyEntrySerializerTest {
               ]
             },
             {
-              "type": "text",
-              "id": "text2",
-              "text": "Get started now!",
-              "alignment": "left",
-              "size": "small"
+              "type": "unkown_entry",
+              "id": "unkown",
+              "unkown_key": "Get started now!"
             }
           ]
         }
@@ -197,15 +195,7 @@ class BodyEntrySerializerTest {
             }
         }
 
-        // Check (Text)
-        assertTrue(body.entries[3] is BodyEntry.BodyText)
-        with(body.entries[3] as BodyEntry.BodyText) {
-            assertEquals("text2", id)
-            assertEquals("Get started now!", text)
-            assertEquals(Alignment.LEFT, alignment)
-            assertEquals(Size.SMALL, size)
-        }
+        // Check (Unknown)
+        assertTrue(body.entries[3] is BodyEntry.Unknown)
     }
-
 }
-
