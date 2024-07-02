@@ -89,7 +89,11 @@ internal object PaymentSheetFixtures {
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
         id = defaultCustomerConfig.id,
         ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
-        paymentMethods = listOf()
+        paymentMethods = listOf(),
+        permissions = CustomerState.Permissions(
+            canRemovePaymentMethods = true,
+            canRemoveDuplicates = false,
+        )
     )
 
     internal val CONFIG_GOOGLEPAY
@@ -149,6 +153,10 @@ internal object PaymentSheetFixtures {
                     id = config.customer?.id ?: "cus_1",
                     ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
                     paymentMethods = paymentMethods,
+                    permissions = CustomerState.Permissions(
+                        canRemovePaymentMethods = true,
+                        canRemoveDuplicates = false,
+                    )
                 ),
                 isGooglePayReady = isGooglePayReady,
                 config = config,
@@ -189,6 +197,20 @@ internal object PaymentSheetFixtures {
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                 customer = null
             )
+        )
+
+    internal val ARGS_DEFERRED_INTENT
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    )
+                )
+            ),
+            CONFIG_CUSTOMER,
+            STATUS_BAR_COLOR
         )
 
     internal val COMPOSE_FRAGMENT_ARGS

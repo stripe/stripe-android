@@ -7,6 +7,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.VectorDrawable
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -153,7 +154,7 @@ class PaymentOptionFactoryTest {
 
         advanceUntilIdle()
 
-        assertThat(paymentOptionIcon.current).isInstanceOf(BitmapDrawable::class.java)
+        assertThat(paymentOptionIcon.current).isInstanceOf<BitmapDrawable>()
         assertThat((paymentOptionIcon.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
     }
 
@@ -168,7 +169,7 @@ class PaymentOptionFactoryTest {
 
         advanceUntilIdle()
 
-        assertThat(paymentOptionIcon.current).isInstanceOf(VectorDrawable::class.java)
+        assertThat(paymentOptionIcon.current).isInstanceOf<VectorDrawable>()
     }
 
     @Test
@@ -182,7 +183,7 @@ class PaymentOptionFactoryTest {
 
         advanceUntilIdle()
 
-        assertThat(paymentOptionIcon.current).isInstanceOf(ShapeDrawable::class.java)
+        assertThat(paymentOptionIcon.current).isInstanceOf<ShapeDrawable>()
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 
@@ -197,7 +198,7 @@ class PaymentOptionFactoryTest {
 
         advanceUntilIdle()
 
-        assertThat(paymentOptionIcon.current).isInstanceOf(VectorDrawable::class.java)
+        assertThat(paymentOptionIcon.current).isInstanceOf<VectorDrawable>()
     }
 
     @Test
@@ -211,7 +212,7 @@ class PaymentOptionFactoryTest {
 
         advanceUntilIdle()
 
-        assertThat(paymentOptionIcon.current).isInstanceOf(ShapeDrawable::class.java)
+        assertThat(paymentOptionIcon.current).isInstanceOf<ShapeDrawable>()
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 

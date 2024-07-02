@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -49,6 +50,7 @@ internal interface PaymentSheetLoader {
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean = false,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full>
 }
 
@@ -73,60 +75,36 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
+    private val userFacingLogger: UserFacingLogger,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        eventReporter.onLoadStarted()
+        eventReporter.onLoadStarted(initializedViaCompose)
+
+        val savedPaymentMethodSelection = when (paymentSheetConfiguration.customer?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession ->
+                retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
+            null -> null
+        }
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = paymentSheetConfiguration.customer,
             externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            defaultPaymentMethodId = savedPaymentMethodSelection?.id,
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
-            val billingDetailsCollectionConfig =
-                paymentSheetConfiguration.billingDetailsCollectionConfiguration
-
-            val cbcEligibility = CardBrandChoiceEligibility.create(
-                isEligible = elementsSession.isEligibleForCardBrandChoice,
-                preferredNetworks = paymentSheetConfiguration.preferredNetworks,
+            val metadata = createPaymentMethodMetadata(
+                paymentSheetConfiguration = paymentSheetConfiguration,
+                elementsSession = elementsSession,
             )
-
-            val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
-                stripeIntent = elementsSession.stripeIntent,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
-            )
-            val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
-                elementsSession.externalPaymentMethodData
-            )
-            logIfMissingExternalPaymentMethods(
-                requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
-                actualExternalPaymentMethods = externalPaymentMethodSpecs
-            )
-            val metadata = PaymentMethodMetadata(
-                stripeIntent = elementsSession.stripeIntent,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
-                    .allowsPaymentMethodsRequiringShippingAddress,
-                paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
-                cbcEligibility = cbcEligibility,
-                merchantName = paymentSheetConfiguration.merchantDisplayName,
-                defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
-                shippingDetails = paymentSheetConfiguration.shippingDetails,
-                hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
-                sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
-                externalPaymentMethodSpecs = externalPaymentMethodSpecs
-            )
-
-            if (sharedDataSpecsResult.failedToParseServerResponse) {
-                eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
-            }
 
             create(
                 elementsSession = elementsSession,
@@ -272,8 +250,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
+        defaultPaymentMethodId: String?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode, customer, externalPaymentMethods)
+        return elementsSessionRepository.get(
+            initializationMode = initializationMode,
+            customer = customer,
+            externalPaymentMethods = externalPaymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId
+        )
     }
 
     private suspend fun loadLinkState(
@@ -307,6 +291,52 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             configuration = linkConfig,
             loginState = loginState,
         )
+    }
+
+    private fun createPaymentMethodMetadata(
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        elementsSession: ElementsSession,
+    ): PaymentMethodMetadata {
+        val billingDetailsCollectionConfig =
+            paymentSheetConfiguration.billingDetailsCollectionConfiguration
+
+        val cbcEligibility = CardBrandChoiceEligibility.create(
+            isEligible = elementsSession.isEligibleForCardBrandChoice,
+            preferredNetworks = paymentSheetConfiguration.preferredNetworks,
+        )
+
+        val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
+            stripeIntent = elementsSession.stripeIntent,
+            serverLpmSpecs = elementsSession.paymentMethodSpecs,
+        )
+        val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            elementsSession.externalPaymentMethodData
+        )
+        logIfMissingExternalPaymentMethods(
+            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            actualExternalPaymentMethods = externalPaymentMethodSpecs
+        )
+        val metadata = PaymentMethodMetadata(
+            stripeIntent = elementsSession.stripeIntent,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+            allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
+                .allowsPaymentMethodsRequiringShippingAddress,
+            paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
+            cbcEligibility = cbcEligibility,
+            merchantName = paymentSheetConfiguration.merchantDisplayName,
+            defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
+            shippingDetails = paymentSheetConfiguration.shippingDetails,
+            hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
+            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs
+        )
+
+        if (sharedDataSpecsResult.failedToParseServerResponse) {
+            eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
+        }
+
+        return metadata
     }
 
     private suspend fun createLinkConfiguration(
@@ -395,12 +425,41 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         isGooglePayReady: Boolean,
         elementsSession: ElementsSession
     ): SavedSelection {
+        return retrieveSavedSelection(
+            config = config,
+            isGooglePayReady = isGooglePayReady,
+            isLinkAvailable = elementsSession.isLinkEnabled,
+        )
+    }
+
+    private suspend fun retrieveSavedPaymentMethodSelection(
+        config: PaymentSheet.Configuration,
+    ): SavedSelection.PaymentMethod? {
+        /*
+         * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment method
+         * ID to ensure it is properly returned by the API when performing payment method deduping. We only care
+         * about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are locally defined
+         * LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know if they are ready and
+         * can safely set them to `false`.
+         */
+        return retrieveSavedSelection(
+            config = config,
+            isGooglePayReady = false,
+            isLinkAvailable = false,
+        ) as? SavedSelection.PaymentMethod
+    }
+
+    private suspend fun retrieveSavedSelection(
+        config: PaymentSheet.Configuration,
+        isGooglePayReady: Boolean,
+        isLinkAvailable: Boolean,
+    ): SavedSelection {
         val customerConfig = config.customer
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
         return prefsRepository.getSavedSelection(
             isGooglePayAvailable = isGooglePayReady,
-            isLinkAvailable = elementsSession.isLinkEnabled,
+            isLinkAvailable = isLinkAvailable,
         )
     }
 
@@ -469,8 +528,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     requestedExternalPaymentMethod
                 )
             ) {
-                logger.warning(
-                    "Requested external payment method $requestedExternalPaymentMethod is not supported."
+                userFacingLogger.logWarningWithoutPii(
+                    "Requested external payment method $requestedExternalPaymentMethod is not supported. View all " +
+                        "available external payment methods here: " +
+                        "https://docs.stripe.com/payments/external-payment-methods?platform=android#" +
+                        "available-external-payment-methods"
                 )
             }
         }
@@ -478,10 +540,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private fun ElementsSession.toCustomerState(): CustomerState? {
         return customer?.let { customer ->
+            val canRemovePaymentMethods = when (
+                val paymentSheetComponent = customer.session.components.paymentSheet
+            ) {
+                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
+                    paymentSheetComponent.isPaymentMethodRemoveEnabled
+                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
+            }
+
             CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
                 paymentMethods = customer.paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = canRemovePaymentMethods,
+                    // Should always remove duplicates when using `customer_session`
+                    canRemoveDuplicates = true,
+                )
             )
         } ?: run {
             val exception = IllegalStateException(
@@ -512,6 +587,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             paymentMethods = retrieveCustomerPaymentMethods(
                 metadata = metadata,
                 customerConfig = this,
+            ),
+            permissions = CustomerState.Permissions(
+                /*
+                 * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should always be
+                 * set to true.
+                 */
+                canRemovePaymentMethods = true,
+                /*
+                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
+                 * un-scoped ephemeral keys.
+                 */
+                canRemoveDuplicates = false,
             )
         )
     }

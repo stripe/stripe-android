@@ -23,6 +23,13 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                     BillingDetails().parse(it)
                 }
             )
+            .setAllowRedisplay(
+                StripeJsonUtils.optString(json, FIELD_ALLOW_REDISPLAY)?.let { allowRedisplayRawValue ->
+                    PaymentMethod.AllowRedisplay.entries.find { entry ->
+                        allowRedisplayRawValue == entry.value
+                    }
+                }
+            )
             .setCustomerId(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
             .setLiveMode(json.optBoolean(FIELD_LIVEMODE))
 
@@ -377,6 +384,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private const val FIELD_CREATED = "created"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_LIVEMODE = "livemode"
+        private const val FIELD_ALLOW_REDISPLAY = "allow_redisplay"
         private const val FIELD_TYPE = "type"
     }
 }

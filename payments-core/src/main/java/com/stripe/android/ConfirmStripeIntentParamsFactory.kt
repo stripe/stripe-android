@@ -20,8 +20,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     abstract fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        requiresSaveOnConfirmation: Boolean = false,
-        recollectedCvc: String? = null
+        optionsParams: PaymentMethodOptionsParams?,
     ): T
 
     abstract fun create(
@@ -31,14 +30,12 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     fun create(
         paymentMethod: PaymentMethod,
-        requiresSaveOnConfirmation: Boolean = false,
-        recollectedCvc: String? = null
+        optionsParams: PaymentMethodOptionsParams?,
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = paymentMethod.type,
-            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
-            recollectedCvc = recollectedCvc
+            optionsParams = optionsParams,
         )
     }
 
@@ -70,30 +67,12 @@ internal class ConfirmPaymentIntentParamsFactory(
     override fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
+        optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            paymentMethodOptions = when (paymentMethodType) {
-                PaymentMethod.Type.Card -> {
-                    PaymentMethodOptionsParams.Card(
-                        cvc = recollectedCvc,
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
-                            requiresSaveOnConfirmation
-                        } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    )
-                }
-                PaymentMethod.Type.USBankAccount -> {
-                    PaymentMethodOptionsParams.USBankAccount(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                    )
-                }
-                else -> {
-                    null
-                }
-            },
+            paymentMethodOptions = optionsParams,
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                 .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
@@ -120,8 +99,7 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        requiresSaveOnConfirmation: Boolean,
-        recollectedCvc: String?
+        optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethodId,

@@ -69,6 +69,8 @@
   <string name="stripe_paymentsheet_add_new_card">Tilføj nyt kort</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kortoplysninger</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Tilføj amerikansk bankkonto</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">Køb ved hjælp af et UPI ID</string>
   <!-- Payment Method type brand name. -->

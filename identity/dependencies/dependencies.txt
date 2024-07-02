@@ -943,8 +943,4 @@
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2 (*)
 +--- com.google.android.material:material:1.11.0 (*)
-+--- com.microblink:capture-core:1.2.0
-|    +--- androidx.core:core-ktx:1.12.0 (*)
-|    +--- androidx.appcompat:appcompat:1.6.1 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10 -> 1.9.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22 (*)

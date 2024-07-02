@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
 import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.utils.isInstanceOf
 import com.stripe.android.view.BecsDebitBanks
 import org.junit.Test
 
@@ -39,26 +40,26 @@ class BsbConfigTest {
     @Test
     fun `verify incomplete BSB is in incomplete state`() {
         Truth.assertThat(bsbConfig.determineState("123"))
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
 
         Truth.assertThat(bsbConfig.determineState("12345"))
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
     }
 
     @Test
     fun `verify invalid BSB is in invalid state`() {
         // input length > LENGTH
         Truth.assertThat(bsbConfig.determineState("1234567"))
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
 
         // invalid BSB prefix
         Truth.assertThat(bsbConfig.determineState("891200"))
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
     }
 
     @Test
     fun `verify valid BSB is in valid state`() {
         Truth.assertThat(bsbConfig.determineState("001234"))
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 }

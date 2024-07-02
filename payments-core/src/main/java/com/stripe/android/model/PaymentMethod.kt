@@ -142,7 +142,16 @@ constructor(
      *
      * [us_bank_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account)
      */
-    @JvmField val usBankAccount: USBankAccount? = null
+    @JvmField val usBankAccount: USBankAccount? = null,
+
+    /**
+     * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
+     * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved
+     * payment method in a checkout flow. The field defaults to "unspecified".
+     *
+     * [allow_redisplay](https://docs.stripe.com/api/payment_methods/object#payment_method_object-allow_redisplay)
+     */
+    @JvmField val allowRedisplay: AllowRedisplay? = null,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -377,6 +386,22 @@ constructor(
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
         ),
+        Billie(
+            "billie",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Satispay(
+            "satispay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
         AmazonPay(
             "amazon_pay",
             isReusable = false,
@@ -455,6 +480,10 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            // We are intentionally polling for Swish even though it uses the redirect trampoline.
+            // About 50% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
             shouldRefreshIfIntentRequiresAction = true,
         ),
         Twint(
@@ -490,6 +519,7 @@ constructor(
         private var type: Type? = null
         private var code: PaymentMethodCode? = null
         private var billingDetails: BillingDetails? = null
+        private var allowRedisplay: AllowRedisplay? = null
         private var metadata: Map<String, String>? = null
         private var customerId: String? = null
         private var card: Card? = null
@@ -526,6 +556,10 @@ constructor(
 
         fun setBillingDetails(billingDetails: BillingDetails?): Builder = apply {
             this.billingDetails = billingDetails
+        }
+
+        fun setAllowRedisplay(allowRedisplay: AllowRedisplay?): Builder = apply {
+            this.allowRedisplay = allowRedisplay
         }
 
         fun setCard(card: Card?): Builder = apply {
@@ -588,6 +622,7 @@ constructor(
                 type = type,
                 code = code,
                 billingDetails = billingDetails,
+                allowRedisplay = allowRedisplay,
                 customerId = customerId,
                 card = card,
                 cardPresent = cardPresent,
@@ -717,6 +752,21 @@ constructor(
                 )
             }
         }
+    }
+
+    @Parcelize
+    enum class AllowRedisplay(internal val value: String) : StripeModel {
+        // Default value for payment methods where `allow_redisplay` was not set.
+        UNSPECIFIED("unspecified"),
+
+        /*
+         * Indicates that the payment method can’t always be shown to a customer in a checkout flow. For example,
+         * it can only be shown in the context of a specific subscription.
+         */
+        LIMITED("limited"),
+
+        // Indicates that the payment method can always be shown to a customer in a checkout flow.
+        ALWAYS("always"),
     }
 
     sealed class TypeData : StripeModel {

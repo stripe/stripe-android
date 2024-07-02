@@ -28,9 +28,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        initializedViaCompose: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_started"
-        override val additionalParams: Map<String, Any?> = emptyMap()
+        override val additionalParams: Map<String, Any?> = mapOf(FIELD_COMPOSE to initializedViaCompose)
     }
 
     class LoadSucceeded(
@@ -463,6 +464,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
+        const val FIELD_COMPOSE = "compose"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

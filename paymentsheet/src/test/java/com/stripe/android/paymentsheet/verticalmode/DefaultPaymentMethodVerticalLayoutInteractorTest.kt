@@ -2,19 +2,26 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
@@ -261,6 +268,163 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun stateDoesNotReturnWalletPaymentMethodsWhenInPaymentSheet() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        isFlowController = false,
+    ) {
+        walletsState.value = WalletsState(
+            link = WalletsState.Link("email@email.com"),
+            googlePay = WalletsState.GooglePay(
+                buttonType = GooglePayButtonType.Pay,
+                allowCreditCards = true,
+                billingAddressParameters = null,
+            ),
+            buttonsEnabled = true,
+            dividerTextResource = 0,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        interactor.state.test {
+            awaitItem().run {
+                assertThat(displayablePaymentMethods.map { it.code }).containsNoneOf("link", "google_pay")
+            }
+        }
+        interactor.showsWalletsHeader.test {
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun stateIncludesWalletPaymentMethodsWhenInFlowController() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        isFlowController = true,
+    ) {
+        walletsState.value = WalletsState(
+            link = WalletsState.Link("email@email.com"),
+            googlePay = WalletsState.GooglePay(
+                buttonType = GooglePayButtonType.Pay,
+                allowCreditCards = true,
+                billingAddressParameters = null,
+            ),
+            buttonsEnabled = true,
+            dividerTextResource = 0,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        interactor.state.test {
+            awaitItem().run {
+                assertThat(displayablePaymentMethods.map { it.code })
+                    .isEqualTo(listOf("card", "link", "google_pay", "cashapp"))
+            }
+        }
+        interactor.showsWalletsHeader.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun walletDisplayablePaymentMethodsUpdateWalletSelection() {
+        var selectedWallet: PaymentSelection? = null
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp")
+                )
+            ),
+            isFlowController = true,
+            onWalletSelected = { selectedWallet = it },
+        ) {
+            walletsState.value = WalletsState(
+                link = WalletsState.Link("email@email.com"),
+                googlePay = WalletsState.GooglePay(
+                    buttonType = GooglePayButtonType.Pay,
+                    allowCreditCards = true,
+                    billingAddressParameters = null,
+                ),
+                buttonsEnabled = true,
+                dividerTextResource = 0,
+                onGooglePayPressed = {},
+                onLinkPressed = {},
+            )
+            assertThat(selectedWallet).isNull()
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "link" }.onClick()
+            assertThat(selectedWallet).isEqualTo(PaymentSelection.Link)
+            displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+            assertThat(selectedWallet).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
+    fun stateDoesNotReturnWalletPaymentMethodsWhenInFlowControllerAndGooglePayIsNotAvailable() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        isFlowController = true,
+    ) {
+        walletsState.value = WalletsState(
+            link = WalletsState.Link("email@email.com"),
+            googlePay = null,
+            buttonsEnabled = true,
+            dividerTextResource = 0,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        interactor.state.test {
+            awaitItem().run {
+                assertThat(displayablePaymentMethods.map { it.code })
+                    .isEqualTo(listOf("card", "cashapp"))
+            }
+        }
+        interactor.showsWalletsHeader.test {
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun stateIncludesGooglePayWhenInFlowControllerAndLinkIsNotAvailable() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        isFlowController = true,
+    ) {
+        walletsState.value = WalletsState(
+            link = null,
+            googlePay = WalletsState.GooglePay(
+                buttonType = GooglePayButtonType.Pay,
+                allowCreditCards = true,
+                billingAddressParameters = null,
+            ),
+            buttonsEnabled = true,
+            dividerTextResource = 0,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        interactor.state.test {
+            awaitItem().run {
+                assertThat(displayablePaymentMethods.map { it.code })
+                    .isEqualTo(listOf("card", "google_pay", "cashapp"))
+            }
+        }
+        interactor.showsWalletsHeader.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenFieldsAllowUserInteraction() {
         var calledFormScreenFactory = false
         var calledTransitionTo = false
@@ -344,6 +508,49 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
             assertThat(onFormFieldValuesChangedCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_updatesSelectedLPMAndMandate() {
+        var onFormFieldValuesChangedCalled = false
+        var mostRecentMandate: ResolvableString? = null
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            )
+        )
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formElementsForCode = {
+                val uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                    cardAccountRangeRepositoryFactory = mock(),
+                    paymentMethodCreateParams = null,
+                    paymentMethodExtraParams = null,
+                )
+                paymentMethodMetadata.formElementsForCode(it, uiDefinitionFactoryArgumentsFactory)!!
+            },
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+            onMandateTextUpdated = { mostRecentMandate = it },
+        ) {
+            assertThat(mostRecentMandate).isNull()
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+            assertThat(onFormFieldValuesChangedCalled).isTrue()
+            assertThat(mostRecentMandate).isEqualTo(
+                resolvableString(
+                    R.string.stripe_cash_app_pay_mandate,
+                    paymentMethodMetadata.merchantName,
+                    paymentMethodMetadata.merchantName
+                )
+            )
         }
     }
 
@@ -451,6 +658,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        isFlowController: Boolean = false,
+        onWalletSelected: (PaymentSelection) -> Unit = { notImplemented() },
+        onMandateTextUpdated: (ResolvableString?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -458,6 +668,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val paymentMethods: MutableStateFlow<List<PaymentMethod>?> = MutableStateFlow(initialPaymentMethods)
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
+        val walletsState = MutableStateFlow<WalletsState?>(null)
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -475,12 +686,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             onEditPaymentMethod = onEditPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            walletsState = walletsState,
+            isFlowController = isFlowController,
+            onWalletSelected = onWalletSelected,
+            onMandateTextUpdated = onMandateTextUpdated,
         )
 
         TestParams(
             processingSource = processing,
             selectionSource = selection,
             mostRecentlySelectedSavedPaymentMethodSource = mostRecentlySelectedSavedPaymentMethod,
+            walletsState = walletsState,
             interactor = interactor,
         ).apply {
             runTest {
@@ -493,6 +709,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val processingSource: MutableStateFlow<Boolean>,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
+        val walletsState: MutableStateFlow<WalletsState?>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
     )
 }

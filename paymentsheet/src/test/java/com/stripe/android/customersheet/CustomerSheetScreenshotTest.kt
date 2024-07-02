@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -45,6 +47,7 @@ internal class CustomerSheetScreenshotTest {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },
@@ -65,6 +68,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -94,6 +98,7 @@ internal class CustomerSheetScreenshotTest {
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     @Test
@@ -289,6 +294,7 @@ internal class CustomerSheetScreenshotTest {
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
@@ -323,6 +329,7 @@ internal class CustomerSheetScreenshotTest {
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {

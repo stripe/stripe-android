@@ -114,15 +114,19 @@ internal fun SelectPaymentMethod(
                 .padding(horizontal = horizontalPadding)
         )
 
+        val paymentOptionsState = PaymentOptionsStateFactory.create(
+            paymentMethods = viewState.savedPaymentMethods,
+            showGooglePay = viewState.isGooglePayEnabled,
+            showLink = false,
+            currentSelection = viewState.paymentSelection,
+            nameProvider = paymentMethodNameProvider,
+            isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
+        )
+
         SavedPaymentMethodTabLayoutUI(
-            state = PaymentOptionsStateFactory.create(
-                paymentMethods = viewState.savedPaymentMethods,
-                showGooglePay = viewState.isGooglePayEnabled,
-                showLink = false,
-                currentSelection = viewState.paymentSelection,
-                nameProvider = paymentMethodNameProvider,
-                isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
-            ),
+            paymentOptionsItems = paymentOptionsState.items,
+            selectedPaymentOptionsItem = paymentOptionsState.selectedItem,
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },

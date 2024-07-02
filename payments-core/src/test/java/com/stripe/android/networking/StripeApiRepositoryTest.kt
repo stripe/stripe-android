@@ -1773,6 +1773,7 @@ internal class StripeApiRepositoryTest {
                     customer = "customer_id",
                     onBehalfOf = null,
                     amount = 1000,
+                    hostedSurface = "payment_element",
                     currency = "usd"
                 ),
                 DEFAULT_OPTIONS
@@ -1790,6 +1791,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["customer"]).isEqualTo("customer_id")
                 assertThat(this["on_behalf_of"]).isEqualTo(null)
                 assertThat(this["amount"]).isEqualTo(1000)
+                assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
             }
         }
@@ -2050,6 +2052,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2064,6 +2067,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2090,7 +2094,8 @@ internal class StripeApiRepositoryTest {
             paymentIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )
@@ -2135,6 +2140,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2150,6 +2156,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2176,7 +2183,8 @@ internal class StripeApiRepositoryTest {
             setupIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )
@@ -2587,6 +2595,72 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("setup_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_secret"]).isEqualTo("client_secret")
+        }
+    }
+
+    @Test
+    fun `Verify 'client_default_payment_method' is in params when provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                defaultPaymentMethodId = "pm_123",
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isEqualTo("pm_123")
+        }
+    }
+
+    @Test
+    fun `Verify 'client_default_payment_method' not in params when not provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                defaultPaymentMethodId = null,
+                externalPaymentMethods = emptyList(),
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isNull()
         }
     }
 

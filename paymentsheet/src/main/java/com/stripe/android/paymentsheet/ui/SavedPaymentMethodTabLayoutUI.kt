@@ -4,11 +4,16 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,11 +24,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -39,7 +51,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -49,16 +60,19 @@ import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun SavedPaymentMethodTabLayoutUI(
-    state: PaymentOptionsState,
+    paymentOptionsItems: List<PaymentOptionsItem>,
+    selectedPaymentOptionsItem: PaymentOptionsItem?,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -77,11 +91,11 @@ internal fun SavedPaymentMethodTabLayoutUI(
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
             items(
-                items = state.items,
+                items = paymentOptionsItems,
                 key = { it.key },
             ) { item ->
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
-                val isSelected = item == state.selectedItem && !isEditing
+                val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
                     item = item,
@@ -108,42 +122,40 @@ internal fun SavedPaymentMethodTabLayoutUI(
 private fun SavedPaymentMethodsTabLayoutPreview() {
     DefaultStripeTheme {
         SavedPaymentMethodTabLayoutUI(
-            state = PaymentOptionsState(
-                items = listOf(
-                    PaymentOptionsItem.AddCard,
-                    PaymentOptionsItem.Link,
-                    PaymentOptionsItem.GooglePay,
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "001",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.Card.code,
-                                type = PaymentMethod.Type.Card,
-                                card = PaymentMethod.Card(
-                                    brand = CardBrand.Visa,
-                                    last4 = "4242",
-                                )
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link,
+                PaymentOptionsItem.GooglePay,
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "001",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Card.code,
+                            type = PaymentMethod.Type.Card,
+                            card = PaymentMethod.Card(
+                                brand = CardBrand.Visa,
+                                last4 = "4242",
                             )
                         )
-                    ),
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "002",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.SepaDebit.code,
-                                type = PaymentMethod.Type.SepaDebit,
-                            )
-                        )
-                    ),
+                    )
                 ),
-                selectedIndex = 1
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "002",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.SepaDebit.code,
+                            type = PaymentMethod.Type.SepaDebit,
+                        )
+                    )
+                ),
             ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -210,6 +222,7 @@ private fun SavedPaymentMethodTab(
                 isEnabled = isEnabled,
                 isEditing = isEditing,
                 isModifiable = item.isModifiable,
+                isRemovable = item.isRemovable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
@@ -296,6 +309,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isModifiable: Boolean,
+    isRemovable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (PaymentMethod) -> Unit,
@@ -317,7 +331,7 @@ private fun SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
                 isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEditing && isRemovable -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,
@@ -339,35 +353,74 @@ private fun SavedPaymentMethodTab(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>) {
+internal fun CvcRecollectionField(
+    cvcControllerFlow: StateFlow<CvcController>,
+    isProcessing: Boolean,
+    animationDuration: Int = ANIMATION_DURATION,
+    animationDelay: Int = ANIMATION_DELAY
+) {
+    val controller by cvcControllerFlow.collectAsState()
+    val error = controller.error.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
-        cvcControllerFlow.collectAsState().value
+        controller
     )
+    val focusRequester = remember { FocusRequester() }
+    var visible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(isProcessing) {
+        // Clear focus once primary button is clicked
+        if (isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
 
-    Text(
-        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-        style = MaterialTheme.typography.body1,
-        modifier = Modifier.padding(20.dp, 20.dp, 0.dp, 0.dp)
-    )
-    SectionCard(
-        Modifier
-            .padding(20.dp, 8.dp, 20.dp, 8.dp)
-            .height(IntrinsicSize.Min)
+    LaunchedEffect(key1 = Unit) {
+        delay(animationDelay.toLong())
+        visible = true
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(tween(animationDuration, animationDelay)) {
+            it
+        }
     ) {
-        element.controller.ComposeUI(
-            enabled = true,
-            field = element,
-            modifier = Modifier
-                .fillMaxWidth(),
-            hiddenIdentifiers = setOf(),
-            lastTextFieldIdentifier = null,
-            nextFocusDirection = FocusDirection.Exit,
-            previousFocusDirection = FocusDirection.Previous
-        )
+        Column(
+            Modifier.padding(20.dp, 20.dp, 20.dp, 0.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.stripeColors.subtitle
+            )
+            SectionCard(
+                Modifier
+                    .padding(0.dp, 8.dp, 0.dp, 8.dp)
+                    .height(IntrinsicSize.Min)
+            ) {
+                element.controller.ComposeUI(
+                    enabled = !isProcessing,
+                    field = element,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    hiddenIdentifiers = setOf(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Exit,
+                    previousFocusDirection = FocusDirection.Previous
+                )
+            }
+            error.value?.errorMessage?.let {
+                Row {
+                    SectionError(error = stringResource(id = it))
+                }
+            }
+        }
     }
 }
 
 @VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
+private const val ANIMATION_DELAY = 400
+private const val ANIMATION_DURATION = 500

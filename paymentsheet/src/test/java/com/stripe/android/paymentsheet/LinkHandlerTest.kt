@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -18,9 +19,11 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -65,9 +68,9 @@ class LinkHandlerTest {
         verify(linkLauncher).present(configuration)
         verifyNoMoreInteractions(linkLauncher)
         handler.onLinkActivityResult(LinkActivityResult.Completed(mock()))
-        assertThat(processingStateTurbine.awaitItem()).isInstanceOf(
-            LinkHandler.ProcessingState.PaymentMethodCollected::class.java
-        )
+        assertThat(processingStateTurbine.awaitItem()).isInstanceOf<
+            LinkHandler.ProcessingState.PaymentMethodCollected
+            >()
     }
 
     @Test
@@ -163,7 +166,7 @@ class LinkHandlerTest {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+            assertThat(awaitItem()).isInstanceOf<LinkHandler.ProcessingState.PaymentDetailsCollected>()
             verify(linkLauncher, never()).present(eq(configuration))
             verify(linkStore).markLinkAsUsed()
         }
@@ -270,7 +273,7 @@ class LinkHandlerTest {
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
 
             accountStatusFlow.emit(AccountStatus.Verified)
-            assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+            assertThat(awaitItem()).isInstanceOf<LinkHandler.ProcessingState.PaymentDetailsCollected>()
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkLauncher, never()).present(eq(configuration))
             verify(linkStore).markLinkAsUsed()
@@ -391,7 +394,9 @@ class LinkHandlerTest {
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
-                        requiresSaveOnConfirmation = true,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                        ),
                     ),
                 )
             )
@@ -616,12 +621,12 @@ private fun runLinkInlineTest(
 private fun assertAndGetInlineLinkSelection(
     processingState: LinkHandler.ProcessingState
 ): PaymentSelection.New.LinkInline {
-    assertThat(processingState).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+    assertThat(processingState).isInstanceOf<LinkHandler.ProcessingState.PaymentDetailsCollected>()
 
     val paymentDetailsCollectedState = processingState as LinkHandler.ProcessingState.PaymentDetailsCollected
     val selection = paymentDetailsCollectedState.paymentSelection
 
-    assertThat(selection).isInstanceOf(PaymentSelection.New.LinkInline::class.java)
+    assertThat(selection).isInstanceOf<PaymentSelection.New.LinkInline>()
 
     return selection as PaymentSelection.New.LinkInline
 }

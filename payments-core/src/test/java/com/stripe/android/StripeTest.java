@@ -462,36 +462,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
-            throws StripeException {
-        final SourceParams params = SourceParams.createGiropayParams(
-                2000L,
-                "Mr. X",
-                "example://redirect",
-                "a well-described statement");
-        final Map<String, String> metamap = new HashMap<String, String>() {{
-            put("giro", "with chicken");
-            put("type", "wrap");
-        }};
-        params.setMetadata(metamap);
-
-        final Source giropaySource = defaultStripe.createSourceSynchronous(params);
-        assertNotNull(giropaySource);
-        assertNotNull(giropaySource.getClientSecret());
-        assertNotNull(giropaySource.getId());
-        assertNotNull(giropaySource.getAmount());
-        assertEquals("eur", giropaySource.getCurrency());
-        assertEquals(2000L, giropaySource.getAmount().longValue());
-        assertEquals(Source.SourceType.GIROPAY, giropaySource.getType());
-        assertNotNull(giropaySource.getSourceTypeData());
-        assertNull(giropaySource.getSourceTypeModel());
-        assertNotNull(giropaySource.getOwner());
-        assertNotNull(giropaySource.getRedirect());
-        assertEquals("Mr. X", giropaySource.getOwner().getName());
-        assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
-    }
-
-    @Test
     public void createSourceSynchronous_withP24Params_passesIntegrationTest()
             throws StripeException {
         final SourceParams p24Params = SourceParams.createP24Params(

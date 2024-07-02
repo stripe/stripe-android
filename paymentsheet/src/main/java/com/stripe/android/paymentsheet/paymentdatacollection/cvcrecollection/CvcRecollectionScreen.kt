@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,13 +22,17 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.H4Text
@@ -49,6 +55,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 internal fun CvcRecollectionScreen(
     cardBrand: CardBrand,
     lastFour: String,
+    isTestMode: Boolean,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     val element = remember {
@@ -64,11 +71,7 @@ internal fun CvcRecollectionScreen(
                 .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
-            CvcRecollectionHeader(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .offset(16.dp)
-            ) {
+            CvcRecollectionHeader(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
@@ -83,7 +86,7 @@ internal fun CvcRecollectionScreen(
     }
 }
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, lastFour: String) {
@@ -91,6 +94,16 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
         Color.White.copy(alpha = 0.075f)
     } else {
         Color.Black.copy(alpha = 0.075f)
+    }
+
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(element) {
+            focusRequester.requestFocus()
+        }
     }
 
     return SectionCard {
@@ -129,14 +142,15 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                 modifier = Modifier
                     .width(1.dp)
                     .fillMaxHeight(),
-                color = MaterialTheme.stripeColors.componentDivider
+                color = MaterialTheme.stripeColors.componentBorder
             )
             element.controller.ComposeUI(
                 enabled = true,
                 field = element,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(.5f, true),
+                    .weight(.5f, true)
+                    .focusRequester(focusRequester),
                 hiddenIdentifiers = setOf(),
                 lastTextFieldIdentifier = null,
                 nextFocusDirection = FocusDirection.Exit,
@@ -147,13 +161,24 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionHeader(modifier: Modifier, onClosePressed: () -> Unit) {
-    IconButton(
-        onClick = { onClosePressed.invoke() },
-        modifier = modifier
+private fun CvcRecollectionHeader(testMode: Boolean, onClosePressed: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(0.dp, 16.dp, 0.dp, 0.dp)
+            .height(32.dp)
     ) {
-        Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+        if (testMode) {
+            TestModeBadge()
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = { onClosePressed.invoke() },
+            Modifier.offset(16.dp, -8.dp)
+        ) {
+            Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+        }
     }
+
     H4Text(
         text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
         modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
@@ -185,6 +210,7 @@ private fun CvcRecollectionFieldPreview() {
         CvcRecollectionScreen(
             cardBrand = CardBrand.Visa,
             lastFour = "4242",
+            isTestMode = true,
             viewActionHandler = { }
         )
     }

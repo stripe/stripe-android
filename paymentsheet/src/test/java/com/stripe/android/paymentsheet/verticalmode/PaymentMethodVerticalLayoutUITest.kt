@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -281,6 +282,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     ): PaymentMethodVerticalLayoutInteractor {
         return object : PaymentMethodVerticalLayoutInteractor {
             override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlow
+            override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(false)
 
             override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
                 viewActionRecorder.record(viewAction)

@@ -5,16 +5,17 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val uniqueId: String,
-    val initialInstitution: String? = null,
-    val manualEntryOnly: Boolean? = null,
-    val searchSession: String? = null,
-    val verificationMethod: VerificationMethodParam? = null,
-    val customer: String? = null,
-    val onBehalfOf: String? = null,
+    val initialInstitution: String?,
+    val manualEntryOnly: Boolean?,
+    val searchSession: String?,
+    val verificationMethod: VerificationMethodParam?,
+    val hostedSurface: String?,
+    val customer: String?,
+    val onBehalfOf: String?,
 
     // PaymentIntent only params
-    val amount: Int? = null,
-    val currency: String? = null,
+    val amount: Int?,
+    val currency: String?,
 ) {
     fun toMap(): Map<String, Any?> {
         return mapOf(
@@ -25,6 +26,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
             PARAM_VERIFICATION_METHOD to verificationMethod?.value,
             PARAM_CUSTOMER to customer,
             PARAM_ON_BEHALF_OF to onBehalfOf,
+            PARAM_HOSTED_SURFACE to hostedSurface,
             PARAM_AMOUNT to amount,
             PARAM_CURRENCY to currency
         )
@@ -35,6 +37,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
         const val PARAM_INITIAL_INSTITUTION = "initial_institution"
         const val PARAM_MANUAL_ENTRY_ONLY = "manual_entry_only"
         const val PARAM_SEARCH_SESSION = "search_session"
+        const val PARAM_HOSTED_SURFACE = "hosted_surface"
         const val PARAM_VERIFICATION_METHOD = "verification_method"
         const val PARAM_CUSTOMER = "customer"
         const val PARAM_ON_BEHALF_OF = "on_behalf_of"

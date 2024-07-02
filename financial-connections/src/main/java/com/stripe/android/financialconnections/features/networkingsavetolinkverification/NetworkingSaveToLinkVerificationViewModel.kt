@@ -24,11 +24,13 @@ import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -49,6 +51,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     private val startVerification: StartVerification,
     private val getOrFetchSync: GetOrFetchSync,
     private val confirmVerification: ConfirmVerification,
+    private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val markLinkVerified: MarkLinkVerified,
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
@@ -135,6 +138,13 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
             )
 
             val accounts = getCachedAccounts()
+            if (accounts.isEmpty()) {
+                val attachedAccount = attachedPaymentAccountRepository.get()?.attachedPaymentAccount
+                require(
+                    value = attachedAccount is PaymentAccountParams.BankAccount,
+                    lazyMessage = { "An already attached account is required when no accounts cached" }
+                )
+            }
             val manifest = getOrFetchSync().manifest
 
             saveAccountToLink.existing(

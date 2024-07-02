@@ -22,6 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -37,6 +38,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -60,6 +62,7 @@ internal object CustomerSheetTestHelper {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onCollectBankAccountResult = { },
         onConfirmUSBankAccount = { },
@@ -80,6 +83,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -109,6 +113,7 @@ internal object CustomerSheetTestHelper {
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     internal fun createViewModel(
@@ -181,6 +186,7 @@ internal object CustomerSheetTestHelper {
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
+            errorReporter = FakeErrorReporter(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 

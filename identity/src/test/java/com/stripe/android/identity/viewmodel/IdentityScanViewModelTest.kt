@@ -11,10 +11,8 @@ import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -31,7 +29,6 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityScanViewModelTest {
     private val mockFpsTracker: FPSTracker = mock()
-    private val mockIdentityRepository: IdentityRepository = mock()
     private val mockIdentityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory = mock()
     private val mockPageAndModelFiles = mock<IdentityViewModel.PageAndModelFiles> {
         on { page }.then { mock<VerificationPage>() }
@@ -47,11 +44,9 @@ internal class IdentityScanViewModelTest {
         on { requireCameraAdapter() }.then { mock<CameraAdapter<CameraPreviewImage<Bitmap>>>() }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val viewModel = object : IdentityScanViewModel(
         ApplicationProvider.getApplicationContext(),
         mockFpsTracker,
-        mockIdentityRepository,
         mockIdentityAnalyticsRequestFactory,
         mock(),
         mock()

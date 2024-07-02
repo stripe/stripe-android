@@ -16,7 +16,6 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
@@ -42,7 +41,6 @@ internal class IdentityScanFlow(
     private val modelPerformanceTracker: ModelPerformanceTracker,
     private val laplacianBlurDetector: LaplacianBlurDetector,
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    private val identityRepository: IdentityRepository
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -108,14 +106,11 @@ internal class IdentityScanFlow(
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
-                            context,
                             idDetectorModelFile,
                             verificationPage.documentCapture.models.idDetectorMinScore,
-                            verificationPage.documentCapture.mbSettings,
                             modelPerformanceTracker,
                             laplacianBlurDetector,
                             identityAnalyticsRequestFactory,
-                            identityRepository
                         )
                     }
                 )

@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -28,6 +27,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -37,9 +37,12 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -82,6 +85,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+@OptIn(ExperimentalCvcRecollectionApi::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
@@ -112,6 +116,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val errorReporter: ErrorReporter,
+    @InitializedViaCompose private val initializedViaCompose: Boolean,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -225,6 +230,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     PaymentSheet.FlowController.linkHandler = null
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
                 }
             }
         )
@@ -276,6 +282,7 @@ internal class DefaultFlowController @Inject internal constructor(
             initializationMode = mode,
             configuration = configuration,
             callback = callback,
+            initializedViaCompose = initializedViaCompose,
         )
     }
 
@@ -389,19 +396,27 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else if (
-            FeatureFlags.cvcRecollection.isEnabled &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card &&
-            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
+            isCvcRecollectionEnabled(state) &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
             CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
                 cvcRecollectionLauncher.launch(
                     data = it,
-                    appearance = getPaymentAppearance()
+                    appearance = getPaymentAppearance(),
+                    state.stripeIntent.isLiveMode
                 )
             }
         } else {
             confirmPaymentSelection(paymentSelection, state)
         }
+    }
+
+    private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
+        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
+            (
+                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
+                    initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+                )
     }
 
     private fun confirmGenericPaymentMethod(
@@ -598,7 +613,9 @@ internal class DefaultFlowController @Inject internal constructor(
                             val selection = PaymentSelection.Saved(
                                 paymentMethod = it.paymentMethod,
                                 walletType = it.walletType,
-                                recollectedCvc = result.cvc
+                                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                                    cvc = result.cvc,
+                                )
                             )
                             confirmPaymentSelection(selection, state)
                         } ?: paymentResultCallback.onPaymentSheetResult(
@@ -917,7 +934,8 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback
+            paymentResultCallback: PaymentSheetResultCallback,
+            initializedViaCompose: Boolean,
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
@@ -933,6 +951,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
+                    .initializedViaCompose(initializedViaCompose)
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent

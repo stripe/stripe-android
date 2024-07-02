@@ -63,6 +63,7 @@ internal fun USBankAccountForm(
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
                 formArgs = formArgs,
+                hostedSurface = usBankAccountFormArgs.hostedSurface,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,

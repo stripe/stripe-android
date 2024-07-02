@@ -248,7 +248,14 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : 
 	public fun <init> (Ljava/lang/String;)V
 }
 
+public abstract interface class com/stripe/android/paymentsheet/CvcRecollectionEnabledCallback {
+	public abstract fun isCvcRecollectionRequired ()Z
+}
+
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalCvcRecollectionApi : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
@@ -561,6 +568,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
+	public final fun cvcRecollectionEnabledCallback (Lcom/stripe/android/paymentsheet/CvcRecollectionEnabledCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 }
 
@@ -681,6 +689,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun paymentMethodLayout (Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonColor (Landroid/content/res/ColorStateList;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
@@ -764,6 +773,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$B
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
+	public final fun cvcRecollectionEnabledCallback (Lcom/stripe/android/paymentsheet/CvcRecollectionEnabledCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 }
 
@@ -1528,24 +1538,6 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 	public abstract fun onAddressLauncherResult (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult;)V
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field paymentOptionsPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field paymentSheetPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentSheetPrimaryButtonBinding;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding : androidx/viewbinding/ViewBinding {
 	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
@@ -1887,6 +1879,14 @@ public final class com/stripe/android/paymentsheet/state/CustomerState$Creator :
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/CustomerState$Permissions$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState$Permissions;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState$Permissions;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

@@ -1,9 +1,14 @@
 package com.stripe.android.financialconnections.model
 
-internal sealed class PaymentAccountParams(val type: String) {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+internal sealed class PaymentAccountParams(val type: String) : Parcelable {
 
     abstract fun toParamMap(): Map<String, String>
 
+    @Parcelize
     data class LinkedAccount(
         val id: String
     ) : PaymentAccountParams("linked_account") {
@@ -13,6 +18,7 @@ internal sealed class PaymentAccountParams(val type: String) {
         )
     }
 
+    @Parcelize
     data class BankAccount(
         val routingNumber: String,
         val accountNumber: String
