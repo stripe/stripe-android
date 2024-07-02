@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
+import com.stripe.android.financialconnections.features.common.GenericBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -58,6 +59,12 @@ private fun NoticeSheetContent(
 ) {
     Box(modifier) {
         when (content) {
+            is NoticeSheetContent.Generic -> GenericBottomSheetContent(
+                content = content.content,
+                onConfirmModalClick = onConfirmModalClick,
+                onClickableTextClick = onClickableTextClick
+            )
+
             is Legal -> LegalDetailsBottomSheetContent(
                 legalDetails = content.legalDetails,
                 onConfirmModalClick = onConfirmModalClick,

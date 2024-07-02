@@ -95,6 +95,7 @@ private fun ConsentContent(
                 GenericScreen(
                     state = ScreenState(genericScreen),
                     onPrimaryButtonClick = onContinueClick,
+                    onClickableTextClick = onClickableTextClick,
                 )
             } else {
                 LoadedContent(

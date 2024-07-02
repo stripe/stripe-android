@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.model.NoticeContent
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -118,6 +119,11 @@ internal data class NoticeSheetState(
     )
 
     internal sealed interface NoticeSheetContent : Parcelable {
+
+        @Parcelize
+        data class Generic(
+            val content: NoticeContent,
+        ) : NoticeSheetContent
 
         @Parcelize
         data class Legal(

@@ -81,6 +81,7 @@ internal fun GenericScreenPreview() {
             screenState?.let { state ->
                 GenericScreen(
                     state = state,
+                    onClickableTextClick = {},
                     onPrimaryButtonClick = {
                         Log.d("GenericScreenPreview", "Primary button clicked")
                     },
@@ -97,6 +98,7 @@ internal fun GenericScreen(
     state: ScreenState,
     modifier: Modifier = Modifier,
     onPrimaryButtonClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -120,6 +122,7 @@ internal fun GenericScreen(
                 GenericFooter(
                     payload = it,
                     onPrimaryButtonClick = onPrimaryButtonClick,
+                    onClickableTextClick = onClickableTextClick,
                     modifier = Modifier.onGloballyPositioned {
                         with(density) {
                             footerHeight = it.size.height.toDp()
@@ -154,6 +157,7 @@ internal fun GenericScreen(
 
             GenericBody(
                 payload = state.screen.body,
+                onClickableTextClick = onClickableTextClick,
             )
         }
 
@@ -167,6 +171,7 @@ internal fun GenericScreen(
 internal fun GenericBody(
     payload: Screen.Body,
     modifier: Modifier = Modifier,
+    onClickableTextClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -186,7 +191,7 @@ internal fun GenericBody(
 
                         AnnotatedText(
                             text = TextResource.Text(fromHtml(entry.content)),
-                            onClickableTextClick = {},
+                            onClickableTextClick = onClickableTextClick,
                             defaultStyle = font.copy(
                                 textAlign = when (entry.alignment) {
                                     Start -> TextAlign.Start
@@ -245,7 +250,9 @@ internal fun GenericHeader(
 
         AnnotatedText(
             text = TextResource.Text(payload.title),
-            onClickableTextClick = { },
+            onClickableTextClick = {
+                Log.d("TILL123", it)
+            },
             defaultStyle = typography.headingXLarge.copy(
                 textAlign = textAlign,
             ),
@@ -272,6 +279,7 @@ internal fun GenericFooter(
     payload: Screen.Footer,
     modifier: Modifier = Modifier,
     onPrimaryButtonClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
 ) {
     val textAlign = when (payload.alignment) {
         Start -> TextAlign.Start
@@ -284,7 +292,7 @@ internal fun GenericFooter(
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
                 text = TextResource.Text(fromHtml(disclaimer)),
-                onClickableTextClick = {},
+                onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
                     textAlign = textAlign,
@@ -334,7 +342,7 @@ internal fun GenericFooter(
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
                 text = TextResource.Text(fromHtml(belowCta)),
-                onClickableTextClick = {},
+                onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
                     textAlign = textAlign,

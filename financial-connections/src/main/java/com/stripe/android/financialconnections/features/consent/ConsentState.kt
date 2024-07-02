@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.StreamlinedConsentPane
 import com.stripe.android.financialconnections.presentation.Async
 
 internal data class ConsentState(
@@ -15,8 +16,11 @@ internal data class ConsentState(
         val consent: ConsentPane,
         val merchantLogos: List<String>,
         val shouldShowMerchantLogos: Boolean,
-        val genericScreen: Screen? = null,
-    )
+        val streamlinedConsentPane: StreamlinedConsentPane? = null,
+    ) {
+        val genericScreen: Screen?
+            get() = streamlinedConsentPane?.screen
+    }
 
     sealed class ViewEffect {
         data class OpenUrl(

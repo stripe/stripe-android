@@ -32,6 +32,10 @@ internal data class TextUpdate(
 internal data class StreamlinedConsentPane(
     @SerialName("screen")
     val screen: Screen,
+    @SerialName("legal_details_notice")
+    val legalDetailsNotice: NoticeContent,
+    @SerialName("data_access_notice")
+    val dataAccessNotice: NoticeContent,
 ) : Parcelable
 
 @Serializable
@@ -246,6 +250,36 @@ internal data class LegalDetailsNotice(
     @SerialName("disclaimer")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val disclaimer: String? = null
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class NoticeContent(
+    @SerialName("icon")
+    val icon: Image? = null,
+    @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val title: String,
+    @SerialName("subtitle")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val subtitle: String? = null,
+    @SerialName("body")
+    val body: NoticeBody,
+    @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val cta: String,
+    @SerialName("disclaimer")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val disclaimer: String? = null
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class NoticeBody(
+    @SerialName("links")
+    val links: List<ServerLink> = emptyList(),
+    @SerialName("bullets")
+    val bullets: List<Bullet> = emptyList(),
 ) : Parcelable
 
 @Serializable

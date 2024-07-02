@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.model.NoticeContent
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -84,6 +85,53 @@ internal fun DataAccessBottomSheetContent(
 }
 
 @Composable
+internal fun GenericBottomSheetContent(
+    content: NoticeContent,
+    onClickableTextClick: (String) -> Unit,
+    onConfirmModalClick: () -> Unit
+) {
+    val title = rememberHtml(content.title)
+    val subtitle = content.subtitle?.let { rememberHtml(it) }
+    val learnMore = content.disclaimer?.let { rememberHtml(it) }
+    val links = remember(content.body.links) {
+        content.body.links.map { TextResource.Text(fromHtml(it.title)) }
+    }
+    val bullets = remember(content.body.bullets) {
+        content.body.bullets.map { BulletUI.from(it) }
+    }
+    ModalBottomSheetContent(
+        onClickableTextClick = onClickableTextClick,
+        cta = content.cta,
+        disclaimer = learnMore,
+        onConfirmModalClick = onConfirmModalClick
+    ) {
+        content.icon?.default?.let {
+            ShapedIcon(it, contentDescription = "legal details icon")
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+
+        Title(title = title, onClickableTextClick = onClickableTextClick)
+
+        subtitle?.let {
+            Spacer(modifier = Modifier.size(16.dp))
+            Subtitle(text = it, onClickableTextClick = onClickableTextClick)
+        }
+
+        Spacer(modifier = Modifier.size(24.dp))
+
+        if (bullets.isNotEmpty()) {
+            Bullets(bullets, onClickableTextClick)
+            Spacer(modifier = Modifier.size(24.dp))
+        }
+
+        if (links.isNotEmpty()) {
+            Links(links, onClickableTextClick)
+            Spacer(modifier = Modifier.size(24.dp))
+        }
+    }
+}
+
+@Composable
 internal fun LegalDetailsBottomSheetContent(
     legalDetails: LegalDetailsNotice,
     onClickableTextClick: (String) -> Unit,
@@ -140,6 +188,22 @@ internal fun Links(
             if (links.lastIndex == index) {
                 Divider(color = colors.border)
             }
+        }
+    }
+}
+
+@Composable
+internal fun Bullets(
+    bullets: List<BulletUI>,
+    onClickableTextClick: (String) -> Unit,
+) {
+    Column {
+        bullets.forEach { bullet ->
+            ListItem(
+                bullet = bullet,
+                onClickableTextClick = onClickableTextClick
+            )
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

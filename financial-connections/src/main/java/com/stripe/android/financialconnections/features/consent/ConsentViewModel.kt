@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -65,17 +66,10 @@ internal class ConsentViewModel @AssistedInject constructor(
                 consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
                 merchantLogos = sync.visual.merchantLogos,
-                genericScreen = sync.text.streamlinedConsentPane?.screen,
+                streamlinedConsentPane = sync.text.streamlinedConsentPane,
             )
         }.execute { copy(consent = it) }
     }
-
-//    private suspend fun initializeGenericScreenPresenter(screen: Screen) {
-//        genericScreenPresenter.initialize(screen)
-//
-//        genericScreenPresenter.onPrimaryButtonClick = ::onContinueClick
-//        genericScreenPresenter.onClickableTextClick = ::onClickableTextClick
-//    }
 
     override fun updateTopAppBar(state: ConsentState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
@@ -138,17 +132,31 @@ internal class ConsentViewModel @AssistedInject constructor(
     }
 
     private fun presentDataAccessBottomSheet() {
-        val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
+        val payload = stateFlow.value.consent() ?: return
+
+        val content = if (payload.streamlinedConsentPane != null) {
+            Generic(payload.streamlinedConsentPane.dataAccessNotice)
+        } else {
+            DataAccess(payload.consent.dataAccessNotice!!)
+        }
+
         presentNoticeSheet(
-            content = DataAccess(dataAccessNotice),
+            content = content,
             referrer = Pane.CONSENT,
         )
     }
 
     private fun presentLegalDetailsBottomSheet() {
-        val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
+        val payload = stateFlow.value.consent() ?: return
+
+        val content = if (payload.streamlinedConsentPane != null) {
+            Generic(payload.streamlinedConsentPane.legalDetailsNotice)
+        } else {
+            Legal(payload.consent.legalDetailsNotice)
+        }
+
         presentNoticeSheet(
-            content = Legal(notice),
+            content = content,
             referrer = Pane.CONSENT,
         )
     }
