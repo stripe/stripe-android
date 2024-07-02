@@ -552,13 +552,6 @@ public final class com/stripe/android/financialconnections/features/reset/Compos
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/success/ComposableSingletons$SuccessContentKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/success/ComposableSingletons$SuccessContentKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData;
