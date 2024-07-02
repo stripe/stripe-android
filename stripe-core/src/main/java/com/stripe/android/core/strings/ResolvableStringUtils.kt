@@ -5,7 +5,7 @@ package com.stripe.android.core.strings
 import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.core.strings.transformations.TransformOperation
+import kotlinx.parcelize.RawValue
 
 internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
     return args.map { arg ->
@@ -27,10 +27,9 @@ internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(
     @StringRes id: Int,
-    vararg formatArgs: Any?,
-    transformations: List<TransformOperation> = listOf()
+    vararg formatArgs: @RawValue Any?,
 ): ResolvableString {
-    return IdentifierResolvableString(id, formatArgs.toList(), transformations)
+    return IdentifierResolvableString(id, formatArgs.toList())
 }
 
 /**
@@ -42,6 +41,6 @@ fun resolvableString(
  * @return a [ResolvableString] instance when resolved returns the string value.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun resolvableString(value: String, vararg formatArgs: Any?): ResolvableString {
+fun resolvableString(value: String, vararg formatArgs: @RawValue Any?): ResolvableString {
     return StaticResolvableString(value, formatArgs.toList())
 }
