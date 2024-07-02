@@ -45,15 +45,15 @@ internal data class PartnerAccountsList(
 @Parcelize
 internal data class PartnerAccount(
 
-    @SerialName(value = "authorization") @Required val authorization: String,
+    @SerialName(value = "authorization") @Required val authorization: String? = null,
 
-    @SerialName(value = "category") @Required val category: FinancialConnectionsAccount.Category,
+    @SerialName(value = "category") @Required val category: FinancialConnectionsAccount.Category? = null,
 
     @SerialName(value = "id") @Required val id: String,
 
     @SerialName(value = "name") @Required val name: String,
 
-    @SerialName(value = "subcategory") @Required val subcategory: FinancialConnectionsAccount.Subcategory,
+    @SerialName(value = "subcategory") @Required val subcategory: FinancialConnectionsAccount.Subcategory? = null,
 
     @SerialName(value = "supported_payment_method_types")
     @Required

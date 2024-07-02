@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -120,7 +121,7 @@ internal interface FinancialConnectionsManifestRepository {
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>
+        selectedAccounts: Set<String>?
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -384,8 +385,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>,
+        selectedAccounts: Set<String>?,
     ): FinancialConnectionsSessionManifest {
+        // Accounts to be saved can be null in case of manual entry.
+        val accounts: Map<String, Any> = selectedAccounts
+            ?.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
+            ?.toMap()
+            ?: emptyMap()
         val request = apiRequestFactory.createPost(
             url = saveAccountToLinkUrl,
             options = apiOptions,
@@ -397,9 +403,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "locale" to locale,
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ).filterNotNullValues() + selectedAccounts.mapIndexed { index, account ->
-                "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account
-            }
+            ).filterNotNullValues() + accounts
         )
         return requestExecutor.execute(
             request,

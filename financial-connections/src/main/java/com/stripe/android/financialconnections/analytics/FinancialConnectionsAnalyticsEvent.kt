@@ -285,6 +285,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             ConsumerNotFoundError("ConsumerNotFoundError"),
             LookupConsumerSession("LookupConsumerSession"),
             StartVerificationSessionError("StartVerificationSessionError"),
+            SaveToLinkError("SaveToLinkError"),
             ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
             MarkLinkVerifiedError("MarkLinkVerifiedError"),
         }

@@ -399,7 +399,7 @@ private fun createUpdateRequiredContent(
             AccountUpdateRequiredState.Payload(
                 iconUrl = partnerAccount.institution?.icon?.default,
                 type = Repair(
-                    authorization = partnerToCoreAuths?.getValue(partnerAccount.authorization),
+                    authorization = partnerAccount.authorization?.let { partnerToCoreAuths?.getValue(it) },
                 ),
             )
         }
