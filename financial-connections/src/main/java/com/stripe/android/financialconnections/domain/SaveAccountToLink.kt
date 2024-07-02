@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 
 internal class SaveAccountToLink @Inject constructor(
@@ -117,8 +118,6 @@ internal class SaveAccountToLink @Inject constructor(
         manifest: FinancialConnectionsSessionManifest,
         selectedAccounts: Int,
     ) {
-        // No saved accounts means a manually entered account was already attached.
-        val accountsCount = if (selectedAccounts == 0) 1 else selectedAccounts
         successContentRepository.set(
             customSuccessMessage = manifest.displayText?.successPane?.subCaption
                 // If backend returns a custom success message, use it
@@ -126,18 +125,18 @@ internal class SaveAccountToLink @Inject constructor(
                 // If not, build a Link success message locally
                 ?: TextResource.PluralId(
                     value = R.plurals.stripe_success_pane_desc_link_success,
-                    count = accountsCount,
+                    // No selected accounts means a manually entered account was already attached.
+                    count = max(1, selectedAccounts),
                 )
         )
     }
 
     private fun storeFailedToSaveToLinkMessage(selectedAccounts: Int) {
-        // No saved accounts means a manually entered account was already attached.
-        val accountsCount = if (selectedAccounts == 0) 1 else selectedAccounts
         successContentRepository.set(
             customSuccessMessage = TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_desc_link_error,
-                count = accountsCount,
+                // No selected accounts means a manually entered account was already attached.
+                count = max(1, selectedAccounts),
             )
         )
     }
