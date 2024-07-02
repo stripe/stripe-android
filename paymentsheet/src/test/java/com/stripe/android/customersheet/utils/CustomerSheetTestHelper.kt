@@ -22,6 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -61,6 +62,7 @@ internal object CustomerSheetTestHelper {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onCollectBankAccountResult = { },
         onConfirmUSBankAccount = { },

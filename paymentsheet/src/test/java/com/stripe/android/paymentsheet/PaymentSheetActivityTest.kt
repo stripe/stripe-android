@@ -4,11 +4,16 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -27,6 +32,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -52,10 +58,15 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
@@ -393,6 +404,67 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `selected saved PM does not change after selecting a new non-saved PM`() {
+        val paymentMethods = PAYMENT_METHODS.take(1)
+        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
+
+            composeTestRule.onNodeWithTag(
+                PaymentOptionsItem.AddCard.viewType.name
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                SHEET_NAVIGATION_BUTTON_TAG
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
+        }
+    }
+
+    @Test
+    fun `removing last selected saved PM clears out saved payment selection`() {
+        val paymentMethods = PAYMENT_METHODS.take(1)
+        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity { activity ->
+            composeTestRule.onNodeWithTag(
+                PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG,
+            ).performClick()
+
+            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.onAllNodes(hasTestTag(TEST_TAG_REMOVE_BADGE), useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+
+            composeTestRule.onNodeWithTag(
+                TEST_TAG_REMOVE_BADGE,
+                useUnmergedTree = true,
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
+
+            composeTestRule.waitForIdle()
+
+            assertThat(viewModel.currentScreen.value).isInstanceOf(PaymentSheetScreen.AddFirstPaymentMethod::class.java)
+
+            composeTestRule.onNodeWithTag(
+                TEST_TAG_LIST + "card",
+            ).onChildren().assertAny(isSelected())
+            assertThat(activity.buyButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
     fun `updates buy button state on add payment`() {
         Dispatchers.setMain(testDispatcher)
 
@@ -473,19 +545,19 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             scenario.launch(intent)
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddAnotherPaymentMethod>()
 
             pressBack()
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             viewModel.modifyPaymentMethod(card)
-            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             pressBack()
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             pressBack()
             expectNoEvents()
@@ -606,9 +678,7 @@ internal class PaymentSheetActivityTest {
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
-                WalletsProcessingState.Completed::class.java
-            )
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf<WalletsProcessingState.Completed>()
             assertThat(viewModel.contentVisible.value).isEqualTo(true)
         }
     }
@@ -635,9 +705,7 @@ internal class PaymentSheetActivityTest {
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
-                WalletsProcessingState.Completed::class.java
-            )
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf<WalletsProcessingState.Completed>()
         }
     }
 
@@ -696,9 +764,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isInstanceOf(
-            PaymentSheetResult.Failed::class.java
-        )
+        ).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -861,7 +927,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -892,7 +958,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -915,7 +981,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test

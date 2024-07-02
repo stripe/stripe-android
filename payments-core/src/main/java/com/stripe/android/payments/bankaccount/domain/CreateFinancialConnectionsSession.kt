@@ -22,6 +22,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         stripeAccountId: String?,
+        hostedSurface: String?,
         configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
         val paymentIntentClientSecretResult = runCatching {
@@ -31,7 +32,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         return paymentIntentClientSecretResult.mapCatching { paymentIntentClientSecret ->
             stripeRepository.createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = paymentIntentClientSecret.paymentIntentId,
-                params = configuration.toCreateSessionParams(clientSecret),
+                params = configuration.toCreateSessionParams(
+                    clientSecret = clientSecret,
+                    hostedSurface = hostedSurface
+                ),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
@@ -47,6 +51,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         stripeAccountId: String?,
+        hostedSurface: String?,
         configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
         val setupIntentClientSecretResult = runCatching {
@@ -56,7 +61,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         return setupIntentClientSecretResult.mapCatching { setupIntentClientSecret ->
             stripeRepository.createSetupIntentFinancialConnectionsSession(
                 setupIntentId = setupIntentClientSecret.setupIntentId,
-                params = configuration.toCreateSessionParams(clientSecret),
+                params = configuration.toCreateSessionParams(
+                    clientSecret = clientSecret,
+                    hostedSurface = hostedSurface
+                ),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
@@ -80,17 +88,22 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         elementsSessionId: String,
         customerId: String?,
         onBehalfOf: String?,
+        hostedSurface: String?,
         amount: Int?,
         currency: String?
     ): Result<FinancialConnectionsSession> {
         return stripeRepository.createFinancialConnectionsSessionForDeferredPayments(
             params = CreateFinancialConnectionsSessionForDeferredPaymentParams(
+                initialInstitution = null,
+                manualEntryOnly = null,
+                searchSession = null,
+                hostedSurface = hostedSurface,
                 uniqueId = elementsSessionId,
                 verificationMethod = VerificationMethodParam.Automatic,
                 customer = customerId,
                 onBehalfOf = onBehalfOf,
                 amount = amount,
-                currency = currency
+                currency = currency,
             ),
             requestOptions = ApiRequest.Options(
                 publishableKey,
@@ -100,21 +113,24 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
     }
 
     private fun CollectBankAccountConfiguration.toCreateSessionParams(
-        clientSecret: String
+        clientSecret: String,
+        hostedSurface: String?
     ): CreateFinancialConnectionsSessionParams {
         return when (this) {
             is CollectBankAccountConfiguration.USBankAccount -> {
                 CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmailAddress = email
+                    customerEmailAddress = email,
+                    hostedSurface = hostedSurface
                 )
             }
 
             is CollectBankAccountConfiguration.InstantDebits -> {
                 CreateFinancialConnectionsSessionParams.InstantDebits(
                     clientSecret = clientSecret,
-                    customerEmailAddress = email
+                    customerEmailAddress = email,
+                    hostedSurface = hostedSurface
                 )
             }
         }

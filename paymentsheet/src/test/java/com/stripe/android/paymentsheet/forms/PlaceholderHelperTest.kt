@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.removeCorrespondingPlaceholder
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specForPlaceholderField
@@ -407,9 +408,9 @@ class PlaceholderHelperTest {
                 requiresMandate = true,
                 configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             )
-        ).isInstanceOf(
-            SepaMandateTextSpec::class.java
-        )
+        ).isInstanceOf<
+            SepaMandateTextSpec
+            >()
     }
 
     @Test
@@ -429,9 +430,9 @@ class PlaceholderHelperTest {
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
             )
-        ).isInstanceOf(
-            NameSpec::class.java
-        )
+        ).isInstanceOf<
+            NameSpec
+            >()
         assertThat(
             specForPlaceholderField(
                 field = PlaceholderField.Email,
@@ -439,9 +440,9 @@ class PlaceholderHelperTest {
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
             )
-        ).isInstanceOf(
-            EmailSpec::class.java
-        )
+        ).isInstanceOf<
+            EmailSpec
+            >()
         assertThat(
             specForPlaceholderField(
                 field = PlaceholderField.Phone,
@@ -449,9 +450,9 @@ class PlaceholderHelperTest {
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
             )
-        ).isInstanceOf(
-            PhoneSpec::class.java
-        )
+        ).isInstanceOf<
+            PhoneSpec
+            >()
         assertThat(
             specForPlaceholderField(
                 field = PlaceholderField.BillingAddress,
@@ -459,9 +460,9 @@ class PlaceholderHelperTest {
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
             )
-        ).isInstanceOf(
-            AddressSpec::class.java
-        )
+        ).isInstanceOf<
+            AddressSpec
+            >()
     }
 
     @Test
