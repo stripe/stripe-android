@@ -2,14 +2,17 @@ package com.stripe.android.financialconnections.domain
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository.State
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -19,6 +22,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.whenever
 import java.util.Locale
 import kotlin.test.assertFails
 
@@ -138,6 +142,44 @@ internal class SaveAccountToLinkTest {
         )
     }
 
+    @Test
+    fun `Sets custom success message with one account if manual entry account was attached`() =
+        runTest(testDispatcher) {
+            val accountsRepository = mockAccountsRepository()
+            val attachedPaymentAccountRepository = mock<AttachedPaymentAccountRepository>()
+            val successRepository = SuccessContentRepository(SavedStateHandle())
+
+            whenever(attachedPaymentAccountRepository.get()).thenReturn(
+                State(
+                    attachedPaymentAccount = PaymentAccountParams.BankAccount(
+                        accountNumber = "acct_123",
+                        routingNumber = "110000000",
+                    )
+                )
+            )
+
+            val saveAccountToLink = makeSaveAccountToLink(
+                accountsRepository = accountsRepository,
+                successRepository = successRepository,
+                attachedPaymentAccountRepository = attachedPaymentAccountRepository,
+            )
+
+            saveAccountToLink.new(
+                email = "email@email.com",
+                phoneNumber = "+15555555555",
+                selectedAccounts = emptyList(),
+                country = "US",
+                shouldPollAccountNumbers = true,
+            )
+
+            assertThat(successRepository.get()?.customSuccessMessage).isEqualTo(
+                TextResource.PluralId(
+                    value = R.plurals.stripe_success_pane_desc_link_success,
+                    count = 1,
+                )
+            )
+        }
+
     private fun makeSaveAccountToLink(
         repository: FinancialConnectionsManifestRepository = mockManifestRepository(),
         accountsRepository: FinancialConnectionsAccountsRepository = mockAccountsRepository(),
@@ -153,6 +195,7 @@ internal class SaveAccountToLinkTest {
             successContentRepository = successRepository,
             repository = repository,
             attachedPaymentAccountRepository = attachedPaymentAccountRepository,
+            logger = Logger.noop(),
             accountsRepository = accountsRepository,
         )
     }

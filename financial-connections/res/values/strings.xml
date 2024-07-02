@@ -57,6 +57,7 @@
         <item quantity="other">Your accounts were connected.</item>
     </plurals>
     <plurals name="stripe_success_pane_desc_link_success">
+        <item quantity="zero">Your account was connected and saved with Link.</item>
         <item quantity="one">Your account was connected and saved with Link.</item>
         <item quantity="other">Your accounts were connected and saved with Link.</item>
     </plurals>
