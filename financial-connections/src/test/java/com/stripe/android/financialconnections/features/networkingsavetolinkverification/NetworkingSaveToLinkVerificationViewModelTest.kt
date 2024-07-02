@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -44,6 +45,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val getOrFetchSync = mock<GetOrFetchSync>()
+    private val attachedPaymentAccountRepository = mock<AttachedPaymentAccountRepository>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
@@ -62,6 +64,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
         initialState = state,
+        attachedPaymentAccountRepository = attachedPaymentAccountRepository,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 

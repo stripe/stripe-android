@@ -145,8 +145,8 @@ internal class ManualEntryViewModel @AssistedInject constructor(
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(routing),
-                    accountNumber = requireNotNull(account)
+                    routingNumber = routing,
+                    accountNumber = account
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
