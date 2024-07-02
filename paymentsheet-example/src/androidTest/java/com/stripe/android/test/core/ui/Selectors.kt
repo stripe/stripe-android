@@ -249,21 +249,21 @@ internal class Selectors(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(id)
 
     // Note: Compose will take care of scrolling to the field if not in view.
-    fun getEmail() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getEmail() = composeTestRule.onNodeWithText(
         getResourceString(UiCoreR.string.stripe_email)
     )
 
-    fun getName(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
+    fun getName(labelText: String) = composeTestRule.onNodeWithText(labelText)
 
-    fun getLine1() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getLine1() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_address_line1)
     )
 
-    fun getCity() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getCity() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_city)
     )
 
-    fun getState() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getState() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_state)
     )
 
@@ -274,11 +274,11 @@ internal class Selectors(
             .performClick()
     }
 
-    fun getZip() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
-    fun getPostalCode() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getPostalCode() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_postal_code)
     )
 
