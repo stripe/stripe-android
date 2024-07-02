@@ -308,12 +308,6 @@ internal class Selectors(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
-    fun getGoogleDividerText() = composeTestRule.onNodeWithText(
-        "Or pay",
-        substring = true,
-        useUnmergedTree = true
-    )
-
     fun getCardNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             StripeR.string.stripe_acc_label_card_number
