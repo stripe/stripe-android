@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -19,7 +18,6 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SaveAccountToLink @Inject constructor(
     private val locale: Locale?,
-    private val logger: Logger,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val successContentRepository: SuccessContentRepository,
@@ -92,8 +90,7 @@ internal class SaveAccountToLink @Inject constructor(
             action(selectedAccountIds)
         }.onSuccess { manifest ->
             storeSavedToLinkMessage(manifest, selectedAccountIds.size)
-        }.onFailure { it ->
-            logger.error("Failed to save accounts to Link", it)
+        }.onFailure {
             storeFailedToSaveToLinkMessage(selectedAccountIds.size)
         }.getOrThrow()
     }
