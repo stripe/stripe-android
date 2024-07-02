@@ -291,7 +291,11 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ephemeral_key_2",
-                paymentMethods = paymentMethods
+                paymentMethods = paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = false,
+                ),
             ),
             customerRepository = customerRepository
         )
@@ -370,7 +374,11 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ephemeral_key_2",
-                paymentMethods = paymentMethods
+                paymentMethods = paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = false,
+                ),
             ),
             customerRepository = customerRepository
         )
