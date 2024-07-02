@@ -12,9 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -120,7 +118,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 selection is PaymentSelection.Saved ||
                     selection == PaymentSelection.Link ||
                     selection == PaymentSelection.GooglePay
-            }.stateIn(this).collect {
+            }.collect {
                 _paymentOptionsRelevantSelection.value = it
             }
         }
