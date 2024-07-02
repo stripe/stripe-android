@@ -77,8 +77,8 @@ internal fun SavedPaymentMethodTabLayoutUI(
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
+    onModifyItem: (paymentMethodId: String?) -> Unit,
+    onItemRemoved: (paymentMethodId: String?) -> Unit,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
@@ -186,8 +186,8 @@ private fun SavedPaymentMethodTab(
     isSelected: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
+    onModifyItem: (paymentMethodId: String?) -> Unit,
+    onItemRemoved: (paymentMethodId: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (item) {
@@ -314,8 +314,8 @@ private fun SavedPaymentMethodTab(
     isRemovable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
+    onModifyItem: (paymentMethodId: String?) -> Unit,
+    onItemRemoved: (paymentMethodId: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -343,9 +343,9 @@ private fun SavedPaymentMethodTab(
             labelText = labelText,
             paymentMethod = paymentMethod.displayableSavedPaymentMethod,
             description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
-            onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
+            onModifyListener = { onModifyItem(paymentMethod.paymentMethod.id) },
             onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
-            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
+            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod.id) },
             onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
             onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
             modifier = modifier,

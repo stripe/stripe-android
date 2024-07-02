@@ -62,8 +62,8 @@ internal class DefaultManageScreenInteractor(
         allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
         onSelectPaymentMethod = { viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod)) },
-        onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod) },
-        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+        onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod.id) },
+        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod.id) },
         navigateBack = viewModel::handleBackPressed
     )
 

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -32,8 +31,8 @@ internal interface SelectSavedPaymentMethodsInteractor {
 
         data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
 
-        data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
-        data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
+        data class DeletePaymentMethod(val paymentMethodId: String?) : ViewAction()
+        data class EditPaymentMethod(val paymentMethodId: String?) : ViewAction()
     }
 }
 
@@ -42,8 +41,8 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val editing: StateFlow<Boolean>,
     private val isProcessing: StateFlow<Boolean>,
     private val onAddCardPressed: () -> Unit,
-    private val onEditPaymentMethod: (PaymentMethod) -> Unit,
-    private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
+    private val onEditPaymentMethod: (paymentMethodId: String?) -> Unit,
+    private val onDeletePaymentMethod: (paymentMethodId: String?) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : SelectSavedPaymentMethodsInteractor {
@@ -100,11 +99,11 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     override fun handleViewAction(viewAction: SelectSavedPaymentMethodsInteractor.ViewAction) {
         when (viewAction) {
             is SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(
-                viewAction.paymentMethod
+                viewAction.paymentMethodId
             )
 
             is SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(
-                viewAction.paymentMethod
+                viewAction.paymentMethodId
             )
 
             is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> onPaymentMethodSelected(

@@ -174,8 +174,8 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
-            is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
-            is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
+            is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethodId)
+            is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethodId)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
             is CustomerSheetViewAction.OnAddPaymentMethodItemChanged ->
@@ -470,8 +470,19 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onItemRemoved(paymentMethod: PaymentMethod) {
+    private fun onItemRemoved(paymentMethodId: String?) {
+        // TODO(samer-stripe): We should guarantee a payment method ID is available with data modeling updates to UI
+        if (paymentMethodId == null) {
+            return
+        }
+
         viewModelScope.launch(workContext) {
+            val currentViewState = viewState.value
+
+            val paymentMethod = currentViewState.savedPaymentMethods.find { paymentMethod ->
+                paymentMethod.id == paymentMethodId
+            } ?: return@launch
+
             val result = removePaymentMethod(paymentMethod)
 
             result.fold(
@@ -542,8 +553,17 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onModifyItem(paymentMethod: PaymentMethod) {
+    private fun onModifyItem(paymentMethodId: String?) {
+        // TODO(samer-stripe): We should guarantee a payment method ID is available with data modeling updates to UI
+        if (paymentMethodId == null) {
+            return
+        }
+
         val currentViewState = viewState.value
+
+        val paymentMethod = currentViewState.savedPaymentMethods.find { paymentMethod ->
+            paymentMethod.id == paymentMethodId
+        } ?: return
 
         val canRemove = if (configuration.allowsRemovalOfLastSavedPaymentMethod) {
             true

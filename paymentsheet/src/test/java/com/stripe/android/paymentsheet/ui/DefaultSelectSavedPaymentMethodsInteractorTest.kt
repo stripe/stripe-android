@@ -116,39 +116,39 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     @Test
     fun handleViewAction_DeletePaymentMethod_deletesPaymentMethod() {
-        var deletedPaymentMethod: PaymentMethod? = null
-        fun onDeletePaymentMethod(paymentMethod: PaymentMethod) {
-            deletedPaymentMethod = paymentMethod
+        var deletedPaymentMethodId: String? = null
+        fun onDeletePaymentMethod(paymentMethodId: String?) {
+            deletedPaymentMethodId = paymentMethodId
         }
 
         runScenario(onDeletePaymentMethod = ::onDeletePaymentMethod) {
             val paymentMethodToDelete = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(
-                    paymentMethodToDelete
+                    paymentMethodToDelete.id
                 )
             )
 
-            assertThat(deletedPaymentMethod).isEqualTo(paymentMethodToDelete)
+            assertThat(deletedPaymentMethodId).isEqualTo(paymentMethodToDelete.id)
         }
     }
 
     @Test
     fun handleViewAction_EditPaymentMethod_editsPaymentMethod() {
-        var editedPaymentMethod: PaymentMethod? = null
-        fun onEditPaymentMethod(paymentMethod: PaymentMethod) {
-            editedPaymentMethod = paymentMethod
+        var editedPaymentMethodId: String? = null
+        fun onEditPaymentMethod(paymentMethodId: String?) {
+            editedPaymentMethodId = paymentMethodId
         }
 
         runScenario(onEditPaymentMethod = ::onEditPaymentMethod) {
             val paymentMethodToEdit = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(
-                    paymentMethodToEdit
+                    paymentMethodToEdit.id
                 )
             )
 
-            assertThat(editedPaymentMethod).isEqualTo(paymentMethodToEdit)
+            assertThat(editedPaymentMethodId).isEqualTo(paymentMethodToEdit.id)
         }
     }
 
@@ -214,8 +214,8 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         onAddCardPressed: () -> Unit = { notImplemented() },
-        onEditPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
-        onDeletePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        onEditPaymentMethod: (String?) -> Unit = { notImplemented() },
+        onDeletePaymentMethod: (String?) -> Unit = { notImplemented() },
         onPaymentMethodSelected: (PaymentSelection?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
