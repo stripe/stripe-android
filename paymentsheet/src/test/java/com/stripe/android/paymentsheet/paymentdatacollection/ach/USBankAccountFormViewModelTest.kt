@@ -47,6 +47,7 @@ import kotlin.test.Test
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
+        instantDebits = false,
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
@@ -65,7 +66,7 @@ class USBankAccountFormViewModelTest {
         onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
-        instantDebits = false,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()

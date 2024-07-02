@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.utils.filterNotNullValues
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CreateFinancialConnectionsSessionParams {
@@ -9,7 +10,8 @@ sealed interface CreateFinancialConnectionsSessionParams {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebits(
         val clientSecret: String,
-        val customerEmailAddress: String?
+        val customerEmailAddress: String?,
+        val hostedSurface: String?
     ) : CreateFinancialConnectionsSessionParams {
 
         override fun toMap(): Map<String, Any> {
@@ -21,11 +23,11 @@ sealed interface CreateFinancialConnectionsSessionParams {
             )
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
-                PARAM_HOSTED_SURFACE to "payment_element",
+                PARAM_HOSTED_SURFACE to hostedSurface,
                 PARAM_PRODUCT to "instant_debits",
                 PARAM_ATTACH_REQUIRED to true,
                 PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
-            )
+            ).filterNotNullValues()
         }
     }
 
@@ -33,7 +35,8 @@ sealed interface CreateFinancialConnectionsSessionParams {
     data class USBankAccount(
         val clientSecret: String,
         val customerName: String,
-        val customerEmailAddress: String?
+        val customerEmailAddress: String?,
+        val hostedSurface: String?
     ) : CreateFinancialConnectionsSessionParams {
         override fun toMap(): Map<String, Any> {
             val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(
@@ -44,8 +47,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
             )
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
+                PARAM_HOSTED_SURFACE to hostedSurface,
                 PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
-            )
+            ).filterNotNullValues()
         }
     }
 

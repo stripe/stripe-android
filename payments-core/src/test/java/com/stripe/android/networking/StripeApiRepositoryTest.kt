@@ -1773,6 +1773,7 @@ internal class StripeApiRepositoryTest {
                     customer = "customer_id",
                     onBehalfOf = null,
                     amount = 1000,
+                    hostedSurface = "payment_element",
                     currency = "usd"
                 ),
                 DEFAULT_OPTIONS
@@ -1790,6 +1791,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["customer"]).isEqualTo("customer_id")
                 assertThat(this["on_behalf_of"]).isEqualTo(null)
                 assertThat(this["amount"]).isEqualTo(1000)
+                assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
             }
         }
@@ -2050,6 +2052,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2064,6 +2067,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2090,7 +2094,8 @@ internal class StripeApiRepositoryTest {
             paymentIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )
@@ -2135,6 +2140,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2150,6 +2156,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2176,7 +2183,8 @@ internal class StripeApiRepositoryTest {
             setupIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )

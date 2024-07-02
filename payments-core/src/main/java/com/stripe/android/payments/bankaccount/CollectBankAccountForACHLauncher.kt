@@ -4,7 +4,8 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 
 internal class CollectBankAccountForACHLauncher(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+    private val hostedSurface: String?
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(
@@ -19,6 +20,7 @@ internal class CollectBankAccountForACHLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -36,6 +38,7 @@ internal class CollectBankAccountForACHLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -60,6 +63,7 @@ internal class CollectBankAccountForACHLauncher(
                 customerId = customerId,
                 onBehalfOf = onBehalfOf,
                 amount = amount,
+                hostedSurface = hostedSurface,
                 currency = currency,
             )
         )
@@ -80,6 +84,7 @@ internal class CollectBankAccountForACHLauncher(
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,
+                hostedSurface = hostedSurface,
                 onBehalfOf = onBehalfOf,
             )
         )

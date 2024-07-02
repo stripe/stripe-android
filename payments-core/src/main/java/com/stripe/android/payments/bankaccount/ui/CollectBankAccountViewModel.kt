@@ -63,6 +63,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 createFinancialConnectionsSession.forDeferredPayments(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
+                    hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
@@ -74,6 +75,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 createFinancialConnectionsSession.forDeferredPayments(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
+                    hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
@@ -85,6 +87,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
+                    hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
                 )
@@ -93,6 +96,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
+                    hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
                 )

@@ -14,7 +14,10 @@ class CollectBankAccountForACHLauncherTest {
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
-    private val launcher = CollectBankAccountForACHLauncher(mockHostActivityLauncher)
+    private val launcher = CollectBankAccountForACHLauncher(
+        mockHostActivityLauncher,
+        hostedSurface = null
+    )
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
@@ -31,7 +34,8 @@ class CollectBankAccountForACHLauncherTest {
                 stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = true,
+                hostedSurface = null
             )
         )
     }
@@ -42,7 +46,7 @@ class CollectBankAccountForACHLauncherTest {
             publishableKey = PUBLISHABLE_KEY,
             stripeAccountId = STRIPE_ACCOUNT_ID,
             clientSecret = CLIENT_SECRET,
-            configuration = CONFIGURATION
+            configuration = CONFIGURATION,
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -51,7 +55,8 @@ class CollectBankAccountForACHLauncherTest {
                 stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = true,
+                hostedSurface = null
             )
         )
     }
@@ -78,7 +83,8 @@ class CollectBankAccountForACHLauncherTest {
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
-                currency = "usd"
+                currency = "usd",
+                hostedSurface = null
             )
         )
     }
@@ -102,6 +108,7 @@ class CollectBankAccountForACHLauncherTest {
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
+                hostedSurface = null
             )
         )
     }

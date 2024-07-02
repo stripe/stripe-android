@@ -47,6 +47,7 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
+                    hostedSurface = "payment_element",
                     stripeAccountId = null
                 )
 
@@ -54,9 +55,10 @@ class CreateFinancialConnectionsSessionTest {
             verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
                 params = CreateFinancialConnectionsSessionParams.USBankAccount(
-                    clientSecret,
-                    customerName,
-                    null
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    hostedSurface = "payment_element",
+                    customerEmailAddress = null
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -83,6 +85,7 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
+                    hostedSurface = "payment_element",
                     stripeAccountId = null
                 )
 
@@ -92,6 +95,7 @@ class CreateFinancialConnectionsSessionTest {
                 params = CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret = clientSecret,
                     customerName = customerName,
+                    hostedSurface = "payment_element",
                     customerEmailAddress = null
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
@@ -117,7 +121,8 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null
+                    stripeAccountId = null,
+                    hostedSurface = "payment_element"
                 )
 
             // Then
@@ -143,16 +148,18 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    hostedSurface = "payment_element"
                 )
 
             // Then
             verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
                 params = CreateFinancialConnectionsSessionParams.USBankAccount(
-                    clientSecret,
-                    customerName,
-                    null
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = null,
+                    hostedSurface = "payment_element"
                 ),
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
@@ -181,16 +188,18 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null
+                    stripeAccountId = null,
+                    hostedSurface = "payment_element"
                 )
 
             // Then
             verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
                 params = CreateFinancialConnectionsSessionParams.USBankAccount(
-                    clientSecret,
-                    customerName,
-                    null
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = null,
+                    hostedSurface = "payment_element"
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -215,7 +224,8 @@ class CreateFinancialConnectionsSessionTest {
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null
+                    stripeAccountId = null,
+                    hostedSurface = "payment_element"
                 )
 
             // Then
@@ -243,6 +253,7 @@ class CreateFinancialConnectionsSessionTest {
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
+                    hostedSurface = "payment_element",
                     onBehalfOf = onBehalfOf,
                     amount = amount,
                     currency = currency
@@ -258,6 +269,7 @@ class CreateFinancialConnectionsSessionTest {
                         searchSession = null,
                         verificationMethod = VerificationMethodParam.Automatic,
                         customer = customerId,
+                        hostedSurface = "payment_element",
                         onBehalfOf = onBehalfOf,
                         amount = amount,
                         currency = currency
@@ -297,7 +309,8 @@ class CreateFinancialConnectionsSessionTest {
                     customerId = customerId,
                     onBehalfOf = onBehalfOf,
                     amount = amount,
-                    currency = currency
+                    currency = currency,
+                    hostedSurface = "payment_element"
                 )
 
             // Then
@@ -312,7 +325,8 @@ class CreateFinancialConnectionsSessionTest {
                         customer = customerId,
                         onBehalfOf = onBehalfOf,
                         amount = amount,
-                        currency = currency
+                        currency = currency,
+                        hostedSurface = "payment_element"
                     )
                 ),
                 requestOptions = eq(

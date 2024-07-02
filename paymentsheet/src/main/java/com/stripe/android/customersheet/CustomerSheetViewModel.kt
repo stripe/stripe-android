@@ -36,6 +36,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -836,6 +837,7 @@ internal class CustomerSheetViewModel(
                     onUpdatePrimaryButtonUIState = {
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
                     },
+                    hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
                     onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
                     onError = { error ->
                         handleViewAction(CustomerSheetViewAction.OnFormError(error))
