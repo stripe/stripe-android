@@ -23,8 +23,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
@@ -157,7 +157,8 @@ internal class ManualEntryViewModel @AssistedInject constructor(
                         )
                     )
                 }
-                navigationManager.tryNavigateTo(Destination.ManualEntrySuccess(referrer = PANE))
+                val nextPane = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination(referrer = PANE)
+                navigationManager.tryNavigateTo(nextPane)
             }
         }.execute { copy(linkPaymentAccount = it) }
     }
