@@ -127,7 +127,6 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     fun `otpEntered - on valid OTP confirms, no accounts but attached ME still saves navigates to success pane`() =
         runTest {
             val consumerSession = consumerSession()
-            val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
@@ -150,7 +149,6 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
             }
-
 
             val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
