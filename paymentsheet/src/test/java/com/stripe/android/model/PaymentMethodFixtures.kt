@@ -406,6 +406,12 @@ internal object PaymentMethodFixtures {
 
     val US_BANK_ACCOUNT = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_JSON)
 
+    val CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
+        PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+        CardBrand.Visa,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+    )
+
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """
