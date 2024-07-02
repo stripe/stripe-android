@@ -9,7 +9,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -58,7 +57,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
@@ -437,14 +435,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            composeTestRule.onNodeWithTag(
-                PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG,
-            ).performClick()
-
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
-                composeTestRule.onAllNodes(hasTestTag(TEST_TAG_REMOVE_BADGE), useUnmergedTree = true)
-                    .fetchSemanticsNodes().isNotEmpty()
-            }
+            viewModel.toggleEditing()
 
             composeTestRule.onNodeWithTag(
                 TEST_TAG_REMOVE_BADGE,
