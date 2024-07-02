@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
@@ -1174,7 +1175,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializedViaCompose = false,
             ).exceptionOrNull()
 
-            assertThat(exception).isInstanceOf(IllegalStateException::class.java)
+            assertThat(exception).isInstanceOf<IllegalStateException>()
 
             assertThat(errorReporter.getLoggedErrors())
                 .contains(

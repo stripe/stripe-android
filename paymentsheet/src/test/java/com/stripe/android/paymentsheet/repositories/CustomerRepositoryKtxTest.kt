@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
@@ -201,7 +202,7 @@ class CustomerRepositoryKtxTest {
                 )
             }
 
-            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).isInstanceOf<IllegalArgumentException>()
             assertThat(exception.message).isEqualTo("Payment method with id 'pm_1' does not exist!")
         }
 
@@ -239,7 +240,7 @@ class CustomerRepositoryKtxTest {
             )
 
             assertThat(results[1].result.exceptionOrNull())
-                .isInstanceOf(NoPaymentMethodIdOnRemovalException::class.java)
+                .isInstanceOf<NoPaymentMethodIdOnRemovalException>()
         }
 
     private data class TestException(override val message: String?) : Exception()

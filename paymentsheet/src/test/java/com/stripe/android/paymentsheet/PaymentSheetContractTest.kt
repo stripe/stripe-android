@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -18,7 +19,7 @@ class PaymentSheetContractTest {
     @Suppress("DEPRECATION")
     fun `parseResult() with missing data should return failed result`() {
         assertThat(PaymentSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(PaymentSheetResult.Failed::class.java)
+            .isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test

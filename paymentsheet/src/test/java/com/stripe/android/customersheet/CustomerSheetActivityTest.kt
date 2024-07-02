@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
@@ -91,7 +92,7 @@ internal class CustomerSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData,
             )
-            assertThat(result).isInstanceOf(InternalCustomerSheetResult.Error::class.java)
+            assertThat(result).isInstanceOf<InternalCustomerSheetResult.Error>()
         }
     }
 

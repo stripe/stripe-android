@@ -5,6 +5,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Incomplete
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 
 class BlikConfigTest {
@@ -29,24 +30,24 @@ class BlikConfigTest {
     @Test
     fun `Treats input with less than six digits as incomplete`() {
         val state = config.determineState("12345")
-        assertThat(state).isInstanceOf(Incomplete::class.java)
+        assertThat(state).isInstanceOf<Incomplete>()
     }
 
     @Test
     fun `Treats input more than six digits as invalid`() {
-        assertThat(config.determineState("1234567")).isInstanceOf(Invalid::class.java)
+        assertThat(config.determineState("1234567")).isInstanceOf<Invalid>()
     }
 
     @Test
     fun `Treats non-numeric input as blank`() {
-        assertThat(config.determineState("12a456")).isInstanceOf(Invalid::class.java)
-        assertThat(config.determineState("abcdef")).isInstanceOf(Invalid::class.java)
-        assertThat(config.determineState("stripe.com")).isInstanceOf(Invalid::class.java)
+        assertThat(config.determineState("12a456")).isInstanceOf<Invalid>()
+        assertThat(config.determineState("abcdef")).isInstanceOf<Invalid>()
+        assertThat(config.determineState("stripe.com")).isInstanceOf<Invalid>()
     }
 
     @Test
     fun `Treats valid input as valid and limitless`() {
         val state = config.determineState("123456")
-        assertThat(state).isInstanceOf(Limitless::class.java)
+        assertThat(state).isInstanceOf<Limitless>()
     }
 }

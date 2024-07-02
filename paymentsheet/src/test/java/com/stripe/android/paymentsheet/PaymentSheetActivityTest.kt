@@ -27,6 +27,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -473,19 +474,19 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             scenario.launch(intent)
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(awaitItem()).isInstanceOf(AddAnotherPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<AddAnotherPaymentMethod>()
 
             pressBack()
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             viewModel.modifyPaymentMethod(card)
-            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             pressBack()
-            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
             pressBack()
             expectNoEvents()
@@ -606,9 +607,7 @@ internal class PaymentSheetActivityTest {
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
-                WalletsProcessingState.Completed::class.java
-            )
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf<WalletsProcessingState.Completed>()
             assertThat(viewModel.contentVisible.value).isEqualTo(true)
         }
     }
@@ -635,9 +634,7 @@ internal class PaymentSheetActivityTest {
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
-                WalletsProcessingState.Completed::class.java
-            )
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf<WalletsProcessingState.Completed>()
         }
     }
 
@@ -696,9 +693,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isInstanceOf(
-            PaymentSheetResult.Failed::class.java
-        )
+        ).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -861,7 +856,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -892,7 +887,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test
@@ -915,7 +910,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
     }
 
     @Test

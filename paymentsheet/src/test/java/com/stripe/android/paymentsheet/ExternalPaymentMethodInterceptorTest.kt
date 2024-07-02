@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -27,7 +28,7 @@ class ExternalPaymentMethodInterceptorTest {
             errorReporter = errorReporter,
         )
 
-        assertThat(paymentResult).isInstanceOf(PaymentResult.Failed::class.java)
+        assertThat(paymentResult).isInstanceOf<PaymentResult.Failed>()
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
             ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL.eventName
         )
@@ -48,7 +49,7 @@ class ExternalPaymentMethodInterceptorTest {
             errorReporter = errorReporter,
         )
 
-        assertThat(paymentResult).isInstanceOf(PaymentResult.Failed::class.java)
+        assertThat(paymentResult).isInstanceOf<PaymentResult.Failed>()
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
             ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL.eventName
         )
