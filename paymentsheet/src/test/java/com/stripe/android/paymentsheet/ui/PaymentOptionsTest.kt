@@ -10,7 +10,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.PaymentOptionsState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,10 +29,8 @@ class PaymentOptionsTest {
 
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
-                state = PaymentOptionsState(
-                    items = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
-                    selectedIndex = 1,
-                ),
+                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
+                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = { didCallOnAddCardPressed = true },
@@ -61,10 +58,8 @@ class PaymentOptionsTest {
 
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
-                state = PaymentOptionsState(
-                    items = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
-                    selectedIndex = 1,
-                ),
+                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
+                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -89,16 +84,14 @@ class PaymentOptionsTest {
     fun `When items are removable & editing, should show removable badge`() {
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
-                state = PaymentOptionsState(
-                    items = listOf(
-                        PaymentOptionsItem.SavedPaymentMethod(
-                            displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                                .copy(id = "pm_123")
-                                .toDisplayableSavedPaymentMethod(isRemovable = true),
-                        ),
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                            .copy(id = "pm_123")
+                            .toDisplayableSavedPaymentMethod(isRemovable = true),
                     ),
-                    selectedIndex = 1,
                 ),
+                selectedPaymentOptionsItem = null,
                 isEditing = true,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -117,16 +110,14 @@ class PaymentOptionsTest {
     fun `When items are not removable & editing, should show removable badge`() {
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
-                state = PaymentOptionsState(
-                    items = listOf(
-                        PaymentOptionsItem.SavedPaymentMethod(
-                            displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                                .copy(id = "pm_123")
-                                .toDisplayableSavedPaymentMethod(isRemovable = false),
-                        ),
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                            .copy(id = "pm_123")
+                            .toDisplayableSavedPaymentMethod(isRemovable = false),
                     ),
-                    selectedIndex = 1,
                 ),
+                selectedPaymentOptionsItem = null,
                 isEditing = true,
                 isProcessing = false,
                 onAddCardPressed = {},

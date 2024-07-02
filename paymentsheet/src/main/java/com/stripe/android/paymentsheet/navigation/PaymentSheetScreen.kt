@@ -102,7 +102,8 @@ internal sealed interface PaymentSheetScreen {
             val state by selectSavedPaymentMethodsInteractor.state.collectAsState()
 
             SavedPaymentMethodTabLayoutUI(
-                state = state.paymentOptionsState,
+                paymentOptionsItems = state.paymentOptionsItems,
+                selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
                 isEditing = state.isEditing,
                 isProcessing = state.isProcessing,
                 onAddCardPressed = {
@@ -132,7 +133,7 @@ internal sealed interface PaymentSheetScreen {
 
             if (
                 cvcRecollectionState is CvcRecollectionState.Required &&
-                (state.paymentOptionsState.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
+                (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
                     ?.paymentMethod?.type == PaymentMethod.Type.Card
             ) {
                 CvcRecollectionField(
