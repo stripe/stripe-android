@@ -64,6 +64,7 @@ internal class CustomerApiRepository @Inject constructor(
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
                         customerId = customerInfo.id,
+                        limit = 100,
                         paymentMethodType = paymentMethodType,
                     ),
                     productUsageTokens = productUsageTokens,
@@ -92,23 +93,7 @@ internal class CustomerApiRepository @Inject constructor(
                     }
                 },
                 onSuccess = { customerPaymentMethods ->
-                    val linkPaymentMethods = getLinkPaymentMethods(customerPaymentMethods)
-
-                    paymentMethods.addAll(linkPaymentMethods)
-
-                    val walletTypesToRemove = setOf(
-                        Wallet.Type.ApplePay,
-                        Wallet.Type.GooglePay,
-                        Wallet.Type.SamsungPay,
-                        Wallet.Type.Link,
-                    )
-                    paymentMethods.addAll(
-                        customerPaymentMethods.filter { paymentMethod ->
-                            val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
-                                walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
-                            !isCardWithWallet
-                        }
-                    )
+                    paymentMethods.addAll(filterPaymentMethods(customerPaymentMethods))
                 }
             )
         }
@@ -162,6 +147,30 @@ internal class CustomerApiRepository @Inject constructor(
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
+
+    private fun filterPaymentMethods(allPaymentMethods: List<PaymentMethod>): List<PaymentMethod> {
+        val paymentMethods = mutableListOf<PaymentMethod>()
+
+        val linkPaymentMethods = getLinkPaymentMethods(allPaymentMethods)
+
+        paymentMethods.addAll(linkPaymentMethods)
+
+        val walletTypesToRemove = setOf(
+            Wallet.Type.ApplePay,
+            Wallet.Type.GooglePay,
+            Wallet.Type.SamsungPay,
+            Wallet.Type.Link,
+        )
+        paymentMethods.addAll(
+            allPaymentMethods.filter { paymentMethod ->
+                val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
+                    walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
+                !isCardWithWallet
+            }
+        )
+
+        return paymentMethods
+    }
 
     private fun getLinkPaymentMethods(paymentMethods: List<PaymentMethod>): List<PaymentMethod> {
         return paymentMethods.filter { paymentMethod ->
