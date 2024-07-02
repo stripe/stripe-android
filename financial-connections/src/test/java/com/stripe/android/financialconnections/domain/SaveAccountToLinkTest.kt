@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.domain
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -195,7 +194,6 @@ internal class SaveAccountToLinkTest {
             successContentRepository = successRepository,
             repository = repository,
             attachedPaymentAccountRepository = attachedPaymentAccountRepository,
-            logger = Logger.noop(),
             accountsRepository = accountsRepository,
         )
     }
