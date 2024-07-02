@@ -64,7 +64,7 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>
+        selectedAccounts: Set<String>?
     ): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }

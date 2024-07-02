@@ -8,25 +8,21 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConsumerNotFoundError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.LookupConsumerSession
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.MarkLinkVerifiedError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CompleteVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
-import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
@@ -52,10 +48,10 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getOrFetchSync: GetOrFetchSync,
     private val confirmVerification: ConfirmVerification,
-    private val markLinkVerified: MarkLinkVerified,
     private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
+    private val completeVerification: CompleteVerification,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<NetworkingLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -141,28 +137,10 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
-
-        runCatching { markLinkVerified() }
-            .fold(
-                // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
-                onSuccess = {
-                    analyticsTracker.track(VerificationSuccess(PANE))
-                    navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
-                },
-                onFailure = {
-                    analyticsTracker.logError(
-                        extraMessage = "Error confirming verification or marking link as verified",
-                        error = it,
-                        logger = logger,
-                        pane = PANE
-                    )
-                    val nextPaneOnFailure = payload.initialInstitution
-                        ?.let { Pane.PARTNER_AUTH }
-                        ?: Pane.INSTITUTION_PICKER
-                    analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
-                    navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
-                }
-            )
+        completeVerification(
+            consumerSessionClientSecret = payload.consumerSessionClientSecret,
+            pane = PANE
+        )
     }.execute { copy(confirmVerification = it) }
 
     @AssistedFactory

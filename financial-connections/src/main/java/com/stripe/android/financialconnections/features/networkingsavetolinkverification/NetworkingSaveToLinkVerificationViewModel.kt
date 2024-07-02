@@ -7,22 +7,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConfirmVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CompleteVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
-import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
-import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -48,10 +43,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val startVerification: StartVerification,
     private val getOrFetchSync: GetOrFetchSync,
+    private val completeVerification: CompleteVerification,
     private val confirmVerification: ConfirmVerification,
-    private val markLinkVerified: MarkLinkVerified,
-    private val getCachedAccounts: GetCachedAccounts,
-    private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
@@ -127,29 +120,16 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(stateFlow.value.payload())
-
         runCatching {
             confirmVerification.sms(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 verificationCode = otp
             )
-
-            val accounts = getCachedAccounts()
-            val manifest = getOrFetchSync().manifest
-
-            saveAccountToLink.existing(
+            completeVerification(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                selectedAccounts = accounts,
-                shouldPollAccountNumbers = manifest.isDataFlow,
+                pane = PANE
             )
         }
-            .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }
-            .onFailure {
-                eventTracker.track(VerificationError(PANE, ConfirmVerificationSessionError))
-            }.getOrThrow()
-
-        // Mark link verified (ignore its result).
-        kotlin.runCatching { markLinkVerified() }
         Unit
     }.execute { copy(confirmVerification = it) }
 
