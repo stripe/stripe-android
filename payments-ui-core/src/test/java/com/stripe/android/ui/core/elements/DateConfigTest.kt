@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 import java.util.Calendar
 import com.stripe.android.uicore.R as UiCoreR
@@ -26,7 +27,7 @@ class DateConfigTest {
     fun `incomplete number is in incomplete state`() {
         val state = dateConfig.determineState("12")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
@@ -36,7 +37,7 @@ class DateConfigTest {
     fun `date is too long`() {
         val state = dateConfig.determineState("1234567890123456789")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
@@ -46,7 +47,7 @@ class DateConfigTest {
     fun `date invalid month and 2 digit year`() {
         val state = dateConfig.determineState("1955")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
@@ -56,7 +57,7 @@ class DateConfigTest {
     fun `date in the past`() {
         val state = dateConfig.determineState("1299")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
@@ -66,7 +67,7 @@ class DateConfigTest {
     fun `date in the near past`() {
         val state = dateConfig.determineState("1220")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
@@ -81,7 +82,7 @@ class DateConfigTest {
 
         val state = dateConfig.determineState(input)
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
@@ -98,7 +99,7 @@ class DateConfigTest {
         val state = dateConfig.determineState(input)
 
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
@@ -110,7 +111,7 @@ class DateConfigTest {
         val state = dateConfig.determineState(input)
 
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
@@ -134,7 +135,7 @@ class DateConfigTest {
         val state = dateConfig.determineState(input)
 
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(expectedErrorMessage)
@@ -150,7 +151,7 @@ class DateConfigTest {
         val state = dateConfig.determineState(input)
 
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
@@ -166,7 +167,7 @@ class DateConfigTest {
             currentYear
         )
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
@@ -182,7 +183,7 @@ class DateConfigTest {
             currentYear
         )
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     private fun get1BasedCurrentMonth() = Calendar.getInstance().get(Calendar.MONTH) + 1
@@ -191,14 +192,14 @@ class DateConfigTest {
     fun `date is valid 2 digit month and 2 digit year`() {
         val state = dateConfig.determineState("1255")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
     fun `date is invalid 2X month and 2 digit year`() {
         val state = dateConfig.determineState("2123")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
+            .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
             state.getError()?.errorMessage
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
@@ -208,21 +209,21 @@ class DateConfigTest {
     fun `date is valid one digit month two digit year`() {
         val state = dateConfig.determineState("130")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
     fun `date is valid 0X month two digit year`() {
         val state = dateConfig.determineState("0130")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     @Test
     fun `date is valid 2X month and 2 digit year`() {
         val state = dateConfig.determineState("230")
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 
     private fun produceInput(month: Int, year: Int): String {

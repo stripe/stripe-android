@@ -11,6 +11,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSessionParams
@@ -606,7 +607,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val result = loader.load(configuration)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf<IllegalStateException>()
     }
 
     @Test

@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -359,7 +360,7 @@ class DefaultIntentConfirmationInterceptorTest {
             shippingValues = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
+        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Confirm>()
     }
 
     @Test
