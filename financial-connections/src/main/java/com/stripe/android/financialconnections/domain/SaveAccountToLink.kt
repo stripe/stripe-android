@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.PaymentAccountParams.BankAccount
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -12,11 +14,13 @@ import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 
 internal class SaveAccountToLink @Inject constructor(
     private val locale: Locale?,
     private val configuration: FinancialConnectionsSheet.Configuration,
+    private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,
     private val accountsRepository: FinancialConnectionsAccountsRepository,
@@ -44,7 +48,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     suspend fun existing(
         consumerSessionClientSecret: String,
-        selectedAccounts: List<CachedPartnerAccount>,
+        selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
@@ -62,16 +66,23 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
-        partnerAccounts: List<CachedPartnerAccount>,
-        action: suspend (Set<String>) -> FinancialConnectionsSessionManifest,
+        partnerAccounts: List<CachedPartnerAccount>?,
+        action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
-        val selectedAccountIds = partnerAccounts.map { it.id }.toSet()
-        val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
+        val selectedAccountIds = partnerAccounts?.map { it.id }?.toSet() ?: emptySet()
+        val linkedAccountIds = partnerAccounts?.mapNotNull { it.linkedAccountId }?.toSet() ?: emptySet()
 
-        val pollingResult = if (shouldPollAccountNumbers) {
-            runCatching { awaitAccountNumbersReady(linkedAccountIds) }
-        } else {
-            Result.success(Unit)
+        val pollingResult = when {
+            partnerAccounts.isNullOrEmpty() -> when (attachedPaymentAccountRepository.get()?.attachedPaymentAccount) {
+                is BankAccount -> Result.success(Unit)
+                else -> Result.failure(
+                    IllegalStateException(
+                        "Must have a bank account attached if no accounts are selected"
+                    )
+                )
+            }
+            shouldPollAccountNumbers -> runCatching { awaitAccountNumbersReady(linkedAccountIds) }
+            else -> Result.success(Unit)
         }
 
         return pollingResult.onFailure {
@@ -113,8 +124,9 @@ internal class SaveAccountToLink @Inject constructor(
                 ?.let { TextResource.Text(it) }
                 // If not, build a Link success message locally
                 ?: TextResource.PluralId(
-                    R.plurals.stripe_success_pane_desc_link_success,
-                    selectedAccounts
+                    value = R.plurals.stripe_success_pane_desc_link_success,
+                    // No selected accounts means a manually entered account was already attached.
+                    count = max(1, selectedAccounts),
                 )
         )
     }
@@ -123,7 +135,8 @@ internal class SaveAccountToLink @Inject constructor(
         successContentRepository.set(
             customSuccessMessage = TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_desc_link_error,
-                count = selectedAccounts,
+                // No selected accounts means a manually entered account was already attached.
+                count = max(1, selectedAccounts),
             )
         )
     }
