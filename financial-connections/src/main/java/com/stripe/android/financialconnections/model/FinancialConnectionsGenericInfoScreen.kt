@@ -113,32 +113,32 @@ internal data class FinancialConnectionsGenericInfoScreen(
 @Serializable
 internal enum class Alignment {
     @SerialName("left")
-    LEFT,
+    Left,
 
     @SerialName("center")
-    CENTER,
+    Center,
 
     @SerialName("right")
-    RIGHT
+    Right
 }
 
 @Serializable
 internal enum class VerticalAlignment {
     @SerialName("default")
-    DEFAULT,
+    Default,
 
     @SerialName("centered")
-    CENTERED
+    Centered
 }
 
 @Serializable
 internal enum class Size {
     @SerialName("x-small")
-    X_SMALL,
+    XSmall,
 
     @SerialName("small")
-    SMALL,
+    Small,
 
     @SerialName("medium")
-    MEDIUM
+    Medium
 }
