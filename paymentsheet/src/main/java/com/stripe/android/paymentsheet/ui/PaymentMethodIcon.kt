@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -27,6 +29,7 @@ internal fun PaymentMethodIcon(
     iconUrl: String?,
     imageLoader: StripeImageLoader,
     iconRequiresTinting: Boolean,
+    iconSize: Dp? = null,
     modifier: Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
 ) {
@@ -38,6 +41,7 @@ internal fun PaymentMethodIcon(
             null
         }
     }
+    val iconModifier = iconSize?.let { Modifier.size(iconSize) } ?: Modifier
 
     Box(
         modifier = modifier,
@@ -53,13 +57,17 @@ internal fun PaymentMethodIcon(
                     PaymentMethodIconFromResource(
                         iconRes = iconRes,
                         colorFilter = colorFilter,
-                        modifier = modifier,
+                        modifier = iconModifier,
                     )
                 },
-                modifier = modifier,
+                modifier = iconModifier,
             )
         } else {
-            PaymentMethodIconFromResource(iconRes = iconRes, colorFilter = colorFilter, modifier = modifier)
+            PaymentMethodIconFromResource(
+                iconRes = iconRes,
+                colorFilter = colorFilter,
+                modifier = iconModifier
+            )
         }
     }
 }
