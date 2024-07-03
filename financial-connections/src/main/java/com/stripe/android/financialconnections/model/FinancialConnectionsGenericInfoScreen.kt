@@ -1,9 +1,10 @@
+
 import android.os.Parcelable
-import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.serializer.BodyEntrySerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.stripe.android.financialconnections.model.Image as ImageResponse
 
 @Parcelize
 @Serializable
@@ -20,48 +21,48 @@ internal data class FinancialConnectionsGenericInfoScreen(
     internal data class Header(
         val title: String? = null,
         val subtitle: String? = null,
-        val icon: Image? = null,
+        val icon: ImageResponse? = null,
         val alignment: Alignment? = null
     ) : Parcelable
 
     @Parcelize
     @Serializable
     internal data class Body(
-        val entries: List<BodyEntry>
+        val entries: List<Entry>
     ) : Parcelable {
 
         @Serializable(with = BodyEntrySerializer::class)
-        sealed class BodyEntry : Parcelable {
+        sealed class Entry : Parcelable {
             abstract val id: String
 
             @Parcelize
             @Serializable
-            internal data class BodyText(
+            internal data class Text(
                 override val id: String,
                 val text: String,
                 val alignment: Alignment? = null,
                 val size: Size? = null
-            ) : BodyEntry()
+            ) : Entry()
 
             @Parcelize
             @Serializable
-            internal data class BodyImage(
+            internal data class Image(
                 override val id: String,
-                val image: Image,
+                val image: ImageResponse,
                 val alt: String
-            ) : BodyEntry()
+            ) : Entry()
 
             @Parcelize
             @Serializable
-            internal data class BodyBullets(
+            internal data class Bullets(
                 override val id: String,
                 val bullets: List<GenericBulletPoint>
-            ) : BodyEntry() {
+            ) : Entry() {
                 @Parcelize
                 @Serializable
                 internal data class GenericBulletPoint(
                     val id: String,
-                    val icon: Image? = null,
+                    val icon: ImageResponse? = null,
                     val title: String? = null,
                     val content: String? = null
                 ) : Parcelable
@@ -71,7 +72,7 @@ internal data class FinancialConnectionsGenericInfoScreen(
             @Parcelize
             internal data class Unknown(
                 override val id: String
-            ) : BodyEntry()
+            ) : Entry()
 
             // TODO@carlosmuvi: Add missing body items: prepane, forms.
         }
@@ -93,7 +94,7 @@ internal data class FinancialConnectionsGenericInfoScreen(
         internal data class GenericInfoAction(
             val id: String,
             val label: String,
-            val icon: Image? = null,
+            val icon: ImageResponse? = null,
             val action: String? = null,
             @SerialName("test_id")
             val testId: String? = null
