@@ -277,8 +277,17 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         eventTracker.track(event)
     }
 
-    fun onAccountClick(partnerAccount: PartnerAccount) {
+    fun onAccountClick(partnerAccount: PartnerAccount) = viewModelScope.launch {
         logAccountClick(partnerAccount)
+
+        val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
+        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
+
+        if (drawerOnSelection != null) {
+            // TODO@carlosmuvi handle drawer display.
+            logger.debug("Drawer on selection: $drawerOnSelection")
+            return@launch
+        }
 
         val updateRequired = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
@@ -288,7 +297,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         if (updateRequired != null) {
             logUpdateRequired(updateRequired)
             presentUpdateRequiredSheet(updateRequired, referrer = PANE)
-            return
+            return@launch
         }
 
         setState {
