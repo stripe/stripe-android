@@ -52,12 +52,14 @@ internal fun PaymentMethodIcon(
                 errorContent = {
                     PaymentMethodIconFromResource(
                         iconRes = iconRes,
-                        colorFilter = colorFilter
+                        colorFilter = colorFilter,
+                        modifier = modifier,
                     )
                 },
+                modifier = modifier,
             )
         } else {
-            PaymentMethodIconFromResource(iconRes = iconRes, colorFilter = colorFilter)
+            PaymentMethodIconFromResource(iconRes = iconRes, colorFilter = colorFilter, modifier = modifier)
         }
     }
 }
@@ -66,7 +68,7 @@ internal fun PaymentMethodIcon(
 internal fun PaymentMethodIconFromResource(
     iconRes: Int,
     colorFilter: ColorFilter?,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
 ) {
     if (iconRes != 0) {
         Image(
