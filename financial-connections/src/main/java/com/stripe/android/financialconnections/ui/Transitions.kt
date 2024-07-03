@@ -9,7 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
 
 private const val TransitionDurationMillis = 300
@@ -24,7 +24,7 @@ private val FADE_OUT_TRANSITION = fadeOut(
 
 internal fun enterTransition(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition {
     return {
-        if (initialState.skipTransition) {
+        if (initialState.pane.destination.fadeOnlyTransition) {
             FADE_IN_TRANSITION
         } else {
             FADE_IN_TRANSITION + slideInHorizontally(
@@ -39,7 +39,7 @@ internal fun enterTransition(): AnimatedContentTransitionScope<NavBackStackEntry
 
 internal fun resumeTransition(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition {
     return {
-        if (initialState.skipTransition) {
+        if (initialState.pane.destination.fadeOnlyTransition) {
             FADE_IN_TRANSITION
         } else {
             FADE_IN_TRANSITION + slideInHorizontally(
@@ -54,7 +54,7 @@ internal fun resumeTransition(): AnimatedContentTransitionScope<NavBackStackEntr
 
 internal fun pauseTransition(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition {
     return {
-        if (initialState.skipTransition) {
+        if (initialState.pane.destination.fadeOnlyTransition) {
             FADE_OUT_TRANSITION
         } else {
             FADE_OUT_TRANSITION + slideOutHorizontally(
@@ -69,7 +69,7 @@ internal fun pauseTransition(): AnimatedContentTransitionScope<NavBackStackEntry
 
 internal fun exitTransition(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition {
     return {
-        if (initialState.skipTransition) {
+        if (initialState.pane.destination.fadeOnlyTransition) {
             FADE_OUT_TRANSITION
         } else {
             FADE_OUT_TRANSITION + slideOutHorizontally(
@@ -81,11 +81,3 @@ internal fun exitTransition(): AnimatedContentTransitionScope<NavBackStackEntry>
         }
     }
 }
-
-/**
- * We want to skip the transition for some screens and use a simple fade instead. This currently only applies
- * to transitions starting from the attach linked payment account screen, which only ever shows a loading indicator.
- * We wouldn't want to show a slide transition from one loading indicator to another, therefore we use a fade.
- */
-private val NavBackStackEntry.skipTransition: Boolean
-    get() = destination.pane == ATTACH_LINKED_PAYMENT_ACCOUNT
