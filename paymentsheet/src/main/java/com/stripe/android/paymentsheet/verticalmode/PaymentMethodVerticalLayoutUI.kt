@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
@@ -156,36 +156,37 @@ private fun SavedPaymentMethodTrailingContent(
 
 @Composable
 private fun EditButton(onClick: () -> Unit) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.testTag(TEST_TAG_EDIT_SAVED_CARD),
-    ) {
-        Text(
-            stringResource(id = com.stripe.android.R.string.stripe_edit),
-            color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.button
-        )
-    }
+    Text(
+        stringResource(id = com.stripe.android.R.string.stripe_edit),
+        color = MaterialTheme.colors.primary,
+        style = MaterialTheme.typography.button,
+        modifier = Modifier
+            .testTag(TEST_TAG_EDIT_SAVED_CARD)
+            .clickable(onClick = onClick)
+            .padding(4.dp)
+    )
 }
 
 @Composable
 private fun ViewMoreButton(
     onViewMorePaymentMethods: () -> Unit,
 ) {
-    TextButton(
-        onClick = onViewMorePaymentMethods,
-        modifier = Modifier.testTag(TEST_TAG_VIEW_MORE),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .testTag(TEST_TAG_VIEW_MORE)
+            .clickable(onClick = onViewMorePaymentMethods)
+            .padding(4.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(id = R.string.stripe_view_more),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.button
-            )
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowRight,
-                contentDescription = null,
-            )
-        }
+        Text(
+            stringResource(id = R.string.stripe_view_more),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.button,
+        )
+        Icon(
+            imageVector = Icons.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colors.primary,
+        )
     }
 }

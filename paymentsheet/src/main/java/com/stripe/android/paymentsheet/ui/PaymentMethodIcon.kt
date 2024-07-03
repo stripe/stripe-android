@@ -66,13 +66,14 @@ internal fun PaymentMethodIcon(
 internal fun PaymentMethodIconFromResource(
     iconRes: Int,
     colorFilter: ColorFilter?,
+    modifier: Modifier = Modifier,
 ) {
     if (iconRes != 0) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
             colorFilter = colorFilter,
-            modifier = Modifier.testTag(TEST_TAG_ICON_FROM_RES)
+            modifier = modifier.testTag(TEST_TAG_ICON_FROM_RES)
         )
     }
 }
