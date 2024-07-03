@@ -112,9 +112,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         // auth session in the manifest.
         // if coming from a process kill, we'll fetch the current manifest from network,
         // that should contain the active auth session.
-        val sync: SynchronizeSessionResponse = getOrFetchSync(
-            refetchCondition = IfMissingActiveAuthSession
-        )
+        val sync: SynchronizeSessionResponse = getOrFetchSync()
         val manifest = sync.manifest
         val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
             institution = requireNotNull(manifest.activeInstitution),
