@@ -206,7 +206,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
-                    subtitle = null,
+                    subtitle = resolvableString(PaymentsCoreR.string.stripe_link_simple_secure_payments),
                     onClick = {
                         updateSelection(PaymentSelection.Link)
                     },
