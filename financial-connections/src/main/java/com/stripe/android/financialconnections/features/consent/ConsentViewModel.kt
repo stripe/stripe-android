@@ -16,12 +16,10 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.NoticeContent
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -134,10 +132,10 @@ internal class ConsentViewModel @AssistedInject constructor(
     private fun presentDataAccessBottomSheet() {
         val payload = stateFlow.value.consent() ?: return
 
-        val content = if (payload.streamlinedConsentPane != null) {
-            Generic(payload.streamlinedConsentPane.dataAccessNotice)
+        val content: NoticeContent = if (payload.streamlinedConsentPane != null) {
+            payload.streamlinedConsentPane.dataAccessNotice
         } else {
-            DataAccess(payload.consent.dataAccessNotice!!)
+            payload.consent.dataAccessNotice!!.toGenericNotice()
         }
 
         presentNoticeSheet(
@@ -149,10 +147,10 @@ internal class ConsentViewModel @AssistedInject constructor(
     private fun presentLegalDetailsBottomSheet() {
         val payload = stateFlow.value.consent() ?: return
 
-        val content = if (payload.streamlinedConsentPane != null) {
-            Generic(payload.streamlinedConsentPane.legalDetailsNotice)
+        val content: NoticeContent = if (payload.streamlinedConsentPane != null) {
+            payload.streamlinedConsentPane.legalDetailsNotice
         } else {
-            Legal(payload.consent.legalDetailsNotice)
+            payload.consent.legalDetailsNotice.toGenericNotice()
         }
 
         presentNoticeSheet(

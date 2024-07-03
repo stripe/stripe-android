@@ -219,7 +219,21 @@ internal data class DataAccessNotice(
     @SerialName("cta")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
-) : Parcelable
+) : Parcelable {
+
+    fun toGenericNotice(): NoticeContent {
+        return NoticeContent(
+            icon = icon,
+            title = title,
+            subtitle = subtitle,
+            disclaimer = disclaimer,
+            body = NoticeBody(
+                bullets = body.bullets,
+            ),
+            cta = cta
+        )
+    }
+}
 
 @Serializable
 @Parcelize
@@ -250,7 +264,21 @@ internal data class LegalDetailsNotice(
     @SerialName("disclaimer")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val disclaimer: String? = null
-) : Parcelable
+) : Parcelable {
+
+    fun toGenericNotice(): NoticeContent {
+        return NoticeContent(
+            icon = icon,
+            title = title,
+            subtitle = subtitle,
+            disclaimer = disclaimer,
+            body = NoticeBody(
+                links = body.links,
+            ),
+            cta = cta
+        )
+    }
+}
 
 @Serializable
 @Parcelize

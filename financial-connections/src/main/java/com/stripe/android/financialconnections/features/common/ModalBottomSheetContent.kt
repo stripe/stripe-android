@@ -93,12 +93,15 @@ internal fun GenericBottomSheetContent(
     val title = rememberHtml(content.title)
     val subtitle = content.subtitle?.let { rememberHtml(it) }
     val learnMore = content.disclaimer?.let { rememberHtml(it) }
+
     val links = remember(content.body.links) {
         content.body.links.map { TextResource.Text(fromHtml(it.title)) }
     }
+
     val bullets = remember(content.body.bullets) {
         content.body.bullets.map { BulletUI.from(it) }
     }
+
     ModalBottomSheetContent(
         onClickableTextClick = onClickableTextClick,
         cta = content.cta,
