@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod")
+
 package com.stripe.android.financialconnections.model.serializer
 
 import Alignment
@@ -147,8 +149,8 @@ class BodyEntrySerializerTest {
               ]
             },
             {
-              "type": "unkown_entry",
-              "id": "unkown",
+              "type": "unknown_entry",
+              "id": "???",
               "unkown_key": "Get started now!"
             }
           ]
