@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -467,7 +468,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = resolvableString("Continue"),
                 mandateText = null,
             ),
         )

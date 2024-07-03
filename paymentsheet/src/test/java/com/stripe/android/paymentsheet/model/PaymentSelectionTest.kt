@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
@@ -63,7 +64,7 @@ class PaymentSelectionTest {
                     intentId = "intent_1234",
                     bankName = "Stripe Bank",
                     last4 = "6789",
-                    primaryButtonText = "Continue",
+                    primaryButtonText = resolvableString("Continue"),
                     mandateText = null,
                 ),
             )

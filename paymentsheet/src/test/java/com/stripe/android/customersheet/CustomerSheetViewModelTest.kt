@@ -1975,7 +1975,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = resolvableString("Continue"),
                 mandateText = null,
             ),
         )
@@ -2594,7 +2594,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = resolvableString("Continue"),
                 mandateText = null,
             ),
         )

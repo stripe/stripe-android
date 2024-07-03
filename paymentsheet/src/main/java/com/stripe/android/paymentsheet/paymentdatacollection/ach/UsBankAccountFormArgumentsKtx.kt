@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
