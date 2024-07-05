@@ -113,7 +113,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
     /**
      * Handles new intents in the form of the redirect from the custom tab hosted auth flow
      */
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         viewModel.handleOnNewIntent(intent)
     }

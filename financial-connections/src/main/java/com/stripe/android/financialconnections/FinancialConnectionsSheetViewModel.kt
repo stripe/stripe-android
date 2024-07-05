@@ -364,10 +364,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      * @param intent the new intent with the redirect URL in the intent data
      */
-    internal fun handleOnNewIntent(intent: Intent?) {
+    internal fun handleOnNewIntent(intent: Intent) {
         viewModelScope.launch {
             mutex.withLock {
-                val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
+                val receivedUrl = intent.data.toString().toUriOrNull()
                 val state = stateFlow.value
                 when {
                     // stripe-auth://native-redirect

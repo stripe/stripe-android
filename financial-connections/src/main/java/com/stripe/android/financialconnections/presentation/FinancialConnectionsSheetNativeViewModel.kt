@@ -154,9 +154,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *
      * @param intent the new intent with the redirect URL in the intent data
      */
-    fun handleOnNewIntent(intent: Intent?) = viewModelScope.launch {
+    fun handleOnNewIntent(intent: Intent) = viewModelScope.launch {
         mutex.withLock {
-            val receivedUrl: String = intent?.data?.toString() ?: ""
+            val receivedUrl = intent.data.toString()
             when {
                 // App2App: status comes as a query parameter in the fragment section of the url.
                 receivedUrl.contains("authentication_return", true) -> onUrlReceived(
