@@ -218,7 +218,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val customerState = when (val accessType = customerConfig?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
                 elementsSession.customer?.let { customer ->
-                    CustomerState.createForCustomerSession(customer)
+                    CustomerState.createForCustomerSession(customer, metadata.supportedSavedPaymentMethodTypes())
                 } ?: run {
                     val exception = IllegalStateException(
                         "Excepted 'customer' attribute as part of 'elements_session' response!"

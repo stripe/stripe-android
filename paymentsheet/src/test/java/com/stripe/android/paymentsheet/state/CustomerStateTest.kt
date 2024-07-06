@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class CustomerStateTest {
@@ -18,7 +20,10 @@ class CustomerStateTest {
             paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Disabled
         )
 
-        val customerState = CustomerState.createForCustomerSession(customer)
+        val customerState = CustomerState.createForCustomerSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+        )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -47,7 +52,10 @@ class CustomerStateTest {
             ),
         )
 
-        val customerState = CustomerState.createForCustomerSession(customer)
+        val customerState = CustomerState.createForCustomerSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+        )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -76,7 +84,10 @@ class CustomerStateTest {
             ),
         )
 
-        val customerState = CustomerState.createForCustomerSession(customer)
+        val customerState = CustomerState.createForCustomerSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+        )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -118,9 +129,34 @@ class CustomerStateTest {
         )
     }
 
+    @Test
+    fun `Should create 'CustomerState' with filtered payment methods`() =
+        runTest {
+            val cards = PaymentMethodFixtures.createCards(2)
+
+            val customer = createElementsSessionCustomer(
+                paymentMethods = cards + listOf(
+                    PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                    PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+                    PaymentMethodFixtures.AU_BECS_DEBIT,
+                ),
+                paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                    isPaymentMethodSaveEnabled = false,
+                    isPaymentMethodRemoveEnabled = false,
+                ),
+            )
+
+            val customerState = CustomerState.createForCustomerSession(
+                customer = customer,
+                supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+            )
+
+            assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)
+        }
+
     private fun createElementsSessionCustomer(
-        customerId: String,
-        ephemeralKeySecret: String,
+        customerId: String = "cus_1",
+        ephemeralKeySecret: String = "ek_1",
         paymentMethods: List<PaymentMethod>,
         paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet
     ): ElementsSession.Customer {
