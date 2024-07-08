@@ -33,8 +33,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
-import com.stripe.android.financialconnections.features.common.ViewState.Disabled
-import com.stripe.android.financialconnections.features.common.ViewState.Enabled
+import com.stripe.android.financialconnections.features.common.AccountSelectionState.Disabled
+import com.stripe.android.financialconnections.features.common.AccountSelectionState.Enabled
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
@@ -124,28 +124,28 @@ internal fun AccountItem(
 private fun getVisibilityState(
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?
-): ViewState = when {
+): AccountSelectionState = when {
     // networked account's allowSelection takes precedence over the account's.
     networkedAccount?.allowSelection ?: account.allowSelection -> Enabled
     // Even if the account looks "not selectable", when clicking we'd display the "drawer on selection" if available.
-    networkedAccount?.drawerOnSelection != null -> ViewState.VisuallyDisabled
+    networkedAccount?.drawerOnSelection != null -> AccountSelectionState.VisuallyDisabled
     else -> Disabled
 }
 
 @Composable
 private fun AccountSubtitle(
-    viewState: ViewState,
+    accountSelectionState: AccountSelectionState,
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?,
 ) {
-    val subtitle = getSubtitle(viewState = viewState, account = account, networkedAccount = networkedAccount)
+    val subtitle = getSubtitle(accountSelectionState = accountSelectionState, account = account, networkedAccount = networkedAccount)
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MiddleEllipsisText(
             text = subtitle ?: account.redactedAccountNumbers,
             // underline there's a subtitle and the account is clickable (even if visually disabled)
-            textDecoration = if (viewState != Disabled && subtitle != null) TextDecoration.Underline else null,
+            textDecoration = if (accountSelectionState != Disabled && subtitle != null) TextDecoration.Underline else null,
             color = colors.textSubdued,
             style = typography.labelMedium
         )
@@ -172,12 +172,12 @@ private fun AccountSubtitle(
 
 @Composable
 private fun getSubtitle(
-    viewState: ViewState,
+    accountSelectionState: AccountSelectionState,
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?,
 ): String? = when {
     networkedAccount?.caption != null -> networkedAccount.caption
-    viewState != Enabled && account.allowSelectionMessage?.isNotBlank() == true -> account.allowSelectionMessage
+    accountSelectionState != Enabled && account.allowSelectionMessage?.isNotBlank() == true -> account.allowSelectionMessage
     else -> null
 }
 
@@ -196,7 +196,7 @@ private fun PartnerAccount.getFormattedBalance(): String? {
     }
 }
 
-private enum class ViewState(val alpha: Float) {
+private enum class AccountSelectionState(val alpha: Float) {
     Enabled(alpha = 1f),
     Disabled(alpha = VISUALLY_DISABLED_ALPHA),
     VisuallyDisabled(alpha = VISUALLY_DISABLED_ALPHA)
