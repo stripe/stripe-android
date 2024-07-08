@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -49,7 +50,7 @@ internal fun NewPaymentMethodTab(
             imageLoader = imageLoader,
             iconRequiresTinting = iconRequiresTinting,
             modifier = Modifier
-                .height(PaymentMethodUISpacing.iconSize),
+                .size(PaymentMethodUISpacing.iconSize),
         )
 
         LpmSelectorText(
