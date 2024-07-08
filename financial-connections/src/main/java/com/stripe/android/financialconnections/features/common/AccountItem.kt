@@ -138,7 +138,11 @@ private fun AccountSubtitle(
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?,
 ) {
-    val subtitle = getSubtitle(accountSelectionState = accountSelectionState, account = account, networkedAccount = networkedAccount)
+    val subtitle = getSubtitle(
+        accountSelectionState = accountSelectionState,
+        account = account,
+        networkedAccount = networkedAccount
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
