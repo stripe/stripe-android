@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -714,7 +715,7 @@ class DefaultEventReporterTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = resolvableString("Continue"),
                 mandateText = null,
             ),
         )
