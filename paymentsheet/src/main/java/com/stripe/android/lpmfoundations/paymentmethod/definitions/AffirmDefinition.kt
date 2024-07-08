@@ -34,6 +34,6 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_affirm,
         iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_affirm,
-        subtitle = resolvableString(id = StripeR.string.stripe_affirm_buy_now_pay_later)
+        subtitle = resolvableString(id = StripeR.string.stripe_affirm_buy_now_pay_later_plaintext)
     )
 }
