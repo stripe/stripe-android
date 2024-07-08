@@ -151,12 +151,18 @@ internal fun GenericBody(
         payload.entries.forEachIndexed { index, entry: Body.Entry ->
             Box {
                 when (entry) {
-//                    is Body.Entry.Image -> {
-//                        PrepaneImage(entry)
-//                    }
+                    is Body.Entry.Image -> {
+                        StripeImage(
+                            url = entry.image.default.orEmpty(),
+                            contentDescription = entry.alt,
+                            imageLoader = LocalImageLoader.current,
+                            errorContent = { },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                     is Body.Entry.Text -> {
                         val font = when (entry.size) {
-                            Size.XSmall -> typography.bodySmall // TODO XSmall
+                            Size.XSmall -> typography.labelSmall
                             Size.Small -> typography.bodySmall
                             Size.Medium -> typography.bodyMedium
                             null -> typography.bodyMedium
@@ -204,7 +210,7 @@ internal fun GenericHeader(
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
-        //TODO align header based on textAlign
+        // TODO align header based on textAlign
         // const isBrandIcon = content.header?.icon?.default.indexOf('BrandIcon') !== -1;
         // size={content.header.alignment === 'center' ? 'large' : 'medium'}
         payload.icon?.default?.let { iconUrl ->
@@ -240,7 +246,6 @@ internal fun GenericHeader(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-
 
         if (payload.subtitle != null) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -300,7 +305,6 @@ internal fun GenericFooter(
                 }
             }
         }
-
 
         payload.secondaryCta?.let { secondaryCta ->
             Spacer(modifier = Modifier.size(8.dp))

@@ -64,4 +64,3 @@ internal class GenericScreenPreviewParameterProvider : PreviewParameterProvider<
 
     private fun modal() = canonical().copy(inModal = true)
 }
-
