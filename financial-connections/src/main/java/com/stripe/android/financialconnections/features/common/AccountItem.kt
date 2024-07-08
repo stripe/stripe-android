@@ -92,8 +92,8 @@ internal fun AccountItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            account.institution
-                ?.icon?.default
+            (networkedAccount?.accountIcon ?: account.institution?.icon)
+                ?.default
                 ?.takeIf { showInstitutionIcon }?.let {
                     InstitutionIcon(institutionIcon = it)
                 }
