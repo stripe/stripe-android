@@ -36,14 +36,14 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
 
 @DrawableRes
 internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
-    CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa
-    CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex
-    CardBrand.Discover -> com.stripe.payments.model.R.drawable.stripe_ic_discover
-    CardBrand.JCB -> com.stripe.payments.model.R.drawable.stripe_ic_jcb
-    CardBrand.DinersClub -> com.stripe.payments.model.R.drawable.stripe_ic_diners
-    CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
-    CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
+    CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded
+    CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex_unpadded
+    CardBrand.Discover -> com.stripe.payments.model.R.drawable.stripe_ic_discover_unpadded
+    CardBrand.JCB -> com.stripe.payments.model.R.drawable.stripe_ic_jcb_unpadded
+    CardBrand.DinersClub -> com.stripe.payments.model.R.drawable.stripe_ic_diners_unpadded
+    CardBrand.MasterCard -> com.stripe.payments.model.R.drawable.stripe_ic_mastercard_unpadded
+    CardBrand.UnionPay -> com.stripe.payments.model.R.drawable.stripe_ic_unionpay_unpadded
+    CardBrand.CartesBancaires -> com.stripe.payments.model.R.drawable.stripe_ic_cartes_bancaires_unpadded
     Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
