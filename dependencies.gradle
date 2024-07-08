@@ -40,7 +40,7 @@ ext.versions = [
         junit                       : '4.13.2',
         json                        : '20230227',
         kotlin                      : '1.9.22',
-        kotlinCoroutines            : '1.7.3',
+        kotlinCoroutines            : '1.8.1',
         kotlinSerialization         : '1.6.2',
         kotlinSerializationConverter: '1.0.0',
         lint                        : '31.4.0',
