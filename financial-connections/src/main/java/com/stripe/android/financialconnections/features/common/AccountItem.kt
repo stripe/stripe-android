@@ -85,8 +85,7 @@ internal fun AccountItem(
                 if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
-            // Reduce
-            .alpha(if (viewState == Enabled) 1f else VISUALLY_DISABLED_ALPHA)
+            .alpha(viewState.alpha)
             .padding(16.dp)
     ) {
         Row(
@@ -197,8 +196,10 @@ private fun PartnerAccount.getFormattedBalance(): String? {
     }
 }
 
-private enum class ViewState {
-    Enabled, Disabled, VisuallyDisabled
+private enum class ViewState(val alpha: Float) {
+    Enabled(alpha = 1f),
+    Disabled(alpha = VISUALLY_DISABLED_ALPHA),
+    VisuallyDisabled(alpha = VISUALLY_DISABLED_ALPHA)
 }
 
 /**
