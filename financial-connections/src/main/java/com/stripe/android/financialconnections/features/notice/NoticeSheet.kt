@@ -73,8 +73,8 @@ private fun NoticeSheetContent(
             )
             is Generic -> GenericBottomSheetContent(
                 generic = content.generic,
-                onClickableTextClick = { }, // TODO
-                onConfirmModalClick = { } // TODO
+                onClickableTextClick = onClickableTextClick,
+                onConfirmModalClick = onConfirmModalClick
             )
         }
         onViewEffectLaunched()

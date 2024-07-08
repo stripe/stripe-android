@@ -56,6 +56,7 @@ internal fun GenericScreenPreview(
             GenericScreen(
                 state = state,
                 onClickableTextClick = {},
+                onSecondaryButtonClick = {},
                 onPrimaryButtonClick = {},
             )
         }
@@ -66,6 +67,7 @@ internal fun GenericScreenPreview(
 internal fun GenericScreen(
     state: GenericScreenState,
     onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -89,13 +91,14 @@ internal fun GenericScreen(
             {
                 GenericFooter(
                     payload = it,
-                    onPrimaryButtonClick = onPrimaryButtonClick,
-                    onClickableTextClick = onClickableTextClick,
                     modifier = Modifier.onGloballyPositioned {
                         with(density) {
                             footerHeight = it.size.height.toDp()
                         }
                     },
+                    onPrimaryButtonClick = onPrimaryButtonClick,
+                    onSecondaryButtonClick = onSecondaryButtonClick,
+                    onClickableTextClick = onClickableTextClick,
                 )
             }
         },
@@ -267,6 +270,7 @@ internal fun GenericFooter(
     payload: Footer,
     modifier: Modifier = Modifier,
     onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
     Column(modifier) {
@@ -284,40 +288,22 @@ internal fun GenericFooter(
             Spacer(modifier = Modifier.size(16.dp))
         }
 
-        payload.primaryCta?.let { primaryCta ->
-            FinancialConnectionsButton(
-                loading = false,
+        payload.primaryCta?.let { action ->
+            GenericCTA(
                 type = FinancialConnectionsButton.Type.Primary,
                 onClick = onPrimaryButtonClick,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(text = primaryCta.label)
-
-                payload.primaryCta?.icon?.default?.let {
-                    Spacer(modifier = Modifier.size(12.dp))
-                    StripeImage(
-                        url = it,
-                        contentDescription = null,
-                        imageLoader = LocalImageLoader.current,
-                        errorContent = { },
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
+                action = action,
+            )
         }
 
         payload.secondaryCta?.let { secondaryCta ->
             Spacer(modifier = Modifier.size(8.dp))
 
-            FinancialConnectionsButton(
-                loading = false,
-                enabled = true,
+            GenericCTA(
                 type = FinancialConnectionsButton.Type.Secondary,
-                onClick = {},
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = secondaryCta.label)
-            }
+                onClick = onSecondaryButtonClick,
+                action = secondaryCta,
+            )
         }
 
         payload.belowCta?.let { belowCta ->
@@ -331,6 +317,33 @@ internal fun GenericFooter(
                     color = colors.textDefault,
                     textAlign = TextAlign.Start,
                 ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun GenericCTA(
+    onClick: () -> Unit,
+    type: FinancialConnectionsButton.Type,
+    action: Footer.GenericInfoAction,
+) {
+    FinancialConnectionsButton(
+        loading = false,
+        type = type,
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(text = action.label)
+
+        action.icon?.default?.let {
+            Spacer(modifier = Modifier.size(12.dp))
+            StripeImage(
+                url = it,
+                contentDescription = null,
+                imageLoader = LocalImageLoader.current,
+                errorContent = { },
+                modifier = Modifier.size(16.dp)
             )
         }
     }

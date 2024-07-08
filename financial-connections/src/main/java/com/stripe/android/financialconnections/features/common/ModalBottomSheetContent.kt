@@ -131,7 +131,8 @@ internal fun GenericBottomSheetContent(
     GenericScreen(
         state = GenericScreenState(generic, inModal = true),
         onPrimaryButtonClick = onConfirmModalClick,
-        onClickableTextClick = onClickableTextClick
+        onSecondaryButtonClick = onConfirmModalClick,
+        onClickableTextClick = onClickableTextClick,
     )
 }
 
