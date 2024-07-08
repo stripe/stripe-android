@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Adresa za otpremu nije valjana</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Vaš poštanski broj nije kompletan.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Jednostavna sigurna plaćanja jednim klikom</string>
   <string name="stripe_payment_method_add_new_card">Dodajte novu karticu...</string>
   <string name="stripe_payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
   <!-- Label for free shipping method -->

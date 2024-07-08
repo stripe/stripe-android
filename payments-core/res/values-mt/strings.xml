@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">L-Indirizz għat-Trasport tal-Merkanzija Mhux Validu</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Il-kodiċi postali tiegħek mhux komplut.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Pagamenti sempliċi u siguri b\'mossa waħda</string>
   <string name="stripe_payment_method_add_new_card">Żid kard ġdida…</string>
   <string name="stripe_payment_method_add_new_fpx">Agħżel Kont Bankarju (FPX)…</string>
   <!-- Label for free shipping method -->

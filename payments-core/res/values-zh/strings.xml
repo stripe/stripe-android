@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">收货地址无效</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">您的邮编不完整。</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">简单、安全的一键支付</string>
   <string name="stripe_payment_method_add_new_card">添加新卡...</string>
   <string name="stripe_payment_method_add_new_fpx">选择银行账户 (FPX)…</string>
   <!-- Label for free shipping method -->

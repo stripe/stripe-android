@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Neplatná dodacia adresa</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Vaše poštové smerovacie číslo je neúplné.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Jednoduché, bezpečné platby jedným kliknutím</string>
   <string name="stripe_payment_method_add_new_card">Pridať novú kartu…</string>
   <string name="stripe_payment_method_add_new_fpx">Zvoľte bankový účet (FPX)…</string>
   <!-- Label for free shipping method -->
