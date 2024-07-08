@@ -66,7 +66,7 @@ internal fun AccountItem(
     networkedAccount: NetworkedAccount? = null,
 ) {
     val view = LocalView.current
-    val viewState = remember { getVisibilityState(account, networkedAccount) }
+    val viewState = remember(account, networkedAccount) { getVisibilityState(account, networkedAccount) }
 
     val shape = remember { RoundedCornerShape(12.dp) }
     Box(
