@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">ที่อยู่สำหรับจัดส่งไม่ถูกต้อง</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">รหัสไปรษณีย์ไม่ครบถ้วน</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">การชำระเงินด้วยคลิกเดียวที่ปลอดภัยและใช้ง่าย</string>
   <string name="stripe_payment_method_add_new_card">เพิ่มบัตรใหม่...</string>
   <string name="stripe_payment_method_add_new_fpx">เลือกบัญชีธนาคาร (FPX)…</string>
   <!-- Label for free shipping method -->
