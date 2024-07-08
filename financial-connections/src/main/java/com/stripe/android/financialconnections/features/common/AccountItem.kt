@@ -149,7 +149,11 @@ private fun AccountSubtitle(
         MiddleEllipsisText(
             text = subtitle ?: account.redactedAccountNumbers,
             // underline there's a subtitle and the account is clickable (even if visually disabled)
-            textDecoration = if (accountSelectionState != Disabled && subtitle != null) TextDecoration.Underline else null,
+            textDecoration = if (accountSelectionState != Disabled && subtitle != null) {
+                TextDecoration.Underline
+            } else {
+                null
+            },
             color = colors.textSubdued,
             style = typography.labelMedium
         )
@@ -181,7 +185,8 @@ private fun getSubtitle(
     networkedAccount: NetworkedAccount?,
 ): String? = when {
     networkedAccount?.caption != null -> networkedAccount.caption
-    accountSelectionState != Enabled && account.allowSelectionMessage?.isNotBlank() == true -> account.allowSelectionMessage
+    accountSelectionState != Enabled && account.allowSelectionMessage?.isNotBlank() == true ->
+        account.allowSelectionMessage
     else -> null
 }
 
