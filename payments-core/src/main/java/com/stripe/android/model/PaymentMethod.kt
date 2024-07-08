@@ -170,7 +170,7 @@ constructor(
         }
 
     @Parcelize
-    enum class Type constructor(
+    enum class Type(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
@@ -492,7 +492,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            shouldRefreshIfIntentRequiresAction = true,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
