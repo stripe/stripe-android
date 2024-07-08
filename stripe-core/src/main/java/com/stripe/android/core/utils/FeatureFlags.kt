@@ -7,16 +7,19 @@ import com.stripe.android.core.BuildConfig
 @Suppress("unused")
 object FeatureFlags {
     // Add any feature flags here
+    val nativeInstantDebits = FeatureFlag(enabledInDebugMode = true)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FeatureFlag {
+class FeatureFlag(
+    private val enabledInDebugMode: Boolean = false,
+) {
 
     private var overrideEnabledValue: Boolean? = null
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideEnabledValue ?: false
+            overrideEnabledValue ?: enabledInDebugMode
         } else {
             false
         }

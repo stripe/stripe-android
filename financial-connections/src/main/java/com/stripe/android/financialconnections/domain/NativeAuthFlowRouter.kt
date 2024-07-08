@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -19,13 +20,15 @@ internal class NativeAuthFlowRouter @Inject constructor(
 
     fun nativeAuthFlowEnabled(
         manifest: FinancialConnectionsSessionManifest,
-        isInstantDebits: Boolean
+        isInstantDebits: Boolean,
     ): Boolean {
         debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
         val nativeExperimentEnabled = manifest
             .experimentAssignment(Experiment.CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
-        return isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
+        return (isInstantDebits.not() || FeatureFlags.nativeInstantDebits.isEnabled) &&
+            killSwitchEnabled.not() &&
+            nativeExperimentEnabled
     }
 
     fun logExposure(
