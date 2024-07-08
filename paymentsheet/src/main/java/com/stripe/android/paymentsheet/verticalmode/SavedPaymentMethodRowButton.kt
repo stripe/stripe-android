@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -39,6 +40,7 @@ internal fun SavedPaymentMethodRowButton(
             PaymentMethodIconFromResource(
                 iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
                 colorFilter = null,
+                alignment = Alignment.Center,
                 modifier = Modifier.padding(4.dp).height(16.dp).width(24.dp)
             )
         },

@@ -56,15 +56,18 @@ internal fun PaymentMethodIcon(
                         iconRes = iconRes,
                         colorFilter = colorFilter,
                         modifier = iconModifier,
+                        alignment = contentAlignment,
                     )
                 },
+                alignment = contentAlignment,
                 modifier = iconModifier,
             )
         } else {
             PaymentMethodIconFromResource(
                 iconRes = iconRes,
                 colorFilter = colorFilter,
-                modifier = iconModifier
+                modifier = iconModifier,
+                alignment = contentAlignment,
             )
         }
     }
@@ -74,6 +77,7 @@ internal fun PaymentMethodIcon(
 internal fun PaymentMethodIconFromResource(
     iconRes: Int,
     colorFilter: ColorFilter?,
+    alignment: Alignment,
     modifier: Modifier,
 ) {
     if (iconRes != 0) {
@@ -81,6 +85,7 @@ internal fun PaymentMethodIconFromResource(
             painter = painterResource(iconRes),
             contentDescription = null,
             colorFilter = colorFilter,
+            alignment = alignment,
             modifier = modifier.testTag(TEST_TAG_ICON_FROM_RES)
         )
     }
