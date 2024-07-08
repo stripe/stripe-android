@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import FinancialConnectionsGenericInfoScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.features.generic.GenericScreen
+import com.stripe.android.financialconnections.features.generic.GenericScreenState
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.TextResource
@@ -117,6 +120,19 @@ internal fun LegalDetailsBottomSheetContent(
 
         Links(links, onClickableTextClick)
     }
+}
+
+@Composable
+internal fun GenericBottomSheetContent(
+    generic: FinancialConnectionsGenericInfoScreen,
+    onClickableTextClick: (String) -> Unit,
+    onConfirmModalClick: () -> Unit
+) {
+    GenericScreen(
+        state = GenericScreenState(generic, inModal = true),
+        onPrimaryButtonClick = onConfirmModalClick,
+        onClickableTextClick = onClickableTextClick
+    )
 }
 
 @Composable

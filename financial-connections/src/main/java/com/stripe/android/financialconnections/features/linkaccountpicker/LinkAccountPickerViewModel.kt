@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.features.accountupdate.PresentAcc
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -284,7 +285,10 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
 
         if (drawerOnSelection != null) {
-            // TODO@carlosmuvi handle drawer display.
+            presentNoticeSheet(
+                content = NoticeSheetState.NoticeSheetContent.Generic(drawerOnSelection),
+                referrer = PANE,
+            )
             logger.debug("Drawer on selection: $drawerOnSelection")
             return
         }
