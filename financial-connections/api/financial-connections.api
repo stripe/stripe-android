@@ -1,3 +1,91 @@
+public final class FinancialConnectionsGenericInfoScreen$Body$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Body$Entry$Bullets$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body$Entry$Bullets;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body$Entry$Bullets;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Body$Entry$Bullets$GenericBulletPoint$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body$Entry$Bullets$GenericBulletPoint;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body$Entry$Bullets$GenericBulletPoint;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Body$Entry$Image$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body$Entry$Image;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body$Entry$Image;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Body$Entry$Text$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body$Entry$Text;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body$Entry$Text;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Body$Entry$Unknown$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Body$Entry$Unknown;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Body$Entry$Unknown;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Footer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Footer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Footer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Footer$GenericInfoAction$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Footer$GenericInfoAction;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Footer$GenericInfoAction;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Header$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Header;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Header;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class FinancialConnectionsGenericInfoScreen$Options$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)LFinancialConnectionsGenericInfoScreen$Options;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[LFinancialConnectionsGenericInfoScreen$Options;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/financialconnections/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
