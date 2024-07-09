@@ -3362,6 +3362,30 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/c
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/model/PaymentMethod$AfterRedirectAction$None$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$None;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$None;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethod$AfterRedirectAction$Poll$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$Poll;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$Poll;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethod$AfterRedirectAction$Refresh$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$Refresh;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethod$AfterRedirectAction$Refresh;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/PaymentMethod$AllowRedisplay : java/lang/Enum, com/stripe/android/core/model/StripeModel {
 	public static final field ALWAYS Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
