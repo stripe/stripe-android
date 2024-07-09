@@ -17,12 +17,14 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
+import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +106,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
-                            publishableKey = it.publishableKey
+                            publishableKey = it.publishableKey,
+                            experience = settings.get<ExperienceSetting>().selectedOption,
                         )
                     )
                 }
@@ -209,57 +212,108 @@ internal class FinancialConnectionsPlaygroundViewModel(
         _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
 
-    fun onCollectBankAccountLauncherResult(
-        result: CollectBankAccountResult
-    ) = viewModelScope.launch {
-        when (result) {
-            is CollectBankAccountResult.Completed -> runCatching {
-                _state.update {
-                    val session = result.response.financialConnectionsSession
-                    val account = session.accounts.data.firstOrNull()
-                    it.copy(
-                        status = it.status + listOf(
-                            "Session Completed! ${session.id} (account: ${account?.id})"
+    fun onCollectBankAccountForInstantDebitsLauncherResult(
+        result: CollectBankAccountForInstantDebitsResult,
+    ) {
+        viewModelScope.launch {
+            when (result) {
+                is CollectBankAccountForInstantDebitsResult.Completed -> runCatching {
+                    _state.update {
+                        it.copy(
+                            status = it.status + listOf(
+                                "Session Completed! ${result.intent.id} " +
+                                    "(account: ${result.bankName} •••• ${result.last4})"
+                            )
                         )
-                    )
+                    }
+                    confirmIntentIfNeeded(result.intent)
+                }.onSuccess {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Completed!"
+                        )
+                    }
+                }.onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Failed!: $error"
+                        )
+                    }
                 }
-                confirmIntentIfNeeded(result.response)
-            }.onSuccess {
-                _state.update {
-                    it.copy(
-                        loading = false,
-                        status = it.status + "Completed!"
-                    )
-                }
-            }.onFailure { error ->
-                _state.update {
-                    it.copy(
-                        loading = false,
-                        status = it.status + "Failed!: $error"
-                    )
-                }
-            }
 
-            is CollectBankAccountResult.Failed -> {
-                _state.update {
-                    it.copy(
-                        loading = false,
-                        status = it.status + "Failed! ${result.error}"
-                    )
+                is CollectBankAccountForInstantDebitsResult.Failed -> {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Failed! ${result.error}"
+                        )
+                    }
                 }
-            }
 
-            is CollectBankAccountResult.Cancelled -> {
-                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+                is CollectBankAccountForInstantDebitsResult.Cancelled -> {
+                    _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+                }
             }
         }
     }
 
-    private suspend fun confirmIntentIfNeeded(response: CollectBankAccountResponse) {
+    fun onCollectBankAccountLauncherResult(
+        result: CollectBankAccountResult
+    ) {
+        viewModelScope.launch {
+            when (result) {
+                is CollectBankAccountResult.Completed -> runCatching {
+                    _state.update {
+                        val session = result.response.financialConnectionsSession
+                        val account = session.accounts.data.firstOrNull()
+                        it.copy(
+                            status = it.status + listOf(
+                                "Session Completed! ${session.id} (account: ${account?.id})"
+                            )
+                        )
+                    }
+                    confirmIntentIfNeeded(result.response.intent)
+                }.onSuccess {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Completed!"
+                        )
+                    }
+                }.onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Failed!: $error"
+                        )
+                    }
+                }
+
+                is CollectBankAccountResult.Failed -> {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            status = it.status + "Failed! ${result.error}"
+                        )
+                    }
+                }
+
+                is CollectBankAccountResult.Cancelled -> {
+                    _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+                }
+            }
+        }
+    }
+
+    private suspend fun confirmIntentIfNeeded(
+        intent: StripeIntent,
+    ) {
         val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption
         if (shouldConfirmIntent) {
             val params = ConfirmPaymentIntentParams.create(
-                clientSecret = requireNotNull(response.intent.clientSecret),
+                clientSecret = intent.clientSecret!!,
                 paymentMethodType = PaymentMethod.Type.USBankAccount
             )
             stripe().confirmPaymentIntent(params)
@@ -342,6 +396,13 @@ enum class Flow(val apiValue: String) {
     }
 }
 
+enum class Experience(
+    val displayName: String,
+) {
+    FinancialConnections("Financial Connections"),
+    InstantDebits("Instant Debits"),
+}
+
 enum class NativeOverride(val apiValue: String) {
     None("none"), Native("native"), Web("web");
 
@@ -361,7 +422,8 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
     data class OpenForPaymentIntent(
         val paymentIntentSecret: String,
-        val publishableKey: String
+        val publishableKey: String,
+        val experience: Experience,
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 
@@ -379,5 +441,6 @@ internal data class FinancialConnectionsPlaygroundState(
             ?: PlaygroundSettings.createFromSharedPreferences(application)
     )
 
+    val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
 }

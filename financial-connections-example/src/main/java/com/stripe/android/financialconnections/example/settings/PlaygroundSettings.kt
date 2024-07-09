@@ -153,6 +153,7 @@ internal data class PlaygroundSettings(
         }
 
         private val allSettings: List<Setting<*>> = listOf(
+            ExperienceSetting(),
             MerchantSetting(),
             PublicKeySetting(),
             PrivateKeySetting(),
