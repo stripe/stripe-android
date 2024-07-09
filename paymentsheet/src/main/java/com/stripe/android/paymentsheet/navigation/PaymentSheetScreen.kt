@@ -78,8 +78,8 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data class SelectSavedPaymentMethods constructor(
-        val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
+    class SelectSavedPaymentMethods(
+        private val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
         val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
     ) : PaymentSheetScreen, Closeable {
 
@@ -148,8 +148,8 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data class AddAnotherPaymentMethod(
-        val interactor: AddPaymentMethodInteractor,
+    class AddAnotherPaymentMethod(
+        private val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
@@ -171,8 +171,8 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data class AddFirstPaymentMethod(
-        val interactor: AddPaymentMethodInteractor,
+    class AddFirstPaymentMethod(
+        private val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
@@ -194,7 +194,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data class EditPaymentMethod(
+    class EditPaymentMethod(
         val interactor: ModifiableEditPaymentMethodViewInteractor,
     ) : PaymentSheetScreen, Closeable {
 
