@@ -1,11 +1,9 @@
 package com.stripe.example.activity
 
 import android.app.Activity
+import android.app.Dialog
 import android.os.Bundle
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.CardBrand
 import com.stripe.android.view.CardFormView
 import com.stripe.example.Settings
 
@@ -15,9 +13,10 @@ class ComposeLifecycleOwnerActivity : Activity() {
 
         PaymentConfiguration.init(this, Settings(this).publishableKey)
 
-        val frameLayout = FrameLayout(this)
+        val dialog = Dialog(this)
+
         val cardFormView = CardFormView(this)
-        frameLayout.addView(cardFormView)
-        setContentView(frameLayout)
+        dialog.setContentView(cardFormView)
+        dialog.show()
     }
 }

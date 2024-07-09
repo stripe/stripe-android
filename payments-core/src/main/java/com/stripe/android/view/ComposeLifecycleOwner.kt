@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
+import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -28,7 +29,7 @@ open class ComposeLifecycleOwner(
         (parent as? View)?.findViewTreeLifecycleOwner() ?: run {
             savedStateRegistryController.performRestore(null)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-            attachToDecorView(parent as View)
+            attachToDecorView((parent as View).rootView)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         }
     }
@@ -48,11 +49,14 @@ open class ComposeLifecycleOwner(
     Therefore, we need to set this class as the "owner" for the decor view.
      */
     private fun attachToDecorView(decorView: View?) {
-        if (decorView == null) return
+        if (decorView == null) {
+            return
+        }
 
         decorView.setViewTreeLifecycleOwner(this)
         decorView.setViewTreeViewModelStoreOwner(this)
         decorView.setViewTreeSavedStateRegistryOwner(this)
+        decorView.compositionContext = this.compositionContext
     }
 
     // LifecycleOwner methods
