@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -177,7 +178,76 @@ internal class SetupIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `Keeps refreshing when encountering a CashAppPay setup that still requires action`() =
+    fun `Stops polling after max retries when encountering a Swish payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = SetupIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            // We need to retrieve the first time, before we start retries.
+            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrieveSetupIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `Keeps retrying when encountering a Swish payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = SetupIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Calls refresh endpoint when encountering a CashAppPay setup that still requires action`() =
         runTest(testDispatcher) {
             val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
@@ -192,7 +262,6 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             whenever(mockStripeRepository.refreshSetupIntent(any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 

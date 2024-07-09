@@ -42,6 +42,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun swish(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Swish,
+            code = PaymentMethod.Type.Swish.code,
+        )
+    }
+
     fun usBankAccount(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
