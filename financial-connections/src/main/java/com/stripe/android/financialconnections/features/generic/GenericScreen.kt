@@ -31,8 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.features.generic.IconSize.Large
-import com.stripe.android.financialconnections.features.generic.IconSize.Medium
+import com.stripe.android.financialconnections.features.common.IconSize
+import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
@@ -43,6 +43,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
+import androidx.compose.ui.Alignment as ComposeAlignment
 
 @Preview
 @Composable
@@ -83,7 +84,7 @@ internal fun GenericScreen(
     }
 
     Layout(
-        bodyPadding = PaddingValues(vertical = 24.dp),
+        bodyPadding = PaddingValues(0.dp),
         inModal = state.inModal,
         footer = state.screen.footer?.let {
             {
@@ -117,6 +118,8 @@ internal fun GenericScreen(
                 }
             }
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
             state.screen.header?.let {
                 GenericHeader(
                     payload = it,
@@ -125,7 +128,7 @@ internal fun GenericScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             state.screen.body?.let {
                 GenericBody(
@@ -163,23 +166,13 @@ internal fun GenericBody(
                         )
                     }
                     is Body.Entry.Text -> {
-                        val font = when (entry.size) {
-                            Size.XSmall -> typography.labelSmall
-                            Size.Small -> typography.bodySmall
-                            Size.Medium -> typography.bodyMedium
-                            null -> typography.bodyMedium
-                        }
+                        val font = entry.size.toComposeSize()
 
                         AnnotatedText(
                             text = TextResource.Text(fromHtml(entry.text)),
                             onClickableTextClick = onClickableTextClick,
                             defaultStyle = font.copy(
-                                textAlign = when (entry.alignment) {
-                                    Alignment.Left -> TextAlign.Start
-                                    Alignment.Center -> TextAlign.Center
-                                    Alignment.Right -> TextAlign.End
-                                    null -> TextAlign.Start
-                                }
+                                textAlign = entry.alignment.toComposeTextAlign()
                             ),
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
@@ -203,22 +196,17 @@ internal fun GenericHeader(
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val contentAlignment = when (payload.alignment) {
-        Alignment.Left -> TextAlign.Start
-        Alignment.Center -> TextAlign.Center
-        Alignment.Right -> TextAlign.End
-        null -> TextAlign.Start
-    }
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
         payload.icon?.default?.let { iconUrl ->
-            ServerIcon(
-                iconUrl = iconUrl,
-                iconSize = if (payload.alignment == Alignment.Center) Large else Medium,
-                squarcle = true
+            ShapedIcon(
+                modifier = Modifier.align(payload.alignment.toComposeAlignment()),
+                url = iconUrl,
+                contentDescription = null,
+                iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
             )
-            Spacer(modifier = Modifier.size(32.dp))
+            Spacer(modifier = Modifier.size(24.dp))
         }
 
         if (payload.title != null) {
@@ -226,7 +214,7 @@ internal fun GenericHeader(
                 text = TextResource.Text(payload.title),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.headingXLarge.copy(
-                    textAlign = contentAlignment,
+                    textAlign = payload.alignment.toComposeTextAlign(),
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -239,7 +227,7 @@ internal fun GenericHeader(
                 text = TextResource.Text(fromHtml(payload.subtitle)),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.bodyMedium.copy(
-                    textAlign = contentAlignment,
+                    textAlign = payload.alignment.toComposeTextAlign(),
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -329,6 +317,28 @@ private fun GenericCTA(
             )
         }
     }
+}
+
+private fun Alignment?.toComposeTextAlign(): TextAlign = when (this) {
+    Alignment.Left -> TextAlign.Start
+    Alignment.Center -> TextAlign.Center
+    Alignment.Right -> TextAlign.End
+    null -> TextAlign.Start
+}
+
+private fun Alignment?.toComposeAlignment() = when (this){
+    Alignment.Center -> ComposeAlignment.CenterHorizontally
+    Alignment.Left -> ComposeAlignment.Start
+    Alignment.Right -> ComposeAlignment.End
+    null -> ComposeAlignment.Start
+}
+
+@Composable
+private fun Size?.toComposeSize() = when (this) {
+    Size.XSmall -> typography.labelSmall
+    Size.Small -> typography.bodySmall
+    Size.Medium -> typography.bodyMedium
+    null -> typography.bodyMedium
 }
 
 internal data class GenericScreenState(

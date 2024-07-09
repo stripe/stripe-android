@@ -131,7 +131,7 @@ internal fun GenericBottomSheetContent(
     GenericScreen(
         state = GenericScreenState(generic, inModal = true),
         onPrimaryButtonClick = onConfirmModalClick,
-        onSecondaryButtonClick = onConfirmModalClick,
+        onSecondaryButtonClick = { TODO("Secondary button click not yet implemented") },
         onClickableTextClick = onClickableTextClick,
     )
 }
@@ -146,7 +146,9 @@ private fun Links(
         links.forEachIndexed { index, link ->
             Divider(color = colors.border)
             AnnotatedText(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
                 text = link,
                 defaultStyle = linkStyle,
                 annotationStyles = mapOf(

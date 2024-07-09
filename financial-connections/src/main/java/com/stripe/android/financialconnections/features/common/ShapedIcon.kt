@@ -20,8 +20,6 @@ import com.stripe.android.financialconnections.ui.theme.Brand50
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
 
-private val iconSize = 20.dp
-
 /**
  * A circular icon with a branded background color.
  *
@@ -30,14 +28,19 @@ private val iconSize = 20.dp
 @Composable
 internal fun ShapedIcon(
     painter: Painter,
+    modifier: Modifier = Modifier,
+    iconSize: IconSize = IconSize.Medium,
     backgroundShape: Shape = CircleShape,
-    contentDescription: String?
+    contentDescription: String?,
 ) {
     CircleBox(
-        backgroundShape = backgroundShape
+        modifier = modifier,
+        iconSize = iconSize,
+        backgroundShape = backgroundShape,
     ) {
         LocalIcon(
             painter = painter,
+            iconSize = iconSize,
             contentDescription = contentDescription
         )
     }
@@ -53,28 +56,40 @@ internal fun ShapedIcon(
 @Composable
 internal fun ShapedIcon(
     url: String,
-    size: Dp = iconSize,
+    modifier: Modifier = Modifier,
+    iconSize: IconSize = IconSize.Medium,
     backgroundShape: Shape = CircleShape,
     contentDescription: String?,
     errorPainter: Painter? = null
 ) {
     CircleBox(
+        modifier = modifier,
         backgroundShape = backgroundShape,
+        iconSize = iconSize
     ) {
         StripeImage(
-            modifier = Modifier.size(size),
+            modifier = Modifier.size(iconSize.paddedSize),
             url = url,
             imageLoader = LocalImageLoader.current,
             debugPainter = painterResource(id = R.drawable.stripe_ic_person),
             contentDescription = contentDescription,
-            errorContent = { errorPainter?.let { LocalIcon(errorPainter, contentDescription) } },
+            errorContent = {
+                errorPainter?.let {
+                    LocalIcon(
+                        iconSize = iconSize,
+                        painter = errorPainter,
+                        contentDescription = contentDescription
+                    )
+                }
+            },
             contentScale = ContentScale.Crop
         )
     }
 }
 
 @Composable
-internal fun LocalIcon(
+private fun LocalIcon(
+    iconSize: IconSize,
     painter: Painter,
     contentDescription: String?
 ) {
@@ -82,22 +97,29 @@ internal fun LocalIcon(
         painter = painter,
         tint = FinancialConnectionsTheme.colors.iconBrand,
         contentDescription = contentDescription,
-        modifier = Modifier.size(iconSize),
+        modifier = Modifier.size(iconSize.paddedSize),
     )
 }
 
 @Composable
-internal fun CircleBox(
-    size: Dp = 56.dp,
+private fun CircleBox(
+    modifier: Modifier = Modifier,
+    iconSize: IconSize,
     backgroundShape: Shape,
     content: @Composable () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(size)
+        modifier = modifier
+            .size(iconSize.size)
             .background(color = Brand50, shape = backgroundShape)
     ) {
         content()
     }
+}
+
+internal enum class IconSize(val size: Dp, val paddedSize: Dp) {
+    Large(64.dp, 32.dp),
+    Medium(56.dp, 20.dp),
+    Small(24.dp, 12.dp)
 }
