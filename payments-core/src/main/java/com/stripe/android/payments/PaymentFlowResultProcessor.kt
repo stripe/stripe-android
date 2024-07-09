@@ -175,7 +175,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      */
     private fun shouldCallRefreshIntent(stripeIntent: StripeIntent): Boolean {
         return stripeIntent.paymentMethod?.type == PaymentMethod.Type.WeChatPay ||
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi ||
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
     }
 
     protected abstract suspend fun retrieveStripeIntent(
@@ -376,10 +377,9 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
-        return stripeRepository.retrieveSetupIntent(
+        return stripeRepository.refreshSetupIntent(
             clientSecret,
             requestOptions,
-            expandFields
         )
     }
 

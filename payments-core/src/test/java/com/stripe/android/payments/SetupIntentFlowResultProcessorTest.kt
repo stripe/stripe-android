@@ -189,6 +189,9 @@ internal class SetupIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshSetupIntent(any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
