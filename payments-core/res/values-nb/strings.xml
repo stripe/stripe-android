@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Ugyldig leveringsadresse</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Postnummeret er ufullstendig.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Enkle, trygge betalinger med ett klikk</string>
   <string name="stripe_payment_method_add_new_card">Legg til nytt kort …</string>
   <string name="stripe_payment_method_add_new_fpx">Velg bankkonto (FPX) …</string>
   <!-- Label for free shipping method -->

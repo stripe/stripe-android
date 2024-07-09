@@ -289,7 +289,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 content = NoticeSheetState.NoticeSheetContent.Generic(drawerOnSelection),
                 referrer = PANE,
             )
-            logger.debug("Drawer on selection: $drawerOnSelection")
             return
         }
 

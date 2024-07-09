@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Ungültige Versandadresse</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Postleitzahl ist unvollständig.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Einfach und sicher bezahlen – mit nur einem Klick</string>
   <string name="stripe_payment_method_add_new_card">Neue Karte hinzufügen …</string>
   <string name="stripe_payment_method_add_new_fpx">Bankkonto (FPX) auswählen …</string>
   <!-- Label for free shipping method -->

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import android.content.Context
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.combine
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
-    private val context: Context,
     private val config: PaymentSheet.Configuration,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
@@ -65,20 +65,23 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    private fun buyButtonLabel(amount: Amount?): String {
-        return if (config.primaryButtonLabel != null) {
-            config.primaryButtonLabel
-        } else if (isProcessingPayment) {
-            val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
-            amount?.buildPayButtonLabel(context.resources) ?: fallback
-        } else {
-            context.getString(StripeUiCoreR.string.stripe_setup_button_label)
+    private fun buyButtonLabel(amount: Amount?): ResolvableString {
+        return config.primaryButtonLabel?.let {
+            resolvableString(it)
+        } ?: run {
+            if (isProcessingPayment) {
+                val fallback = resolvableString(R.string.stripe_paymentsheet_pay_button_label)
+                amount?.buildPayButtonLabel() ?: fallback
+            } else {
+                resolvableString(StripeUiCoreR.string.stripe_setup_button_label)
+            }
         }
     }
 
-    private fun continueButtonLabel(): String {
-        val customLabel = config.primaryButtonLabel
-        return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
+    private fun continueButtonLabel(): ResolvableString {
+        return config.primaryButtonLabel?.let { customLabel ->
+            resolvableString(customLabel)
+        } ?: resolvableString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 
     private fun cvcRecollectionCompleteOrNotRequired(

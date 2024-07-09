@@ -28,14 +28,14 @@ internal class HeaderTextFactory(
         isWalletEnabled: Boolean,
         isEditing: Boolean,
     ) = when (screen) {
-        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+        is PaymentSheetScreen.SelectSavedPaymentMethods, is PaymentSheetScreen.VerticalMode -> {
             if (isWalletEnabled) {
                 null
             } else {
                 R.string.stripe_paymentsheet_select_payment_method
             }
         }
-        is PaymentSheetScreen.AddFirstPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+        is PaymentSheetScreen.AddFirstPaymentMethod -> {
             R.string.stripe_paymentsheet_add_payment_method_title.takeUnless {
                 isWalletEnabled
             }

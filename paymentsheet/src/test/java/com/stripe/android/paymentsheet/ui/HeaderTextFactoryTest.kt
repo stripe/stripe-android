@@ -5,6 +5,9 @@ import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.junit.Test
 import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR
@@ -156,6 +159,71 @@ class HeaderTextFactoryTest {
         assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods)
     }
 
+    @Test
+    fun `Shows correct header for vertical mode when wallets are not enabled`() {
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
+            screen = PaymentSheetScreen.VerticalMode(
+                FakeVerticalModeInteractor
+            ),
+            isWalletEnabled = false,
+            types = listOf("card", "not_card"),
+        )
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
+    @Test
+    fun `Doesn't show header text for vertical mode when wallets are enabled`() {
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
+            screen = PaymentSheetScreen.VerticalMode(
+                FakeVerticalModeInteractor
+            ),
+            isWalletEnabled = true,
+            types = listOf("card", "not_card"),
+        )
+
+        assertThat(resource).isNull()
+    }
+
+    @Test
+    fun `Shows correct header for vertical mode when wallets are not enabled in flow controller`() {
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
+            screen = PaymentSheetScreen.VerticalMode(
+                FakeVerticalModeInteractor
+            ),
+            isWalletEnabled = false,
+            types = listOf("card", "not_card"),
+        )
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method)
+    }
+
+    @Test
+    fun `Shows correct header for vertical mode when only one payment method in flow controller`() {
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
+            screen = PaymentSheetScreen.VerticalMode(
+                FakeVerticalModeInteractor
+            ),
+            isWalletEnabled = false,
+            types = listOf("card"),
+        )
+
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_add_a_card)
+    }
+
+    @Test
+    fun `Doesn't show header for vertical mode when wallets are enabled in flow controller`() {
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
+            screen = PaymentSheetScreen.VerticalMode(
+                FakeVerticalModeInteractor
+            ),
+            isWalletEnabled = true,
+            types = listOf("card"),
+        )
+
+        assertThat(resource).isNull()
+    }
+
     private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean, isEditing: Boolean): Int? {
         return HeaderTextFactory(isCompleteFlow = isCompleteFlow).create(
             screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
@@ -163,5 +231,15 @@ class HeaderTextFactoryTest {
             types = emptyList(),
             isEditing,
         )
+    }
+
+    private object FakeVerticalModeInteractor : PaymentMethodVerticalLayoutInteractor {
+        override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State>
+            get() = throw NotImplementedError("This fake is not implemented yet.")
+        override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(false)
+
+        override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
+            // Do nothing.
+        }
     }
 }

@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Mã bưu điện chưa đầy đủ.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Thanh toán đơn giản, an toàn chỉ bằng một cú nhấp chuột</string>
   <string name="stripe_payment_method_add_new_card">Thêm thẻ mới...</string>
   <string name="stripe_payment_method_add_new_fpx">Chọn Tài khoản Ngân hàng (FPX)...</string>
   <!-- Label for free shipping method -->
