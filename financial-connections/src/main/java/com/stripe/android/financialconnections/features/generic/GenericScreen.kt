@@ -84,7 +84,7 @@ internal fun GenericScreen(
     }
 
     Layout(
-        bodyPadding = PaddingValues(0.dp),
+        bodyPadding = PaddingValues(vertical = 16.dp),
         inModal = state.inModal,
         footer = state.screen.footer?.let {
             {
@@ -118,8 +118,6 @@ internal fun GenericScreen(
                 }
             }
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
-
             state.screen.header?.let {
                 GenericHeader(
                     payload = it,
