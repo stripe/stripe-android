@@ -147,6 +147,8 @@
   <string name="stripe_invalid_shipping_information">Indirizzo di spedizione non valido</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Il codice postale è incompleto.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Pagamenti semplici e sicuri con un solo clic</string>
   <string name="stripe_payment_method_add_new_card">Aggiungi nuova carta…</string>
   <string name="stripe_payment_method_add_new_fpx">Seleziona conto bancario (FPX)…</string>
   <!-- Label for free shipping method -->

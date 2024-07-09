@@ -170,7 +170,7 @@ constructor(
         }
 
     @Parcelize
-    enum class Type constructor(
+    enum class Type(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
@@ -492,7 +492,11 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            // We are intentionally polling for Twint even though it uses the redirect trampoline.
+            // About 50% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
+            shouldRefreshIfIntentRequiresAction = true,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

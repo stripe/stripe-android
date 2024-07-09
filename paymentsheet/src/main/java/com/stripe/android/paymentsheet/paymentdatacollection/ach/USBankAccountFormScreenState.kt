@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
 import androidx.annotation.StringRes
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import kotlinx.parcelize.Parcelize
 
@@ -9,13 +10,13 @@ internal sealed class USBankAccountFormScreenState(
     @StringRes open val error: Int? = null,
     open val isProcessing: Boolean = false
 ) : Parcelable {
-    abstract val primaryButtonText: String
+    abstract val primaryButtonText: ResolvableString
     abstract val mandateText: String?
 
     @Parcelize
     data class BillingDetailsCollection(
         @StringRes override val error: Int? = null,
-        override val primaryButtonText: String,
+        override val primaryButtonText: ResolvableString,
         override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {
 
@@ -29,7 +30,7 @@ internal sealed class USBankAccountFormScreenState(
         val bankName: String?,
         val last4: String?,
         val intentId: String?,
-        override val primaryButtonText: String,
+        override val primaryButtonText: ResolvableString,
         override val mandateText: String?,
     ) : USBankAccountFormScreenState()
 
@@ -38,7 +39,7 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
         val intentId: String?,
-        override val primaryButtonText: String,
+        override val primaryButtonText: ResolvableString,
         override val mandateText: String?,
     ) : USBankAccountFormScreenState()
 
@@ -48,7 +49,7 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String?,
         val bankName: String,
         val last4: String?,
-        override val primaryButtonText: String,
+        override val primaryButtonText: ResolvableString,
         override val mandateText: String?,
     ) : USBankAccountFormScreenState()
 
