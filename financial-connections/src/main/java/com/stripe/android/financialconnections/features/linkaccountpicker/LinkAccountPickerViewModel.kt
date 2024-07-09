@@ -280,6 +280,15 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     fun onAccountClick(partnerAccount: PartnerAccount) {
         logAccountClick(partnerAccount)
 
+        val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
+        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
+
+        if (drawerOnSelection != null) {
+            // TODO@carlosmuvi handle drawer display.
+            logger.debug("Drawer on selection: $drawerOnSelection")
+            return
+        }
+
         val updateRequired = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
             partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,

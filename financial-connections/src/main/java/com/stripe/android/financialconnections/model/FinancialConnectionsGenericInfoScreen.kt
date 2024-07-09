@@ -95,9 +95,6 @@ internal data class FinancialConnectionsGenericInfoScreen(
             val id: String,
             val label: String,
             val icon: ImageResponse? = null,
-            val action: String? = null,
-            @SerialName("test_id")
-            val testId: String? = null
         ) : Parcelable
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import FinancialConnectionsGenericInfoScreen
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.M
 import android.view.HapticFeedbackConstants.CONTEXT_CLICK
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,10 +28,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
+import com.stripe.android.financialconnections.features.common.AccountSelectionState.Disabled
+import com.stripe.android.financialconnections.features.common.AccountSelectionState.Enabled
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
@@ -63,8 +66,8 @@ internal fun AccountItem(
     networkedAccount: NetworkedAccount? = null,
 ) {
     val view = LocalView.current
-    // networked account's allowSelection takes precedence over the account's.
-    val selectable = networkedAccount?.allowSelection ?: account.allowSelection
+    val viewState = remember(account, networkedAccount) { getVisibilityState(account, networkedAccount) }
+
     val shape = remember { RoundedCornerShape(12.dp) }
     Box(
         modifier = Modifier
@@ -78,11 +81,11 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickableSingle(enabled = selectable) {
+            .clickableSingle(enabled = viewState != Disabled) {
                 if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
-            .alpha(if (selectable) 1f else ContentAlpha.disabled)
+            .alpha(viewState.alpha)
             .padding(16.dp)
     ) {
         Row(
@@ -104,7 +107,7 @@ internal fun AccountItem(
                     color = colors.textDefault,
                     style = typography.labelLargeEmphasized
                 )
-                AccountSubtitle(selectable, account, networkedAccount)
+                AccountSubtitle(viewState, account, networkedAccount)
             }
             Icon(
                 modifier = Modifier
@@ -118,18 +121,39 @@ internal fun AccountItem(
     }
 }
 
+private fun getVisibilityState(
+    account: PartnerAccount,
+    networkedAccount: NetworkedAccount?
+): AccountSelectionState = when {
+    // networked account's allowSelection takes precedence over the account's.
+    networkedAccount?.allowSelection ?: account.allowSelection -> Enabled
+    // Even if the account looks "not selectable", when clicking we'd display the "drawer on selection" if available.
+    networkedAccount?.drawerOnSelection != null -> AccountSelectionState.VisuallyDisabled
+    else -> Disabled
+}
+
 @Composable
 private fun AccountSubtitle(
-    selectable: Boolean,
+    accountSelectionState: AccountSelectionState,
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?,
 ) {
-    val subtitle = getSubtitle(allowSelection = selectable, account = account, networkedAccount = networkedAccount)
+    val subtitle = getSubtitle(
+        accountSelectionState = accountSelectionState,
+        account = account,
+        networkedAccount = networkedAccount
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MiddleEllipsisText(
             text = subtitle ?: account.redactedAccountNumbers,
+            // underline there's a subtitle and the account is clickable (even if visually disabled)
+            textDecoration = if (accountSelectionState != Disabled && subtitle != null) {
+                TextDecoration.Underline
+            } else {
+                null
+            },
             color = colors.textSubdued,
             style = typography.labelMedium
         )
@@ -156,12 +180,13 @@ private fun AccountSubtitle(
 
 @Composable
 private fun getSubtitle(
-    allowSelection: Boolean,
+    accountSelectionState: AccountSelectionState,
     account: PartnerAccount,
     networkedAccount: NetworkedAccount?,
 ): String? = when {
     networkedAccount?.caption != null -> networkedAccount.caption
-    allowSelection.not() && account.allowSelectionMessage?.isNotBlank() == true -> account.allowSelectionMessage
+    accountSelectionState != Enabled && account.allowSelectionMessage?.isNotBlank() == true ->
+        account.allowSelectionMessage
     else -> null
 }
 
@@ -180,6 +205,18 @@ private fun PartnerAccount.getFormattedBalance(): String? {
     }
 }
 
+private enum class AccountSelectionState(val alpha: Float) {
+    Enabled(alpha = 1f),
+    Disabled(alpha = VISUALLY_DISABLED_ALPHA),
+    VisuallyDisabled(alpha = VISUALLY_DISABLED_ALPHA)
+}
+
+/**
+ * Using a more visible alpha (instead of ContentAlpha.disabled)
+ * since disabled accounts are still clickable (they can show a drawer on selection)
+ */
+private const val VISUALLY_DISABLED_ALPHA = 0.6f
+
 @Composable
 @Preview
 internal fun AccountItemPreview() {
@@ -194,7 +231,35 @@ internal fun AccountItemPreview() {
                     onAccountClicked = { },
                     account = PartnerAccount(
                         id = "id",
-                        name = "Regular Checking (Unselected)",
+                        name = "Regular Checking",
+                        allowSelectionMessage = "allowSelectionMessage",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
+                        authorization = "",
+                        currency = "USD",
+                        category = FinancialConnectionsAccount.Category.CASH,
+                        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                        supportedPaymentMethodTypes = emptyList(),
+                        balanceAmount = 100,
+                    ),
+                    networkedAccount = NetworkedAccount(
+                        id = "id",
+                        caption = "With some caption",
+                        allowSelection = true,
+                        icon = Image(default = "www.image.com")
+                    )
+                )
+                AccountItem(
+                    selected = false,
+                    onAccountClicked = { },
+                    account = PartnerAccount(
+                        id = "id",
+                        name = "Regular Checking",
                         allowSelectionMessage = "allowSelectionMessage",
                         institution = FinancialConnectionsInstitution(
                             id = "id",
@@ -292,6 +357,37 @@ internal fun AccountItemPreview() {
                         id = "id",
                         allowSelection = false,
                         icon = Image(default = "www.image.com")
+                    )
+                )
+                AccountItem(
+                    selected = false,
+                    onAccountClicked = { },
+                    account = PartnerAccount(
+                        id = "id",
+                        name = "Manually entered (Disabled)",
+                        _allowSelection = false,
+                        allowSelectionMessage = "Visually disabled but clickable",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
+                        authorization = "",
+                        currency = "USD",
+                        category = FinancialConnectionsAccount.Category.CASH,
+                        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                        supportedPaymentMethodTypes = emptyList(),
+                        balanceAmount = 100,
+                    ),
+                    networkedAccount = NetworkedAccount(
+                        id = "id",
+                        allowSelection = false,
+                        icon = Image(default = "www.image.com"),
+                        drawerOnSelection = FinancialConnectionsGenericInfoScreen(
+                            id = "id",
+                        )
                     )
                 )
             }
