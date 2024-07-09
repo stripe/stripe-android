@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -52,6 +53,7 @@ internal fun ShapedIcon(
 @Composable
 internal fun ShapedIcon(
     url: String,
+    size: Dp = iconSize,
     backgroundShape: Shape = CircleShape,
     contentDescription: String?,
     errorPainter: Painter? = null
@@ -60,7 +62,7 @@ internal fun ShapedIcon(
         backgroundShape = backgroundShape,
     ) {
         StripeImage(
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(size),
             url = url,
             imageLoader = LocalImageLoader.current,
             debugPainter = painterResource(id = R.drawable.stripe_ic_person),
@@ -72,7 +74,7 @@ internal fun ShapedIcon(
 }
 
 @Composable
-private fun LocalIcon(
+internal fun LocalIcon(
     painter: Painter,
     contentDescription: String?
 ) {
@@ -85,14 +87,15 @@ private fun LocalIcon(
 }
 
 @Composable
-private fun CircleBox(
+internal fun CircleBox(
+    size: Dp = 56.dp,
     backgroundShape: Shape,
     content: @Composable () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(56.dp)
+            .size(size)
             .background(color = Brand50, shape = backgroundShape)
     ) {
         content()
