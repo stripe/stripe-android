@@ -343,7 +343,8 @@ internal class PaymentIntentFlowResultProcessorTest {
             val expectedResult = PaymentIntentResult(
                 intent = requiresActionIntent,
                 outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
-                failureMessage = "We are unable to authenticate your payment method. Please choose a different payment method and try again.",
+                failureMessage = "We are unable to authenticate your payment method." +
+                    " Please choose a different payment method and try again.",
             )
 
             assertThat(result).isEqualTo(expectedResult)

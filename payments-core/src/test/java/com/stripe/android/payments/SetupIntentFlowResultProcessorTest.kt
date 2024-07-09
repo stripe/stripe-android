@@ -177,7 +177,6 @@ internal class SetupIntentFlowResultProcessorTest {
                 )
         }
 
-
     @Test
     fun `Stops polling after max retries when encountering a Swish payment that still requires action`() =
         runTest(testDispatcher) {
