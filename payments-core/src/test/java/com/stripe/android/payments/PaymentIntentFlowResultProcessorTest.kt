@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -158,7 +159,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `refresh reaches max retry user confirms the payment`() =
+    fun `refresh only retries once`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
@@ -185,7 +186,6 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(PaymentFlowResultProcessor.MAX_RETRIES)
             ).refreshPaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions)
@@ -319,7 +319,76 @@ internal class PaymentIntentFlowResultProcessorTest {
     }
 
     @Test
-    fun `Keeps refreshing when encountering a CashAppPay payment that still requires action`() =
+    fun `Stops polling after max retries when encountering a Swish payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = "We are unable to authenticate your payment method. Please choose a different payment method and try again.",
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            // We need to retrieve the first time, before we start retries.
+            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `Keeps retrying when encountering a Swish payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Calls refresh endpoint when encountering a CashAppPay payment that still requires action`() =
         runTest(testDispatcher) {
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
@@ -334,7 +403,6 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
 
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 

@@ -211,7 +211,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         var remainingRetries = MAX_RETRIES
 
         var stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-            refreshStripeIntent(
+            return refreshStripeIntent(
                 clientSecret = clientSecret,
                 requestOptions = requestOptions,
                 expandFields = EXPAND_PAYMENT_METHOD
@@ -231,7 +231,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
             delay(delayDuration)
             stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-                refreshStripeIntent(
+                return refreshStripeIntent(
                     clientSecret = clientSecret,
                     requestOptions = requestOptions,
                     expandFields = EXPAND_PAYMENT_METHOD
