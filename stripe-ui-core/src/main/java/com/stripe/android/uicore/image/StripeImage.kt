@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
@@ -51,6 +52,7 @@ fun StripeImage(
     contentScale: ContentScale = ContentScale.Fit,
     colorFilter: ColorFilter? = null,
     debugPainter: Painter? = null,
+    alignment: Alignment = Alignment.Center,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
@@ -88,6 +90,7 @@ fun StripeImage(
                     colorFilter = colorFilter,
                     contentDescription = contentDescription,
                     contentScale = contentScale,
+                    alignment = alignment,
                     painter = it.painter
                 )
             }

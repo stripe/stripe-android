@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -29,14 +30,23 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
+    val contentPaddingValues = if (subtitle != null) {
+        8.dp
+    } else {
+        12.dp
+    }
+
     RowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
         onClick = onClick,
-        contentPaddingValues = PaddingValues(12.dp),
-        modifier = modifier.fillMaxWidth(),
+        contentPaddingValues = PaddingValues(horizontal = 12.dp, vertical = contentPaddingValues),
+        modifier = modifier.fillMaxWidth().heightIn(48.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             iconContent()
 
             TitleContent(title = title, subtitle = subtitle, isEnabled = isEnabled)
@@ -57,6 +67,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean,) 
         Text(
             text = title,
             style = MaterialTheme.typography.caption,
+            fontSize = 14.sp,
             color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ internal fun PaymentMethodIcon(
             null
         }
     }
+    val iconModifier = Modifier.fillMaxSize()
 
     Box(
         modifier = modifier,
@@ -52,12 +54,21 @@ internal fun PaymentMethodIcon(
                 errorContent = {
                     PaymentMethodIconFromResource(
                         iconRes = iconRes,
-                        colorFilter = colorFilter
+                        colorFilter = colorFilter,
+                        modifier = iconModifier,
+                        alignment = contentAlignment,
                     )
                 },
+                alignment = contentAlignment,
+                modifier = iconModifier,
             )
         } else {
-            PaymentMethodIconFromResource(iconRes = iconRes, colorFilter = colorFilter)
+            PaymentMethodIconFromResource(
+                iconRes = iconRes,
+                colorFilter = colorFilter,
+                modifier = iconModifier,
+                alignment = contentAlignment,
+            )
         }
     }
 }
@@ -66,13 +77,16 @@ internal fun PaymentMethodIcon(
 internal fun PaymentMethodIconFromResource(
     iconRes: Int,
     colorFilter: ColorFilter?,
+    alignment: Alignment,
+    modifier: Modifier,
 ) {
     if (iconRes != 0) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
             colorFilter = colorFilter,
-            modifier = Modifier.testTag(TEST_TAG_ICON_FROM_RES)
+            alignment = alignment,
+            modifier = modifier.testTag(TEST_TAG_ICON_FROM_RES)
         )
     }
 }
