@@ -84,7 +84,7 @@ internal fun FinancialConnectionsButton(
         // We need to flip the direction of the gradient when rendering in a primary button
         // due to its background color. Otherwise, the spinner looks inverted.
         when (type) {
-            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.iconWhite))
+            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.contentOnBrand))
             Secondary -> Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
         }
     }
@@ -168,9 +168,9 @@ internal object FinancialConnectionsButton {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
                 backgroundColor = colors.iconBrand,
-                contentColor = colors.textWhite,
+                contentColor = colors.contentOnBrand,
                 disabledBackgroundColor = colors.iconBrand,
-                disabledContentColor = colors.textWhite.copy(alpha = 0.4f)
+                disabledContentColor = colors.contentOnBrand.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Brand400

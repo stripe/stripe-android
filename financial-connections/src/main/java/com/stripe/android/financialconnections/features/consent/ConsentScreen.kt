@@ -159,6 +159,7 @@ private fun LazyListScope.consentBody(
         ConsentLogoHeader(
             modifier = Modifier.fillMaxWidth(),
             logos = payload.merchantLogos,
+            showDots = payload.showAnimatedDots,
         )
         Spacer(modifier = Modifier.size(32.dp))
     }

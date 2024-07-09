@@ -54,6 +54,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity.Companion.getArgs
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.toLocalTheme
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
@@ -468,7 +470,8 @@ internal data class FinancialConnectionsSheetNativeState(
     val testMode: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
-    val initialPane: Pane
+    val initialPane: Pane,
+    val theme: Theme,
 ) {
 
     /**
@@ -486,6 +489,7 @@ internal data class FinancialConnectionsSheetNativeState(
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
+        theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
         viewEffect = null
     )
 
@@ -570,5 +574,6 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
+        theme = theme,
     )
 }

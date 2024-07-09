@@ -84,7 +84,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
                 viewModel.onDismissed()
             }
 
-            FinancialConnectionsTheme(state.isInstantDebits) {
+            FinancialConnectionsTheme(state.theme) {
                 FinancialConnectionsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onDismissed,

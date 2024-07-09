@@ -27,7 +27,30 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
+import com.stripe.android.uicore.R as StripeUiCoreR
+
+internal enum class Theme {
+    DefaultLight,
+    LinkLight;
+
+    val colors: FinancialConnectionsColors
+        get() = when (this) {
+            DefaultLight -> Colors
+            LinkLight -> InstantDebitsColors
+        }
+
+    val icon: Int
+        get() = when (this) {
+            DefaultLight -> R.drawable.stripe_logo
+            LinkLight -> StripeUiCoreR.drawable.stripe_link_logo_bw
+        }
+
+    companion object {
+        val default: Theme = DefaultLight
+    }
+}
 
 private val Colors = FinancialConnectionsColors(
     textDefault = Color(0xFF353A44),
@@ -54,14 +77,16 @@ private val Colors = FinancialConnectionsColors(
     backgroundCaution = Color(0xFFFEF9DA),
     border = Color(0xFFD8DEE4),
     borderBrand = Color(0xFF675DFF),
+    useDarkColorOnBrand = false,
 )
 
-internal val InstantDebitsColors = Colors.copy(
+private val InstantDebitsColors = Colors.copy(
     textBrand = Color(0XFF00A355),
     iconBrand = Color(0XFF00D66F),
     buttonPrimary = Color(0XFF00D66F),
     buttonPrimaryPressed = Color(0XFF00D66F),
     borderBrand = Color(0XFF00D66F),
+    useDarkColorOnBrand = true,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -148,35 +173,37 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
-private val TextSelectionColors = TextSelectionColors(
-    handleColor = Colors.textBrand,
-    backgroundColor = Colors.textBrand.copy(alpha = 0.4f)
-)
+private val TextSelectionColors: TextSelectionColors
+    @Composable
+    get() = TextSelectionColors(
+        handleColor = FinancialConnectionsTheme.colors.textBrand,
+        backgroundColor = FinancialConnectionsTheme.colors.textBrand.copy(alpha = 0.4f)
+    )
 
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = Colors.textBrand,
-        lightTheme = MaterialTheme.colors.isLight
+        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        lightTheme = MaterialTheme.colors.isLight,
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = Colors.textBrand,
-        lightTheme = MaterialTheme.colors.isLight
+        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        lightTheme = MaterialTheme.colors.isLight,
     )
 }
 
 @Composable
 internal fun FinancialConnectionsTheme(
-    instantDebits: Boolean = false,
+    theme: Theme = Theme.default,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
         LocalNavHostController provides rememberNavController(),
         LocalTypography provides Typography,
-        LocalColors provides if (instantDebits) InstantDebitsColors else Colors
+        LocalColors provides theme.colors,
     ) {
         val view = LocalView.current
         val window = findWindow()
