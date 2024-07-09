@@ -154,7 +154,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // For some payment method types, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
         val shouldRefresh = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type?.shouldRefreshIfIntentRequiresAction == true
+            stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRefresh == true
 
         return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
     }
@@ -174,9 +174,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      * implemented on wechat_pay and upi
      */
     private fun shouldCallRefreshIntent(stripeIntent: StripeIntent): Boolean {
-        return stripeIntent.paymentMethod?.type == PaymentMethod.Type.WeChatPay ||
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi ||
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
+        return stripeIntent.paymentMethod?.type?.afterRedirectAction is PaymentMethod.AfterRedirectAction.Refresh
     }
 
     protected abstract suspend fun retrieveStripeIntent(
@@ -208,10 +206,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): Result<T> {
-        var remainingRetries = MAX_RETRIES
+        var remainingRetries = originalIntent.paymentMethod?.type?.afterRedirectAction?.retryCount ?: MAX_RETRIES
 
         var stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-            return refreshStripeIntent(
+            refreshStripeIntent(
                 clientSecret = clientSecret,
                 requestOptions = requestOptions,
                 expandFields = EXPAND_PAYMENT_METHOD
@@ -231,7 +229,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
             delay(delayDuration)
             stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-                return refreshStripeIntent(
+                refreshStripeIntent(
                     clientSecret = clientSecret,
                     requestOptions = requestOptions,
                     expandFields = EXPAND_PAYMENT_METHOD

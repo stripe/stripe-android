@@ -159,7 +159,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `refresh only retries once`() =
+    fun `refresh reaches max retry user confirms the payment`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
@@ -186,6 +186,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
+                times(MAX_RETRIES),
             ).refreshPaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions)
@@ -423,6 +424,44 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
 
             assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Calls refresh endpoint once when encountering a CashAppPay payment that remains requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.cashAppPay(),
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = "We are unable to authenticate your payment method." +
+                    " Please choose a different payment method and try again.",
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            verify(mockStripeRepository).refreshPaymentIntent(any(), any())
         }
 
     private suspend fun runCanceledFlow(
