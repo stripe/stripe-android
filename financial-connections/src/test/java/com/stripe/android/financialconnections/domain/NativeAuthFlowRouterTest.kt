@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.debug.DebugConfiguration
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -25,6 +27,11 @@ internal class NativeAuthFlowRouterTest {
         whenever(debugConfiguration.overriddenNative).thenReturn(null)
     }
 
+    @After
+    fun after() {
+        FeatureFlags.nativeInstantDebits.reset()
+    }
+
     @Test
     fun `nativeAuthFlowEnabled - true if experiment is treatment and no kill switch`() {
         val syncResponse = syncWithAssignments(
@@ -39,7 +46,24 @@ internal class NativeAuthFlowRouterTest {
     }
 
     @Test
-    fun `nativeAuthFlowEnabled - false if experiment is treatment but instant debits`() {
+    fun `nativeAuthFlowEnabled - false if native instant debits`() {
+        FeatureFlags.nativeInstantDebits.setEnabled(true)
+
+        val syncResponse = syncWithAssignments(
+            assignments = mapOf(
+                "connections_mobile_native" to "treatment"
+            ),
+            features = mapOf()
+        )
+
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = true)
+        assertThat(nativeAuthFlowEnabled).isTrue()
+    }
+
+    @Test
+    fun `nativeAuthFlowEnabled - false if experiment is treatment but instant debits web`() {
+        FeatureFlags.nativeInstantDebits.setEnabled(false)
+
         val syncResponse = syncWithAssignments(
             assignments = mapOf(
                 "connections_mobile_native" to "treatment"
