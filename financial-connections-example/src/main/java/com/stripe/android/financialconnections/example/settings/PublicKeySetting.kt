@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
 import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
@@ -29,7 +30,11 @@ internal data class PublicKeySetting(
         return replace(currentSettings, this.copy(selectedOption = value))
     }
 
-    override fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean {
+    override fun shouldDisplay(
+        merchant: Merchant,
+        flow: Flow,
+        experience: Experience,
+    ): Boolean {
         return merchant == Merchant.Custom
     }
 
