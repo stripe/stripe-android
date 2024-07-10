@@ -86,7 +86,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         processing = viewModel.processing,
         selection = viewModel.selection,
         formElementsForCode = viewModel::formElementsForCode,
-        transitionTo = viewModel::transitionTo,
+        transitionTo = viewModel.navigationHandler::transitionTo,
         onFormFieldValuesChanged = viewModel::onFormFieldValuesChanged,
         manageScreenFactory = {
             PaymentSheetScreen.ManageSavedPaymentMethods(
