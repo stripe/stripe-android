@@ -70,7 +70,7 @@ internal class DefaultVerticalModeFormInteractor(
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
         when (viewAction) {
             VerticalModeFormInteractor.ViewAction.FieldInteraction -> {
-                viewModel.reportFieldInteraction(selectedPaymentMethodCode)
+                viewModel.analyticsListener.reportFieldInteraction(selectedPaymentMethodCode)
             }
             is VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged -> {
                 viewModel.onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)

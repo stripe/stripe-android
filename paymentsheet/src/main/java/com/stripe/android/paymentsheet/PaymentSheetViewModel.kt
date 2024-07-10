@@ -137,7 +137,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
-            reportConfirmButtonPressed()
+            eventReporter.onPressConfirmButton(selection.value)
             checkout()
         },
     )
@@ -540,7 +540,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
-        reportConfirmButtonPressed()
+        eventReporter.onPressConfirmButton(selection.value)
         checkout()
     }
 
@@ -820,7 +820,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onUserCancel() {
-        reportDismiss()
+        eventReporter.onDismiss()
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
