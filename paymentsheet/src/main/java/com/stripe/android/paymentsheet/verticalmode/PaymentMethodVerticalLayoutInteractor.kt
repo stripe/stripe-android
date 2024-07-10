@@ -181,6 +181,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         coroutineScope.launch {
+            mostRecentlySelectedSavedPaymentMethod.collect { mostRecentlySelectedSavedPaymentMethod ->
+                if (
+                    mostRecentlySelectedSavedPaymentMethod == null &&
+                    verticalModeScreenSelection.value is PaymentSelection.Saved
+                ) {
+                    _verticalModeScreenSelection.value = null
+                }
+            }
+        }
+
+        coroutineScope.launch {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
                     updateSelection(verticalModeScreenSelection.value)

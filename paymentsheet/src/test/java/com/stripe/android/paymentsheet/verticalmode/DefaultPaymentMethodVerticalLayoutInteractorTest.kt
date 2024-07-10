@@ -91,6 +91,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
         selectionSource.value = savedSelection
+        mostRecentlySelectedSavedPaymentMethodSource.value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -177,6 +178,63 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(availableSavedPaymentMethodAction).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
                     )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `saved PM selection is removed if only saved pm is removed`() {
+        val displayedPM = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        runScenario(
+            initialPaymentMethods = listOf(displayedPM),
+            initialMostRecentlySelectedSavedPaymentMethod = displayedPM,
+            updateSelection = {},
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(displayedPM)
+                }
+            }
+
+            mostRecentlySelectedSavedPaymentMethodSource.value = null
+            paymentMethodsSource.value = emptyList()
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNull()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `saved PM selection is updated if most recently selected saved pm is removed`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val displayedPM = paymentMethods[0]
+        runScenario(
+            initialPaymentMethods = paymentMethods,
+            initialMostRecentlySelectedSavedPaymentMethod = displayedPM,
+            updateSelection = {},
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(displayedPM)
+                }
+            }
+
+            mostRecentlySelectedSavedPaymentMethodSource.value = null
+            val updatedPaymentMethods = paymentMethods.minus(displayedPM)
+            paymentMethodsSource.value = updatedPaymentMethods
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(updatedPaymentMethods[0])
                 }
             }
         }
@@ -732,11 +790,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val initialPaymentSelection = PaymentSelection.Link
         runScenario(
             initialSelection = initialPaymentSelection,
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             updateSelection = {},
             formElementsForCode = { emptyList() }
         ) {
             val newSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             selectionSource.value = newSelection
+            mostRecentlySelectedSavedPaymentMethodSource.value = newSelection.paymentMethod
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -883,6 +943,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selectionSource = selection,
             isCurrentScreenSource = isCurrentScreen,
             mostRecentlySelectedSavedPaymentMethodSource = mostRecentlySelectedSavedPaymentMethod,
+            paymentMethodsSource = paymentMethods,
             walletsState = walletsState,
             interactor = interactor,
             dispatcher = dispatcher,
@@ -898,6 +959,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val isCurrentScreenSource: MutableStateFlow<Boolean>,
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
+        val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
         val walletsState: MutableStateFlow<WalletsState?>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
         val dispatcher: TestDispatcher,
