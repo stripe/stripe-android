@@ -152,14 +152,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration,
         metadata: PaymentMethodMetadata,
     ): PaymentSheetState.Full = coroutineScope {
-        val stripeIntent = elementsSession.stripeIntent
-        val merchantCountry = elementsSession.merchantCountry
-
         val isGooglePayReady = async {
             isGooglePayReady(config, elementsSession)
         }
-
-        val customerConfig = config.customer
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -170,42 +165,28 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val customer = async {
-            val customerState = when (customerConfig?.accessType) {
-                is PaymentSheet.CustomerAccessType.CustomerSession ->
-                    elementsSession.toCustomerState()
-                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey ->
-                    customerConfig.toCustomerState(metadata)
-                else -> null
-            }
-
-            customerState?.let { state ->
-                state.copy(
-                    paymentMethods = state.paymentMethods
-                        .withLastUsedPaymentMethodFirst(savedSelection.await())
-                )
-            }
+            createCustomerState(
+                config = config,
+                elementsSession = elementsSession,
+                metadata = metadata,
+                savedSelection = savedSelection,
+            )
         }
 
         val initialPaymentSelection = async {
             retrieveInitialPaymentSelection(savedSelection, customer)
-                ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
         }
 
         val linkState = async {
-            if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
-                loadLinkState(
-                    config = config,
-                    customer = customer.await(),
-                    metadata = metadata,
-                    merchantCountry = merchantCountry,
-                    passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
-                    linkSignUpDisabled = elementsSession.disableLinkSignup,
-                    flags = elementsSession.linkFlags,
-                )
-            } else {
-                null
-            }
+            createLinkState(
+                config = config,
+                elementsSession = elementsSession,
+                customer = customer,
+                metadata = metadata,
+            )
         }
+
+        val stripeIntent = elementsSession.stripeIntent
 
         warnUnactivatedIfNeeded(stripeIntent)
 
@@ -258,6 +239,27 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             externalPaymentMethods = externalPaymentMethods,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
+    }
+
+    private suspend fun createLinkState(
+        elementsSession: ElementsSession,
+        config: PaymentSheet.Configuration,
+        metadata: PaymentMethodMetadata,
+        customer: Deferred<CustomerState?>,
+    ): LinkState? {
+        return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
+            loadLinkState(
+                config = config,
+                customer = customer.await(),
+                metadata = metadata,
+                merchantCountry = elementsSession.merchantCountry,
+                passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
+                linkSignUpDisabled = elementsSession.disableLinkSignup,
+                flags = elementsSession.linkFlags,
+            )
+        } else {
+            null
+        }
     }
 
     private suspend fun loadLinkState(
@@ -339,6 +341,30 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return metadata
     }
 
+    private suspend fun createCustomerState(
+        config: PaymentSheet.Configuration,
+        elementsSession: ElementsSession,
+        metadata: PaymentMethodMetadata,
+        savedSelection: Deferred<SavedSelection>,
+    ): CustomerState? {
+        val customerConfig = config.customer
+
+        val customerState = when (customerConfig?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession ->
+                elementsSession.toCustomerState()
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey ->
+                customerConfig.toCustomerState(metadata)
+            else -> null
+        }
+
+        return customerState?.let { state ->
+            state.copy(
+                paymentMethods = state.paymentMethods
+                    .withLastUsedPaymentMethodFirst(savedSelection.await())
+            )
+        }
+    }
+
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
         customer: CustomerState?,
@@ -417,7 +443,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
             }
             is SavedSelection.None -> null
-        }
+        } ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
     }
 
     private suspend fun retrieveSavedSelection(
