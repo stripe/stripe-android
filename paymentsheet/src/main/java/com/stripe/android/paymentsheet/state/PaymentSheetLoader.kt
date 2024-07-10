@@ -85,7 +85,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = withTask(::reportFailedLoad) {
+    ): Result<PaymentSheetState.Full> = withContextCatching(::reportFailedLoad) {
         eventReporter.onLoadStarted(initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
@@ -163,7 +163,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             isGooglePaySupported = isGooglePaySupported(),
         )
 
-        return@withTask state
+        return@withContextCatching state
     }
 
     private suspend fun isGooglePayReady(
@@ -632,7 +632,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
      * it. If a failure occurs, we can also run the 'onFailure' logic inside the outer work coroutine rather than the
      * caller's coroutine.
      */
-    private suspend fun <T> withTask(
+    private suspend fun <T> withContextCatching(
         onFailure: (error: Throwable) -> Unit,
         task: suspend CoroutineScope.() -> T
     ): Result<T> {
