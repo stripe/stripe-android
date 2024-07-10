@@ -63,19 +63,6 @@ internal class PaymentSheetAnalyticsListener(
         }
     }
 
-    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
-        eventReporter.onSelectPaymentMethod(code)
-        reportFormShown(code)
-    }
-
-    fun reportAutofillEvent(type: String) {
-        eventReporter.onAutofill(type)
-    }
-
-    fun reportCardNumberCompleted() {
-        eventReporter.onCardNumberCompleted()
-    }
-
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
             is PaymentSheetScreen.Loading,

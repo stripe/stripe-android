@@ -232,8 +232,8 @@ private fun PaymentSheetContent(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             CompositionLocalProvider(
-                LocalAutofillEventReporter provides viewModel.analyticsListener::reportAutofillEvent,
-                LocalCardNumberCompletedEventReporter provides viewModel.analyticsListener::reportCardNumberCompleted,
+                LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
+                LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
             ) {
                 currentScreen.Content(
                     viewModel = viewModel,

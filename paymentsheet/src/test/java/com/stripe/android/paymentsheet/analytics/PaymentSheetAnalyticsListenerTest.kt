@@ -29,29 +29,6 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
-    fun `reportPaymentMethodTypeSelected should report form shown event only once`() = runScenario {
-        analyticsListener.reportPaymentMethodTypeSelected("us_bank_account")
-        analyticsListener.reportPaymentMethodTypeSelected("us_bank_account")
-        analyticsListener.reportPaymentMethodTypeSelected("us_bank_account")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormShown("us_bank_account")
-        verify(eventReporter, times(3)).onSelectPaymentMethod("us_bank_account")
-    }
-
-    @Test
-    fun `reportPaymentMethodTypeSelected should report changes in form shown event`() = runScenario {
-        analyticsListener.reportPaymentMethodTypeSelected("us_bank_account")
-        verify(eventReporter).onPaymentMethodFormShown("us_bank_account")
-        verify(eventReporter).onSelectPaymentMethod("us_bank_account")
-        analyticsListener.reportPaymentMethodTypeSelected("card")
-        verify(eventReporter).onPaymentMethodFormShown("card")
-        verify(eventReporter).onSelectPaymentMethod("card")
-        analyticsListener.reportPaymentMethodTypeSelected("cashapp")
-        verify(eventReporter).onPaymentMethodFormShown("cashapp")
-        verify(eventReporter).onSelectPaymentMethod("cashapp")
-    }
-
-    @Test
     fun `on field interaction, should report event`() = runScenario {
         analyticsListener.reportFieldInteraction("card")
 
@@ -65,20 +42,6 @@ class PaymentSheetAnalyticsListenerTest {
         analyticsListener.reportFieldInteraction("card")
 
         verify(eventReporter, times(1)).onPaymentMethodFormInteraction("card")
-    }
-
-    @Test
-    fun `reportAutofillEvent, should report event`() = runScenario {
-        analyticsListener.reportAutofillEvent("autofill_type")
-
-        verify(eventReporter).onAutofill(eq("autofill_type"))
-    }
-
-    @Test
-    fun `on card number completed event, should report event`() = runScenario {
-        analyticsListener.reportCardNumberCompleted()
-
-        verify(eventReporter).onCardNumberCompleted()
     }
 
     @Test
