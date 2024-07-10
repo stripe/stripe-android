@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -78,49 +79,91 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
 ) : PaymentSheetLoader {
 
+    @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = withContext(workContext) {
+    ): Result<PaymentSheetState.Full> = withContextCatching(::reportFailedLoad) {
         eventReporter.onLoadStarted(initializedViaCompose)
 
-        val savedPaymentMethodSelection = when (paymentSheetConfiguration.customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession ->
-                retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
-            null -> null
-        }
+        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
 
-        val elementsSessionResult = retrieveElementsSession(
+        val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = paymentSheetConfiguration.customer,
             externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
             defaultPaymentMethodId = savedPaymentMethodSelection?.id,
+        ).getOrThrow()
+
+        val metadata = createPaymentMethodMetadata(
+            paymentSheetConfiguration = paymentSheetConfiguration,
+            elementsSession = elementsSession,
         )
 
-        elementsSessionResult.mapCatching { elementsSession ->
-            val metadata = createPaymentMethodMetadata(
-                paymentSheetConfiguration = paymentSheetConfiguration,
-                elementsSession = elementsSession,
-            )
+        val isGooglePayReady = async {
+            isGooglePayReady(paymentSheetConfiguration, elementsSession)
+        }
 
-            create(
-                elementsSession = elementsSession,
+        val savedSelection = async {
+            retrieveSavedSelection(
                 config = paymentSheetConfiguration,
-                metadata = metadata,
-            ).let { state ->
-                reportSuccessfulLoad(
-                    elementsSession = elementsSession,
-                    state = state,
-                    isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
-                    isGooglePaySupported = isGooglePaySupported(),
-                )
+                isGooglePayReady = isGooglePayReady.await(),
+                elementsSession = elementsSession
+            )
+        }
 
-                return@let state
-            }
-        }.onFailure(::reportFailedLoad)
+        val customer = async {
+            createCustomerState(
+                config = paymentSheetConfiguration,
+                elementsSession = elementsSession,
+                metadata = metadata,
+                savedSelection = savedSelection,
+            )
+        }
+
+        val initialPaymentSelection = async {
+            retrieveInitialPaymentSelection(savedSelection, customer)
+        }
+
+        val linkState = async {
+            createLinkState(
+                config = paymentSheetConfiguration,
+                elementsSession = elementsSession,
+                customer = customer,
+                metadata = metadata,
+            )
+        }
+
+        val stripeIntent = elementsSession.stripeIntent
+
+        warnUnactivatedIfNeeded(stripeIntent)
+
+        if (!supportsIntent(metadata)) {
+            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
+        }
+
+        val state = PaymentSheetState.Full(
+            config = paymentSheetConfiguration,
+            customer = customer.await(),
+            isGooglePayReady = isGooglePayReady.await(),
+            linkState = linkState.await(),
+            isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
+            paymentSelection = initialPaymentSelection.await(),
+            validationError = stripeIntent.validate(),
+            paymentMethodMetadata = metadata,
+        )
+
+        reportSuccessfulLoad(
+            elementsSession = elementsSession,
+            state = state,
+            isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+            isGooglePaySupported = isGooglePaySupported(),
+        )
+
+        return@withContextCatching state
     }
 
     private suspend fun isGooglePayReady(
@@ -145,66 +188,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun isGooglePaySupported(): Boolean {
         return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
-    }
-
-    private suspend fun create(
-        elementsSession: ElementsSession,
-        config: PaymentSheet.Configuration,
-        metadata: PaymentMethodMetadata,
-    ): PaymentSheetState.Full = coroutineScope {
-        val isGooglePayReady = async {
-            isGooglePayReady(config, elementsSession)
-        }
-
-        val savedSelection = async {
-            retrieveSavedSelection(
-                config = config,
-                isGooglePayReady = isGooglePayReady.await(),
-                elementsSession = elementsSession
-            )
-        }
-
-        val customer = async {
-            createCustomerState(
-                config = config,
-                elementsSession = elementsSession,
-                metadata = metadata,
-                savedSelection = savedSelection,
-            )
-        }
-
-        val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, customer)
-        }
-
-        val linkState = async {
-            createLinkState(
-                config = config,
-                elementsSession = elementsSession,
-                customer = customer,
-                metadata = metadata,
-            )
-        }
-
-        val stripeIntent = elementsSession.stripeIntent
-
-        warnUnactivatedIfNeeded(stripeIntent)
-
-        if (supportsIntent(metadata)) {
-            PaymentSheetState.Full(
-                config = config,
-                customer = customer.await(),
-                isGooglePayReady = isGooglePayReady.await(),
-                linkState = linkState.await(),
-                isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
-                paymentSelection = initialPaymentSelection.await(),
-                validationError = stripeIntent.validate(),
-                paymentMethodMetadata = metadata,
-            )
-        } else {
-            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-        }
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
@@ -461,18 +444,24 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveSavedPaymentMethodSelection(
         config: PaymentSheet.Configuration,
     ): SavedSelection.PaymentMethod? {
-        /*
-         * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment method
-         * ID to ensure it is properly returned by the API when performing payment method deduping. We only care
-         * about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are locally defined
-         * LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know if they are ready and
-         * can safely set them to `false`.
-         */
-        return retrieveSavedSelection(
-            config = config,
-            isGooglePayReady = false,
-            isLinkAvailable = false,
-        ) as? SavedSelection.PaymentMethod
+        return when (config.customer?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                /*
+                 * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment
+                 * method ID to ensure it is properly returned by the API when performing payment method deduping. We
+                 * only care about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are
+                 * locally defined LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know
+                 * if they are ready and can safely set them to `false`.
+                 */
+                retrieveSavedSelection(
+                    config = config,
+                    isGooglePayReady = false,
+                    isLinkAvailable = false,
+                ) as? SavedSelection.PaymentMethod
+            }
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
+            null -> null
+        }
     }
 
     private suspend fun retrieveSavedSelection(
@@ -627,6 +616,33 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 canRemoveDuplicates = false,
             )
         )
+    }
+
+    /*
+     * This is a helper for catching thrown exceptions from 'async' calls within a suspendable function.
+     *
+     * If a 'runCatching' task wraps a task with 'async' calls, any 'async' failures are not caught by 'runCatching'
+     * but instead by the coroutine, causing the whole coroutine scope to fail and close which propagates the uncaught
+     * exception to the caller. This is counter-intuitive to the idea of catching all exceptions that occur from a
+     * task.
+     *
+     * This function instead launches inside one coroutine scope a 'runCatching' call that creates its own coroutine
+     * scope to launch the task in. If the inner coroutine scope fails and throws an exception, the 'runCatching' call
+     * will be able to catch the exception and return a 'Result' type to the caller rather than throw an exception to
+     * it. If a failure occurs, we can also run the 'onFailure' logic inside the outer work coroutine rather than the
+     * caller's coroutine.
+     */
+    private suspend fun <T> withContextCatching(
+        onFailure: (error: Throwable) -> Unit,
+        task: suspend CoroutineScope.() -> T
+    ): Result<T> {
+        return withContext(workContext) {
+            runCatching {
+                coroutineScope {
+                    task()
+                }
+            }.onFailure(onFailure)
+        }
     }
 }
 
