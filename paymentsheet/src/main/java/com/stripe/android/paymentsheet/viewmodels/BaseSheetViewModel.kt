@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.MandateText
@@ -182,23 +183,13 @@ internal abstract class BaseSheetViewModel(
     private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
-    private var previouslySentDeepLinkEvent: Boolean
-        get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
-        set(value) {
-            savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] = value
-        }
-
-    private var previouslyShownForm: PaymentMethodCode?
-        get() = savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM]
-        set(value) {
-            savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM] = value
-        }
-
-    private var previouslyInteractedForm: PaymentMethodCode?
-        get() = savedStateHandle[PREVIOUSLY_INTERACTION_PAYMENT_FORM]
-        set(value) {
-            savedStateHandle[PREVIOUSLY_INTERACTION_PAYMENT_FORM] = value
-        }
+    val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
+        savedStateHandle = savedStateHandle,
+        eventReporter = eventReporter,
+        currentScreen = navigationHandler.currentScreen,
+        coroutineScope = viewModelScope,
+        currentPaymentMethodTypeProvider = { initiallySelectedPaymentMethodType },
+    )
 
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
@@ -288,25 +279,6 @@ internal abstract class BaseSheetViewModel(
         }
 
         viewModelScope.launch {
-            navigationHandler.currentScreen.collectLatest { screen ->
-                when (screen) {
-                    is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
-                        reportFormShown(initiallySelectedPaymentMethodType)
-                    }
-                    is PaymentSheetScreen.EditPaymentMethod,
-                    is PaymentSheetScreen.Loading,
-                    is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                        previouslyShownForm = null
-                        previouslyInteractedForm = null
-                    }
-                    is PaymentSheetScreen.Form,
-                    is PaymentSheetScreen.ManageSavedPaymentMethods,
-                    is PaymentSheetScreen.ManageOneSavedPaymentMethod -> {}
-                }
-            }
-        }
-
-        viewModelScope.launch {
             var inLinkSignUpMode = false
 
             combine(
@@ -342,7 +314,6 @@ internal abstract class BaseSheetViewModel(
     protected fun transitionToFirstScreen() {
         val initialBackStack = determineInitialBackStack()
         navigationHandler.resetTo(initialBackStack)
-        reportPaymentSheetShown(initialBackStack.last())
     }
 
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
@@ -356,51 +327,9 @@ internal abstract class BaseSheetViewModel(
         navigationHandler.transitionTo(target)
     }
 
-    private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
-        when (currentScreen) {
-            is PaymentSheetScreen.Loading,
-            is PaymentSheetScreen.EditPaymentMethod,
-            is PaymentSheetScreen.Form,
-            is PaymentSheetScreen.ManageOneSavedPaymentMethod,
-            is PaymentSheetScreen.ManageSavedPaymentMethods -> {
-                // Nothing to do here
-            }
-            is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                eventReporter.onShowExistingPaymentOptions()
-            }
-            is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
-                eventReporter.onShowNewPaymentOptionForm()
-            }
-        }
-    }
-
-    private fun reportPaymentSheetHidden(hiddenScreen: PaymentSheetScreen) {
-        when (hiddenScreen) {
-            is PaymentSheetScreen.EditPaymentMethod -> {
-                eventReporter.onHideEditablePaymentOption()
-            }
-            else -> {
-                // Events for hiding other screens not supported
-            }
-        }
-    }
-
-    protected fun reportConfirmButtonPressed() {
-        eventReporter.onPressConfirmButton(selection.value)
-    }
-
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
         supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
-    }
-
-    protected fun reportDismiss() {
-        eventReporter.onDismiss()
-    }
-
-    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
-        eventReporter.onSelectPaymentMethod(code)
-        reportFormShown(code)
     }
 
     abstract fun clearErrorMessages()
@@ -522,14 +451,6 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    fun cannotProperlyReturnFromLinkAndOtherLPMs() {
-        if (!previouslySentDeepLinkEvent) {
-            eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
-
-            previouslySentDeepLinkEvent = true
-        }
-    }
-
     private fun updateCvcFlows(selection: PaymentSelection?) {
         if (selection is PaymentSelection.Saved && selection.paymentMethod.type == PaymentMethod.Type.Card) {
             _cvcControllerFlow.value = CvcController(
@@ -599,8 +520,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        eventReporter.onShowEditablePaymentOption()
-
         val canRemove = if (config.allowsRemovalOfLastSavedPaymentMethod) {
             true
         } else {
@@ -785,28 +704,8 @@ internal abstract class BaseSheetViewModel(
         _mandateText.value = null
 
         navigationHandler.pop { poppedScreen ->
-            reportPaymentSheetHidden(poppedScreen)
+            analyticsListener.reportPaymentSheetHidden(poppedScreen)
         }
-    }
-
-    fun reportFieldInteraction(code: PaymentMethodCode) {
-        /*
-         * Prevents this event from being reported multiple times on field interactions
-         * on the same payment form. We should have one field interaction event for
-         * every form shown event triggered.
-         */
-        if (previouslyInteractedForm != code) {
-            eventReporter.onPaymentMethodFormInteraction(code)
-            previouslyInteractedForm = code
-        }
-    }
-
-    fun reportAutofillEvent(type: String) {
-        eventReporter.onAutofill(type)
-    }
-
-    fun reportCardNumberCompleted() {
-        eventReporter.onCardNumberCompleted()
     }
 
     fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
@@ -817,18 +716,6 @@ internal abstract class BaseSheetViewModel(
                 paymentMethodMetadata = paymentMethodMetadata,
             )
             updateSelection(newSelection)
-        }
-    }
-
-    private fun reportFormShown(code: String) {
-        /*
-         * Prevents this event from being reported multiple times on the same payment form after process death. We
-         * should only trigger a form shown event when initially shown in the add payment method screen or the user
-         * navigates to a different form.
-         */
-        if (previouslyShownForm != code) {
-            eventReporter.onPaymentMethodFormShown(code)
-            previouslyShownForm = code
         }
     }
 
@@ -893,8 +780,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVED_PM_SELECTION = "saved_selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
-        internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
-        internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
-        internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
     }
 }

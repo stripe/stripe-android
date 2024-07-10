@@ -2606,18 +2606,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-
-        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
-    }
-
-    @Test
     fun `on navigate to AddPaymentMethod screen, should report form shown event`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
@@ -2628,34 +2616,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToAddPaymentScreen()
 
         verify(eventReporter).onPaymentMethodFormShown("card")
-    }
-
-    @Test
-    fun `on payment form changed, should report form shown event`() = runTest {
-        val viewModel = createViewModel(
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-            customer = EMPTY_CUSTOMER_STATE,
-        )
-
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-
-        verify(eventReporter).onPaymentMethodFormShown("us_bank_account")
-    }
-
-    @Test
-    fun `on form changed to same value, should report form shown event only once`() = runTest {
-        val viewModel = createViewModel(
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-            customer = EMPTY_CUSTOMER_STATE,
-        )
-
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormShown("us_bank_account")
     }
 
     @Test
@@ -2671,47 +2631,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToAddPaymentScreen()
 
         verify(eventReporter, times(2)).onPaymentMethodFormShown("card")
-    }
-
-    @Test
-    fun `on field interaction, should report event`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportFieldInteraction("card")
-
-        verify(eventReporter).onPaymentMethodFormInteraction("card")
-    }
-
-    @Test
-    fun `on multiple field interactions with same payment form, should report event only once`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportFieldInteraction("card")
-        viewModel.reportFieldInteraction("card")
-        viewModel.reportFieldInteraction("card")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormInteraction("card")
-    }
-
-    @Test
-    fun `on card number completed event, should report event`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportCardNumberCompleted()
-
-        verify(eventReporter).onCardNumberCompleted()
     }
 
     @Test

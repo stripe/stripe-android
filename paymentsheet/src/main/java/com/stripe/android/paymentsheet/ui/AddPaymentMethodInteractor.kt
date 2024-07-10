@@ -83,9 +83,9 @@ internal class DefaultAddPaymentMethodInteractor(
         formElementsForCode = sheetViewModel::formElementsForCode,
         clearErrorMessages = sheetViewModel::clearErrorMessages,
         onLinkSignUpStateUpdated = sheetViewModel::onLinkSignUpStateUpdated,
-        reportFieldInteraction = sheetViewModel::reportFieldInteraction,
+        reportFieldInteraction = sheetViewModel.analyticsListener::reportFieldInteraction,
         onFormFieldValuesChanged = sheetViewModel::onFormFieldValuesChanged,
-        reportPaymentMethodTypeSelected = sheetViewModel::reportPaymentMethodTypeSelected,
+        reportPaymentMethodTypeSelected = sheetViewModel.eventReporter::onSelectPaymentMethod,
         createUSBankAccountFormArguments = {
             USBankAccountFormArguments.create(
                 viewModel = sheetViewModel,
