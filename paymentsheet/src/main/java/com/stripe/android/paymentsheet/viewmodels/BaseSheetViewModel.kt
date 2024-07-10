@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
+import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -70,7 +71,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.Closeable
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -129,19 +129,14 @@ internal abstract class BaseSheetViewModel(
             state?.paymentMethods ?: emptyList()
         }
 
-    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
-        value = listOf(PaymentSheetScreen.Loading),
-    )
-
-    val currentScreen: StateFlow<PaymentSheetScreen> = backStack
-        .mapAsStateFlow { it.last() }
+    val navigationHandler: NavigationHandler = NavigationHandler()
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
     internal val headerText: StateFlow<Int?> by lazy {
         combineAsStateFlow(
-            currentScreen,
+            navigationHandler.currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,
             editing,
@@ -257,8 +252,8 @@ internal abstract class BaseSheetViewModel(
     }
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combineAsStateFlow(
-        currentScreen.mapAsStateFlow { it.sheetScreen },
-        currentScreen.mapAsStateFlow { it.canNavigateBack },
+        navigationHandler.currentScreen.mapAsStateFlow { it.sheetScreen },
+        navigationHandler.currentScreen.mapAsStateFlow { it.canNavigateBack },
         paymentMethodMetadata.mapAsStateFlow { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
@@ -286,14 +281,14 @@ internal abstract class BaseSheetViewModel(
 
         viewModelScope.launch {
             paymentMethods.collect { paymentMethods ->
-                if (paymentMethods.isNullOrEmpty() && editing.value) {
+                if (paymentMethods.isEmpty() && editing.value) {
                     toggleEditing()
                 }
             }
         }
 
         viewModelScope.launch {
-            currentScreen.collectLatest { screen ->
+            navigationHandler.currentScreen.collectLatest { screen ->
                 when (screen) {
                     is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
@@ -346,7 +341,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionToFirstScreen() {
         val initialBackStack = determineInitialBackStack()
-        resetTo(initialBackStack)
+        navigationHandler.resetTo(initialBackStack)
         reportPaymentSheetShown(initialBackStack.last())
     }
 
@@ -358,7 +353,7 @@ internal abstract class BaseSheetViewModel(
 
     fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
-        backStack.update { (it - PaymentSheetScreen.Loading) + target }
+        navigationHandler.transitionTo(target)
     }
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
@@ -593,11 +588,13 @@ internal abstract class BaseSheetViewModel(
             savedStateHandle[SAVE_SELECTION] = null
         }
 
-        val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
-            currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
+        val shouldResetToAddPaymentMethodForm = paymentMethods.value.isEmpty() &&
+            navigationHandler.currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
-            resetTo(listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))))
+            navigationHandler.resetTo(
+                listOf(AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
+            )
         }
     }
 
@@ -774,7 +771,7 @@ internal abstract class BaseSheetViewModel(
         if (processing.value) {
             return
         }
-        if (backStack.value.size > 1) {
+        if (navigationHandler.canGoBack) {
             onUserBack()
         } else {
             onUserCancel()
@@ -783,45 +780,12 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onUserCancel()
 
-    internal fun closeScreens() {
-        backStack.value.forEach {
-            it.onClose()
-        }
-    }
-
     private fun onUserBack() {
         clearErrorMessages()
         _mandateText.value = null
 
-        backStack.update { screens ->
-            val modifiableScreens = screens.toMutableList()
-
-            val lastScreen = modifiableScreens.removeLast()
-
-            lastScreen.onClose()
-
-            reportPaymentSheetHidden(lastScreen)
-
-            modifiableScreens.toList()
-        }
-    }
-
-    private fun resetTo(screens: List<PaymentSheetScreen>) {
-        val previousBackStack = backStack.value
-
-        backStack.value = screens
-
-        previousBackStack.forEach { oldScreen ->
-            if (oldScreen !in screens) {
-                oldScreen.onClose()
-            }
-        }
-    }
-
-    private fun PaymentSheetScreen.onClose() {
-        when (this) {
-            is Closeable -> close()
-            else -> Unit
+        navigationHandler.pop { poppedScreen ->
+            reportPaymentSheetHidden(poppedScreen)
         }
     }
 
