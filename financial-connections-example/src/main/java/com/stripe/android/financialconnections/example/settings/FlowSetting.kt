@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
+import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
@@ -15,6 +17,10 @@ data class FlowSetting(
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body
 
     override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body
+
+    override fun shouldDisplay(merchant: Merchant, flow: Flow, experience: Experience): Boolean {
+        return experience != Experience.InstantDebits
+    }
 
     override fun convertToString(value: Flow): String {
         return value.apiValue

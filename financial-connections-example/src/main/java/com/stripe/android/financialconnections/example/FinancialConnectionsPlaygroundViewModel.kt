@@ -75,10 +75,18 @@ internal class FinancialConnectionsPlaygroundViewModel(
             "Starting session with settings: ${asJsonString()}"
         )
         saveToSharedPreferences(getApplication())
-        when (state.value.flow) {
-            Flow.Data -> startForData(this)
-            Flow.Token -> startForToken(this)
-            Flow.PaymentIntent -> startWithPaymentIntent(this)
+
+        when (state.value.experience) {
+            Experience.FinancialConnections -> {
+                when (state.value.flow) {
+                    Flow.Data -> startForData(this)
+                    Flow.Token -> startForToken(this)
+                    Flow.PaymentIntent -> startWithPaymentIntent(this)
+                }
+            }
+            Experience.InstantDebits -> {
+                startWithPaymentIntent(this)
+            }
         }
     }
 

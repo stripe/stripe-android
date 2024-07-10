@@ -20,10 +20,12 @@ internal data class PlaygroundSettings(
     val displayableSettings: List<Setting<*>> by lazy {
         val merchant = get<MerchantSetting>()
         val flow = get<FlowSetting>()
+        val experience = get<ExperienceSetting>()
         settings.filter {
             it.shouldDisplay(
                 merchant = merchant.selectedOption,
                 flow = flow.selectedOption,
+                experience = experience.selectedOption,
             )
         }
     }
