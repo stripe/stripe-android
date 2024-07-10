@@ -61,8 +61,10 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -586,6 +588,7 @@ internal class CustomerSheetViewModel(
                         }
                     },
                     canRemove = canRemove,
+                    coroutineScope = CoroutineScope(viewModelScope.coroutineContext + SupervisorJob()),
                 ),
                 isLiveMode = currentViewState.isLiveMode,
                 cbcEligibility = currentViewState.cbcEligibility,

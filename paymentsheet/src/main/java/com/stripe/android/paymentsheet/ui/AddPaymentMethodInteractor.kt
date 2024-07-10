@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -14,13 +15,11 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
     val state: StateFlow<State>
@@ -69,7 +68,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
 ) : AddPaymentMethodInteractor {
 
     constructor(sheetViewModel: BaseSheetViewModel) : this(
@@ -92,10 +91,9 @@ internal class DefaultAddPaymentMethodInteractor(
                 hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
                 selectedPaymentMethodCode = it
             )
-        }
+        },
+        coroutineScope = CoroutineScope(sheetViewModel.viewModelScope.coroutineContext + SupervisorJob()),
     )
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)

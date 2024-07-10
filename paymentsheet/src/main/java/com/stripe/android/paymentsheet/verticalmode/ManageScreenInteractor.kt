@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -9,13 +10,11 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.CoroutineContext
 
 internal interface ManageScreenInteractor {
     val state: StateFlow<State>
@@ -49,10 +48,8 @@ internal class DefaultManageScreenInteractor(
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
-    dispatcher: CoroutineContext = Dispatchers.Default
+    private val coroutineScope: CoroutineScope,
 ) : ManageScreenInteractor {
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethods = viewModel.paymentMethods,
@@ -64,7 +61,8 @@ internal class DefaultManageScreenInteractor(
         onSelectPaymentMethod = { viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod)) },
         onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod) },
         onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
-        navigateBack = viewModel::handleBackPressed
+        navigateBack = viewModel::handleBackPressed,
+        coroutineScope = CoroutineScope(viewModel.viewModelScope.coroutineContext + SupervisorJob()),
     )
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)

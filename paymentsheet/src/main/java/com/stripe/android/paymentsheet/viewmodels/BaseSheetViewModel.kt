@@ -63,7 +63,9 @@ import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -554,6 +556,7 @@ internal abstract class BaseSheetViewModel(
                         modifyCardPaymentMethod(method, brand)
                     },
                     canRemove = canRemove,
+                    coroutineScope = CoroutineScope(viewModelScope.coroutineContext + SupervisorJob()),
                 )
             )
         )

@@ -6,13 +6,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
 internal typealias PaymentMethodUpdateOperation = suspend (
@@ -45,6 +42,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
             canRemove: Boolean,
+            coroutineScope: CoroutineScope,
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
@@ -56,14 +54,13 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
-    workContext: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
 ) : ModifiableEditPaymentMethodViewInteractor {
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
     private val paymentMethod = MutableStateFlow(initialPaymentMethod)
     private val confirmRemoval = MutableStateFlow(false)
     private val error = MutableStateFlow<ResolvableString?>(null)
-    private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
 
     override val viewState = combineAsStateFlow(
         paymentMethod,
@@ -196,6 +193,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
             canRemove: Boolean,
+            coroutineScope: CoroutineScope,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -204,6 +202,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 updateExecutor = updateExecutor,
                 displayName = displayName,
                 canRemove = canRemove,
+                coroutineScope = coroutineScope,
             )
         }
     }

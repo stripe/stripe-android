@@ -47,12 +47,6 @@ internal class NavigationHandler {
         }
     }
 
-    fun closeScreens() {
-        backStack.value.forEach {
-            it.onClose()
-        }
-    }
-
     private fun PaymentSheetScreen.onClose() {
         when (this) {
             is Closeable -> close()

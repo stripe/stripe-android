@@ -152,21 +152,4 @@ internal class NavigationHandlerTest {
             verify(screenTwo as Closeable).close()
         }
     }
-
-    @Test
-    fun `closeScreens calls close on all closable screens in the backstack`() = runTest {
-        val navigationHandler = NavigationHandler()
-        navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
-            val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
-            navigationHandler.transitionTo(screenOne)
-            assertThat(awaitItem()).isEqualTo(screenOne)
-            val screenTwo = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
-            navigationHandler.transitionTo(screenTwo)
-            assertThat(awaitItem()).isEqualTo(screenTwo)
-            navigationHandler.closeScreens()
-            verify(screenOne as Closeable).close()
-            verify(screenTwo as Closeable).close()
-        }
-    }
 }

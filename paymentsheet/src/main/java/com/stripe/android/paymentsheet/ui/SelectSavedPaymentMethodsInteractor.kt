@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
@@ -7,14 +8,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface SelectSavedPaymentMethodsInteractor {
 
@@ -51,7 +50,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onEditPaymentMethod: (PaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope
 ) : SelectSavedPaymentMethodsInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentOptionsItems = viewModel.paymentOptionsItems,
@@ -63,9 +62,8 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         onEditPaymentMethod = viewModel::modifyPaymentMethod,
         onDeletePaymentMethod = viewModel::removePaymentMethod,
         onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
+        coroutineScope = CoroutineScope(viewModel.viewModelScope.coroutineContext + SupervisorJob()),
     )
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
 

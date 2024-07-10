@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -19,12 +20,10 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
@@ -79,7 +78,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
 ) : PaymentMethodVerticalLayoutInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
@@ -125,9 +124,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         onMandateTextUpdated = {
             viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
         },
+        coroutineScope = CoroutineScope(viewModel.viewModelScope.coroutineContext + SupervisorJob()),
     )
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
     private val verticalModeScreenSelection = _verticalModeScreenSelection
