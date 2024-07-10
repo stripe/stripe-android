@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -176,7 +177,7 @@ constructor(
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
         private val hasDelayedSettlement: Boolean,
-        internal val shouldRefreshIfIntentRequiresAction: Boolean,
+        internal val afterRedirectAction: AfterRedirectAction = AfterRedirectAction.None,
     ) : Parcelable {
         Link(
             "link",
@@ -184,7 +185,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Card(
             "card",
@@ -192,7 +192,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         CardPresent(
             "card_present",
@@ -200,7 +199,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Fpx(
             "fpx",
@@ -208,7 +206,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Ideal(
             "ideal",
@@ -216,7 +213,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         SepaDebit(
             "sepa_debit",
@@ -224,7 +220,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         AuBecsDebit(
             "au_becs_debit",
@@ -232,7 +227,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         BacsDebit(
             "bacs_debit",
@@ -240,7 +234,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Sofort(
             "sofort",
@@ -248,7 +241,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Upi(
             "upi",
@@ -256,7 +248,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         P24(
             "p24",
@@ -264,7 +256,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Bancontact(
             "bancontact",
@@ -272,7 +263,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Giropay(
             "giropay",
@@ -280,7 +270,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Eps(
             "eps",
@@ -288,7 +277,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Oxxo(
             "oxxo",
@@ -296,7 +284,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Alipay(
             "alipay",
@@ -304,7 +291,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         GrabPay(
             "grabpay",
@@ -312,7 +298,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         PayPal(
             "paypal",
@@ -320,7 +305,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         AfterpayClearpay(
             "afterpay_clearpay",
@@ -328,7 +312,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Netbanking(
             "netbanking",
@@ -336,7 +319,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Blik(
             "blik",
@@ -344,7 +326,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         WeChatPay(
             "wechat_pay",
@@ -352,7 +333,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Refresh(retryCount = MAX_RETRIES),
         ),
         Klarna(
             "klarna",
@@ -360,7 +341,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Affirm(
             "affirm",
@@ -368,7 +348,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         RevolutPay(
             "revolut_pay",
@@ -376,7 +355,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Sunbit(
             "sunbit",
@@ -384,7 +362,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Billie(
             "billie",
@@ -392,7 +369,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Satispay(
             "satispay",
@@ -400,7 +376,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         AmazonPay(
             "amazon_pay",
@@ -408,7 +383,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
         ),
         Alma(
             "alma",
@@ -416,7 +390,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         MobilePay(
             "mobilepay",
@@ -424,7 +397,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Multibanco(
             "multibanco",
@@ -432,7 +404,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Zip(
             "zip",
@@ -440,7 +411,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         USBankAccount(
             code = "us_bank_account",
@@ -448,7 +418,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         CashAppPay(
             code = "cashapp",
@@ -456,7 +425,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         Boleto(
             code = "boleto",
@@ -464,7 +433,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Konbini(
             code = "konbini",
@@ -472,7 +440,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Swish(
             code = "swish",
@@ -484,7 +451,7 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Twint(
             code = "twint",
@@ -496,7 +463,7 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -513,6 +480,32 @@ constructor(
             fun fromCode(code: String?): Type? {
                 return entries.firstOrNull { it.code == code }
             }
+        }
+    }
+
+    internal sealed interface AfterRedirectAction : Parcelable {
+        val shouldRefresh: Boolean
+        val retryCount: Int
+
+        @Parcelize
+        data object None : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = false
+
+            @IgnoredOnParcel
+            override val retryCount: Int = MAX_RETRIES
+        }
+
+        @Parcelize
+        data class Poll(override val retryCount: Int = MAX_RETRIES) : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = true
+        }
+
+        @Parcelize
+        data class Refresh(override val retryCount: Int = 1) : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = true
         }
     }
 

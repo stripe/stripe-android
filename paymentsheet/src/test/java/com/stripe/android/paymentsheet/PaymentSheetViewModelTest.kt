@@ -213,7 +213,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
@@ -245,7 +245,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
@@ -326,7 +326,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
@@ -384,7 +384,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(paymentMethods.first())
@@ -450,7 +450,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(firstPaymentMethod)
@@ -520,7 +520,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(firstPaymentMethod)
@@ -1475,7 +1475,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed is consumed when processing is true`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.handleBackPressed()
         }
@@ -1484,7 +1484,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
@@ -1501,7 +1501,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
         viewModel.transitionToAddPaymentScreen()
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<AddAnotherPaymentMethod>()
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -1512,7 +1512,7 @@ internal class PaymentSheetViewModelTest {
     fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
@@ -1525,7 +1525,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
     }
@@ -1560,7 +1560,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         turbineScope {
-            val receiver = viewModel.currentScreen.testIn(this)
+            val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
             verify(eventReporter).onShowNewPaymentOptionForm()
 
@@ -1581,7 +1581,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         turbineScope {
-            val receiver = viewModel.currentScreen.testIn(this)
+            val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
             verify(eventReporter).onShowNewPaymentOptionForm()
 
@@ -1602,7 +1602,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         turbineScope {
-            val receiver = viewModel.currentScreen.testIn(this)
+            val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
             verify(eventReporter).onShowNewPaymentOptionForm()
 
@@ -1741,7 +1741,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             viewModel.removePaymentMethod(paymentMethods.single())
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
@@ -2740,7 +2740,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository,
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
             viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
@@ -2807,7 +2807,7 @@ internal class PaymentSheetViewModelTest {
             ),
             stripeIntent = stripeIntent
         )
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             val screen = awaitItem()
             assertThat(screen).isInstanceOf<SelectSavedPaymentMethods>()
             assertThat(

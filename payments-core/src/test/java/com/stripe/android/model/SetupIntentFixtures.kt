@@ -672,4 +672,39 @@ internal object SetupIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
+            {
+              "id": "seti_1234",
+              "object": "setup_intent",
+              "cancellation_reason": null,
+              "client_secret": "seti_1234_secret_5678",
+              "created": 1561677666,
+              "description": "a description",
+              "last_setup_error": null,
+              "livemode": false,
+              "next_action": {
+                "cashapp_handle_redirect_or_display_qr_code": {
+                  "hosted_instructions_url": "https://payments.stripe.com/cashapp/instructions/CCUaFwoVYWNjdF8xSHZUSTdMdTVvM1AxOFpwKJaloJ4GMgZcsN7zB3I6L2wvyPfW8B6gy0_BsHb7Q21FYoKjIGxNvVsVYjJ6pbAIw_28VE2MVWcJQHMaEObM",
+                  "mobile_auth_url": "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ",
+                  "qr_code": {
+                    "expires_at": 1674056362,
+                    "image_url_png": "https://qr.stripe.com/test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLF9OQzFtSUpKYkMwaVBZTldRMW5BelF0OWNiWkk3a25o0100dYmSjOJt.png",
+                    "image_url_svg": "https://qr.stripe.com/test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLF9OQzFtSUpKYkMwaVBZTldRMW5BelF0OWNiWkk3a25o0100dYmSjOJt.svg"
+                  }
+                },
+                "type": "cashapp_handle_redirect_or_display_qr_code"
+              },
+              "payment_method": "pm_1MRdj7Lu5o3P18Zp41wd191i",
+              "payment_method_types": [
+                "cashapp"
+              ],
+              "status": "requires_action",
+              "usage": "off_session"
+            }
+            """.trimIndent()
+        )
+    }
 }
