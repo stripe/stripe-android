@@ -78,39 +78,85 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
 ) : PaymentSheetLoader {
 
+    @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        eventReporter.onLoadStarted(initializedViaCompose)
+        runCatching {
+            coroutineScope {
+                eventReporter.onLoadStarted(initializedViaCompose)
 
-        val savedPaymentMethodSelection = when (paymentSheetConfiguration.customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession ->
-                retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
-            null -> null
-        }
+                val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
 
-        val elementsSessionResult = retrieveElementsSession(
-            initializationMode = initializationMode,
-            customer = paymentSheetConfiguration.customer,
-            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
-            defaultPaymentMethodId = savedPaymentMethodSelection?.id,
-        )
+                val elementsSession = retrieveElementsSession(
+                    initializationMode = initializationMode,
+                    customer = paymentSheetConfiguration.customer,
+                    externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+                    defaultPaymentMethodId = savedPaymentMethodSelection?.id,
+                ).getOrThrow()
 
-        elementsSessionResult.mapCatching { elementsSession ->
-            val metadata = createPaymentMethodMetadata(
-                paymentSheetConfiguration = paymentSheetConfiguration,
-                elementsSession = elementsSession,
-            )
+                val metadata = createPaymentMethodMetadata(
+                    paymentSheetConfiguration = paymentSheetConfiguration,
+                    elementsSession = elementsSession,
+                )
 
-            create(
-                elementsSession = elementsSession,
-                config = paymentSheetConfiguration,
-                metadata = metadata,
-            ).let { state ->
+                val isGooglePayReady = async {
+                    isGooglePayReady(paymentSheetConfiguration, elementsSession)
+                }
+
+                val savedSelection = async {
+                    retrieveSavedSelection(
+                        config = paymentSheetConfiguration,
+                        isGooglePayReady = isGooglePayReady.await(),
+                        elementsSession = elementsSession
+                    )
+                }
+
+                val customer = async {
+                    createCustomerState(
+                        config = paymentSheetConfiguration,
+                        elementsSession = elementsSession,
+                        metadata = metadata,
+                        savedSelection = savedSelection,
+                    )
+                }
+
+                val initialPaymentSelection = async {
+                    retrieveInitialPaymentSelection(savedSelection, customer)
+                }
+
+                val linkState = async {
+                    createLinkState(
+                        config = paymentSheetConfiguration,
+                        elementsSession = elementsSession,
+                        customer = customer,
+                        metadata = metadata,
+                    )
+                }
+
+                val stripeIntent = elementsSession.stripeIntent
+
+                warnUnactivatedIfNeeded(stripeIntent)
+
+                if (!supportsIntent(metadata)) {
+                    val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+                    throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
+                }
+
+                val state = PaymentSheetState.Full(
+                    config = paymentSheetConfiguration,
+                    customer = customer.await(),
+                    isGooglePayReady = isGooglePayReady.await(),
+                    linkState = linkState.await(),
+                    isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
+                    paymentSelection = initialPaymentSelection.await(),
+                    validationError = stripeIntent.validate(),
+                    paymentMethodMetadata = metadata,
+                )
+
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
                     state = state,
@@ -118,7 +164,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     isGooglePaySupported = isGooglePaySupported(),
                 )
 
-                return@let state
+                return@coroutineScope state
             }
         }.onFailure(::reportFailedLoad)
     }
@@ -145,66 +191,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun isGooglePaySupported(): Boolean {
         return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
-    }
-
-    private suspend fun create(
-        elementsSession: ElementsSession,
-        config: PaymentSheet.Configuration,
-        metadata: PaymentMethodMetadata,
-    ): PaymentSheetState.Full = coroutineScope {
-        val isGooglePayReady = async {
-            isGooglePayReady(config, elementsSession)
-        }
-
-        val savedSelection = async {
-            retrieveSavedSelection(
-                config = config,
-                isGooglePayReady = isGooglePayReady.await(),
-                elementsSession = elementsSession
-            )
-        }
-
-        val customer = async {
-            createCustomerState(
-                config = config,
-                elementsSession = elementsSession,
-                metadata = metadata,
-                savedSelection = savedSelection,
-            )
-        }
-
-        val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, customer)
-        }
-
-        val linkState = async {
-            createLinkState(
-                config = config,
-                elementsSession = elementsSession,
-                customer = customer,
-                metadata = metadata,
-            )
-        }
-
-        val stripeIntent = elementsSession.stripeIntent
-
-        warnUnactivatedIfNeeded(stripeIntent)
-
-        if (supportsIntent(metadata)) {
-            PaymentSheetState.Full(
-                config = config,
-                customer = customer.await(),
-                isGooglePayReady = isGooglePayReady.await(),
-                linkState = linkState.await(),
-                isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
-                paymentSelection = initialPaymentSelection.await(),
-                validationError = stripeIntent.validate(),
-                paymentMethodMetadata = metadata,
-            )
-        } else {
-            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-        }
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
@@ -461,18 +447,24 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveSavedPaymentMethodSelection(
         config: PaymentSheet.Configuration,
     ): SavedSelection.PaymentMethod? {
-        /*
-         * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment method
-         * ID to ensure it is properly returned by the API when performing payment method deduping. We only care
-         * about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are locally defined
-         * LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know if they are ready and
-         * can safely set them to `false`.
-         */
-        return retrieveSavedSelection(
-            config = config,
-            isGooglePayReady = false,
-            isLinkAvailable = false,
-        ) as? SavedSelection.PaymentMethod
+        return when (config.customer?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                /*
+                 * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment
+                 * method ID to ensure it is properly returned by the API when performing payment method deduping. We
+                 * only care about the Stripe `payment_method` id when deduping since `Google Pay` and `Link` are
+                 * locally defined LPMs and not recognized by the `v1/elements/sessions` API. We don't need to know
+                 * if they are ready and can safely set them to `false`.
+                 */
+                retrieveSavedSelection(
+                    config = config,
+                    isGooglePayReady = false,
+                    isLinkAvailable = false,
+                ) as? SavedSelection.PaymentMethod
+            }
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
+            null -> null
+        }
     }
 
     private suspend fun retrieveSavedSelection(
