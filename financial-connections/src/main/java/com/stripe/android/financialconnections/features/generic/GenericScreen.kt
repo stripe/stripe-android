@@ -6,27 +6,19 @@ import FinancialConnectionsGenericInfoScreen.Body
 import FinancialConnectionsGenericInfoScreen.Footer
 import FinancialConnectionsGenericInfoScreen.Header
 import Size
-import VerticalAlignment
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -69,20 +61,6 @@ internal fun GenericScreen(
     onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
-    val density = LocalDensity.current
-
-    var containerHeight by remember { mutableStateOf(0.dp) }
-    var footerHeight by remember { mutableStateOf(0.dp) }
-    var contentHeight by remember { mutableStateOf(0.dp) }
-
-    val spacing by remember {
-        derivedStateOf {
-            ((containerHeight - footerHeight - contentHeight) / 2).takeIf {
-                state.screen.options?.verticalAlignment == VerticalAlignment.Centered && it > 0.dp
-            }
-        }
-    }
-
     Layout(
         bodyPadding = PaddingValues(vertical = 16.dp),
         inModal = state.inModal,
@@ -90,33 +68,15 @@ internal fun GenericScreen(
             {
                 GenericFooter(
                     payload = it,
-                    modifier = Modifier.onGloballyPositioned {
-                        with(density) {
-                            footerHeight = it.size.height.toDp()
-                        }
-                    },
                     onPrimaryButtonClick = onPrimaryButtonClick,
                     onSecondaryButtonClick = onSecondaryButtonClick,
                     onClickableTextClick = onClickableTextClick,
                 )
             }
         },
-        modifier = Modifier.onGloballyPositioned {
-            with(density) {
-                containerHeight = it.size.height.toDp()
-            }
-        }
     ) {
-        spacing?.let {
-            Spacer(modifier = Modifier.height(it))
-        }
-
         Column(
-            modifier = Modifier.onGloballyPositioned {
-                with(density) {
-                    contentHeight = it.size.height.toDp()
-                }
-            }
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             state.screen.header?.let {
                 GenericHeader(
@@ -126,18 +86,12 @@ internal fun GenericScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             state.screen.body?.let {
                 GenericBody(
                     payload = it,
                     onClickableTextClick = onClickableTextClick,
                 )
             }
-        }
-
-        spacing?.let {
-            Spacer(modifier = Modifier.height(it))
         }
     }
 }
@@ -149,9 +103,10 @@ internal fun GenericBody(
     onClickableTextClick: (String) -> Unit,
 ) {
     Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         modifier = modifier.fillMaxWidth(),
     ) {
-        payload.entries.forEachIndexed { index, entry: Body.Entry ->
+        payload.entries.forEach { entry: Body.Entry ->
             Box {
                 when (entry) {
                     is Body.Entry.Image -> {
@@ -159,7 +114,6 @@ internal fun GenericBody(
                             url = entry.image.default.orEmpty(),
                             contentDescription = entry.alt,
                             imageLoader = LocalImageLoader.current,
-                            errorContent = { },
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -180,10 +134,6 @@ internal fun GenericBody(
                     }
                 }
             }
-
-            if (index != payload.entries.lastIndex) {
-                Spacer(modifier = Modifier.size(24.dp))
-            }
         }
     }
 }
@@ -196,6 +146,7 @@ internal fun GenericHeader(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         payload.icon?.default?.let { iconUrl ->
             ShapedIcon(
@@ -204,7 +155,6 @@ internal fun GenericHeader(
                 contentDescription = null,
                 iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
             )
-            Spacer(modifier = Modifier.size(24.dp))
         }
 
         if (payload.title != null) {
@@ -219,8 +169,6 @@ internal fun GenericHeader(
         }
 
         if (payload.subtitle != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-
             AnnotatedText(
                 text = TextResource.Text(fromHtml(payload.subtitle)),
                 onClickableTextClick = onClickableTextClick,
@@ -241,7 +189,10 @@ internal fun GenericFooter(
     onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
-    Column(modifier) {
+    Column(
+        modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         payload.disclaimer?.let { disclaimer ->
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
@@ -252,12 +203,10 @@ internal fun GenericFooter(
                     textAlign = TextAlign.Start,
                 ),
             )
-
-            Spacer(modifier = Modifier.size(16.dp))
         }
 
         payload.primaryCta?.let { action ->
-            GenericCTA(
+            GenericButton(
                 type = FinancialConnectionsButton.Type.Primary,
                 onClick = onPrimaryButtonClick,
                 action = action,
@@ -265,9 +214,7 @@ internal fun GenericFooter(
         }
 
         payload.secondaryCta?.let { secondaryCta ->
-            Spacer(modifier = Modifier.size(8.dp))
-
-            GenericCTA(
+            GenericButton(
                 type = FinancialConnectionsButton.Type.Secondary,
                 onClick = onSecondaryButtonClick,
                 action = secondaryCta,
@@ -275,8 +222,6 @@ internal fun GenericFooter(
         }
 
         payload.belowCta?.let { belowCta ->
-            Spacer(modifier = Modifier.size(12.dp))
-
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
                 text = TextResource.Text(fromHtml(belowCta.label)),
@@ -291,7 +236,7 @@ internal fun GenericFooter(
 }
 
 @Composable
-private fun GenericCTA(
+private fun GenericButton(
     onClick: () -> Unit,
     type: FinancialConnectionsButton.Type,
     action: Footer.GenericInfoAction,
@@ -310,7 +255,6 @@ private fun GenericCTA(
                 url = it,
                 contentDescription = null,
                 imageLoader = LocalImageLoader.current,
-                errorContent = { },
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -324,7 +268,7 @@ private fun Alignment?.toComposeTextAlign(): TextAlign = when (this) {
     null -> TextAlign.Start
 }
 
-private fun Alignment?.toComposeAlignment() = when (this){
+private fun Alignment?.toComposeAlignment() = when (this) {
     Alignment.Center -> ComposeAlignment.CenterHorizontally
     Alignment.Left -> ComposeAlignment.Start
     Alignment.Right -> ComposeAlignment.End

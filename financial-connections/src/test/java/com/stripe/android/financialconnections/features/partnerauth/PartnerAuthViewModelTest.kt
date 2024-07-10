@@ -317,7 +317,7 @@ internal class PartnerAuthViewModelTest {
             handleError = handleError,
             applicationId = applicationId,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-            presentNoticeSheet = mock(),
+            presentSheet = mock(),
         )
     }
 }

@@ -7,14 +7,14 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import javax.inject.Inject
 
-internal interface PresentNoticeSheet {
+internal interface PresentSheet {
     operator fun invoke(content: NoticeSheetContent, referrer: Pane)
 }
 
-internal class RealPresentNoticeSheet @Inject constructor(
+internal class RealPresentSheet @Inject constructor(
     private val navigationManager: NavigationManager,
     private val noticeSheetContentRepository: NoticeSheetContentRepository,
-) : PresentNoticeSheet {
+) : PresentSheet {
 
     override fun invoke(content: NoticeSheetContent, referrer: Pane) {
         noticeSheetContentRepository.set(content)
