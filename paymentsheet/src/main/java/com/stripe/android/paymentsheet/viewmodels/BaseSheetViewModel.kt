@@ -69,6 +69,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -309,6 +310,14 @@ internal abstract class BaseSheetViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
+            navigationHandler.currentScreen.drop(1).collect {
+                clearErrorMessages()
+                _mandateText.value = null
+            }
+        }
     }
 
     protected fun transitionToFirstScreen() {
@@ -319,12 +328,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
-    }
-
-    fun transitionTo(target: PaymentSheetScreen) {
-        clearErrorMessages()
-        navigationHandler.transitionTo(target)
+        navigationHandler.transitionTo(AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this)))
     }
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
@@ -526,7 +530,7 @@ internal abstract class BaseSheetViewModel(
             paymentOptionsItems.value.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
         }
 
-        transitionTo(
+        navigationHandler.transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
@@ -700,9 +704,6 @@ internal abstract class BaseSheetViewModel(
     abstract fun onUserCancel()
 
     private fun onUserBack() {
-        clearErrorMessages()
-        _mandateText.value = null
-
         navigationHandler.pop { poppedScreen ->
             analyticsListener.reportPaymentSheetHidden(poppedScreen)
         }
