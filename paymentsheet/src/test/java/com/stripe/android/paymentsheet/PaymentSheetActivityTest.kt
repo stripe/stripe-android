@@ -446,7 +446,8 @@ internal class PaymentSheetActivityTest {
 
             composeTestRule.waitForIdle()
 
-            assertThat(viewModel.currentScreen.value).isInstanceOf(PaymentSheetScreen.AddFirstPaymentMethod::class.java)
+            assertThat(viewModel.navigationHandler.currentScreen.value)
+                .isInstanceOf(PaymentSheetScreen.AddFirstPaymentMethod::class.java)
 
             composeTestRule.onNodeWithTag(
                 TEST_TAG_LIST + "card",
@@ -534,7 +535,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = paymentMethods)
         val scenario = activityScenario(viewModel)
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             scenario.launch(intent)
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 

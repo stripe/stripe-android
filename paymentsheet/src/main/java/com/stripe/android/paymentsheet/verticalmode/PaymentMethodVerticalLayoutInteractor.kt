@@ -119,7 +119,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState = viewModel.walletsState,
         isFlowController = viewModel is PaymentOptionsViewModel,
         updateSelection = viewModel::updateSelection,
-        isCurrentScreen = viewModel.currentScreen.mapAsStateFlow {
+        isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
             it is PaymentSheetScreen.VerticalMode
         },
         onMandateTextUpdated = {

@@ -174,7 +174,7 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentSelection = null)
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
     }
@@ -190,7 +190,7 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddAnotherPaymentMethod>()
 
             verify(eventReporter).onShowNewPaymentOptionForm()
@@ -320,7 +320,7 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
@@ -336,7 +336,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
 
-            viewModel.currentScreen.test {
+            viewModel.navigationHandler.currentScreen.test {
                 assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
                 verify(eventReporter).onShowExistingPaymentOptions()
@@ -360,7 +360,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
 
-            viewModel.currentScreen.test {
+            viewModel.navigationHandler.currentScreen.test {
                 assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.Form>()
             }
         }
@@ -382,7 +382,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
 
-            viewModel.currentScreen.test {
+            viewModel.navigationHandler.currentScreen.test {
                 assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
             }
         }
@@ -404,7 +404,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
 
-            viewModel.currentScreen.test {
+            viewModel.navigationHandler.currentScreen.test {
                 assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
             }
         }
@@ -684,7 +684,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         turbineScope {
-            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val screenTurbine = viewModel.navigationHandler.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
             assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -736,7 +736,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         turbineScope {
-            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val screenTurbine = viewModel.navigationHandler.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
             assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -841,7 +841,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args = args)
 
-        viewModel.currentScreen.test {
+        viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
         viewModel.paymentMethods.test {
