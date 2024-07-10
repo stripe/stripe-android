@@ -60,6 +60,9 @@ internal interface PaymentSheetLoader {
  * loads [PaymentSheet] information based its provided initialization options.
  *
  * @see <a href="https://whimsical.com/paymentsheet-loading-flow-diagram-EwTmrwvNmhcD9B2PKuSu82/">Flow Diagram</a>
+ *
+ * Generally move around functions within `PaymentSheetLoader` to be more specifically grouped by their
+ * dependencies, priority, and relevance.
  */
 @Singleton
 internal class DefaultPaymentSheetLoader @Inject constructor(
@@ -147,6 +150,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
     }
 
+    /*
+     * Combine `create` and `load` into a single function. Make it straightforward to see we're fetching
+     * elements session first.
+     *
+     * Add comments to each async function explaining what they do.
+     */
     private suspend fun create(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
@@ -170,6 +179,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val customer = async {
+            /*
+             * Move this logic into its own function
+             */
             val customerState = when (customerConfig?.accessType) {
                 is PaymentSheet.CustomerAccessType.CustomerSession ->
                     elementsSession.toCustomerState()
@@ -187,11 +199,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val initialPaymentSelection = async {
+            /*
+             * Move conditional operation for getting the first payment method into 'retrieveInitialPaymentSelection'
+             */
             retrieveInitialPaymentSelection(savedSelection, customer)
                 ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
         }
 
         val linkState = async {
+            /*
+             * Move this logic into its own function
+             */
             if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
                 loadLinkState(
                     config = config,
@@ -293,6 +311,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
     }
 
+    /*
+     * Add comments inside function on how `PaymentMethodMetadata` is being created
+     */
     private fun createPaymentMethodMetadata(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
@@ -339,6 +360,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return metadata
     }
 
+    // Add comments inside function on how Link configuration is being created.
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
         customer: CustomerState?,
@@ -538,6 +560,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
     }
 
+    /*
+     * Rename this function to be more clear on its relevance to `CustomerSession`. Comment what it does.
+     */
     private fun ElementsSession.toCustomerState(): CustomerState? {
         return customer?.let { customer ->
             val canRemovePaymentMethods = when (
@@ -578,6 +603,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
     }
 
+    /*
+     * Rename this function to be more clear on its relevance to legacy ephemeral keys. Add comment on what it does.
+     */
     private suspend fun PaymentSheet.CustomerConfiguration.toCustomerState(
         metadata: PaymentMethodMetadata,
     ): CustomerState {
