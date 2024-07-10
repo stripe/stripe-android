@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -84,89 +85,85 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        runCatching {
-            coroutineScope {
-                eventReporter.onLoadStarted(initializedViaCompose)
+    ): Result<PaymentSheetState.Full> = withTask(::reportFailedLoad) {
+        eventReporter.onLoadStarted(initializedViaCompose)
 
-                val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
+        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
 
-                val elementsSession = retrieveElementsSession(
-                    initializationMode = initializationMode,
-                    customer = paymentSheetConfiguration.customer,
-                    externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
-                    defaultPaymentMethodId = savedPaymentMethodSelection?.id,
-                ).getOrThrow()
+        val elementsSession = retrieveElementsSession(
+            initializationMode = initializationMode,
+            customer = paymentSheetConfiguration.customer,
+            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            defaultPaymentMethodId = savedPaymentMethodSelection?.id,
+        ).getOrThrow()
 
-                val metadata = createPaymentMethodMetadata(
-                    paymentSheetConfiguration = paymentSheetConfiguration,
-                    elementsSession = elementsSession,
-                )
+        val metadata = createPaymentMethodMetadata(
+            paymentSheetConfiguration = paymentSheetConfiguration,
+            elementsSession = elementsSession,
+        )
 
-                val isGooglePayReady = async {
-                    isGooglePayReady(paymentSheetConfiguration, elementsSession)
-                }
+        val isGooglePayReady = async {
+            isGooglePayReady(paymentSheetConfiguration, elementsSession)
+        }
 
-                val savedSelection = async {
-                    retrieveSavedSelection(
-                        config = paymentSheetConfiguration,
-                        isGooglePayReady = isGooglePayReady.await(),
-                        elementsSession = elementsSession
-                    )
-                }
+        val savedSelection = async {
+            retrieveSavedSelection(
+                config = paymentSheetConfiguration,
+                isGooglePayReady = isGooglePayReady.await(),
+                elementsSession = elementsSession
+            )
+        }
 
-                val customer = async {
-                    createCustomerState(
-                        config = paymentSheetConfiguration,
-                        elementsSession = elementsSession,
-                        metadata = metadata,
-                        savedSelection = savedSelection,
-                    )
-                }
+        val customer = async {
+            createCustomerState(
+                config = paymentSheetConfiguration,
+                elementsSession = elementsSession,
+                metadata = metadata,
+                savedSelection = savedSelection,
+            )
+        }
 
-                val initialPaymentSelection = async {
-                    retrieveInitialPaymentSelection(savedSelection, customer)
-                }
+        val initialPaymentSelection = async {
+            retrieveInitialPaymentSelection(savedSelection, customer)
+        }
 
-                val linkState = async {
-                    createLinkState(
-                        config = paymentSheetConfiguration,
-                        elementsSession = elementsSession,
-                        customer = customer,
-                        metadata = metadata,
-                    )
-                }
+        val linkState = async {
+            createLinkState(
+                config = paymentSheetConfiguration,
+                elementsSession = elementsSession,
+                customer = customer,
+                metadata = metadata,
+            )
+        }
 
-                val stripeIntent = elementsSession.stripeIntent
+        val stripeIntent = elementsSession.stripeIntent
 
-                warnUnactivatedIfNeeded(stripeIntent)
+        warnUnactivatedIfNeeded(stripeIntent)
 
-                if (!supportsIntent(metadata)) {
-                    val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-                    throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-                }
+        if (!supportsIntent(metadata)) {
+            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
+        }
 
-                val state = PaymentSheetState.Full(
-                    config = paymentSheetConfiguration,
-                    customer = customer.await(),
-                    isGooglePayReady = isGooglePayReady.await(),
-                    linkState = linkState.await(),
-                    isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
-                    paymentSelection = initialPaymentSelection.await(),
-                    validationError = stripeIntent.validate(),
-                    paymentMethodMetadata = metadata,
-                )
+        val state = PaymentSheetState.Full(
+            config = paymentSheetConfiguration,
+            customer = customer.await(),
+            isGooglePayReady = isGooglePayReady.await(),
+            linkState = linkState.await(),
+            isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
+            paymentSelection = initialPaymentSelection.await(),
+            validationError = stripeIntent.validate(),
+            paymentMethodMetadata = metadata,
+        )
 
-                reportSuccessfulLoad(
-                    elementsSession = elementsSession,
-                    state = state,
-                    isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
-                    isGooglePaySupported = isGooglePaySupported(),
-                )
+        reportSuccessfulLoad(
+            elementsSession = elementsSession,
+            state = state,
+            isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+            isGooglePaySupported = isGooglePaySupported(),
+        )
 
-                return@coroutineScope state
-            }
-        }.onFailure(::reportFailedLoad)
+        return@withTask state
     }
 
     private suspend fun isGooglePayReady(
@@ -619,6 +616,33 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 canRemoveDuplicates = false,
             )
         )
+    }
+
+    /*
+     * This is a helper for catching thrown exceptions from 'async' calls within a suspendable function.
+     *
+     * If a 'runCatching' task wraps a task with 'async' calls, any 'async' failures are not caught by 'runCatching'
+     * but instead by the coroutine, causing the whole coroutine scope to fail and close which propagates the uncaught
+     * exception to the caller. This is counter-intuitive to the idea of catching all exceptions that occur from a
+     * task.
+     *
+     * This function instead launches inside one coroutine scope a 'runCatching' call that creates its own coroutine
+     * scope to launch the task in. If the inner coroutine scope fails and throws an exception, the 'runCatching' call
+     * will be able to catch the exception and return a 'Result' type to the caller rather than throw an exception to
+     * it. If a failure occurs, we can also run the 'onFailure' logic inside the outer work coroutine rather than the
+     * caller's coroutine.
+     */
+    private suspend fun <T> withTask(
+        onFailure: (error: Throwable) -> Unit,
+        task: suspend CoroutineScope.() -> T
+    ): Result<T> {
+        return withContext(workContext) {
+            runCatching {
+                coroutineScope {
+                    task()
+                }
+            }.onFailure(onFailure)
+        }
     }
 }
 
