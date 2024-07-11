@@ -259,7 +259,9 @@ internal data class ReturningNetworkingUserAccountPicker(
     @SerialName("title") val title: String,
     @SerialName("default_cta") val defaultCta: String,
     @SerialName("add_new_account") val addNewAccount: AddNewAccount,
-    @SerialName("accounts") val accounts: List<NetworkedAccount>
+    @SerialName("accounts") val accounts: List<NetworkedAccount>,
+    @SerialName("multiple_account_types_selected_data_access_notice")
+    val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice? = null
 ) : Parcelable
 
 @Serializable
@@ -272,6 +274,7 @@ internal data class NetworkedAccount(
     @SerialName("icon") val icon: Image? = null,
     @SerialName("selection_cta_icon") val selectionCtaIcon: Image? = null,
     @SerialName("account_icon") val accountIcon: Image? = null,
+    @SerialName("data_access_notice") val dataAccessNotice: DataAccessNotice? = null,
     @SerialName("drawer_on_selection") val drawerOnSelection: FinancialConnectionsGenericInfoScreen? = null
 ) : Parcelable
 

@@ -45,6 +45,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -77,7 +78,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val sync = getSync()
             val manifest = sync.manifest
-            val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val merchantDataAccess = MerchantDataAccessModel(
                 businessName = manifest.businessName,
                 permissions = manifest.permissions,
@@ -99,7 +99,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                dataAccessNotice = dataAccessNotice,
+                dataAccessNotice = accounts.preselectedAccount()?.dataAccessNotice,
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
@@ -111,7 +111,16 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false),
                 singleAccount = manifest.singleAccount,
             )
-        }.execute { copy(payload = it) }
+        }.execute {
+            copy(
+                payload = it,
+                selectedAccountIds = listOfNotNull(it()?.accounts?.preselectedAccount()?.id)
+            )
+        }
+    }
+
+    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? {
+        return this.firstOrNull { it.second.allowSelection }?.second
     }
 
     override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
@@ -134,6 +143,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 )
                 navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
             },
+            onSuccess = { payload ->
+
+            }
         )
         onAsync(
             LinkAccountPickerState::selectNetworkedAccountAsync,
@@ -277,37 +289,53 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         eventTracker.track(event)
     }
 
-    fun onAccountClick(partnerAccount: PartnerAccount) {
+    fun onAccountClick(partnerAccount: PartnerAccount) = viewModelScope.launch {
         logAccountClick(partnerAccount)
 
-        val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
-        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
+        val state = stateFlow.value
+        val payload = requireNotNull(state.payload())
+        val accounts = payload.accounts
+        val networkedAccount: NetworkedAccount? = accounts.find { it.first.id == partnerAccount.id }?.second
+        val drawerOnSelection = networkedAccount?.drawerOnSelection
 
         if (drawerOnSelection != null) {
             // TODO@carlosmuvi handle drawer display.
             logger.debug("Drawer on selection: $drawerOnSelection")
-            return
+            return@launch
         }
 
         val updateRequired = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
-            partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
+            partnerToCoreAuths = payload.partnerToCoreAuths,
         )
 
         if (updateRequired != null) {
             logUpdateRequired(updateRequired)
             presentUpdateRequiredSheet(updateRequired, referrer = PANE)
-            return
+            return@launch
+        }
+
+        val selectedAccountIds = when {
+            payload.singleAccount -> listOf(partnerAccount.id)
+            partnerAccount.id in state.selectedAccountIds -> state.selectedAccountIds - partnerAccount.id
+            else -> state.selectedAccountIds + partnerAccount.id
+        }
+
+        val dataAccessNotice = when (selectedAccountIds.size) {
+            // No accounts selected.
+            0 -> null
+            // // if just a single account, use its specific data access notice.
+            // otherwise, we assume the data access notice is the same for all selected accounts
+            // and just use the first one
+            1 -> (networkedAccount ?: accounts.firstOrNull()?.second)?.dataAccessNotice
+            // if multiple types of accounts selected
+            else -> getSync().text?.returningNetworkingUserAccountPicker?.multipleAccountTypesSelectedDataAccessNotice
         }
 
         setState {
-            val payload = requireNotNull(payload())
             copy(
-                selectedAccountIds = when {
-                    payload.singleAccount -> listOf(partnerAccount.id)
-                    partnerAccount.id in selectedAccountIds -> selectedAccountIds - partnerAccount.id
-                    else -> selectedAccountIds + partnerAccount.id
-                }
+                selectedAccountIds = selectedAccountIds,
+                payload = Success(payload.copy(dataAccessNotice = dataAccessNotice))
             )
         }
     }
