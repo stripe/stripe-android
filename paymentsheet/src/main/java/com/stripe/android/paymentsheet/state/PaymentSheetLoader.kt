@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -282,46 +281,30 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
     ): PaymentMethodMetadata {
-        val billingDetailsCollectionConfig =
-            paymentSheetConfiguration.billingDetailsCollectionConfiguration
-
-        val cbcEligibility = CardBrandChoiceEligibility.create(
-            isEligible = elementsSession.isEligibleForCardBrandChoice,
-            preferredNetworks = paymentSheetConfiguration.preferredNetworks,
-        )
-
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
-        val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
-            elementsSession.externalPaymentMethodData
-        )
-        logIfMissingExternalPaymentMethods(
-            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
-            actualExternalPaymentMethods = externalPaymentMethodSpecs
-        )
-        val metadata = PaymentMethodMetadata(
-            stripeIntent = elementsSession.stripeIntent,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-            allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
-                .allowsPaymentMethodsRequiringShippingAddress,
-            paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
-            cbcEligibility = cbcEligibility,
-            merchantName = paymentSheetConfiguration.merchantDisplayName,
-            defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
-            shippingDetails = paymentSheetConfiguration.shippingDetails,
-            hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
-            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
-            externalPaymentMethodSpecs = externalPaymentMethodSpecs
         )
 
         if (sharedDataSpecsResult.failedToParseServerResponse) {
             eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
         }
 
-        return metadata
+        val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            elementsSession.externalPaymentMethodData
+        )
+
+        logIfMissingExternalPaymentMethods(
+            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            actualExternalPaymentMethods = externalPaymentMethodSpecs
+        )
+
+        return PaymentMethodMetadata.create(
+            elementsSession = elementsSession,
+            configuration = paymentSheetConfiguration,
+            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs
+        )
     }
 
     private suspend fun createCustomerState(
