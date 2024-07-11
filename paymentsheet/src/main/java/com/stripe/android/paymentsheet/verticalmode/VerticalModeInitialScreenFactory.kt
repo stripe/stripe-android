@@ -15,6 +15,6 @@ internal object VerticalModeInitialScreenFactory {
                 showsWalletHeader = true,
             )
         }
-        return PaymentSheetScreen.VerticalMode(DefaultPaymentMethodVerticalLayoutInteractor(viewModel))
+        return PaymentSheetScreen.VerticalMode(DefaultPaymentMethodVerticalLayoutInteractor.create(viewModel))
     }
 }

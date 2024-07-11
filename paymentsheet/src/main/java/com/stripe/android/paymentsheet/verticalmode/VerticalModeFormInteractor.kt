@@ -41,8 +41,9 @@ internal class DefaultVerticalModeFormInteractor(
     private val selectedPaymentMethodCode: String,
     private val viewModel: BaseSheetViewModel,
 ) : VerticalModeFormInteractor {
-    private val formArguments: FormArguments = viewModel.createFormArguments(selectedPaymentMethodCode)
-    private val formElements: List<FormElement> = viewModel.formElementsForCode(selectedPaymentMethodCode)
+    private val formHelper = viewModel.createFormHelper()
+    private val formArguments: FormArguments = formHelper.createFormArguments(selectedPaymentMethodCode)
+    private val formElements: List<FormElement> = formHelper.formElementsForCode(selectedPaymentMethodCode)
     private val usBankAccountArguments: USBankAccountFormArguments =
         USBankAccountFormArguments.create(
             viewModel = viewModel,
@@ -73,7 +74,7 @@ internal class DefaultVerticalModeFormInteractor(
                 viewModel.analyticsListener.reportFieldInteraction(selectedPaymentMethodCode)
             }
             is VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged -> {
-                viewModel.onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
+                formHelper.onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
             }
             is VerticalModeFormInteractor.ViewAction.LinkSignupStateChanged -> {
                 viewModel.onLinkSignUpStateUpdated(viewAction.linkInlineSignupViewState)

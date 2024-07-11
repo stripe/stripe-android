@@ -846,7 +846,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 getCvcRecollectionState()
             )
         } else {
-            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
         }
         return listOf(target)
     }
