@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
@@ -15,6 +16,9 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.AddNewAccount
+import com.stripe.android.financialconnections.model.ConnectedAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
@@ -200,6 +204,87 @@ class LinkAccountPickerViewModelTest {
             navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
+    @Test
+    fun `ViewModel state reflects preselected account correctly`() = runTest {
+        // Given a list of networked accounts with mixed selection permissions
+        val accountsData = listOf(
+            partnerAccount().copy(id = "id1", _allowSelection = null),
+            partnerAccount().copy(id = "id2", _allowSelection = null),
+            partnerAccount().copy(id = "id3", _allowSelection = null)
+        )
+        val displayAccounts = listOf(
+            NetworkedAccount(id = "id1", allowSelection = false),
+            NetworkedAccount(id = "id2", allowSelection = false),
+            NetworkedAccount(id = "id3", allowSelection = true)
+        )
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = accountsData,
+                display = display(displayAccounts)
+            )
+        )
+
+        // When initializing the ViewModel
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        val expectedPreselectedAccountId = "id3"
+        val actualPreselectedAccountId = viewModel.stateFlow.value.selectedAccountIds.firstOrNull()
+
+        assertThat(actualPreselectedAccountId).isEqualTo(expectedPreselectedAccountId)
+    }
+
+    @Test
+    fun `ViewModel reflects correct data access notice for multiple selected accounts`() = runTest {
+        val accountsData = listOf(
+            partnerAccount().copy(id = "id1", _allowSelection = true),
+            partnerAccount().copy(id = "id2", _allowSelection = true)
+        )
+        val displayAccounts = listOf(
+            NetworkedAccount(id = "id1", allowSelection = true),
+            NetworkedAccount(id = "id2", allowSelection = true)
+        )
+        val genericDataAccessNotice = DataAccessNotice(
+            title = "Generic Notice",
+            body = DataAccessNoticeBody(bullets = listOf()),
+            cta = "Generic CTA"
+        )
+        whenever(getSync()).thenReturn(
+            syncResponse().copy(
+                manifest = sessionManifest().copy(
+                    singleAccount = false
+                ),
+                text = TextUpdate(
+                    returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
+                        title = "Select account",
+                        defaultCta = "Connect account",
+                        accounts = displayAccounts,
+                        addNewAccount = AddNewAccount(body = "New bank account"),
+                        multipleAccountTypesSelectedDataAccessNotice = genericDataAccessNotice
+                    )
+                )
+            )
+        )
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = accountsData,
+                display = display(displayAccounts)
+            )
+        )
+
+        // When initializing the ViewModel and selecting an additional account (there's a preselection)
+        val viewModel = buildViewModel(LinkAccountPickerState())
+        viewModel.onAccountClick(partnerAccount().copy(id = "id2", _allowSelection = true))
+
+        // Then the ViewModel's state should reflect the generic data access notice for multiple selected accounts
+        val expectedDataAccessNotice = genericDataAccessNotice
+        val actualDataAccessNotice = viewModel.stateFlow.value.payload()?.dataAccessNotice
+
+        assertThat(actualDataAccessNotice).isEqualTo(expectedDataAccessNotice)
+    }
+
     private fun twoAccounts() = NetworkedAccountsList(
         nextPaneOnAddAccount = null,
         data = listOf(
@@ -222,6 +307,23 @@ class LinkAccountPickerViewModelTest {
                 )
             )
         )
+    )
+
+    private fun dataAccessNotice() = DataAccessNotice(
+        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+        title = "Goldilocks uses Stripe to link your accounts",
+        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
+        body = DataAccessNoticeBody(
+            bullets = emptyList()
+        ),
+        disclaimer = "Learn more about data access",
+        connectedAccountNotice = ConnectedAccessNotice(
+            subtitle = "Connected account placeholder",
+            body = DataAccessNoticeBody(
+                bullets = emptyList()
+            )
+        ),
+        cta = "OK"
     )
 
     private fun display(networkedAccounts: List<NetworkedAccount> = emptyList()) = Display(
