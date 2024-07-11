@@ -62,7 +62,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -772,7 +771,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -792,7 +791,7 @@ internal class PaymentSheetActivityTest {
                 .assertDoesNotExist()
 
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -806,7 +805,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)

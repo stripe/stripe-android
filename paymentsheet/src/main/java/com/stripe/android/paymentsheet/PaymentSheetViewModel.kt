@@ -413,7 +413,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun resetViewState(userErrorMessage: String? = null) {
         viewState.value =
-            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+            PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
     }
 

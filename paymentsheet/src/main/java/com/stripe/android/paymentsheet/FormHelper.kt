@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.NewOrExternalPaymentSelection
 import com.stripe.android.uicore.elements.FormElement
 
 internal class FormHelper(

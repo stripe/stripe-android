@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.NewOrExternalPaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry

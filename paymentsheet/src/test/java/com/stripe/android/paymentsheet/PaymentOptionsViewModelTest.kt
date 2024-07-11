@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -451,7 +450,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.New(
+                NewOrExternalPaymentSelection.New(
                     newSelection
                 )
             )
