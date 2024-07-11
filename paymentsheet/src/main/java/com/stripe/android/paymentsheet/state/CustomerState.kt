@@ -21,38 +21,33 @@ internal data class CustomerState(
 
     internal companion object {
         /**
-         * Creates a [CustomerState] instance using an [ElementsSession] response. It's expected that the
-         * [ElementsSession.customer] field is available when creating the state. If the field is null, throws
-         * [IllegalStateException].
+         * Creates a [CustomerState] instance using an [ElementsSession.Customer] response.
          *
-         * @param elementsSession session response object with customer information
+         * @param customer elements session customer data
          *
-         * @return [CustomerState] instance using [ElementsSession.customer] data
-         * @throws IllegalStateException if [ElementsSession.customer] field is null
+         * @return [CustomerState] instance using [ElementsSession.Customer] data
          */
         internal fun createForCustomerSession(
-            elementsSession: ElementsSession
+            customer: ElementsSession.Customer
         ): CustomerState {
-            return elementsSession.customer?.let { customer ->
-                val canRemovePaymentMethods = when (
-                    val paymentSheetComponent = customer.session.components.paymentSheet
-                ) {
-                    is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
-                        paymentSheetComponent.isPaymentMethodRemoveEnabled
-                    is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
-                }
+            val canRemovePaymentMethods = when (
+                val paymentSheetComponent = customer.session.components.paymentSheet
+            ) {
+                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
+                    paymentSheetComponent.isPaymentMethodRemoveEnabled
+                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
+            }
 
-                CustomerState(
-                    id = customer.session.customerId,
-                    ephemeralKeySecret = customer.session.apiKey,
-                    paymentMethods = customer.paymentMethods,
-                    permissions = Permissions(
-                        canRemovePaymentMethods = canRemovePaymentMethods,
-                        // Should always remove duplicates when using `customer_session`
-                        canRemoveDuplicates = true,
-                    )
+            return CustomerState(
+                id = customer.session.customerId,
+                ephemeralKeySecret = customer.session.apiKey,
+                paymentMethods = customer.paymentMethods,
+                permissions = Permissions(
+                    canRemovePaymentMethods = canRemovePaymentMethods,
+                    // Should always remove duplicates when using `customer_session`
+                    canRemoveDuplicates = true,
                 )
-            } ?: throw IllegalStateException("Excepted 'customer' attribute as part of 'elements_session' response!")
+            )
         }
 
         /**

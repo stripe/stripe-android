@@ -2,25 +2,23 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
-import kotlin.test.assertFailsWith
 
 class CustomerStateTest {
     @Test
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
-        val elementsSession = createElementsSession(
+        val customer = createElementsSessionCustomer(
             customerId = "cus_1",
             ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
             paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Disabled
         )
 
-        val customerState = CustomerState.createForCustomerSession(elementsSession)
+        val customerState = CustomerState.createForCustomerSession(customer)
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -39,7 +37,7 @@ class CustomerStateTest {
     @Test
     fun `Should create 'CustomerState' for customer session properly with remove permissions enabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
-        val elementsSession = createElementsSession(
+        val customer = createElementsSessionCustomer(
             customerId = "cus_1",
             ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
@@ -49,7 +47,7 @@ class CustomerStateTest {
             ),
         )
 
-        val customerState = CustomerState.createForCustomerSession(elementsSession)
+        val customerState = CustomerState.createForCustomerSession(customer)
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -68,7 +66,7 @@ class CustomerStateTest {
     @Test
     fun `Should create 'CustomerState' for customer session properly with remove permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(3)
-        val elementsSession = createElementsSession(
+        val customer = createElementsSessionCustomer(
             customerId = "cus_3",
             ephemeralKeySecret = "ek_3",
             paymentMethods = paymentMethods,
@@ -78,7 +76,7 @@ class CustomerStateTest {
             ),
         )
 
-        val customerState = CustomerState.createForCustomerSession(elementsSession)
+        val customerState = CustomerState.createForCustomerSession(customer)
 
         assertThat(customerState).isEqualTo(
             CustomerState(
@@ -92,27 +90,6 @@ class CustomerStateTest {
                 ),
             )
         )
-    }
-
-    @Test
-    fun `Should throw 'IllegalStateException' for customer session if 'customer' field is null`() {
-        val elementsSession = ElementsSession(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            customer = null,
-            linkSettings = null,
-            externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
-            isEligibleForCardBrandChoice = false,
-            isGooglePayEnabled = false,
-            merchantCountry = null,
-        )
-
-        val exception = assertFailsWith<IllegalStateException> {
-            CustomerState.createForCustomerSession(elementsSession)
-        }
-
-        assertThat(exception.message)
-            .isEqualTo("Excepted 'customer' attribute as part of 'elements_session' response!")
     }
 
     @Test
@@ -141,35 +118,26 @@ class CustomerStateTest {
         )
     }
 
-    private fun createElementsSession(
+    private fun createElementsSessionCustomer(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethods: List<PaymentMethod>,
         paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet
-    ): ElementsSession {
-        return ElementsSession(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            customer = ElementsSession.Customer(
-                paymentMethods = paymentMethods,
-                defaultPaymentMethod = null,
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_1",
-                    customerId = customerId,
-                    apiKey = ephemeralKeySecret,
-                    apiKeyExpiry = 999999999,
-                    liveMode = false,
-                    components = ElementsSession.Customer.Components(
-                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                        paymentSheet = paymentSheetComponent
-                    )
-                ),
+    ): ElementsSession.Customer {
+        return ElementsSession.Customer(
+            paymentMethods = paymentMethods,
+            defaultPaymentMethod = null,
+            session = ElementsSession.Customer.Session(
+                id = "cuss_1",
+                customerId = customerId,
+                apiKey = ephemeralKeySecret,
+                apiKeyExpiry = 999999999,
+                liveMode = false,
+                components = ElementsSession.Customer.Components(
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                    paymentSheet = paymentSheetComponent
+                )
             ),
-            linkSettings = null,
-            externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
-            isEligibleForCardBrandChoice = false,
-            isGooglePayEnabled = false,
-            merchantCountry = null
         )
     }
 }

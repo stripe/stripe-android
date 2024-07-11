@@ -317,9 +317,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val customerState = when (val accessType = customerConfig?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                try {
-                    CustomerState.createForCustomerSession(elementsSession)
-                } catch (exception: IllegalStateException) {
+                elementsSession.customer?.let { customer ->
+                    CustomerState.createForCustomerSession(customer)
+                } ?: run {
+                    val exception = IllegalStateException(
+                        "Excepted 'customer' attribute as part of 'elements_session' response!"
+                    )
+
                     errorReporter.report(
                         ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
                         StripeException.create(exception)
