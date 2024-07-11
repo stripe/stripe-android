@@ -20,7 +20,6 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -670,19 +669,6 @@ internal abstract class BaseSheetViewModel(
         navigationHandler.pop { poppedScreen ->
             analyticsListener.reportPaymentSheetHidden(poppedScreen)
         }
-    }
-
-    fun createFormHelper(): FormHelper {
-        return FormHelper(
-            context = getApplication(),
-            paymentMethodMetadata = requireNotNull(paymentMethodMetadata.value),
-            newPaymentSelectionProvider = {
-                newPaymentSelection
-            },
-            selectionUpdater = {
-                updateSelection(it)
-            }
-        )
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)

@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
@@ -83,7 +84,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 ) : PaymentMethodVerticalLayoutInteractor {
     companion object {
         fun create(viewModel: BaseSheetViewModel): PaymentMethodVerticalLayoutInteractor {
-            val formHelper = viewModel.createFormHelper()
+            val formHelper = FormHelper.create(viewModel)
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 processing = viewModel.processing,

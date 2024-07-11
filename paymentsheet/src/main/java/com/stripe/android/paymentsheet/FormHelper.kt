@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.NewOrExternalPaymentSelection
 import com.stripe.android.uicore.elements.FormElement
 
@@ -20,6 +21,21 @@ internal class FormHelper(
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
 ) {
+    companion object {
+        fun create(viewModel: BaseSheetViewModel): FormHelper {
+            return FormHelper(
+                context = viewModel.getApplication(),
+                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                newPaymentSelectionProvider = {
+                    viewModel.newPaymentSelection
+                },
+                selectionUpdater = {
+                    viewModel.updateSelection(it)
+                }
+            )
+        }
+    }
+
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
 
     fun formElementsForCode(code: String): List<FormElement> {

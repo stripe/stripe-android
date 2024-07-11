@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -74,7 +75,7 @@ internal class DefaultAddPaymentMethodInteractor(
 
     companion object {
         fun create(sheetViewModel: BaseSheetViewModel): AddPaymentMethodInteractor {
-            val formHelper = sheetViewModel.createFormHelper()
+            val formHelper = FormHelper.create(sheetViewModel)
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,

@@ -6,6 +6,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -41,7 +42,7 @@ internal class DefaultVerticalModeFormInteractor(
     private val selectedPaymentMethodCode: String,
     private val viewModel: BaseSheetViewModel,
 ) : VerticalModeFormInteractor {
-    private val formHelper = viewModel.createFormHelper()
+    private val formHelper = FormHelper.create(viewModel)
     private val formArguments: FormArguments = formHelper.createFormArguments(selectedPaymentMethodCode)
     private val formElements: List<FormElement> = formHelper.formElementsForCode(selectedPaymentMethodCode)
     private val usBankAccountArguments: USBankAccountFormArguments =
