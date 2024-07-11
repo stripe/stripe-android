@@ -315,11 +315,33 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): CustomerState? {
         val customerConfig = config.customer
 
-        val customerState = when (customerConfig?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession ->
-                elementsSession.toCustomerState()
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey ->
-                customerConfig.toCustomerState(metadata)
+        val customerState = when (val accessType = customerConfig?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                try {
+                    CustomerState.createForCustomerSession(elementsSession)
+                } catch (exception: IllegalStateException) {
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
+                        StripeException.create(exception)
+                    )
+
+                    if (!elementsSession.stripeIntent.isLiveMode) {
+                        throw exception
+                    }
+
+                    null
+                }
+            }
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = customerConfig.id,
+                    accessType = accessType,
+                    paymentMethods = retrieveCustomerPaymentMethods(
+                        metadata = metadata,
+                        customerConfig = customerConfig,
+                    )
+                )
+            }
             else -> null
         }
 
@@ -534,71 +556,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun ElementsSession.toCustomerState(): CustomerState? {
-        return customer?.let { customer ->
-            val canRemovePaymentMethods = when (
-                val paymentSheetComponent = customer.session.components.paymentSheet
-            ) {
-                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
-                    paymentSheetComponent.isPaymentMethodRemoveEnabled
-                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
-            }
-
-            CustomerState(
-                id = customer.session.customerId,
-                ephemeralKeySecret = customer.session.apiKey,
-                paymentMethods = customer.paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = canRemovePaymentMethods,
-                    // Should always remove duplicates when using `customer_session`
-                    canRemoveDuplicates = true,
-                )
-            )
-        } ?: run {
-            val exception = IllegalStateException(
-                "Excepted 'customer' attribute as part of 'elements_session' response!"
-            )
-
-            errorReporter.report(
-                ErrorReporter
-                    .UnexpectedErrorEvent
-                    .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                StripeException.create(exception)
-            )
-
-            if (!stripeIntent.isLiveMode) {
-                throw exception
-            }
-
-            null
-        }
-    }
-
-    private suspend fun PaymentSheet.CustomerConfiguration.toCustomerState(
-        metadata: PaymentMethodMetadata,
-    ): CustomerState {
-        return CustomerState(
-            id = id,
-            ephemeralKeySecret = ephemeralKeySecret,
-            paymentMethods = retrieveCustomerPaymentMethods(
-                metadata = metadata,
-                customerConfig = this,
-            ),
-            permissions = CustomerState.Permissions(
-                /*
-                 * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should always be
-                 * set to true.
-                 */
-                canRemovePaymentMethods = true,
-                /*
-                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
-                 * un-scoped ephemeral keys.
-                 */
-                canRemoveDuplicates = false,
-            )
-        )
     }
 
     /*
