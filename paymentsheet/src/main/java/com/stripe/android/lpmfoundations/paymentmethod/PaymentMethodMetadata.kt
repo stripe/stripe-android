@@ -39,29 +39,6 @@ internal data class PaymentMethodMetadata(
     val hasCustomerConfiguration: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
-    constructor(
-        elementsSession: ElementsSession,
-        configuration: PaymentSheet.Configuration,
-        sharedDataSpecs: List<SharedDataSpec>,
-        externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
-    ) : this(
-        stripeIntent = elementsSession.stripeIntent,
-        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-        allowsPaymentMethodsRequiringShippingAddress = configuration.allowsPaymentMethodsRequiringShippingAddress,
-        paymentMethodOrder = configuration.paymentMethodOrder,
-        cbcEligibility = CardBrandChoiceEligibility.create(
-            isEligible = elementsSession.isEligibleForCardBrandChoice,
-            preferredNetworks = configuration.preferredNetworks,
-        ),
-        merchantName = configuration.merchantDisplayName,
-        defaultBillingDetails = configuration.defaultBillingDetails,
-        shippingDetails = configuration.shippingDetails,
-        hasCustomerConfiguration = configuration.customer != null,
-        sharedDataSpecs = sharedDataSpecs,
-        externalPaymentMethodSpecs = externalPaymentMethodSpecs
-    )
-
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.setupFutureUsage != null
@@ -207,6 +184,34 @@ internal data class PaymentMethodMetadata(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
                 ),
+            )
+        }
+    }
+
+    internal companion object {
+        internal fun create(
+            elementsSession: ElementsSession,
+            configuration: PaymentSheet.Configuration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = configuration
+                    .allowsPaymentMethodsRequiringShippingAddress,
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    preferredNetworks = configuration.preferredNetworks,
+                ),
+                merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = configuration.shippingDetails,
+                hasCustomerConfiguration = configuration.customer != null,
+                sharedDataSpecs = sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
         }
     }

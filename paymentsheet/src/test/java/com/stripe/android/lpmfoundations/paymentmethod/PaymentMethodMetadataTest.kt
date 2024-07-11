@@ -713,7 +713,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `should construct metadata properly with elements session response, configuration, and data specs`() {
+    fun `should create metadata properly with elements session response, configuration, and data specs`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
@@ -730,7 +730,7 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.Address(line1 = "123 Pear Street")
         )
 
-        val metadata = PaymentMethodMetadata(
+        val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 isEligibleForCardBrandChoice = true,
