@@ -241,6 +241,47 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `removing multiple saved PMs leads to correct displayed saved PM`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val displayedPM = paymentMethods[2]
+        runScenario(
+            initialPaymentMethods = paymentMethods,
+            initialMostRecentlySelectedSavedPaymentMethod = displayedPM,
+            updateSelection = {},
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(displayedPM)
+                }
+            }
+
+            var updatedPaymentMethods = paymentMethods.subList(1, 4) // remove first and last PMs
+            paymentMethodsSource.value = updatedPaymentMethods
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(displayedPM)
+                }
+            }
+
+            mostRecentlySelectedSavedPaymentMethodSource.value = null
+            updatedPaymentMethods = paymentMethods.minus(displayedPM)
+            paymentMethodsSource.value = updatedPaymentMethods
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(displayedSavedPaymentMethod).isNotNull()
+                    assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(updatedPaymentMethods[0])
+                }
+            }
+        }
+    }
+
+    @Test
     fun `state displays most recently selected PM if it exists`() {
         val displayedPM = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         runScenario(
