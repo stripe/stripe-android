@@ -40,7 +40,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
-                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
+                multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )
@@ -62,7 +62,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
-                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
+                multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )
@@ -81,7 +81,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
-                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
+                multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )
