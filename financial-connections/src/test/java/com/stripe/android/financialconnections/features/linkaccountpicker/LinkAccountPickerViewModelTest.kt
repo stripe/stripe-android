@@ -237,12 +237,12 @@ class LinkAccountPickerViewModelTest {
     @Test
     fun `ViewModel reflects correct data access notice for multiple selected accounts`() = runTest {
         val accountsData = listOf(
-            partnerAccount().copy(id = "id1", _allowSelection = true),
-            partnerAccount().copy(id = "id2", _allowSelection = true)
+            partnerAccount().copy(id = "type1_1", _allowSelection = true),
+            partnerAccount().copy(id = "type2_2", _allowSelection = true)
         )
         val displayAccounts = listOf(
-            NetworkedAccount(id = "id1", allowSelection = true),
-            NetworkedAccount(id = "id2", allowSelection = true)
+            NetworkedAccount(id = "type1_1", allowSelection = true),
+            NetworkedAccount(id = "type2_1", allowSelection = true)
         )
         val genericDataAccessNotice = DataAccessNotice(
             title = "Generic Notice",
@@ -250,32 +250,19 @@ class LinkAccountPickerViewModelTest {
             cta = "Generic CTA"
         )
         whenever(getSync()).thenReturn(
-            syncResponse().copy(
-                manifest = sessionManifest().copy(
-                    singleAccount = false
-                ),
-                text = TextUpdate(
-                    returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
-                        title = "Select account",
-                        defaultCta = "Connect account",
-                        accounts = displayAccounts,
-                        addNewAccount = AddNewAccount(body = "New bank account"),
-                        multipleAccountTypesSelectedDataAccessNotice = genericDataAccessNotice
-                    )
-                )
-            )
+            syncResponse().copy(manifest = sessionManifest().copy(singleAccount = false))
         )
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
                 data = accountsData,
-                display = display(displayAccounts)
+                display = display(displayAccounts, genericDataAccessNotice)
             )
         )
 
         // When initializing the ViewModel and selecting an additional account (there's a preselection)
         val viewModel = buildViewModel(LinkAccountPickerState())
-        viewModel.onAccountClick(partnerAccount().copy(id = "id2", _allowSelection = true))
+        viewModel.onAccountClick(partnerAccount().copy(id = "type2_1", _allowSelection = true))
 
         // Then the ViewModel's state should reflect the generic data access notice for multiple selected accounts
         val expectedDataAccessNotice = genericDataAccessNotice
@@ -308,7 +295,10 @@ class LinkAccountPickerViewModelTest {
         )
     )
 
-    private fun display(networkedAccounts: List<NetworkedAccount> = emptyList()) = Display(
+    private fun display(
+        networkedAccounts: List<NetworkedAccount> = emptyList(),
+        multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice? = null
+    ) = Display(
         text = TextUpdate(
             returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
                 title = "Select account",
@@ -319,7 +309,8 @@ class LinkAccountPickerViewModelTest {
                     icon = Image(
                         default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
                     ),
-                )
+                ),
+                multipleAccountTypesSelectedDataAccessNotice = multipleAccountTypesSelectedDataAccessNotice
             )
         )
     )

@@ -311,15 +311,14 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             else -> state.selectedAccountIds + partnerAccount.id
         }
 
-        val dataAccessNotice = when (selectedAccountIds.size) {
-            // No accounts selected.
-            0 -> null
-            // // if just a single account, use its specific data access notice.
-            // otherwise, we assume the data access notice is the same for all selected accounts
-            // and just use the first one
-            1 -> (networkedAccount ?: accounts.firstOrNull()?.second)?.dataAccessNotice
-            // if multiple types of accounts selected
-            else -> payload.multipleAccountTypesSelectedDataAccessNotice
+        // Bank accounts can have multiple types (ex. linked account "bctmacct", manual account "csmrbankacct").
+        val selectedAccountTypes = selectedAccountIds.mapNotNull { it.split("_").firstOrNull() }.toSet()
+        val dataAccessNotice = if (selectedAccountTypes.size > 1) {
+            // if user selected multiple different account types, present a special data access notice
+            payload.multipleAccountTypesSelectedDataAccessNotice
+        } else {
+            // we get here if user selected: one account or multiple accounts of the same account type
+            (networkedAccount ?: accounts.firstOrNull()?.second)?.dataAccessNotice
         }
 
         setState {
