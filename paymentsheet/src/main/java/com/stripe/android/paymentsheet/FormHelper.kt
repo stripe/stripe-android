@@ -22,14 +22,6 @@ internal class FormHelper(
 ) {
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
 
-    private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
-        return requireNotNull(
-            paymentMethodMetadata.supportedPaymentMethodForCode(
-                code = code,
-            )
-        )
-    }
-
     fun formElementsForCode(code: String): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
 
@@ -53,13 +45,15 @@ internal class FormHelper(
     }
 
     fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
-        paymentMethodMetadata.let { paymentMethodMetadata ->
-            val newSelection = formValues?.transformToPaymentSelection(
-                context = context,
-                paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
-                paymentMethodMetadata = paymentMethodMetadata,
-            )
-            selectionUpdater(newSelection)
-        }
+        val newSelection = formValues?.transformToPaymentSelection(
+            context = context,
+            paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+        selectionUpdater(newSelection)
+    }
+
+    private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
+        return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
     }
 }
