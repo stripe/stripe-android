@@ -16,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
@@ -2067,6 +2068,7 @@ internal class DefaultFlowControllerTest {
         paymentOptionFactory = PaymentOptionFactory(
             resources = context.resources,
             imageLoader = StripeImageLoader(context),
+            context = context,
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
@@ -2105,7 +2107,7 @@ internal class DefaultFlowControllerTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "Test",
+            label = resolvableString("Test"),
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
@@ -2131,7 +2133,7 @@ internal class DefaultFlowControllerTest {
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-            labelResource = "Bancontact",
+            label = resolvableString("Bancontact"),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,

@@ -490,7 +490,7 @@ class DefaultEventReporterTest {
 
         customEventReporter.onPressConfirmButton(
             PaymentSelection.New.GenericPaymentMethod(
-                labelResource = "Cash App Pay",
+                label = resolvableString("Cash App Pay"),
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,

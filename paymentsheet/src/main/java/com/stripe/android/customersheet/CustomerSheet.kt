@@ -371,6 +371,7 @@ class CustomerSheet @Inject internal constructor(
                 paymentOptionFactory = PaymentOptionFactory(
                     resources = application.resources,
                     imageLoader = StripeImageLoader(application),
+                    context = application,
                 ),
                 callback = callback,
                 statusBarColor = statusBarColor,

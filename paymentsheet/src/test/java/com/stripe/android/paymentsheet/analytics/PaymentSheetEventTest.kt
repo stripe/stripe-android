@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentDetailsFixtures
@@ -504,7 +505,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = "Fawry",
+                label = resolvableString("Fawry"),
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
@@ -543,7 +544,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = "Fawry",
+                label = resolvableString("Fawry"),
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,

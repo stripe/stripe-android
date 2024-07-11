@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -501,7 +502,7 @@ internal object PaymentMethodFixtures {
     fun createExternalPaymentMethod(spec: ExternalPaymentMethodSpec): PaymentSelection.ExternalPaymentMethod {
         return PaymentSelection.ExternalPaymentMethod(
             type = spec.type,
-            label = spec.type,
+            label = resolvableString(spec.type),
             iconResource = 0,
             lightThemeIconUrl = spec.lightImageUrl,
             darkThemeIconUrl = spec.darkImageUrl,

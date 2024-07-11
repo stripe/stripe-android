@@ -66,7 +66,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 }
             }
             selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
-                labelResource = "CashApp",
+                label = resolvableString("CashApp"),
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,

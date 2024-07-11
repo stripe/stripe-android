@@ -61,7 +61,6 @@ internal class FormHelper(
 
     fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
         val newSelection = formValues?.transformToPaymentSelection(
-            context = context,
             paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
             paymentMethodMetadata = paymentMethodMetadata,
         )

@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -592,7 +593,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
                     iconResource = 0,
-                    labelResource = "",
+                    label = resolvableString(""),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     lightThemeIconUrl = null,

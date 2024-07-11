@@ -8,7 +8,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -230,7 +229,6 @@ internal class PaymentMethodVerticalLayoutUITest {
         val selection = FormFieldValues(
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         ).transformToPaymentSelection(
-            context = ApplicationProvider.getApplicationContext(),
             paymentMethod = supportedPaymentMethods[1],
             paymentMethodMetadata = paymentMethodMetadata,
         )
