@@ -119,9 +119,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         }
     }
 
-    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? = this
-        .map { it.second }
-        .firstOrNull { it.allowSelection && it.dataAccessNotice != null }
+    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? =
+        map { (_, networkedAccount) -> networkedAccount }.firstOrNull { it.allowSelection }
 
     override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
