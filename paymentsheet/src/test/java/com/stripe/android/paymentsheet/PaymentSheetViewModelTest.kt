@@ -66,6 +66,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState.UserErrorMessage
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -90,9 +91,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -1688,7 +1687,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.New(
+                NewOrExternalPaymentSelection.New(
                     newSelection
                 )
             )
@@ -1712,7 +1711,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.External(
+                NewOrExternalPaymentSelection.External(
                     newSelection
                 )
             )
