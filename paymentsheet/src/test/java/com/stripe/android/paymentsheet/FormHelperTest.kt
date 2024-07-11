@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -59,7 +60,7 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = {
                 NewOrExternalPaymentSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
-                        labelResource = "Cash App",
+                        label = resolvableString("Cash App"),
                         iconResource = 0,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
@@ -90,7 +91,7 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = {
                 NewOrExternalPaymentSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
-                        labelResource = "Klarna",
+                        label = resolvableString("Klarna"),
                         iconResource = 0,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,

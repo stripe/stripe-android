@@ -1361,7 +1361,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
-                labelResource = "",
+                label = resolvableString(""),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                 lightThemeIconUrl = null,
@@ -1703,7 +1703,7 @@ internal class PaymentSheetViewModelTest {
             val newSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = "Fawry",
+                label = resolvableString("Fawry"),
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
@@ -2485,7 +2485,7 @@ internal class PaymentSheetViewModelTest {
                 viewModel.updateSelection(
                     PaymentSelection.New.GenericPaymentMethod(
                         iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-                        labelResource = "Bancontact",
+                        label = resolvableString("Bancontact"),
                         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
                         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                         lightThemeIconUrl = null,
@@ -3001,7 +3001,7 @@ internal class PaymentSheetViewModelTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "Test",
+            label = resolvableString("Test"),
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -95,7 +94,6 @@ internal fun FormFieldValues.transformToExtraParams(
 }
 
 internal fun FormFieldValues.transformToPaymentSelection(
-    context: Context,
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
@@ -115,14 +113,14 @@ internal fun FormFieldValues.transformToPaymentSelection(
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,
             billingDetails = params.billingDetails,
-            label = paymentMethod.displayName.resolve(context),
+            label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
         )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
-            labelResource = paymentMethod.displayName.resolve(context),
+            label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
