@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConnectedAccessNotice
@@ -34,13 +33,13 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
-                merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
+                aboveCta = display().aboveCta,
             )
         ),
     )
@@ -56,13 +55,13 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList().subList(0, 1),
                 activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
-                merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
+                aboveCta = display().aboveCta,
             )
         ),
     )
@@ -75,13 +74,13 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
-                merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
+                aboveCta = display().aboveCta,
             )
         ),
     )
@@ -222,21 +221,11 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun accessibleCallout() = MerchantDataAccessModel(
-        businessName = "My business",
-        permissions = listOf(
-            FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-            FinancialConnectionsAccount.Permissions.BALANCES,
-            FinancialConnectionsAccount.Permissions.OWNERSHIP,
-            FinancialConnectionsAccount.Permissions.TRANSACTIONS
-        ),
-        isStripeDirect = true,
-    )
-
     fun display() = ReturningNetworkingUserAccountPicker(
         title = "Select account",
         defaultCta = "Connect account",
         accounts = emptyList(),
+        aboveCta = "Above CTA coming from backend.",
         addNewAccount = AddNewAccount(
             body = "New bank account",
             icon = Image(

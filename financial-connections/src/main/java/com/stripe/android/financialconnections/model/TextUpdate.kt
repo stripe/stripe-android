@@ -260,6 +260,9 @@ internal data class ReturningNetworkingUserAccountPicker(
     @SerialName("default_cta") val defaultCta: String,
     @SerialName("add_new_account") val addNewAccount: AddNewAccount,
     @SerialName("accounts") val accounts: List<NetworkedAccount>,
+    @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val aboveCta: String? = null,
     @SerialName("multiple_account_types_selected_data_access_notice")
     val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice? = null
 ) : Parcelable

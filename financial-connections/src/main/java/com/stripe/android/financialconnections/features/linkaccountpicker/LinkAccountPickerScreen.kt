@@ -33,15 +33,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -60,6 +59,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.clickableSingle
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
@@ -170,11 +170,18 @@ private fun LinkAccountPickerLoaded(
         footer = {
             payload()?.let {
                 Column {
-                    MerchantDataAccessText(
-                        model = it.merchantDataAccess,
-                        onLearnMoreClick = { onClickableTextClick(DATA.value) }
-                    )
-                    Spacer(modifier = Modifier.size(12.dp))
+                    it.aboveCta?.let {
+                        AnnotatedText(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = TextResource.Text(fromHtml(it)),
+                            onClickableTextClick = onClickableTextClick,
+                            defaultStyle = typography.labelSmall.copy(
+                                textAlign = TextAlign.Center,
+                                color = colors.textDefault
+                            )
+                        )
+                        Spacer(modifier = Modifier.size(12.dp))
+                    }
                     FinancialConnectionsButton(
                         enabled = selectedAccountIds.isNotEmpty(),
                         loading = selectNetworkedAccountAsync is Loading,

@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.AddNewAccount
-import com.stripe.android.financialconnections.model.ConnectedAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Display
@@ -307,23 +306,6 @@ class LinkAccountPickerViewModelTest {
                 )
             )
         )
-    )
-
-    private fun dataAccessNotice() = DataAccessNotice(
-        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-        title = "Goldilocks uses Stripe to link your accounts",
-        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
-        body = DataAccessNoticeBody(
-            bullets = emptyList()
-        ),
-        disclaimer = "Learn more about data access",
-        connectedAccountNotice = ConnectedAccessNotice(
-            subtitle = "Connected account placeholder",
-            body = DataAccessNoticeBody(
-                bullets = emptyList()
-            )
-        ),
-        cta = "OK"
     )
 
     private fun display(networkedAccounts: List<NetworkedAccount> = emptyList()) = Display(

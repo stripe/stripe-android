@@ -26,7 +26,6 @@ import com.stripe.android.financialconnections.features.accountupdate.AccountUpd
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.PartnerAuth
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.Repair
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -78,11 +77,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val sync = getSync()
             val manifest = sync.manifest
-            val merchantDataAccess = MerchantDataAccessModel(
-                businessName = manifest.businessName,
-                permissions = manifest.permissions,
-                isStripeDirect = manifest.isStripeDirect ?: false
-            )
             val consumerSession = requireNotNull(getCachedConsumerSession())
             val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val display = requireNotNull(
@@ -102,14 +96,13 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 activeDataAccessNotice = accounts.preselectedAccount()?.dataAccessNotice,
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
+                aboveCta = display.aboveCta,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
-                // We always want to refer to Link rather than Stripe on Link panes.
-                merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false),
                 singleAccount = manifest.singleAccount,
             )
         }.execute {
@@ -380,13 +373,13 @@ internal data class LinkAccountPickerState(
         val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
         val activeDataAccessNotice: DataAccessNotice?,
         val addNewAccount: AddNewAccount,
-        val merchantDataAccess: MerchantDataAccessModel,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
         val nextPaneOnNewAccount: Pane?,
         val partnerToCoreAuths: Map<String, String>?,
         val singleAccount: Boolean,
         val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice?,
+        val aboveCta: String?,
     ) {
 
         fun selectedPartnerAccounts(selected: List<String>): List<PartnerAccount> {
