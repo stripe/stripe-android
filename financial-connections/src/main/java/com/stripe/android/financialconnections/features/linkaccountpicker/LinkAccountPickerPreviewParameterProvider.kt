@@ -32,7 +32,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                dataAccessNotice = dataAccessNotice(),
+                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
@@ -40,6 +40,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
+                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )
@@ -53,7 +54,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList().subList(0, 1),
-                dataAccessNotice = dataAccessNotice(),
+                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
@@ -61,6 +62,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
+                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )
@@ -71,7 +73,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                dataAccessNotice = dataAccessNotice(),
+                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
@@ -79,6 +81,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
                 singleAccount = true,
+                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
             )
         ),
     )

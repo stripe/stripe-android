@@ -280,7 +280,7 @@ class LinkAccountPickerViewModelTest {
 
         // Then the ViewModel's state should reflect the generic data access notice for multiple selected accounts
         val expectedDataAccessNotice = genericDataAccessNotice
-        val actualDataAccessNotice = viewModel.stateFlow.value.payload()?.dataAccessNotice
+        val actualDataAccessNotice = viewModel.stateFlow.value.payload()?.activeDataAccessNotice
 
         assertThat(actualDataAccessNotice).isEqualTo(expectedDataAccessNotice)
     }

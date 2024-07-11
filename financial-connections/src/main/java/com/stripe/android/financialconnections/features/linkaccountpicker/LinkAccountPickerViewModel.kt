@@ -99,10 +99,11 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                dataAccessNotice = accounts.preselectedAccount()?.dataAccessNotice,
+                activeDataAccessNotice = accounts.preselectedAccount()?.dataAccessNotice,
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
+                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
@@ -173,7 +174,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     }
 
     private fun presentDataAccessBottomSheet() {
-        val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
+        val dataAccessNotice = stateFlow.value.payload()?.activeDataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
         presentNoticeSheet(
             content = DataAccess(dataAccessNotice),
@@ -285,7 +286,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         eventTracker.track(event)
     }
 
-    fun onAccountClick(partnerAccount: PartnerAccount) = viewModelScope.launch {
+    fun onAccountClick(partnerAccount: PartnerAccount) {
         logAccountClick(partnerAccount)
 
         val state = stateFlow.value
@@ -297,7 +298,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         if (drawerOnSelection != null) {
             // TODO@carlosmuvi handle drawer display.
             logger.debug("Drawer on selection: $drawerOnSelection")
-            return@launch
+            return
         }
 
         val updateRequired = createUpdateRequiredContent(
@@ -308,7 +309,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         if (updateRequired != null) {
             logUpdateRequired(updateRequired)
             presentUpdateRequiredSheet(updateRequired, referrer = PANE)
-            return@launch
+            return
         }
 
         val selectedAccountIds = when {
@@ -325,13 +326,13 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             // and just use the first one
             1 -> (networkedAccount ?: accounts.firstOrNull()?.second)?.dataAccessNotice
             // if multiple types of accounts selected
-            else -> getSync().text?.returningNetworkingUserAccountPicker?.multipleAccountTypesSelectedDataAccessNotice
+            else -> payload.multipleAccountTypesSelectedDataAccessNotice
         }
 
         setState {
             copy(
                 selectedAccountIds = selectedAccountIds,
-                payload = Success(payload.copy(dataAccessNotice = dataAccessNotice))
+                payload = Success(payload.copy(activeDataAccessNotice = dataAccessNotice))
             )
         }
     }
@@ -377,7 +378,7 @@ internal data class LinkAccountPickerState(
     data class Payload(
         val title: String,
         val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
-        val dataAccessNotice: DataAccessNotice?,
+        val activeDataAccessNotice: DataAccessNotice?,
         val addNewAccount: AddNewAccount,
         val merchantDataAccess: MerchantDataAccessModel,
         val consumerSessionClientSecret: String,
@@ -385,6 +386,7 @@ internal data class LinkAccountPickerState(
         val nextPaneOnNewAccount: Pane?,
         val partnerToCoreAuths: Map<String, String>?,
         val singleAccount: Boolean,
+        val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice?,
     ) {
 
         fun selectedPartnerAccounts(selected: List<String>): List<PartnerAccount> {
