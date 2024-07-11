@@ -119,9 +119,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         }
     }
 
-    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? {
-        return this.firstOrNull { it.second.allowSelection }?.second
-    }
+    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? = this
+        .map { it.second }
+        .firstOrNull { it.allowSelection && it.dataAccessNotice != null }
 
     override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
@@ -142,9 +142,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     pane = PANE
                 )
                 navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-            },
-            onSuccess = { payload ->
-
             }
         )
         onAsync(
