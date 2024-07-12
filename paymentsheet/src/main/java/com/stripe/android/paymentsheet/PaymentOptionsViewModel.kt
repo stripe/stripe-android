@@ -86,7 +86,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
-            reportConfirmButtonPressed()
+            eventReporter.onPressConfirmButton(selection.value)
             onUserSelection()
         },
     )
@@ -229,7 +229,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
-        reportDismiss()
+        eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -299,7 +299,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
-        reportConfirmButtonPressed()
+        eventReporter.onPressConfirmButton(selection.value)
         onUserSelection()
     }
 
@@ -332,7 +332,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods(DefaultSelectSavedPaymentMethodsInteractor(this))
         } else {
-            AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
+            AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
         }
 
         return buildList {
@@ -344,7 +344,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // form again.
                 add(
                     PaymentSheetScreen.AddAnotherPaymentMethod(
-                        interactor = DefaultAddPaymentMethodInteractor(this@PaymentOptionsViewModel)
+                        interactor = DefaultAddPaymentMethodInteractor.create(this@PaymentOptionsViewModel)
                     )
                 )
             }

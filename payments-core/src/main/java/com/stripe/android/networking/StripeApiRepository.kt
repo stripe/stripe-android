@@ -1143,7 +1143,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "id" to id,
-                    PAYMENT_USER_AGENT to buildPaymentUserAgentPair()
+                    buildPaymentUserAgentPair(),
                 )
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,

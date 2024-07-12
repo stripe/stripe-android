@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
@@ -81,52 +82,56 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val isCurrentScreen: StateFlow<Boolean>,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
-    constructor(viewModel: BaseSheetViewModel) : this(
-        paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
-        processing = viewModel.processing,
-        selection = viewModel.selection,
-        formElementsForCode = viewModel::formElementsForCode,
-        transitionTo = viewModel::transitionTo,
-        onFormFieldValuesChanged = viewModel::onFormFieldValuesChanged,
-        manageScreenFactory = {
-            PaymentSheetScreen.ManageSavedPaymentMethods(
-                interactor = DefaultManageScreenInteractor(
-                    viewModel
-                )
+    companion object {
+        fun create(viewModel: BaseSheetViewModel): PaymentMethodVerticalLayoutInteractor {
+            val formHelper = FormHelper.create(viewModel)
+            return DefaultPaymentMethodVerticalLayoutInteractor(
+                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                processing = viewModel.processing,
+                selection = viewModel.selection,
+                formElementsForCode = formHelper::formElementsForCode,
+                transitionTo = viewModel.navigationHandler::transitionTo,
+                onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
+                manageScreenFactory = {
+                    PaymentSheetScreen.ManageSavedPaymentMethods(
+                        interactor = DefaultManageScreenInteractor(
+                            viewModel
+                        )
+                    )
+                },
+                manageOneSavedPaymentMethodFactory = {
+                    PaymentSheetScreen.ManageOneSavedPaymentMethod(
+                        interactor = DefaultManageOneSavedPaymentMethodInteractor(viewModel)
+                    )
+                },
+                formScreenFactory = { selectedPaymentMethodCode ->
+                    PaymentSheetScreen.Form(
+                        DefaultVerticalModeFormInteractor(
+                            selectedPaymentMethodCode,
+                            viewModel
+                        )
+                    )
+                },
+                paymentMethods = viewModel.paymentMethods,
+                mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
+                providePaymentMethodName = viewModel::providePaymentMethodName,
+                allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
+                onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+                onSelectSavedPaymentMethod = {
+                    viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
+                },
+                walletsState = viewModel.walletsState,
+                isFlowController = viewModel is PaymentOptionsViewModel,
+                updateSelection = viewModel::updateSelection,
+                isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
+                    it is PaymentSheetScreen.VerticalMode
+                },
+                onMandateTextUpdated = {
+                    viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
+                },
             )
-        },
-        manageOneSavedPaymentMethodFactory = {
-            PaymentSheetScreen.ManageOneSavedPaymentMethod(
-                interactor = DefaultManageOneSavedPaymentMethodInteractor(viewModel)
-            )
-        },
-        formScreenFactory = { selectedPaymentMethodCode ->
-            PaymentSheetScreen.Form(
-                DefaultVerticalModeFormInteractor(
-                    selectedPaymentMethodCode,
-                    viewModel
-                )
-            )
-        },
-        paymentMethods = viewModel.paymentMethods,
-        mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
-        providePaymentMethodName = viewModel::providePaymentMethodName,
-        allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
-        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
-        onSelectSavedPaymentMethod = {
-            viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
-        },
-        walletsState = viewModel.walletsState,
-        isFlowController = viewModel is PaymentOptionsViewModel,
-        updateSelection = viewModel::updateSelection,
-        isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
-            it is PaymentSheetScreen.VerticalMode
-        },
-        onMandateTextUpdated = {
-            viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
-        },
-    )
-
+        }
+    }
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
@@ -176,6 +181,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
                 if (!requiresFormScreen) {
                     _verticalModeScreenSelection.value = it
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            mostRecentlySelectedSavedPaymentMethod.collect { mostRecentlySelectedSavedPaymentMethod ->
+                if (
+                    mostRecentlySelectedSavedPaymentMethod == null &&
+                    verticalModeScreenSelection.value is PaymentSelection.Saved
+                ) {
+                    _verticalModeScreenSelection.value = null
                 }
             }
         }

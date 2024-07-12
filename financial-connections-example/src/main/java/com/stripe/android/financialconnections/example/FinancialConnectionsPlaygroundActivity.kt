@@ -49,9 +49,14 @@ import com.stripe.android.financialconnections.example.settings.SettingsUi
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
+
+    private lateinit var collectBankAccountForAchLauncher: CollectBankAccountLauncher
+    private lateinit var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher
 
     private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel> {
         FinancialConnectionsPlaygroundViewModel.Factory(
@@ -60,15 +65,21 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
     }
 
-    private lateinit var collectBankAccountLauncher: CollectBankAccountLauncher
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            this,
-            viewModel::onCollectBankAccountLauncherResult
+        collectBankAccountForAchLauncher = CollectBankAccountLauncher.create(
+            activity = this,
+            callback = viewModel::onCollectBankAccountLauncherResult,
         )
+
+        collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+            // Pretending this is PaymentSheet for now…
+            hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            activityResultRegistryOwner = this,
+            callback = viewModel::onCollectBankAccountForInstantDebitsLauncherResult,
+        )
+
         setContent {
             FinancialConnectionsExampleTheme {
                 FinancialConnectionsScreen()
@@ -78,10 +89,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun FinancialConnectionsScreen() {
-        val state: FinancialConnectionsPlaygroundState by viewModel.state.collectAsState()
-        val viewEffect: FinancialConnectionsPlaygroundViewEffect? by viewModel.viewEffect.collectAsState(
-            null
-        )
+        val state by viewModel.state.collectAsState()
+        val viewEffect by viewModel.viewEffect.collectAsState(null)
+
         val financialConnectionsSheetForData = rememberFinancialConnectionsSheet(
             viewModel::onFinancialConnectionsSheetResult
         )
@@ -89,6 +99,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
             viewModel::onFinancialConnectionsSheetForTokenResult
         )
+
+        val collectBankAccountLauncher = remember(state.experience) {
+            when (state.experience) {
+                Experience.FinancialConnections -> collectBankAccountForAchLauncher
+                Experience.InstantDebits -> collectBankAccountForInstantDebitsLauncher
+            }
+        }
 
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
@@ -106,10 +123,19 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             publishableKey = it.publishableKey,
                             stripeAccountId = null,
                             clientSecret = it.paymentIntentSecret,
-                            configuration = CollectBankAccountConfiguration.USBankAccount(
-                                name = "Sample name",
-                                email = "sampleEmail@test.com"
-                            )
+                            configuration = when (it.experience) {
+                                Experience.FinancialConnections -> {
+                                    CollectBankAccountConfiguration.USBankAccount(
+                                        name = "Sample name",
+                                        email = "sampleEmail@test.com"
+                                    )
+                                }
+                                Experience.InstantDebits -> {
+                                    CollectBankAccountConfiguration.InstantDebits(
+                                        email = "sampleEmail@test.com",
+                                    )
+                                }
+                            }
                         )
                     }
                 }

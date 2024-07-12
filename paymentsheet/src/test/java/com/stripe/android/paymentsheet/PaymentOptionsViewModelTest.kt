@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -37,7 +38,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -53,7 +53,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -452,7 +451,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.New(
+                NewOrExternalPaymentSelection.New(
                     newSelection
                 )
             )
@@ -594,7 +593,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
                     iconResource = 0,
-                    labelResource = "",
+                    label = resolvableString(""),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     lightThemeIconUrl = null,
@@ -775,18 +774,6 @@ internal class PaymentOptionsViewModelTest {
             assertThat(state?.link).isEqualTo(WalletsState.Link(email = null))
             assertThat(state?.googlePay).isNull()
         }
-    }
-
-    @Test
-    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-
-        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
     }
 
     @Test

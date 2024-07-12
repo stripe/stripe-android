@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
@@ -19,6 +20,7 @@ import com.stripe.android.R as StripeR
 internal class PaymentOptionFactory @Inject constructor(
     private val resources: Resources,
     private val imageLoader: StripeImageLoader,
+    private val context: Context,
 ) {
     private fun isDarkTheme(): Boolean {
         return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
@@ -113,7 +115,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = selection.iconResource,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    label = selection.labelResource,
+                    label = selection.label.resolve(context),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -131,7 +133,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = selection.iconResource,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    label = selection.label,
+                    label = selection.label.resolve(context),
                     imageLoader = ::loadPaymentOption
                 )
             }

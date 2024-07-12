@@ -66,6 +66,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState.UserErrorMessage
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -90,9 +91,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -1157,7 +1156,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods).isEmpty()
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).isEmpty()
     }
 
     @Test
@@ -1174,7 +1173,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1190,7 +1189,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1291,7 +1290,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods.map { it.code }
+            viewModel.supportedPaymentMethodsFlow.value
         ).containsExactly("card", "ideal")
     }
 
@@ -1315,7 +1314,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods.map { it.code }
+            viewModel.supportedPaymentMethodsFlow.value
         ).containsExactly("card", "ideal", "sepa_debit", "sofort")
     }
 
@@ -1361,7 +1360,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
-                labelResource = "",
+                label = resolvableString(""),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                 lightThemeIconUrl = null,
@@ -1536,7 +1535,7 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = viewModel.createFormArguments(
+        val observedArgs = FormHelper.create(viewModel).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
 
@@ -1688,7 +1687,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.New(
+                NewOrExternalPaymentSelection.New(
                     newSelection
                 )
             )
@@ -1703,7 +1702,7 @@ internal class PaymentSheetViewModelTest {
             val newSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = "Fawry",
+                label = resolvableString("Fawry"),
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
@@ -1712,7 +1711,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                BaseSheetViewModel.NewOrExternalPaymentSelection.External(
+                NewOrExternalPaymentSelection.External(
                     newSelection
                 )
             )
@@ -2485,7 +2484,7 @@ internal class PaymentSheetViewModelTest {
                 viewModel.updateSelection(
                     PaymentSelection.New.GenericPaymentMethod(
                         iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-                        labelResource = "Bancontact",
+                        label = resolvableString("Bancontact"),
                         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
                         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                         lightThemeIconUrl = null,
@@ -2606,18 +2605,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
-
-        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
-    }
-
-    @Test
     fun `on navigate to AddPaymentMethod screen, should report form shown event`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
@@ -2628,34 +2615,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToAddPaymentScreen()
 
         verify(eventReporter).onPaymentMethodFormShown("card")
-    }
-
-    @Test
-    fun `on payment form changed, should report form shown event`() = runTest {
-        val viewModel = createViewModel(
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-            customer = EMPTY_CUSTOMER_STATE,
-        )
-
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-
-        verify(eventReporter).onPaymentMethodFormShown("us_bank_account")
-    }
-
-    @Test
-    fun `on form changed to same value, should report form shown event only once`() = runTest {
-        val viewModel = createViewModel(
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-            customer = EMPTY_CUSTOMER_STATE,
-        )
-
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormShown("us_bank_account")
     }
 
     @Test
@@ -2671,47 +2630,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToAddPaymentScreen()
 
         verify(eventReporter, times(2)).onPaymentMethodFormShown("card")
-    }
-
-    @Test
-    fun `on field interaction, should report event`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportFieldInteraction("card")
-
-        verify(eventReporter).onPaymentMethodFormInteraction("card")
-    }
-
-    @Test
-    fun `on multiple field interactions with same payment form, should report event only once`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportFieldInteraction("card")
-        viewModel.reportFieldInteraction("card")
-        viewModel.reportFieldInteraction("card")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormInteraction("card")
-    }
-
-    @Test
-    fun `on card number completed event, should report event`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
-            isGooglePayReady = true,
-            stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.reportCardNumberCompleted()
-
-        verify(eventReporter).onCardNumberCompleted()
     }
 
     @Test
@@ -3082,7 +3000,7 @@ internal class PaymentSheetViewModelTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "Test",
+            label = resolvableString("Test"),
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(

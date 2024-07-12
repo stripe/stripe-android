@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -72,29 +73,34 @@ internal class DefaultAddPaymentMethodInteractor(
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : AddPaymentMethodInteractor {
 
-    constructor(sheetViewModel: BaseSheetViewModel) : this(
-        initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
-        linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
-        selection = sheetViewModel.selection,
-        linkSignupMode = sheetViewModel.linkSignupMode,
-        processing = sheetViewModel.processing,
-        supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-        createFormArguments = sheetViewModel::createFormArguments,
-        formElementsForCode = sheetViewModel::formElementsForCode,
-        clearErrorMessages = sheetViewModel::clearErrorMessages,
-        onLinkSignUpStateUpdated = sheetViewModel::onLinkSignUpStateUpdated,
-        reportFieldInteraction = sheetViewModel::reportFieldInteraction,
-        onFormFieldValuesChanged = sheetViewModel::onFormFieldValuesChanged,
-        reportPaymentMethodTypeSelected = sheetViewModel::reportPaymentMethodTypeSelected,
-        createUSBankAccountFormArguments = {
-            USBankAccountFormArguments.create(
-                viewModel = sheetViewModel,
-                hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                selectedPaymentMethodCode = it
+    companion object {
+        fun create(sheetViewModel: BaseSheetViewModel): AddPaymentMethodInteractor {
+            val formHelper = FormHelper.create(sheetViewModel)
+            val paymentMethodMetadata = requireNotNull(sheetViewModel.paymentMethodMetadata.value)
+            return DefaultAddPaymentMethodInteractor(
+                initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
+                linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
+                selection = sheetViewModel.selection,
+                linkSignupMode = sheetViewModel.linkSignupMode,
+                processing = sheetViewModel.processing,
+                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
+                createFormArguments = formHelper::createFormArguments,
+                formElementsForCode = formHelper::formElementsForCode,
+                clearErrorMessages = sheetViewModel::clearErrorMessages,
+                onLinkSignUpStateUpdated = sheetViewModel::onLinkSignUpStateUpdated,
+                reportFieldInteraction = sheetViewModel.analyticsListener::reportFieldInteraction,
+                onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
+                reportPaymentMethodTypeSelected = sheetViewModel.eventReporter::onSelectPaymentMethod,
+                createUSBankAccountFormArguments = {
+                    USBankAccountFormArguments.create(
+                        viewModel = sheetViewModel,
+                        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+                        selectedPaymentMethodCode = it
+                    )
+                },
             )
         }
-    )
-
+    }
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =

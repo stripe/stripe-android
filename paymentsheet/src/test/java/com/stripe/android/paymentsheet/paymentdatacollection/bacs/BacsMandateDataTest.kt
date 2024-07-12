@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -10,7 +11,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is Bacs and name & email are provided, 'fromPaymentSelection' should return data`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
+            label = resolvableString(""),
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
@@ -40,7 +41,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is Bacs but without name or email, 'fromPaymentSelection' should return null`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
+            label = resolvableString(""),
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
@@ -60,7 +61,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is not Bacs, 'fromPaymentSelection' should return null`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
+            label = resolvableString(""),
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
