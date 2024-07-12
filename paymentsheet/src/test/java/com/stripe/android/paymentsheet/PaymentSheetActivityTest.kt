@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
@@ -187,6 +190,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun `link button should not be enabled when editing`() {
         val viewModel = createViewModel(isLinkAvailable = true)
@@ -198,6 +202,10 @@ internal class PaymentSheetActivityTest {
                 .assertIsEnabled()
 
             viewModel.toggleEditing()
+            composeTestRule.waitUntilAtLeastOneExists(
+                hasTestTag(LinkButtonTestTag).and(isNotEnabled()),
+                timeoutMillis = 5_000
+            )
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
