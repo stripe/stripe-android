@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import java.io.Closeable
 
-internal class NavigationHandler {
+internal class NavigationHandler(
+    private val poppedScreenHandler: (PaymentSheetScreen) -> Unit,
+) {
     private val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
     )
@@ -33,7 +35,7 @@ internal class NavigationHandler {
         }
     }
 
-    fun pop(poppedScreenHandler: (PaymentSheetScreen) -> Unit) {
+    fun pop() {
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 
