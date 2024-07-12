@@ -76,13 +76,14 @@ internal class DefaultAddPaymentMethodInteractor(
     companion object {
         fun create(sheetViewModel: BaseSheetViewModel): AddPaymentMethodInteractor {
             val formHelper = FormHelper.create(sheetViewModel)
+            val paymentMethodMetadata = requireNotNull(sheetViewModel.paymentMethodMetadata.value)
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 selection = sheetViewModel.selection,
                 linkSignupMode = sheetViewModel.linkSignupMode,
                 processing = sheetViewModel.processing,
-                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
                 formElementsForCode = formHelper::formElementsForCode,
                 clearErrorMessages = sheetViewModel::clearErrorMessages,

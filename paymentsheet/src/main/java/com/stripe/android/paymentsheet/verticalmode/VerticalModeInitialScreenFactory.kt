@@ -6,10 +6,13 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 internal object VerticalModeInitialScreenFactory {
     fun create(viewModel: BaseSheetViewModel): PaymentSheetScreen {
         val savedPaymentMethods = viewModel.paymentMethods.value
-        if (viewModel.supportedPaymentMethods.size == 1 && savedPaymentMethods.isEmpty()) {
+        val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+
+        if (supportedPaymentMethodTypes.size == 1 && savedPaymentMethods.isEmpty()) {
             return PaymentSheetScreen.Form(
                 interactor = DefaultVerticalModeFormInteractor(
-                    selectedPaymentMethodCode = viewModel.supportedPaymentMethods.first().code,
+                    selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
                     viewModel = viewModel,
                 ),
                 showsWalletHeader = true,
