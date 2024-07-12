@@ -114,7 +114,9 @@ internal abstract class BaseSheetViewModel(
             state?.paymentMethods ?: emptyList()
         }
 
-    val navigationHandler: NavigationHandler = NavigationHandler()
+    val navigationHandler: NavigationHandler = NavigationHandler { poppedScreen ->
+        analyticsListener.reportPaymentSheetHidden(poppedScreen)
+    }
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
@@ -554,7 +556,7 @@ internal abstract class BaseSheetViewModel(
 
         if (result.isSuccess) {
             viewModelScope.launch(workContext) {
-                onUserBack()
+                navigationHandler.pop()
                 delay(PaymentMethodRemovalDelayMillis)
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
@@ -649,19 +651,13 @@ internal abstract class BaseSheetViewModel(
             return
         }
         if (navigationHandler.canGoBack) {
-            onUserBack()
+            navigationHandler.pop()
         } else {
             onUserCancel()
         }
     }
 
     abstract fun onUserCancel()
-
-    private fun onUserBack() {
-        navigationHandler.pop { poppedScreen ->
-            analyticsListener.reportPaymentSheetHidden(poppedScreen)
-        }
-    }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
 
