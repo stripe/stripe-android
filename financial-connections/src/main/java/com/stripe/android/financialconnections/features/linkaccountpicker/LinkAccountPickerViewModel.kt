@@ -106,6 +106,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         }.execute {
             copy(
                 payload = it,
+                // When accounts load, preselect the first selectable account
                 selectedAccountIds = listOfNotNull(it()?.accounts?.preselectedAccount()?.id)
             )
         }
@@ -280,11 +281,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     fun onAccountClick(partnerAccount: PartnerAccount) {
         logAccountClick(partnerAccount)
 
-        val state = stateFlow.value
-        val payload = requireNotNull(state.payload())
-        val accounts = payload.accounts
-        val networkedAccount: NetworkedAccount? = accounts.find { it.first.id == partnerAccount.id }?.second
-        val drawerOnSelection = networkedAccount?.drawerOnSelection
+        val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
+        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
 
         if (drawerOnSelection != null) {
             // TODO@carlosmuvi handle drawer display.
@@ -294,7 +292,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
         val updateRequired = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
-            partnerToCoreAuths = payload.partnerToCoreAuths,
+            partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
         )
 
         if (updateRequired != null) {
@@ -303,15 +301,14 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             return
         }
 
-        val selectedAccountIds = when {
-            payload.singleAccount -> listOf(partnerAccount.id)
-            partnerAccount.id in state.selectedAccountIds -> state.selectedAccountIds - partnerAccount.id
-            else -> state.selectedAccountIds + partnerAccount.id
-        }
-
         setState {
+            val payload = requireNotNull(payload())
             copy(
-                selectedAccountIds = selectedAccountIds,
+                selectedAccountIds = when {
+                    payload.singleAccount -> listOf(partnerAccount.id)
+                    partnerAccount.id in selectedAccountIds -> selectedAccountIds - partnerAccount.id
+                    else -> selectedAccountIds + partnerAccount.id
+                }
             )
         }
     }

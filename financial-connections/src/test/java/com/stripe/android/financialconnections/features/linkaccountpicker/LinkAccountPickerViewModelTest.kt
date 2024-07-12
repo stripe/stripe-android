@@ -204,7 +204,7 @@ class LinkAccountPickerViewModelTest {
         }
 
     @Test
-    fun `ViewModel state reflects preselected account correctly`() = runTest {
+    fun `init - first selectable account is pre-selected`() = runTest {
         // Given a list of networked accounts with mixed selection permissions
         val accountsData = listOf(
             partnerAccount().copy(id = "id1", _allowSelection = null),
