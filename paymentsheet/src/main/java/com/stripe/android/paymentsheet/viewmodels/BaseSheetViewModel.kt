@@ -86,8 +86,6 @@ internal abstract class BaseSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
-    internal val merchantName = config.merchantDisplayName
-
     protected var mostRecentError: Throwable? = null
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
@@ -417,7 +415,7 @@ internal abstract class BaseSheetViewModel(
 
         val mandateText = selection?.mandateText(
             context = getApplication(),
-            merchantName = merchantName,
+            merchantName = config.merchantDisplayName,
             isSaveForFutureUseSelected = isRequestingReuse,
             isSetupFlow = paymentMethodMetadata.value?.stripeIntent is SetupIntent,
         )
