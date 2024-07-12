@@ -63,7 +63,6 @@ internal class AddPaymentMethodTest {
         )
         val cardPaymentMethod = metadata.supportedPaymentMethodForCode("card")!!
         val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
-            context,
             cardPaymentMethod,
             metadata
         ) as PaymentSelection.New.Card
@@ -87,13 +86,12 @@ internal class AddPaymentMethodTest {
         )
         val externalPaymentMethod = metadata.supportedPaymentMethodForCode(paypalSpec.type)!!
         val externalPaymentSelection = formFieldValues.transformToPaymentSelection(
-            context,
             externalPaymentMethod,
             metadata
         ) as PaymentSelection.ExternalPaymentMethod
         assertThat(externalPaymentSelection.type)
             .isEqualTo(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type)
-        assertThat(externalPaymentSelection.label).isEqualTo(paypalSpec.label)
+        assertThat(externalPaymentSelection.label.resolve(context)).isEqualTo(paypalSpec.label)
         assertThat(externalPaymentSelection.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
         assertThat(externalPaymentSelection.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
         assertThat(externalPaymentSelection.iconResource).isEqualTo(0)
@@ -113,12 +111,12 @@ internal class AddPaymentMethodTest {
         )
         val klarnaPaymentMethod = metadata.supportedPaymentMethodForCode("klarna")!!
         val klarnaPaymentSelection = formFieldValues.transformToPaymentSelection(
-            context,
             klarnaPaymentMethod,
             metadata
         ) as PaymentSelection.New.GenericPaymentMethod
         assertThat(klarnaPaymentSelection.paymentMethodCreateParams.typeCode).isEqualTo(klarnaPaymentMethod.code)
-        assertThat(klarnaPaymentSelection.labelResource).isEqualTo(klarnaPaymentMethod.displayName.resolve(context))
+        assertThat(klarnaPaymentSelection.label.resolve(context))
+            .isEqualTo(klarnaPaymentMethod.displayName.resolve(context))
         assertThat(klarnaPaymentSelection.lightThemeIconUrl).isEqualTo(klarnaPaymentMethod.lightThemeIconUrl)
         assertThat(klarnaPaymentSelection.darkThemeIconUrl).isEqualTo(klarnaPaymentMethod.darkThemeIconUrl)
         assertThat(klarnaPaymentSelection.iconResource).isEqualTo(klarnaPaymentMethod.iconResource)

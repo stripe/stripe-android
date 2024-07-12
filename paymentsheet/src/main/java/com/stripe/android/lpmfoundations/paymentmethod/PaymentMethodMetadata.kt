@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -183,6 +184,34 @@ internal data class PaymentMethodMetadata(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
                 ),
+            )
+        }
+    }
+
+    internal companion object {
+        internal fun create(
+            elementsSession: ElementsSession,
+            configuration: PaymentSheet.Configuration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = configuration
+                    .allowsPaymentMethodsRequiringShippingAddress,
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    preferredNetworks = configuration.preferredNetworks,
+                ),
+                merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = configuration.shippingDetails,
+                hasCustomerConfiguration = configuration.customer != null,
+                sharedDataSpecs = sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
         }
     }

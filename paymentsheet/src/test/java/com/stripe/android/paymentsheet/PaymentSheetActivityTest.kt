@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
@@ -62,7 +65,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -188,6 +190,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun `link button should not be enabled when editing`() {
         val viewModel = createViewModel(isLinkAvailable = true)
@@ -199,6 +202,10 @@ internal class PaymentSheetActivityTest {
                 .assertIsEnabled()
 
             viewModel.toggleEditing()
+            composeTestRule.waitUntilAtLeastOneExists(
+                hasTestTag(LinkButtonTestTag).and(isNotEnabled()),
+                timeoutMillis = 5_000
+            )
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -772,7 +779,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -792,7 +799,7 @@ internal class PaymentSheetActivityTest {
                 .assertDoesNotExist()
 
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -806,7 +813,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
 
             composeTestRule
                 .onNodeWithText(errorMessage)

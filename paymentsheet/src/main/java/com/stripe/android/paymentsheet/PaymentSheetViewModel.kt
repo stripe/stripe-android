@@ -200,7 +200,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             GooglePayEnvironment.Test
                     },
                     merchantCountryCode = config.countryCode,
-                    merchantName = merchantName,
+                    merchantName = this.config.merchantDisplayName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
                     billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 )
@@ -413,7 +413,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun resetViewState(userErrorMessage: String? = null) {
         viewState.value =
-            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+            PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
     }
 
@@ -846,7 +846,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 getCvcRecollectionState()
             )
         } else {
-            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor(this))
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
         }
         return listOf(target)
     }

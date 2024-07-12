@@ -37,7 +37,8 @@ class PaymentOptionFactoryTest {
 
     private val factory = PaymentOptionFactory(
         ApplicationProvider.getApplicationContext<Context>().resources,
-        StripeImageLoader(ApplicationProvider.getApplicationContext())
+        StripeImageLoader(ApplicationProvider.getApplicationContext()),
+        ApplicationProvider.getApplicationContext(),
     )
 
     @Test
@@ -228,7 +229,8 @@ class PaymentOptionFactoryTest {
                 whenever(it.load(eq(workingUrl))).thenReturn(Result.success(simpleBitmap))
             }.also {
                 whenever(it.load(eq(brokenUrl))).thenReturn(Result.failure(Throwable()))
-            }
+            },
+            ApplicationProvider.getApplicationContext(),
         )
         return PaymentOption(
             drawableResourceId = iconRes ?: 0,

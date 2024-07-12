@@ -1959,6 +1959,7 @@ internal class StripeApiRepositoryTest {
                     assertThat(this["consumer_session_client_secret"]).isEqualTo(clientSecret)
                 }
                 assertThat(this["id"]).isEqualTo(id)
+                assertThat(this["payment_user_agent"].toString()).startsWith("stripe-android/")
             }
         }
 

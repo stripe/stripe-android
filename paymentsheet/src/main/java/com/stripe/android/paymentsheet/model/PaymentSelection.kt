@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -69,7 +70,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class ExternalPaymentMethod(
         val type: String,
         val billingDetails: PaymentMethod.BillingDetails?,
-        val label: String,
+        val label: ResolvableString,
         // In practice, we don't have an iconResource for external payment methods.
         @DrawableRes val iconResource: Int,
         // In practice, we always have a lightThemeIconUrl for external payment methods.
@@ -247,7 +248,7 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class GenericPaymentMethod(
-            val labelResource: String,
+            val label: ResolvableString,
             @DrawableRes val iconResource: Int,
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,

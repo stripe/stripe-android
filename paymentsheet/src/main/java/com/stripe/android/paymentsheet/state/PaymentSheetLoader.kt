@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -282,46 +281,30 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
     ): PaymentMethodMetadata {
-        val billingDetailsCollectionConfig =
-            paymentSheetConfiguration.billingDetailsCollectionConfiguration
-
-        val cbcEligibility = CardBrandChoiceEligibility.create(
-            isEligible = elementsSession.isEligibleForCardBrandChoice,
-            preferredNetworks = paymentSheetConfiguration.preferredNetworks,
-        )
-
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
-        val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
-            elementsSession.externalPaymentMethodData
-        )
-        logIfMissingExternalPaymentMethods(
-            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
-            actualExternalPaymentMethods = externalPaymentMethodSpecs
-        )
-        val metadata = PaymentMethodMetadata(
-            stripeIntent = elementsSession.stripeIntent,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-            allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
-                .allowsPaymentMethodsRequiringShippingAddress,
-            paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
-            cbcEligibility = cbcEligibility,
-            merchantName = paymentSheetConfiguration.merchantDisplayName,
-            defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
-            shippingDetails = paymentSheetConfiguration.shippingDetails,
-            hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
-            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
-            externalPaymentMethodSpecs = externalPaymentMethodSpecs
         )
 
         if (sharedDataSpecsResult.failedToParseServerResponse) {
             eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
         }
 
-        return metadata
+        val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            elementsSession.externalPaymentMethodData
+        )
+
+        logIfMissingExternalPaymentMethods(
+            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            actualExternalPaymentMethods = externalPaymentMethodSpecs
+        )
+
+        return PaymentMethodMetadata.create(
+            elementsSession = elementsSession,
+            configuration = paymentSheetConfiguration,
+            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs
+        )
     }
 
     private suspend fun createCustomerState(
@@ -332,11 +315,37 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): CustomerState? {
         val customerConfig = config.customer
 
-        val customerState = when (customerConfig?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession ->
-                elementsSession.toCustomerState()
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey ->
-                customerConfig.toCustomerState(metadata)
+        val customerState = when (val accessType = customerConfig?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                elementsSession.customer?.let { customer ->
+                    CustomerState.createForCustomerSession(customer)
+                } ?: run {
+                    val exception = IllegalStateException(
+                        "Excepted 'customer' attribute as part of 'elements_session' response!"
+                    )
+
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
+                        StripeException.create(exception)
+                    )
+
+                    if (!elementsSession.stripeIntent.isLiveMode) {
+                        throw exception
+                    }
+
+                    null
+                }
+            }
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = customerConfig.id,
+                    accessType = accessType,
+                    paymentMethods = retrieveCustomerPaymentMethods(
+                        metadata = metadata,
+                        customerConfig = customerConfig,
+                    )
+                )
+            }
             else -> null
         }
 
@@ -551,71 +560,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun ElementsSession.toCustomerState(): CustomerState? {
-        return customer?.let { customer ->
-            val canRemovePaymentMethods = when (
-                val paymentSheetComponent = customer.session.components.paymentSheet
-            ) {
-                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
-                    paymentSheetComponent.isPaymentMethodRemoveEnabled
-                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
-            }
-
-            CustomerState(
-                id = customer.session.customerId,
-                ephemeralKeySecret = customer.session.apiKey,
-                paymentMethods = customer.paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = canRemovePaymentMethods,
-                    // Should always remove duplicates when using `customer_session`
-                    canRemoveDuplicates = true,
-                )
-            )
-        } ?: run {
-            val exception = IllegalStateException(
-                "Excepted 'customer' attribute as part of 'elements_session' response!"
-            )
-
-            errorReporter.report(
-                ErrorReporter
-                    .UnexpectedErrorEvent
-                    .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                StripeException.create(exception)
-            )
-
-            if (!stripeIntent.isLiveMode) {
-                throw exception
-            }
-
-            null
-        }
-    }
-
-    private suspend fun PaymentSheet.CustomerConfiguration.toCustomerState(
-        metadata: PaymentMethodMetadata,
-    ): CustomerState {
-        return CustomerState(
-            id = id,
-            ephemeralKeySecret = ephemeralKeySecret,
-            paymentMethods = retrieveCustomerPaymentMethods(
-                metadata = metadata,
-                customerConfig = this,
-            ),
-            permissions = CustomerState.Permissions(
-                /*
-                 * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should always be
-                 * set to true.
-                 */
-                canRemovePaymentMethods = true,
-                /*
-                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
-                 * un-scoped ephemeral keys.
-                 */
-                canRemoveDuplicates = false,
-            )
-        )
     }
 
     /*

@@ -4,14 +4,18 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
@@ -706,5 +710,82 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
+    }
+
+    @Test
+    fun `should create metadata properly with elements session response, configuration, and data specs`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+
+        val shippingDetails = AddressDetails(
+            address = PaymentSheet.Address(line1 = "123 Pear Street")
+        )
+
+        val metadata = PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isEligibleForCardBrandChoice = true,
+            ),
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant Inc.",
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_1"
+                ),
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+        )
+
+        assertThat(metadata).isEqualTo(
+            PaymentMethodMetadata(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                ),
+                merchantName = "Merchant Inc.",
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                sharedDataSpecs = listOf(SharedDataSpec("card")),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+                hasCustomerConfiguration = true,
+            )
+        )
+    }
+
+    private fun createElementsSession(
+        intent: StripeIntent,
+        isEligibleForCardBrandChoice: Boolean,
+    ): ElementsSession {
+        return ElementsSession(
+            stripeIntent = intent,
+            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            merchantCountry = null,
+            isGooglePayEnabled = false,
+            customer = null,
+            linkSettings = null,
+            externalPaymentMethodData = null,
+            paymentMethodSpecs = null,
+        )
     }
 }
