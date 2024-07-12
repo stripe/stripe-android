@@ -10,7 +10,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -95,12 +94,6 @@ internal abstract class BaseSheetViewModel(
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
-
-    internal var supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList()
-        set(value) {
-            field = value
-            _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
-        }
 
     private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
     val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
@@ -250,7 +243,7 @@ internal abstract class BaseSheetViewModel(
     )
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
-        get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
+        get() = newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethodsFlow.value.first()
 
     init {
         viewModelScope.launch {
@@ -325,7 +318,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
-        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
+        _supportedPaymentMethodsFlow.value = paymentMethodMetadata?.supportedPaymentMethodTypes() ?: emptyList()
     }
 
     abstract fun clearErrorMessages()

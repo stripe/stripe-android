@@ -1156,7 +1156,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods).isEmpty()
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).isEmpty()
     }
 
     @Test
@@ -1173,7 +1173,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1189,7 +1189,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1290,7 +1290,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods.map { it.code }
+            viewModel.supportedPaymentMethodsFlow.value
         ).containsExactly("card", "ideal")
     }
 
@@ -1314,7 +1314,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods.map { it.code }
+            viewModel.supportedPaymentMethodsFlow.value
         ).containsExactly("card", "ideal", "sepa_debit", "sofort")
     }
 
