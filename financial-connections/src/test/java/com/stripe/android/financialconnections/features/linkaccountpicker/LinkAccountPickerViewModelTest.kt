@@ -235,7 +235,7 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
-    fun `ViewModel reflects correct data access notice for multiple selected accounts`() = runTest {
+    fun `onAccountClick - uses data access notice for multiple selected account types`() = runTest {
         val accountsData = listOf(
             partnerAccount().copy(id = "type1_1", _allowSelection = true),
             partnerAccount().copy(id = "type2_2", _allowSelection = true)
@@ -244,7 +244,7 @@ class LinkAccountPickerViewModelTest {
             NetworkedAccount(id = "type1_1", allowSelection = true),
             NetworkedAccount(id = "type2_1", allowSelection = true)
         )
-        val genericDataAccessNotice = DataAccessNotice(
+        val expectedDataAccessNotice = DataAccessNotice(
             title = "Generic Notice",
             body = DataAccessNoticeBody(bullets = listOf()),
             cta = "Generic CTA"
@@ -256,17 +256,16 @@ class LinkAccountPickerViewModelTest {
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
                 data = accountsData,
-                display = display(displayAccounts, genericDataAccessNotice)
+                display = display(displayAccounts, expectedDataAccessNotice)
             )
         )
 
-        // When initializing the ViewModel and selecting an additional account (there's a preselection)
+        // When selecting an additional account of a different type (there's a preselection)
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onAccountClick(partnerAccount().copy(id = "type2_1", _allowSelection = true))
 
-        // Then the ViewModel's state should reflect the generic data access notice for multiple selected accounts
-        val expectedDataAccessNotice = genericDataAccessNotice
-        val actualDataAccessNotice = viewModel.stateFlow.value.payload()?.activeDataAccessNotice
+        // generic data access notice for multiple selected accounts
+        val actualDataAccessNotice = viewModel.stateFlow.value.activeDataAccessNotice
 
         assertThat(actualDataAccessNotice).isEqualTo(expectedDataAccessNotice)
     }

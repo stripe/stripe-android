@@ -44,7 +44,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -93,7 +92,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                activeDataAccessNotice = accounts.preselectedAccount()?.dataAccessNotice,
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 aboveCta = display.aboveCta,
@@ -167,7 +165,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     }
 
     private fun presentDataAccessBottomSheet() {
-        val dataAccessNotice = stateFlow.value.payload()?.activeDataAccessNotice ?: return
+        val dataAccessNotice = stateFlow.value.activeDataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
         presentNoticeSheet(
             content = DataAccess(dataAccessNotice),
@@ -311,20 +309,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             else -> state.selectedAccountIds + partnerAccount.id
         }
 
-        // Bank accounts can have multiple types (ex. linked account "bctmacct", manual account "csmrbankacct").
-        val selectedAccountTypes = selectedAccountIds.mapNotNull { it.split("_").firstOrNull() }.toSet()
-        val dataAccessNotice = if (selectedAccountTypes.size > 1) {
-            // if user selected multiple different account types, present a special data access notice
-            payload.multipleAccountTypesSelectedDataAccessNotice
-        } else {
-            // we get here if user selected: one account or multiple accounts of the same account type
-            (networkedAccount ?: accounts.firstOrNull()?.second)?.dataAccessNotice
-        }
-
         setState {
             copy(
                 selectedAccountIds = selectedAccountIds,
-                payload = Success(payload.copy(activeDataAccessNotice = dataAccessNotice))
             )
         }
     }
@@ -370,7 +357,6 @@ internal data class LinkAccountPickerState(
     data class Payload(
         val title: String,
         val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
-        val activeDataAccessNotice: DataAccessNotice?,
         val addNewAccount: AddNewAccount,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
@@ -385,6 +371,26 @@ internal data class LinkAccountPickerState(
             return accounts.filter { it.first.id in selected }.map { it.first }
         }
     }
+
+    val activeDataAccessNotice: DataAccessNotice?
+        get() {
+            val payload = payload()
+            // Bank accounts can have multiple types
+            // (ex. linked account "bctmacct", manual account "csmrbankacct").
+            val selectedAccountTypes = selectedAccountIds
+                .mapNotNull { it.split("_").firstOrNull() }.toSet()
+            return if (selectedAccountTypes.size > 1) {
+                // if user selected multiple different account types, present a special data access notice
+                payload?.multipleAccountTypesSelectedDataAccessNotice
+            } else {
+                // we get here if user selected:
+                // 1) one account
+                // 2) or, multiple accounts of the same account type
+                payload?.accounts
+                    ?.firstOrNull { it.first.id in selectedAccountIds }
+                    ?.second?.dataAccessNotice
+            }
+        }
 
     val cta: TextResource
         get() {

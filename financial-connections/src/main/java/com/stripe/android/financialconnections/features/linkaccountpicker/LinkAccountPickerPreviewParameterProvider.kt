@@ -2,10 +2,6 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.financialconnections.model.AddNewAccount
-import com.stripe.android.financialconnections.model.Bullet
-import com.stripe.android.financialconnections.model.ConnectedAccessNotice
-import com.stripe.android.financialconnections.model.DataAccessNotice
-import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -31,7 +27,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -53,7 +48,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList().subList(0, 1),
-                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -72,7 +66,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                activeDataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -188,36 +181,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ) to NetworkedAccount(
             allowSelection = true,
             id = "id5",
-        ),
-    )
-
-    private fun dataAccessNotice() = DataAccessNotice(
-        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-        title = "Goldilocks uses Stripe to link your accounts",
-        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
-        body = DataAccessNoticeBody(
-            bullets = bullets()
-        ),
-        disclaimer = "Learn more about data access",
-        connectedAccountNotice = ConnectedAccessNotice(
-            subtitle = "Connected account placeholder",
-            body = DataAccessNoticeBody(
-                bullets = bullets()
-            )
-        ),
-        cta = "OK"
-    )
-
-    private fun bullets() = listOf(
-        Bullet(
-            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-            title = "Account details",
-            content = "Account number, routing number, account type, account nickname."
-        ),
-        Bullet(
-            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-            title = "Account details",
-            content = "Account number, routing number, account type, account nickname."
         ),
     )
 
