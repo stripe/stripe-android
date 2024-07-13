@@ -88,6 +88,7 @@ private fun defaultAutofillEventReporter(): (String) -> Unit {
 @Composable
 fun TextFieldSection(
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     textFieldController: TextFieldController,
     imeAction: ImeAction,
     enabled: Boolean,
@@ -109,6 +110,7 @@ fun TextFieldSection(
     Section(title = sectionTitle, error = sectionErrorString, isSelected = isSelected) {
         TextField(
             textFieldController = textFieldController,
+            focusRequester = focusRequester,
             enabled = enabled,
             imeAction = imeAction,
             modifier = modifier,

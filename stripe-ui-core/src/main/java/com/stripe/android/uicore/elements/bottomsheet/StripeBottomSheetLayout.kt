@@ -2,7 +2,7 @@ package com.stripe.android.uicore.elements.bottomsheet
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -47,8 +47,8 @@ fun StripeBottomSheetLayout(
 
     ModalBottomSheetLayout(
         modifier = modifier
-            .statusBarsPadding()
-            .imePadding(),
+            .navigationBarsPadding()
+            .statusBarsPadding(),
         scrimColor = layoutInfo.scrimColor,
         sheetBackgroundColor = layoutInfo.sheetBackgroundColor,
         sheetElevation = 0.dp,
