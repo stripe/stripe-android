@@ -47,6 +47,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val presentNoticeSheet: PresentNoticeSheet,
+    private val determineNextPane: DetermineNextPaneFromConsent,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -96,7 +97,10 @@ internal class ConsentViewModel @AssistedInject constructor(
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+
+            val nextPane = determineNextPane(updatedManifest)
+            navigationManager.tryNavigateTo(nextPane.destination(referrer = Pane.CONSENT))
+
             updatedManifest
         }.execute { copy(acceptConsent = it) }
     }
