@@ -472,6 +472,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val completed: Boolean,
     val initialPane: Pane,
     val theme: Theme,
+    val isLinkWithStripe: Boolean,
 ) {
 
     /**
@@ -490,7 +491,8 @@ internal data class FinancialConnectionsSheetNativeState(
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
-        viewEffect = null
+        viewEffect = null,
+        isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
     )
 
     companion object {
