@@ -33,7 +33,7 @@ internal class SavedPaymentMethodMutator(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
-    private val viewModelScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
     private val navigationHandler: NavigationHandler,
     private val customerRepository: CustomerRepository,
@@ -94,7 +94,7 @@ internal class SavedPaymentMethodMutator(
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
         val paymentMethodId = paymentMethod.id ?: return
 
-        viewModelScope.launch(workContext) {
+        coroutineScope.launch(workContext) {
             removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
         }
@@ -197,7 +197,7 @@ internal class SavedPaymentMethodMutator(
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
-            viewModelScope.launch(workContext) {
+            coroutineScope.launch(workContext) {
                 navigationHandler.pop()
                 delay(PaymentMethodRemovalDelayMillis)
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
@@ -259,12 +259,14 @@ internal class SavedPaymentMethodMutator(
     }
 
     companion object {
+        const val SAVED_CUSTOMER = "customer_info"
+
         fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
                 editInteractorFactory = viewModel.editInteractorFactory,
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
-                viewModelScope = viewModel.viewModelScope,
+                coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
                 navigationHandler = viewModel.navigationHandler,
                 customerRepository = viewModel.customerRepository,
@@ -286,5 +288,3 @@ internal class SavedPaymentMethodMutator(
         }
     }
 }
-
-private const val SAVED_CUSTOMER = "customer_info"
