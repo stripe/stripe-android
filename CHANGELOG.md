@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 20.48.1 - 2024-07-15
 * [FIXED][8746](https://github.com/stripe/stripe-android/pull/8746) Fixed an issue where successful TWINT payments were sometimes incorrectly considered 'canceled'.
 * [FIXED][8670](https://github.com/stripe/stripe-android/pull/8670) Fixed `PaymentSheet` PrimaryButton text not translating for per app localization.
 
