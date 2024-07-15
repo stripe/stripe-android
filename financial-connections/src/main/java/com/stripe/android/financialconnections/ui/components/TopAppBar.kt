@@ -235,7 +235,7 @@ private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
 
 @Preview(group = "Components", name = "TopAppBar")
 @Composable
-internal fun TopAppBarNoStripeLogoPreview() {
+internal fun TopAppBarWithStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = false),
@@ -244,9 +244,23 @@ internal fun TopAppBarNoStripeLogoPreview() {
     }
 }
 
+@Preview(group = "Components", name = "TopAppBar - Instant Debits")
+@Composable
+internal fun TopAppBarWithLinkLogoPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(
+                hideStripeLogo = false,
+                theme = Theme.LinkLight,
+            ),
+            onCloseClick = {},
+        )
+    }
+}
+
 @Preview(group = "Components", name = "TopAppBar - no Stripe logo")
 @Composable
-internal fun FinancialConnectionsTopAppBarPreview() {
+internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = true),
