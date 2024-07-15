@@ -373,7 +373,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customer = state.customer
+        savedPaymentMethodMutator.customer = state.customer
 
         updateSelection(state.paymentSelection)
 
@@ -837,7 +837,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
-        val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
+        val hasPaymentMethods = savedPaymentMethodMutator.paymentMethods.value.isNotEmpty()
         val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods(
                 DefaultSelectSavedPaymentMethodsInteractor(

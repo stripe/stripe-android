@@ -54,14 +54,14 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : SelectSavedPaymentMethodsInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
-        paymentOptionsItems = viewModel.paymentOptionsItems,
+        paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
         editing = viewModel.editing,
         isProcessing = viewModel.processing,
         currentSelection = viewModel.selection,
         mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
         onAddCardPressed = viewModel::transitionToAddPaymentScreen,
-        onEditPaymentMethod = viewModel::modifyPaymentMethod,
-        onDeletePaymentMethod = viewModel::removePaymentMethod,
+        onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
+        onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
         onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
     )
 
