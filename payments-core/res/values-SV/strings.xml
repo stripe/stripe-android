@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Ange delstat</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Sprid ut betalningarna med &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Sprid ut betalningarna med Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Namn på kontot</string>
   <!-- Placeholder for AU BECS BSB number -->

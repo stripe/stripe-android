@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Ievadiet novadu/štatu</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Maksāt pakāpeniski ar &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Maksāt pakāpeniski ar Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Konta īpašnieks</string>
   <!-- Placeholder for AU BECS BSB number -->
