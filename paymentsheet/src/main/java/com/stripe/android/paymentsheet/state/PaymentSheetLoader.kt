@@ -165,50 +165,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return@withContextCatching state
     }
 
-    private suspend fun isGooglePayReady(
-        paymentSheetConfiguration: PaymentSheet.Configuration,
-        elementsSession: ElementsSession,
-    ): Boolean {
-        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
-    }
-
-    private suspend fun PaymentSheet.Configuration.isGooglePayReady(): Boolean {
-        return googlePay?.environment?.let { environment ->
-            googlePayRepositoryFactory(
-                when (environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                        GooglePayEnvironment.Production
-                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                        GooglePayEnvironment.Test
-                }
-            )
-        }?.isReady()?.first() ?: false
-    }
-
-    private suspend fun isGooglePaySupported(): Boolean {
-        return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
-    }
-
-    private suspend fun retrieveCustomerPaymentMethods(
-        metadata: PaymentMethodMetadata,
-        customerConfig: PaymentSheet.CustomerConfiguration,
-    ): List<PaymentMethod> {
-        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
-
-        val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret
-            ),
-            types = paymentMethodTypes,
-            silentlyFail = metadata.stripeIntent.isLiveMode,
-        ).getOrThrow()
-
-        return paymentMethods.filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
-        }
-    }
-
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
@@ -220,60 +176,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
             defaultPaymentMethodId = defaultPaymentMethodId
-        )
-    }
-
-    private suspend fun createLinkState(
-        elementsSession: ElementsSession,
-        config: PaymentSheet.Configuration,
-        metadata: PaymentMethodMetadata,
-        customer: Deferred<CustomerState?>,
-    ): LinkState? {
-        return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
-            loadLinkState(
-                config = config,
-                customer = customer.await(),
-                metadata = metadata,
-                merchantCountry = elementsSession.merchantCountry,
-                passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
-                linkSignUpDisabled = elementsSession.disableLinkSignup,
-                flags = elementsSession.linkFlags,
-            )
-        } else {
-            null
-        }
-    }
-
-    private suspend fun loadLinkState(
-        config: PaymentSheet.Configuration,
-        customer: CustomerState?,
-        metadata: PaymentMethodMetadata,
-        merchantCountry: String?,
-        passthroughModeEnabled: Boolean,
-        linkSignUpDisabled: Boolean,
-        flags: Map<String, Boolean>,
-    ): LinkState {
-        val linkConfig = createLinkConfiguration(
-            config = config,
-            customer = customer,
-            metadata = metadata,
-            merchantCountry = merchantCountry,
-            passthroughModeEnabled = passthroughModeEnabled,
-            flags = flags,
-            linkSignUpDisabled = linkSignUpDisabled,
-        )
-
-        val loginState = when (accountStatusProvider(linkConfig)) {
-            AccountStatus.Verified -> LinkState.LoginState.LoggedIn
-            AccountStatus.NeedsVerification,
-            AccountStatus.VerificationStarted -> LinkState.LoginState.NeedsVerification
-            AccountStatus.SignedOut,
-            AccountStatus.Error -> LinkState.LoginState.LoggedOut
-        }
-
-        return LinkState(
-            configuration = linkConfig,
-            loginState = loginState,
         )
     }
 
@@ -357,6 +259,80 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
     }
 
+    private suspend fun retrieveCustomerPaymentMethods(
+        metadata: PaymentMethodMetadata,
+        customerConfig: PaymentSheet.CustomerConfiguration,
+    ): List<PaymentMethod> {
+        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
+
+        val paymentMethods = customerRepository.getPaymentMethods(
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+            ),
+            types = paymentMethodTypes,
+            silentlyFail = metadata.stripeIntent.isLiveMode,
+        ).getOrThrow()
+
+        return paymentMethods.filter { paymentMethod ->
+            paymentMethod.hasExpectedDetails()
+        }
+    }
+
+    private suspend fun createLinkState(
+        elementsSession: ElementsSession,
+        config: PaymentSheet.Configuration,
+        metadata: PaymentMethodMetadata,
+        customer: Deferred<CustomerState?>,
+    ): LinkState? {
+        return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
+            loadLinkState(
+                config = config,
+                customer = customer.await(),
+                metadata = metadata,
+                merchantCountry = elementsSession.merchantCountry,
+                passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
+                linkSignUpDisabled = elementsSession.disableLinkSignup,
+                flags = elementsSession.linkFlags,
+            )
+        } else {
+            null
+        }
+    }
+
+    private suspend fun loadLinkState(
+        config: PaymentSheet.Configuration,
+        customer: CustomerState?,
+        metadata: PaymentMethodMetadata,
+        merchantCountry: String?,
+        passthroughModeEnabled: Boolean,
+        linkSignUpDisabled: Boolean,
+        flags: Map<String, Boolean>,
+    ): LinkState {
+        val linkConfig = createLinkConfiguration(
+            config = config,
+            customer = customer,
+            metadata = metadata,
+            merchantCountry = merchantCountry,
+            passthroughModeEnabled = passthroughModeEnabled,
+            flags = flags,
+            linkSignUpDisabled = linkSignUpDisabled,
+        )
+
+        val loginState = when (accountStatusProvider(linkConfig)) {
+            AccountStatus.Verified -> LinkState.LoginState.LoggedIn
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted -> LinkState.LoginState.NeedsVerification
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> LinkState.LoginState.LoggedOut
+        }
+
+        return LinkState(
+            configuration = linkConfig,
+            loginState = loginState,
+        )
+    }
+
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
         customer: CustomerState?,
@@ -422,6 +398,30 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
         )
+    }
+
+    private suspend fun isGooglePayReady(
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        elementsSession: ElementsSession,
+    ): Boolean {
+        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+    }
+
+    private suspend fun PaymentSheet.Configuration.isGooglePayReady(): Boolean {
+        return googlePay?.environment?.let { environment ->
+            googlePayRepositoryFactory(
+                when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayEnvironment.Production
+                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                        GooglePayEnvironment.Test
+                }
+            )
+        }?.isReady()?.first() ?: false
+    }
+
+    private suspend fun isGooglePaySupported(): Boolean {
+        return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
     }
 
     private suspend fun retrieveInitialPaymentSelection(
