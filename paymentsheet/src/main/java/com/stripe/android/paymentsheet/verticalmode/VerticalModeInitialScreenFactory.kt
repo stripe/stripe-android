@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal object VerticalModeInitialScreenFactory {
     fun create(viewModel: BaseSheetViewModel): PaymentSheetScreen {
-        val savedPaymentMethods = viewModel.paymentMethods.value
+        val savedPaymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods.value
         val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
 

@@ -196,7 +196,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository
         )
 
-        viewModel.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        viewModel.savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         verify(customerRepository).detachPaymentMethod(
             any(),
@@ -215,7 +215,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
             val currentScreen = awaitItem()
 
@@ -247,7 +247,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
             val currentScreen = awaitItem()
 
@@ -300,7 +300,7 @@ internal class PaymentSheetViewModelTest {
             customerRepository = customerRepository
         )
 
-        viewModel.removePaymentMethod(paymentMethods.first())
+        viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethods.first())
 
         val customerInfoCaptor = argumentCaptor<CustomerRepository.CustomerInfo>()
 
@@ -328,7 +328,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
             val currentScreen = awaitItem()
 
@@ -386,7 +386,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(paymentMethods.first())
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(paymentMethods.first())
 
             val currentScreen = awaitItem()
 
@@ -452,7 +452,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(firstPaymentMethod)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(firstPaymentMethod)
 
             val currentScreen = awaitItem()
 
@@ -496,7 +496,7 @@ internal class PaymentSheetViewModelTest {
             ).toParamMap()
         )
 
-        assertThat(viewModel.paymentMethods.value).isEqualTo(
+        assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value).isEqualTo(
             listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
         )
     }
@@ -522,7 +522,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(firstPaymentMethod)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(firstPaymentMethod)
 
             val currentScreen = awaitItem()
 
@@ -1456,7 +1456,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        viewModel.paymentMethods.test {
+        viewModel.savedPaymentMethodMutator.paymentMethods.test {
             assertThat(awaitItem()).isNotEmpty()
         }
     }
@@ -1465,7 +1465,7 @@ internal class PaymentSheetViewModelTest {
     fun `paymentMethods is empty if customer has no payment methods`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
-        viewModel.paymentMethods.test {
+        viewModel.savedPaymentMethodMutator.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
         }
     }
@@ -1618,7 +1618,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards),
         )
 
-        viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
         verify(eventReporter).onShowEditablePaymentOption()
     }
@@ -1632,7 +1632,7 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards),
         )
 
-        viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
         viewModel.handleBackPressed()
 
         verify(eventReporter).onHideEditablePaymentOption()
@@ -1651,7 +1651,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.toggleEditing()
             assertThat(awaitItem()).isTrue()
 
-            viewModel.removePaymentMethod(customerPaymentMethods.single())
+            viewModel.savedPaymentMethodMutator.removePaymentMethod(customerPaymentMethods.single())
             assertThat(awaitItem()).isFalse()
         }
     }
@@ -1742,7 +1742,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
-            viewModel.removePaymentMethod(paymentMethods.single())
+            viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethods.single())
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
@@ -2644,7 +2644,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        viewModel.removePaymentMethod(PAYMENT_METHODS.first())
+        viewModel.savedPaymentMethodMutator.removePaymentMethod(PAYMENT_METHODS.first())
 
         verify(customerRepository, never()).detachPaymentMethod(any(), any())
     }
@@ -2661,7 +2661,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
             val currentScreen = awaitItem()
 

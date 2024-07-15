@@ -552,7 +552,7 @@ internal class PaymentSheetActivityTest {
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
-            viewModel.modifyPaymentMethod(card)
+            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(card)
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             pressBack()

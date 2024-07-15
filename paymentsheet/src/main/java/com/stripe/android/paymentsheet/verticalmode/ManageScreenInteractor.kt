@@ -55,15 +55,15 @@ internal class DefaultManageScreenInteractor(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     constructor(viewModel: BaseSheetViewModel) : this(
-        paymentMethods = viewModel.paymentMethods,
+        paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         selection = viewModel.selection,
         editing = viewModel.editing,
         allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
         onSelectPaymentMethod = { viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod)) },
-        onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod) },
-        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+        onDeletePaymentMethod = { viewModel.savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
+        onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
         navigateBack = viewModel::handleBackPressed
     )
 

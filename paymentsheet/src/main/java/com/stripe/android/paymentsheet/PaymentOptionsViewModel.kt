@@ -169,7 +169,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         if (paymentMethodMetadata.value == null) {
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
-        customer = args.state.customer
+        savedPaymentMethodMutator.customer = args.state.customer
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
@@ -223,7 +223,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Failed(
                 error = throwable,
-                paymentMethods = paymentMethods.value
+                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
             )
         )
     }
@@ -234,7 +234,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
                 paymentSelection = determinePaymentSelectionUponCancel(),
-                paymentMethods = paymentMethods.value,
+                paymentMethods = savedPaymentMethodMutator.paymentMethods.value,
             )
         )
     }
@@ -250,7 +250,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
-        val paymentMethods = paymentMethods.value.orEmpty()
+        val paymentMethods = savedPaymentMethodMutator.paymentMethods.value
         val isStillAround = paymentMethods.any { it.id == paymentMethod.id }
         return this.takeIf { isStillAround }
     }
@@ -311,7 +311,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = paymentMethods.value
+                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
             )
         )
     }
@@ -320,7 +320,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = paymentMethods.value
+                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
             )
         )
     }

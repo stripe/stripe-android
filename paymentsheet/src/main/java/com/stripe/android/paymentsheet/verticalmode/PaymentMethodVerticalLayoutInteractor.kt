@@ -112,11 +112,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         )
                     )
                 },
-                paymentMethods = viewModel.paymentMethods,
+                paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel::providePaymentMethodName,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
-                onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+                onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
