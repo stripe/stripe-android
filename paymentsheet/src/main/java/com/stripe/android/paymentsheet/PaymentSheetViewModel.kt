@@ -126,6 +126,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     isCompleteFlow = true,
 ) {
 
+    private val _contentVisible = MutableStateFlow(true)
+    internal val contentVisible: StateFlow<Boolean> = _contentVisible
+
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
         isProcessingPayment = isProcessingPaymentIntent,
@@ -887,6 +890,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         } else {
             viewState
         }
+    }
+
+    private fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
     }
 
     internal class Factory(

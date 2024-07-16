@@ -105,9 +105,6 @@ internal abstract class BaseSheetViewModel(
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
 
-    private val _contentVisible = MutableStateFlow(true)
-    internal val contentVisible: StateFlow<Boolean> = _contentVisible
-
     private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
     val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
@@ -263,10 +260,6 @@ internal abstract class BaseSheetViewModel(
 
     fun toggleEditing() {
         _editing.value = !editing.value
-    }
-
-    fun setContentVisible(visible: Boolean) {
-        _contentVisible.value = visible
     }
 
     private fun updateCvcFlows(selection: PaymentSelection?) {

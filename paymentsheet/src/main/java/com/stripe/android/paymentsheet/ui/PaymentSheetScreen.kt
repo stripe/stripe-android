@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
@@ -56,6 +57,7 @@ import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -72,11 +74,31 @@ import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
-    viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
-    modifier: Modifier = Modifier,
+    viewModel: PaymentSheetViewModel,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
+    PaymentSheetScreen(viewModel) {
+        AnimatedVisibility(visible = contentVisible) {
+            PaymentSheetScreenContent(viewModel, type = Complete)
+        }
+    }
+}
+
+@Composable
+internal fun PaymentSheetScreen(
+    viewModel: PaymentOptionsViewModel,
+) {
+    PaymentSheetScreen(viewModel) {
+        PaymentSheetScreenContent(viewModel, type = Custom)
+    }
+}
+
+@Composable
+private fun PaymentSheetScreen(
+    viewModel: BaseSheetViewModel,
+    contentVisible: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     val processing by viewModel.processing.collectAsState()
 
     val topBarState by viewModel.topBarState.collectAsState()
@@ -95,12 +117,8 @@ internal fun PaymentSheetScreen(
                 toggleEditing = viewModel::toggleEditing,
             )
         },
-        content = {
-            AnimatedVisibility(visible = contentVisible) {
-                PaymentSheetScreenContent(viewModel, type)
-            }
-        },
-        modifier = modifier.onGloballyPositioned {
+        content = content,
+        modifier = Modifier.onGloballyPositioned {
             contentHeight = with(density) { it.size.height.toDp() }
         },
     )
