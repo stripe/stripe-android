@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -114,7 +115,7 @@ internal abstract class BaseSheetViewModel(
     val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
-    abstract val error: StateFlow<String?>
+    abstract val error: StateFlow<ResolvableString?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
@@ -312,7 +313,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
 
-    abstract fun onError(error: String? = null)
+    abstract fun onError(error: ResolvableString? = null)
 
     companion object {
         internal const val SAVE_SELECTION = "selection"

@@ -408,9 +408,9 @@ internal class PaymentOptionsViewModelTest {
         viewModel.error.test {
             assertThat(awaitItem())
                 .isNull()
-            viewModel.onError("some error")
+            viewModel.onError("some error".resolvableString)
             assertThat(awaitItem())
-                .isEqualTo("some error")
+                .isEqualTo("some error".resolvableString)
         }
     }
 
@@ -421,9 +421,9 @@ internal class PaymentOptionsViewModelTest {
         viewModel.error.test {
             assertThat(awaitItem())
                 .isNull()
-            viewModel.onError("some error")
+            viewModel.onError("some error".resolvableString)
             assertThat(awaitItem())
-                .isEqualTo("some error")
+                .isEqualTo("some error".resolvableString)
             viewModel.clearErrorMessages()
             assertThat(awaitItem())
                 .isNull()
@@ -586,7 +586,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
                     iconResource = 0,
-                    label = resolvableString(""),
+                    label = "".resolvableString,
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     lightThemeIconUrl = null,

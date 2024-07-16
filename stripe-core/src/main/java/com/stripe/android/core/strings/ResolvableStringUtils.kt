@@ -44,3 +44,10 @@ fun resolvableString(
 fun resolvableString(value: String, vararg formatArgs: @RawValue Any?): ResolvableString {
     return StaticResolvableString(value, formatArgs.toList())
 }
+
+/**
+ * Creates a [ResolvableString] from a given string value.
+ */
+@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val String.resolvableString: ResolvableString
+    get() = StaticResolvableString(this, emptyList())

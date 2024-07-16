@@ -28,10 +28,10 @@ internal fun Throwable.stripeErrorMessage(): ResolvableString {
         return resolvableString(R.string.stripe_network_error_message)
     }
     (this as? LocalStripeException)?.displayMessage?.let {
-        return resolvableString(it)
+        return it.resolvableString
     }
     (this as? StripeException)?.stripeError?.message?.let {
-        return resolvableString(it)
+        return it.resolvableString
     }
     return resolvableString(R.string.stripe_something_went_wrong)
 }

@@ -53,7 +53,7 @@ class LinkInlineHandlerTest {
             updateLinkPrimaryButtonUiState = { updatedLinkPrimaryButtonUiState = it },
         ) {
             selection.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            primaryButtonLabel.value = resolvableString("Continue")
+            primaryButtonLabel.value = "Continue".resolvableString
             linkInlineHandler.onStateUpdated(filledOutInlineSignupViewState)
         }
         assertThat(updatedLinkPrimaryButtonUiState).isNotNull()
@@ -69,7 +69,7 @@ class LinkInlineHandlerTest {
             }
         ) {
             selection.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            primaryButtonLabel.value = resolvableString("Continue")
+            primaryButtonLabel.value = "Continue".resolvableString
             linkInlineHandler.onStateUpdated(incompleteInlineSignupViewState)
         }
         assertThat(hasCalledUpdateLinkPrimaryButtonUiState).isTrue()
@@ -83,7 +83,7 @@ class LinkInlineHandlerTest {
             updateLinkPrimaryButtonUiState = { updatedLinkPrimaryButtonUiState = it },
         ) {
             selection.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            primaryButtonLabel.value = resolvableString("Continue")
+            primaryButtonLabel.value = "Continue".resolvableString
 
             linkInlineHandler.onStateUpdated(filledOutInlineSignupViewState)
             assertThat(updatedLinkPrimaryButtonUiState).isNotNull()
@@ -101,7 +101,7 @@ class LinkInlineHandlerTest {
             updateLinkPrimaryButtonUiState = { updatedLinkPrimaryButtonUiState = it },
         ) {
             selection.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            primaryButtonLabel.value = resolvableString("Continue")
+            primaryButtonLabel.value = "Continue".resolvableString
 
             linkInlineHandler.onStateUpdated(filledOutInlineSignupViewState)
             assertThat(updatedLinkPrimaryButtonUiState).isNotNull()
@@ -125,7 +125,7 @@ class LinkInlineHandlerTest {
             }
         ) {
             selection.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            primaryButtonLabel.value = resolvableString("Continue")
+            primaryButtonLabel.value = "Continue".resolvableString
             linkInlineHandler.onStateUpdated(filledOutInlineSignupViewState)
             assertThat(updatedLinkPrimaryButtonUiState).isNotNull()
             assertThat(hasCalledPayWithLink).isFalse()

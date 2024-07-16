@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentIntent
@@ -89,8 +91,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
     internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
-    private val _error = MutableStateFlow<String?>(null)
-    override val error: StateFlow<String?> = _error
+    private val _error = MutableStateFlow<ResolvableString?>(null)
+    override val error: StateFlow<ResolvableString?> = _error
 
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
@@ -183,7 +185,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message)
+                onError(processingState.message?.resolvableString)
             }
             LinkHandler.ProcessingState.Launched -> {
             }
@@ -237,7 +239,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         return this.takeIf { isStillAround }
     }
 
-    override fun onError(error: String?) {
+    override fun onError(error: ResolvableString?) {
         _error.value = error
     }
 

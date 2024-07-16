@@ -343,7 +343,7 @@ internal class CustomerSheetActivityTest {
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isFirstPaymentMethod = false,
-            primaryButtonLabel = resolvableString("Save"),
+            primaryButtonLabel = "Save".resolvableString,
             primaryButtonEnabled = false,
             customPrimaryButtonUiState = null,
             bankAccountResult = null,

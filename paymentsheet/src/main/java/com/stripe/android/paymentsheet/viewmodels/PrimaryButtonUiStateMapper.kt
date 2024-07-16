@@ -67,7 +67,7 @@ internal class PrimaryButtonUiStateMapper(
 
     private fun buyButtonLabel(amount: Amount?): ResolvableString {
         return config.primaryButtonLabel?.let {
-            resolvableString(it)
+            it.resolvableString
         } ?: run {
             if (isProcessingPayment) {
                 val fallback = resolvableString(R.string.stripe_paymentsheet_pay_button_label)
@@ -79,9 +79,8 @@ internal class PrimaryButtonUiStateMapper(
     }
 
     private fun continueButtonLabel(): ResolvableString {
-        return config.primaryButtonLabel?.let { customLabel ->
-            resolvableString(customLabel)
-        } ?: resolvableString(StripeUiCoreR.string.stripe_continue_button_label)
+        return config.primaryButtonLabel?.resolvableString
+            ?: resolvableString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 
     private fun cvcRecollectionCompleteOrNotRequired(

@@ -418,7 +418,7 @@ internal object PaymentMethodFixtures {
 
     val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
-        label = resolvableString("PayPal"),
+        label = "PayPal".resolvableString,
         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         lightThemeIconUrl = null,
@@ -443,7 +443,7 @@ internal object PaymentMethodFixtures {
             intentId = "intent_1234",
             bankName = "Stripe Bank",
             last4 = "6789",
-            primaryButtonText = resolvableString("Continue"),
+            primaryButtonText = "Continue".resolvableString,
             mandateText = null,
         ),
     )
@@ -537,7 +537,7 @@ internal object PaymentMethodFixtures {
     fun createExternalPaymentMethod(spec: ExternalPaymentMethodSpec): PaymentSelection.ExternalPaymentMethod {
         return PaymentSelection.ExternalPaymentMethod(
             type = spec.type,
-            label = resolvableString(spec.type),
+            label = spec.type.resolvableString,
             iconResource = 0,
             lightThemeIconUrl = spec.lightImageUrl,
             darkThemeIconUrl = spec.darkImageUrl,

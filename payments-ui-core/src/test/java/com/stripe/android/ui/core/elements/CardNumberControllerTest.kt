@@ -216,12 +216,12 @@ internal class CardNumberControllerTest {
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -250,18 +250,18 @@ internal class CardNumberControllerTest {
                         title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -285,7 +285,7 @@ internal class CardNumberControllerTest {
             cardNumberController.onDropdownItemClicked(
                 TextFieldIcon.Dropdown.Item(
                     id = CardBrand.CartesBancaires.code,
-                    label = resolvableString("Cartes Bancaires"),
+                    label = "Cartes Bancaires".resolvableString,
                     icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
                 )
             )
@@ -297,18 +297,18 @@ internal class CardNumberControllerTest {
                         title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -332,7 +332,7 @@ internal class CardNumberControllerTest {
             cardNumberController.onDropdownItemClicked(
                 TextFieldIcon.Dropdown.Item(
                     id = CardBrand.CartesBancaires.code,
-                    label = resolvableString("Cartes Bancaires"),
+                    label = "Cartes Bancaires".resolvableString,
                     icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
                 )
             )
@@ -346,18 +346,18 @@ internal class CardNumberControllerTest {
                         title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),

@@ -128,7 +128,7 @@ class EditPaymentMethodUiScreenshotTest {
             ),
             displayName = "Card",
             confirmRemoval = confirmRemoval,
-            error = error?.let { resolvableString(it) },
+            error = error?.let { it.resolvableString },
             canRemove = canRemove,
         )
     }

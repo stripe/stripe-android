@@ -109,7 +109,7 @@ internal sealed class CustomerSheetViewState(
         val enabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
-        val errorMessage: String? = null,
+        val errorMessage: ResolvableString? = null,
         val isFirstPaymentMethod: Boolean,
         val primaryButtonLabel: ResolvableString,
         val primaryButtonEnabled: Boolean,
