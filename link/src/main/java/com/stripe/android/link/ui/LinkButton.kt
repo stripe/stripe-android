@@ -37,12 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.utils.InlineContentTemplateBuilder
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
@@ -217,7 +217,7 @@ private fun LinkIconAndDivider() {
 @Composable
 private fun LinkIcon() {
     Icon(
-        painter = painterResource(R.drawable.stripe_link_logo_bw),
+        painter = painterResource(StripeUiCoreR.drawable.stripe_link_logo_bw),
         contentDescription = stringResource(StripeR.string.stripe_link),
         modifier = Modifier
             .aspectRatio(LINK_ICON_ASPECT_RATIO)

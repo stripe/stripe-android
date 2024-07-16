@@ -33,7 +33,8 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                         "www.logo1.com",
                         "www.logo2.com"
                     ),
-                    shouldShowMerchantLogos = true
+                    shouldShowMerchantLogos = true,
+                    showAnimatedDots = true,
                 )
             )
         )
@@ -48,7 +49,8 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                         "www.logo2.com",
                         "www.logo3.com",
                     ),
-                    shouldShowMerchantLogos = true
+                    shouldShowMerchantLogos = true,
+                    showAnimatedDots = true,
                 )
             )
         )
@@ -61,7 +63,8 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     "www.logo1.com",
                     "www.logo2.com"
                 ),
-                shouldShowMerchantLogos = false
+                shouldShowMerchantLogos = false,
+                showAnimatedDots = true,
             )
         )
     )

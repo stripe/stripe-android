@@ -56,8 +56,13 @@ internal data class FinancialConnectionsColors(
     val backgroundBrand: Color,
     val backgroundCaution: Color,
     val border: Color,
-    val borderBrand: Color
-)
+    val borderBrand: Color,
+    val useDarkColorOnBrand: Boolean,
+) {
+
+    val contentOnBrand: Color
+        get() = if (useDarkColorOnBrand) textDefault else textWhite
+}
 
 @Preview(group = "Components", name = "Colors")
 @Composable
