@@ -4,6 +4,7 @@ require 'colorize'
 require 'optparse'
 
 require_relative 'update_version_numbers'
+require_relative 'validate_version_number'
 
 @step_index = 1
 
@@ -44,6 +45,7 @@ OptionParser.new do |opts|
 end.parse!
 
 steps = [
+    method(:validate_version_number),
     method(:update_read_me),
     method(:update_stripe_sdk_version),
     method(:update_gradle_properties),
