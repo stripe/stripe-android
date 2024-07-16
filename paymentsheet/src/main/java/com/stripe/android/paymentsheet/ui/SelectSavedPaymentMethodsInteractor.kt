@@ -4,6 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +60,11 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         isProcessing = viewModel.processing,
         currentSelection = viewModel.selection,
         mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
-        onAddCardPressed = viewModel::transitionToAddPaymentScreen,
+        onAddCardPressed = {
+            viewModel.navigationHandler.transitionTo(
+                AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
+            )
+        },
         onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
         onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
         onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
