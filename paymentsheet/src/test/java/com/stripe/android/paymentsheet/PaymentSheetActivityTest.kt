@@ -709,25 +709,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify ProcessResult state closes the sheet`() {
-        val viewModel = createViewModel()
-        val scenario = activityScenario(viewModel)
-
-        scenario.launchForResult(intent).onActivity {
-            viewModel.onFinish()
-        }
-
-        composeTestRule.waitForIdle()
-
-        val result = contract.parseResult(
-            scenario.getResult().resultCode,
-            scenario.getResult().resultData
-        )
-
-        assertThat(result).isEqualTo(PaymentSheetResult.Completed)
-    }
-
-    @Test
     fun `successful payment should dismiss bottom sheet`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)

@@ -7,7 +7,6 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
-import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -25,7 +24,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -67,7 +65,6 @@ internal class PaymentOptionsViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val prefsRepository = FakePrefsRepository()
     private val customerRepository = mock<CustomerRepository>()
 
     @Before
@@ -119,8 +116,6 @@ internal class PaymentOptionsViewModelTest {
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
                 )
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(SavedSelection.None)
         }
 
     @Test
@@ -144,8 +139,6 @@ internal class PaymentOptionsViewModelTest {
                 .onSelectPaymentOption(
                     paymentSelection = EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION
                 )
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(SavedSelection.None)
         }
 
     @Test
@@ -859,12 +852,10 @@ internal class PaymentOptionsViewModelTest {
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, linkInteractor, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
-            prefsRepositoryFactory = { prefsRepository },
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,

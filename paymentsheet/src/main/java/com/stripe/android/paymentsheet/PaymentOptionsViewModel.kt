@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +8,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -51,12 +49,10 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
-    prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
     application: Application,
-    logger: Logger,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -64,11 +60,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
-    prefsRepository = prefsRepositoryFactory(args.state.config.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
-    logger = logger,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -217,16 +211,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun onFatal(throwable: Throwable) {
-        mostRecentError = throwable
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Failed(
-                error = throwable,
-                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
-            )
-        )
-    }
-
     override fun onUserCancel() {
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
@@ -253,13 +237,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val isStillAround = paymentMethods.any { it.id == paymentMethod.id }
         return this.takeIf { isStillAround }
     }
-
-    override fun onFinish() {
-        onUserSelection()
-    }
-
-    override fun onError(@StringRes error: Int?) =
-        onError(error?.let { getApplication<Application>().getString(it) })
 
     override fun onError(error: String?) {
         _error.value = error

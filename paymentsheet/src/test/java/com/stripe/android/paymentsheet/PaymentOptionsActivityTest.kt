@@ -23,7 +23,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -450,12 +449,10 @@ internal class PaymentOptionsActivityTest {
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
-                prefsRepositoryFactory = { FakePrefsRepository() },
                 eventReporter = eventReporter,
                 customerRepository = FakeCustomerRepository(),
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
-                logger = Logger.noop(),
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
