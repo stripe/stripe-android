@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -121,7 +120,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
                 walletsState = viewModel.walletsState,
-                isFlowController = viewModel is PaymentOptionsViewModel,
+                isFlowController = !viewModel.isCompleteFlow,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode

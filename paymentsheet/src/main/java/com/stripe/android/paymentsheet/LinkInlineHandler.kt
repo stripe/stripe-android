@@ -108,7 +108,7 @@ internal class LinkInlineHandler(
                 selection = viewModel.selection,
                 updateLinkPrimaryButtonUiState = { viewModel.customPrimaryButtonUiState.value = it },
                 primaryButtonLabel = viewModel.primaryButtonUiState.mapAsStateFlow { it?.label },
-                shouldCompleteLinkFlowInline = viewModel.shouldCompleteLinkFlowInline,
+                shouldCompleteLinkFlowInline = viewModel.isCompleteFlow,
             )
         }
     }

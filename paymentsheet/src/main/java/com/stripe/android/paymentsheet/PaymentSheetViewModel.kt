@@ -124,7 +124,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
-    editInteractorFactory = editInteractorFactory
+    editInteractorFactory = editInteractorFactory,
+    isCompleteFlow = true,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -271,8 +272,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             loadPaymentSheetState()
         }
     }
-
-    override val shouldCompleteLinkFlowInline: Boolean = true
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
