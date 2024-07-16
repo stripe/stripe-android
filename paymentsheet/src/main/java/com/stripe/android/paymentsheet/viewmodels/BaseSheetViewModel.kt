@@ -7,9 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -20,7 +17,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -43,18 +39,13 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -126,16 +117,13 @@ internal abstract class BaseSheetViewModel(
     private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
     val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
-    protected val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
+    val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
     abstract val error: StateFlow<String?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
-
-    private val linkInlineSignUpState = MutableStateFlow<InlineSignupViewState?>(null)
-    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
 
     private val _cvcControllerFlow = MutableStateFlow(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
     internal val cvcControllerFlow: StateFlow<CvcController> = _cvcControllerFlow
@@ -181,12 +169,6 @@ internal abstract class BaseSheetViewModel(
         PaymentSheetTopBarStateFactory::create,
     )
 
-    val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null,
-    )
-
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethodsFlow.value.first()
 
@@ -203,38 +185,6 @@ internal abstract class BaseSheetViewModel(
             savedPaymentMethodMutator.paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty() && editing.value) {
                     toggleEditing()
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            var inLinkSignUpMode = false
-
-            combine(
-                linkHandler.linkInlineSelection,
-                selection,
-                linkInlineSignUpState
-            ).collectLatest { (linkInlineSelection, paymentSelection, linkInlineSignUpState) ->
-                // Only reset custom primary button state if we haven't already
-                if (paymentSelection !is PaymentSelection.New.Card) {
-                    if (inLinkSignUpMode) {
-                        // US bank account will update the custom primary state on its own
-                        if (paymentSelection !is PaymentSelection.New.USBankAccount) {
-                            updateLinkPrimaryButtonUiState(null)
-                        }
-
-                        inLinkSignUpMode = false
-                    }
-
-                    return@collectLatest
-                }
-
-                inLinkSignUpMode = true
-
-                if (linkInlineSignUpState != null) {
-                    updatePrimaryButtonForLinkSignup(linkInlineSignUpState)
-                } else if (linkInlineSelection != null) {
-                    updatePrimaryButtonForLinkInline()
                 }
             }
         }
@@ -273,55 +223,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun clearErrorMessages()
-
-    fun updatePrimaryButtonForLinkSignup(viewState: InlineSignupViewState) {
-        val uiState = primaryButtonUiState.value ?: return
-
-        updateLinkPrimaryButtonUiState(
-            if (viewState.useLink) {
-                val userInput = viewState.userInput
-                val paymentSelection = selection.value
-
-                if (userInput != null && paymentSelection != null) {
-                    PrimaryButton.UIState(
-                        label = uiState.label,
-                        onClick = { payWithLinkInline(userInput) },
-                        enabled = true,
-                        lockVisible = this is PaymentSheetViewModel,
-                    )
-                } else {
-                    PrimaryButton.UIState(
-                        label = uiState.label,
-                        onClick = {},
-                        enabled = false,
-                        lockVisible = this is PaymentSheetViewModel,
-                    )
-                }
-            } else {
-                null
-            }
-        )
-    }
-
-    fun updatePrimaryButtonForLinkInline() {
-        val uiState = primaryButtonUiState.value ?: return
-        updateLinkPrimaryButtonUiState(
-            PrimaryButton.UIState(
-                label = uiState.label,
-                onClick = { payWithLinkInline(userInput = null) },
-                enabled = true,
-                lockVisible = this is PaymentSheetViewModel,
-            )
-        )
-    }
-
-    private fun updateLinkPrimaryButtonUiState(state: PrimaryButton.UIState?) {
-        customPrimaryButtonUiState.value = state
-    }
-
-    fun updateCustomPrimaryButtonUiState(block: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
-        customPrimaryButtonUiState.update(block)
-    }
 
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
         _primaryButtonState.value = state
@@ -411,20 +312,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract val shouldCompleteLinkFlowInline: Boolean
-
-    private fun payWithLinkInline(userInput: UserInput?) {
-        viewModelScope.launch(workContext) {
-            linkHandler.payWithLinkInline(
-                userInput = userInput,
-                paymentSelection = selection.value,
-                shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,
-            )
-        }
-    }
-
-    fun onLinkSignUpStateUpdated(state: InlineSignupViewState) {
-        linkInlineSignUpState.value = state
-    }
 
     fun handleBackPressed() {
         if (processing.value) {

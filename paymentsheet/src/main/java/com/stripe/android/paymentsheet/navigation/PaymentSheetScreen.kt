@@ -237,7 +237,7 @@ internal sealed interface PaymentSheetScreen {
     class Form(
         private val interactor: VerticalModeFormInteractor,
         private val showsWalletHeader: Boolean = false,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -251,6 +251,10 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
             VerticalModeFormUI(interactor)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 

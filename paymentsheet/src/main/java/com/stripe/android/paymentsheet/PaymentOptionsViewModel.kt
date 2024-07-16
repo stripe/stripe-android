@@ -101,7 +101,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkEmailFlow,
+        linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
         googlePayState,
@@ -160,7 +160,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // This is bad, but I don't think there's a better option
         PaymentSheet.FlowController.linkHandler = linkHandler
 
-        linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.setupLink(linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
