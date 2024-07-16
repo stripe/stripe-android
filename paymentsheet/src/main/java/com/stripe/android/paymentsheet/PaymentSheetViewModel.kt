@@ -100,11 +100,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
-    prefsRepository: PrefsRepository,
+    private val prefsRepository: PrefsRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    logger: Logger,
+    private val logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
@@ -117,9 +117,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
-    prefsRepository = prefsRepository,
     workContext = workContext,
-    logger = logger,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -812,7 +810,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun onFatal(throwable: Throwable) {
+    private fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
         mostRecentError = throwable
         _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
@@ -823,11 +821,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
-    override fun onFinish() {
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
-    }
-
-    override fun onError(@IntegerRes error: Int?) =
+    private fun onError(@IntegerRes error: Int?) =
         onError(error?.let { getApplication<Application>().resources.getString(it) })
 
     override fun onError(error: String?) = resetViewState(error)

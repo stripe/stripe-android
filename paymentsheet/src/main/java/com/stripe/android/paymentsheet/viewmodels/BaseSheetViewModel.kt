@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
-import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -17,7 +15,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
@@ -58,9 +55,7 @@ internal abstract class BaseSheetViewModel(
     val config: PaymentSheet.Configuration,
     val eventReporter: EventReporter,
     val customerRepository: CustomerRepository,
-    protected val prefsRepository: PrefsRepository,
     val workContext: CoroutineContext = Dispatchers.IO,
-    protected val logger: Logger,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -148,8 +143,6 @@ internal abstract class BaseSheetViewModel(
      * the user returns to that payment method type.
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
-
-    abstract fun onFatal(throwable: Throwable)
 
     protected val buttonsEnabled = combineAsStateFlow(
         processing,
@@ -326,10 +319,6 @@ internal abstract class BaseSheetViewModel(
     abstract fun onUserCancel()
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
-
-    abstract fun onFinish()
-
-    abstract fun onError(@StringRes error: Int? = null)
 
     abstract fun onError(error: String? = null)
 
