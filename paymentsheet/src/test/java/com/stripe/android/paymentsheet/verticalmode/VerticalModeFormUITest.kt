@@ -111,6 +111,8 @@ internal class VerticalModeFormUITest {
             override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
                 viewActionRecorder.record(viewAction)
             }
+
+            override fun close() {}
         }
     }
 

@@ -72,8 +72,6 @@ internal class LinkHandler @Inject constructor(
         MutableSharedFlow<ProcessingState>(replay = 1, extraBufferCapacity = 5)
     val processingState: Flow<ProcessingState> = _processingState
 
-    val linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
-
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
@@ -86,13 +84,11 @@ internal class LinkHandler @Inject constructor(
 
     val linkSignupMode: Flow<LinkSignupMode?> = combine(
         linkConfiguration,
-        linkInlineSelection,
         accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
-    ) { linkConfig, linkInlineSelection, linkAccountStatus ->
-        val linkInlineSelectionValid = linkInlineSelection != null
+    ) { linkConfig, linkAccountStatus ->
         val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
         val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
-        val ableToShowLink = validFundingSource && (notLoggedIn || linkInlineSelectionValid)
+        val ableToShowLink = validFundingSource && notLoggedIn
         linkConfig?.signupMode.takeIf { ableToShowLink }
     }
 

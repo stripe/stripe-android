@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.flow.update
 
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
@@ -88,7 +89,7 @@ internal class USBankAccountFormArguments(
                 onMandateTextChanged = viewModel::updateMandateText,
                 onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
                 onCollectBankAccountResult = null,
-                onUpdatePrimaryButtonUIState = viewModel::updateCustomPrimaryButtonUiState,
+                onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError
             )

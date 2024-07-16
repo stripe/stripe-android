@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
@@ -820,7 +821,8 @@ internal class PaymentSheetViewModelTest {
                 )
             )
 
-            viewModel.updatePrimaryButtonForLinkSignup(
+            val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
+            linkInlineHandler.onStateUpdated(
                 InlineSignupViewState.create(
                     config = linkConfiguration
                 ).copy(
@@ -2466,7 +2468,8 @@ internal class PaymentSheetViewModelTest {
 
                 assertThat(awaitItem()?.enabled).isTrue()
 
-                viewModel.onLinkSignUpStateUpdated(
+                val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
+                linkInlineHandler.onStateUpdated(
                     InlineSignupViewState.create(config = LINK_CONFIG).copy(
                         isExpanded = true,
                         userInput = UserInput.SignUp(

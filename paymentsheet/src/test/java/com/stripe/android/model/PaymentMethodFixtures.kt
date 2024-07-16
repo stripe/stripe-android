@@ -4,8 +4,11 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import org.json.JSONObject
+import org.mockito.kotlin.mock
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
@@ -411,6 +414,38 @@ internal object PaymentMethodFixtures {
         PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
         CardBrand.Visa,
         customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+    )
+
+    val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        label = resolvableString("PayPal"),
+        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+    )
+
+    val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
+        labelResource = "Test",
+        iconResource = 0,
+        paymentMethodCreateParams = mock(),
+        customerRequestedSave = mock(),
+        input = PaymentSelection.New.USBankAccount.Input(
+            name = "",
+            email = null,
+            phone = null,
+            address = null,
+            saveForFutureUse = false,
+        ),
+        instantDebits = null,
+        screenState = USBankAccountFormScreenState.SavedAccount(
+            financialConnectionsSessionId = "session_1234",
+            intentId = "intent_1234",
+            bankName = "Stripe Bank",
+            last4 = "6789",
+            primaryButtonText = resolvableString("Continue"),
+            mandateText = null,
+        ),
     )
 
 //

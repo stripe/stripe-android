@@ -217,7 +217,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkEmailFlow,
+        linkConfigurationCoordinator.emailFlow,
         googlePayState,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
