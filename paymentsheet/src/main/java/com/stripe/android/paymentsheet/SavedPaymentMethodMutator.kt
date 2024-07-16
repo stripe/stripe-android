@@ -283,7 +283,7 @@ internal class SavedPaymentMethodMutator(
                 },
                 googlePayState = viewModel.googlePayState,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
-                isNotPaymentFlow = viewModel is PaymentOptionsViewModel,
+                isNotPaymentFlow = !viewModel.isCompleteFlow,
             )
         }
     }

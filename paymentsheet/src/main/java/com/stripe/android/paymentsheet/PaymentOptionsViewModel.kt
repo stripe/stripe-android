@@ -73,7 +73,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
-    editInteractorFactory = editInteractorFactory
+    editInteractorFactory = editInteractorFactory,
+    isCompleteFlow = false,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -175,8 +176,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         transitionToFirstScreen()
     }
-
-    override val shouldCompleteLinkFlowInline: Boolean = false
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {

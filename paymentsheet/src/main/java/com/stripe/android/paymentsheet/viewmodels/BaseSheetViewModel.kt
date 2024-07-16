@@ -65,7 +65,8 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
-    val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    val isCompleteFlow: Boolean,
 ) : AndroidViewModel(application) {
 
     protected var mostRecentError: Throwable? = null
@@ -310,8 +311,6 @@ internal abstract class BaseSheetViewModel(
             isEditing = editing,
         )
     }
-
-    abstract val shouldCompleteLinkFlowInline: Boolean
 
     fun handleBackPressed() {
         if (processing.value) {

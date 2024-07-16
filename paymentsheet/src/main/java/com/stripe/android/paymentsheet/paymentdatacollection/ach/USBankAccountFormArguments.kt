@@ -80,7 +80,7 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 onBehalfOf = onBehalfOf,
-                isCompleteFlow = viewModel is PaymentSheetViewModel,
+                isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,
                 stripeIntentId = stripeIntent?.id,
                 clientSecret = stripeIntent?.clientSecret,
