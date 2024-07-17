@@ -236,7 +236,7 @@ internal fun AddPaymentMethod(
 
     viewState.errorMessage?.let { error ->
         ErrorMessage(
-            error = error,
+            error = error.resolve(),
             modifier = Modifier.padding(horizontal = horizontalPadding)
         )
     }

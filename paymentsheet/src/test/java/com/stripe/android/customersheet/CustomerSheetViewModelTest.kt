@@ -739,7 +739,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.")
+            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -843,7 +843,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
+            assertThat(viewState.errorMessage).isEqualTo(resolvableString(R.string.stripe_something_went_wrong))
             assertThat(viewState.enabled).isTrue()
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -875,7 +875,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message")
+            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -915,7 +915,8 @@ class CustomerSheetViewModelTest {
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("We couldn't save this payment method. Please try again.")
+            assertThat(viewState.errorMessage)
+                .isEqualTo("We couldn't save this payment method. Please try again.".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -1909,7 +1910,7 @@ class CustomerSheetViewModelTest {
                 CustomerSheetViewAction.OnUpdateCustomButtonUIState(
                     callback = {
                         PrimaryButton.UIState(
-                            label = resolvableString("Continue"),
+                            label = "Continue".resolvableString,
                             enabled = true,
                             lockVisible = false,
                             onClick = {}
@@ -1975,7 +1976,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -2035,13 +2036,13 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormError(
-                    error = "This is an error."
+                    error = "This is an error.".resolvableString
                 )
             )
 
             viewState = awaitViewState()
             assertThat(viewState.errorMessage)
-                .isEqualTo("This is an error.")
+                .isEqualTo("This is an error.".resolvableString)
         }
     }
 
@@ -2594,7 +2595,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )

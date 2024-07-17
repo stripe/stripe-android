@@ -15,6 +15,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -298,7 +299,7 @@ internal class CustomerSheetViewModel(
                         enabled = true,
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = result.throwable.stripeErrorMessage(application),
+                        errorMessage = result.throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -772,7 +773,7 @@ internal class CustomerSheetViewModel(
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                         it.copy(
-                            errorMessage = throwable.stripeErrorMessage(application),
+                            errorMessage = throwable.stripeErrorMessage(),
                             primaryButtonEnabled = it.formFieldValues != null,
                             isProcessing = false,
                         )
@@ -907,7 +908,7 @@ internal class CustomerSheetViewModel(
         eventReporter.onCardNumberCompleted()
     }
 
-    private fun onFormError(error: String?) {
+    private fun onFormError(error: ResolvableString?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 errorMessage = error
@@ -971,7 +972,7 @@ internal class CustomerSheetViewModel(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage ?: cause.stripeErrorMessage(application),
+                        errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
                         enabled = true,
                         primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
                         isProcessing = false,
@@ -1024,7 +1025,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = nextStep.message,
+                        errorMessage = nextStep.message.resolvableString,
                     )
                 }
                 Result.failure(nextStep.cause)
@@ -1056,7 +1057,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -1083,7 +1084,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -1117,7 +1118,7 @@ internal class CustomerSheetViewModel(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage,
+                        errorMessage = displayMessage?.resolvableString,
                         primaryButtonEnabled = it.formFieldValues != null,
                         isProcessing = false,
                     )

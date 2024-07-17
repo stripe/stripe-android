@@ -92,7 +92,7 @@ internal class CustomerSheetScreenshotTest {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString("Save"),
+        primaryButtonLabel = "Save".resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,

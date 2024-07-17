@@ -539,7 +539,7 @@ internal class PaymentMethodMetadataTest {
         val headerInformation = metadata.formHeaderInformationForCode(
             code = paypalSpec.type,
         )!!
-        assertThat(headerInformation.displayName).isEqualTo(resolvableString(paypalSpec.label))
+        assertThat(headerInformation.displayName).isEqualTo(paypalSpec.label.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
         assertThat(headerInformation.iconResource).isEqualTo(0)
         assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
@@ -664,7 +664,7 @@ internal class PaymentMethodMetadataTest {
         )
         val expectedSupportedPaymentMethod = SupportedPaymentMethod(
             code = "external_paypal",
-            displayName = resolvableString("PayPal"),
+            displayName = "PayPal".resolvableString,
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,

@@ -17,7 +17,7 @@ internal class VerticalModeFormHeaderUITest {
             VerticalModeFormHeaderUI(
                 isEnabled = true,
                 formHeaderInformation = FormHeaderInformation(
-                    displayName = resolvableString("Cash App Pay"),
+                    displayName = "Cash App Pay".resolvableString,
                     shouldShowIcon = true,
                     iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
                     lightThemeIconUrl = null,
@@ -34,7 +34,7 @@ internal class VerticalModeFormHeaderUITest {
             VerticalModeFormHeaderUI(
                 isEnabled = true,
                 formHeaderInformation = FormHeaderInformation(
-                    displayName = resolvableString("Add new card"),
+                    displayName = "Add new card".resolvableString,
                     shouldShowIcon = false,
                     iconResource = 0,
                     lightThemeIconUrl = null,

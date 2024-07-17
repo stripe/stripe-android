@@ -64,7 +64,7 @@ class PaymentSelectionTest {
                     intentId = "intent_1234",
                     bankName = "Stripe Bank",
                     last4 = "6789",
-                    primaryButtonText = resolvableString("Continue"),
+                    primaryButtonText = "Continue".resolvableString,
                     mandateText = null,
                 ),
             )

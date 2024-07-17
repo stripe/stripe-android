@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -221,7 +222,7 @@ private fun PaymentSheetContent(
     headerText: Int?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
-    error: String?,
+    error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
 ) {
@@ -269,7 +270,7 @@ private fun PaymentSheetContent(
 
         error?.let {
             ErrorMessage(
-                error = it,
+                error = it.resolve(),
                 modifier = Modifier
                     .padding(vertical = 2.dp, horizontal = horizontalPadding)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),

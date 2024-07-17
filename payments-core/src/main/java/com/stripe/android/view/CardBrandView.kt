@@ -335,7 +335,7 @@ private fun CardBrandChoiceDropdown(
 
 private fun CardBrand.toChoice(): CardBrandChoice {
     return CardBrandChoice(
-        label = resolvableString(displayName),
+        label = displayName.resolvableString,
         icon = icon
     )
 }

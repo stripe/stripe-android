@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 
 /**
@@ -18,5 +19,5 @@ internal sealed class PaymentSheetViewState(
         val onComplete: () -> Unit
     ) : PaymentSheetViewState()
 
-    data class UserErrorMessage(val message: String)
+    data class UserErrorMessage(val message: ResolvableString)
 }

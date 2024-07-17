@@ -27,7 +27,7 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `Chooses custom button over default one`() = runTest {
         val usBankButton = PrimaryButton.UIState(
-            label = resolvableString("US Bank Account FTW"),
+            label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
             lockVisible = true,

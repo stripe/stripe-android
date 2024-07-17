@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -18,6 +17,7 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -215,7 +215,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    override val error: StateFlow<String?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
+    override val error: StateFlow<ResolvableString?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
@@ -242,9 +242,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (val viewState = mapViewStateToCheckoutIdentifier(vs, CheckoutIdentifier.SheetTopWallet)) {
             null -> null
             is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
-                error = viewState.errorMessage?.message?.let { message ->
-                    resolvableString(message)
-                }
+                error = viewState.errorMessage?.message
             )
             is PaymentSheetViewState.StartProcessing -> WalletsProcessingState.Processing
             is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
@@ -292,7 +290,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message)
+                onError(processingState.message?.resolvableString)
             }
             LinkHandler.ProcessingState.Launched -> {
                 startProcessing(CheckoutIdentifier.SheetTopWallet)
@@ -390,7 +388,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLink(linkState)
 
         val pendingFailedPaymentResult = awaitPaymentResult() as? InternalPaymentResult.Failed
-        val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage(getApplication())
+        val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage()
 
         resetViewState(errorMessage)
         transitionToFirstScreen()
@@ -411,7 +409,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun resetViewState(userErrorMessage: String? = null) {
+    private fun resetViewState(userErrorMessage: ResolvableString? = null) {
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
@@ -474,16 +472,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     )
                 }.onFailure {
                     resetViewState(
-                        userErrorMessage = getApplication<Application>()
-                            .resources
-                            .getString(R.string.stripe_something_went_wrong)
+                        userErrorMessage = resolvableString(R.string.stripe_something_went_wrong)
                     )
                 }
             } ?: run {
                 resetViewState(
-                    userErrorMessage = getApplication<Application>()
-                        .resources
-                        .getString(R.string.stripe_something_went_wrong)
+                    userErrorMessage = resolvableString(R.string.stripe_something_went_wrong)
                 )
             }
         } else {
@@ -642,7 +636,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onError(nextStep.message)
+                    onError(nextStep.message.resolvableString)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
                     processPayment(stripeIntent, PaymentResult.Completed)
@@ -706,7 +700,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
 
         resetViewState(
-            userErrorMessage = error.stripeErrorMessage(getApplication())
+            userErrorMessage = error.stripeErrorMessage()
         )
     }
 
@@ -783,11 +777,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     error = PaymentSheetConfirmationError.GooglePay(result.errorCode),
                 )
                 onError(
-                    when (result.errorCode) {
-                        GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                            StripeR.string.stripe_failure_connection_error
-                        else -> StripeR.string.stripe_internal_error
-                    }
+                    resolvableString(
+                        when (result.errorCode) {
+                            GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                                StripeR.string.stripe_failure_connection_error
+                            else -> StripeR.string.stripe_internal_error
+                        }
+                    )
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {
@@ -824,10 +820,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
-    private fun onError(@IntegerRes error: Int?) =
-        onError(error?.let { getApplication<Application>().resources.getString(it) })
-
-    override fun onError(error: String?) = resetViewState(error)
+    override fun onError(error: ResolvableString?) = resetViewState(error)
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {

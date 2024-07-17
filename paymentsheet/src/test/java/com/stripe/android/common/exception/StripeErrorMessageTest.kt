@@ -61,13 +61,13 @@ internal class StripeErrorMessageTest {
     @Test
     fun testLocalStripeExceptionWithResolvableString() {
         assertThatResolvableStripeErrorMessage(LocalStripeException("Hi mom", null))
-            .isEqualTo(resolvableString("Hi mom"))
+            .isEqualTo("Hi mom".resolvableString)
     }
 
     @Test
     fun testStripeExceptionWithStripeErrorMessageWithResolvableString() {
         assertThatResolvableStripeErrorMessage(CardException(StripeError(message = "From the server")))
-            .isEqualTo(resolvableString("From the server"))
+            .isEqualTo("From the server".resolvableString)
     }
 
     @Test

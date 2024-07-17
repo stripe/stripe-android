@@ -208,7 +208,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
         interactor.viewState.test {
             val viewState = awaitItem()
 
-            assertThat(viewState.error).isEqualTo(resolvableString("Failed to remove"))
+            assertThat(viewState.error).isEqualTo("Failed to remove".resolvableString)
         }
     }
 
@@ -281,7 +281,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
         interactor.viewState.test {
             val viewState = awaitItem()
 
-            assertThat(viewState.error).isEqualTo(resolvableString("Failed to update"))
+            assertThat(viewState.error).isEqualTo("Failed to update".resolvableString)
         }
     }
 

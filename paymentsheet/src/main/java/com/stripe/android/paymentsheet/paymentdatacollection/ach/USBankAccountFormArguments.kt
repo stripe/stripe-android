@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -50,7 +51,7 @@ internal class USBankAccountFormArguments(
     val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
-    val onError: (String?) -> Unit,
+    val onError: (ResolvableString?) -> Unit,
 ) {
     companion object {
         fun create(

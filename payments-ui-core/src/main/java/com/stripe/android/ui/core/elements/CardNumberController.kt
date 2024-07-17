@@ -190,7 +190,7 @@ internal class DefaultCardNumberController(
 
                 TextFieldIcon.Dropdown.Item(
                     id = onlyAvailableBrand.code,
-                    label = resolvableString(onlyAvailableBrand.displayName),
+                    label = onlyAvailableBrand.displayName.resolvableString,
                     icon = onlyAvailableBrand.icon
                 )
             } else {
@@ -198,7 +198,7 @@ internal class DefaultCardNumberController(
                     CardBrand.Unknown -> null
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
-                        label = resolvableString(chosen.displayName),
+                        label = chosen.displayName.resolvableString,
                         icon = chosen.icon
                     )
                 }
@@ -207,7 +207,7 @@ internal class DefaultCardNumberController(
             val items = brands.map { brand ->
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
-                    label = resolvableString(brand.displayName),
+                    label = brand.displayName.resolvableString,
                     icon = brand.icon
                 )
             }

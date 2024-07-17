@@ -1,13 +1,12 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
-import androidx.annotation.StringRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
-    @StringRes open val error: Int? = null,
+    open val error: ResolvableString? = null,
     open val isProcessing: Boolean = false
 ) : Parcelable {
     abstract val primaryButtonText: ResolvableString
@@ -15,7 +14,7 @@ internal sealed class USBankAccountFormScreenState(
 
     @Parcelize
     data class BillingDetailsCollection(
-        @StringRes override val error: Int? = null,
+        override val error: ResolvableString? = null,
         override val primaryButtonText: ResolvableString,
         override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {

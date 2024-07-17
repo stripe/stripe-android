@@ -14,7 +14,7 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
     onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
 ) {
     screenState.error?.let {
-        onError(context.getString(it))
+        onError(it)
     }
 
     val showProcessingWhenClicked = screenState is BillingDetailsCollection || isCompleteFlow

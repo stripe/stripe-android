@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -279,7 +278,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             is CollectBankAccountResultInternal.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
@@ -296,7 +295,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
                 reset()
@@ -313,7 +312,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (usBankAccountData != null) {
             handleResultForACH(usBankAccountData, intentId)
         } else {
-            reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+            reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
         }
     }
 
@@ -365,7 +364,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             null -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
             }
         }
     }
@@ -409,7 +408,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun reset(@StringRes error: Int? = null) {
+    fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)

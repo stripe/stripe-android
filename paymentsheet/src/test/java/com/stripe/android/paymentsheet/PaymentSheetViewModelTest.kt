@@ -133,6 +133,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
+import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -595,26 +596,27 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() for Setup Intent with saved payment method that requires mandate should include mandate`() = runTest {
-        val stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
-        val viewModel = spy(
-            createViewModel(
-                stripeIntent = stripeIntent,
-                args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-                    initializationMode = InitializationMode.SetupIntent(stripeIntent.clientSecret!!),
-                ),
+    fun `checkout() for Setup Intent with saved payment method that requires mandate should include mandate`() =
+        runTest {
+            val stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            val viewModel = spy(
+                createViewModel(
+                    stripeIntent = stripeIntent,
+                    args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+                        initializationMode = InitializationMode.SetupIntent(stripeIntent.clientSecret!!),
+                    ),
+                )
             )
-        )
 
-        val confirmParams = mock<ConfirmSetupIntentParams>()
-        fakeIntentConfirmationInterceptor.enqueueConfirmStep(confirmParams)
+            val confirmParams = mock<ConfirmSetupIntentParams>()
+            fakeIntentConfirmationInterceptor.enqueueConfirmStep(confirmParams)
 
-        val paymentSelection = PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
-        viewModel.updateSelection(paymentSelection)
-        viewModel.checkout()
+            val paymentSelection = PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
+            viewModel.updateSelection(paymentSelection)
+            viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(confirmParams)
-    }
+            verify(viewModel).confirmStripeIntent(confirmParams)
+        }
 
     @Test
     fun `checkout() should confirm new payment methods`() = runTest {
@@ -785,7 +787,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(viewModel.contentVisible.value).isTrue()
             assertThat(walletsProcessingStateTurbine.awaitItem())
-                .isEqualTo(WalletsProcessingState.Idle(resolvableString("An internal error occurred.")))
+                .isEqualTo(WalletsProcessingState.Idle(resolvableString(PaymentsCoreR.string.stripe_internal_error)))
             assertThat(processingTurbine.awaitItem()).isFalse()
 
             walletsProcessingStateTurbine.cancel()
@@ -1094,7 +1096,7 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem())
                     .isEqualTo(
                         PaymentSheetViewState.Reset(
-                            UserErrorMessage("Something went wrong")
+                            UserErrorMessage(resolvableString(R.string.stripe_something_went_wrong))
                         )
                     )
             }
@@ -1117,7 +1119,7 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem())
                     .isEqualTo(
                         PaymentSheetViewState.Reset(
-                            UserErrorMessage(errorMessage)
+                            UserErrorMessage(errorMessage.resolvableString)
                         )
                     )
             }
@@ -1362,7 +1364,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
-                label = resolvableString(""),
+                label = "".resolvableString,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                 lightThemeIconUrl = null,
@@ -1686,7 +1688,7 @@ internal class PaymentSheetViewModelTest {
             val newSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = resolvableString("Fawry"),
+                label = "Fawry".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
@@ -1874,24 +1876,25 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() = runTest {
-        val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+    fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() =
+        runTest {
+            val viewModel = createViewModelForDeferredIntent().apply {
+                registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+            }
+
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            val resultClientSecret = "pi_123_secret_456"
+
+            fakeIntentConfirmationInterceptor.enqueueNextActionStep(
+                clientSecret = resultClientSecret,
+            )
+
+            val savedSelection = PaymentSelection.Saved(paymentMethod)
+            viewModel.updateSelection(savedSelection)
+            viewModel.checkout()
+
+            verify(paymentLauncher).handleNextActionForPaymentIntent(eq(resultClientSecret))
         }
-
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val resultClientSecret = "pi_123_secret_456"
-
-        fakeIntentConfirmationInterceptor.enqueueNextActionStep(
-            clientSecret = resultClientSecret,
-        )
-
-        val savedSelection = PaymentSelection.Saved(paymentMethod)
-        viewModel.updateSelection(savedSelection)
-        viewModel.checkout()
-
-        verify(paymentLauncher).handleNextActionForPaymentIntent(eq(resultClientSecret))
-    }
 
     @Test
     fun `Completes if intent confirmation interceptor returns a completed intent`() = runTest {
@@ -1930,7 +1933,7 @@ internal class PaymentSheetViewModelTest {
                 cause = Exception(error),
                 message = error
             )
-            assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error)))
+            assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error.resolvableString)))
         }
     }
 
@@ -2106,7 +2109,7 @@ internal class PaymentSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -2147,7 +2150,7 @@ internal class PaymentSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -2469,7 +2472,7 @@ internal class PaymentSheetViewModelTest {
                 viewModel.updateSelection(
                     PaymentSelection.New.GenericPaymentMethod(
                         iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-                        label = resolvableString("Bancontact"),
+                        label = "Bancontact".resolvableString,
                         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
                         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                         lightThemeIconUrl = null,
@@ -2506,15 +2509,16 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On complete payment launcher result in PI mode & should not reuse, should not save payment selection`() = runTest {
-        selectionSavedTest(
-            initializationMode = InitializationMode.PaymentIntent(
-                clientSecret = "pi_12345"
-            ),
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
-            shouldSave = false
-        )
-    }
+    fun `On complete payment launcher result in PI mode & should not reuse, should not save payment selection`() =
+        runTest {
+            selectionSavedTest(
+                initializationMode = InitializationMode.PaymentIntent(
+                    clientSecret = "pi_12345"
+                ),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                shouldSave = false
+            )
+        }
 
     @Test
     fun `On complete payment launcher result in SI mode, should save payment selection`() = runTest {
@@ -2985,7 +2989,7 @@ internal class PaymentSheetViewModelTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString("Test"),
+            label = "Test".resolvableString,
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(

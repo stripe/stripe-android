@@ -12,8 +12,8 @@ class ResolvableStringTest {
     @Test
     fun `static resolvable strings should be equal when using same value`() {
         assertEquals(
-            resolvableString(value = "1453235"),
-            resolvableString(value = "1453235")
+            "1453235".resolvableString,
+            "1453235".resolvableString
         )
     }
 
@@ -28,8 +28,8 @@ class ResolvableStringTest {
     @Test
     fun `static resolvable strings with same value & other static resolvable strings should be equal`() {
         assertEquals(
-            resolvableString(value = "1453235", resolvableString(value = "argOne"), "argTwo"),
-            resolvableString(value = "1453235", resolvableString(value = "argOne"), "argTwo")
+            resolvableString(value = "1453235", "argOne".resolvableString, "argTwo"),
+            resolvableString(value = "1453235", "argOne".resolvableString, "argTwo")
         )
     }
 
@@ -60,8 +60,8 @@ class ResolvableStringTest {
     @Test
     fun `resolvable strings with same value & other resolvable strings should be equal`() {
         assertEquals(
-            resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo"),
-            resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo")
+            resolvableString(id = 1453235, "1453235".resolvableString, "argTwo"),
+            resolvableString(id = 1453235, "1453235".resolvableString, "argTwo")
         )
 
         assertEquals(
@@ -73,8 +73,8 @@ class ResolvableStringTest {
     @Test
     fun `resolvable strings with the same values & arguments should produce the same 'toString' value`() {
         assertEquals(
-            resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo").toString(),
-            resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo").toString()
+            resolvableString(id = 1453235, "1453235".resolvableString, "argTwo").toString(),
+            resolvableString(id = 1453235, "1453235".resolvableString, "argTwo").toString()
         )
 
         assertEquals(
@@ -88,7 +88,7 @@ class ResolvableStringTest {
         val identifierResolvable = IdentifierResolvableString(
             id = 1453235,
             args = listOf(
-                resolvableString(value = "1453235"),
+                "1453235".resolvableString,
                 "argTwo",
                 123,
                 1267L,
@@ -107,7 +107,7 @@ class ResolvableStringTest {
         val staticResolvable = StaticResolvableString(
             value = "This is a value!",
             args = listOf(
-                resolvableString(value = "1453235"),
+                "1453235".resolvableString,
                 "argTwo",
                 123,
                 1267L,

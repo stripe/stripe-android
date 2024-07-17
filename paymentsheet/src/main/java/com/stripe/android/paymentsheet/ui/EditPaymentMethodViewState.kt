@@ -29,6 +29,6 @@ internal data class EditPaymentMethodViewState(
             get() = brand.icon
 
         override val label: ResolvableString
-            get() = resolvableString(brand.displayName)
+            get() = brand.displayName.resolvableString
     }
 }

@@ -31,6 +31,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -243,7 +244,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -269,7 +270,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -296,7 +297,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -330,7 +331,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -367,7 +368,7 @@ internal class PaymentSheetActivityTest {
             viewModel.transitionToAddPaymentScreen()
             composeTestRule.waitForIdle()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -394,7 +395,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -760,7 +761,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -780,7 +781,7 @@ internal class PaymentSheetActivityTest {
                 .assertDoesNotExist()
 
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -794,7 +795,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
 
             composeTestRule
                 .onNodeWithText(errorMessage)

@@ -119,17 +119,17 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
-                    title = resolvableString("Select an option"),
+                    title = "Select an option".resolvableString,
                     hide = false,
                     currentItem = TextFieldIcon.Dropdown.Item(
                         id = "visa",
-                        label = resolvableString("Visa"),
+                        label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
                         TextFieldIcon.Dropdown.Item(
                             id = "visa",
-                            label = resolvableString("Visa"),
+                            label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
@@ -150,17 +150,17 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
-                    title = resolvableString("Select an option"),
+                    title = "Select an option".resolvableString,
                     hide = true,
                     currentItem = TextFieldIcon.Dropdown.Item(
                         id = "visa",
-                        label = resolvableString("Visa"),
+                        label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
                         TextFieldIcon.Dropdown.Item(
                             id = "visa",
-                            label = resolvableString("Visa"),
+                            label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
