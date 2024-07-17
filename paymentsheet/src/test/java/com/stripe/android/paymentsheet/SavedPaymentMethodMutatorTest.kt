@@ -7,6 +7,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -138,7 +140,7 @@ class SavedPaymentMethodMutatorTest {
                 editInteractorFactory = mock(),
                 eventReporter = mock(),
                 savedStateHandle = savedStateHandle,
-                coroutineScope = this,
+                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
                 navigationHandler = mock(),
                 customerRepository = mock(),
@@ -147,7 +149,6 @@ class SavedPaymentMethodMutatorTest {
                 providePaymentMethodName = { it.orEmpty() },
                 addFirstPaymentMethodScreenFactory = { throw AssertionError("Not implemented") },
                 updateSelection = { throw AssertionError("Not implemented") },
-                mostRecentlySelectedSavedPaymentMethod = stateFlowOf(null),
                 isCbcEligible = isCbcEligible,
                 googlePayState = stateFlowOf(GooglePayState.NotAvailable),
                 isLinkEnabled = stateFlowOf(false),

@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVED_PM_SELECTION
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -42,7 +41,6 @@ internal class SavedPaymentMethodMutator(
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
     private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
     private val updateSelection: (PaymentSelection?) -> Unit,
-    private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     isCbcEligible: () -> Boolean,
     googlePayState: StateFlow<GooglePayState>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -87,6 +85,21 @@ internal class SavedPaymentMethodMutator(
                 paymentMethods.first().isModifiable
             } else {
                 paymentMethods.size > 1
+            }
+        }
+    }
+
+    val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
+        SAVED_PM_SELECTION,
+        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+    )
+
+    init {
+        coroutineScope.launch {
+            selection.collect { selection ->
+                if (selection is PaymentSelection.Saved) {
+                    savedStateHandle[SAVED_PM_SELECTION] = selection.paymentMethod
+                }
             }
         }
     }
@@ -260,6 +273,7 @@ internal class SavedPaymentMethodMutator(
 
     companion object {
         const val SAVED_CUSTOMER = "customer_info"
+        private const val SAVED_PM_SELECTION = "saved_selection"
 
         fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
@@ -277,7 +291,6 @@ internal class SavedPaymentMethodMutator(
                     PaymentSheetScreen.AddFirstPaymentMethod(DefaultAddPaymentMethodInteractor.create(viewModel))
                 },
                 updateSelection = viewModel::updateSelection,
-                mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
                 isCbcEligible = {
                     viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible
                 },

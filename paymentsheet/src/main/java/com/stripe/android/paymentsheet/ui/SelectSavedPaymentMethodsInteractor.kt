@@ -59,7 +59,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         editing = viewModel.editing,
         isProcessing = viewModel.processing,
         currentSelection = viewModel.selection,
-        mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
+        mostRecentlySelectedSavedPaymentMethod = viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
         onAddCardPressed = {
             viewModel.navigationHandler.transitionTo(
                 AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
