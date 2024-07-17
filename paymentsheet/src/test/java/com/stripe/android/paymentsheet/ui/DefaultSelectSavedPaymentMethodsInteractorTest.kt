@@ -11,9 +11,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -34,8 +31,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             editing = MutableStateFlow(expectedIsEditing),
             isProcessing = MutableStateFlow(expectedIsProcessing),
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(paymentOptionsItems).isEqualTo(expectedPaymentOptionsItems)
@@ -63,8 +58,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
             isEditingFlow.value = !initialIsEditingValue
 
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(isEditing).isEqualTo(!initialIsEditingValue)
@@ -86,8 +79,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             }
 
             isProcessingFlow.value = !initialIsProcessingValue
-
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -113,8 +104,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             val newPaymentMethods = PaymentMethodFixtures.createCards(2)
             val newPaymentOptionsState = createPaymentOptionsItems(newPaymentMethods)
             paymentOptionsStateFlow.value = newPaymentOptionsState
-
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -213,8 +202,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             ),
             currentSelection = currentSelectionFlow,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
@@ -236,8 +223,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             ),
             currentSelection = currentSelectionFlow,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
@@ -245,7 +230,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             }
 
             currentSelectionFlow.value = PaymentSelection.GooglePay
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -268,8 +252,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             ),
             currentSelection = currentSelectionFlow,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
@@ -277,7 +259,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             }
 
             currentSelectionFlow.value = newPaymentSelection()
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -301,8 +282,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = currentSelectionFlow,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(
@@ -329,8 +308,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = currentSelectionFlow,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(
@@ -342,7 +319,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             }
 
             mostRecentlySelectedSavedPaymentMethod.value = paymentMethods[0]
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -374,8 +350,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = currentSelectionFlow,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(
@@ -387,7 +361,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             }
 
             currentSelectionFlow.value = PaymentSelection.Link
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -413,8 +386,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = currentSelectionFlow,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         ) {
-            dispatcher.scheduler.advanceUntilIdle()
-
             interactor.state.test {
                 awaitItem().run {
                     assertThat(
@@ -425,7 +396,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
             currentSelectionFlow.value = null
             mostRecentlySelectedSavedPaymentMethod.value = null
-            dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
@@ -488,8 +458,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         onPaymentMethodSelected: (PaymentSelection?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
-        val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
-
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
             paymentOptionsItems,
             editing,
@@ -500,12 +468,10 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             onEditPaymentMethod,
             onDeletePaymentMethod,
             onPaymentMethodSelected,
-            dispatcher = dispatcher,
         )
 
         TestParams(
             interactor = interactor,
-            dispatcher = dispatcher,
         ).apply {
             runTest {
                 testBlock()
@@ -515,6 +481,5 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     private class TestParams(
         val interactor: SelectSavedPaymentMethodsInteractor,
-        val dispatcher: TestDispatcher,
     )
 }

@@ -14,8 +14,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface SelectSavedPaymentMethodsInteractor {
 
@@ -52,7 +52,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onEditPaymentMethod: (PaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
-    dispatcher: CoroutineContext = Dispatchers.Default,
 ) : SelectSavedPaymentMethodsInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
@@ -71,7 +70,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
     )
 
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
     private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
 
@@ -97,25 +96,31 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     init {
         coroutineScope.launch {
             paymentOptionsItems.collect {
-                _state.value = _state.value.copy(
-                    paymentOptionsItems = it,
-                )
+                _state.update { previousState ->
+                    previousState.copy(
+                        paymentOptionsItems = it,
+                    )
+                }
             }
         }
 
         coroutineScope.launch {
             editing.collect {
-                _state.value = _state.value.copy(
-                    isEditing = it
-                )
+                _state.update { previousState ->
+                    previousState.copy(
+                        isEditing = it
+                    )
+                }
             }
         }
 
         coroutineScope.launch {
             isProcessing.collect {
-                _state.value = _state.value.copy(
-                    isProcessing = it
-                )
+                _state.update { previousState ->
+                    previousState.copy(
+                        isProcessing = it
+                    )
+                }
             }
         }
 
@@ -137,9 +142,11 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             ) { selection, savedSelection, paymentOptionsItems ->
                 getSelectedPaymentOptionsItem(selection, savedSelection, paymentOptionsItems)
             }.collect { selectedPaymentOptionsItem ->
-                _state.value = _state.value.copy(
-                    selectedPaymentOptionsItem = selectedPaymentOptionsItem
-                )
+                _state.update { previousState ->
+                    previousState.copy(
+                        selectedPaymentOptionsItem = selectedPaymentOptionsItem
+                    )
+                }
             }
         }
     }
