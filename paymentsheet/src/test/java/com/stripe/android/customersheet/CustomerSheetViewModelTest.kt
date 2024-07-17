@@ -2665,9 +2665,6 @@ class CustomerSheetViewModelTest {
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
 
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
-
             // Show users that the payment method was removed briefly
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
@@ -2702,9 +2699,6 @@ class CustomerSheetViewModelTest {
             // once we return to the SPM screen.
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).containsExactly(paymentMethods.last())
@@ -2768,9 +2762,6 @@ class CustomerSheetViewModelTest {
                 // once we return to the SPM screen.
                 val updatedViewState = awaitViewState<SelectPaymentMethod>()
                 assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
-                // Simulate the delay
-                testDispatcher.scheduler.advanceUntilIdle()
 
                 verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
 
@@ -2963,9 +2954,6 @@ class CustomerSheetViewModelTest {
                 )
             )
             editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             verify(eventReporter).onUpdatePaymentMethodFailed(
                 eq(CardBrand.Visa),
@@ -3307,9 +3295,6 @@ class CustomerSheetViewModelTest {
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).contains(originalPaymentMethod)
 
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
-
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).contains(updatedPaymentMethod)
         }
@@ -3328,9 +3313,6 @@ class CustomerSheetViewModelTest {
 
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).contains(paymentMethodToRemove)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).doesNotContain(paymentMethodToRemove)
