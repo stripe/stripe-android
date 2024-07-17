@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
@@ -58,7 +57,6 @@ internal abstract class BaseSheetViewModel(
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    private val headerTextFactory: HeaderTextFactory,
     val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     val isCompleteFlow: Boolean,
 ) : AndroidViewModel(application) {
@@ -80,17 +78,6 @@ internal abstract class BaseSheetViewModel(
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
-
-    internal val headerText: StateFlow<Int?> by lazy {
-        combineAsStateFlow(
-            navigationHandler.currentScreen,
-            walletsState,
-            supportedPaymentMethodsFlow,
-            editing,
-        ) { screen, walletsState, supportedPaymentMethods, editing ->
-            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods, editing)
-        }
-    }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
@@ -275,20 +262,6 @@ internal abstract class BaseSheetViewModel(
                 }
             }
         }
-    }
-
-    private fun mapToHeaderTextResource(
-        screen: PaymentSheetScreen?,
-        walletsState: WalletsState?,
-        supportedPaymentMethods: List<PaymentMethodCode>,
-        editing: Boolean,
-    ): Int? {
-        return headerTextFactory.create(
-            screen = screen,
-            isWalletEnabled = walletsState != null,
-            types = supportedPaymentMethods,
-            isEditing = editing,
-        )
     }
 
     fun handleBackPressed() {

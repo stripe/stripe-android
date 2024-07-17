@@ -161,13 +161,13 @@ internal fun PaymentSheetScreenContent(
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
-    val headerText by viewModel.headerText.collectAsState()
     val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
-    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
     val mandateText by viewModel.mandateText.collectAsState()
-    val showsWalletsHeader by currentScreen.showsWalletsHeader(type == Complete).collectAsState()
+    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+    val headerText by currentScreen.title(type == Complete, walletsState != null).collectAsState()
+    val showsWalletsHeader by currentScreen.showsWalletsHeader(type == Complete,).collectAsState()
 
     Column(modifier) {
         PaymentSheetContent(
@@ -219,7 +219,7 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: Int?,
+    headerText: ResolvableString?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
@@ -231,7 +231,7 @@ private fun PaymentSheetContent(
     Column(modifier = Modifier.animateContentSize()) {
         headerText?.let { text ->
             H4Text(
-                text = stringResource(text),
+                text = text.resolve(),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .padding(horizontal = horizontalPadding),
