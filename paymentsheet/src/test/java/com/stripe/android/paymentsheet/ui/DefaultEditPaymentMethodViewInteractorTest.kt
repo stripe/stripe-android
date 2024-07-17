@@ -8,8 +8,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -19,7 +17,7 @@ import org.mockito.kotlin.verify
 import kotlin.coroutines.CoroutineContext
 
 class DefaultEditPaymentMethodViewInteractorTest {
-    private val testDispatcher = StandardTestDispatcher(TestCoroutineScheduler())
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun `on init, view state should be initialized properly`() = runTest {
@@ -203,8 +201,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
-        testDispatcher.scheduler.advanceUntilIdle()
-
         interactor.viewState.test {
             val viewState = awaitItem()
 
@@ -275,8 +271,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
         )
 
         interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
-
-        testDispatcher.scheduler.advanceUntilIdle()
 
         interactor.viewState.test {
             val viewState = awaitItem()

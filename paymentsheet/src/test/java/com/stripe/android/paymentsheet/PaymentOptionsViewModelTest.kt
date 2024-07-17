@@ -40,7 +40,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -62,7 +62,7 @@ internal class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val customerRepository = mock<CustomerRepository>()
@@ -200,7 +200,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.savedPaymentMethodMutator.removePaymentMethod(cards[1])
-        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -218,7 +217,6 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.selection.value).isNull()
     }
@@ -233,7 +231,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethod)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
@@ -551,7 +548,6 @@ internal class PaymentOptionsViewModelTest {
         viewModel.paymentOptionResult.test {
             // Simulate user removing the selected payment method
             viewModel.savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
-            testDispatcher.scheduler.advanceUntilIdle()
 
             viewModel.onUserCancel()
 
