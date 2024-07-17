@@ -166,14 +166,22 @@ internal fun PaymentSheetScreenContent(
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
-    val headerText by currentScreen.title(type == Complete, walletsState != null).collectAsState()
-    val showsWalletsHeader by currentScreen.showsWalletsHeader(type == Complete,).collectAsState()
+
+    val showsWalletsHeader by remember(currentScreen, type) {
+        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
+    }.collectAsState()
+
+    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+
+    val headerText by remember(currentScreen, type, actualWalletsState != null) {
+        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
+    }.collectAsState()
 
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
             headerText = headerText,
-            walletsState = walletsState.takeIf { showsWalletsHeader },
+            walletsState = actualWalletsState,
             walletsProcessingState = walletsProcessingState,
             error = error,
             currentScreen = currentScreen,
