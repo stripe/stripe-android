@@ -1433,24 +1433,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `setContentVisible updates content visible state`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.contentVisible.test {
-            // Initially true
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.setContentVisible(false)
-
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.setContentVisible(true)
-
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
     fun `paymentMethods is not empty if customer has payment methods`() = runTest {
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(
