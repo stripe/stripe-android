@@ -41,6 +41,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +57,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
+import com.stripe.android.financialconnections.ui.theme.Theme
 
 private val DefaultSpinnerHeight = 24.dp
 
@@ -221,10 +224,14 @@ internal object FinancialConnectionsButton {
     }
 }
 
+internal class ThemePreviewParameterProvider : CollectionPreviewParameterProvider<Theme>(Theme.entries)
+
 @Preview(group = "Components", name = "Button - primary - idle")
 @Composable
-internal fun FinancialConnectionsButtonPreview() {
-    FinancialConnectionsPreview {
+internal fun FinancialConnectionsButtonPreview(
+    @PreviewParameter(provider = ThemePreviewParameterProvider::class) theme: Theme,
+) {
+    FinancialConnectionsPreview(theme) {
         Column(
             modifier = Modifier
                 .background(colors.backgroundSurface)
