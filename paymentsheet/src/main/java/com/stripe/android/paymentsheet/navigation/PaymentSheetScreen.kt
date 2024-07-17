@@ -6,8 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.CvcRecollectionField
@@ -28,9 +31,11 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
+import com.stripe.android.R as PaymentsCoreR
 
 internal val PaymentSheetScreen.topContentPadding: Dp
     get() = when (this) {
@@ -56,6 +61,8 @@ internal sealed interface PaymentSheetScreen {
     val canNavigateBack: Boolean
     val sheetScreen: SheetScreen
 
+    fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?>
+
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
     @Composable
@@ -67,6 +74,10 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
         override val sheetScreen: SheetScreen = SheetScreen.LOADING
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(null)
+        }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(false)
@@ -92,6 +103,16 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = false
         override val sheetScreen: SheetScreen = SheetScreen.SELECT_SAVED_PAYMENT_METHODS
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(
+                if (isCompleteFlow && isWalletEnabled) {
+                    null
+                } else {
+                    resolvableString(R.string.stripe_paymentsheet_select_payment_method)
+                }
+            )
+        }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(isCompleteFlow)
@@ -157,6 +178,20 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = true
         override val sheetScreen: SheetScreen = SheetScreen.ADD_ANOTHER_PAYMENT_METHOD
 
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return interactor.state.mapAsStateFlow { state ->
+                if (isWalletEnabled || isCompleteFlow) {
+                    null
+                } else {
+                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
+                        resolvableString(PaymentsCoreR.string.stripe_title_add_a_card)
+                    } else {
+                        resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                    }
+                }
+            }
+        }
+
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(isCompleteFlow)
         }
@@ -179,6 +214,22 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = false
         override val sheetScreen: SheetScreen = SheetScreen.ADD_FIRST_PAYMENT_METHOD
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return interactor.state.mapAsStateFlow { state ->
+                if (isWalletEnabled) {
+                    null
+                } else if (isCompleteFlow) {
+                    resolvableString(R.string.stripe_paymentsheet_add_payment_method_title)
+                } else {
+                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
+                        resolvableString(PaymentsCoreR.string.stripe_title_add_a_card)
+                    } else {
+                        resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                    }
+                }
+            }
+        }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(true)
@@ -203,6 +254,10 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = true
         override val sheetScreen: SheetScreen = SheetScreen.EDIT_PAYMENT_METHOD
 
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(resolvableString(PaymentsCoreR.string.stripe_title_update_card))
+        }
+
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(false)
         }
@@ -224,6 +279,18 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = false
         override val sheetScreen: SheetScreen = SheetScreen.VERTICAL_MODE
 
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(
+                if (isWalletEnabled) {
+                    null
+                } else if (isCompleteFlow) {
+                    resolvableString(R.string.stripe_paymentsheet_select_payment_method)
+                } else {
+                    resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                }
+            )
+        }
+
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return interactor.showsWalletsHeader
         }
@@ -243,6 +310,10 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
         override val sheetScreen: SheetScreen = SheetScreen.FORM
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(null)
+        }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(showsWalletHeader)
@@ -264,7 +335,20 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = true
         override val sheetScreen: SheetScreen = SheetScreen.MANAGE_SAVED_PAYMENT_METHODS
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return interactor.state.mapAsStateFlow { state ->
+                resolvableString(
+                    if (state.isEditing) {
+                        R.string.stripe_paymentsheet_manage_payment_methods
+                    } else {
+                        R.string.stripe_paymentsheet_select_payment_method
+                    }
+                )
+            }
+        }
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> =
+            stateFlowOf(false)
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -283,7 +367,12 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = true
         override val sheetScreen: SheetScreen = SheetScreen.MANAGE_ONE_SAVED_PAYMENT_METHOD
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(resolvableString(R.string.stripe_paymentsheet_remove_pm_title))
+        }
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> =
+            stateFlowOf(false)
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {

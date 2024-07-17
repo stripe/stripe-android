@@ -650,8 +650,10 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.headerText.test {
-            assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card)
+        viewModel.navigationHandler.currentScreen.test {
+            awaitItem().title(isCompleteFlow = false, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_title_add_a_card))
+            }
         }
     }
 
