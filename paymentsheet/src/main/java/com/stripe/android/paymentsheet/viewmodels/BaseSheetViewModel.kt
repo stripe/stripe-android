@@ -144,7 +144,8 @@ internal abstract class BaseSheetViewModel(
     )
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
-        get() = newPaymentSelection?.getPaymentMethodCode() ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
+        get() = newPaymentSelection?.getPaymentMethodCode()
+            ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
 
     init {
         viewModelScope.launch {
