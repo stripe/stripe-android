@@ -3030,7 +3030,7 @@ internal class PaymentSheetViewModelTest {
     private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {
         return "{\"card\":{\"require_cvc_recollection\":$enabled}}"
     }
-    
+
     private val BaseSheetViewModel.supportedPaymentMethodTypes: List<String>
         get() = paymentMethodMetadata.value?.supportedPaymentMethodTypes().orEmpty()
 
