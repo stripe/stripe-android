@@ -11,8 +11,9 @@ import org.mockito.kotlin.mock
 internal class PaymentSheetScreenManageOneSavedPaymentMethodTest {
     @Test
     fun `title returns remove payment method`() = runTest {
-        PaymentSheetScreen.ManageOneSavedPaymentMethod(mock()).title(isCompleteFlow = true, isWalletEnabled = true).test {
-            assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_remove_pm_title))
-        }
+        PaymentSheetScreen.ManageOneSavedPaymentMethod(mock())
+            .title(isCompleteFlow = true, isWalletEnabled = true).test {
+                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_remove_pm_title))
+            }
     }
 }
