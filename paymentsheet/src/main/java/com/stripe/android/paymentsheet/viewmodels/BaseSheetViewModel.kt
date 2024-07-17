@@ -171,13 +171,6 @@ internal abstract class BaseSheetViewModel(
         }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
-    protected fun transitionToFirstScreen() {
-        val initialBackStack = determineInitialBackStack()
-        navigationHandler.resetTo(initialBackStack)
-    }
-
-    abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
-
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
     }

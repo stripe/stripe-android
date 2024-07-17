@@ -168,7 +168,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        transitionToFirstScreen()
+        navigationHandler.resetTo(determineInitialBackStack())
     }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
@@ -300,7 +300,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(VerticalModeInitialScreenFactory.create(this))
         }
