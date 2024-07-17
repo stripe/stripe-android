@@ -214,7 +214,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
-                mostRecentError = mostRecentError,
+                mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = savedPaymentMethodMutator.paymentMethods.value,
             )

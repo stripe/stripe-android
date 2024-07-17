@@ -60,9 +60,6 @@ internal abstract class BaseSheetViewModel(
     val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     val isCompleteFlow: Boolean,
 ) : AndroidViewModel(application) {
-
-    protected var mostRecentError: Throwable? = null
-
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
 
