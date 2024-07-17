@@ -69,9 +69,6 @@ internal abstract class BaseSheetViewModel(
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
-    private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
-    val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
-
     val navigationHandler: NavigationHandler = NavigationHandler { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
@@ -147,7 +144,7 @@ internal abstract class BaseSheetViewModel(
     )
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
-        get() = newPaymentSelection?.getPaymentMethodCode() ?: supportedPaymentMethodsFlow.value.first()
+        get() = newPaymentSelection?.getPaymentMethodCode() ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
 
     init {
         viewModelScope.launch {
@@ -190,7 +187,6 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
-        _supportedPaymentMethodsFlow.value = paymentMethodMetadata?.supportedPaymentMethodTypes() ?: emptyList()
     }
 
     abstract fun clearErrorMessages()

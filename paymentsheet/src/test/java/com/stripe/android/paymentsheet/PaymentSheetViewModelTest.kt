@@ -92,6 +92,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -1160,7 +1161,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodsFlow.value).isEmpty()
+        assertThat(viewModel.supportedPaymentMethodTypes).isEmpty()
     }
 
     @Test
@@ -1177,7 +1178,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1193,7 +1194,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodsFlow.value).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1294,7 +1295,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethodsFlow.value
+            viewModel.supportedPaymentMethodTypes
         ).containsExactly("card", "ideal")
     }
 
@@ -1318,7 +1319,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethodsFlow.value
+            viewModel.supportedPaymentMethodTypes
         ).containsExactly("card", "ideal", "sepa_debit", "sofort")
     }
 
@@ -3029,6 +3030,9 @@ internal class PaymentSheetViewModelTest {
     private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {
         return "{\"card\":{\"require_cvc_recollection\":$enabled}}"
     }
+    
+    private val BaseSheetViewModel.supportedPaymentMethodTypes: List<String>
+        get() = paymentMethodMetadata.value?.supportedPaymentMethodTypes().orEmpty()
 
     private companion object {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =

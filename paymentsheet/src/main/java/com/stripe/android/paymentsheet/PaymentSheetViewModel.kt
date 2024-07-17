@@ -220,7 +220,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkConfigurationCoordinator.emailFlow,
         googlePayState,
         buttonsEnabled,
-        supportedPaymentMethodsFlow,
+        paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
     ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
