@@ -98,7 +98,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkHandler.isLinkEnabled,
         linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-        supportedPaymentMethodsFlow,
+        paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
         googlePayState,
     ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, googlePayState ->
         WalletsState.create(
