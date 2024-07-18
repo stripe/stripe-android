@@ -10,18 +10,15 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
-import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -89,8 +86,7 @@ internal abstract class BaseSheetViewModel(
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
     abstract val error: StateFlow<ResolvableString?>
 
-    private val _mandateText = MutableStateFlow<MandateText?>(null)
-    internal val mandateText: StateFlow<MandateText?> = _mandateText
+    val mandateHandler = MandateHandler.create(this)
 
     private val _cvcControllerFlow = MutableStateFlow(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
     internal val cvcControllerFlow: StateFlow<CvcController> = _cvcControllerFlow
@@ -159,7 +155,7 @@ internal abstract class BaseSheetViewModel(
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
             navigationHandler.currentScreen.drop(1).collect {
                 clearErrorMessages()
-                _mandateText.value = null
+                mandateHandler.updateMandateText(null, false)
             }
         }
     }
@@ -180,17 +176,6 @@ internal abstract class BaseSheetViewModel(
         _primaryButtonState.value = state
     }
 
-    fun updateMandateText(mandateText: ResolvableString?, showAbove: Boolean) {
-        _mandateText.value = if (mandateText != null) {
-            MandateText(
-                text = mandateText,
-                showAbovePrimaryButton = showAbove || config.paymentMethodLayout == PaymentMethodLayout.Vertical
-            )
-        } else {
-            null
-        }
-    }
-
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
     abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
@@ -205,23 +190,7 @@ internal abstract class BaseSheetViewModel(
 
         savedStateHandle[SAVE_SELECTION] = selection
 
-        val isRequestingReuse = if (selection is PaymentSelection.New) {
-            selection.customerRequestedSave == RequestReuse
-        } else {
-            false
-        }
-
-        val mandateText = selection?.mandateText(
-            merchantName = config.merchantDisplayName,
-            isSaveForFutureUseSelected = isRequestingReuse,
-            isSetupFlow = paymentMethodMetadata.value?.stripeIntent is SetupIntent,
-        )
-
-        val showAbove = (selection as? PaymentSelection.Saved?)
-            ?.showMandateAbovePrimaryButton == true
-
         updateCvcFlows(selection)
-        updateMandateText(mandateText = mandateText, showAbove = showAbove)
         clearErrorMessages()
     }
 

@@ -22,7 +22,6 @@ class PaymentSelectionTest {
             val link = PaymentSelection.Link
             val result = link.mandateText(
                 merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
             )
             assertThat(result).isNull()
@@ -34,7 +33,6 @@ class PaymentSelectionTest {
             val googlePay = PaymentSelection.GooglePay
             val result = googlePay.mandateText(
                 merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
             )
             assertThat(result).isNull()
@@ -69,7 +67,6 @@ class PaymentSelectionTest {
 
             val result = newPaymentSelection.mandateText(
                 merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
             )
 
@@ -84,7 +81,6 @@ class PaymentSelectionTest {
 
         var result = newPaymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = true,
             isSetupFlow = false,
         )?.resolve(context)
 
@@ -95,7 +91,6 @@ class PaymentSelectionTest {
 
         result = newPaymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = true,
         )?.resolve(context)
 
@@ -113,7 +108,6 @@ class PaymentSelectionTest {
 
         val result = newPaymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
         )?.resolve(context)
 
@@ -131,7 +125,6 @@ class PaymentSelectionTest {
 
         val result = paymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
         )?.resolve(context)
 
@@ -154,7 +147,6 @@ class PaymentSelectionTest {
 
         val result = paymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
         )?.resolve(context)
 
@@ -173,7 +165,6 @@ class PaymentSelectionTest {
 
             val result = newPaymentSelection.mandateText(
                 merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
             )
             assertThat(result).isNull()

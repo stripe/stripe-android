@@ -284,7 +284,6 @@ internal class CustomerSheetViewModel(
                             ),
                             mandateText = newPaymentSelection.mandateText(
                                 merchantName = configuration.merchantDisplayName,
-                                isSaveForFutureUseSelected = false,
                                 isSetupFlow = false,
                             )
                         )
@@ -446,7 +445,6 @@ internal class CustomerSheetViewModel(
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
                     merchantName = configuration.merchantDisplayName,
-                    isSaveForFutureUseSelected = false,
                     isSetupFlow = true,
                 ),
                 primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
@@ -700,7 +698,6 @@ internal class CustomerSheetViewModel(
                         ),
                         mandateText = paymentSelection.mandateText(
                             merchantName = configuration.merchantDisplayName,
-                            isSaveForFutureUseSelected = false,
                             isSetupFlow = false,
                         )?.takeIf { primaryButtonVisible },
                     )

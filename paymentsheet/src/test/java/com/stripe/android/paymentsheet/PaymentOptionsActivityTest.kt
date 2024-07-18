@@ -366,14 +366,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text.resolvableString, false)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -392,14 +392,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text.resolvableString, true)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, true)
+                viewModel.mandateHandler.updateMandateText(null, true)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -421,14 +421,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text.resolvableString, false)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
