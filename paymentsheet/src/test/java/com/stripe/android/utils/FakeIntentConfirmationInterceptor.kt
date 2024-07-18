@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -38,7 +39,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     fun enqueueFailureStep(cause: Exception, message: String) {
         val nextStep = IntentConfirmationInterceptor.NextStep.Fail(
             cause = cause,
-            message = message
+            message = message.resolvableString
         )
         channel.trySend(nextStep)
     }

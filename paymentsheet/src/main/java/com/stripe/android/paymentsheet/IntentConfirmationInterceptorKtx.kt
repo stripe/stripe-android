@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
@@ -35,7 +36,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
         null -> {
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = IllegalStateException("Nothing selected."),
-                message = context.getString(R.string.stripe_something_went_wrong),
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         }
         else -> {
@@ -48,7 +49,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
             )
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = exception,
-                message = context.getString(R.string.stripe_something_went_wrong),
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         }
     }
