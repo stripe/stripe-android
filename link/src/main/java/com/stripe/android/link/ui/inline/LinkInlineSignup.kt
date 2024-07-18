@@ -48,6 +48,7 @@ import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
@@ -217,8 +218,7 @@ private fun LinkCheckbox(
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface
-                    .copy(alpha = contentAlpha)
+                color = MaterialTheme.stripeColors.subtitle
             )
         }
     }
