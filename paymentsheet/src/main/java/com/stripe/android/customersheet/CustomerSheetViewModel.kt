@@ -1019,7 +1019,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = nextStep.message.resolvableString,
+                        errorMessage = nextStep.message,
                     )
                 }
                 Result.failure(nextStep.cause)

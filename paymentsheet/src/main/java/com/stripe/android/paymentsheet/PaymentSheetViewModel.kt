@@ -634,7 +634,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onError(nextStep.message.resolvableString)
+                    onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
                     processPayment(stripeIntent, PaymentResult.Completed)
