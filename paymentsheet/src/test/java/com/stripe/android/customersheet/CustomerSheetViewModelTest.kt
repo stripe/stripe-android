@@ -1943,7 +1943,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnUpdateMandateText(
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showAbovePrimaryButton = true,
                 )
             )
@@ -2444,7 +2444,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnUpdateMandateText(
-                    mandateText = "Mandate",
+                    mandateText = "Mandate".resolvableString,
                     showAbovePrimaryButton = false
                 )
             )

@@ -46,7 +46,7 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
-    val onMandateTextChanged: (mandate: String?, showAbove: Boolean) -> Unit,
+    val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
     val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,

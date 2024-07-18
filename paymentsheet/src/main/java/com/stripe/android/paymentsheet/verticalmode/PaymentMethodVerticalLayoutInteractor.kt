@@ -127,7 +127,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     it is PaymentSheetScreen.VerticalMode
                 },
                 onMandateTextUpdated = {
-                    viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
+                    viewModel.updateMandateText(it, true)
                 },
             )
         }

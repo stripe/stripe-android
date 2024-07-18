@@ -626,9 +626,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun buildMandateText(): String {
+    private fun buildMandateText(): ResolvableString {
         return USBankAccountTextBuilder.getContinueMandateText(
-            context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
             isInstantDebits = args.instantDebits,

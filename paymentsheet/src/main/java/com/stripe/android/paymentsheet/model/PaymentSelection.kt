@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.model
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -28,11 +28,10 @@ internal sealed class PaymentSelection : Parcelable {
     abstract val requiresConfirmation: Boolean
 
     abstract fun mandateText(
-        context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
         isSetupFlow: Boolean,
-    ): String?
+    ): ResolvableString?
 
     @Parcelize
     data object GooglePay : PaymentSelection() {
@@ -41,11 +40,10 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -57,11 +55,10 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -81,11 +78,10 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -111,15 +107,13 @@ internal sealed class PaymentSelection : Parcelable {
                 paymentMethod.type == PaymentMethod.Type.SepaDebit
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
                     USBankAccountTextBuilder.getContinueMandateText(
-                        context = context,
                         merchantName = merchantName,
                         isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                         isInstantDebits = false,
@@ -127,7 +121,7 @@ internal sealed class PaymentSelection : Parcelable {
                     )
                 }
                 PaymentMethod.Type.SepaDebit -> {
-                    context.getString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
+                    resolvableString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
                 }
                 else -> {
                     null
@@ -153,11 +147,10 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
 
@@ -187,11 +180,10 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New() {
 
             override fun mandateText(
-                context: Context,
                 merchantName: String,
                 isSaveForFutureUseSelected: Boolean,
                 isSetupFlow: Boolean,
-            ): String? {
+            ): ResolvableString? {
                 return screenState.mandateText
             }
 

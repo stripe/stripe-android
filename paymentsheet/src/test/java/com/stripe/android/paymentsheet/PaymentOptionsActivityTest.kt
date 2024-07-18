@@ -24,6 +24,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -365,7 +366,7 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -391,7 +392,7 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, true)
+                viewModel.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -420,7 +421,7 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y

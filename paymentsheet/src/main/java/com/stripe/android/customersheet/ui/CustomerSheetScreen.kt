@@ -163,7 +163,7 @@ internal fun SelectPaymentMethod(
         }
 
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -243,7 +243,7 @@ internal fun AddPaymentMethod(
 
     if (viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -267,7 +267,7 @@ internal fun AddPaymentMethod(
 
     if (!viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)

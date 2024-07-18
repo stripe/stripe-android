@@ -29,7 +29,7 @@ internal sealed class CustomerSheetViewAction {
         val callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?,
     ) : CustomerSheetViewAction()
     class OnUpdateMandateText(
-        val mandateText: String?,
+        val mandateText: ResolvableString?,
         val showAbovePrimaryButton: Boolean,
     ) : CustomerSheetViewAction()
     class OnConfirmUSBankAccount(

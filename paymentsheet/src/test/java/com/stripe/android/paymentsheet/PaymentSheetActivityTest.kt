@@ -807,11 +807,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
+            val text = resolvableString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
             viewModel.updateMandateText(text, false)
 
             composeTestRule
-                .onNodeWithText(text)
+                .onNodeWithText(text.resolve(context))
                 .assertIsDisplayed()
         }
     }
@@ -827,7 +827,7 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, false)
+            viewModel.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -850,7 +850,7 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, true)
+            viewModel.updateMandateText(text.resolvableString, true)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -878,7 +878,7 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, false)
+            viewModel.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
