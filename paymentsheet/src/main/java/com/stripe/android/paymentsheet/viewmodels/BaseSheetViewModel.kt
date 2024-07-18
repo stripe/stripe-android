@@ -155,7 +155,7 @@ internal abstract class BaseSheetViewModel(
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
             navigationHandler.currentScreen.drop(1).collect {
                 clearErrorMessages()
-                mandateHandler.updateMandateText(null, false)
+                mandateHandler.updateMandateText(mandateText = null, showAbove = false)
             }
         }
     }
