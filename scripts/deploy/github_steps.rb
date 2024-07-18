@@ -24,14 +24,14 @@ def pull_latest()
 end
 
 def switch_to_release_branch()
-    # Using the -B flag will create a new branch if it doesn't exist, or will reset the existing
-    # branch.
-    execute_or_fail("git checkout -B #{release_branch}")
+    # Ensure that the branch doesn't already exist locally or remotely before creating it here.
+    delete_release_branch
+    execute_or_fail("git checkout -b #{release_branch}")
 end
 
 def delete_release_branch()
-    execute_or_fail("git push origin --delete #{release_branch}")
-    execute_or_fail("git branch -d #{release_branch}")
+    execute("git push origin --delete #{release_branch}")
+    execute("git branch -d #{release_branch}")
 end
 
 def create_version_bump_pr()
@@ -43,7 +43,7 @@ def create_version_bump_pr()
         execute_or_fail("git push -u origin")
     rescue
         # Undo all of the above if any of the steps fail.
-        execute_or_fail("git reset HEAD~")
+        execute("git reset HEAD~")
         # Don't continue if any of the above failed.
         raise
     end

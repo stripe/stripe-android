@@ -9,6 +9,11 @@ def wait_for_user
     STDIN.gets
 end
 
+def execute(command)
+    puts "Executing #{command}..."
+    system(command)
+end
+
 def execute_or_fail(command)
     puts "Executing #{command}..."
     system(command) or raise "Failed to execute #{command}"

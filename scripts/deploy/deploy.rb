@@ -47,7 +47,7 @@ OptionParser.new do |opts|
       @is_dry_run = t
   end
 
-  opts.on('--branch', "Branch to deploy from") do |t|
+  opts.on('--branch BRANCH', "Branch to deploy from") do |t|
       @branch = t
   end
 end.parse!
@@ -66,11 +66,7 @@ steps = [
     method(:create_version_bump_pr),
 ]
 
-begin
-    execute_steps(steps, @step_index)
-rescue
-    delete_release_branch()
-end
+execute_steps(steps, @step_index)
 
 if (@is_dry_run)
     rputs "Please verify that the dry run worked as expected, then press enter to revert all changes."
