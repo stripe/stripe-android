@@ -1355,12 +1355,12 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
-        assertThat(viewModel.mandateText.value?.text?.resolve(application))
+        assertThat(viewModel.mandateHandler.mandateText.value?.text?.resolve(application))
             .isEqualTo(
                 "By continuing, you agree to authorize payments pursuant to " +
                     "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
             )
-        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isFalse()
+        assertThat(viewModel.mandateHandler.mandateText.value?.showAbovePrimaryButton).isFalse()
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -1373,13 +1373,13 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.mandateText.value).isNull()
+        assertThat(viewModel.mandateHandler.mandateText.value).isNull()
 
         viewModel.updateSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.mandateText.value).isNull()
+        assertThat(viewModel.mandateHandler.mandateText.value).isNull()
     }
 
     @Test
@@ -1390,7 +1390,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.mandateText.value?.text?.resolve(application))
+        assertThat(viewModel.mandateHandler.mandateText.value?.text?.resolve(application))
             .isEqualTo(
                 "By providing your payment information and confirming this payment, you authorise (A) Merchant, Inc. " +
                     "and Stripe, our payment service provider, to send instructions to your bank to debit your " +
@@ -1401,13 +1401,13 @@ internal class PaymentSheetViewModelTest {
                     "obtain from your bank. You agree to receive notifications for future debits up to 2 days before" +
                     " they occur."
             )
-        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isTrue()
+        assertThat(viewModel.mandateHandler.mandateText.value?.showAbovePrimaryButton).isTrue()
 
         viewModel.updateSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.mandateText.value).isNull()
+        assertThat(viewModel.mandateHandler.mandateText.value).isNull()
     }
 
     @Test

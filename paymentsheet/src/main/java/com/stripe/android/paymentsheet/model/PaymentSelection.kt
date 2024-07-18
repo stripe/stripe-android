@@ -29,7 +29,6 @@ internal sealed class PaymentSelection : Parcelable {
 
     abstract fun mandateText(
         merchantName: String,
-        isSaveForFutureUseSelected: Boolean,
         isSetupFlow: Boolean,
     ): ResolvableString?
 
@@ -41,7 +40,6 @@ internal sealed class PaymentSelection : Parcelable {
 
         override fun mandateText(
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
         ): ResolvableString? {
             return null
@@ -56,7 +54,6 @@ internal sealed class PaymentSelection : Parcelable {
 
         override fun mandateText(
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
         ): ResolvableString? {
             return null
@@ -79,7 +76,6 @@ internal sealed class PaymentSelection : Parcelable {
 
         override fun mandateText(
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean
         ): ResolvableString? {
             return null
@@ -108,14 +104,13 @@ internal sealed class PaymentSelection : Parcelable {
 
         override fun mandateText(
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
         ): ResolvableString? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
                     USBankAccountTextBuilder.getContinueMandateText(
                         merchantName = merchantName,
-                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isSaveForFutureUseSelected = false,
                         isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
                     )
@@ -148,7 +143,6 @@ internal sealed class PaymentSelection : Parcelable {
 
         override fun mandateText(
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
         ): ResolvableString? {
             return null
@@ -181,7 +175,6 @@ internal sealed class PaymentSelection : Parcelable {
 
             override fun mandateText(
                 merchantName: String,
-                isSaveForFutureUseSelected: Boolean,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
                 return screenState.mandateText

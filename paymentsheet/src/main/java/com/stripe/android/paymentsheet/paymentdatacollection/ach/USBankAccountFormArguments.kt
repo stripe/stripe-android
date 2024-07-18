@@ -87,7 +87,7 @@ internal class USBankAccountFormArguments(
                 clientSecret = stripeIntent?.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
-                onMandateTextChanged = viewModel::updateMandateText,
+                onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
                 onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
                 onCollectBankAccountResult = null,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },

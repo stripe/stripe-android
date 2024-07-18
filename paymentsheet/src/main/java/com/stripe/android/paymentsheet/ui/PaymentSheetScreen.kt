@@ -164,7 +164,7 @@ internal fun PaymentSheetScreenContent(
     val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
-    val mandateText by viewModel.mandateText.collectAsState()
+    val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
 
     val showsWalletsHeader by remember(currentScreen, type) {
