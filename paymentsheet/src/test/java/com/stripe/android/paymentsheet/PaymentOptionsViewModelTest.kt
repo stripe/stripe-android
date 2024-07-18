@@ -648,7 +648,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.navigationHandler.currentScreen.test {
             awaitItem().title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_title_add_a_card))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card.resolvableString)
             }
         }
     }

@@ -107,7 +107,7 @@ internal object CustomerSheetTestHelper {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
+        primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,

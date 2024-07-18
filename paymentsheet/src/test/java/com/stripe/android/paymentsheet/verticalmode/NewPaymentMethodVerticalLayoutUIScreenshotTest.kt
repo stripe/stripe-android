@@ -85,7 +85,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             DisplayablePaymentMethod(
                 code = "example_pm",
-                displayName = resolvableString(R.string.stripe_paymentsheet_payment_method_affirm),
+                displayName = R.string.stripe_paymentsheet_payment_method_affirm.resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,

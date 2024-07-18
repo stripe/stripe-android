@@ -55,7 +55,7 @@ internal class StripeErrorMessageTest {
     @Test
     fun testApiConnectionExceptionWithResolvableString() {
         assertThatResolvableStripeErrorMessage(APIConnectionException.create(IOException("Foobar")))
-            .isEqualTo(resolvableString(R.string.stripe_network_error_message))
+            .isEqualTo(R.string.stripe_network_error_message.resolvableString)
     }
 
     @Test
@@ -73,13 +73,13 @@ internal class StripeErrorMessageTest {
     @Test
     fun testStripeExceptionWithoutStripeErrorMessageWithResolvableString() {
         assertThatResolvableStripeErrorMessage(InvalidRequestException())
-            .isEqualTo(resolvableString(R.string.stripe_something_went_wrong))
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
     }
 
     @Test
     fun testIllegalStateExceptionWithResolvableString() {
         assertThatResolvableStripeErrorMessage(IllegalStateException("Hi mom"))
-            .isEqualTo(resolvableString(R.string.stripe_something_went_wrong))
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
     }
 
     private fun assertThatStripeErrorMessage(throwable: Throwable): StringSubject {

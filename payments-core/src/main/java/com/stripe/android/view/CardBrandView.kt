@@ -315,7 +315,7 @@ private fun CardBrandChoiceDropdown(
     val choices = brands.map { it.toChoice() }
 
     SingleChoiceDropdown(
-        title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
+        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
         expanded = expanded,
         currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
         choices = choices,

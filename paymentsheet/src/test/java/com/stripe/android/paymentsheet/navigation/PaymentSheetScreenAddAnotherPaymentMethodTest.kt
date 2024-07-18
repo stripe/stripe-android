@@ -40,7 +40,7 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
         val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(state))
         PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(PaymentsCoreR.string.stripe_title_add_a_card))
+                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
             }
     }
 
@@ -50,7 +50,7 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
         val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(state))
         PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_choose_payment_method))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
             }
     }
 
@@ -59,7 +59,7 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
         val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(createState()))
         PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_choose_payment_method))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
             }
     }
 

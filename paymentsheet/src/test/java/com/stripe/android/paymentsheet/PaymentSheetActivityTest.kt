@@ -807,7 +807,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            val text = resolvableString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
+            val text = StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account.resolvableString
             viewModel.mandateHandler.updateMandateText(text, false)
 
             composeTestRule

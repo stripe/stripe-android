@@ -843,7 +843,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo(resolvableString(R.string.stripe_something_went_wrong))
+            assertThat(viewState.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(viewState.enabled).isTrue()
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -1854,7 +1854,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -1864,7 +1864,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+                .isEqualTo(UiCoreR.string.stripe_continue_button_label.resolvableString)
         }
     }
 
@@ -2339,7 +2339,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
         }
     }
 
@@ -2359,7 +2359,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
@@ -2369,7 +2369,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+                .isEqualTo(UiCoreR.string.stripe_continue_button_label.resolvableString)
         }
     }
 
@@ -2391,7 +2391,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2401,7 +2401,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2411,7 +2411,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
         }
     }
 

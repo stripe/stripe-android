@@ -788,7 +788,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(viewModel.contentVisible.value).isTrue()
             assertThat(walletsProcessingStateTurbine.awaitItem())
-                .isEqualTo(WalletsProcessingState.Idle(resolvableString(PaymentsCoreR.string.stripe_internal_error)))
+                .isEqualTo(WalletsProcessingState.Idle(PaymentsCoreR.string.stripe_internal_error.resolvableString))
             assertThat(processingTurbine.awaitItem()).isFalse()
 
             walletsProcessingStateTurbine.cancel()
@@ -1097,7 +1097,7 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitItem())
                     .isEqualTo(
                         PaymentSheetViewState.Reset(
-                            UserErrorMessage(resolvableString(R.string.stripe_something_went_wrong))
+                            UserErrorMessage(R.string.stripe_something_went_wrong.resolvableString)
                         )
                     )
             }

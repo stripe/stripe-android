@@ -181,7 +181,7 @@ internal class DefaultCardNumberController(
         if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
-                label = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
+                label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
                 icon = CardBrand.Unknown.icon
             )
 
@@ -213,7 +213,7 @@ internal class DefaultCardNumberController(
             }
 
             TextFieldIcon.Dropdown(
-                title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
+                title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
                 currentItem = selected ?: noSelection,
                 items = items,
                 hide = brands.size < 2

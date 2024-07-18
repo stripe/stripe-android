@@ -185,7 +185,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = true
         isClickable = false
         setLabel(
-            resolvableString(R.string.stripe_paymentsheet_primary_button_processing)
+            R.string.stripe_paymentsheet_primary_button_processing.resolvableString
         )
     }
 

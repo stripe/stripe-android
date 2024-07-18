@@ -15,7 +15,7 @@ internal class PaymentSheetScreenEditPaymentMethodTest {
             interactor = mock(),
             isLiveMode = true
         ).title(isCompleteFlow = true, isWalletEnabled = true).test {
-            assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_title_update_card))
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_title_update_card.resolvableString)
         }
     }
 }
