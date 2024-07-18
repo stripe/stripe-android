@@ -355,6 +355,37 @@ class PrimaryButtonUiStateMapperTest {
         }
     }
 
+    @Test
+    fun `Formats currency correctly with no per app localization`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+        assertThat(AppCompatDelegate.getApplicationLocales()).isEqualTo(LocaleListCompat.getEmptyLocaleList())
+
+        result.test {
+            assertThat(
+                awaitItem()?.label
+            ).isEqualTo(
+                resolvableString(
+                    id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("\$12.34")
+                )
+            )
+        }
+    }
+
     private fun createMapper(
         isProcessingPayment: Boolean,
         config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some Name"),
