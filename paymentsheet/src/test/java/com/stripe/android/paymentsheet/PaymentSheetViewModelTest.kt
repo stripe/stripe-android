@@ -1355,7 +1355,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
-        assertThat(viewModel.mandateText.value?.text)
+        assertThat(viewModel.mandateText.value?.text?.resolve(application))
             .isEqualTo(
                 "By continuing, you agree to authorize payments pursuant to " +
                     "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
@@ -1390,7 +1390,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.mandateText.value?.text)
+        assertThat(viewModel.mandateText.value?.text?.resolve(application))
             .isEqualTo(
                 "By providing your payment information and confirming this payment, you authorise (A) Merchant, Inc. " +
                     "and Stripe, our payment service provider, to send instructions to your bank to debit your " +

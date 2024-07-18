@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -61,7 +62,7 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
 internal fun USBankAccountFormArguments.updateMandateText(
     context: Context,
     screenState: USBankAccountFormScreenState,
-    mandateText: String?,
+    mandateText: ResolvableString?,
     merchantName: String,
 ) {
     val microdepositsText =
@@ -75,9 +76,9 @@ internal fun USBankAccountFormArguments.updateMandateText(
         """
             $microdepositsText
                 
-            $mandateText
+            ${mandateText.resolve(context)}
         """.trimIndent()
-    }
+    }?.resolvableString
 
     onMandateTextChanged(updatedText, false)
 }

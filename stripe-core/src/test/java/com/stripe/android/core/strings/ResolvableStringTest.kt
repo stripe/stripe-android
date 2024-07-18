@@ -3,6 +3,7 @@ package com.stripe.android.core.strings
 import android.os.Bundle
 import android.os.Parcel
 import androidx.test.runner.AndroidJUnit4
+import com.stripe.android.core.strings.transformations.Replace
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -54,6 +55,24 @@ class ResolvableStringTest {
         assertEquals(
             resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo"),
             resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo")
+        )
+    }
+
+    @Test
+    fun `identifier resolvable strings with comparable 'TransformOperation' objects should be equal`() {
+        assertEquals(
+            resolvableString(
+                id = 1453235,
+                resolvableString(value = "1453235"),
+                "argTwo",
+                transformations = listOf(Replace("one", "two"))
+            ).toString(),
+            resolvableString(
+                id = 1453235,
+                resolvableString(value = "1453235"),
+                "argTwo",
+                transformations = listOf(Replace("one", "two"))
+            ).toString()
         )
     }
 
@@ -121,6 +140,24 @@ class ResolvableStringTest {
         assertEquals(
             staticResolvable,
             unparcelizedStaticResolvable,
+        )
+    }
+
+    @Test
+    fun `resolvable strings should parcelize and un-parcelize properly with transforms`() {
+        val identifierResolvable = IdentifierResolvableString(
+            id = 1453235,
+            args = emptyList(),
+            transformations = listOf(
+                Replace("old", "new")
+            )
+        )
+
+        val unparcelizedIdentifierResolvable = writeThenRead(identifierResolvable)
+
+        assertEquals(
+            identifierResolvable,
+            unparcelizedIdentifierResolvable,
         )
     }
 

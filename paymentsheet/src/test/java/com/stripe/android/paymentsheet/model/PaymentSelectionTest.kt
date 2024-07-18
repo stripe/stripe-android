@@ -21,7 +21,6 @@ class PaymentSelectionTest {
         runAllConfigurations { isSaveForFutureUseSelected ->
             val link = PaymentSelection.Link
             val result = link.mandateText(
-                context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
@@ -34,7 +33,6 @@ class PaymentSelectionTest {
         runAllConfigurations { isSaveForFutureUseSelected ->
             val googlePay = PaymentSelection.GooglePay
             val result = googlePay.mandateText(
-                context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
@@ -70,7 +68,6 @@ class PaymentSelectionTest {
             )
 
             val result = newPaymentSelection.mandateText(
-                context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,
@@ -86,11 +83,10 @@ class PaymentSelectionTest {
         )
 
         var result = newPaymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = true,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By saving your bank account for Merchant you agree to authorize payments pursuant " +
@@ -98,11 +94,10 @@ class PaymentSelectionTest {
         )
 
         result = newPaymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
             isSetupFlow = true,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By saving your bank account for Merchant you agree to authorize payments pursuant " +
@@ -117,11 +112,10 @@ class PaymentSelectionTest {
         )
 
         val result = newPaymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By continuing, you agree to authorize payments pursuant to " +
@@ -136,11 +130,10 @@ class PaymentSelectionTest {
         )
 
         val result = paymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By providing your payment information and confirming this payment, you authorise (A) Merchant and" +
@@ -160,11 +153,10 @@ class PaymentSelectionTest {
         )
 
         val result = paymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By continuing, you agree to authorize payments pursuant to " +
@@ -180,7 +172,6 @@ class PaymentSelectionTest {
             )
 
             val result = newPaymentSelection.mandateText(
-                context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                 isSetupFlow = false,

@@ -81,7 +81,7 @@ internal sealed class CustomerSheetViewState(
         override val canRemovePaymentMethods: Boolean,
         val errorMessage: String? = null,
         val unconfirmedPaymentMethod: PaymentMethod? = null,
-        val mandateText: String? = null,
+        val mandateText: ResolvableString? = null,
         override val cbcEligibility: CardBrandChoiceEligibility,
     ) : CustomerSheetViewState(
         savedPaymentMethods = savedPaymentMethods,
@@ -114,7 +114,7 @@ internal sealed class CustomerSheetViewState(
         val primaryButtonLabel: ResolvableString,
         val primaryButtonEnabled: Boolean,
         val customPrimaryButtonUiState: PrimaryButton.UIState?,
-        val mandateText: String? = null,
+        val mandateText: ResolvableString? = null,
         val showMandateAbovePrimaryButton: Boolean = false,
         val displayDismissConfirmationModal: Boolean = false,
         val bankAccountResult: CollectBankAccountResultInternal?,

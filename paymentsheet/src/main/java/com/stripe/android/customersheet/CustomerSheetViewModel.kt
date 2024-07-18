@@ -283,7 +283,6 @@ internal class CustomerSheetViewModel(
                                 R.string.stripe_paymentsheet_confirm
                             ),
                             mandateText = newPaymentSelection.mandateText(
-                                context = application,
                                 merchantName = configuration.merchantDisplayName,
                                 isSaveForFutureUseSelected = false,
                                 isSetupFlow = false,
@@ -446,7 +445,6 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
-                    context = application,
                     merchantName = configuration.merchantDisplayName,
                     isSaveForFutureUseSelected = false,
                     isSetupFlow = true,
@@ -701,7 +699,6 @@ internal class CustomerSheetViewModel(
                             R.string.stripe_paymentsheet_confirm
                         ),
                         mandateText = paymentSelection.mandateText(
-                            context = application,
                             merchantName = configuration.merchantDisplayName,
                             isSaveForFutureUseSelected = false,
                             isSetupFlow = false,
@@ -878,7 +875,7 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun updateMandateText(mandateText: String?, showAbove: Boolean) {
+    private fun updateMandateText(mandateText: ResolvableString?, showAbove: Boolean) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 mandateText = mandateText,

@@ -180,7 +180,7 @@ internal abstract class BaseSheetViewModel(
         _primaryButtonState.value = state
     }
 
-    fun updateMandateText(mandateText: String?, showAbove: Boolean) {
+    fun updateMandateText(mandateText: ResolvableString?, showAbove: Boolean) {
         _mandateText.value = if (mandateText != null) {
             MandateText(
                 text = mandateText,
@@ -212,7 +212,6 @@ internal abstract class BaseSheetViewModel(
         }
 
         val mandateText = selection?.mandateText(
-            context = getApplication(),
             merchantName = config.merchantDisplayName,
             isSaveForFutureUseSelected = isRequestingReuse,
             isSetupFlow = paymentMethodMetadata.value?.stripeIntent is SetupIntent,

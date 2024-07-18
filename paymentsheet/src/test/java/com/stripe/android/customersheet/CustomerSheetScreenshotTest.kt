@@ -215,7 +215,7 @@ internal class CustomerSheetScreenshotTest {
                     isGooglePayEnabled = false,
                     primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
-                    mandateText = "Some mandate text."
+                    mandateText = "Some mandate text.".resolvableString
                 ),
                 paymentMethodNameProvider = { it!! },
             )
@@ -230,7 +230,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = true,
                 ),
                 paymentMethodNameProvider = { it!! },
@@ -247,7 +247,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = false,
                 ),
                 paymentMethodNameProvider = { it!! },
