@@ -69,7 +69,11 @@ steps = [
 execute_steps(steps, @step_index)
 
 if (@is_dry_run)
-    rputs "Please verify that the dry run worked as expected, then press enter to revert all changes."
+    rputs "Please verify that the dry run worked as expected.
+
+    You should see a PR opened that bumps version numbers in the stripe-android codebase on branch release/<new release number>.
+
+    When you're done, press enter to revert all changes."
     wait_for_user()
 
     revert_all_changes()

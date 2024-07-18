@@ -66,7 +66,10 @@ def create_version_bump_pr()
     )
 
     rputs "Merge the version bump PR"
-    `open #{response.html_url}`
+
+    pr_url = response.html_url
+    puts "Opening url #{pr_url}"
+    `open #{pr_url}`
     wait_for_user
 end
 
@@ -84,7 +87,7 @@ end
 private def github_login
   token = `fetch-password -q bindings/gh-tokens/$USER`
   if $?.exitstatus != 0
-    puts "Couldn't fetch GitHub token. Follow the Android SDK Deploy Guide (http://go/android-sdk-deploy) to set up a token. \a".red
+    puts "Couldn't fetch GitHub token. Follow the Android SDK Deploy Guide (https://go/android-sdk-deploy) to set up a token. \a".red
     exit(1)
   end
   client = Octokit::Client.new(access_token: token)
