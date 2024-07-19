@@ -631,7 +631,6 @@ internal class PaymentOptionsViewModelTest {
                 config = PAYMENT_OPTION_CONTRACT_ARGS.state.config.copy(
                     allowsDelayedPaymentMethods = false,
                 ),
-                isGooglePayReady = false,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT.copy(
                         paymentMethodTypes = listOf(
@@ -901,12 +900,13 @@ internal class PaymentOptionsViewModelTest {
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                isGooglePayReady = true,
                 paymentSelection = null,
                 linkState = null,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = PAYMENT_INTENT),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT,
+                    isGooglePayReady = true,
+                ),
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,

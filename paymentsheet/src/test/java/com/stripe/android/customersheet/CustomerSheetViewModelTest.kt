@@ -559,6 +559,7 @@ class CustomerSheetViewModelTest {
     fun `When removing last payment method & google pay disabled, should transition to add payment screen`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            isGooglePayAvailable = false,
             customerSheetLoader = FakeCustomerSheetLoader(
                 isGooglePayAvailable = false,
                 customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
@@ -2642,6 +2643,7 @@ class CustomerSheetViewModelTest {
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            isGooglePayAvailable = false,
             initialBackStack = listOf(
                 selectPaymentMethodViewState.copy(
                     savedPaymentMethods = paymentMethods,

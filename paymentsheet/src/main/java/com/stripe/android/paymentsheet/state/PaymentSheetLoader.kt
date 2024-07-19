@@ -96,19 +96,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             defaultPaymentMethodId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
 
+        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession)
+
         val metadata = createPaymentMethodMetadata(
             paymentSheetConfiguration = paymentSheetConfiguration,
             elementsSession = elementsSession,
+            isGooglePayReady = isGooglePayReady
         )
-
-        val isGooglePayReady = async {
-            isGooglePayReady(paymentSheetConfiguration, elementsSession)
-        }
 
         val savedSelection = async {
             retrieveSavedSelection(
                 config = paymentSheetConfiguration,
-                isGooglePayReady = isGooglePayReady.await(),
+                isGooglePayReady = isGooglePayReady,
                 elementsSession = elementsSession
             )
         }
@@ -147,9 +146,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val state = PaymentSheetState.Full(
             config = paymentSheetConfiguration,
             customer = customer.await(),
-            isGooglePayReady = isGooglePayReady.await(),
             linkState = linkState.await(),
-            isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = metadata,
@@ -182,6 +179,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun createPaymentMethodMetadata(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
+        isGooglePayReady: Boolean,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -205,7 +203,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             elementsSession = elementsSession,
             configuration = paymentSheetConfiguration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
-            externalPaymentMethodSpecs = externalPaymentMethodSpecs
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            isGooglePayReady = isGooglePayReady,
         )
     }
 

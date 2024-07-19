@@ -344,10 +344,8 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
-            isEligibleForCardBrandChoice = false,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
@@ -359,6 +357,7 @@ class PaymentSelectionUpdaterTest {
                     SharedDataSpec("sofort"),
                 ),
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                isGooglePayReady = true,
             ),
         )
     }
@@ -376,15 +375,14 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
-            isEligibleForCardBrandChoice = false,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
                     paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
-                )
+                ),
+                isGooglePayReady = true,
             ),
         )
     }

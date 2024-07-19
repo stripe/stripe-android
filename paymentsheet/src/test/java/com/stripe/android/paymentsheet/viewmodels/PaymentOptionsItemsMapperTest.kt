@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.state.GooglePayState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -18,14 +17,14 @@ class PaymentOptionsItemsMapperTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>>(emptyList())
-    private val googlePayStateFlow = MutableStateFlow<GooglePayState>(GooglePayState.Indeterminate)
+    private val isGooglePayReadyFlow = MutableStateFlow(false)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
 
     @Test
     fun `Only emits value if required flows have emitted values`() = runTest {
         val mapper = PaymentOptionsItemsMapper(
             paymentMethods = paymentMethodsFlow,
-            googlePayState = googlePayStateFlow,
+            isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
@@ -36,7 +35,7 @@ class PaymentOptionsItemsMapperTest {
             assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
 
             paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
-            googlePayStateFlow.value = GooglePayState.Available
+            isGooglePayReadyFlow.value = true
             isLinkEnabledFlow.value = true
 
             val state = awaitItem()
@@ -53,7 +52,7 @@ class PaymentOptionsItemsMapperTest {
     fun `Doesn't include Google Pay and Link in payment flow`() = runTest {
         val mapper = PaymentOptionsItemsMapper(
             paymentMethods = paymentMethodsFlow,
-            googlePayState = googlePayStateFlow,
+            isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!! },
@@ -65,7 +64,7 @@ class PaymentOptionsItemsMapperTest {
 
             val cards = PaymentMethodFixtures.createCards(2)
             paymentMethodsFlow.value = cards
-            googlePayStateFlow.value = GooglePayState.Available
+            isGooglePayReadyFlow.value = true
             isLinkEnabledFlow.value = true
 
             assertThat(awaitItem()).containsNoneOf(

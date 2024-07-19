@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -53,9 +52,6 @@ internal abstract class BaseSheetViewModel(
     val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     val isCompleteFlow: Boolean,
 ) : AndroidViewModel(application) {
-    internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
-        .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
-
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
@@ -219,6 +215,5 @@ internal abstract class BaseSheetViewModel(
     companion object {
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
-        internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
     }
 }

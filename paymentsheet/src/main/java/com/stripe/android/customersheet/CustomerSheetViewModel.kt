@@ -149,7 +149,6 @@ internal class CustomerSheetViewModel(
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
-    private var isGooglePayReadyAndEnabled: Boolean = false
     private var paymentLauncher: PaymentLauncher? = null
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
@@ -322,7 +321,6 @@ internal class CustomerSheetViewModel(
                     supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
                     originalPaymentSelection = state.paymentSelection
-                    isGooglePayReadyAndEnabled = state.isGooglePayReady
                     paymentMethodMetadata = state.paymentMethodMetadata
 
                     transitionToInitialScreen(
@@ -345,7 +343,7 @@ internal class CustomerSheetViewModel(
         paymentSelection: PaymentSelection?,
         cbcEligibility: CardBrandChoiceEligibility,
     ) {
-        if (paymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
+        if (paymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
             transitionToAddPaymentMethod(
                 isFirstPaymentMethod = true,
                 cbcEligibility = cbcEligibility,
@@ -625,7 +623,7 @@ internal class CustomerSheetViewModel(
             }
         }
 
-        if (newSavedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
+        if (newSavedPaymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
             transitionToAddPaymentMethod(isFirstPaymentMethod = true)
         }
     }
@@ -1215,7 +1213,7 @@ internal class CustomerSheetViewModel(
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
                 isEditing = false,
-                isGooglePayEnabled = isGooglePayReadyAndEnabled,
+                isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
                 primaryButtonVisible = false,
                 primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,

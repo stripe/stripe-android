@@ -751,6 +751,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            isGooglePayReady = false,
         )
 
         assertThat(metadata).isEqualTo(
@@ -769,6 +770,7 @@ internal class PaymentMethodMetadataTest {
                 sharedDataSpecs = listOf(SharedDataSpec("card")),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 hasCustomerConfiguration = true,
+                isGooglePayReady = false,
             )
         )
     }
