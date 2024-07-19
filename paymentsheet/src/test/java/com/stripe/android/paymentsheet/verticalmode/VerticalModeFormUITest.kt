@@ -106,6 +106,7 @@ internal class VerticalModeFormUITest {
         viewActionRecorder: ViewActionRecorder<VerticalModeFormInteractor.ViewAction>,
     ): VerticalModeFormInteractor {
         return object : VerticalModeFormInteractor {
+            override val isLiveMode: Boolean = true
             override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlow
 
             override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {

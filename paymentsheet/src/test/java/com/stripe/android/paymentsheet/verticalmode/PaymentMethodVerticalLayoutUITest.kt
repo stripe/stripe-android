@@ -279,6 +279,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
     ): PaymentMethodVerticalLayoutInteractor {
         return object : PaymentMethodVerticalLayoutInteractor {
+            override val isLiveMode: Boolean = true
             override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlow
             override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(false)
 
