@@ -61,18 +61,7 @@ internal class DefaultCustomerSheetLoader(
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
         return runCatching {
-            val customerAdapter = customerAdapterProvider.awaitAsResult(
-                timeout = 5.seconds,
-                error = {
-                    "Couldn't find an instance of CustomerAdapter. " +
-                        "Are you instantiating CustomerSheet unconditionally in your app?"
-                },
-            ).onFailure {
-                errorReporter.report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND,
-                    stripeException = StripeException.create(it)
-                )
-            }.getOrThrow()
+            val customerAdapter = retrieveCustomerAdapter().getOrThrow()
 
             val elementsSession = retrieveElementsSession(
                 customerAdapter = customerAdapter,
@@ -101,6 +90,21 @@ internal class DefaultCustomerSheetLoader(
                     stripeException = StripeException.create(it)
                 )
             }.getOrThrow()
+        }
+    }
+
+    private suspend fun retrieveCustomerAdapter(): Result<CustomerAdapter> {
+        return customerAdapterProvider.awaitAsResult(
+            timeout = 5.seconds,
+            error = {
+                "Couldn't find an instance of CustomerAdapter. " +
+                    "Are you instantiating CustomerSheet unconditionally in your app?"
+            },
+        ).onFailure {
+            errorReporter.report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND,
+                stripeException = StripeException.create(it)
+            )
         }
     }
 
