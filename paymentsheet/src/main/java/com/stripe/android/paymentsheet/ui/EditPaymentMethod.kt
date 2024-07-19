@@ -143,7 +143,7 @@ internal fun EditPaymentMethodUi(
     if (viewState.confirmRemoval) {
         val title = stringResource(
             R.string.stripe_paymentsheet_remove_pm,
-            viewState.displayName,
+            viewState.displayName.resolve(),
         )
 
         val message = stringResource(
@@ -194,7 +194,8 @@ private fun RemoveButton(
                 .padding(
                     start = 8.dp,
                     end = 8.dp
-                ).offset(y = 8.dp),
+                )
+                .offset(y = 8.dp),
         ) {
             CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
                 TextButton(
