@@ -48,10 +48,8 @@ internal class FakePaymentSheetLoader(
                 PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
                     customer = customer,
-                    isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
-                    isEligibleForCardBrandChoice = false,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
@@ -60,6 +58,7 @@ internal class FakePaymentSheetLoader(
                         allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
                         allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                             .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = isGooglePayAvailable,
                     ),
                 )
             )

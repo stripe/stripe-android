@@ -14,7 +14,6 @@ internal sealed interface CustomerSheetState {
         val paymentMethodMetadata: PaymentMethodMetadata,
         val customerPaymentMethods: List<PaymentMethod>,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
-        val isGooglePayReady: Boolean,
         val paymentSelection: PaymentSelection?,
         val validationError: Throwable?,
     ) : CustomerSheetState

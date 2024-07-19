@@ -431,10 +431,8 @@ internal class DefaultFlowControllerTest {
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
-                isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
@@ -646,10 +644,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -687,10 +683,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -731,10 +725,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )

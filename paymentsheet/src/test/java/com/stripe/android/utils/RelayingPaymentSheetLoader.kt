@@ -22,10 +22,8 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
                 PaymentSheetState.Full(
                     customer = null,
                     config = PaymentSheet.Configuration("Example"),
-                    isGooglePayReady = false,
                     paymentSelection = null,
                     linkState = null,
-                    isEligibleForCardBrandChoice = false,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),
                 ),

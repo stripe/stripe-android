@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -99,12 +98,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
         paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
-        googlePayState,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, googlePayState ->
+        paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, isGooglePayReady ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
-            googlePayState = googlePayState,
+            isGooglePayReady = isGooglePayReady,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = null,
@@ -138,14 +137,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
-            GooglePayState.Available
-        } else {
-            GooglePayState.NotAvailable
-        }
-
-        val linkState = args.state.linkState
-
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
                 handleLinkProcessingState(processingState)
@@ -155,7 +146,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // This is bad, but I don't think there's a better option
         PaymentSheet.FlowController.linkHandler = linkHandler
 
-        linkHandler.setupLink(linkState)
+        linkHandler.setupLink(args.state.linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which

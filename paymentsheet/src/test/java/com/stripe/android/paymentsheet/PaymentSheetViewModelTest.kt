@@ -81,7 +81,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
@@ -1200,16 +1199,16 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Google Pay is not available if it's not ready`() = runTest {
         val viewModel = createViewModel(isGooglePayReady = false)
-        viewModel.googlePayState.test {
-            assertThat(awaitItem()).isEqualTo(GooglePayState.NotAvailable)
+        viewModel.paymentMethodMetadata.test {
+            assertThat(awaitItem()?.isGooglePayReady).isFalse()
         }
     }
 
     @Test
     fun `Google Pay is available if it is ready`() = runTest {
         val viewModel = createViewModel(isGooglePayReady = true)
-        viewModel.googlePayState.test {
-            assertThat(awaitItem()).isEqualTo(GooglePayState.Available)
+        viewModel.paymentMethodMetadata.test {
+            assertThat(awaitItem()?.isGooglePayReady).isTrue()
         }
     }
 

@@ -190,7 +190,9 @@ internal object CustomerSheetTestHelper {
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = isGooglePayAvailable,
+            )
         }
     }
 

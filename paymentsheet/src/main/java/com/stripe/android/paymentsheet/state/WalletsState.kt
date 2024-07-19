@@ -32,7 +32,7 @@ internal data class WalletsState(
         fun create(
             isLinkAvailable: Boolean?,
             linkEmail: String?,
-            googlePayState: GooglePayState,
+            isGooglePayReady: Boolean,
             googlePayButtonType: GooglePayButtonType,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
@@ -60,7 +60,7 @@ internal data class WalletsState(
                         isPhoneNumberRequired = it.billingAddressConfig.isPhoneNumberRequired,
                     )
                 },
-            ).takeIf { googlePayState.isReadyForUse }
+            ).takeIf { isGooglePayReady }
 
             return if (link != null || googlePay != null) {
                 WalletsState(

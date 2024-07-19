@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -218,14 +217,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
         linkConfigurationCoordinator.emailFlow,
-        googlePayState,
+        paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
         buttonsEnabled,
         paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
-    ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes ->
+    ) { isLinkAvailable, linkEmail, isGooglePayReady, buttonsEnabled, paymentMethodTypes ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
-            googlePayState = googlePayState,
+            isGooglePayReady = isGooglePayReady,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -373,17 +372,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         updateSelection(state.paymentSelection)
 
-        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
-            GooglePayState.Available
-        } else {
-            GooglePayState.NotAvailable
-        }
-
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        val linkState = state.linkState
-
-        linkHandler.setupLink(linkState)
+        linkHandler.setupLink(state.linkState)
 
         val pendingFailedPaymentResult = awaitPaymentResult() as? InternalPaymentResult.Failed
         val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage()

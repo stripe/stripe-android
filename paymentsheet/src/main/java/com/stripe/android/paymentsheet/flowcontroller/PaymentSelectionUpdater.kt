@@ -51,7 +51,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
-                state.isGooglePayReady
+                state.paymentMethodMetadata.isGooglePayReady
             }
             is PaymentSelection.Link -> {
                 state.linkState != null

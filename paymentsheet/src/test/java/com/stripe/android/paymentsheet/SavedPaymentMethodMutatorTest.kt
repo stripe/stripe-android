@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -150,7 +149,7 @@ class SavedPaymentMethodMutatorTest {
                 addFirstPaymentMethodScreenFactory = { throw AssertionError("Not implemented") },
                 updateSelection = { throw AssertionError("Not implemented") },
                 isCbcEligible = isCbcEligible,
-                googlePayState = stateFlowOf(GooglePayState.NotAvailable),
+                isGooglePayReady = stateFlowOf(false),
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
                 isLiveModeProvider = { true },

@@ -131,6 +131,10 @@ internal class DefaultCustomerSheetLoader(
                 preferredNetworks = configuration.preferredNetworks,
             )
 
+            val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
+                if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
+            ).isReady().first()
+
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
@@ -145,6 +149,7 @@ internal class DefaultCustomerSheetLoader(
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 externalPaymentMethodSpecs = emptyList(),
+                isGooglePayReady = isGooglePayReadyAndEnabled,
             )
 
             ElementsSessionWithMetadata(elementsSession = elementsSession, metadata = metadata)
@@ -194,10 +199,6 @@ internal class DefaultCustomerSheetLoader(
                     }
                 }
 
-                val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
-                    if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
-                ).isReady().first()
-
                 val elementsSession = elementsSessionWithMetadata.elementsSession
                 val metadata = elementsSessionWithMetadata.metadata
 
@@ -211,7 +212,6 @@ internal class DefaultCustomerSheetLoader(
                         paymentMethodMetadata = metadata,
                         supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
-                        isGooglePayReady = isGooglePayReadyAndEnabled,
                         paymentSelection = paymentSelection,
                         validationError = elementsSession.stripeIntent.validate(),
                     )

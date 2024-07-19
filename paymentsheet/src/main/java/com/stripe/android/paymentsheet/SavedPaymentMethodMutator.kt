@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -43,7 +42,7 @@ internal class SavedPaymentMethodMutator(
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isLiveModeProvider: () -> Boolean,
     isCbcEligible: () -> Boolean,
-    googlePayState: StateFlow<GooglePayState>,
+    isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
@@ -66,7 +65,7 @@ internal class SavedPaymentMethodMutator(
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
             paymentMethods = paymentMethods,
-            googlePayState = googlePayState,
+            isGooglePayReady = isGooglePayReady,
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = providePaymentMethodName,
@@ -297,7 +296,7 @@ internal class SavedPaymentMethodMutator(
                 isCbcEligible = {
                     viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible
                 },
-                googlePayState = viewModel.googlePayState,
+                isGooglePayReady = viewModel.paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
                 isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode }
