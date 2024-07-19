@@ -582,6 +582,7 @@ internal class CustomerSheetViewModel(
                         }
                     },
                     canRemove = canRemove,
+                    isLiveMode = requireNotNull(paymentMethodMetadata).stripeIntent.isLiveMode,
                 ),
                 isLiveMode = currentViewState.isLiveMode,
                 cbcEligibility = currentViewState.cbcEligibility,

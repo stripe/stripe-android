@@ -60,7 +60,10 @@ class ManageOneSavedPaymentMethodUITest {
 
         val manageScreenInteractor = object : ManageOneSavedPaymentMethodInteractor {
             override val state: ManageOneSavedPaymentMethodInteractor.State
-                get() = ManageOneSavedPaymentMethodInteractor.State(paymentMethod.toDisplayableSavedPaymentMethod())
+                get() = ManageOneSavedPaymentMethodInteractor.State(
+                    paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(),
+                    isLiveMode = true,
+                )
 
             override fun handleViewAction(viewAction: ManageOneSavedPaymentMethodInteractor.ViewAction) {
                 viewActionRecorder.record(viewAction)

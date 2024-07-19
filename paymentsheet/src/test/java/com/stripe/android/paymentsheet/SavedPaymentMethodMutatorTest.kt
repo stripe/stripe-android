@@ -153,6 +153,7 @@ class SavedPaymentMethodMutatorTest {
                 googlePayState = stateFlowOf(GooglePayState.NotAvailable),
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
+                isLiveModeProvider = { true },
             )
             Scenario(savedPaymentMethodMutator).apply {
                 block()

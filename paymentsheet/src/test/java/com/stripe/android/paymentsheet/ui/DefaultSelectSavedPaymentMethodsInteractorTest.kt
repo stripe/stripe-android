@@ -67,6 +67,19 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     }
 
     @Test
+    fun updatingCanEdit_updatesState() {
+        val canEdit = MutableStateFlow(true)
+        runScenario(canEdit = canEdit) {
+            interactor.state.test {
+                assertThat(awaitItem().canEdit).isTrue()
+
+                canEdit.value = false
+                assertThat(awaitItem().canEdit).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun updatingIsProcessing_updatesState() {
         val initialIsProcessingValue = false
         val isProcessingFlow = MutableStateFlow(initialIsProcessingValue)
@@ -449,6 +462,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     private fun runScenario(
         paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = MutableStateFlow(emptyList()),
         editing: StateFlow<Boolean> = MutableStateFlow(false),
+        canEdit: StateFlow<Boolean> = MutableStateFlow(true),
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
@@ -459,15 +473,17 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
-            paymentOptionsItems,
-            editing,
+            paymentOptionsItems = paymentOptionsItems,
+            editing = editing,
+            canEdit = canEdit,
             isProcessing = isProcessing,
             currentSelection = currentSelection,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            onAddCardPressed,
-            onEditPaymentMethod,
-            onDeletePaymentMethod,
-            onPaymentMethodSelected,
+            onAddCardPressed = onAddCardPressed,
+            onEditPaymentMethod = onEditPaymentMethod,
+            onDeletePaymentMethod = onDeletePaymentMethod,
+            onPaymentMethodSelected = onPaymentMethodSelected,
+            isLiveMode = true,
         )
 
         TestParams(

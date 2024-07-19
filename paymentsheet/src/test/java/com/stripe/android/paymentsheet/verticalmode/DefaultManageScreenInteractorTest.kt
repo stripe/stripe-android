@@ -36,6 +36,19 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
+    fun `updating canEdit updates state`() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.test {
+                assertThat(awaitItem().canEdit).isTrue()
+
+                canEditSource.value = false
+                assertThat(awaitItem().canEdit).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun initializeState_currentSelectionFoundCorrectly() {
         val paymentMethods = PaymentMethodFixtures.createCards(2)
         runScenario(
@@ -289,6 +302,7 @@ class DefaultManageScreenInteractorTest {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
         val selection = MutableStateFlow(currentSelection)
         val editing = MutableStateFlow(isEditing)
+        val canEdit = MutableStateFlow(true)
         val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
 
         val interactor = DefaultManageScreenInteractor(
@@ -299,6 +313,7 @@ class DefaultManageScreenInteractorTest {
             ),
             selection = selection,
             editing = editing,
+            canEdit = canEdit,
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             providePaymentMethodName = { it ?: "Missing name" },
             onSelectPaymentMethod = onSelectPaymentMethod,
@@ -306,13 +321,15 @@ class DefaultManageScreenInteractorTest {
             onEditPaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             dispatcher = dispatcher,
+            isLiveMode = true,
         )
 
         TestParams(
             interactor = interactor,
             paymentMethodsSource = paymentMethods,
             editingSource = editing,
-            dispatcher = dispatcher
+            canEditSource = canEdit,
+            dispatcher = dispatcher,
         ).apply {
             runTest {
                 testBlock()
@@ -325,5 +342,6 @@ class DefaultManageScreenInteractorTest {
         val dispatcher: TestDispatcher,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
         val editingSource: MutableStateFlow<Boolean>,
+        val canEditSource: MutableStateFlow<Boolean>,
     )
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal interface SelectSavedPaymentMethodsInteractor {
+    val isLiveMode: Boolean
 
     val state: StateFlow<State>
 
@@ -30,6 +31,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
         val selectedPaymentOptionsItem: PaymentOptionsItem?,
         val isEditing: Boolean,
         val isProcessing: Boolean,
+        val canEdit: Boolean,
     )
 
     sealed class ViewAction {
@@ -45,6 +47,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
 internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>,
     private val editing: StateFlow<Boolean>,
+    private val canEdit: StateFlow<Boolean>,
     private val isProcessing: StateFlow<Boolean>,
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
@@ -52,10 +55,12 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onEditPaymentMethod: (PaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
+    override val isLiveMode: Boolean,
 ) : SelectSavedPaymentMethodsInteractor {
     constructor(viewModel: BaseSheetViewModel) : this(
         paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
         editing = viewModel.editing,
+        canEdit = viewModel.savedPaymentMethodMutator.canEdit,
         isProcessing = viewModel.processing,
         currentSelection = viewModel.selection,
         mostRecentlySelectedSavedPaymentMethod =
@@ -68,6 +73,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
         onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
         onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
+        isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
     )
 
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
@@ -90,6 +96,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             ),
             isEditing = editing.value,
             isProcessing = isProcessing.value,
+            canEdit = canEdit.value,
         )
     }
 
@@ -109,6 +116,16 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 _state.update { previousState ->
                     previousState.copy(
                         isEditing = it
+                    )
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            canEdit.collect {
+                _state.update { previousState ->
+                    previousState.copy(
+                        canEdit = it
                     )
                 }
             }

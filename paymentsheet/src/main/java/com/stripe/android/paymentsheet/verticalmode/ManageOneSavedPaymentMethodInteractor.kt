@@ -13,6 +13,7 @@ internal interface ManageOneSavedPaymentMethodInteractor {
 
     data class State(
         val paymentMethod: DisplayableSavedPaymentMethod,
+        val isLiveMode: Boolean,
     )
 
     sealed class ViewAction {
@@ -37,10 +38,11 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
     )
 
     override val state = ManageOneSavedPaymentMethodInteractor.State(
-        paymentMethod.toDisplayableSavedPaymentMethod(
+        paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
             paymentMethodMetadata,
-        )
+        ),
+        isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
     )
 
     override fun handleViewAction(viewAction: ManageOneSavedPaymentMethodInteractor.ViewAction) {

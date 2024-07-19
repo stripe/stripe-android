@@ -205,6 +205,7 @@ internal object CustomerSheetTestHelper {
                 updateExecutor: PaymentMethodUpdateOperation,
                 displayName: String,
                 canRemove: Boolean,
+                isLiveMode: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
@@ -214,6 +215,7 @@ internal object CustomerSheetTestHelper {
                     eventHandler = eventHandler,
                     workContext = workContext,
                     canRemove = canRemove,
+                    isLiveMode = isLiveMode,
                 )
             }
         }

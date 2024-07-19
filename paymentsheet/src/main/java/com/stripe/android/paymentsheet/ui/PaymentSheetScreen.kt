@@ -102,7 +102,6 @@ private fun PaymentSheetScreen(
 ) {
     val processing by viewModel.processing.collectAsState()
 
-    val topBarState by viewModel.topBarState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
 
     val density = LocalDensity.current
@@ -112,8 +111,14 @@ private fun PaymentSheetScreen(
 
     PaymentSheetScaffold(
         topBar = {
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+            val topBarState by remember(currentScreen) {
+                currentScreen.topBarState()
+            }.collectAsState()
+
             PaymentSheetTopBar(
                 state = topBarState,
+                isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
                 toggleEditing = viewModel::toggleEditing,
             )

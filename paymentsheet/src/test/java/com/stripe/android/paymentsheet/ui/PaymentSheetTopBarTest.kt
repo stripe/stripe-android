@@ -39,7 +39,8 @@ class PaymentSheetTopBarTest {
                 LocalTextInputService provides mockTextInputService,
             ) {
                 PaymentSheetTopBar(
-                    state = mockState(isEnabled = true),
+                    state = mockState(),
+                    isEnabled = true,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
                     onEditIconPressed = { throw AssertionError("Not expected") },
@@ -66,7 +67,8 @@ class PaymentSheetTopBarTest {
                 LocalTextInputService provides mockTextInputService,
             ) {
                 PaymentSheetTopBar(
-                    state = mockState(isEnabled = false),
+                    state = mockState(),
+                    isEnabled = false,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
                     onEditIconPressed = { throw AssertionError("Not expected") },
@@ -89,6 +91,7 @@ class PaymentSheetTopBarTest {
         composeTestRule.setContent {
             PaymentSheetTopBar(
                 state = mockState(showEditMenu = true),
+                isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = { throw AssertionError("Not expected") },
                 onEditIconPressed = { didCallOnEditIconPressed = true },
@@ -103,7 +106,6 @@ class PaymentSheetTopBarTest {
     }
 
     private fun mockState(
-        isEnabled: Boolean = true,
         showEditMenu: Boolean = false,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
@@ -112,7 +114,6 @@ class PaymentSheetTopBarTest {
             showTestModeLabel = false,
             showEditMenu = showEditMenu,
             editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = isEnabled,
         )
     }
 }

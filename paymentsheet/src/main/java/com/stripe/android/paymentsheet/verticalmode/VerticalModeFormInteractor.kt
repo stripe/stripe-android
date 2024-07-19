@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
 internal interface VerticalModeFormInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -51,6 +53,7 @@ internal class DefaultVerticalModeFormInteractor(
     private val selectedPaymentMethodCode: String,
     private val viewModel: BaseSheetViewModel,
 ) : VerticalModeFormInteractor {
+    private val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
     private val linkSignupMode = viewModel.linkHandler.linkSignupMode.stateIn(
@@ -68,11 +71,12 @@ internal class DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode
         )
 
+    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
+
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
         viewModel.processing,
         linkSignupMode,
-        viewModel.paymentMethodMetadata,
-    ) { isProcessing, linkSignupMode, paymentMethodMetadata ->
+    ) { isProcessing, linkSignupMode ->
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
@@ -81,7 +85,7 @@ internal class DefaultVerticalModeFormInteractor(
             formElements = formElements,
             linkSignupMode = linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code },
             linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
-            headerInformation = paymentMethodMetadata?.formHeaderInformationForCode(selectedPaymentMethodCode),
+            headerInformation = paymentMethodMetadata.formHeaderInformationForCode(selectedPaymentMethodCode),
         )
     }
 

@@ -35,6 +35,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         assertThat(
@@ -55,6 +56,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         assertThat(
@@ -76,6 +78,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canDelete = true,
+                canEdit = true,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -98,6 +101,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canDelete = true,
+                canEdit = true,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -116,6 +120,7 @@ class ManageScreenUITest {
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -133,6 +138,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -151,6 +157,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = false,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(cbcEligibleSavedPaymentMethod).assertDoesNotExist()
@@ -164,6 +171,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -185,6 +193,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -203,6 +212,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         val editablePaymentMethod = displayableSavedPaymentMethods[2]

@@ -28,6 +28,8 @@ import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     val showsWalletsHeader: StateFlow<Boolean>
@@ -79,13 +81,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
+    override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
     companion object {
         fun create(viewModel: BaseSheetViewModel): PaymentMethodVerticalLayoutInteractor {
             val formHelper = FormHelper.create(viewModel)
+            val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
             return DefaultPaymentMethodVerticalLayoutInteractor(
-                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
                 formElementsForCode = formHelper::formElementsForCode,
@@ -129,6 +133,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onMandateTextUpdated = {
                     viewModel.mandateHandler.updateMandateText(mandateText = it, showAbove = true)
                 },
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
     }
@@ -161,7 +166,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethods,
                 displayedSavedPaymentMethod,
                 allowsRemovalOfLastSavedPaymentMethod
-            )
+            ),
         )
     }
 

@@ -11,7 +11,10 @@ import org.mockito.kotlin.mock
 internal class PaymentSheetScreenEditPaymentMethodTest {
     @Test
     fun `title returns update card`() = runTest {
-        PaymentSheetScreen.EditPaymentMethod(mock()).title(isCompleteFlow = true, isWalletEnabled = true).test {
+        PaymentSheetScreen.EditPaymentMethod(
+            interactor = mock(),
+            isLiveMode = true
+        ).title(isCompleteFlow = true, isWalletEnabled = true).test {
             assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_title_update_card))
         }
     }

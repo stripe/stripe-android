@@ -977,6 +977,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             updateSelection = updateSelection,
             isCurrentScreen = isCurrentScreen,
             dispatcher = dispatcher,
+            isLiveMode = true,
         )
 
         TestParams(
