@@ -72,11 +72,11 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                 state = PaymentSheetTopBarState(
                                     icon = R.drawable.stripe_ic_paymentsheet_close,
                                     contentDescription = StripeUiCoreR.string.stripe_back,
-                                    isEnabled = true,
                                     showEditMenu = false,
                                     showTestModeLabel = false,
                                     editMenuLabel = StripeR.string.stripe_edit
                                 ),
+                                isEnabled = true,
                                 handleBackPressed = {
                                     viewModel.handleViewAction(OnBackPressed)
                                 },

@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal interface AddPaymentMethodInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -73,6 +75,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
+    override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
     companion object {
@@ -108,6 +111,7 @@ internal class DefaultAddPaymentMethodInteractor(
                     )
                 },
                 coroutineScope = coroutineScope,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
     }

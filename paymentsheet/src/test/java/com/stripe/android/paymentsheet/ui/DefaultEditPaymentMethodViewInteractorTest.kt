@@ -294,6 +294,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
             updateExecutor = onUpdate,
             workContext = workContext,
             canRemove = canRemove,
+            isLiveMode = true,
         )
     }
 

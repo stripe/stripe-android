@@ -337,6 +337,7 @@ class DefaultAddPaymentMethodInteractorTest {
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
             coroutineScope = CoroutineScope(dispatcher),
+            isLiveMode = true,
         )
 
         TestParams(

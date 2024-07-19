@@ -41,6 +41,7 @@ internal class SavedPaymentMethodMutator(
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
     private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
     private val updateSelection: (PaymentSelection?) -> Unit,
+    private val isLiveModeProvider: () -> Boolean,
     isCbcEligible: () -> Boolean,
     googlePayState: StateFlow<GooglePayState>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -200,7 +201,9 @@ internal class SavedPaymentMethodMutator(
                         modifyCardPaymentMethod(method, brand)
                     },
                     canRemove = canRemove,
-                )
+                    isLiveMode = isLiveModeProvider(),
+                ),
+                isLiveMode = isLiveModeProvider(),
             )
         )
     }
@@ -297,6 +300,7 @@ internal class SavedPaymentMethodMutator(
                 googlePayState = viewModel.googlePayState,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
+                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode }
             )
         }
     }

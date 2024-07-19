@@ -48,6 +48,7 @@ internal fun CustomerSheetScreen(
         topBar = {
             PaymentSheetTopBar(
                 state = viewState.topBarState,
+                isEnabled = !viewState.isProcessing,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed

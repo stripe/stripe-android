@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeEditPaymentMethodInteractor(
-    paymentMethod: PaymentMethod
+    paymentMethod: PaymentMethod,
+    override val isLiveMode: Boolean = true,
 ) : ModifiableEditPaymentMethodViewInteractor {
     override val viewState: StateFlow<EditPaymentMethodViewState> = MutableStateFlow(
         EditPaymentMethodViewState(
@@ -46,6 +47,7 @@ internal class FakeEditPaymentMethodInteractor(
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
         }
