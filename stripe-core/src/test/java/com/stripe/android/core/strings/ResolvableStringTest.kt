@@ -37,8 +37,8 @@ class ResolvableStringTest {
     @Test
     fun `identifier resolvable strings should be equal when using same value`() {
         assertEquals(
-            resolvableString(id = 1453235),
-            resolvableString(id = 1453235)
+            1453235.resolvableString,
+            1453235.resolvableString
         )
     }
 
@@ -53,8 +53,8 @@ class ResolvableStringTest {
     @Test
     fun `identifier resolvable strings with same value & other identifier resolvable strings should be equal`() {
         assertEquals(
-            resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo"),
-            resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo")
+            resolvableString(id = 1453235, 52523525.resolvableString, "argTwo"),
+            resolvableString(id = 1453235, 52523525.resolvableString, "argTwo")
         )
     }
 
@@ -84,8 +84,8 @@ class ResolvableStringTest {
         )
 
         assertEquals(
-            resolvableString(value = "1453235", resolvableString(id = 52523525), "argTwo"),
-            resolvableString(value = "1453235", resolvableString(id = 52523525), "argTwo")
+            resolvableString(value = "1453235", 52523525.resolvableString, "argTwo"),
+            resolvableString(value = "1453235", 52523525.resolvableString, "argTwo")
         )
     }
 
@@ -97,8 +97,8 @@ class ResolvableStringTest {
         )
 
         assertEquals(
-            resolvableString(value = "1453235", resolvableString(id = 52523525), "argTwo").toString(),
-            resolvableString(value = "1453235", resolvableString(id = 52523525), "argTwo").toString()
+            resolvableString(value = "1453235", 52523525.resolvableString, "argTwo").toString(),
+            resolvableString(value = "1453235", 52523525.resolvableString, "argTwo").toString()
         )
     }
 

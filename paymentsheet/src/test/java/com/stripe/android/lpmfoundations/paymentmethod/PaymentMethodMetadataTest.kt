@@ -514,7 +514,7 @@ internal class PaymentMethodMetadataTest {
     fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(code = "card")!!
-        assertThat(headerInformation.displayName).isEqualTo(resolvableString(R.string.stripe_paymentsheet_add_new_card))
+        assertThat(headerInformation.displayName).isEqualTo(R.string.stripe_paymentsheet_add_new_card.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isFalse()
     }
 
@@ -527,7 +527,7 @@ internal class PaymentMethodMetadataTest {
         )
         val headerInformation = metadata.formHeaderInformationForCode(code = "bancontact")!!
         assertThat(headerInformation.displayName)
-            .isEqualTo(resolvableString(R.string.stripe_paymentsheet_payment_method_bancontact))
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_bancontact.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
         assertThat(headerInformation.iconResource).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
     }

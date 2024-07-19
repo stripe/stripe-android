@@ -222,12 +222,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             walletsState?.link?.let {
                 wallets += DisplayablePaymentMethod(
                     code = PaymentMethod.Type.Link.code,
-                    displayName = resolvableString(PaymentsCoreR.string.stripe_link),
+                    displayName = PaymentsCoreR.string.stripe_link.resolvableString,
                     iconResource = R.drawable.stripe_ic_paymentsheet_link,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
-                    subtitle = resolvableString(PaymentsCoreR.string.stripe_link_simple_secure_payments),
+                    subtitle = PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString,
                     onClick = {
                         updateSelection(PaymentSelection.Link)
                     },
@@ -237,7 +237,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             walletsState?.googlePay?.let {
                 wallets += DisplayablePaymentMethod(
                     code = "google_pay",
-                    displayName = resolvableString(PaymentsCoreR.string.stripe_google_pay),
+                    displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
                     iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,

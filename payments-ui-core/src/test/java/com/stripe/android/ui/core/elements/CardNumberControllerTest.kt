@@ -207,10 +207,10 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
-                            label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                            label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
                             icon = CardBrand.Unknown.icon
                         ),
                         items = listOf(
@@ -247,7 +247,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -294,7 +294,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -343,7 +343,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,

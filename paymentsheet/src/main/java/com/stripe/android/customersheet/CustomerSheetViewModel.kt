@@ -435,13 +435,9 @@ internal class CustomerSheetViewModel(
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
                     it.bankAccountResult !is CollectBankAccountResultInternal.Completed
                 ) {
-                    resolvableString(
-                        id = UiCoreR.string.stripe_continue_button_label
-                    )
+                    UiCoreR.string.stripe_continue_button_label.resolvableString
                 } else {
-                    resolvableString(
-                        id = R.string.stripe_paymentsheet_save
-                    )
+                    R.string.stripe_paymentsheet_save.resolvableString
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
                     merchantName = configuration.merchantDisplayName,
@@ -843,9 +839,7 @@ internal class CustomerSheetViewModel(
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
                 isFirstPaymentMethod = isFirstPaymentMethod,
-                primaryButtonLabel = resolvableString(
-                    id = R.string.stripe_paymentsheet_save
-                ),
+                primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
@@ -887,9 +881,9 @@ internal class CustomerSheetViewModel(
             it.copy(
                 bankAccountResult = bankAccountResult,
                 primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
-                    resolvableString(id = R.string.stripe_paymentsheet_save)
+                    R.string.stripe_paymentsheet_save.resolvableString
                 } else {
-                    resolvableString(id = UiCoreR.string.stripe_continue_button_label)
+                    UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
             )
         }

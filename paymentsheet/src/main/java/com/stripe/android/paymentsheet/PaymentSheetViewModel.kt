@@ -470,12 +470,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     )
                 }.onFailure {
                     resetViewState(
-                        userErrorMessage = resolvableString(R.string.stripe_something_went_wrong)
+                        userErrorMessage = R.string.stripe_something_went_wrong.resolvableString
                     )
                 }
             } ?: run {
                 resetViewState(
-                    userErrorMessage = resolvableString(R.string.stripe_something_went_wrong)
+                    userErrorMessage = R.string.stripe_something_went_wrong.resolvableString
                 )
             }
         } else {
@@ -774,15 +774,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = PaymentSelection.GooglePay,
                     error = PaymentSheetConfirmationError.GooglePay(result.errorCode),
                 )
-                onError(
-                    resolvableString(
-                        when (result.errorCode) {
-                            GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                                StripeR.string.stripe_failure_connection_error
-                            else -> StripeR.string.stripe_internal_error
-                        }
-                    )
-                )
+                val errorMessage = when (result.errorCode) {
+                    GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                        StripeR.string.stripe_failure_connection_error
+                    else -> StripeR.string.stripe_internal_error
+                }
+                onError(errorMessage.resolvableString)
             }
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                 resetViewState()

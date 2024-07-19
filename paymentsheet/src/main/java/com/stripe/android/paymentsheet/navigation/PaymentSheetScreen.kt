@@ -121,7 +121,7 @@ internal sealed interface PaymentSheetScreen {
                 if (isCompleteFlow && isWalletEnabled) {
                     null
                 } else {
-                    resolvableString(R.string.stripe_paymentsheet_select_payment_method)
+                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
                 }
             )
         }
@@ -205,9 +205,9 @@ internal sealed interface PaymentSheetScreen {
                     null
                 } else {
                     if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        resolvableString(PaymentsCoreR.string.stripe_title_add_a_card)
+                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                     } else {
-                        resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                     }
                 }
             }
@@ -250,12 +250,12 @@ internal sealed interface PaymentSheetScreen {
                 if (isWalletEnabled) {
                     null
                 } else if (isCompleteFlow) {
-                    resolvableString(R.string.stripe_paymentsheet_add_payment_method_title)
+                    R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
                 } else {
                     if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        resolvableString(PaymentsCoreR.string.stripe_title_add_a_card)
+                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                     } else {
-                        resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                     }
                 }
             }
@@ -295,7 +295,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(resolvableString(PaymentsCoreR.string.stripe_title_update_card))
+            return stateFlowOf(PaymentsCoreR.string.stripe_title_update_card.resolvableString)
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
@@ -333,9 +333,9 @@ internal sealed interface PaymentSheetScreen {
                 if (isWalletEnabled) {
                     null
                 } else if (isCompleteFlow) {
-                    resolvableString(R.string.stripe_paymentsheet_select_payment_method)
+                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
                 } else {
-                    resolvableString(R.string.stripe_paymentsheet_choose_payment_method)
+                    R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                 }
             )
         }
@@ -404,13 +404,13 @@ internal sealed interface PaymentSheetScreen {
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return interactor.state.mapAsStateFlow { state ->
-                resolvableString(
-                    if (state.isEditing) {
-                        R.string.stripe_paymentsheet_manage_payment_methods
-                    } else {
-                        R.string.stripe_paymentsheet_select_payment_method
-                    }
-                )
+                val title = if (state.isEditing) {
+                    R.string.stripe_paymentsheet_manage_payment_methods
+                } else {
+                    R.string.stripe_paymentsheet_select_payment_method
+                }
+
+                title.resolvableString
             }
         }
 
@@ -444,7 +444,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(resolvableString(R.string.stripe_paymentsheet_remove_pm_title))
+            return stateFlowOf(R.string.stripe_paymentsheet_remove_pm_title.resolvableString)
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> =

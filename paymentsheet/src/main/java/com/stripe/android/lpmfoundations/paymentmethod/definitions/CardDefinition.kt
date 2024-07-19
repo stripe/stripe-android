@@ -49,7 +49,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
     override fun createFormHeaderInformation(): FormHeaderInformation {
         return createSupportedPaymentMethod().asFormHeaderInformation().copy(
-            displayName = resolvableString(R.string.stripe_paymentsheet_add_new_card),
+            displayName = R.string.stripe_paymentsheet_add_new_card.resolvableString,
             shouldShowIcon = false,
         )
     }

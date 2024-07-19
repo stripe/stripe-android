@@ -15,7 +15,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
         val interactor = FakeManageScreenInteractor(createState(isEditing = true))
         PaymentSheetScreen.ManageSavedPaymentMethods(interactor)
             .title(isCompleteFlow = true, isWalletEnabled = true).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_manage_payment_methods))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods.resolvableString)
             }
     }
 
@@ -24,7 +24,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
         val interactor = FakeManageScreenInteractor(createState(isEditing = false))
         PaymentSheetScreen.ManageSavedPaymentMethods(interactor)
             .title(isCompleteFlow = true, isWalletEnabled = true).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_select_payment_method))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_select_payment_method.resolvableString)
             }
     }
 

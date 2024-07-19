@@ -53,3 +53,10 @@ fun resolvableString(value: String, vararg formatArgs: @RawValue Any?): Resolvab
 @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val String.resolvableString: ResolvableString
     get() = StaticResolvableString(this, emptyList())
+
+/**
+ * Creates a [ResolvableString] from a given string identifier.
+ */
+@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val @receiver:StringRes Int.resolvableString: ResolvableString
+    get() = IdentifierResolvableString(this, emptyList(), emptyList())

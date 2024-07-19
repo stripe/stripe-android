@@ -13,7 +13,7 @@ internal class PaymentSheetScreenManageOneSavedPaymentMethodTest {
     fun `title returns remove payment method`() = runTest {
         PaymentSheetScreen.ManageOneSavedPaymentMethod(mock())
             .title(isCompleteFlow = true, isWalletEnabled = true).test {
-                assertThat(awaitItem()).isEqualTo(resolvableString(R.string.stripe_paymentsheet_remove_pm_title))
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_remove_pm_title.resolvableString)
             }
     }
 }

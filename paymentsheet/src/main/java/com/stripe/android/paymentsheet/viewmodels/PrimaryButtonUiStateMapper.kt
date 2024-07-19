@@ -70,17 +70,17 @@ internal class PrimaryButtonUiStateMapper(
             it.resolvableString
         } ?: run {
             if (isProcessingPayment) {
-                val fallback = resolvableString(R.string.stripe_paymentsheet_pay_button_label)
+                val fallback = R.string.stripe_paymentsheet_pay_button_label.resolvableString
                 amount?.buildPayButtonLabel() ?: fallback
             } else {
-                resolvableString(StripeUiCoreR.string.stripe_setup_button_label)
+                StripeUiCoreR.string.stripe_setup_button_label.resolvableString
             }
         }
     }
 
     private fun continueButtonLabel(): ResolvableString {
         return config.primaryButtonLabel?.resolvableString
-            ?: resolvableString(StripeUiCoreR.string.stripe_continue_button_label)
+            ?: StripeUiCoreR.string.stripe_continue_button_label.resolvableString
     }
 
     private fun cvcRecollectionCompleteOrNotRequired(

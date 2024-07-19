@@ -261,9 +261,7 @@ private fun Dropdown(
 
         SingleChoiceDropdown(
             expanded = expanded,
-            title = resolvableString(
-                id = PaymentsCoreR.string.stripe_card_brand_choice_selection_header
-            ),
+            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentChoice = viewState.selectedBrand,
             choices = viewState.availableBrands,
             headerTextColor = MaterialTheme.stripeColors.subtitle,

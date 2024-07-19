@@ -278,7 +278,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             is CollectBankAccountResultInternal.Failed -> {
-                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
@@ -295,7 +295,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
-                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
                 reset()
@@ -312,7 +312,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (usBankAccountData != null) {
             handleResultForACH(usBankAccountData, intentId)
         } else {
-            reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
+            reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
         }
     }
 
@@ -364,7 +364,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             null -> {
-                reset(resolvableString(R.string.stripe_paymentsheet_ach_something_went_wrong))
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
         }
     }
@@ -416,9 +416,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
-                primaryButtonText = resolvableString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -443,9 +441,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = resolvableString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -614,15 +610,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 if (args.isPaymentFlow) {
                     args.formArgs.amount!!.buildPayButtonLabel()
                 } else {
-                    resolvableString(
-                        StripeUiCoreR.string.stripe_setup_button_label
-                    )
+                    StripeUiCoreR.string.stripe_setup_button_label.resolvableString
                 }
             }
 
-            else -> resolvableString(
-                StripeUiCoreR.string.stripe_continue_button_label
-            )
+            else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
         }
     }
 
