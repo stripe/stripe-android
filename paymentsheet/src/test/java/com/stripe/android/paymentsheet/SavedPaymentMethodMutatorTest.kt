@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -145,7 +147,7 @@ class SavedPaymentMethodMutatorTest {
                 customerRepository = mock(),
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 selection = stateFlowOf(null),
-                providePaymentMethodName = { it.orEmpty() },
+                providePaymentMethodName = { it?.resolvableString.orEmpty() },
                 addFirstPaymentMethodScreenFactory = { throw AssertionError("Not implemented") },
                 updateSelection = { throw AssertionError("Not implemented") },
                 isCbcEligible = isCbcEligible,

@@ -16,6 +16,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -222,10 +223,10 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    fun providePaymentMethodName(code: PaymentMethodCode?): String {
+    fun providePaymentMethodName(code: PaymentMethodCode?): ResolvableString {
         return code?.let {
             paymentMethodMetadata?.supportedPaymentMethodForCode(code)
-        }?.displayName?.resolve(context = application).orEmpty()
+        }?.displayName.orEmpty()
     }
 
     fun registerFromActivity(

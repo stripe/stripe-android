@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
@@ -26,7 +28,7 @@ internal class FakeEditPaymentMethodInteractor(
             selectedBrand = paymentMethod.card?.networks?.preferred?.let { code ->
                 EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
             } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown),
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             canRemove = true,
         )
     )
@@ -45,7 +47,7 @@ internal class FakeEditPaymentMethodInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -37,7 +38,7 @@ internal class SavedPaymentMethodMutator(
     private val customerRepository: CustomerRepository,
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val selection: StateFlow<PaymentSelection?>,
-    private val providePaymentMethodName: (PaymentMethodCode?) -> String,
+    private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isLiveModeProvider: () -> Boolean,

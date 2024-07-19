@@ -426,7 +426,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             canRemovePaymentMethods = true,
             isCbcEligible = true,
         ).items

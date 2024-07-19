@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -315,7 +316,7 @@ class DefaultManageScreenInteractorTest {
             editing = editing,
             canEdit = canEdit,
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
-            providePaymentMethodName = { it ?: "Missing name" },
+            providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,
             onDeletePaymentMethod = { notImplemented() },
             onEditPaymentMethod = { notImplemented() },

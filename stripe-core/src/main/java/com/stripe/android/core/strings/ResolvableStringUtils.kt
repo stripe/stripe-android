@@ -60,3 +60,8 @@ val String.resolvableString: ResolvableString
 @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val @receiver:StringRes Int.resolvableString: ResolvableString
     get() = IdentifierResolvableString(this, emptyList(), emptyList())
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun ResolvableString?.orEmpty(): ResolvableString {
+    return this ?: "".resolvableString
+}

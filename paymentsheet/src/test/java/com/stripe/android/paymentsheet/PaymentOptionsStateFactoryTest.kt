@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,7 +19,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = true,
             showLink = true,
             currentSelection = PaymentSelection.Saved(paymentMethod),
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
         )
@@ -36,7 +37,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
         )
@@ -65,7 +66,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = true,
         )
@@ -84,7 +85,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = true,
         )
@@ -107,7 +108,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = false,
         )
@@ -140,7 +141,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = false,
         )
@@ -167,7 +168,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
         )
@@ -190,7 +191,7 @@ class PaymentOptionsStateFactoryTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = false,
         )

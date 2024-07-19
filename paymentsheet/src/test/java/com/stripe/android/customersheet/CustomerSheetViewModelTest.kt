@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
@@ -266,7 +267,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         val name = viewModel.providePaymentMethodName(PaymentMethod.Type.Card.code)
-        assertThat(name)
+        assertThat(name.resolve(ApplicationProvider.getApplicationContext()))
             .isEqualTo("Card")
     }
 

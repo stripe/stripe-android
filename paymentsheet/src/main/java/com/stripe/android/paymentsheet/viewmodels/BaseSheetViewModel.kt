@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -143,10 +144,10 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    internal fun providePaymentMethodName(code: PaymentMethodCode?): String {
+    internal fun providePaymentMethodName(code: PaymentMethodCode?): ResolvableString {
         return code?.let {
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-        }?.displayName?.resolve(getApplication()).orEmpty()
+        }?.displayName.orEmpty()
     }
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {

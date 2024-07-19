@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -27,7 +28,7 @@ class PaymentOptionsItemsMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = { false }
         )
 
@@ -55,7 +56,7 @@ class PaymentOptionsItemsMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             isCbcEligible = { false }
         )
 

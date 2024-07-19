@@ -308,7 +308,7 @@ private fun EditPaymentMethodPreview() {
             viewState = EditPaymentMethodViewState(
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),

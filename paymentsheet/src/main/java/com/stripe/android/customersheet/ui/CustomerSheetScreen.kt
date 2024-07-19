@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -42,7 +43,7 @@ internal fun CustomerSheetScreen(
     displayAddForm: Boolean = true,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
-    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
 ) {
     PaymentSheetScaffold(
         topBar = {
@@ -98,7 +99,7 @@ internal fun CustomerSheetScreen(
 internal fun SelectPaymentMethod(
     viewState: CustomerSheetViewState.SelectPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
-    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)

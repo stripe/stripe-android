@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
@@ -205,13 +206,13 @@ internal object CustomerSheetTestHelper {
                 eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
                 removeExecutor: PaymentMethodRemoveOperation,
                 updateExecutor: PaymentMethodUpdateOperation,
-                displayName: String,
+                displayName: ResolvableString,
                 canRemove: Boolean,
                 isLiveMode: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     removeExecutor = removeExecutor,
                     updateExecutor = updateExecutor,
                     eventHandler = eventHandler,

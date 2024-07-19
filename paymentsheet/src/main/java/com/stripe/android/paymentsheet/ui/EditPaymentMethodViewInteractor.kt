@@ -45,7 +45,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor
@@ -54,7 +54,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
 
 internal class DefaultEditPaymentMethodViewInteractor(
     initialPaymentMethod: PaymentMethod,
-    displayName: String,
+    displayName: ResolvableString,
     private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
@@ -198,7 +198,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
