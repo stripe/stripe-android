@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -75,9 +74,8 @@ internal class DefaultCustomerSheetLoader(
                 )
             }.getOrThrow()
 
-            val elementsSessionWithMetadata = retrieveElementsSession(
-                configuration = configuration,
-                customerAdapter = customerAdapter
+            val elementsSession = retrieveElementsSession(
+                customerAdapter = customerAdapter,
             ).onFailure {
                 errorReporter.report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
@@ -85,10 +83,18 @@ internal class DefaultCustomerSheetLoader(
                 )
             }.getOrThrow()
 
+            val metadata = createPaymentMethodMetadata(
+                configuration = configuration,
+                elementsSession = elementsSession,
+            )
+
             loadPaymentMethods(
                 customerAdapter = customerAdapter,
                 configuration = configuration,
-                elementsSessionWithMetadata = elementsSessionWithMetadata,
+                elementsSessionWithMetadata = ElementsSessionWithMetadata(
+                    elementsSession = elementsSession,
+                    metadata = metadata,
+                ),
             ).onFailure {
                 errorReporter.report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
@@ -99,9 +105,8 @@ internal class DefaultCustomerSheetLoader(
     }
 
     private suspend fun retrieveElementsSession(
-        configuration: CustomerSheet.Configuration,
         customerAdapter: CustomerAdapter,
-    ): Result<ElementsSessionWithMetadata> {
+    ): Result<ElementsSession> {
         val paymentMethodTypes = if (customerAdapter.canCreateSetupIntents) {
             customerAdapter.paymentMethodTypes ?: emptyList()
         } else {
@@ -119,41 +124,29 @@ internal class DefaultCustomerSheetLoader(
             customer = null,
             externalPaymentMethods = emptyList(),
             defaultPaymentMethodId = null,
-        ).map { elementsSession ->
-            val billingDetailsCollectionConfig = configuration.billingDetailsCollectionConfiguration
-            val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
-                stripeIntent = elementsSession.stripeIntent,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
-            ).sharedDataSpecs
+        )
+    }
 
-            val cbcEligibility = CardBrandChoiceEligibility.create(
-                isEligible = elementsSession.isEligibleForCardBrandChoice,
-                preferredNetworks = configuration.preferredNetworks,
-            )
+    private suspend fun createPaymentMethodMetadata(
+        configuration: CustomerSheet.Configuration,
+        elementsSession: ElementsSession,
+    ): PaymentMethodMetadata {
+        val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
+            stripeIntent = elementsSession.stripeIntent,
+            serverLpmSpecs = elementsSession.paymentMethodSpecs,
+        ).sharedDataSpecs
 
-            val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
-                if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
-            ).isReady().first()
+        val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
+            if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
+        ).isReady().first()
 
-            val metadata = PaymentMethodMetadata(
-                stripeIntent = elementsSession.stripeIntent,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
-                paymentMethodOrder = configuration.paymentMethodOrder,
-                cbcEligibility = cbcEligibility,
-                merchantName = configuration.merchantDisplayName,
-                defaultBillingDetails = configuration.defaultBillingDetails,
-                shippingDetails = null,
-                hasCustomerConfiguration = true,
-                sharedDataSpecs = sharedDataSpecs,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
-                externalPaymentMethodSpecs = emptyList(),
-                isGooglePayReady = isGooglePayReadyAndEnabled,
-            )
-
-            ElementsSessionWithMetadata(elementsSession = elementsSession, metadata = metadata)
-        }
+        return PaymentMethodMetadata.create(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            sharedDataSpecs = sharedDataSpecs,
+            isGooglePayReady = isGooglePayReadyAndEnabled,
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
+        )
     }
 
     private suspend fun loadPaymentMethods(
