@@ -97,14 +97,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 manageScreenFactory = {
                     PaymentSheetScreen.ManageSavedPaymentMethods(
-                        interactor = DefaultManageScreenInteractor(
-                            viewModel
-                        )
+                        interactor = DefaultManageScreenInteractor.create(viewModel)
                     )
                 },
                 manageOneSavedPaymentMethodFactory = {
                     PaymentSheetScreen.ManageOneSavedPaymentMethod(
-                        interactor = DefaultManageOneSavedPaymentMethodInteractor(viewModel)
+                        interactor = DefaultManageOneSavedPaymentMethodInteractor.create(viewModel)
                     )
                 },
                 formScreenFactory = { selectedPaymentMethodCode ->

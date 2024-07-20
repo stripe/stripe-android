@@ -28,15 +28,6 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
 ) : ManageOneSavedPaymentMethodInteractor {
-
-    constructor(sheetViewModel: BaseSheetViewModel) : this(
-        paymentMethod = sheetViewModel.savedPaymentMethodMutator.paymentMethods.value.first(),
-        paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
-        providePaymentMethodName = sheetViewModel::providePaymentMethodName,
-        onDeletePaymentMethod = sheetViewModel.savedPaymentMethodMutator::removePaymentMethod,
-        navigateBack = sheetViewModel::handleBackPressed,
-    )
-
     override val state = ManageOneSavedPaymentMethodInteractor.State(
         paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
@@ -51,6 +42,18 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
                 onDeletePaymentMethod(state.paymentMethod.paymentMethod)
                 navigateBack()
             }
+        }
+    }
+
+    companion object {
+        fun create(sheetViewModel: BaseSheetViewModel): ManageOneSavedPaymentMethodInteractor {
+            return DefaultManageOneSavedPaymentMethodInteractor(
+                paymentMethod = sheetViewModel.savedPaymentMethodMutator.paymentMethods.value.first(),
+                paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
+                providePaymentMethodName = sheetViewModel::providePaymentMethodName,
+                onDeletePaymentMethod = sheetViewModel.savedPaymentMethodMutator::removePaymentMethod,
+                navigateBack = sheetViewModel::handleBackPressed,
+            )
         }
     }
 }

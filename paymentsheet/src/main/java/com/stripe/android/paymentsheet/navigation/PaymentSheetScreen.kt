@@ -93,7 +93,7 @@ internal sealed interface PaymentSheetScreen {
     }
 
     class SelectSavedPaymentMethods(
-        private val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
+        private val interactor: SelectSavedPaymentMethodsInteractor,
         val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
     ) : PaymentSheetScreen, Closeable {
 
@@ -106,10 +106,10 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return selectSavedPaymentMethodsInteractor.state.mapAsStateFlow { state ->
+            return interactor.state.mapAsStateFlow { state ->
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
-                    isLiveMode = selectSavedPaymentMethodsInteractor.isLiveMode,
+                    isLiveMode = interactor.isLiveMode,
                     isEditing = state.isEditing,
                     canEdit = state.canEdit,
                 )
@@ -132,7 +132,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val state by selectSavedPaymentMethodsInteractor.state.collectAsState()
+            val state by interactor.state.collectAsState()
 
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = state.paymentOptionsItems,
@@ -140,24 +140,24 @@ internal sealed interface PaymentSheetScreen {
                 isEditing = state.isEditing,
                 isProcessing = state.isProcessing,
                 onAddCardPressed = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                    interactor.handleViewAction(
                         SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
                     )
                 },
                 onItemSelected = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                    interactor.handleViewAction(
                         SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
                             it
                         )
                     )
                 },
                 onModifyItem = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                    interactor.handleViewAction(
                         SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
                     )
                 },
                 onItemRemoved = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
+                    interactor.handleViewAction(
                         SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
                     )
                 },
@@ -177,7 +177,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun close() {
-            selectSavedPaymentMethodsInteractor.close()
+            interactor.close()
         }
     }
 
