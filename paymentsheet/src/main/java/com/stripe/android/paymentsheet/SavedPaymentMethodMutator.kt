@@ -24,7 +24,9 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -95,6 +97,9 @@ internal class SavedPaymentMethodMutator(
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
 
+    private val _editing = MutableStateFlow(false)
+    internal val editing: StateFlow<Boolean> = _editing
+
     init {
         coroutineScope.launch {
             selection.collect { selection ->
@@ -103,6 +108,26 @@ internal class SavedPaymentMethodMutator(
                 }
             }
         }
+
+        coroutineScope.launch {
+            canEdit.collect { canEdit ->
+                if (!canEdit && editing.value) {
+                    toggleEditing()
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            paymentMethods.collect { paymentMethods ->
+                if (paymentMethods.isEmpty() && editing.value) {
+                    toggleEditing()
+                }
+            }
+        }
+    }
+
+    fun toggleEditing() {
+        _editing.update { !it }
     }
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) {

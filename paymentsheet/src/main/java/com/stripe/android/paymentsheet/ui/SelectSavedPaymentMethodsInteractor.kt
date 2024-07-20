@@ -194,7 +194,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         fun create(viewModel: BaseSheetViewModel): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
-                editing = viewModel.editing,
+                editing = viewModel.savedPaymentMethodMutator.editing,
                 canEdit = viewModel.savedPaymentMethodMutator.canEdit,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,

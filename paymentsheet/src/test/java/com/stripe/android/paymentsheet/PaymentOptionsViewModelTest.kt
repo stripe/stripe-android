@@ -469,12 +469,12 @@ internal class PaymentOptionsViewModelTest {
             updateSelection(PaymentSelection.Link)
         }
 
-        viewModel.toggleEditing()
+        viewModel.savedPaymentMethodMutator.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
 
-        viewModel.toggleEditing()
+        viewModel.savedPaymentMethodMutator.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
