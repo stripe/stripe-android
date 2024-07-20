@@ -108,10 +108,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                 },
                 formScreenFactory = { selectedPaymentMethodCode ->
-                    PaymentSheetScreen.Form(
-                        DefaultVerticalModeFormInteractor(
-                            selectedPaymentMethodCode,
-                            viewModel
+                    PaymentSheetScreen.VerticalModeForm(
+                        DefaultVerticalModeFormInteractor.create(
+                            selectedPaymentMethodCode = selectedPaymentMethodCode,
+                            viewModel = viewModel
                         )
                     )
                 },
