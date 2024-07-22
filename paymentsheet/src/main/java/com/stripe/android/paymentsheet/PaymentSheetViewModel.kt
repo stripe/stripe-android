@@ -814,10 +814,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val hasPaymentMethods = savedPaymentMethodMutator.paymentMethods.value.isNotEmpty()
         val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                DefaultSelectSavedPaymentMethodsInteractor(
-                    this
-                ),
-                getCvcRecollectionState()
+                interactor = DefaultSelectSavedPaymentMethodsInteractor.create(this),
+                cvcRecollectionState = getCvcRecollectionState()
             )
         } else {
             PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))

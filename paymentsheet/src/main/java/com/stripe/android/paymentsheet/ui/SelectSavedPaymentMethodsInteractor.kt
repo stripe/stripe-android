@@ -57,25 +57,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     override val isLiveMode: Boolean,
 ) : SelectSavedPaymentMethodsInteractor {
-    constructor(viewModel: BaseSheetViewModel) : this(
-        paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
-        editing = viewModel.editing,
-        canEdit = viewModel.savedPaymentMethodMutator.canEdit,
-        isProcessing = viewModel.processing,
-        currentSelection = viewModel.selection,
-        mostRecentlySelectedSavedPaymentMethod =
-        viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
-        onAddCardPressed = {
-            viewModel.navigationHandler.transitionTo(
-                AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
-            )
-        },
-        onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
-        onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
-        onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
-        isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
-    )
-
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
     private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
@@ -207,5 +188,28 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
     override fun close() {
         coroutineScope.cancel()
+    }
+
+    companion object {
+        fun create(viewModel: BaseSheetViewModel): SelectSavedPaymentMethodsInteractor {
+            return DefaultSelectSavedPaymentMethodsInteractor(
+                paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
+                editing = viewModel.editing,
+                canEdit = viewModel.savedPaymentMethodMutator.canEdit,
+                isProcessing = viewModel.processing,
+                currentSelection = viewModel.selection,
+                mostRecentlySelectedSavedPaymentMethod =
+                viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
+                onAddCardPressed = {
+                    viewModel.navigationHandler.transitionTo(
+                        AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
+                    )
+                },
+                onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
+                onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
+                onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
+                isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode,
+            )
+        }
     }
 }
