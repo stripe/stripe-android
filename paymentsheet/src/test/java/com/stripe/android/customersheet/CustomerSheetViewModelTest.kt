@@ -479,19 +479,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -509,19 +509,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -3170,14 +3170,14 @@ class CustomerSheetViewModelTest {
             viewModel.viewState.test {
                 val viewState = awaitViewState<SelectPaymentMethod>()
 
-                assertThat(viewState.topBarState.showEditMenu).isTrue()
+                assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
                 val viewStateAfterClickingEdit = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterClickingEdit.isEditing).isTrue()
-                assertThat(viewStateAfterClickingEdit.topBarState.showEditMenu).isTrue()
+                assertThat(viewStateAfterClickingEdit.topBarState {}.showEditMenu).isTrue()
             }
 
             viewModel.removePaymentMethodFromEditScreen(paymentMethodToRemove)
@@ -3186,7 +3186,7 @@ class CustomerSheetViewModelTest {
                 val viewStateAfterRemoval = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterRemoval.isEditing).isFalse()
-                assertThat(viewStateAfterRemoval.topBarState.showEditMenu).isFalse()
+                assertThat(viewStateAfterRemoval.topBarState {}.showEditMenu).isFalse()
             }
         }
 

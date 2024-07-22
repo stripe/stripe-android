@@ -277,12 +277,27 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `handleViewAction ToggleEdit calls toggleEdit`() {
+        var hasCalledToggleEdit = false
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(
+            initialPaymentMethods = initialPaymentMethods,
+            currentSelection = null,
+            toggleEdit = { hasCalledToggleEdit = true },
+        ) {
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
+            assertThat(hasCalledToggleEdit).isTrue()
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
         initialPaymentMethods: List<PaymentMethod>?,
         currentSelection: PaymentSelection?,
         isEditing: Boolean = false,
+        toggleEdit: () -> Unit = { notImplemented() },
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         handleBackPressed: () -> Unit = { notImplemented() },
@@ -303,6 +318,7 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
+            toggleEdit = toggleEdit,
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,

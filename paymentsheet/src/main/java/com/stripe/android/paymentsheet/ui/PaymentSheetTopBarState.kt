@@ -12,14 +12,23 @@ internal data class PaymentSheetTopBarState(
     val showTestModeLabel: Boolean,
     val showEditMenu: Boolean,
     @StringRes val editMenuLabel: Int,
-)
+    val onEditIconPressed: () -> Unit,
+) {
+    sealed interface Editable {
+        data object Never : Editable
+        data class Maybe(
+            val isEditing: Boolean,
+            val canEdit: Boolean,
+            val onEditIconPressed: () -> Unit,
+        ) : Editable
+    }
+}
 
 internal object PaymentSheetTopBarStateFactory {
     fun create(
         hasBackStack: Boolean,
         isLiveMode: Boolean,
-        isEditing: Boolean,
-        canEdit: Boolean,
+        editable: PaymentSheetTopBarState.Editable,
     ): PaymentSheetTopBarState {
         val icon = if (hasBackStack) {
             R.drawable.stripe_ic_paymentsheet_back
@@ -33,7 +42,7 @@ internal object PaymentSheetTopBarStateFactory {
             R.string.stripe_paymentsheet_close
         }
 
-        val editMenuLabel = if (isEditing) {
+        val editMenuLabel = if ((editable as? PaymentSheetTopBarState.Editable.Maybe)?.isEditing == true) {
             StripeR.string.stripe_done
         } else {
             StripeR.string.stripe_edit
@@ -43,8 +52,10 @@ internal object PaymentSheetTopBarStateFactory {
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = canEdit,
+            showEditMenu = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.canEdit == true,
             editMenuLabel = editMenuLabel,
+            onEditIconPressed = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.onEditIconPressed
+                ?: {},
         )
     }
 }

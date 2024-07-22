@@ -43,7 +43,6 @@ class PaymentSheetTopBarTest {
                     isEnabled = true,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -71,7 +70,6 @@ class PaymentSheetTopBarTest {
                     isEnabled = false,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -90,11 +88,10 @@ class PaymentSheetTopBarTest {
 
         composeTestRule.setContent {
             PaymentSheetTopBar(
-                state = mockState(showEditMenu = true),
+                state = mockState(showEditMenu = true, onEditIconPressed = { didCallOnEditIconPressed = true }),
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = { throw AssertionError("Not expected") },
-                onEditIconPressed = { didCallOnEditIconPressed = true },
             )
         }
 
@@ -107,6 +104,7 @@ class PaymentSheetTopBarTest {
 
     private fun mockState(
         showEditMenu: Boolean = false,
+        onEditIconPressed: () -> Unit = { throw AssertionError("Not expected") }
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
@@ -114,6 +112,7 @@ class PaymentSheetTopBarTest {
             showTestModeLabel = false,
             showEditMenu = showEditMenu,
             editMenuLabel = StripeR.string.stripe_edit,
+            onEditIconPressed = onEditIconPressed,
         )
     }
 }

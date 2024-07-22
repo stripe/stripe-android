@@ -32,6 +32,7 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = false,
             showEditMenu = false,
             editMenuLabel = StripeR.string.stripe_edit,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -40,7 +41,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -53,6 +53,7 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_edit,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -61,7 +62,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -74,6 +74,7 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_done,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -82,7 +83,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -95,6 +95,7 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = false,
             editMenuLabel = StripeR.string.stripe_edit,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -103,7 +104,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
