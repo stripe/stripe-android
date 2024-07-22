@@ -9,7 +9,7 @@ import org.mockito.kotlin.mock
 internal class PaymentSheetScreenFormTest {
     @Test
     fun `title returns null`() = runTest {
-        PaymentSheetScreen.Form(mock()).title(isCompleteFlow = true, isWalletEnabled = true).test {
+        PaymentSheetScreen.VerticalModeForm(mock()).title(isCompleteFlow = true, isWalletEnabled = true).test {
             assertThat(awaitItem()).isNull()
         }
     }

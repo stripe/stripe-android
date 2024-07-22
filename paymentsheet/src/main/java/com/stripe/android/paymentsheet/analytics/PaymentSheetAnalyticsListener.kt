@@ -66,7 +66,7 @@ internal class PaymentSheetAnalyticsListener(
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
             is PaymentSheetScreen.Loading,
-            is PaymentSheetScreen.Form,
+            is PaymentSheetScreen.VerticalModeForm,
             is PaymentSheetScreen.ManageOneSavedPaymentMethod,
             is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                 // Nothing to do here

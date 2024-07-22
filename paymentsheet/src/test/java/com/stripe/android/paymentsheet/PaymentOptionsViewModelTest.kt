@@ -350,7 +350,7 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.Form>()
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             }
         }
 

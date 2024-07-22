@@ -45,7 +45,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         }
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.VerticalMode,
-        is PaymentSheetScreen.Form,
+        is PaymentSheetScreen.VerticalModeForm,
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.ManageSavedPaymentMethods,
@@ -350,7 +350,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    class Form(
+    class VerticalModeForm(
         private val interactor: VerticalModeFormInteractor,
         private val showsWalletHeader: Boolean = false,
     ) : PaymentSheetScreen, Closeable {

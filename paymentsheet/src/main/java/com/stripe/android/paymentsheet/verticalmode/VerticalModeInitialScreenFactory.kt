@@ -10,8 +10,8 @@ internal object VerticalModeInitialScreenFactory {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
 
         if (supportedPaymentMethodTypes.size == 1 && savedPaymentMethods.isEmpty()) {
-            return PaymentSheetScreen.Form(
-                interactor = DefaultVerticalModeFormInteractor(
+            return PaymentSheetScreen.VerticalModeForm(
+                interactor = DefaultVerticalModeFormInteractor.create(
                     selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
                     viewModel = viewModel,
                 ),

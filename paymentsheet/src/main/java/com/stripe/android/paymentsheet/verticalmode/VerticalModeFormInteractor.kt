@@ -51,30 +51,21 @@ internal interface VerticalModeFormInteractor {
 
 internal class DefaultVerticalModeFormInteractor(
     private val selectedPaymentMethodCode: String,
-    private val viewModel: BaseSheetViewModel,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    private val onLinkInlineStateUpdated: (InlineSignupViewState) -> Unit,
+    private val linkSignupMode: StateFlow<LinkSignupMode?>,
+    private val formArguments: FormArguments,
+    private val formElements: List<FormElement>,
+    private val onFormFieldValuesChanged: (formValues: FormFieldValues?, selectedPaymentMethodCode: String) -> Unit,
+    private val usBankAccountArguments: USBankAccountFormArguments,
+    private val reportFieldInteraction: (String) -> Unit,
+    private val headerInformation: FormHeaderInformation?,
+    override val isLiveMode: Boolean,
+    processing: StateFlow<Boolean>,
+    private val coroutineScope: CoroutineScope,
 ) : VerticalModeFormInteractor {
-    private val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
-    private val linkSignupMode = viewModel.linkHandler.linkSignupMode.stateIn(
-        scope = coroutineScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null,
-    )
-    private val formHelper = FormHelper.create(viewModel)
-    private val formArguments: FormArguments = formHelper.createFormArguments(selectedPaymentMethodCode)
-    private val formElements: List<FormElement> = formHelper.formElementsForCode(selectedPaymentMethodCode)
-    private val usBankAccountArguments: USBankAccountFormArguments =
-        USBankAccountFormArguments.create(
-            viewModel = viewModel,
-            hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-            selectedPaymentMethodCode = selectedPaymentMethodCode
-        )
-
-    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
-
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
-        viewModel.processing,
+        processing,
         linkSignupMode,
     ) { isProcessing, linkSignupMode ->
         VerticalModeFormInteractor.State(
@@ -84,26 +75,57 @@ internal class DefaultVerticalModeFormInteractor(
             formArguments = formArguments,
             formElements = formElements,
             linkSignupMode = linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code },
-            linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
-            headerInformation = paymentMethodMetadata.formHeaderInformationForCode(selectedPaymentMethodCode),
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            headerInformation = headerInformation,
         )
     }
 
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
         when (viewAction) {
             VerticalModeFormInteractor.ViewAction.FieldInteraction -> {
-                viewModel.analyticsListener.reportFieldInteraction(selectedPaymentMethodCode)
+                reportFieldInteraction(selectedPaymentMethodCode)
             }
             is VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged -> {
-                formHelper.onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
+                onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
             }
             is VerticalModeFormInteractor.ViewAction.LinkSignupStateChanged -> {
-                linkInlineHandler.onStateUpdated(viewAction.linkInlineSignupViewState)
+                onLinkInlineStateUpdated(viewAction.linkInlineSignupViewState)
             }
         }
     }
 
     override fun close() {
         coroutineScope.cancel()
+    }
+
+    companion object {
+        fun create(selectedPaymentMethodCode: String, viewModel: BaseSheetViewModel): VerticalModeFormInteractor {
+            val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+            val formHelper = FormHelper.create(viewModel)
+            val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+            return DefaultVerticalModeFormInteractor(
+                selectedPaymentMethodCode = selectedPaymentMethodCode,
+                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
+                onLinkInlineStateUpdated = LinkInlineHandler.create(viewModel, coroutineScope)::onStateUpdated,
+                linkSignupMode = viewModel.linkHandler.linkSignupMode.stateIn(
+                    scope = coroutineScope,
+                    started = SharingStarted.WhileSubscribed(5_000),
+                    initialValue = null,
+                ),
+                formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
+                formElements = formHelper.formElementsForCode(selectedPaymentMethodCode),
+                onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
+                usBankAccountArguments = USBankAccountFormArguments.create(
+                    viewModel = viewModel,
+                    hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+                    selectedPaymentMethodCode = selectedPaymentMethodCode
+                ),
+                headerInformation = paymentMethodMetadata.formHeaderInformationForCode(selectedPaymentMethodCode),
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                processing = viewModel.processing,
+                reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
+                coroutineScope = coroutineScope,
+            )
+        }
     }
 }
