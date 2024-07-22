@@ -54,9 +54,12 @@ internal interface FinancialConnectionsRepository {
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
-    private val apiOptions: ApiRequest.Options,
+    private val apiOptionsProvider: ApiRequestOptionsProvider,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsRepository {
+
+    private val apiOptions: ApiRequest.Options
+        get() = apiOptionsProvider.provideApiRequestOptions()
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams

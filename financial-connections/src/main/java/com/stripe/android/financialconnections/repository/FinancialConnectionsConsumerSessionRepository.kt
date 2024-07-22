@@ -36,14 +36,14 @@ internal interface FinancialConnectionsConsumerSessionRepository {
     companion object {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
-            apiOptions: ApiRequest.Options,
+            apiOptionsProvider: ApiRequestOptionsProvider,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
-                apiOptions = apiOptions,
+                apiOptionsProvider = apiOptionsProvider,
                 financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
                 locale = locale,
                 logger = logger,
@@ -54,13 +54,16 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
-    private val apiOptions: ApiRequest.Options,
+    private val apiOptionsProvider: ApiRequestOptionsProvider,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
 
     private val mutex = Mutex()
     private var cachedConsumerSession: ConsumerSession? = null
+
+    private val apiOptions: ApiRequest.Options
+        get() = apiOptionsProvider.provideApiRequestOptions()
 
     override suspend fun getCachedConsumerSession(): ConsumerSession? =
         mutex.withLock { cachedConsumerSession }
@@ -71,6 +74,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSessionLookup = mutex.withLock {
         postConsumerSession(email, clientSecret).also { lookup ->
             updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
+            apiOptionsProvider.setTentativeConsumerPublishableKey(lookup.publishableKey)
         }
     }
 
@@ -105,6 +109,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = CONSUMER_SURFACE,
             requestOptions = apiOptions
         ).also { session ->
+            apiOptionsProvider.confirmConsumerPublishableKey()
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
     }

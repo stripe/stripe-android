@@ -18,5 +18,7 @@ data class ConsumerSessionLookup(
     @SerialName("consumer_session")
     val consumerSession: ConsumerSession? = null,
     @SerialName("error_message")
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    @SerialName("publishable_key")
+    val publishableKey: String? = null,
 ) : StripeModel
