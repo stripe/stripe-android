@@ -148,10 +148,13 @@ internal class DefaultManageScreenInteractor(
     }
 
     companion object {
-        fun create(viewModel: BaseSheetViewModel): ManageScreenInteractor {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): ManageScreenInteractor {
             return DefaultManageScreenInteractor(
                 paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
-                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                paymentMethodMetadata = paymentMethodMetadata,
                 selection = viewModel.selection,
                 editing = viewModel.savedPaymentMethodMutator.editing,
                 canEdit = viewModel.savedPaymentMethodMutator.canEdit,
@@ -163,7 +166,7 @@ internal class DefaultManageScreenInteractor(
                 onDeletePaymentMethod = { viewModel.savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 navigateBack = viewModel::handleBackPressed,
-                isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
 

@@ -4,6 +4,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
@@ -99,10 +100,13 @@ internal class DefaultVerticalModeFormInteractor(
     }
 
     companion object {
-        fun create(selectedPaymentMethodCode: String, viewModel: BaseSheetViewModel): VerticalModeFormInteractor {
+        fun create(
+            selectedPaymentMethodCode: String,
+            viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val formHelper = FormHelper.create(viewModel)
-            val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
+            val formHelper = FormHelper.create(viewModel = viewModel, paymentMethodMetadata = paymentMethodMetadata)
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
@@ -117,6 +121,7 @@ internal class DefaultVerticalModeFormInteractor(
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 usBankAccountArguments = USBankAccountFormArguments.create(
                     viewModel = viewModel,
+                    paymentMethodMetadata = paymentMethodMetadata,
                     hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
                     selectedPaymentMethodCode = selectedPaymentMethodCode
                 ),

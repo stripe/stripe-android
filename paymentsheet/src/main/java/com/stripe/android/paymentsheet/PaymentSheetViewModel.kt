@@ -25,6 +25,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -380,7 +381,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage()
 
         resetViewState(errorMessage)
-        navigationHandler.resetTo(determineInitialBackStack())
+        navigationHandler.resetTo(determineInitialBackStack(state.paymentMethodMetadata))
     }
 
     fun setupGooglePay(
@@ -807,18 +808,31 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onError(error: ResolvableString?) = resetViewState(error)
 
-    private fun determineInitialBackStack(): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(paymentMethodMetadata: PaymentMethodMetadata): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(VerticalModeInitialScreenFactory.create(this))
+            return listOf(
+                VerticalModeInitialScreenFactory.create(
+                    viewModel = this,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            )
         }
         val hasPaymentMethods = savedPaymentMethodMutator.paymentMethods.value.isNotEmpty()
         val target = if (hasPaymentMethods) {
+            val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                interactor = DefaultSelectSavedPaymentMethodsInteractor.create(this),
+                interactor = interactor,
                 cvcRecollectionState = getCvcRecollectionState()
             )
         } else {
-            PaymentSheetScreen.AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
+            val interactor = DefaultAddPaymentMethodInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = interactor)
         }
         return listOf(target)
     }

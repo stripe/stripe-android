@@ -47,10 +47,13 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
     }
 
     companion object {
-        fun create(sheetViewModel: BaseSheetViewModel): ManageOneSavedPaymentMethodInteractor {
+        fun create(
+            sheetViewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): ManageOneSavedPaymentMethodInteractor {
             return DefaultManageOneSavedPaymentMethodInteractor(
                 paymentMethod = sheetViewModel.savedPaymentMethodMutator.paymentMethods.value.first(),
-                paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
+                paymentMethodMetadata = paymentMethodMetadata,
                 providePaymentMethodName = sheetViewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 onDeletePaymentMethod = sheetViewModel.savedPaymentMethodMutator::removePaymentMethod,
                 navigateBack = sheetViewModel::handleBackPressed,

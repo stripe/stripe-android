@@ -1521,7 +1521,10 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = FormHelper.create(viewModel).createFormArguments(
+        val observedArgs = FormHelper.create(
+            viewModel = viewModel,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+        ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
 

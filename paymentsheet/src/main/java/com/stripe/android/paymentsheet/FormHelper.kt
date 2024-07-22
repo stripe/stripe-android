@@ -21,10 +21,10 @@ internal class FormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
 ) {
     companion object {
-        fun create(viewModel: BaseSheetViewModel): FormHelper {
+        fun create(viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata): FormHelper {
             return FormHelper(
                 context = viewModel.getApplication(),
-                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
                 },
