@@ -113,7 +113,7 @@ internal class SavedPaymentMethodMutator(
         coroutineScope.launch {
             canEdit.collect { canEdit ->
                 if (!canEdit && editing.value) {
-                    toggleEditing()
+                    _editing.value = false
                 }
             }
         }
@@ -121,7 +121,7 @@ internal class SavedPaymentMethodMutator(
         coroutineScope.launch {
             paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty() && editing.value) {
-                    toggleEditing()
+                    _editing.value = false
                 }
             }
         }
