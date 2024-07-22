@@ -49,7 +49,11 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `showEditMenu=true when canEdit=true`() {
         val state = buildTopBarState(
-            canEdit = true,
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = true,
+                isEditing = false,
+                onEditIconPressed = {},
+            ),
         )
 
         assertThat(state.showEditMenu).isTrue()
@@ -58,7 +62,20 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `showEditMenu=false when canEdit=false`() {
         val state = buildTopBarState(
-            canEdit = false,
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = false,
+                onEditIconPressed = {},
+            ),
+        )
+
+        assertThat(state.showEditMenu).isFalse()
+    }
+
+    @Test
+    fun `showEditMenu=false when editable=Never`() {
+        val state = buildTopBarState(
+            editable = PaymentSheetTopBarState.Editable.Never,
         )
 
         assertThat(state.showEditMenu).isFalse()
@@ -67,7 +84,11 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `editMenuLabel=edit when isEditing=false`() {
         val state = buildTopBarState(
-            isEditing = false,
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = false,
+                onEditIconPressed = {},
+            ),
         )
 
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_edit)
@@ -76,7 +97,11 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `editMenuLabel=done when isEditing=true`() {
         val state = buildTopBarState(
-            isEditing = true,
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = true,
+                onEditIconPressed = {},
+            ),
         )
 
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_done)
@@ -85,14 +110,12 @@ class PaymentSheetTopBarStateFactoryTest {
     private fun buildTopBarState(
         canNavigateBack: Boolean = false,
         isLiveMode: Boolean = false,
-        isEditing: Boolean = false,
-        canEdit: Boolean = false,
+        editable: PaymentSheetTopBarState.Editable = PaymentSheetTopBarState.Editable.Never,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarStateFactory.create(
             hasBackStack = canNavigateBack,
             isLiveMode = isLiveMode,
-            isEditing = isEditing,
-            canEdit = canEdit,
+            editable,
         )
     }
 }

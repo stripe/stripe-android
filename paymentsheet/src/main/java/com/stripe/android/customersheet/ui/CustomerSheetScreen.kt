@@ -48,15 +48,14 @@ internal fun CustomerSheetScreen(
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                state = viewState.topBarState,
+                state = viewState.topBarState {
+                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
+                },
                 isEnabled = !viewState.isProcessing,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed
                     )
-                },
-                toggleEditing = {
-                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
                 },
             )
         },

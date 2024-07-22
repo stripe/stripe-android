@@ -74,13 +74,13 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                     contentDescription = StripeUiCoreR.string.stripe_back,
                                     showEditMenu = false,
                                     showTestModeLabel = false,
-                                    editMenuLabel = StripeR.string.stripe_edit
+                                    editMenuLabel = StripeR.string.stripe_edit,
+                                    onEditIconPressed = {},
                                 ),
                                 isEnabled = true,
                                 handleBackPressed = {
                                     viewModel.handleViewAction(OnBackPressed)
                                 },
-                                toggleEditing = {},
                             )
                         },
                         content = {

@@ -43,7 +43,6 @@ internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState?,
     isEnabled: Boolean,
     handleBackPressed: () -> Unit,
-    toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
     if (state != null) {
@@ -52,7 +51,6 @@ internal fun PaymentSheetTopBar(
             isEnabled = isEnabled,
             elevation = elevation,
             onNavigationIconPressed = handleBackPressed,
-            onEditIconPressed = toggleEditing,
         )
     }
 }
@@ -63,7 +61,6 @@ internal fun PaymentSheetTopBar(
     isEnabled: Boolean,
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
-    onEditIconPressed: () -> Unit,
 ) {
     val keyboardController = LocalTextInputService.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
@@ -99,7 +96,7 @@ internal fun PaymentSheetTopBar(
                     labelResourceId = state.editMenuLabel,
                     isEnabled = isEnabled,
                     tintColor = tintColor,
-                    onClick = onEditIconPressed,
+                    onClick = state.onEditIconPressed,
                 )
             }
         },
@@ -173,6 +170,7 @@ internal fun PaymentSheetTopBar_Preview() {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_edit,
+            onEditIconPressed = {},
         )
 
         PaymentSheetTopBar(
@@ -180,7 +178,6 @@ internal fun PaymentSheetTopBar_Preview() {
             isEnabled = true,
             elevation = 0.dp,
             onNavigationIconPressed = {},
-            onEditIconPressed = {},
         )
     }
 }

@@ -110,8 +110,13 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = state.isEditing,
-                    canEdit = state.canEdit,
+                    editable = PaymentSheetTopBarState.Editable.Maybe(
+                        isEditing = state.isEditing,
+                        canEdit = state.canEdit,
+                        onEditIconPressed = {
+                            interactor.handleViewAction(SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit)
+                        },
+                    ),
                 )
             }
         }
@@ -193,8 +198,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -239,8 +243,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -288,8 +291,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -322,8 +324,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -363,8 +364,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -396,8 +396,13 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = state.isEditing,
-                    canEdit = state.canEdit,
+                    editable = PaymentSheetTopBarState.Editable.Maybe(
+                        isEditing = state.isEditing,
+                        canEdit = state.canEdit,
+                        onEditIconPressed = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
+                        },
+                    ),
                 )
             }
         }
@@ -437,8 +442,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.state.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }

@@ -39,6 +39,7 @@ internal interface ManageScreenInteractor {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data class DeletePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
+        data object ToggleEdit : ViewAction()
     }
 }
 
@@ -48,6 +49,7 @@ internal class DefaultManageScreenInteractor(
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
+    private val toggleEdit: () -> Unit,
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -120,6 +122,7 @@ internal class DefaultManageScreenInteractor(
                 handlePaymentMethodSelected(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
+            ManageScreenInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
     }
 
@@ -158,6 +161,7 @@ internal class DefaultManageScreenInteractor(
                 selection = viewModel.selection,
                 editing = viewModel.savedPaymentMethodMutator.editing,
                 canEdit = viewModel.savedPaymentMethodMutator.canEdit,
+                toggleEdit = viewModel.savedPaymentMethodMutator::toggleEditing,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {

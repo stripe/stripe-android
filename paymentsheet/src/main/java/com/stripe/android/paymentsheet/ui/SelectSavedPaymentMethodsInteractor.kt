@@ -37,11 +37,10 @@ internal interface SelectSavedPaymentMethodsInteractor {
 
     sealed class ViewAction {
         data object AddCardPressed : ViewAction()
-
         data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
-
         data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
         data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
+        data object ToggleEdit : ViewAction()
     }
 }
 
@@ -49,6 +48,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>,
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
+    private val toggleEdit: () -> Unit,
     private val isProcessing: StateFlow<Boolean>,
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
@@ -184,6 +184,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             )
 
             SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed -> onAddCardPressed()
+            SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
     }
 
@@ -200,6 +201,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
                 editing = viewModel.savedPaymentMethodMutator.editing,
                 canEdit = viewModel.savedPaymentMethodMutator.canEdit,
+                toggleEdit = viewModel.savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,
                 mostRecentlySelectedSavedPaymentMethod =
