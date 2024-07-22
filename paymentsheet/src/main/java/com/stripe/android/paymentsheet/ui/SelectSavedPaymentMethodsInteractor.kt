@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
@@ -191,7 +192,10 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     }
 
     companion object {
-        fun create(viewModel: BaseSheetViewModel): SelectSavedPaymentMethodsInteractor {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
                 editing = viewModel.savedPaymentMethodMutator.editing,
@@ -201,14 +205,18 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 mostRecentlySelectedSavedPaymentMethod =
                 viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
                 onAddCardPressed = {
+                    val interactor = DefaultAddPaymentMethodInteractor.create(
+                        viewModel = viewModel,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                    )
                     viewModel.navigationHandler.transitionTo(
-                        AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
+                        AddAnotherPaymentMethod(interactor = interactor)
                     )
                 },
                 onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
                 onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
                 onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
-                isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
     }

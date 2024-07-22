@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -159,7 +160,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        navigationHandler.resetTo(determineInitialBackStack())
+        navigationHandler.resetTo(determineInitialBackStack(args.state.paymentMethodMetadata))
     }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
@@ -291,14 +292,27 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    private fun determineInitialBackStack(): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(paymentMethodMetadata: PaymentMethodMetadata): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(VerticalModeInitialScreenFactory.create(this))
+            return listOf(
+                VerticalModeInitialScreenFactory.create(
+                    viewModel = this,
+                    paymentMethodMetadata = paymentMethodMetadata
+                )
+            )
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods(DefaultSelectSavedPaymentMethodsInteractor.create(this))
+            val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            SelectSavedPaymentMethods(interactor = interactor)
         } else {
-            AddFirstPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
+            val interactor = DefaultAddPaymentMethodInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            AddFirstPaymentMethod(interactor = interactor)
         }
 
         return buildList {
@@ -308,10 +322,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // The user has previously selected a new payment method. Instead of sending them
                 // to the payment methods screen, we directly launch them into the payment method
                 // form again.
+                val interactor = DefaultAddPaymentMethodInteractor.create(
+                    viewModel = this@PaymentOptionsViewModel,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
                 add(
-                    PaymentSheetScreen.AddAnotherPaymentMethod(
-                        interactor = DefaultAddPaymentMethodInteractor.create(this@PaymentOptionsViewModel)
-                    )
+                    PaymentSheetScreen.AddAnotherPaymentMethod(interactor = interactor)
                 )
             }
         }

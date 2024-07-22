@@ -321,7 +321,11 @@ internal class SavedPaymentMethodMutator(
                     }?.displayName.orEmpty()
                 },
                 addFirstPaymentMethodScreenFactory = {
-                    PaymentSheetScreen.AddFirstPaymentMethod(DefaultAddPaymentMethodInteractor.create(viewModel))
+                    val interactor = DefaultAddPaymentMethodInteractor.create(
+                        viewModel = viewModel,
+                        paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                    )
+                    PaymentSheetScreen.AddFirstPaymentMethod(interactor)
                 },
                 updateSelection = viewModel::updateSelection,
                 isCbcEligible = {

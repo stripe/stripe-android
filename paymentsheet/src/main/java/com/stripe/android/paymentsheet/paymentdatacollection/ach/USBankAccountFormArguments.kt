@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -56,16 +57,14 @@ internal class USBankAccountFormArguments(
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
             hostedSurface: String,
             selectedPaymentMethodCode: String,
         ): USBankAccountFormArguments {
-            val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
-            val isSaveForFutureUseValueChangeable = paymentMethodMetadata?.let {
-                isSaveForFutureUseValueChangeable(
-                    code = selectedPaymentMethodCode,
-                    metadata = it,
-                )
-            } ?: false
+            val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+                code = selectedPaymentMethodCode,
+                metadata = paymentMethodMetadata,
+            )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val initializationMode = (viewModel as? PaymentSheetViewModel)
                 ?.args
@@ -73,7 +72,7 @@ internal class USBankAccountFormArguments(
             val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
-            val stripeIntent = paymentMethodMetadata?.stripeIntent
+            val stripeIntent = paymentMethodMetadata.stripeIntent
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable &&
                     // Instant Debits does not support saving for future use
@@ -83,8 +82,8 @@ internal class USBankAccountFormArguments(
                 onBehalfOf = onBehalfOf,
                 isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent?.id,
-                clientSecret = stripeIntent?.clientSecret,
+                stripeIntentId = stripeIntent.id,
+                clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
