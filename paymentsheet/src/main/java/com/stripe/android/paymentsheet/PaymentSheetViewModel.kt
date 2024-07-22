@@ -381,7 +381,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage()
 
         resetViewState(errorMessage)
-        navigationHandler.resetTo(determineInitialBackStack(state.paymentMethodMetadata))
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                savedPaymentMethods = state.customer?.paymentMethods.orEmpty(),
+            )
+        )
     }
 
     fun setupGooglePay(
@@ -808,12 +813,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onError(error: ResolvableString?) = resetViewState(error)
 
-    private fun determineInitialBackStack(paymentMethodMetadata: PaymentMethodMetadata): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        savedPaymentMethods: List<PaymentMethod>,
+    ): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(
                 VerticalModeInitialScreenFactory.create(
                     viewModel = this,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    savedPaymentMethods = savedPaymentMethods,
                 )
             )
         }
