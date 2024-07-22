@@ -51,7 +51,7 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
             return DefaultManageOneSavedPaymentMethodInteractor(
                 paymentMethod = sheetViewModel.savedPaymentMethodMutator.paymentMethods.value.first(),
                 paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
-                providePaymentMethodName = sheetViewModel::providePaymentMethodName,
+                providePaymentMethodName = sheetViewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 onDeletePaymentMethod = sheetViewModel.savedPaymentMethodMutator::removePaymentMethod,
                 navigateBack = sheetViewModel::handleBackPressed,
             )
