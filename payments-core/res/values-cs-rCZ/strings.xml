@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Zadejte stát</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Platit průběžně pomocí &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Splácejte v průběhu času pomocí služby Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Jméno na účtu</string>
   <!-- Placeholder for AU BECS BSB number -->

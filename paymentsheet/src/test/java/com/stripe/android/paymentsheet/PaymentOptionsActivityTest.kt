@@ -23,8 +23,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -366,14 +366,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -392,14 +392,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, true)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, true)
+                viewModel.mandateHandler.updateMandateText(null, true)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -421,14 +421,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -450,12 +450,10 @@ internal class PaymentOptionsActivityTest {
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
-                prefsRepositoryFactory = { FakePrefsRepository() },
                 eventReporter = eventReporter,
                 customerRepository = FakeCustomerRepository(),
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
-                logger = Logger.noop(),
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,

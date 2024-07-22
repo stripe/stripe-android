@@ -14,7 +14,7 @@ internal class ExternalPaymentMethodUiDefinitionFactory(
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,
-            displayName = resolvableString(externalPaymentMethodSpec.label),
+            displayName = externalPaymentMethodSpec.label.resolvableString,
             lightThemeIconUrl = externalPaymentMethodSpec.lightImageUrl,
             darkThemeIconUrl = externalPaymentMethodSpec.darkImageUrl,
             iconResource = 0,

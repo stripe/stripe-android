@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -10,6 +11,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.flow.update
 
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
@@ -44,12 +46,12 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
-    val onMandateTextChanged: (mandate: String?, showAbove: Boolean) -> Unit,
+    val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
     val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
-    val onError: (String?) -> Unit,
+    val onError: (ResolvableString?) -> Unit,
 ) {
     companion object {
         fun create(
@@ -79,16 +81,16 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 onBehalfOf = onBehalfOf,
-                isCompleteFlow = viewModel is PaymentSheetViewModel,
+                isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,
                 stripeIntentId = stripeIntent?.id,
                 clientSecret = stripeIntent?.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
-                onMandateTextChanged = viewModel::updateMandateText,
+                onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
                 onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
                 onCollectBankAccountResult = null,
-                onUpdatePrimaryButtonUIState = viewModel::updateCustomPrimaryButtonUiState,
+                onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError
             )

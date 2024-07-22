@@ -43,11 +43,11 @@ internal class FakeCustomerSheetLoader(
                         stripeIntent = stripeIntent,
                         cbcEligibility = cbcEligibility,
                         financialConnectionsAvailable = financialConnectionsAvailable,
-                        paymentMethodOrder = configuration.paymentMethodOrder
+                        paymentMethodOrder = configuration.paymentMethodOrder,
+                        isGooglePayReady = isGooglePayAvailable,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
-                    isGooglePayReady = isGooglePayAvailable,
                     paymentSelection = paymentSelection,
                     validationError = null,
                 )

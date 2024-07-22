@@ -12,16 +12,12 @@ internal data class PaymentSheetTopBarState(
     val showTestModeLabel: Boolean,
     val showEditMenu: Boolean,
     @StringRes val editMenuLabel: Int,
-    val isEnabled: Boolean,
 )
 
 internal object PaymentSheetTopBarStateFactory {
-
     fun create(
-        screen: SheetScreen,
         hasBackStack: Boolean,
         isLiveMode: Boolean,
-        isProcessing: Boolean,
         isEditing: Boolean,
         canEdit: Boolean,
     ): PaymentSheetTopBarState {
@@ -43,29 +39,12 @@ internal object PaymentSheetTopBarStateFactory {
             StripeR.string.stripe_edit
         }
 
-        val showEditMenu = (
-            screen == SheetScreen.SELECT_SAVED_PAYMENT_METHODS ||
-                screen == SheetScreen.MANAGE_SAVED_PAYMENT_METHODS
-            ) && canEdit
-
         return PaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = showEditMenu,
+            showEditMenu = canEdit,
             editMenuLabel = editMenuLabel,
-            isEnabled = !isProcessing,
-        )
-    }
-
-    fun createDefault(): PaymentSheetTopBarState {
-        return create(
-            screen = SheetScreen.LOADING,
-            hasBackStack = false,
-            canEdit = false,
-            isLiveMode = true,
-            isProcessing = false,
-            isEditing = false,
         )
     }
 }

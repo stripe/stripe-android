@@ -60,7 +60,8 @@ internal class ConsentViewModel @AssistedInject constructor(
             ConsentState.Payload(
                 consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
-                merchantLogos = sync.visual.merchantLogos
+                merchantLogos = sync.visual.merchantLogos,
+                showAnimatedDots = sync.manifest.showAnimatedDots,
             )
         }.execute { copy(consent = it) }
     }
@@ -158,3 +159,9 @@ internal class ConsentViewModel @AssistedInject constructor(
             }
     }
 }
+
+private val FinancialConnectionsSessionManifest.showAnimatedDots: Boolean
+    get() {
+        val isInstantDebits = isLinkWithStripe ?: false
+        return !isInstantDebits
+    }

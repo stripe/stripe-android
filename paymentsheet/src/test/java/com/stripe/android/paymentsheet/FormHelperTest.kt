@@ -59,7 +59,7 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = {
                 NewOrExternalPaymentSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
-                        label = resolvableString("Cash App"),
+                        label = "Cash App".resolvableString,
                         iconResource = 0,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
@@ -90,7 +90,7 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = {
                 NewOrExternalPaymentSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
-                        label = resolvableString("Klarna"),
+                        label = "Klarna".resolvableString,
                         iconResource = 0,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,

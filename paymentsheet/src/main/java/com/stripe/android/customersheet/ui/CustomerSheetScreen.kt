@@ -48,6 +48,7 @@ internal fun CustomerSheetScreen(
         topBar = {
             PaymentSheetTopBar(
                 state = viewState.topBarState,
+                isEnabled = !viewState.isProcessing,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed
@@ -163,7 +164,7 @@ internal fun SelectPaymentMethod(
         }
 
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -236,14 +237,14 @@ internal fun AddPaymentMethod(
 
     viewState.errorMessage?.let { error ->
         ErrorMessage(
-            error = error,
+            error = error.resolve(),
             modifier = Modifier.padding(horizontal = horizontalPadding)
         )
     }
 
     if (viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -267,7 +268,7 @@ internal fun AddPaymentMethod(
 
     if (!viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)

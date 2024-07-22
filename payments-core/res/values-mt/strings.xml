@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Jekk jogħġbok daħħal l-istat tiegħek</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Ħallas bin-nifs grazzi għal &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Ħallas bin-nifs grazzi għal Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Isem sid il-kont</string>
   <!-- Placeholder for AU BECS BSB number -->

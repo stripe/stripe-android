@@ -40,22 +40,27 @@ internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 
 @Composable
 internal fun PaymentSheetTopBar(
-    state: PaymentSheetTopBarState,
+    state: PaymentSheetTopBarState?,
+    isEnabled: Boolean,
     handleBackPressed: () -> Unit,
     toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    PaymentSheetTopBar(
-        state = state,
-        elevation = elevation,
-        onNavigationIconPressed = handleBackPressed,
-        onEditIconPressed = toggleEditing,
-    )
+    if (state != null) {
+        PaymentSheetTopBar(
+            state = state,
+            isEnabled = isEnabled,
+            elevation = elevation,
+            onNavigationIconPressed = handleBackPressed,
+            onEditIconPressed = toggleEditing,
+        )
+    }
 }
 
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState,
+    isEnabled: Boolean,
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
     onEditIconPressed: () -> Unit,
@@ -71,7 +76,7 @@ internal fun PaymentSheetTopBar(
         },
         navigationIcon = {
             IconButton(
-                enabled = state.isEnabled,
+                enabled = isEnabled,
                 onClick = {
                     @Suppress("DEPRECATION")
                     keyboardController?.hideSoftwareKeyboard()
@@ -92,7 +97,7 @@ internal fun PaymentSheetTopBar(
             if (state.showEditMenu) {
                 EditButton(
                     labelResourceId = state.editMenuLabel,
-                    isEnabled = state.isEnabled,
+                    isEnabled = isEnabled,
                     tintColor = tintColor,
                     onClick = onEditIconPressed,
                 )
@@ -168,11 +173,11 @@ internal fun PaymentSheetTopBar_Preview() {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = true,
         )
 
         PaymentSheetTopBar(
             state = state,
+            isEnabled = true,
             elevation = 0.dp,
             onNavigationIconPressed = {},
             onEditIconPressed = {},

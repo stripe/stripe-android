@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">주를 입력하십시오</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt;으로 할부 결제하십시오.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Affirm으로 할부 결제하십시오.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">계좌 명의</string>
   <!-- Placeholder for AU BECS BSB number -->

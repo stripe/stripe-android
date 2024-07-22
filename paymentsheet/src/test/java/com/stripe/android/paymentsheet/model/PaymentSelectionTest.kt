@@ -17,97 +17,57 @@ class PaymentSelectionTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `Doesn't display a mandate for Link`() =
-        runAllConfigurations { isSaveForFutureUseSelected ->
-            val link = PaymentSelection.Link
-            val result = link.mandateText(
-                context = context,
-                merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                isSetupFlow = false,
-            )
-            assertThat(result).isNull()
-        }
+    fun `Doesn't display a mandate for Link`() {
+        val link = PaymentSelection.Link
+        val result = link.mandateText(
+            merchantName = "Merchant",
+            isSetupFlow = false,
+        )
+        assertThat(result).isNull()
+    }
 
     @Test
-    fun `Doesn't display a mandate for Google Pay`() =
-        runAllConfigurations { isSaveForFutureUseSelected ->
-            val googlePay = PaymentSelection.GooglePay
-            val result = googlePay.mandateText(
-                context = context,
-                merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                isSetupFlow = false,
-            )
-            assertThat(result).isNull()
-        }
+    fun `Doesn't display a mandate for Google Pay`() {
+        val googlePay = PaymentSelection.GooglePay
+        val result = googlePay.mandateText(
+            merchantName = "Merchant",
+            isSetupFlow = false,
+        )
+        assertThat(result).isNull()
+    }
 
     @Test
-    fun `Doesn't display a mandate for new US bank accounts`() =
-        runAllConfigurations { isSaveForFutureUseSelected ->
-            // We actually do show a mandate, but it's set independently from the PaymentSelection.
-            val newPaymentSelection = PaymentSelection.New.USBankAccount(
-                labelResource = "Test",
-                iconResource = 0,
-                paymentMethodCreateParams = mock(),
-                customerRequestedSave = mock(),
-                input = PaymentSelection.New.USBankAccount.Input(
-                    name = "",
-                    email = null,
-                    phone = null,
-                    address = null,
-                    saveForFutureUse = false,
-                ),
-                instantDebits = null,
-                screenState = USBankAccountFormScreenState.SavedAccount(
-                    financialConnectionsSessionId = "session_1234",
-                    intentId = "intent_1234",
-                    bankName = "Stripe Bank",
-                    last4 = "6789",
-                    primaryButtonText = resolvableString("Continue"),
-                    mandateText = null,
-                ),
-            )
-
-            val result = newPaymentSelection.mandateText(
-                context = context,
-                merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                isSetupFlow = false,
-            )
-
-            assertThat(result).isNull()
-        }
-
-    @Test
-    fun `Displays the correct mandate for a saved US bank account when saving for future use`() {
-        val newPaymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFactory.usBankAccount(),
+    fun `Doesn't display a mandate for new US bank accounts`() {
+        // We actually do show a mandate, but it's set independently from the PaymentSelection.
+        val newPaymentSelection = PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            instantDebits = null,
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue".resolvableString,
+                mandateText = null,
+            ),
         )
 
-        var result = newPaymentSelection.mandateText(
-            context = context,
+        val result = newPaymentSelection.mandateText(
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = true,
             isSetupFlow = false,
         )
 
-        assertThat(result).isEqualTo(
-            "By saving your bank account for Merchant you agree to authorize payments pursuant " +
-                "to <a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
-        )
-
-        result = newPaymentSelection.mandateText(
-            context = context,
-            merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
-            isSetupFlow = true,
-        )
-
-        assertThat(result).isEqualTo(
-            "By saving your bank account for Merchant you agree to authorize payments pursuant " +
-                "to <a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
-        )
+        assertThat(result).isNull()
     }
 
     @Test
@@ -117,11 +77,9 @@ class PaymentSelectionTest {
         )
 
         val result = newPaymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By continuing, you agree to authorize payments pursuant to " +
@@ -136,11 +94,9 @@ class PaymentSelectionTest {
         )
 
         val result = paymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By providing your payment information and confirming this payment, you authorise (A) Merchant and" +
@@ -160,11 +116,9 @@ class PaymentSelectionTest {
         )
 
         val result = paymentSelection.mandateText(
-            context = context,
             merchantName = "Merchant",
-            isSaveForFutureUseSelected = false,
             isSetupFlow = false,
-        )
+        )?.resolve(context)
 
         assertThat(result).isEqualTo(
             "By continuing, you agree to authorize payments pursuant to " +
@@ -173,20 +127,17 @@ class PaymentSelectionTest {
     }
 
     @Test
-    fun `Doesn't display a mandate for a saved payment method that isn't US bank account`() =
-        runAllConfigurations { isSaveForFutureUseSelected ->
-            val newPaymentSelection = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFactory.cashAppPay(),
-            )
+    fun `Doesn't display a mandate for a saved payment method that isn't US bank account`() {
+        val newPaymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.cashAppPay(),
+        )
 
-            val result = newPaymentSelection.mandateText(
-                context = context,
-                merchantName = "Merchant",
-                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                isSetupFlow = false,
-            )
-            assertThat(result).isNull()
-        }
+        val result = newPaymentSelection.mandateText(
+            merchantName = "Merchant",
+            isSetupFlow = false,
+        )
+        assertThat(result).isNull()
+    }
 
     @Test
     fun `showMandateAbovePrimaryButton is true for sepa family`() {
@@ -227,11 +178,5 @@ class PaymentSelectionTest {
                 paymentMethod = PaymentMethodFactory.card(),
             ).requiresConfirmation
         ).isFalse()
-    }
-
-    private fun runAllConfigurations(block: (Boolean) -> Unit) {
-        for (isSaveForFutureUseSelected in listOf(true, false)) {
-            block(isSaveForFutureUseSelected)
-        }
     }
 }

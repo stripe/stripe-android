@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
 internal interface ManageScreenInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -29,6 +31,7 @@ internal interface ManageScreenInteractor {
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
         val canDelete: Boolean,
+        val canEdit: Boolean,
     )
 
     sealed class ViewAction {
@@ -43,28 +46,32 @@ internal class DefaultManageScreenInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
+    private val canEdit: StateFlow<Boolean>,
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val providePaymentMethodName: (PaymentMethodCode?) -> String,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
-    dispatcher: CoroutineContext = Dispatchers.Default
+    override val isLiveMode: Boolean,
+    dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     constructor(viewModel: BaseSheetViewModel) : this(
-        paymentMethods = viewModel.paymentMethods,
+        paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
         paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         selection = viewModel.selection,
         editing = viewModel.editing,
+        canEdit = viewModel.savedPaymentMethodMutator.canEdit,
         allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
         providePaymentMethodName = viewModel::providePaymentMethodName,
         onSelectPaymentMethod = { viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod)) },
-        onDeletePaymentMethod = { viewModel.removePaymentMethod(it.paymentMethod) },
-        onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
-        navigateBack = viewModel::handleBackPressed
+        onDeletePaymentMethod = { viewModel.savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
+        onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
+        navigateBack = viewModel::handleBackPressed,
+        isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode,
     )
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
@@ -80,7 +87,8 @@ internal class DefaultManageScreenInteractor(
         displayableSavedPaymentMethods,
         selection,
         editing,
-    ) { displayablePaymentMethods, paymentSelection, editing ->
+        canEdit,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
         val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
 
         val currentSelection = if (editing) {
@@ -89,7 +97,13 @@ internal class DefaultManageScreenInteractor(
             paymentSelectionToDisplayableSavedPaymentMethod(paymentSelection, displayablePaymentMethods)
         }
 
-        ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, editing, canDelete = canDelete)
+        ManageScreenInteractor.State(
+            paymentMethods = displayablePaymentMethods,
+            currentSelection = currentSelection,
+            isEditing = editing,
+            canDelete = canDelete,
+            canEdit = canEdit,
+        )
     }
 
     init {

@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -19,11 +20,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -70,24 +74,32 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
+    override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
     companion object {
         fun create(sheetViewModel: BaseSheetViewModel): AddPaymentMethodInteractor {
+            val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(sheetViewModel)
             val paymentMethodMetadata = requireNotNull(sheetViewModel.paymentMethodMetadata.value)
+            val linkInlineHandler = LinkInlineHandler.create(sheetViewModel, coroutineScope)
+            val linkSignupMode = sheetViewModel.linkHandler.linkSignupMode.stateIn(
+                scope = coroutineScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = null,
+            )
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = sheetViewModel.initiallySelectedPaymentMethodType,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 selection = sheetViewModel.selection,
-                linkSignupMode = sheetViewModel.linkSignupMode,
+                linkSignupMode = linkSignupMode,
                 processing = sheetViewModel.processing,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
                 formElementsForCode = formHelper::formElementsForCode,
                 clearErrorMessages = sheetViewModel::clearErrorMessages,
-                onLinkSignUpStateUpdated = sheetViewModel::onLinkSignUpStateUpdated,
+                onLinkSignUpStateUpdated = linkInlineHandler::onStateUpdated,
                 reportFieldInteraction = sheetViewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 reportPaymentMethodTypeSelected = sheetViewModel.eventReporter::onSelectPaymentMethod,
@@ -98,10 +110,11 @@ internal class DefaultAddPaymentMethodInteractor(
                         selectedPaymentMethodCode = it
                     )
                 },
+                coroutineScope = coroutineScope,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
     }
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)

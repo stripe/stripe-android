@@ -16,6 +16,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -335,7 +336,8 @@ class DefaultAddPaymentMethodInteractorTest {
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
-            dispatcher = dispatcher,
+            coroutineScope = CoroutineScope(dispatcher),
+            isLiveMode = true,
         )
 
         TestParams(

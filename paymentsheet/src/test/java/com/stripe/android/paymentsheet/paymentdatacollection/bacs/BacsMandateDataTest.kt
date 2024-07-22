@@ -11,7 +11,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is Bacs and name & email are provided, 'fromPaymentSelection' should return data`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString(""),
+            label = "".resolvableString,
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
@@ -41,7 +41,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is Bacs but without name or email, 'fromPaymentSelection' should return null`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString(""),
+            label = "".resolvableString,
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
@@ -61,7 +61,7 @@ class BacsMandateDataTest {
     @Test
     fun `when payment selection is not Bacs, 'fromPaymentSelection' should return null`() {
         val selection = PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString(""),
+            label = "".resolvableString,
             iconResource = 0,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,

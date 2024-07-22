@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">都道府県を入力してください</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt; で時間をかけて支払う</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Affirm で分割払いに。</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">口座名義人</string>
   <!-- Placeholder for AU BECS BSB number -->

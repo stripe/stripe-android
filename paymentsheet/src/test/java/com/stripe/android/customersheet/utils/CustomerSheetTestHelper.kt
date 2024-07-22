@@ -107,7 +107,7 @@ internal object CustomerSheetTestHelper {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
+        primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
@@ -190,7 +190,9 @@ internal object CustomerSheetTestHelper {
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = isGooglePayAvailable,
+            )
         }
     }
 
@@ -205,6 +207,7 @@ internal object CustomerSheetTestHelper {
                 updateExecutor: PaymentMethodUpdateOperation,
                 displayName: String,
                 canRemove: Boolean,
+                isLiveMode: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
@@ -214,6 +217,7 @@ internal object CustomerSheetTestHelper {
                     eventHandler = eventHandler,
                     workContext = workContext,
                     canRemove = canRemove,
+                    isLiveMode = isLiveMode,
                 )
             }
         }

@@ -45,7 +45,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
@@ -56,6 +58,7 @@ import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -72,14 +75,33 @@ import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
-    viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
-    modifier: Modifier = Modifier,
+    viewModel: PaymentSheetViewModel,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
+    PaymentSheetScreen(viewModel) {
+        AnimatedVisibility(visible = contentVisible) {
+            PaymentSheetScreenContent(viewModel, type = Complete)
+        }
+    }
+}
+
+@Composable
+internal fun PaymentSheetScreen(
+    viewModel: PaymentOptionsViewModel,
+) {
+    PaymentSheetScreen(viewModel) {
+        PaymentSheetScreenContent(viewModel, type = Custom)
+    }
+}
+
+@Composable
+private fun PaymentSheetScreen(
+    viewModel: BaseSheetViewModel,
+    contentVisible: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     val processing by viewModel.processing.collectAsState()
 
-    val topBarState by viewModel.topBarState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
 
     val density = LocalDensity.current
@@ -89,18 +111,20 @@ internal fun PaymentSheetScreen(
 
     PaymentSheetScaffold(
         topBar = {
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+            val topBarState by remember(currentScreen) {
+                currentScreen.topBarState()
+            }.collectAsState()
+
             PaymentSheetTopBar(
                 state = topBarState,
+                isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
                 toggleEditing = viewModel::toggleEditing,
             )
         },
-        content = {
-            AnimatedVisibility(visible = contentVisible) {
-                PaymentSheetScreenContent(viewModel, type)
-            }
-        },
-        modifier = modifier.onGloballyPositioned {
+        content = content,
+        modifier = Modifier.onGloballyPositioned {
             contentHeight = with(density) { it.size.height.toDp() }
         },
     )
@@ -142,19 +166,27 @@ internal fun PaymentSheetScreenContent(
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
-    val headerText by viewModel.headerText.collectAsState()
     val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
+    val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
-    val mandateText by viewModel.mandateText.collectAsState()
-    val showsWalletsHeader by currentScreen.showsWalletsHeader(type == Complete).collectAsState()
+
+    val showsWalletsHeader by remember(currentScreen, type) {
+        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
+    }.collectAsState()
+
+    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+
+    val headerText by remember(currentScreen, type, actualWalletsState != null) {
+        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
+    }.collectAsState()
 
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
             headerText = headerText,
-            walletsState = walletsState.takeIf { showsWalletsHeader },
+            walletsState = actualWalletsState,
             walletsProcessingState = walletsProcessingState,
             error = error,
             currentScreen = currentScreen,
@@ -200,10 +232,10 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: Int?,
+    headerText: ResolvableString?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
-    error: String?,
+    error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
 ) {
@@ -212,7 +244,7 @@ private fun PaymentSheetContent(
     Column(modifier = Modifier.animateContentSize()) {
         headerText?.let { text ->
             H4Text(
-                text = stringResource(text),
+                text = text.resolve(),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .padding(horizontal = horizontalPadding),
@@ -244,14 +276,14 @@ private fun PaymentSheetContent(
 
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
-                mandateText = mandateText.text,
+                mandateText = mandateText.text?.resolve(),
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
         }
 
         error?.let {
             ErrorMessage(
-                error = it,
+                error = it.resolve(),
                 modifier = Modifier
                     .padding(vertical = 2.dp, horizontal = horizontalPadding)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
@@ -264,7 +296,7 @@ private fun PaymentSheetContent(
     Box(modifier = Modifier.animateContentSize()) {
         if (mandateText?.showAbovePrimaryButton == false) {
             Mandate(
-                mandateText = mandateText.text,
+                mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .padding(horizontal = horizontalPadding),

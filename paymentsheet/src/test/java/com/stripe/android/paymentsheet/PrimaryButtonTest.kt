@@ -78,7 +78,7 @@ class PrimaryButtonTest {
     fun `onReadyState() should update label`() {
         primaryButton.updateUiState(
             PrimaryButton.UIState(
-                label = resolvableString("Pay $10.99"),
+                label = "Pay $10.99".resolvableString,
                 onClick = {},
                 enabled = true,
                 lockVisible = true,

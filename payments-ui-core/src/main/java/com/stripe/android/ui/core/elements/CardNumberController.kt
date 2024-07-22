@@ -181,7 +181,7 @@ internal class DefaultCardNumberController(
         if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
-                label = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
+                label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
                 icon = CardBrand.Unknown.icon
             )
 
@@ -190,7 +190,7 @@ internal class DefaultCardNumberController(
 
                 TextFieldIcon.Dropdown.Item(
                     id = onlyAvailableBrand.code,
-                    label = resolvableString(onlyAvailableBrand.displayName),
+                    label = onlyAvailableBrand.displayName.resolvableString,
                     icon = onlyAvailableBrand.icon
                 )
             } else {
@@ -198,7 +198,7 @@ internal class DefaultCardNumberController(
                     CardBrand.Unknown -> null
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
-                        label = resolvableString(chosen.displayName),
+                        label = chosen.displayName.resolvableString,
                         icon = chosen.icon
                     )
                 }
@@ -207,13 +207,13 @@ internal class DefaultCardNumberController(
             val items = brands.map { brand ->
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
-                    label = resolvableString(brand.displayName),
+                    label = brand.displayName.resolvableString,
                     icon = brand.icon
                 )
             }
 
             TextFieldIcon.Dropdown(
-                title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
+                title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
                 currentItem = selected ?: noSelection,
                 items = items,
                 hide = brands.size < 2

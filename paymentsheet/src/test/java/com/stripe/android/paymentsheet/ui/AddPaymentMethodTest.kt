@@ -194,7 +194,7 @@ internal class AddPaymentMethodTest {
             linkInlineSignupMode = null,
             processing = false,
             usBankAccountFormArguments = mock(),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
         val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()
@@ -218,6 +218,7 @@ internal class AddPaymentMethodTest {
     class FakeAddPaymentMethodInteractor(
         private val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>,
         initialState: AddPaymentMethodInteractor.State,
+        override val isLiveMode: Boolean = true,
     ) : AddPaymentMethodInteractor {
 
         override val state: StateFlow<AddPaymentMethodInteractor.State> = MutableStateFlow(initialState)

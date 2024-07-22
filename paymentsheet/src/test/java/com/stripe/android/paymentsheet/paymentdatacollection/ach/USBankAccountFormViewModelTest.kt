@@ -296,7 +296,7 @@ class USBankAccountFormViewModelTest {
                         intentId = "intent_1234",
                         bankName = "Stripe Bank",
                         last4 = "6789",
-                        primaryButtonText = resolvableString("Continue"),
+                        primaryButtonText = "Continue".resolvableString,
                         mandateText = null,
                     ),
                 )
@@ -348,7 +348,7 @@ class USBankAccountFormViewModelTest {
                         intentId = "intent_1234",
                         bankName = "Stripe Bank",
                         last4 = "6789",
-                        primaryButtonText = resolvableString("Continue"),
+                        primaryButtonText = "Continue".resolvableString,
                         mandateText = null,
                     ),
                 )
@@ -391,7 +391,7 @@ class USBankAccountFormViewModelTest {
     fun `Restores screen state when re-opening screen`() = runTest {
         val screenStates = listOf(
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
@@ -399,7 +399,7 @@ class USBankAccountFormViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = null,
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
             USBankAccountFormScreenState.VerifyWithMicrodeposits(
@@ -409,7 +409,7 @@ class USBankAccountFormViewModelTest {
                     id = "bank_id",
                     last4 = "6789",
                 ),
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
             USBankAccountFormScreenState.SavedAccount(
@@ -417,7 +417,7 @@ class USBankAccountFormViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -470,7 +470,7 @@ class USBankAccountFormViewModelTest {
                             intentId = "intent_1234",
                             bankName = "Stripe Bank",
                             last4 = "6789",
-                            primaryButtonText = resolvableString("Continue"),
+                            primaryButtonText = "Continue".resolvableString,
                             mandateText = null,
                         ),
                     )

@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">请输入您所在的州</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">用 &lt;img src=\"affirm\"&gt; 慢慢支付。</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">用 Affirm 慢慢支付。</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">账户名</string>
   <!-- Placeholder for AU BECS BSB number -->

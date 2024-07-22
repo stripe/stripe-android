@@ -431,10 +431,8 @@ internal class DefaultFlowControllerTest {
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
-                isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
@@ -646,10 +644,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -687,10 +683,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -731,10 +725,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -2107,7 +2099,7 @@ internal class DefaultFlowControllerTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString("Test"),
+            label = "Test".resolvableString,
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
@@ -2133,7 +2125,7 @@ internal class DefaultFlowControllerTest {
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-            label = resolvableString("Bancontact"),
+            label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,

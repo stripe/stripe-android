@@ -13,7 +13,8 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         loading(),
         disablingNetworking(),
         payloadError(),
-        disablingError()
+        disablingError(),
+        instantDebits(),
     )
 
     private fun canonical() = NetworkingLinkLoginWarmupState(
@@ -23,17 +24,20 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
                 email = "email@test.com"
             )
         ),
-        disableNetworkingAsync = Uninitialized
+        disableNetworkingAsync = Uninitialized,
+        isInstantDebits = false,
     )
 
     private fun loading() = NetworkingLinkLoginWarmupState(
         payload = Loading(),
-        disableNetworkingAsync = Uninitialized
+        disableNetworkingAsync = Uninitialized,
+        isInstantDebits = false,
     )
 
     private fun payloadError() = NetworkingLinkLoginWarmupState(
         payload = Fail(Exception("Error")),
-        disableNetworkingAsync = Uninitialized
+        disableNetworkingAsync = Uninitialized,
+        isInstantDebits = false,
     )
 
     private fun disablingError() = NetworkingLinkLoginWarmupState(
@@ -43,7 +47,8 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
                 email = "email@test.com"
             )
         ),
-        disableNetworkingAsync = Fail(Exception("Error"))
+        disableNetworkingAsync = Fail(Exception("Error")),
+        isInstantDebits = false,
     )
 
     private fun disablingNetworking() = NetworkingLinkLoginWarmupState(
@@ -53,6 +58,18 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
                 email = "email@test.com"
             )
         ),
-        disableNetworkingAsync = Loading()
+        disableNetworkingAsync = Loading(),
+        isInstantDebits = false,
+    )
+
+    private fun instantDebits() = NetworkingLinkLoginWarmupState(
+        payload = Success(
+            NetworkingLinkLoginWarmupState.Payload(
+                merchantName = "Test",
+                email = "email@test.com"
+            )
+        ),
+        disableNetworkingAsync = Uninitialized,
+        isInstantDebits = true,
     )
 }

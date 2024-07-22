@@ -15,6 +15,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -148,7 +149,6 @@ internal class CustomerSheetViewModel(
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
-    private var isGooglePayReadyAndEnabled: Boolean = false
     private var paymentLauncher: PaymentLauncher? = null
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
@@ -282,9 +282,7 @@ internal class CustomerSheetViewModel(
                                 R.string.stripe_paymentsheet_confirm
                             ),
                             mandateText = newPaymentSelection.mandateText(
-                                context = application,
                                 merchantName = configuration.merchantDisplayName,
-                                isSaveForFutureUseSelected = false,
                                 isSetupFlow = false,
                             )
                         )
@@ -298,7 +296,7 @@ internal class CustomerSheetViewModel(
                         enabled = true,
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = result.throwable.stripeErrorMessage(application),
+                        errorMessage = result.throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -323,7 +321,6 @@ internal class CustomerSheetViewModel(
                     supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
                     originalPaymentSelection = state.paymentSelection
-                    isGooglePayReadyAndEnabled = state.isGooglePayReady
                     paymentMethodMetadata = state.paymentMethodMetadata
 
                     transitionToInitialScreen(
@@ -346,7 +343,7 @@ internal class CustomerSheetViewModel(
         paymentSelection: PaymentSelection?,
         cbcEligibility: CardBrandChoiceEligibility,
     ) {
-        if (paymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
+        if (paymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
             transitionToAddPaymentMethod(
                 isFirstPaymentMethod = true,
                 cbcEligibility = cbcEligibility,
@@ -436,18 +433,12 @@ internal class CustomerSheetViewModel(
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
                     it.bankAccountResult !is CollectBankAccountResultInternal.Completed
                 ) {
-                    resolvableString(
-                        id = UiCoreR.string.stripe_continue_button_label
-                    )
+                    UiCoreR.string.stripe_continue_button_label.resolvableString
                 } else {
-                    resolvableString(
-                        id = R.string.stripe_paymentsheet_save
-                    )
+                    R.string.stripe_paymentsheet_save.resolvableString
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
-                    context = application,
                     merchantName = configuration.merchantDisplayName,
-                    isSaveForFutureUseSelected = false,
                     isSetupFlow = true,
                 ),
                 primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
@@ -585,6 +576,7 @@ internal class CustomerSheetViewModel(
                         }
                     },
                     canRemove = canRemove,
+                    isLiveMode = requireNotNull(paymentMethodMetadata).stripeIntent.isLiveMode,
                 ),
                 isLiveMode = currentViewState.isLiveMode,
                 cbcEligibility = currentViewState.cbcEligibility,
@@ -631,7 +623,7 @@ internal class CustomerSheetViewModel(
             }
         }
 
-        if (newSavedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
+        if (newSavedPaymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
             transitionToAddPaymentMethod(isFirstPaymentMethod = true)
         }
     }
@@ -700,9 +692,7 @@ internal class CustomerSheetViewModel(
                             R.string.stripe_paymentsheet_confirm
                         ),
                         mandateText = paymentSelection.mandateText(
-                            context = application,
                             merchantName = configuration.merchantDisplayName,
-                            isSaveForFutureUseSelected = false,
                             isSetupFlow = false,
                         )?.takeIf { primaryButtonVisible },
                     )
@@ -772,7 +762,7 @@ internal class CustomerSheetViewModel(
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                         it.copy(
-                            errorMessage = throwable.stripeErrorMessage(application),
+                            errorMessage = throwable.stripeErrorMessage(),
                             primaryButtonEnabled = it.formFieldValues != null,
                             isProcessing = false,
                         )
@@ -847,9 +837,7 @@ internal class CustomerSheetViewModel(
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
                 isFirstPaymentMethod = isFirstPaymentMethod,
-                primaryButtonLabel = resolvableString(
-                    id = R.string.stripe_paymentsheet_save
-                ),
+                primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
@@ -877,7 +865,7 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun updateMandateText(mandateText: String?, showAbove: Boolean) {
+    private fun updateMandateText(mandateText: ResolvableString?, showAbove: Boolean) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 mandateText = mandateText,
@@ -891,9 +879,9 @@ internal class CustomerSheetViewModel(
             it.copy(
                 bankAccountResult = bankAccountResult,
                 primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
-                    resolvableString(id = R.string.stripe_paymentsheet_save)
+                    R.string.stripe_paymentsheet_save.resolvableString
                 } else {
-                    resolvableString(id = UiCoreR.string.stripe_continue_button_label)
+                    UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
             )
         }
@@ -907,7 +895,7 @@ internal class CustomerSheetViewModel(
         eventReporter.onCardNumberCompleted()
     }
 
-    private fun onFormError(error: String?) {
+    private fun onFormError(error: ResolvableString?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 errorMessage = error
@@ -971,7 +959,7 @@ internal class CustomerSheetViewModel(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage ?: cause.stripeErrorMessage(application),
+                        errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
                         enabled = true,
                         primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
                         isProcessing = false,
@@ -1056,7 +1044,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -1083,7 +1071,7 @@ internal class CustomerSheetViewModel(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = throwable.stripeErrorMessage(),
                     )
                 }
             }
@@ -1117,7 +1105,7 @@ internal class CustomerSheetViewModel(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage,
+                        errorMessage = displayMessage?.resolvableString,
                         primaryButtonEnabled = it.formFieldValues != null,
                         isProcessing = false,
                     )
@@ -1225,7 +1213,7 @@ internal class CustomerSheetViewModel(
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
                 isEditing = false,
-                isGooglePayEnabled = isGooglePayReadyAndEnabled,
+                isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
                 primaryButtonVisible = false,
                 primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,

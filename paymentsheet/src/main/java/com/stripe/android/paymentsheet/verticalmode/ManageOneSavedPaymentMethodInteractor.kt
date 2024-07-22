@@ -13,6 +13,7 @@ internal interface ManageOneSavedPaymentMethodInteractor {
 
     data class State(
         val paymentMethod: DisplayableSavedPaymentMethod,
+        val isLiveMode: Boolean,
     )
 
     sealed class ViewAction {
@@ -29,18 +30,19 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
 ) : ManageOneSavedPaymentMethodInteractor {
 
     constructor(sheetViewModel: BaseSheetViewModel) : this(
-        paymentMethod = sheetViewModel.paymentMethods.value.first(),
+        paymentMethod = sheetViewModel.savedPaymentMethodMutator.paymentMethods.value.first(),
         paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
         providePaymentMethodName = sheetViewModel::providePaymentMethodName,
-        onDeletePaymentMethod = { sheetViewModel.removePaymentMethod(it) },
+        onDeletePaymentMethod = sheetViewModel.savedPaymentMethodMutator::removePaymentMethod,
         navigateBack = sheetViewModel::handleBackPressed,
     )
 
     override val state = ManageOneSavedPaymentMethodInteractor.State(
-        paymentMethod.toDisplayableSavedPaymentMethod(
+        paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
             paymentMethodMetadata,
-        )
+        ),
+        isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
     )
 
     override fun handleViewAction(viewAction: ManageOneSavedPaymentMethodInteractor.ViewAction) {

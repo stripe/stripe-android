@@ -514,7 +514,7 @@ internal class PaymentMethodMetadataTest {
     fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(code = "card")!!
-        assertThat(headerInformation.displayName).isEqualTo(resolvableString(R.string.stripe_paymentsheet_add_new_card))
+        assertThat(headerInformation.displayName).isEqualTo(R.string.stripe_paymentsheet_add_new_card.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isFalse()
     }
 
@@ -527,7 +527,7 @@ internal class PaymentMethodMetadataTest {
         )
         val headerInformation = metadata.formHeaderInformationForCode(code = "bancontact")!!
         assertThat(headerInformation.displayName)
-            .isEqualTo(resolvableString(R.string.stripe_paymentsheet_payment_method_bancontact))
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_bancontact.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
         assertThat(headerInformation.iconResource).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
     }
@@ -539,7 +539,7 @@ internal class PaymentMethodMetadataTest {
         val headerInformation = metadata.formHeaderInformationForCode(
             code = paypalSpec.type,
         )!!
-        assertThat(headerInformation.displayName).isEqualTo(resolvableString(paypalSpec.label))
+        assertThat(headerInformation.displayName).isEqualTo(paypalSpec.label.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
         assertThat(headerInformation.iconResource).isEqualTo(0)
         assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
@@ -664,7 +664,7 @@ internal class PaymentMethodMetadataTest {
         )
         val expectedSupportedPaymentMethod = SupportedPaymentMethod(
             code = "external_paypal",
-            displayName = resolvableString("PayPal"),
+            displayName = "PayPal".resolvableString,
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,
@@ -751,6 +751,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            isGooglePayReady = false,
         )
 
         assertThat(metadata).isEqualTo(
@@ -769,6 +770,7 @@ internal class PaymentMethodMetadataTest {
                 sharedDataSpecs = listOf(SharedDataSpec("card")),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 hasCustomerConfiguration = true,
+                isGooglePayReady = false,
             )
         )
     }

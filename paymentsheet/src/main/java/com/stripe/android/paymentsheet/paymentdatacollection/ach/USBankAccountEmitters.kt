@@ -49,7 +49,6 @@ internal fun USBankAccountEmitters(
         }.collect { saved ->
             val merchantName = viewModel.formattedMerchantName()
             val mandateText = USBankAccountTextBuilder.getContinueMandateText(
-                context = context,
                 merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
                 isInstantDebits = usBankAccountFormArgs.instantDebits,

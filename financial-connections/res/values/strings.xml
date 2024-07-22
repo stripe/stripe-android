@@ -116,6 +116,7 @@
     <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
     <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
     <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
+    <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel</string>
     <string name="stripe_networking_verification_title">Confirm it\'s you</string>
     <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
     <string name="stripe_networking_verification_email">Signing in as %1$s</string>

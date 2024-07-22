@@ -32,12 +32,12 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = false,
             showEditMenu = false,
             editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = true,
         )
 
         paparazzi.snapshot {
             PaymentSheetTopBar(
                 state = state,
+                isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
                 onEditIconPressed = {},
@@ -53,12 +53,12 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = true,
         )
 
         paparazzi.snapshot {
             PaymentSheetTopBar(
                 state = state,
+                isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
                 onEditIconPressed = {},
@@ -74,12 +74,12 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = true,
             editMenuLabel = StripeR.string.stripe_done,
-            isEnabled = true,
         )
 
         paparazzi.snapshot {
             PaymentSheetTopBar(
                 state = state,
+                isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
                 onEditIconPressed = {},
@@ -95,12 +95,12 @@ class PaymentSheetTopBarScreenshotTest {
             showTestModeLabel = true,
             showEditMenu = false,
             editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = true,
         )
 
         paparazzi.snapshot {
             PaymentSheetTopBar(
                 state = state,
+                isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
                 onEditIconPressed = {},

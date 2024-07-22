@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.image.NetworkImageDecoder
 import com.stripe.android.uicore.image.StripeImageLoader
 
@@ -18,11 +19,12 @@ import com.stripe.android.uicore.image.StripeImageLoader
  */
 @Composable
 internal fun FinancialConnectionsPreview(
+    theme: Theme = Theme.default,
     testMode: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
-    FinancialConnectionsTheme {
+    FinancialConnectionsTheme(theme) {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
             LocalTestMode provides testMode,

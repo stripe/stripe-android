@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -29,6 +28,8 @@ import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
+    val isLiveMode: Boolean
+
     val state: StateFlow<State>
 
     val showsWalletsHeader: StateFlow<Boolean>
@@ -80,13 +81,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
+    override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
     companion object {
         fun create(viewModel: BaseSheetViewModel): PaymentMethodVerticalLayoutInteractor {
             val formHelper = FormHelper.create(viewModel)
+            val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
             return DefaultPaymentMethodVerticalLayoutInteractor(
-                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
                 formElementsForCode = formHelper::formElementsForCode,
@@ -112,23 +115,25 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         )
                     )
                 },
-                paymentMethods = viewModel.paymentMethods,
-                mostRecentlySelectedSavedPaymentMethod = viewModel.mostRecentlySelectedSavedPaymentMethod,
+                paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
+                mostRecentlySelectedSavedPaymentMethod =
+                viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel::providePaymentMethodName,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
-                onEditPaymentMethod = { viewModel.modifyPaymentMethod(it.paymentMethod) },
+                onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
                 walletsState = viewModel.walletsState,
-                isFlowController = viewModel is PaymentOptionsViewModel,
+                isFlowController = !viewModel.isCompleteFlow,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode
                 },
                 onMandateTextUpdated = {
-                    viewModel.updateMandateText(it?.resolve(viewModel.getApplication()), true)
+                    viewModel.mandateHandler.updateMandateText(mandateText = it, showAbove = true)
                 },
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
     }
@@ -161,7 +166,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethods,
                 displayedSavedPaymentMethod,
                 allowsRemovalOfLastSavedPaymentMethod
-            )
+            ),
         )
     }
 
@@ -217,12 +222,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             walletsState?.link?.let {
                 wallets += DisplayablePaymentMethod(
                     code = PaymentMethod.Type.Link.code,
-                    displayName = resolvableString(PaymentsCoreR.string.stripe_link),
+                    displayName = PaymentsCoreR.string.stripe_link.resolvableString,
                     iconResource = R.drawable.stripe_ic_paymentsheet_link,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
-                    subtitle = resolvableString(PaymentsCoreR.string.stripe_link_simple_secure_payments),
+                    subtitle = PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString,
                     onClick = {
                         updateSelection(PaymentSelection.Link)
                     },
@@ -232,7 +237,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             walletsState?.googlePay?.let {
                 wallets += DisplayablePaymentMethod(
                     code = "google_pay",
-                    displayName = resolvableString(PaymentsCoreR.string.stripe_google_pay),
+                    displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
                     iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,

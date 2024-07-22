@@ -19,6 +19,7 @@ internal class FakeEditPaymentMethodInteractorFactory(
         updateExecutor: PaymentMethodUpdateOperation,
         displayName: String,
         canRemove: Boolean,
+        isLiveMode: Boolean,
     ): ModifiableEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = initialPaymentMethod,
@@ -28,6 +29,7 @@ internal class FakeEditPaymentMethodInteractorFactory(
             displayName = displayName,
             workContext = context,
             canRemove = canRemove,
+            isLiveMode = isLiveMode,
         )
     }
 }

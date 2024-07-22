@@ -37,6 +37,7 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val hasCustomerConfiguration: Boolean,
+    val isGooglePayReady: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -194,6 +195,7 @@ internal data class PaymentMethodMetadata(
             configuration: PaymentSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+            isGooglePayReady: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -211,7 +213,8 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = configuration.shippingDetails,
                 hasCustomerConfiguration = configuration.customer != null,
                 sharedDataSpecs = sharedDataSpecs,
-                externalPaymentMethodSpecs = externalPaymentMethodSpecs
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                isGooglePayReady = isGooglePayReady,
             )
         }
     }

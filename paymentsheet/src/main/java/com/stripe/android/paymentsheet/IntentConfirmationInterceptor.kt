@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -26,7 +27,7 @@ internal interface IntentConfirmationInterceptor {
 
         data class Fail(
             val cause: Throwable,
-            val message: String,
+            val message: ResolvableString,
         ) : NextStep {
 
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
@@ -88,16 +89,11 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
 }
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
-    private val context: Context,
     private val stripeRepository: StripeRepository,
     @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
-
-    private val genericErrorMessage: String
-        get() = context.getString(R.string.stripe_something_went_wrong)
-
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
             apiKey = publishableKeyProvider(),
@@ -212,7 +208,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             onFailure = { error ->
                 NextStep.Fail(
                     cause = error,
-                    message = genericErrorMessage,
+                    message = resolvableString(GENERIC_STRIPE_MESSAGE),
                 )
             }
         )
@@ -286,7 +282,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is CreateIntentResult.Failure -> {
                 NextStep.Fail(
                     cause = result.cause,
-                    message = result.displayMessage ?: genericErrorMessage,
+                    message = result.displayMessage?.resolvableString
+                        ?: resolvableString(GENERIC_STRIPE_MESSAGE),
                 )
             }
         }
@@ -317,7 +314,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }.getOrElse { error ->
             NextStep.Fail(
                 cause = error,
-                message = genericErrorMessage,
+                message = resolvableString(GENERIC_STRIPE_MESSAGE),
             )
         }
     }
@@ -382,5 +379,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             confirmParams = confirmParams,
             isDeferred = false,
         )
+    }
+
+    private companion object {
+        private val GENERIC_STRIPE_MESSAGE = R.string.stripe_something_went_wrong
     }
 }
