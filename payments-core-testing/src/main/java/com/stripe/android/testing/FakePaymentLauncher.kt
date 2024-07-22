@@ -1,14 +1,15 @@
 package com.stripe.android.testing
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 
 class FakePaymentLauncher : PaymentLauncher {
-    private val _calls = mutableListOf<Call>()
-    val calls: List<Call>
-        get() = _calls.toList()
+    private val _calls = Turbine<Call>()
+    val calls: ReceiveTurbine<Call> = _calls
 
     override fun confirm(params: ConfirmPaymentIntentParams) {
         _calls.add(Call.Confirm.PaymentIntent(params))

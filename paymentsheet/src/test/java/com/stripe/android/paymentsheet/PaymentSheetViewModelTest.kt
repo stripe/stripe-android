@@ -2749,6 +2749,35 @@ internal class PaymentSheetViewModelTest {
             .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
     }
 
+    @Test
+    fun `On confirm with existing payment method, calls interceptor with expected parameters`() = runTest {
+        val initializationMode = InitializationMode.PaymentIntent(clientSecret = "pi_123")
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                initializationMode = initializationMode,
+            ),
+            stripeIntent = intent,
+            intentConfirmationInterceptor = intentConfirmationInterceptor
+        )
+
+        val paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout()
+
+        val call = intentConfirmationInterceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethod = CARD_PAYMENT_METHOD,
+                paymentMethodOptionsParams = null,
+                shippingValues = null,
+            )
+        )
+    }
+
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `getCvcRecollectionState returns correct state for deferred flow`() = runTest {
