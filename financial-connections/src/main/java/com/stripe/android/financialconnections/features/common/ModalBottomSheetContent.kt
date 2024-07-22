@@ -124,12 +124,12 @@ internal fun LegalDetailsBottomSheetContent(
 
 @Composable
 internal fun GenericBottomSheetContent(
-    generic: FinancialConnectionsGenericInfoScreen,
+    screen: FinancialConnectionsGenericInfoScreen,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
     GenericScreen(
-        state = GenericScreenState(generic, inModal = true),
+        state = GenericScreenState(screen, inModal = true),
         onPrimaryButtonClick = onConfirmModalClick,
         onSecondaryButtonClick = { TODO("Secondary button click not yet implemented") },
         onClickableTextClick = onClickableTextClick,
