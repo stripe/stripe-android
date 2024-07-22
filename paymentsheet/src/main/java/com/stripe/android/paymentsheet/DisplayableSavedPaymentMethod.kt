@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet
 
 import android.content.res.Resources
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 
 internal data class DisplayableSavedPaymentMethod(
-    val displayName: String,
+    val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val isRemovable: Boolean = true,
     val isCbcEligible: Boolean = false,

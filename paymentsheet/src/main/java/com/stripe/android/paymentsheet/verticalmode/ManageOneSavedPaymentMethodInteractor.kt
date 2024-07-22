@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -24,7 +25,7 @@ internal interface ManageOneSavedPaymentMethodInteractor {
 internal class DefaultManageOneSavedPaymentMethodInteractor(
     paymentMethod: PaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-    providePaymentMethodName: (PaymentMethodCode?) -> String,
+    providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
 ) : ManageOneSavedPaymentMethodInteractor {

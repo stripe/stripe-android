@@ -6,6 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 
 @Composable
@@ -16,7 +17,7 @@ internal fun RemovePaymentMethodDialogUI(
 ) {
     val removeTitle = stringResource(
         R.string.stripe_paymentsheet_remove_pm,
-        paymentMethod.displayName,
+        paymentMethod.displayName.resolve(),
     )
 
     SimpleDialogElementUI(

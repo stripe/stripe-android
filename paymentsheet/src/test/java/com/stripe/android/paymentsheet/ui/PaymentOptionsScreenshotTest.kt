@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -40,19 +41,19 @@ class PaymentOptionsScreenshotTest {
             PaymentOptionsItem.GooglePay,
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
                 )
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
                 )
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
                 )
             ),
@@ -79,19 +80,19 @@ class PaymentOptionsScreenshotTest {
             PaymentOptionsItem.GooglePay,
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
                 )
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
                 )
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
                 )
             ),
@@ -117,14 +118,14 @@ class PaymentOptionsScreenshotTest {
         val paymentOptionsItems = listOf(
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
                     isRemovable = false,
                 )
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000").run {
                         copy(
                             card = card?.copy(
@@ -140,7 +141,7 @@ class PaymentOptionsScreenshotTest {
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
                     isRemovable = false,
                 )

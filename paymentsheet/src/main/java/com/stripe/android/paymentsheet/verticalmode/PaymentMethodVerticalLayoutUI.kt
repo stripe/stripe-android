@@ -95,7 +95,6 @@ internal fun PaymentMethodVerticalLayoutUI(
             Text(stringResource(id = R.string.stripe_paymentsheet_saved), style = textStyle, color = textColor)
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
-                resources = LocalContext.current.resources,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
                 trailingContent = {

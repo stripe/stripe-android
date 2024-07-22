@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -17,7 +18,7 @@ class DefaultManageOneSavedPaymentMethodInteractorTest {
         val interactor = DefaultManageOneSavedPaymentMethodInteractor(
             paymentMethod = paymentMethod,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            providePaymentMethodName = { it!! },
+            providePaymentMethodName = { it!!.resolvableString },
             onDeletePaymentMethod = { deletedPm = it },
             navigateBack = { hasNavigatedBack = true }
         )

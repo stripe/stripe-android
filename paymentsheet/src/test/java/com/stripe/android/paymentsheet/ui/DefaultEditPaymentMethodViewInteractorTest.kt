@@ -36,7 +36,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = true,
                 )
             )
@@ -60,7 +60,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = false,
                 )
             )
@@ -119,7 +119,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                             VISA_BRAND_CHOICE,
                             CARTES_BANCAIRES_BRAND_CHOICE
                         ),
-                        displayName = "Card",
+                        displayName = "Card".resolvableString,
                         canRemove = true,
                     )
                 )
@@ -151,7 +151,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = true,
                 )
             )
@@ -288,7 +288,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             eventHandler = eventHandler,
             removeExecutor = onRemove,
             updateExecutor = onUpdate,

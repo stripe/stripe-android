@@ -47,6 +47,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -62,6 +63,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -128,7 +130,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                 PaymentOptionsItem.GooglePay,
                 PaymentOptionsItem.SavedPaymentMethod(
                     DisplayableSavedPaymentMethod(
-                        displayName = "4242",
+                        displayName = "4242".resolvableString,
                         paymentMethod = PaymentMethod(
                             id = "001",
                             created = null,
@@ -144,7 +146,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                 ),
                 PaymentOptionsItem.SavedPaymentMethod(
                     DisplayableSavedPaymentMethod(
-                        displayName = "4242",
+                        displayName = "4242".resolvableString,
                         paymentMethod = PaymentMethod(
                             id = "002",
                             created = null,
@@ -318,7 +320,7 @@ private fun SavedPaymentMethodTab(
 ) {
     val context = LocalContext.current
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(context.resources) ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {

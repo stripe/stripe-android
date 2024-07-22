@@ -106,7 +106,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -140,7 +140,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -177,7 +177,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -194,7 +194,7 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -217,7 +217,7 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text.".resolvableString
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -233,7 +233,7 @@ internal class CustomerSheetScreenshotTest {
                     mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -250,7 +250,7 @@ internal class CustomerSheetScreenshotTest {
                     mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = false,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -264,7 +264,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
                     displayDismissConfirmationModal = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -284,7 +284,7 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
@@ -301,7 +301,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -320,7 +320,7 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
@@ -337,7 +337,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }

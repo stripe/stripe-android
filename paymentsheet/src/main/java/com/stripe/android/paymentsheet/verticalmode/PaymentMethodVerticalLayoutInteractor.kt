@@ -72,7 +72,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
     paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
-    private val providePaymentMethodName: (PaymentMethodCode?) -> String,
+    private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,

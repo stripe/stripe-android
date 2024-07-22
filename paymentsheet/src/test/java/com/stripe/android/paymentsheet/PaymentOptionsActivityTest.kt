@@ -129,7 +129,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity {
                 // We use US Bank Account because they don't dismiss PaymentSheet upon selection
                 // due to their mandate requirement.
-                val usBankAccountLabel = usBankAccount.getLabel(context.resources)
+                val usBankAccountLabel = usBankAccount.getLabel()?.resolve(context)
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
@@ -259,7 +259,7 @@ internal class PaymentOptionsActivityTest {
     fun `notes visibility is set correctly`() {
         val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
 
-        val label = usBankAccount.getLabel(context.resources)
+        val label = usBankAccount.getLabel()?.resolve(context)
         val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
 
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(

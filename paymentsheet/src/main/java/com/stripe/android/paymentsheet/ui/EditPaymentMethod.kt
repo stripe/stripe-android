@@ -143,7 +143,7 @@ internal fun EditPaymentMethodUi(
     if (viewState.confirmRemoval) {
         val title = stringResource(
             R.string.stripe_paymentsheet_remove_pm,
-            viewState.displayName,
+            viewState.displayName.resolve(),
         )
 
         val message = stringResource(
@@ -194,7 +194,8 @@ private fun RemoveButton(
                 .padding(
                     start = 8.dp,
                     end = 8.dp
-                ).offset(y = 8.dp),
+                )
+                .offset(y = 8.dp),
         ) {
             CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
                 TextButton(
@@ -308,7 +309,7 @@ private fun EditPaymentMethodPreview() {
             viewState = EditPaymentMethodViewState(
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),

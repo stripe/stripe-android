@@ -8,7 +8,7 @@ import com.stripe.android.uicore.elements.SingleChoiceDropdownItem
 internal data class EditPaymentMethodViewState(
     val status: Status,
     val last4: String,
-    val displayName: String,
+    val displayName: ResolvableString,
     val canUpdate: Boolean,
     val selectedBrand: CardBrandChoice,
     val availableBrands: List<CardBrandChoice>,
