@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -33,7 +34,11 @@ class FinancialConnectionsRepositoryImplTest {
             logger = Logger.noop(),
         ),
         apiRequestFactory = apiRequestFactory,
-        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        apiOptionsProvider = RealApiRequestOptionsProvider(
+            originalRequestOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            savedStateHandle = SavedStateHandle(),
+            isLinkWithStripe = { false },
+        ),
     )
 
     @Test

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
@@ -13,9 +14,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.Locale
@@ -30,15 +33,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val apiOptions: ApiRequest.Options = mock()
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
-
-    private fun buildRepository() =
-        FinancialConnectionsConsumerSessionRepository(
-            consumersApiService = consumersApiService,
-            financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
-            apiOptions = apiOptions,
-            locale = locale,
-            logger = logger
-        )
 
     @Test
     fun testLookupConsumerSession() = runTest {
@@ -75,6 +69,30 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         // ensures there's a cached consumer session after the lookup call.
         assertEquals(repository.getCachedConsumerSession(), consumerSession)
+    }
+
+    @Test
+    fun `Stores tentative consumer publishable key on consumer session lookup`() = runTest {
+        val consumerPublishableKey = "pk_123_consumer"
+
+        val apiOptionsProvider: ApiRequestOptionsProvider = mock()
+        val repository = buildRepository(apiOptionsProvider)
+
+        whenever(
+            financialConnectionsConsumersApiService.postConsumerSession(any(), any(), any())
+        ).thenReturn(
+            ConsumerSessionLookup(
+                consumerSession = consumerSession(),
+                errorMessage = null,
+                exists = true,
+                publishableKey = consumerPublishableKey,
+            )
+        )
+
+        repository.lookupConsumerSession("test@example.com", "client_secret")
+
+        verify(apiOptionsProvider).setTentativeConsumerPublishableKey(eq(consumerPublishableKey))
+        verify(apiOptionsProvider, never()).confirmConsumerPublishableKey()
     }
 
     @Test
@@ -160,5 +178,47 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         // ensures there's a cached consumer session after the lookup call.
         assertEquals(repository.getCachedConsumerSession(), consumerSession)
+    }
+
+    @Test
+    fun `Confirms tentative consumer publishable key on consumer verification`() = runTest {
+        val apiOptionsProvider: ApiRequestOptionsProvider = mock()
+        val repository = buildRepository(apiOptionsProvider)
+
+        whenever(
+            consumersApiService.confirmConsumerVerification(
+                consumerSessionClientSecret = any(),
+                verificationCode = any(),
+                requestSurface = any(),
+                type = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(
+            consumerSession()
+        )
+
+        repository.confirmConsumerVerification(
+            consumerSessionClientSecret = "client_secret",
+            verificationCode = "123456",
+            type = VerificationType.SMS,
+        )
+
+        verify(apiOptionsProvider).confirmConsumerPublishableKey()
+    }
+
+    private fun buildRepository(
+        apiOptionsProvider: ApiRequestOptionsProvider = RealApiRequestOptionsProvider(
+            originalRequestOptions = apiOptions,
+            savedStateHandle = SavedStateHandle(),
+            isLinkWithStripe = { false },
+        ),
+    ): FinancialConnectionsConsumerSessionRepository {
+        return FinancialConnectionsConsumerSessionRepository(
+            consumersApiService = consumersApiService,
+            financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+            apiOptionsProvider = apiOptionsProvider,
+            locale = locale,
+            logger = logger,
+        )
     }
 }
