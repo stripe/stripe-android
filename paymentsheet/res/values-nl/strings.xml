@@ -27,7 +27,7 @@
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Verzendadres</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Binnen drie werkdagen wordt een e-mail gestuurd naar %s om de instelling van deze opdracht voor afschrijving te bevestigen.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Binnen drie werkdagen wordt een e-mail gestuurd naar %s om de instelling van deze incasso-opdracht te bevestigen.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Je incassogegevens bevestigen</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
