@@ -15,6 +15,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -160,7 +161,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        navigationHandler.resetTo(determineInitialBackStack(args.state.paymentMethodMetadata))
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = args.state.paymentMethodMetadata,
+                savedPaymentMethods = args.state.customer?.paymentMethods.orEmpty(),
+            )
+        )
     }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
@@ -292,12 +298,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    private fun determineInitialBackStack(paymentMethodMetadata: PaymentMethodMetadata): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        savedPaymentMethods: List<PaymentMethod>,
+    ): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(
                 VerticalModeInitialScreenFactory.create(
                     viewModel = this,
-                    paymentMethodMetadata = paymentMethodMetadata
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    savedPaymentMethods = savedPaymentMethods,
                 )
             )
         }
