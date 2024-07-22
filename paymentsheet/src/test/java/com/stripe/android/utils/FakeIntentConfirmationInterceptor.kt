@@ -11,6 +11,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.channels.Channel
 
 internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
+    private val _calls = mutableListOf<InterceptCall>()
+    val calls: List<InterceptCall>
+        get() = _calls.toList()
 
     private val channel = Channel<IntentConfirmationInterceptor.NextStep>(capacity = 1)
 
@@ -51,6 +54,16 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
+        _calls.add(
+            InterceptCall.WithNewPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                shippingValues = shippingValues,
+                customerRequestedSave = customerRequestedSave,
+            )
+        )
+
         return channel.receive()
     }
 
@@ -60,6 +73,32 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): IntentConfirmationInterceptor.NextStep {
+        _calls.add(
+            InterceptCall.WithExistingPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                shippingValues = shippingValues,
+            )
+        )
+
         return channel.receive()
+    }
+
+    sealed interface InterceptCall {
+        data class WithNewPaymentMethod(
+            val initializationMode: PaymentSheet.InitializationMode,
+            val paymentMethodCreateParams: PaymentMethodCreateParams,
+            val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+            val shippingValues: ConfirmPaymentIntentParams.Shipping?,
+            val customerRequestedSave: Boolean,
+        ) : InterceptCall
+
+        data class WithExistingPaymentMethod(
+            val initializationMode: PaymentSheet.InitializationMode,
+            val paymentMethod: PaymentMethod,
+            val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+            val shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        ) : InterceptCall
     }
 }
