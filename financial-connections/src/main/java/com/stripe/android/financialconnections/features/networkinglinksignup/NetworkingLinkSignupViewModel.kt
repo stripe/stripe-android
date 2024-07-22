@@ -353,7 +353,7 @@ internal data class NetworkingLinkSignupState(
     ) {
 
         val focusEmailField: Boolean
-            get() = isInstantDebits && emailController.initialValue == null
+            get() = isInstantDebits && emailController.initialValue.isNullOrBlank()
     }
 
     data class Content(

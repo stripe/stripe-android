@@ -86,6 +86,52 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     @Test
+    fun `init - focuses email field if no email provided in Instant Debits flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "",
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest.copy(isLinkWithStripe = true),
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState(isInstantDebits = true))
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.focusEmailField).isTrue()
+    }
+
+    @Test
+    fun `init - does not focus email field if no email provided in Financial Connections flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "",
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest.copy(isLinkWithStripe = false),
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState(isInstantDebits = false))
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.focusEmailField).isFalse()
+    }
+
+    @Test
     fun `Redirects to verification screen if entering returning user email`() = runTest {
         val manifest = ApiKeyFixtures.sessionManifest()
 
