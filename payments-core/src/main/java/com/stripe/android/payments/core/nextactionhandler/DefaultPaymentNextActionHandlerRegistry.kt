@@ -15,7 +15,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
+import com.stripe.android.payments.core.injection.DaggerNextActionHandlerComponent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.IntentNextActionHandlerMap
 import javax.inject.Inject
@@ -130,7 +130,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
         ): PaymentNextActionHandlerRegistry {
-            val component = DaggerAuthenticationComponent.builder()
+            val component = DaggerNextActionHandlerComponent.builder()
                 .context(context)
                 .analyticsRequestFactory(paymentAnalyticsRequestFactory)
                 .enableLogging(enableLogging)

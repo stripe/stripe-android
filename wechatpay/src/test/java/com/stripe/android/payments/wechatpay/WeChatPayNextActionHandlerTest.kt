@@ -26,10 +26,10 @@ import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class WeChatPayAuthenticatorTest {
+class WeChatPayNextActionHandlerTest {
     private val mockWeChatPayAuthStarter: WeChatPayAuthStarter = mock()
     private val mockReflectionHelper: WeChatPayReflectionHelper = mock()
-    private val authenticator = WeChatPayNextActionHandler().also {
+    private val nextActionHandler = WeChatPayNextActionHandler().also {
         it.weChatAuthLauncherFactory = { _, _ -> mockWeChatPayAuthStarter }
         it.reflectionHelper = mockReflectionHelper
     }
@@ -62,7 +62,7 @@ class WeChatPayAuthenticatorTest {
                 "WeChatPay dependency is not found, add " +
                     "${WeChatPayReflectionHelper.WECHAT_PAY_GRADLE_DEP} in app's build.gradle"
             ) {
-                authenticator.nextAction(
+                nextActionHandler.nextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
                     REQUEST_OPTIONS
@@ -77,7 +77,7 @@ class WeChatPayAuthenticatorTest {
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is BlikAuthorize"
             ) {
-                authenticator.nextAction(
+                nextActionHandler.nextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
                     REQUEST_OPTIONS
@@ -92,7 +92,7 @@ class WeChatPayAuthenticatorTest {
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is null"
             ) {
-                authenticator.nextAction(
+                nextActionHandler.nextAction(
                     host,
                     PaymentIntentFixtures.PI_NO_NEXT_ACTION_DATA,
                     REQUEST_OPTIONS
@@ -104,7 +104,7 @@ class WeChatPayAuthenticatorTest {
     @Ignore("Flaky mockito behavior: https://github.com/mockito/mockito/issues/2026")
     fun `wechatPayAuthStarter should start when stripeIntent is WeChatPay`() =
         runTest {
-            authenticator.nextAction(
+            nextActionHandler.nextAction(
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
                 REQUEST_OPTIONS

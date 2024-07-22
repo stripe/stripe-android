@@ -40,7 +40,7 @@ internal class PaymentLauncherModule {
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean,
-        @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetAuthenticators: Boolean,
+        @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextActionHandlers: Boolean,
     ): PaymentNextActionHandlerRegistry = DefaultPaymentNextActionHandlerRegistry.createInstance(
         context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
@@ -51,7 +51,7 @@ internal class PaymentLauncherModule {
         publishableKeyProvider = publishableKeyProvider,
         productUsage = productUsage,
         isInstantApp = isInstantApp,
-        includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+        includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,
     )
 
     @Provides

@@ -31,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
         StripeRepositoryModule::class,
     ]
 )
-internal interface AuthenticationComponent {
+internal interface NextActionHandlerComponent {
     val registry: DefaultPaymentNextActionHandlerRegistry
 
     @Component.Builder
@@ -69,9 +69,9 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun includePaymentSheetNextActionHandlers(
-            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetAuthenticators: Boolean
+            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextActionHandlers: Boolean
         ): Builder
 
-        fun build(): AuthenticationComponent
+        fun build(): NextActionHandlerComponent
     }
 }
