@@ -2,6 +2,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.CardBrand
@@ -713,7 +715,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `should create metadata properly with elements session response, configuration, and data specs`() {
+    fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
@@ -771,6 +773,63 @@ internal class PaymentMethodMetadataTest {
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 hasCustomerConfiguration = true,
                 isGooglePayReady = false,
+            )
+        )
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Test
+    fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+
+        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .defaultBillingDetails(defaultBillingDetails)
+            .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+            .paymentMethodOrder(listOf("us_bank_account", "card", "sepa_debit"))
+            .build()
+
+        val metadata = PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isEligibleForCardBrandChoice = true,
+            ),
+            configuration = configuration,
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            isGooglePayReady = true,
+            isFinancialConnectionsAvailable = {
+                false
+            }
+        )
+
+        assertThat(metadata).isEqualTo(
+            PaymentMethodMetadata(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                ),
+                merchantName = "Merchant Inc.",
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = null,
+                sharedDataSpecs = listOf(SharedDataSpec("card")),
+                externalPaymentMethodSpecs = listOf(),
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true,
+                financialConnectionsAvailable = false,
             )
         )
     }
