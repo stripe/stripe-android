@@ -153,7 +153,7 @@ internal class DefaultManageScreenInteractor(
                 paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
                 paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                 selection = viewModel.selection,
-                editing = viewModel.editing,
+                editing = viewModel.savedPaymentMethodMutator.editing,
                 canEdit = viewModel.savedPaymentMethodMutator.canEdit,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 providePaymentMethodName = viewModel::providePaymentMethodName,

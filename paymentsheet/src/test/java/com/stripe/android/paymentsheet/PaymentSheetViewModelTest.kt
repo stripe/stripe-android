@@ -1631,10 +1631,10 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = customerPaymentMethods)
         )
 
-        viewModel.editing.test {
+        viewModel.savedPaymentMethodMutator.editing.test {
             assertThat(awaitItem()).isFalse()
 
-            viewModel.toggleEditing()
+            viewModel.savedPaymentMethodMutator.toggleEditing()
             assertThat(awaitItem()).isTrue()
 
             viewModel.savedPaymentMethodMutator.removePaymentMethod(customerPaymentMethods.single())
@@ -1648,12 +1648,12 @@ internal class PaymentSheetViewModelTest {
             updateSelection(PaymentSelection.Link)
         }
 
-        viewModel.toggleEditing()
+        viewModel.savedPaymentMethodMutator.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
 
-        viewModel.toggleEditing()
+        viewModel.savedPaymentMethodMutator.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }

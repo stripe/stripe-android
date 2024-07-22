@@ -120,7 +120,7 @@ private fun PaymentSheetScreen(
                 state = topBarState,
                 isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
-                toggleEditing = viewModel::toggleEditing,
+                toggleEditing = viewModel.savedPaymentMethodMutator::toggleEditing,
             )
         },
         content = content,

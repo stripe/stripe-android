@@ -183,7 +183,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.buyButton.isEnabled).isTrue()
 
-            viewModel.toggleEditing()
+            viewModel.savedPaymentMethodMutator.toggleEditing()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -198,7 +198,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
-            viewModel.toggleEditing()
+            viewModel.savedPaymentMethodMutator.toggleEditing()
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -435,7 +435,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            viewModel.toggleEditing()
+            viewModel.savedPaymentMethodMutator.toggleEditing()
 
             composeTestRule.onNodeWithTag(
                 TEST_TAG_REMOVE_BADGE,

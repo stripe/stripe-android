@@ -66,9 +66,6 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    private val _editing = MutableStateFlow(false)
-    internal val editing: StateFlow<Boolean> = _editing
-
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
 
@@ -105,36 +102,20 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
+    val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
+
     protected val buttonsEnabled = combineAsStateFlow(
         processing,
-        editing,
+        savedPaymentMethodMutator.editing,
     ) { isProcessing, isEditing ->
         !isProcessing && !isEditing
     }
-
-    val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode()
             ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
 
     init {
-        viewModelScope.launch {
-            savedPaymentMethodMutator.canEdit.collect { canEdit ->
-                if (!canEdit && editing.value) {
-                    toggleEditing()
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            savedPaymentMethodMutator.paymentMethods.collect { paymentMethods ->
-                if (paymentMethods.isEmpty() && editing.value) {
-                    toggleEditing()
-                }
-            }
-        }
-
         viewModelScope.launch {
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
             navigationHandler.currentScreen.drop(1).collect {
@@ -176,10 +157,6 @@ internal abstract class BaseSheetViewModel(
 
         updateCvcFlows(selection)
         clearErrorMessages()
-    }
-
-    fun toggleEditing() {
-        _editing.value = !editing.value
     }
 
     private fun updateCvcFlows(selection: PaymentSelection?) {
