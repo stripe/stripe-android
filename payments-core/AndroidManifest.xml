@@ -56,7 +56,7 @@
         </activity>
 
         <activity
-            android:name=".payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
+            android:name=".payments.core.nextactionhandler.threeds2.Stripe3ds2TransactionActivity"
             android:theme="@style/StripeDefaultTheme"
             android:exported="false" />
 

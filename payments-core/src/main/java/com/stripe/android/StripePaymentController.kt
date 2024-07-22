@@ -30,8 +30,8 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.nextactionhandler.DefaultPaymentNextActionHandlerRegistry
+import com.stripe.android.payments.core.nextactionhandler.PaymentNextActionHandlerRegistry
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -96,8 +96,8 @@ constructor(
      */
     private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    private val authenticatorRegistry: PaymentAuthenticatorRegistry =
-        DefaultPaymentAuthenticatorRegistry.createInstance(
+    private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
+        DefaultPaymentNextActionHandlerRegistry.createInstance(
             context = context,
             paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
             enableLogging = enableLogging,
@@ -107,7 +107,7 @@ constructor(
             publishableKeyProvider = publishableKeyProvider,
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
-            includePaymentSheetAuthenticators = false, // StripePaymentController is not used in PaymentSheet.
+            includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -118,7 +118,7 @@ constructor(
             PaymentRelayContract(),
             activityResultCallback
         )
-        authenticatorRegistry.onNewActivityResultCaller(
+        nextActionHandlerRegistry.onNewActivityResultCaller(
             activityResultCaller,
             activityResultCallback
         )
@@ -127,7 +127,7 @@ constructor(
     override fun unregisterLaunchers() {
         paymentRelayLauncher?.unregister()
         paymentRelayLauncher = null
-        authenticatorRegistry.onLauncherInvalidated()
+        nextActionHandlerRegistry.onLauncherInvalidated()
     }
 
     /**
@@ -321,7 +321,7 @@ constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(source).authenticate(
+        nextActionHandlerRegistry.getNextActionHandler(source).nextAction(
             host,
             source,
             requestOptions
@@ -448,7 +448,7 @@ constructor(
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
+        nextActionHandlerRegistry.getNextActionHandler(stripeIntent).nextAction(
             host,
             stripeIntent,
             requestOptions

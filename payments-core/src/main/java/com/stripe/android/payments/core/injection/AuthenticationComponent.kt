@@ -7,7 +7,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.nextactionhandler.DefaultPaymentNextActionHandlerRegistry
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -17,14 +17,14 @@ import kotlin.coroutines.CoroutineContext
 /**
  * [Component] for com.stripe.android.payments.core.authentication.
  *
- * It holds the dagger graph for [DefaultPaymentAuthenticatorRegistry], with
+ * It holds the dagger graph for [DefaultPaymentNextActionHandlerRegistry], with
  * more dependencies daggerized and a higher level [Component]s created, this class will be merged
  * into it.
  */
 @Singleton
 @Component(
     modules = [
-        AuthenticationModule::class,
+        NextActionHandlerModule::class,
         Stripe3DSAuthenticatorModule::class,
         WeChatPayAuthenticatorModule::class,
         CoreCommonModule::class,
@@ -32,7 +32,7 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 internal interface AuthenticationComponent {
-    val registry: DefaultPaymentAuthenticatorRegistry
+    val registry: DefaultPaymentNextActionHandlerRegistry
 
     @Component.Builder
     interface Builder {
@@ -68,8 +68,8 @@ internal interface AuthenticationComponent {
         fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
 
         @BindsInstance
-        fun includePaymentSheetAuthenticators(
-            @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) includePaymentSheetAuthenticators: Boolean
+        fun includePaymentSheetNextActionHandlers(
+            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetAuthenticators: Boolean
         ): Builder
 
         fun build(): AuthenticationComponent

@@ -3,8 +3,8 @@ package com.stripe.android.payments.core.injection
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
-import com.stripe.android.payments.core.authentication.PaymentAuthenticator
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
+import com.stripe.android.payments.core.nextactionhandler.PaymentNextActionHandler
+import com.stripe.android.payments.core.nextactionhandler.threeds2.Stripe3DS2NextActionHandler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -12,7 +12,7 @@ import dagger.multibindings.IntoMap
 import javax.inject.Singleton
 
 /**
- * Provides [PaymentAuthenticator] for [NextActionData.SdkData.Use3DS2].
+ * Provides [PaymentNextActionHandler] for [NextActionData.SdkData.Use3DS2].
  * Requires 3ds2 SDK.
  */
 @Module(
@@ -22,13 +22,13 @@ import javax.inject.Singleton
 )
 @SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class Stripe3DSAuthenticatorModule {
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS2::class)
+    @IntentNextActionHandlerKey(NextActionData.SdkData.Use3DS2::class)
     abstract fun bindsStripe3DSAuthenticator(
-        stripe3ds2Authenticator: Stripe3DS2Authenticator
-    ): PaymentAuthenticator<StripeIntent>
+        stripe3ds2Authenticator: Stripe3DS2NextActionHandler
+    ): PaymentNextActionHandler<StripeIntent>
 
     companion object {
         @Provides

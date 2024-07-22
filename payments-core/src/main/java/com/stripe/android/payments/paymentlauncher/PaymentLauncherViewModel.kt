@@ -30,7 +30,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.nextactionhandler.PaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
@@ -51,7 +51,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentLauncherViewModel @Inject constructor(
     @Named(IS_PAYMENT_INTENT) private val isPaymentIntent: Boolean,
     private val stripeApiRepository: StripeRepository,
-    private val authenticatorRegistry: PaymentAuthenticatorRegistry,
+    private val authenticatorRegistry: PaymentNextActionHandlerRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
@@ -141,7 +141,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        authenticatorRegistry.getAuthenticator(intent).authenticate(
+                        authenticatorRegistry.getNextActionHandler(intent).nextAction(
                             host,
                             intent,
                             apiRequestOptionsProvider.get()
@@ -217,8 +217,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
             ).fold(
                 onSuccess = { intent ->
                     authenticatorRegistry
-                        .getAuthenticator(intent)
-                        .authenticate(
+                        .getNextActionHandler(intent)
+                        .nextAction(
                             host,
                             intent,
                             apiRequestOptionsProvider.get()

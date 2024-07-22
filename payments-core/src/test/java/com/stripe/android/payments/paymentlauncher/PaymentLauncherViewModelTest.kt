@@ -30,8 +30,8 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.core.authentication.PaymentAuthenticator
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.nextactionhandler.PaymentNextActionHandler
+import com.stripe.android.payments.core.nextactionhandler.PaymentNextActionHandlerRegistry
 import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -61,7 +61,7 @@ class PaymentLauncherViewModelTest {
     internal class TestFragment : Fragment()
 
     private val stripeApiRepository = mock<StripeApiRepository>()
-    private val authenticatorRegistry = mock<PaymentAuthenticatorRegistry>()
+    private val authenticatorRegistry = mock<PaymentNextActionHandlerRegistry>()
     private val defaultReturnUrl =
         DefaultReturnUrl.create(ApplicationProvider.getApplicationContext())
     private val apiRequestOptions = mock<ApiRequest.Options>()
@@ -86,11 +86,11 @@ class PaymentLauncherViewModelTest {
         paymentMethodId = PM_ID
     )
     private val paymentIntent = mock<PaymentIntent>()
-    private val piAuthenticator = mock<PaymentAuthenticator<PaymentIntent>>()
+    private val piAuthenticator = mock<PaymentNextActionHandler<PaymentIntent>>()
     private val setupIntent = mock<SetupIntent>()
-    private val siAuthenticator = mock<PaymentAuthenticator<SetupIntent>>()
+    private val siAuthenticator = mock<PaymentNextActionHandler<SetupIntent>>()
     private val stripeIntent = mock<StripeIntent>()
-    private val stripeIntentAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
+    private val stripeIntentAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val succeededPaymentResult =
         PaymentIntentResult(paymentIntent, StripeIntentResult.Outcome.SUCCEEDED)
     private val failedPaymentResult =
@@ -139,10 +139,10 @@ class PaymentLauncherViewModelTest {
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
         ).thenReturn(Result.success(setupIntent))
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(setupIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(setupIntent)))
             .thenReturn(siAuthenticator)
 
         whenever(
@@ -153,7 +153,7 @@ class PaymentLauncherViewModelTest {
             )
         ).thenReturn(Result.success(stripeIntent))
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
     }
 
@@ -177,7 +177,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator).authenticate(
+            verify(piAuthenticator).nextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -210,7 +210,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator).authenticate(
+            verify(piAuthenticator).nextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -244,7 +244,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator, never()).authenticate(
+            verify(piAuthenticator, never()).nextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -275,7 +275,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(siAuthenticator).authenticate(
+            verify(siAuthenticator).nextAction(
                 eq(authHost),
                 eq(setupIntent),
                 eq(apiRequestOptions)
@@ -308,7 +308,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(siAuthenticator).authenticate(
+            verify(siAuthenticator).nextAction(
                 eq(authHost),
                 eq(setupIntent),
                 eq(apiRequestOptions)
@@ -363,7 +363,7 @@ class PaymentLauncherViewModelTest {
             createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
-            verify(stripeIntentAuthenticator).authenticate(
+            verify(stripeIntentAuthenticator).nextAction(
                 eq(authHost),
                 eq(stripeIntent),
                 eq(apiRequestOptions)
