@@ -10,9 +10,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -97,7 +95,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = emptyList()
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
         }
     }
@@ -121,7 +118,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
         }
     }
@@ -147,7 +143,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(cbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             interactor.state.test {
@@ -185,12 +180,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(cbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
             assertThat(selectedPaymentMethod?.paymentMethod).isEqualTo(cbcCard)
         }
@@ -218,12 +211,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(nonCbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
         }
     }
@@ -248,12 +239,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
         }
     }
@@ -277,7 +266,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             interactor.state.test {
@@ -303,7 +291,7 @@ class DefaultManageScreenInteractorTest {
         val selection = MutableStateFlow(currentSelection)
         val editing = MutableStateFlow(isEditing)
         val canEdit = MutableStateFlow(true)
-        val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
+        val dispatcher = UnconfinedTestDispatcher()
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -329,7 +317,6 @@ class DefaultManageScreenInteractorTest {
             paymentMethodsSource = paymentMethods,
             editingSource = editing,
             canEditSource = canEdit,
-            dispatcher = dispatcher,
         ).apply {
             runTest {
                 testBlock()
@@ -339,7 +326,6 @@ class DefaultManageScreenInteractorTest {
 
     private data class TestParams(
         val interactor: ManageScreenInteractor,
-        val dispatcher: TestDispatcher,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,
