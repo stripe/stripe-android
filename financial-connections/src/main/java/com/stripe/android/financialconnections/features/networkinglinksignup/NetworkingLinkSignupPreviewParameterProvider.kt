@@ -98,7 +98,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
-                isInstantDebits = false,
+                isInstantDebits = true,
                 content = linkLoginPane(),
             )
         ),
