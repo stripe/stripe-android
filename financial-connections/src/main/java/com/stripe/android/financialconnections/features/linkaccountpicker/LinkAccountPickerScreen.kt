@@ -44,7 +44,6 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
-import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
@@ -214,7 +213,7 @@ private fun LazyListScope.loadedContent(
     }
     items(payload.accounts) {
         NetworkedAccountItem(
-            selected = it.first.id in selectedAccountIds,
+            selected = it.account.id in selectedAccountIds,
             account = it,
             onAccountClicked = { selected ->
                 if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
@@ -255,7 +254,7 @@ private fun LazyListScope.loadingContent() {
 
 @Composable
 private fun NetworkedAccountItem(
-    account: Pair<PartnerAccount, NetworkedAccount>,
+    account: LinkedAccount,
     onAccountClicked: (PartnerAccount) -> Unit,
     selected: Boolean
 ) {

@@ -86,7 +86,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val accounts = display.accounts.mapNotNull { networkedAccount: NetworkedAccount ->
                 accountsResponse.data.firstOrNull { it.id == networkedAccount.id }
                     ?.let { matchingPartnerAccount ->
-                        Pair(matchingPartnerAccount, networkedAccount)
+                        LinkedAccount(matchingPartnerAccount, networkedAccount)
                     }
             }
 
@@ -103,17 +103,18 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 singleAccount = manifest.singleAccount,
             )
-        }.execute {
+        }.execute { payload ->
             copy(
-                payload = it,
+                payload = payload,
                 // When accounts load, preselect the first selectable account
-                selectedAccountIds = listOfNotNull(it()?.accounts?.preselectedAccount()?.id)
+                selectedAccountIds = listOfNotNull(
+                    payload()?.accounts
+                        ?.firstOrNull { account -> account.display.allowSelection }
+                        ?.account?.id
+                )
             )
         }
     }
-
-    private fun List<Pair<PartnerAccount, NetworkedAccount>>.preselectedAccount(): NetworkedAccount? =
-        map { (_, networkedAccount) -> networkedAccount }.firstOrNull { it.allowSelection }
 
     override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
@@ -282,7 +283,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         logAccountClick(partnerAccount)
 
         val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
-        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
+        val drawerOnSelection = accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
 
         if (drawerOnSelection != null) {
             // TODO@carlosmuvi handle drawer display.
@@ -353,7 +354,7 @@ internal data class LinkAccountPickerState(
 
     data class Payload(
         val title: String,
-        val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
+        val accounts: List<LinkedAccount>,
         val addNewAccount: AddNewAccount,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
@@ -365,7 +366,7 @@ internal data class LinkAccountPickerState(
     ) {
 
         fun selectedPartnerAccounts(selected: List<String>): List<PartnerAccount> {
-            return accounts.filter { it.first.id in selected }.map { it.first }
+            return accounts.map { it.account }.filter { it.id in selected }
         }
     }
 
@@ -384,8 +385,8 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload?.accounts
-                    ?.firstOrNull { it.first.id in selectedAccountIds }
-                    ?.second?.dataAccessNotice
+                    ?.firstOrNull { it.account.id in selectedAccountIds }
+                    ?.display?.dataAccessNotice
             }
         }
 
@@ -396,7 +397,7 @@ internal data class LinkAccountPickerState(
             return if (payload?.singleAccount == true) {
                 val selectedAccount = payload.accounts.singleOrNull { (partnerAccount, _) ->
                     partnerAccount.id in selectedAccountIds
-                }?.second
+                }?.display
 
                 TextResource.Text(
                     value = selectedAccount?.selectionCta ?: payload.defaultCta,
@@ -419,6 +420,11 @@ internal data class LinkAccountPickerState(
 internal enum class LinkAccountPickerClickableText(val value: String) {
     DATA("stripe://data-access-notice"),
 }
+
+internal data class LinkedAccount(
+    val account: PartnerAccount,
+    val display: NetworkedAccount
+)
 
 private fun createUpdateRequiredContent(
     partnerAccount: PartnerAccount,
