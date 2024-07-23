@@ -95,6 +95,7 @@ internal class IntentConfirmationHandler(
      * @param paymentSelection the customer's payment selection to use for confirming the intent
      */
     fun start(
+        initializationMode: PaymentSheet.InitializationMode,
         intent: StripeIntent,
         paymentSelection: PaymentSelection?
     ) {
@@ -106,7 +107,7 @@ internal class IntentConfirmationHandler(
 
         coroutineScope.launch {
             val nextStep = intentConfirmationInterceptor.intercept(
-                initializationMode = arguments.initializationMode,
+                initializationMode = initializationMode,
                 paymentSelection = paymentSelection,
                 shippingValues = arguments.shippingDetails?.toConfirmPaymentIntentShipping(),
                 context = context,
@@ -247,7 +248,6 @@ internal class IntentConfirmationHandler(
     }
 
     internal data class Args(
-        val initializationMode: PaymentSheet.InitializationMode,
         val shippingDetails: AddressDetails?,
     )
 
@@ -311,7 +311,6 @@ internal class IntentConfirmationHandler(
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
                 arguments = Args(
-                    initializationMode = paymentSheetArguments.initializationMode,
                     shippingDetails = paymentSheetArguments.config.shippingDetails,
                 ),
                 paymentLauncherFactory = { hostActivityLauncher ->

@@ -542,6 +542,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val stripeIntent = awaitStripeIntent()
 
             intentConfirmationHandler.start(
+                initializationMode = args.initializationMode,
                 intent = stripeIntent,
                 paymentSelection = paymentSelectionWithCvcIfEnabled(paymentSelection),
             )
