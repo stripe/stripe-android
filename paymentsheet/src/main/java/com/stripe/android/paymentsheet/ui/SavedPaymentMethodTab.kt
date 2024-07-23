@@ -67,6 +67,7 @@ internal fun SavedPaymentMethodTab(
     isSelected: Boolean,
     editState: PaymentOptionEditState,
     isEnabled: Boolean,
+    isClickable: Boolean = isEnabled,
     iconRes: Int,
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
@@ -99,6 +100,7 @@ internal fun SavedPaymentMethodTab(
                 SavedPaymentMethodCard(
                     isSelected = isSelected,
                     isEnabled = isEnabled,
+                    isClickable = isClickable,
                     labelText = labelText,
                     iconRes = iconRes,
                     iconTint = iconTint,
@@ -174,6 +176,7 @@ private fun SavedPaymentMethodBadge(
 private fun SavedPaymentMethodCard(
     isSelected: Boolean,
     isEnabled: Boolean,
+    isClickable: Boolean = isEnabled,
     iconRes: Int,
     iconTint: Color?,
     labelText: String,
@@ -195,7 +198,7 @@ private fun SavedPaymentMethodCard(
                 .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
                 .selectable(
                     selected = isSelected,
-                    enabled = isEnabled,
+                    enabled = isClickable,
                     onClick = onItemSelectedListener,
                 ),
         ) {

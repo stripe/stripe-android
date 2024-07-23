@@ -18,6 +18,7 @@ import com.stripe.android.uicore.stripeColors
 internal fun RowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
+    isClickable: Boolean = isEnabled,
     onClick: () -> Unit,
     contentPaddingValues: PaddingValues,
     modifier: Modifier,
@@ -35,7 +36,7 @@ internal fun RowButton(
             modifier = Modifier
                 .selectable(
                     selected = isSelected,
-                    enabled = isEnabled,
+                    enabled = isClickable,
                     onClick = onClick
                 )
                 .padding(contentPaddingValues)

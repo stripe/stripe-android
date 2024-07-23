@@ -389,6 +389,7 @@ private fun SavedPaymentMethodTab(
             },
             isSelected = isSelected,
             isEnabled = isEnabled,
+            isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
             labelIcon = labelIcon,
             labelText = labelText,
@@ -399,9 +400,7 @@ private fun SavedPaymentMethodTab(
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
             onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
             onItemSelectedListener = {
-                if (!isEditing) {
-                    onItemSelected(paymentMethod.toPaymentSelection())
-                }
+                onItemSelected(paymentMethod.toPaymentSelection())
             },
             modifier = modifier,
         )
