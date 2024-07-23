@@ -36,7 +36,6 @@ import javax.inject.Provider
  * intent at a time.
  */
 internal class IntentConfirmationHandler(
-    private val arguments: Args,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
     private val context: Context,
@@ -87,17 +86,14 @@ internal class IntentConfirmationHandler(
     }
 
     /**
-     * Starts the confirmation process with a given [StripeIntent] and [PaymentSelection] instance. Result from this
-     * method can be received from [awaitIntentResult]. This method cannot return a result since the confirmation
-     * process can be handed off to another [Activity] to handle after starting it.
+     * Starts the confirmation process with a given [Args] instance. Result from this method can be received
+     * from [awaitIntentResult]. This method cannot return a result since the confirmation process can be handed
+     * off to another [Activity] to handle after starting it.
      *
-     * @param intent the Stripe intent to confirm
-     * @param paymentSelection the customer's payment selection to use for confirming the intent
+     * @param arguments arguments required to confirm a Stripe intent
      */
     fun start(
-        initializationMode: PaymentSheet.InitializationMode,
-        intent: StripeIntent,
-        paymentSelection: PaymentSelection?
+        arguments: Args,
     ) {
         if (completableResult?.isActive == true) {
             return
@@ -107,8 +103,8 @@ internal class IntentConfirmationHandler(
 
         coroutineScope.launch {
             val nextStep = intentConfirmationInterceptor.intercept(
-                initializationMode = initializationMode,
-                paymentSelection = paymentSelection,
+                initializationMode = arguments.initializationMode,
+                paymentSelection = arguments.paymentSelection,
                 shippingValues = arguments.shippingDetails?.toConfirmPaymentIntentShipping(),
                 context = context,
             )
@@ -119,7 +115,7 @@ internal class IntentConfirmationHandler(
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
                     handleNextAction(
                         clientSecret = nextStep.clientSecret,
-                        stripeIntent = intent,
+                        stripeIntent = arguments.intent,
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Confirm -> {
@@ -133,7 +129,7 @@ internal class IntentConfirmationHandler(
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    onPaymentResult(InternalPaymentResult.Completed(intent))
+                    onPaymentResult(InternalPaymentResult.Completed(arguments.intent))
                 }
             }
         }
@@ -248,7 +244,10 @@ internal class IntentConfirmationHandler(
     }
 
     internal data class Args(
+        val initializationMode: PaymentSheet.InitializationMode,
         val shippingDetails: AddressDetails?,
+        val intent: StripeIntent,
+        val paymentSelection: PaymentSelection?
     )
 
     /**
@@ -301,24 +300,21 @@ internal class IntentConfirmationHandler(
     }
 
     class Factory(
-        private val paymentSheetArguments: PaymentSheetContractV2.Args,
         private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         private val savedStateHandle: SavedStateHandle,
+        private val statusBarColor: Int?,
         private val application: Application,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
-                arguments = Args(
-                    shippingDetails = paymentSheetArguments.config.shippingDetails,
-                ),
                 paymentLauncherFactory = { hostActivityLauncher ->
                     stripePaymentLauncherAssistedFactory.create(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },
                         stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
                         hostActivityLauncher = hostActivityLauncher,
-                        statusBarColor = paymentSheetArguments.statusBarColor,
+                        statusBarColor = statusBarColor,
                         includePaymentSheetAuthenticators = true,
                     )
                 },
