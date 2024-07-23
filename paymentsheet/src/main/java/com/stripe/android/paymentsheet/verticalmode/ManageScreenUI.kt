@@ -35,6 +35,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 isEnabled = true,
+                isClickable = !state.isEditing,
                 isSelected = isSelected,
                 trailingContent = {
                     TrailingContent(
@@ -56,9 +57,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 onClick = {
-                    if (!state.isEditing) {
-                        interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
-                    }
+                    interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
                 },
             )
         }
