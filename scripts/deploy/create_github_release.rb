@@ -12,7 +12,6 @@ def create_github_release
     build_example_release_apk
     tag_release
 
-    # TODO: generate assets and attach them to release -- before tagging? idk
     begin
         release_response = octokit_client.create_release(
           "stripe/stripe-android",
@@ -23,7 +22,9 @@ def create_github_release
         )
 
         @release_url = release_response.url
-        upload_assets_to_release(@release_url)
+        upload_example_apk_to_release(@release_url)
+
+        rputs "Created new release"
         open_url(release_response.html_url)
     rescue
         delete_release_tag
@@ -48,8 +49,8 @@ private def tag_release
         Subprocess.check_call(["git", "tag", "-s", "-u", "#{gnupg_key_id}", "#{tag_name}", "-m", "\"Version #{@version}\""], env: env)
     end
 
+    # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
     if(!@is_dry_run)
-        # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
         execute_or_fail("git push --tags")
     end
 end
@@ -107,22 +108,13 @@ private def build_example_release_apk
     end
 end
 
-private def upload_assets_to_release(release_url)
-    upload_asset(
+private def upload_example_apk_to_release(release_url)
+    octokit_client.upload_asset(
         release_url,
         "../stripe-android/paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk",
-        "paymentsheet-example-release-#{@version}.apk",
-        "application/vnd.android.package-archive"
+        name: "paymentsheet-example-release-#{@version}.apk",
+        content_type: "application/vnd.android.package-archive"
     )
-end
-
-def upload_asset(release_url, source_name, dest_name, mime_type)
-      octokit_client.upload_asset(
-        release_url,
-        source_name,
-        content_type: mime_type,
-        name: dest_name
-      )
 end
 
 private def octokit_client

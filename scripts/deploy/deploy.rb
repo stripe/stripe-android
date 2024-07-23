@@ -5,7 +5,7 @@ require 'optparse'
 
 require_relative 'common'
 require_relative 'create_github_release'
-require_relative 'github_steps'
+require_relative 'version_bump_pr_steps'
 require_relative 'update_version_numbers'
 require_relative 'validate_version_number'
 
