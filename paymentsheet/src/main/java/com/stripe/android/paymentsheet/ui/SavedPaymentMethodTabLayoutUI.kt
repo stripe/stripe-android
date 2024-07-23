@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -69,6 +70,56 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
+
+@Composable
+internal fun SavedPaymentMethodTabLayoutUI(
+    interactor: SelectSavedPaymentMethodsInteractor,
+    cvcRecollectionState: CvcRecollectionState,
+    modifier: Modifier,
+) {
+    val state by interactor.state.collectAsState()
+
+    SavedPaymentMethodTabLayoutUI(
+        paymentOptionsItems = state.paymentOptionsItems,
+        selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        isEditing = state.isEditing,
+        isProcessing = state.isProcessing,
+        onAddCardPressed = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
+            )
+        },
+        onItemSelected = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
+                    it
+                )
+            )
+        },
+        onModifyItem = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
+            )
+        },
+        onItemRemoved = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
+            )
+        },
+        modifier = modifier,
+    )
+
+    if (
+        cvcRecollectionState is CvcRecollectionState.Required &&
+        (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
+            ?.paymentMethod?.type == PaymentMethod.Type.Card
+    ) {
+        CvcRecollectionField(
+            cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
+            state.isProcessing
+        )
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable

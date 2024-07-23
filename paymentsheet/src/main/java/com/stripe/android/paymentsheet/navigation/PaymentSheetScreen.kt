@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -9,11 +8,9 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -30,7 +27,6 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -136,48 +132,11 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            val state by interactor.state.collectAsState()
-
             SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = state.paymentOptionsItems,
-                selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
-                isEditing = state.isEditing,
-                isProcessing = state.isProcessing,
-                onAddCardPressed = {
-                    interactor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
-                    )
-                },
-                onItemSelected = {
-                    interactor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
-                            it
-                        )
-                    )
-                },
-                onModifyItem = {
-                    interactor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
-                    )
-                },
-                onItemRemoved = {
-                    interactor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
-                    )
-                },
+                interactor = interactor,
+                cvcRecollectionState = cvcRecollectionState,
                 modifier = modifier,
             )
-
-            if (
-                cvcRecollectionState is CvcRecollectionState.Required &&
-                (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.paymentMethod?.type == PaymentMethod.Type.Card
-            ) {
-                CvcRecollectionField(
-                    cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
-                    state.isProcessing
-                )
-            }
         }
 
         override fun close() {
