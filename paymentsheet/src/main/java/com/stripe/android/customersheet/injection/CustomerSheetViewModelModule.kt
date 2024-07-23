@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -27,7 +28,9 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -129,6 +132,25 @@ internal interface CustomerSheetViewModelModule {
             analyticsRequestFactory = analyticsRequestFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
         )
+
+        @Provides
+        fun providesIntentConfirmationHandlerFactory(
+            application: Application,
+            savedStateHandle: SavedStateHandle,
+            paymentConfigurationProvider: Provider<PaymentConfiguration>,
+            stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
+            statusBarColor: Int?,
+            intentConfirmationInterceptor: IntentConfirmationInterceptor,
+        ): IntentConfirmationHandler.Factory {
+            return IntentConfirmationHandler.Factory(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                paymentConfigurationProvider = paymentConfigurationProvider,
+                stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                application = application,
+                statusBarColor = { statusBarColor },
+                savedStateHandle = savedStateHandle,
+            )
+        }
 
         @Provides
         fun resources(application: Application): Resources {

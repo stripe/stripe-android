@@ -33,6 +33,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -3203,6 +3204,48 @@ class CustomerSheetViewModelTest {
 
         verify(eventReporter).onCardNumberCompleted()
     }
+
+    @Test
+    fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
+        runTest(testDispatcher) {
+            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                initialBackStack = listOf(
+                    selectPaymentMethodViewState,
+                    addPaymentMethodViewState,
+                ),
+                stripeRepository = FakeStripeRepository(
+                    createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                    retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                ),
+                customerAdapter = FakeCustomerAdapter(
+                    onSetupIntentClientSecretForCustomerAttach = {
+                        CustomerAdapter.Result.success("seti_123")
+                    },
+                    canCreateSetupIntents = true,
+                ),
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val call = intentConfirmationInterceptor.calls.awaitItem()
+
+            assertThat(call).isEqualTo(
+                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                        clientSecret = "seti_123"
+                    ),
+                    paymentMethod = CARD_PAYMENT_METHOD,
+                    shippingValues = null,
+                    paymentMethodOptionsParams = null,
+                )
+            )
+
+            intentConfirmationInterceptor.calls.ensureAllEventsConsumed()
+        }
 
     private fun mockUSBankAccountResult(
         isVerified: Boolean
