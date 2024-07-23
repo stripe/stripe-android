@@ -4,7 +4,6 @@ require 'open3'
 require 'octokit'
 
 require_relative 'common'
-# TODO: probably rename this file.
 
 def ensure_clean_repo()
   repo_dir = File.basename(Dir.getwd)
