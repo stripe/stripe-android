@@ -98,12 +98,18 @@ class LinkAccountPickerViewModelTest {
         assertThat(viewModel.stateFlow.value.payload()!!.accounts)
             .isEqualTo(
                 listOf(
-                    partnerAccount().copy(id = "id1", _allowSelection = null) to
-                        NetworkedAccount(id = "id1", allowSelection = true),
-                    partnerAccount().copy(id = "id2", _allowSelection = null) to
-                        NetworkedAccount(id = "id2", allowSelection = false),
-                    partnerAccount().copy(id = "id3", _allowSelection = null) to
-                        NetworkedAccount(id = "id3", allowSelection = false)
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id1", _allowSelection = null),
+                        display = NetworkedAccount(id = "id1", allowSelection = true)
+                    ),
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id2", _allowSelection = null),
+                        display = NetworkedAccount(id = "id2", allowSelection = false)
+                    ),
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id3", _allowSelection = null),
+                        display = NetworkedAccount(id = "id3", allowSelection = false)
+                    )
                 )
             )
     }
@@ -229,7 +235,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
 
         val expectedPreselectedAccountId = "id3"
-        val actualPreselectedAccountId = viewModel.stateFlow.value.selectedAccountIds.firstOrNull()
+        val actualPreselectedAccountId = viewModel.stateFlow.value.payload()!!.selectedAccountIds.firstOrNull()
 
         assertThat(actualPreselectedAccountId).isEqualTo(expectedPreselectedAccountId)
     }
@@ -238,7 +244,7 @@ class LinkAccountPickerViewModelTest {
     fun `onAccountClick - uses data access notice for multiple selected account types`() = runTest {
         val accountsData = listOf(
             partnerAccount().copy(id = "type1_1", _allowSelection = true),
-            partnerAccount().copy(id = "type2_2", _allowSelection = true)
+            partnerAccount().copy(id = "type2_1", _allowSelection = true)
         )
         val displayAccounts = listOf(
             NetworkedAccount(id = "type1_1", allowSelection = true),

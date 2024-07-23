@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -90,6 +91,13 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     }
             }
 
+            // When accounts load, preselect the first selectable account
+            val selectedAccountIds = listOfNotNull(
+                accounts
+                    .firstOrNull { account -> account.display.allowSelection }
+                    ?.account?.id
+            )
+
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
@@ -102,16 +110,12 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 singleAccount = manifest.singleAccount,
+                selectedAccountIds = selectedAccountIds
             )
         }.execute { payload ->
             copy(
                 payload = payload,
-                // When accounts load, preselect the first selectable account
-                selectedAccountIds = listOfNotNull(
-                    payload()?.accounts
-                        ?.firstOrNull { account -> account.display.allowSelection }
-                        ?.account?.id
-                )
+
             )
         }
     }
@@ -186,7 +190,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val payload = requireNotNull(state.payload())
 
-            val accounts = payload.selectedPartnerAccounts(state.selectedAccountIds)
+            val accounts = payload.selectedAccounts.map { it.account }
             updateCachedAccounts(accounts)
 
             // We assume that at this point, all selected accounts have the same next pane.
@@ -267,7 +271,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private fun logAccountClick(partnerAccount: PartnerAccount) {
         val state = stateFlow.value
         val payload = state.payload() ?: return
-        val isNewSelection = partnerAccount.id !in state.selectedAccountIds
+        val isNewSelection = partnerAccount.id !in payload.selectedAccountIds
 
         val event = FinancialConnectionsAnalyticsEvent.AccountSelected(
             pane = PANE,
@@ -302,14 +306,16 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             return
         }
 
+        val payload = requireNotNull(stateFlow.value.payload())
+        val selectedAccountIds = when {
+            payload.singleAccount -> listOf(partnerAccount.id)
+            partnerAccount.id in payload.selectedAccountIds -> payload.selectedAccountIds - partnerAccount.id
+            else -> payload.selectedAccountIds + partnerAccount.id
+        }
+
         setState {
-            val payload = requireNotNull(payload())
             copy(
-                selectedAccountIds = when {
-                    payload.singleAccount -> listOf(partnerAccount.id)
-                    partnerAccount.id in selectedAccountIds -> selectedAccountIds - partnerAccount.id
-                    else -> selectedAccountIds + partnerAccount.id
-                }
+                payload = Success(payload.copy(selectedAccountIds = selectedAccountIds))
             )
         }
     }
@@ -348,13 +354,13 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 internal data class LinkAccountPickerState(
     val payload: Async<Payload> = Uninitialized,
     val selectNetworkedAccountAsync: Async<Unit> = Uninitialized,
-    val selectedAccountIds: List<String> = emptyList(),
     val viewEffect: ViewEffect? = null,
 ) {
 
     data class Payload(
         val title: String,
         val accounts: List<LinkedAccount>,
+        val selectedAccountIds: List<String>,
         val addNewAccount: AddNewAccount,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
@@ -365,28 +371,23 @@ internal data class LinkAccountPickerState(
         val aboveCta: String?,
     ) {
 
-        fun selectedPartnerAccounts(selected: List<String>): List<PartnerAccount> {
-            return accounts.map { it.account }.filter { it.id in selected }
-        }
+        val selectedAccounts: List<LinkedAccount>
+            get() = accounts.filter { it.account.id in selectedAccountIds }
+
     }
 
     val activeDataAccessNotice: DataAccessNotice?
         get() {
-            val payload = payload()
-            // Bank accounts can have multiple types
-            // (ex. linked account "bctmacct", manual account "csmrbankacct").
-            val selectedAccountTypes = selectedAccountIds
-                .mapNotNull { it.split("_").firstOrNull() }.toSet()
+            val payload = payload() ?: return null
+            val selectedAccountTypes = payload.selectedAccounts.mapNotNull { it.type }.toSet()
             return if (selectedAccountTypes.size > 1) {
                 // if user selected multiple different account types, present a special data access notice
-                payload?.multipleAccountTypesSelectedDataAccessNotice
+                payload.multipleAccountTypesSelectedDataAccessNotice
             } else {
                 // we get here if user selected:
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
-                payload?.accounts
-                    ?.firstOrNull { it.account.id in selectedAccountIds }
-                    ?.display?.dataAccessNotice
+                payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
             }
         }
 
@@ -395,9 +396,7 @@ internal data class LinkAccountPickerState(
             val payload = payload()
 
             return if (payload?.singleAccount == true) {
-                val selectedAccount = payload.accounts.singleOrNull { (partnerAccount, _) ->
-                    partnerAccount.id in selectedAccountIds
-                }?.display
+                val selectedAccount = payload.selectedAccounts.singleOrNull()?.display
 
                 TextResource.Text(
                     value = selectedAccount?.selectionCta ?: payload.defaultCta,
@@ -424,7 +423,13 @@ internal enum class LinkAccountPickerClickableText(val value: String) {
 internal data class LinkedAccount(
     val account: PartnerAccount,
     val display: NetworkedAccount
-)
+) {
+
+    // Bank accounts can have multiple types, determined by their prefixes.
+    // (ex. linked account "bctmacct", manual account "csmrbankacct").
+    val type: String?
+        get() = account.id.split("_").firstOrNull()
+}
 
 private fun createUpdateRequiredContent(
     partnerAccount: PartnerAccount,

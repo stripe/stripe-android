@@ -125,7 +125,6 @@ private fun LinkAccountPickerContent(
                 scrollState = scrollState,
                 payload = payload,
                 cta = state.cta,
-                selectedAccountIds = state.selectedAccountIds,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
                 onClickableTextClick = onClickableTextClick,
                 onSelectAccountClick = onSelectAccountClick,
@@ -142,7 +141,6 @@ private fun LinkAccountPickerContent(
 private fun LinkAccountPickerLoaded(
     scrollState: LazyListState,
     payload: Async<Payload>,
-    selectedAccountIds: List<String>,
     selectNetworkedAccountAsync: Async<Unit>,
     onAccountClick: (PartnerAccount) -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -159,7 +157,6 @@ private fun LinkAccountPickerLoaded(
             payload()?.let {
                 loadedContent(
                     payload = it,
-                    selectedAccountIds = selectedAccountIds,
                     selectNetworkedAccountAsync = selectNetworkedAccountAsync,
                     onAccountClick = onAccountClick,
                     onNewBankAccountClick = onNewBankAccountClick
@@ -182,7 +179,7 @@ private fun LinkAccountPickerLoaded(
                         Spacer(modifier = Modifier.size(12.dp))
                     }
                     FinancialConnectionsButton(
-                        enabled = selectedAccountIds.isNotEmpty(),
+                        enabled = it.selectedAccountIds.isNotEmpty(),
                         loading = selectNetworkedAccountAsync is Loading,
                         onClick = onSelectAccountClick,
                         modifier = Modifier
@@ -198,7 +195,6 @@ private fun LinkAccountPickerLoaded(
 
 private fun LazyListScope.loadedContent(
     payload: Payload,
-    selectedAccountIds: List<String>,
     selectNetworkedAccountAsync: Async<Unit>,
     onAccountClick: (PartnerAccount) -> Unit,
     onNewBankAccountClick: () -> Unit
@@ -213,7 +209,7 @@ private fun LazyListScope.loadedContent(
     }
     items(payload.accounts) {
         NetworkedAccountItem(
-            selected = it.account.id in selectedAccountIds,
+            selected = it.account.id in payload.selectedAccountIds,
             account = it,
             onAccountClicked = { selected ->
                 if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
