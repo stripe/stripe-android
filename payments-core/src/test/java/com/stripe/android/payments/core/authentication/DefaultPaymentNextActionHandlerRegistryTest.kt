@@ -25,14 +25,14 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultPaymentAuthenticatorRegistryTest {
-    private val noOpIntentAuthenticator = mock<NoOpIntentAuthenticator>()
-    private val sourceAuthenticator = mock<SourceAuthenticator>()
-    private val threeDs1lAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
-    private val threeDs2lAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
-    private val redirectToUrlAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
-    private val alipayRedirectAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
-    private val dispayOxxoDetailsAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
+class DefaultPaymentNextActionHandlerRegistryTest {
+    private val noOpIntentAuthenticator = mock<NoOpIntentNextActionHandler>()
+    private val sourceAuthenticator = mock<SourceNextActionHandler>()
+    private val threeDs1lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
+    private val threeDs2lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
+    private val redirectToUrlAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
+    private val alipayRedirectAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
+    private val dispayOxxoDetailsAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
 
     private val registry = DefaultPaymentAuthenticatorRegistry(
         noOpIntentAuthenticator = noOpIntentAuthenticator,
@@ -98,7 +98,7 @@ class DefaultPaymentAuthenticatorRegistryTest {
 
     private fun verifyIntentWithType(
         nextActionData: NextActionData,
-        paymentAuthenticator: PaymentAuthenticator<StripeIntent>
+        paymentNextActionHandler: PaymentNextActionHandler<StripeIntent>
     ) {
         val stripeIntent = mock<StripeIntent>()
         whenever(stripeIntent.requiresAction()).thenReturn(true)
@@ -106,7 +106,7 @@ class DefaultPaymentAuthenticatorRegistryTest {
         assertThat(
             registry.getAuthenticator(stripeIntent)
         ).isEqualTo(
-            paymentAuthenticator
+            paymentNextActionHandler
         )
     }
 

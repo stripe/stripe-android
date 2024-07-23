@@ -24,16 +24,16 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 private typealias AuthenticatorKey = Class<out StripeIntent.NextActionData>
-private typealias Authenticator = @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>
+private typealias Authenticator = @JvmSuppressWildcards PaymentNextActionHandler<StripeIntent>
 
 /**
- * Default registry to provide look ups for [PaymentAuthenticator].
+ * Default registry to provide look ups for [PaymentNextActionHandler].
  * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
  */
 @Singleton
 internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
-    private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
-    private val sourceAuthenticator: SourceAuthenticator,
+    private val noOpIntentAuthenticator: NoOpIntentNextActionHandler,
+    private val sourceAuthenticator: SourceNextActionHandler,
     @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>,
     @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
     applicationContext: Context,
@@ -44,7 +44,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal val allAuthenticators: Set<PaymentAuthenticator<out StripeModel>>
+    internal val allAuthenticators: Set<PaymentNextActionHandler<out StripeModel>>
         get() = buildSet {
             add(noOpIntentAuthenticator)
             add(sourceAuthenticator)
@@ -67,11 +67,11 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     @Suppress("UNCHECKED_CAST")
     override fun <Authenticatable> getAuthenticator(
         authenticatable: Authenticatable
-    ): PaymentAuthenticator<Authenticatable> {
+    ): PaymentNextActionHandler<Authenticatable> {
         return when (authenticatable) {
             is StripeIntent -> {
                 if (!authenticatable.requiresAction()) {
-                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+                    return noOpIntentAuthenticator as PaymentNextActionHandler<Authenticatable>
                 }
 
                 val allAuthenticators = paymentAuthenticators + paymentSheetAuthenticators
@@ -79,10 +79,10 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                     allAuthenticators[it::class.java]
                 } ?: noOpIntentAuthenticator
 
-                return authenticator as PaymentAuthenticator<Authenticatable>
+                return authenticator as PaymentNextActionHandler<Authenticatable>
             }
             is Source -> {
-                sourceAuthenticator as PaymentAuthenticator<Authenticatable>
+                sourceAuthenticator as PaymentNextActionHandler<Authenticatable>
             }
             else -> {
                 error("No suitable PaymentAuthenticator for $authenticatable")

@@ -9,16 +9,16 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.wechatpay.reflection.DefaultWeChatPayReflectionHelper
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
- * [PaymentAuthenticator] implementation to authenticate through WeChatPay SDK.
+ * [PaymentNextActionHandler] implementation to authenticate through WeChatPay SDK.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
+class WeChatPayNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
     /**
      * [weChatPayAuthLauncher] is mutable and might be updated during
      * through [onNewActivityResultCaller]
@@ -52,9 +52,9 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
         weChatPayAuthLauncher = null
     }
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         require(reflectionHelper.isWeChatPayAvailable()) {
@@ -64,9 +64,9 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
 
         val weChatPayRedirect =
             requireNotNull(
-                authenticatable.nextActionData as? StripeIntent.NextActionData.WeChatPayRedirect
+                actionable.nextActionData as? StripeIntent.NextActionData.WeChatPayRedirect
             ) {
-                val incorrectNextActionDataType = authenticatable.nextActionData?.let {
+                val incorrectNextActionDataType = actionable.nextActionData?.let {
                     it::class.java.simpleName
                 } ?: run {
                     "null"
@@ -77,11 +77,11 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
 
         weChatAuthLauncherFactory(
             host,
-            authenticatable.getRequestCode()
+            actionable.getRequestCode()
         ).start(
             WeChatPayAuthContract.Args(
                 weChatPayRedirect.weChat,
-                authenticatable.clientSecret.orEmpty()
+                actionable.clientSecret.orEmpty()
             )
         )
     }

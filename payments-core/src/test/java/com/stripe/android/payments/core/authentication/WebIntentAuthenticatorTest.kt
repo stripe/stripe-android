@@ -163,7 +163,7 @@ class WebIntentAuthenticatorTest {
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?
     ) = runTest {
-        val authenticator = WebIntentAuthenticator(
+        val authenticator = WebIntentNextActionHandler(
             paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
@@ -176,7 +176,7 @@ class WebIntentAuthenticatorTest {
             redirectResolver = redirectResolver,
         )
 
-        authenticator.authenticate(
+        authenticator.nextAction(
             host,
             stripeIntent,
             REQUEST_OPTIONS

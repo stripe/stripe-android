@@ -26,15 +26,15 @@ class GenericAuthenticatorTest {
 
     @Test
     fun `Only starts authentication flow once lifecycle changes to resumed`() = runTest {
-        val authenticator = TestAuthenticator()
+        val authenticator = TestNextActionHandler()
         lifecycleOwner.currentState = Lifecycle.State.CREATED
 
         val completable = CompletableDeferred<Unit>()
 
         launch(backgroundScope.coroutineContext) {
-            authenticator.authenticate(
+            authenticator.nextAction(
                 host = host,
-                authenticatable = mock(),
+                actionable = mock(),
                 requestOptions = mock(),
             )
             completable.complete(Unit)
@@ -50,12 +50,12 @@ class GenericAuthenticatorTest {
 
     @Test
     fun `Immediately starts authentication flow if lifecycle already resumed`() = runTest {
-        val authenticator = TestAuthenticator()
+        val authenticator = TestNextActionHandler()
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
 
-        authenticator.authenticate(
+        authenticator.nextAction(
             host = host,
-            authenticatable = mock(),
+            actionable = mock(),
             requestOptions = mock(),
         )
 
@@ -63,14 +63,14 @@ class GenericAuthenticatorTest {
     }
 }
 
-private class TestAuthenticator : PaymentAuthenticator<StripeIntent>() {
+private class TestNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     var wasInvoked: Boolean = false
         private set
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         wasInvoked = true

@@ -9,7 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
@@ -21,19 +21,19 @@ private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
 private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val BLIK_MAX_ATTEMPTS = 12
 
-internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
+internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val args = when (authenticatable.paymentMethod?.type) {
+        val args = when (actionable.paymentMethod?.type) {
             PaymentMethod.Type.Upi ->
                 PollingContract.Args(
-                    clientSecret = requireNotNull(authenticatable.clientSecret),
+                    clientSecret = requireNotNull(actionable.clientSecret),
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
@@ -42,7 +42,7 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
                 )
             PaymentMethod.Type.Blik ->
                 PollingContract.Args(
-                    clientSecret = requireNotNull(authenticatable.clientSecret),
+                    clientSecret = requireNotNull(actionable.clientSecret),
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
@@ -52,7 +52,7 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
             else ->
                 error(
                     "Received invalid payment method type " +
-                        "${authenticatable.paymentMethod?.type?.code} " +
+                        "${actionable.paymentMethod?.type?.code} " +
                         "in PollingAuthenticator"
                 )
         }

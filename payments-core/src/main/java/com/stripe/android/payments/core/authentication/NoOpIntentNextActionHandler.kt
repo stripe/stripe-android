@@ -8,21 +8,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] implementation to perform no-op, just return to client's host.
+ * [PaymentNextActionHandler] implementation to perform no-op, just return to client's host.
  */
 @Singleton
 @JvmSuppressWildcards
-internal class NoOpIntentAuthenticator @Inject constructor(
+internal class NoOpIntentNextActionHandler @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-) : PaymentAuthenticator<StripeIntent>() {
+) : PaymentNextActionHandler<StripeIntent>() {
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         val args = PaymentRelayStarter.Args.create(
-            stripeIntent = authenticatable,
+            stripeIntent = actionable,
             stripeAccountId = requestOptions.stripeAccount,
         )
         paymentRelayStarterFactory(host).start(args)

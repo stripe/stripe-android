@@ -10,36 +10,36 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] for [NextActionData.DisplayVoucherDetails], redirects to
- * [WebIntentAuthenticator] or [NoOpIntentAuthenticator] based on whether if there is a
+ * [PaymentNextActionHandler] for [NextActionData.DisplayVoucherDetails], redirects to
+ * [WebIntentNextActionHandler] or [NoOpIntentNextActionHandler] based on whether if there is a
  * hostedVoucherUrl set.
  */
 @Singleton
-internal class VoucherAuthenticator @Inject constructor(
-    private val webIntentAuthenticator: WebIntentAuthenticator,
-    private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
+internal class VoucherNextActionHandler @Inject constructor(
+    private val webIntentAuthenticator: WebIntentNextActionHandler,
+    private val noOpIntentAuthenticator: NoOpIntentNextActionHandler,
     private val context: Context,
-) : PaymentAuthenticator<StripeIntent>() {
-    override suspend fun performAuthentication(
+) : PaymentNextActionHandler<StripeIntent>() {
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val detailsData = authenticatable.nextActionData as NextActionData.DisplayVoucherDetails
+        val detailsData = actionable.nextActionData as NextActionData.DisplayVoucherDetails
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(context).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
-                additionalNonPiiParams = mapOf("next_action_type" to (authenticatable.nextActionType?.code ?: ""))
+                additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))
             )
-            noOpIntentAuthenticator.authenticate(
+            noOpIntentAuthenticator.nextAction(
                 host,
-                authenticatable,
+                actionable,
                 requestOptions
             )
         } else {
-            webIntentAuthenticator.authenticate(
+            webIntentAuthenticator.nextAction(
                 host,
-                authenticatable,
+                actionable,
                 requestOptions
             )
         }

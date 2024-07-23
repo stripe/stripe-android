@@ -10,7 +10,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
@@ -19,15 +19,15 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] authenticating through Stripe's 3ds2 SDK.
+ * [PaymentNextActionHandler] authenticating through Stripe's 3ds2 SDK.
  */
 @Singleton
-internal class Stripe3DS2Authenticator @Inject constructor(
+internal class Stripe3DS2NextActionHandler @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
-) : PaymentAuthenticator<StripeIntent>() {
+) : PaymentNextActionHandler<StripeIntent>() {
 
     /**
      * [stripe3ds2CompletionLauncher] is mutable and might be updated during
@@ -58,17 +58,17 @@ internal class Stripe3DS2Authenticator @Inject constructor(
         stripe3ds2CompletionLauncher = null
     }
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         stripe3ds2CompletionStarterFactory(host).start(
             Stripe3ds2TransactionContract.Args(
                 SdkTransactionId.create(),
                 config.stripe3ds2Config,
-                authenticatable,
-                authenticatable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
+                actionable,
+                actionable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
                 requestOptions,
                 enableLogging = enableLogging,
                 host.statusBarColor,

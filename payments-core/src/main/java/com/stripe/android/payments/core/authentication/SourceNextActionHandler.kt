@@ -21,11 +21,11 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [PaymentAuthenticator] implementation to authenticate [Source].
+ * [PaymentNextActionHandler] implementation to authenticate [Source].
  */
 @Singleton
 @JvmSuppressWildcards
-internal class SourceAuthenticator @Inject constructor(
+internal class SourceNextActionHandler @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -34,21 +34,21 @@ internal class SourceAuthenticator @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
-) : PaymentAuthenticator<Source>() {
+) : PaymentNextActionHandler<Source>() {
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: Source,
+        actionable: Source,
         requestOptions: ApiRequest.Options
     ) {
-        if (authenticatable.flow == Source.Flow.Redirect) {
+        if (actionable.flow == Source.Flow.Redirect) {
             startSourceAuth(
                 host,
-                authenticatable,
+                actionable,
                 requestOptions
             )
         } else {
-            bypassAuth(host, authenticatable, requestOptions.stripeAccount)
+            bypassAuth(host, actionable, requestOptions.stripeAccount)
         }
     }
 

@@ -141,7 +141,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        authenticatorRegistry.getAuthenticator(intent).authenticate(
+                        authenticatorRegistry.getAuthenticator(intent).nextAction(
                             host,
                             intent,
                             apiRequestOptionsProvider.get()
@@ -218,7 +218,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 onSuccess = { intent ->
                     authenticatorRegistry
                         .getAuthenticator(intent)
-                        .authenticate(
+                        .nextAction(
                             host,
                             intent,
                             apiRequestOptionsProvider.get()

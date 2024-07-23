@@ -22,11 +22,11 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
+ * [PaymentNextActionHandler] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
 @Singleton
 @JvmSuppressWildcards
-internal class WebIntentAuthenticator @Inject constructor(
+internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -37,11 +37,11 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val redirectResolver: RedirectResolver,
-) : PaymentAuthenticator<StripeIntent>() {
+) : PaymentNextActionHandler<StripeIntent>() {
 
-    override suspend fun performAuthentication(
+    override suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: StripeIntent,
+        actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         val authUrl: String
@@ -52,11 +52,11 @@ internal class WebIntentAuthenticator @Inject constructor(
         var referrer: String? = null
         var forceInAppWebView = false
 
-        when (val nextActionData = authenticatable.nextActionData) {
+        when (val nextActionData = actionable.nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                 authUrl = nextActionData.url
-                returnUrl = authenticatable.id?.let {
+                returnUrl = actionable.id?.let {
                     threeDs1IntentReturnUrlMap.remove(it)
                 }
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
@@ -75,7 +75,7 @@ internal class WebIntentAuthenticator @Inject constructor(
 
                 returnUrl = nextActionData.returnUrl
 
-                if (authenticatable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
+                if (actionable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
                     val originalUrl = nextActionData.url.toString()
 
                     authUrl = redirectResolver(originalUrl)
@@ -100,7 +100,7 @@ internal class WebIntentAuthenticator @Inject constructor(
                 // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
                 authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
                     ?: throw IllegalArgumentException(
-                        "null hostedVoucherUrl for ${authenticatable.nextActionType?.code}"
+                        "null hostedVoucherUrl for ${actionable.nextActionType?.code}"
                     )
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
@@ -122,9 +122,9 @@ internal class WebIntentAuthenticator @Inject constructor(
 
         beginWebAuth(
             host = host,
-            stripeIntent = authenticatable,
-            requestCode = StripePaymentController.getRequestCode(authenticatable),
-            clientSecret = authenticatable.clientSecret.orEmpty(),
+            stripeIntent = actionable,
+            requestCode = StripePaymentController.getRequestCode(actionable),
+            clientSecret = actionable.clientSecret.orEmpty(),
             authUrl = authUrl,
             stripeAccount = requestOptions.stripeAccount,
             returnUrl = returnUrl,
