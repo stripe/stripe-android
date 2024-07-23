@@ -5,6 +5,7 @@ def replace_in_file(filename, pattern, replacement)
   content = File.read(filename)
   new_content = content.sub(pattern, replacement)
   File.write(filename, new_content)
+  execute_or_fail("git add #{filename}")
 end
 
 def update_read_me()
@@ -26,4 +27,14 @@ def update_gradle_properties()
       /VERSION_NAME=[.\d]+/,
       "VERSION_NAME=#{@version}",
   )
+end
+
+def update_changelog()
+    date = Time.now.strftime("%Y-%m-%d")
+
+    replace_in_file(
+        "CHANGELOG.md",
+        /## XX.XX.XX - 20XX-XX-XX/,
+        "## XX.XX.XX - 20XX-XX-XX\n\n## #{@version} - #{date}"
+    )
 end

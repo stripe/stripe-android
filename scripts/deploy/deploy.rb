@@ -63,6 +63,7 @@ steps = [
     method(:update_read_me),
     method(:update_stripe_sdk_version),
     method(:update_gradle_properties),
+    method(:update_changelog),
     method(:create_version_bump_pr),
 ]
 

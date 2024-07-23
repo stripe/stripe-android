@@ -36,9 +36,6 @@ end
 
 def create_version_bump_pr()
     begin
-        execute_or_fail("git add README.md")
-        execute_or_fail("git add gradle.properties")
-        execute_or_fail("git add stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt")
         execute_or_fail("git commit -m \"Bump version to #{@version}\"")
         execute_or_fail("git push -u origin")
     rescue
@@ -76,6 +73,7 @@ end
 def revert_all_changes()
     execute_or_fail("git reset HEAD~")
     execute_or_fail("git restore README.md")
+    execute_or_fail("git restore CHANGELOG.md")
     execute_or_fail("git restore gradle.properties")
     execute_or_fail("git restore stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt")
 end
