@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -196,16 +197,17 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
-                paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
-                editing = viewModel.savedPaymentMethodMutator.editing,
-                canEdit = viewModel.savedPaymentMethodMutator.canEdit,
-                toggleEdit = viewModel.savedPaymentMethodMutator::toggleEditing,
+                paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
+                editing = savedPaymentMethodMutator.editing,
+                canEdit = savedPaymentMethodMutator.canEdit,
+                toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,
                 mostRecentlySelectedSavedPaymentMethod =
-                viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
+                savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
                 onAddCardPressed = {
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
@@ -215,8 +217,8 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                         AddAnotherPaymentMethod(interactor = interactor)
                     )
                 },
-                onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
-                onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
+                onEditPaymentMethod = savedPaymentMethodMutator::modifyPaymentMethod,
+                onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
                 onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )

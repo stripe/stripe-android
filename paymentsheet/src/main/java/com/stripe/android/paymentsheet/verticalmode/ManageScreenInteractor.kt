@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -154,21 +155,22 @@ internal class DefaultManageScreenInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): ManageScreenInteractor {
             return DefaultManageScreenInteractor(
-                paymentMethods = viewModel.savedPaymentMethodMutator.paymentMethods,
+                paymentMethods = savedPaymentMethodMutator.paymentMethods,
                 paymentMethodMetadata = paymentMethodMetadata,
                 selection = viewModel.selection,
-                editing = viewModel.savedPaymentMethodMutator.editing,
-                canEdit = viewModel.savedPaymentMethodMutator.canEdit,
-                toggleEdit = viewModel.savedPaymentMethodMutator::toggleEditing,
+                editing = savedPaymentMethodMutator.editing,
+                canEdit = savedPaymentMethodMutator.canEdit,
+                toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
-                providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
+                providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod))
                 },
-                onDeletePaymentMethod = { viewModel.savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
-                onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
+                onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
+                onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 navigateBack = viewModel::handleBackPressed,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )

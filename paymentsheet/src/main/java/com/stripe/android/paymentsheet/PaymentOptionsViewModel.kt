@@ -308,6 +308,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     viewModel = this,
                     paymentMethodMetadata = paymentMethodMetadata,
                     savedPaymentMethods = savedPaymentMethods,
+                    savedPaymentMethodMutator = savedPaymentMethodMutator,
                 )
             )
         }
@@ -315,6 +316,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                savedPaymentMethodMutator = savedPaymentMethodMutator,
             )
             SelectSavedPaymentMethods(interactor = interactor)
         } else {
