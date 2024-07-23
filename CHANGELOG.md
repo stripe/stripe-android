@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 20.48.2 - 2024-07-22
+## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
 * [FIXED][8825](https://github.com/stripe/stripe-android/pull/8825) Fixed an issue the amount in the buy button in `PaymentSheet` did not formatted with set per-application locale.
