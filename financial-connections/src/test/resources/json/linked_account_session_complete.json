@@ -1,0 +1,44 @@
+{
+  "id": "fcsess_123",
+  "accounts": {
+    "object": "list",
+    "data": [],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/financial_connections/accounts"
+  },
+  "client_secret": "fcsess_client_secret_123",
+  "filters": {
+    "account_subcategories": null,
+    "countries": null
+  },
+  "livemode": false,
+  "payment_account": {
+    "id": "fca_123",
+    "balance": null,
+    "balance_refresh": null,
+    "category": "cash",
+    "created": 1719262140,
+    "display_name": "Account Closed",
+    "institution_name": "StripeBank",
+    "last4": "1234",
+    "livemode": false,
+    "ownership": null,
+    "ownership_refresh": null,
+    "permissions": [
+      "payment_method"
+    ],
+    "status": "inactive",
+    "subcategory": "checking",
+    "subscriptions": [],
+    "supported_payment_method_types": [
+      "us_bank_account",
+      "link"
+    ],
+    "transaction_refresh": null
+  },
+  "permissions": [
+    "payment_method"
+  ],
+  "prefetch": []
+}

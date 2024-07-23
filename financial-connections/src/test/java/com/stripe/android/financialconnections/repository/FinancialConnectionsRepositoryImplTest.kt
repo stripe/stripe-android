@@ -15,7 +15,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.net.HttpURLConnection
 
@@ -25,16 +27,21 @@ class FinancialConnectionsRepositoryImplTest {
     private val mockStripeNetworkClient = mock<StripeNetworkClient>()
     private val apiRequestFactory = ApiRequest.Factory()
 
-    private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
-        requestExecutor = FinancialConnectionsRequestExecutor(
-            json = testJson(),
-            eventEmitter = mock(),
-            stripeNetworkClient = mockStripeNetworkClient,
-            logger = Logger.noop(),
-        ),
-        apiRequestFactory = apiRequestFactory,
-        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-    )
+    private fun buildRepository(
+        consumerPublishableKeyProvider: ConsumerPublishableKeyProvider = ConsumerPublishableKeyProvider { null },
+    ): FinancialConnectionsRepositoryImpl {
+        return FinancialConnectionsRepositoryImpl(
+            requestExecutor = FinancialConnectionsRequestExecutor(
+                json = testJson(),
+                eventEmitter = mock(),
+                stripeNetworkClient = mockStripeNetworkClient,
+                logger = Logger.noop(),
+            ),
+            apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            apiRequestFactory = apiRequestFactory,
+            consumerPublishableKeyProvider = consumerPublishableKeyProvider,
+        )
+    }
 
     @Test
     fun `getFinancialConnectionsSession - accounts under linked_accounts json key`() =
@@ -45,8 +52,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -60,8 +67,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -75,8 +82,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -90,8 +97,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -105,8 +112,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -120,8 +127,9 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl
-                .getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
+
             val financialConnectionsAccount = result.paymentAccount as FinancialConnectionsAccount
             assertThat(financialConnectionsAccount.permissions).containsExactly(
                 FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
@@ -138,11 +146,34 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val repository = buildRepository()
+            val result = repository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }
+
+    @Test
+    fun `postCompleteFinancialConnectionsSessions - uses consumer publishable key if present`() = runTest {
+        givenGetRequestReturns(
+            readResourceAsString("json/linked_account_session_complete.json")
+        )
+
+        val consumerPublishableKey = "pk_123_consumer"
+
+        val repository = buildRepository(
+            consumerPublishableKeyProvider = { consumerPublishableKey },
+        )
+
+        repository.postCompleteFinancialConnectionsSessions(
+            clientSecret = "client_secret",
+            terminalError = null,
+        )
+
+        val apiRequestCaptor = argumentCaptor<ApiRequest>()
+        verify(mockStripeNetworkClient).executeRequest(apiRequestCaptor.capture())
+
+        assertThat(apiRequestCaptor.firstValue.options.apiKey).isEqualTo(consumerPublishableKey)
+    }
 
     private suspend fun givenGetRequestReturns(successBody: String) {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(

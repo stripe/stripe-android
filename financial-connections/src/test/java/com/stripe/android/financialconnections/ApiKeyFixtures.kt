@@ -7,7 +7,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -95,6 +97,12 @@ internal object ApiKeyFixtures {
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
     )
 
+    fun networkedAccountsList(
+        vararg ids: String,
+    ) = NetworkedAccountsList(
+        data = ids.map { partnerAccount().copy(id = it) },
+    )
+
     fun institution() = FinancialConnectionsInstitution(
         id = "id",
         name = "name",
@@ -102,6 +110,10 @@ internal object ApiKeyFixtures {
         featured = true,
         featuredOrder = null,
         mobileHandoffCapable = false
+    )
+
+    fun institutionResponse() = InstitutionResponse(
+        data = listOf(institution()),
     )
 
     fun partnerAccount() = PartnerAccount(
