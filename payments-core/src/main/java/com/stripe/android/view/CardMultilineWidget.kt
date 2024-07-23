@@ -47,7 +47,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -56,7 +56,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val cardNumberEditText = viewBinding.etCardNumber
 
-    internal val cardBrandView: CardBrandView = viewBinding.cardBrandView
+    internal val cardBrandView: CardBrandViewRebuild = viewBinding.cardBrandView
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val expiryDateEditText = viewBinding.etExpiry
@@ -373,7 +373,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
-        cardBrandView.reserveSpaceForCbcDropdown = false
+        //cardBrandView.reserveSpaceForCbcDropdown = false
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         cardNumberEditText.completionCallback = {

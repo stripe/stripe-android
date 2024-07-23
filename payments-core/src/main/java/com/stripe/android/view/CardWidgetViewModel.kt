@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -71,11 +72,9 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(val context: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = extras.requireApplication()
-
             val stripeRepository = StripeApiRepository(
                 context = context,
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -85,7 +84,7 @@ internal class CardWidgetViewModel(
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
                 stripeRepository = stripeRepository,
-                handle = extras.createSavedStateHandle()
+                handle = SavedStateHandle()
             ) as T
         }
     }
@@ -113,8 +112,7 @@ internal fun View.doWithCardWidgetViewModel(
         return
     }
 
-    val factory = CardWidgetViewModel.Factory()
-
+    val factory = CardWidgetViewModel.Factory(context.applicationContext)
     val viewModel = ViewModelProvider(
         owner = storeOwner,
         factory = factory,
