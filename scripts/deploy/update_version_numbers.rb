@@ -30,21 +30,11 @@ def update_gradle_properties()
 end
 
 def update_changelog()
-  done = false
-  final_lines = []
-
-  File.foreach('CHANGELOG.md') do |line|
-    is_line = line.include? "XX.XX.XX"
-    final_lines.append(line)
-
     date = Time.now.strftime("%Y-%m-%d")
 
-    if is_line
-        final_lines.append("\n")
-        final_lines.append("## #{@version} - #{date}\n")
-    end
-  end
-
-  File.write('CHANGELOG.md', final_lines.join(""))
-  execute_or_fail("git add CHANGELOG.md")
+    replace_in_file(
+        "CHANGELOG.md",
+        /## XX.XX.XX - 20XX-XX-XX/,
+        "## XX.XX.XX - 20XX-XX-XX\n\n## #{@version} - #{date}"
+    )
 end
