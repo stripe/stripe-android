@@ -361,7 +361,7 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
+                    hasBackStack = interactor.canGoBack(),
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
