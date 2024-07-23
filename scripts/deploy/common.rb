@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 
+require 'open3'
+
+def fetch_password(password)
+    stdout, stderr, status = Open3.capture3("fetch-password --raw #{password}")
+
+    stdout
+end
+
 def rputs(string)
     puts string.red
 end

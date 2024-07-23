@@ -4,6 +4,7 @@ require 'open3'
 require 'octokit'
 
 require_relative 'common'
+# TODO: probably rename this file.
 
 def ensure_clean_repo()
   repo_dir = File.basename(Dir.getwd)
@@ -48,25 +49,20 @@ def create_version_bump_pr()
 
     pr_description = create_pr_description()
 
-    options = {}
-    if (@is_dry_run)
-        options["draft"] = true
-    end
-
     response = github_login.create_pull_request(
         "stripe/stripe-android",
         "master",
         release_branch,
         "Bump version to #{@version}",
         pr_description,
-        options
+        draft: @is_dry_run,
     )
-
-    rputs "Merge the version bump PR"
 
     pr_url = response.html_url
     puts "Opening url #{pr_url}"
     `open #{pr_url}`
+
+    rputs "Merge the version bump PR"
     wait_for_user
 end
 

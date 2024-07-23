@@ -54,8 +54,10 @@ private def delete_release_tag
 end
 
 private def release_description
+    changelog_entries = changelog_entries_for_version()
+
     release_body = <<~EOS
-        #{changelog_entries_for_version()}
+        #{changelog_entries}
 
         See [the changelog for more details](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
     EOS
@@ -70,7 +72,7 @@ private def changelog_entries_for_version
     #     ## 1.2.3 - 2017-10-12
     #
     # line_version is the version in the line like "1.2.3".
-    res.each_with_index do |(line_title, line_version), i|
+    version_lines.each_with_index do |(line_title, line_version), i|
         next if line_version != @version
 
         # Start at the location of the title PLUS the length of the title so
@@ -88,6 +90,7 @@ private def changelog_entries_for_version
         return contents[start_pos...end_pos].strip
     end
 
+    # TODO: this is failing because I haven't yet moved over the changelog update into this branch
     raise ArgumentError.new("version #{@version} not found in changelog")
 end
 
