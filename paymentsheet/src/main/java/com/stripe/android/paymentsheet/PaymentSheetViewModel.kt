@@ -823,6 +823,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     viewModel = this,
                     paymentMethodMetadata = paymentMethodMetadata,
                     savedPaymentMethods = savedPaymentMethods,
+                    savedPaymentMethodMutator = savedPaymentMethodMutator,
                 )
             )
         }
@@ -831,6 +832,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                savedPaymentMethodMutator = savedPaymentMethodMutator,
             )
             PaymentSheetScreen.SelectSavedPaymentMethods(
                 interactor = interactor,
