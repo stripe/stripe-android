@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
 internal data class TextUpdate(
     @SerialName("consent_pane")
     val consent: ConsentPane? = null,
+    @SerialName("link_login_pane")
+    val linkLoginPane: LinkLoginPane? = null,
     @SerialName("networking_link_signup_pane")
     val networkingLinkSignupPane: NetworkingLinkSignupPane? = null,
     @SerialName("oauth_prepane")
@@ -152,6 +154,23 @@ internal data class NetworkingLinkSignupPane(
 internal data class NetworkingLinkSignupBody(
     @SerialName("bullets")
     val bullets: List<Bullet>
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class LinkLoginPane(
+    @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val title: String,
+    @SerialName("body")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val body: String,
+    @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val aboveCta: String,
+    @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val cta: String,
 ) : Parcelable
 
 @Serializable
