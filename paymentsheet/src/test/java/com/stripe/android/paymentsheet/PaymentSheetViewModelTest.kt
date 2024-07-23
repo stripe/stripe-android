@@ -570,7 +570,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -592,7 +592,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -615,7 +615,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(paymentSelection)
             viewModel.checkout()
 
-            verify(viewModel).confirmStripeIntent(confirmParams)
+            verify(paymentLauncher).confirm(eq(confirmParams))
         }
 
     @Test
@@ -642,7 +642,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -688,7 +688,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -2019,6 +2019,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
+        val callback = viewModel.capturePaymentResultListener()
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2035,7 +2036,7 @@ internal class PaymentSheetViewModelTest {
             confirmParams = confirmParams,
             isDeferred = true,
         )
-        viewModel.onPaymentResult(PaymentResult.Completed)
+        callback.onActivityResult(InternalPaymentResult.Completed(PAYMENT_INTENT))
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
@@ -2046,6 +2047,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
+        val callback = viewModel.capturePaymentResultListener()
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2054,7 +2056,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout()
 
         fakeIntentConfirmationInterceptor.enqueueNextActionStep("pi_123_secret_456")
-        viewModel.onPaymentResult(PaymentResult.Completed)
+        callback.onActivityResult(InternalPaymentResult.Completed(PAYMENT_INTENT))
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
@@ -2246,7 +2248,8 @@ internal class PaymentSheetViewModelTest {
         }
 
         val viewModel = createViewModel(
-            bacsMandateConfirmationLauncherFactory = launcherFactory
+            bacsMandateConfirmationLauncherFactory = launcherFactory,
+            shouldRegister = false,
         ).apply {
             registerFromActivity(activityResultCaller, TestLifecycleOwner())
         }
@@ -2733,6 +2736,35 @@ internal class PaymentSheetViewModelTest {
             .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
     }
 
+    @Test
+    fun `On confirm with existing payment method, calls interceptor with expected parameters`() = runTest {
+        val initializationMode = InitializationMode.PaymentIntent(clientSecret = "pi_123")
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                initializationMode = initializationMode,
+            ),
+            stripeIntent = intent,
+            intentConfirmationInterceptor = intentConfirmationInterceptor
+        )
+
+        val paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout()
+
+        val call = intentConfirmationInterceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethod = CARD_PAYMENT_METHOD,
+                paymentMethodOptionsParams = null,
+                shippingValues = null,
+            )
+        )
+    }
+
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `getCvcRecollectionState returns correct state for deferred flow`() = runTest {
@@ -2825,6 +2857,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.updateSelection(selection)
+        viewModel.checkout()
 
         paymentResultListener.onActivityResult(InternalPaymentResult.Completed(intent))
 
@@ -2869,6 +2902,7 @@ internal class PaymentSheetViewModelTest {
         initialPaymentSelection: PaymentSelection? =
             customer?.paymentMethods?.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        paymentLauncherFactory: StripePaymentLauncherAssistedFactory = this.paymentLauncherFactory,
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         paymentSheetLoader: PaymentSheetLoader = FakePaymentSheetLoader(
@@ -2881,6 +2915,7 @@ internal class PaymentSheetViewModelTest {
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
         ),
+        shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -2891,11 +2926,9 @@ internal class PaymentSheetViewModelTest {
                 application = application,
                 args = args,
                 eventReporter = eventReporter,
-                lazyPaymentConfig = { paymentConfiguration },
                 paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
-                paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
@@ -2903,10 +2936,27 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                    paymentSheetArguments = args,
+                    intentConfirmationInterceptor = intentConfirmationInterceptor,
+                    savedStateHandle = thisSavedStateHandle,
+                    stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
+                    paymentConfigurationProvider = { paymentConfiguration },
+                    application = application,
+                ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
                 errorReporter = FakeErrorReporter(),
-            )
+            ).apply {
+                if (shouldRegister) {
+                    val activityResultCaller = mock<ActivityResultCaller> {
+                        on {
+                            registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
+                        } doReturn mock()
+                    }
+
+                    registerFromActivity(activityResultCaller, TestLifecycleOwner())
+                }
+            }
         }
     }
 

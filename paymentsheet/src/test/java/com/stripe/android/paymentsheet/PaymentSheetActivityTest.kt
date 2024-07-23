@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
@@ -1061,11 +1062,12 @@ internal class PaymentSheetActivityTest {
                 on { emailFlow } doReturn stateFlowOf("email@email.com")
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
+            val application = ApplicationProvider.getApplicationContext<Application>()
+
             PaymentSheetViewModel(
-                application = ApplicationProvider.getApplicationContext(),
+                application = application,
                 args = args,
                 eventReporter = eventReporter,
-                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
@@ -1079,7 +1081,6 @@ internal class PaymentSheetActivityTest {
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
                 prefsRepository = FakePrefsRepository(),
-                paymentLauncherFactory = stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                 bacsMandateConfirmationLauncherFactory = mock(),
                 logger = Logger.noop(),
@@ -1087,7 +1088,14 @@ internal class PaymentSheetActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                    paymentSheetArguments = args,
+                    intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                    savedStateHandle = savedStateHandle,
+                    stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                    paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                    application = application,
+                ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
                 errorReporter = FakeErrorReporter(),
             )
