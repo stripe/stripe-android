@@ -95,6 +95,26 @@ class ManageScreenUITest {
         }
 
     @Test
+    fun clickingPaymentMethod_whenInEditMode_doesNothing() =
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = displayableSavedPaymentMethods,
+                currentSelection = null,
+                isEditing = true,
+                canDelete = true,
+                canEdit = true,
+            )
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[0].paymentMethod.id}"
+            ).performClick()
+
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+
+    @Test
     fun clickingPaymentMethod_inEditMode_doesNothing() =
         runScenario(
             initialState = ManageScreenInteractor.State(
