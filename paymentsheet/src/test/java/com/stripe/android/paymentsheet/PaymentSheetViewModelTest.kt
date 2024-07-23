@@ -2937,11 +2937,11 @@ internal class PaymentSheetViewModelTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
-                    paymentSheetArguments = args,
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
+                    statusBarColor = args.statusBarColor,
                     application = application,
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,

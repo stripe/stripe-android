@@ -1089,11 +1089,11 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
-                    paymentSheetArguments = args,
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                    statusBarColor = args.statusBarColor,
                     application = application,
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,

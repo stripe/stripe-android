@@ -33,11 +33,11 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
     ): IntentConfirmationHandler.Factory {
         return IntentConfirmationHandler.Factory(
-            paymentSheetArguments = starterArgs,
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentConfigurationProvider = paymentConfigurationProvider,
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
             application = application,
+            statusBarColor = starterArgs.statusBarColor,
             savedStateHandle = savedStateHandle,
         )
     }
