@@ -65,12 +65,7 @@ internal class DefaultCustomerSheetLoader(
 
             val elementsSession = retrieveElementsSession(
                 customerAdapter = customerAdapter,
-            ).onFailure {
-                errorReporter.report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
-                    stripeException = StripeException.create(it)
-                )
-            }.getOrThrow()
+            ).getOrThrow()
 
             val metadata = createPaymentMethodMetadata(
                 configuration = configuration,
@@ -111,12 +106,7 @@ internal class DefaultCustomerSheetLoader(
     private suspend fun retrieveElementsSession(
         customerAdapter: CustomerAdapter,
     ): Result<ElementsSession> {
-        val paymentMethodTypes = if (customerAdapter.canCreateSetupIntents) {
-            customerAdapter.paymentMethodTypes ?: emptyList()
-        } else {
-            // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
-            listOf("card")
-        }
+        val paymentMethodTypes = createPaymentMethodTypes(customerAdapter)
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
@@ -128,7 +118,12 @@ internal class DefaultCustomerSheetLoader(
             customer = null,
             externalPaymentMethods = emptyList(),
             defaultPaymentMethodId = null,
-        )
+        ).onFailure {
+            errorReporter.report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
+                stripeException = StripeException.create(it)
+            )
+        }
     }
 
     private suspend fun createPaymentMethodMetadata(
@@ -218,6 +213,17 @@ internal class DefaultCustomerSheetLoader(
                 Result.failure(cause)
             }
         )
+    }
+
+    private fun createPaymentMethodTypes(
+        customerAdapter: CustomerAdapter,
+    ): List<String> {
+        return if (customerAdapter.canCreateSetupIntents) {
+            customerAdapter.paymentMethodTypes ?: emptyList()
+        } else {
+            // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
+            listOf("card")
+        }
     }
 
     private fun filterSupportedPaymentMethods(
