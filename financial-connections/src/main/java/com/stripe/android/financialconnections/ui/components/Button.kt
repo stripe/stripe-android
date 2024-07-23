@@ -170,9 +170,9 @@ internal object FinancialConnectionsButton {
         data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.iconBrand,
+                backgroundColor = colors.buttonPrimary,
                 contentColor = colors.contentOnBrand,
-                disabledBackgroundColor = colors.iconBrand,
+                disabledBackgroundColor = colors.buttonPrimary,
                 disabledContentColor = colors.contentOnBrand.copy(alpha = 0.4f)
             )
 

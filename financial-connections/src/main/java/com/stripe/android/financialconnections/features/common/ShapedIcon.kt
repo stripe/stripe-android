@@ -15,8 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
-import com.stripe.android.financialconnections.ui.theme.Brand50
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.uicore.image.StripeImage
 
 private val iconSize = 20.dp
@@ -78,7 +77,7 @@ private fun LocalIcon(
 ) {
     Icon(
         painter = painter,
-        tint = FinancialConnectionsTheme.colors.iconBrand,
+        tint = colors.iconBrand,
         contentDescription = contentDescription,
         modifier = Modifier.size(iconSize),
     )
@@ -93,7 +92,7 @@ private fun CircleBox(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(56.dp)
-            .background(color = Brand50, shape = backgroundShape)
+            .background(color = colors.iconBackground, shape = backgroundShape)
     ) {
         content()
     }

@@ -17,7 +17,7 @@ internal fun StripeThemeForConnections(
             componentBorder = colors.border,
             placeholderText = colors.textSubdued,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = colors.iconBrand,
+                primary = colors.buttonPrimary,
                 error = colors.textCritical,
             )
         ),

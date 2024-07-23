@@ -64,6 +64,7 @@ private val Colors = FinancialConnectionsColors(
     iconWhite = Color(0xFFFFFFFF),
     iconBrand = Color(0xFF675DFF),
     iconCaution = Color(0xFFFF8F0E),
+    iconBackground = Color(0xFFF5F6F8),
     buttonPrimary = Color(0xFF675DFF),
     buttonPrimaryHover = Color(0xFF857AFE),
     buttonPrimaryPressed = Color(0xFF533AFD),
@@ -81,8 +82,9 @@ private val Colors = FinancialConnectionsColors(
 )
 
 private val InstantDebitsColors = Colors.copy(
-    textBrand = Color(0XFF00A355),
-    iconBrand = Color(0XFF00D66F),
+    textBrand = Color(0XFF008545),
+    iconBrand = Color(0XFF008545),
+    iconBackground = Color(0xFFE6FFED),
     buttonPrimary = Color(0XFF00D66F),
     buttonPrimaryPressed = Color(0XFF00D66F),
     borderBrand = Color(0XFF00D66F),
