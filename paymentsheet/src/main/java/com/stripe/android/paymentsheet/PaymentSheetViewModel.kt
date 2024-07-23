@@ -522,7 +522,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
-        if (!savedPaymentMethodMutator.editing.value && selection != this.selection.value) {
+        if (selection != this.selection.value) {
             updateSelection(selection)
         }
     }

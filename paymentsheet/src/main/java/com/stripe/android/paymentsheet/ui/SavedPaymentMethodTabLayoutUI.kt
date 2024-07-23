@@ -347,7 +347,11 @@ private fun SavedPaymentMethodTab(
             onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
             onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
-            onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
+            onItemSelectedListener = {
+                if (!isEditing) {
+                    onItemSelected(paymentMethod.toPaymentSelection())
+                }
+            },
             modifier = modifier,
         )
     }

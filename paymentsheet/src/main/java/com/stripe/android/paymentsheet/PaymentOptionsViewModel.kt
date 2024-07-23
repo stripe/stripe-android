@@ -261,12 +261,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
-        if (!savedPaymentMethodMutator.editing.value) {
-            updateSelection(selection)
+        updateSelection(selection)
 
-            if (selection?.requiresConfirmation != true) {
-                onUserSelection()
-            }
+        if (selection?.requiresConfirmation != true) {
+            onUserSelection()
         }
     }
 

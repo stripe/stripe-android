@@ -1646,22 +1646,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Ignores payment selection while in edit mode`() = runTest {
-        val viewModel = createViewModel().apply {
-            updateSelection(PaymentSelection.Link)
-        }
-
-        viewModel.savedPaymentMethodMutator.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-
-        viewModel.savedPaymentMethodMutator.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
     fun `updateSelection with new payment method updates the current selection`() = runTest {
         val viewModel = createViewModel(initialPaymentSelection = null)
 
