@@ -62,12 +62,12 @@ class IntentConfirmationHandlerTest {
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
                 shippingDetails = shippingDetails,
             )
         )
 
         intentConfirmationHandler.start(
+            initializationMode = initializationMode,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = savedPaymentMethod,
@@ -117,12 +117,12 @@ class IntentConfirmationHandlerTest {
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
                 shippingDetails = null
             )
         )
 
         intentConfirmationHandler.start(
+            initializationMode = initializationMode,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.New.Card(
                 paymentMethodCreateParams = newCard,
@@ -166,12 +166,12 @@ class IntentConfirmationHandlerTest {
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
                 shippingDetails = null
             )
         )
 
         intentConfirmationHandler.start(
+            initializationMode = initializationMode,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -198,6 +198,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -205,6 +206,8 @@ class IntentConfirmationHandlerTest {
         interceptor.calls.skipItems(1)
 
         intentConfirmationHandler.start(
+
+            initializationMode = INITIALIZATION_MODE.copy(clientSecret = "pi_456_secret_756"),
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -224,6 +227,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            initializationMode = INITIALIZATION_MODE,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
@@ -254,6 +258,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -284,6 +289,7 @@ class IntentConfirmationHandlerTest {
             )
 
             intentConfirmationHandler.start(
+                initializationMode = INITIALIZATION_MODE,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             )
@@ -315,6 +321,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -345,6 +352,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -372,6 +380,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -399,6 +408,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -426,6 +436,7 @@ class IntentConfirmationHandlerTest {
         val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -456,6 +467,7 @@ class IntentConfirmationHandlerTest {
         val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -481,6 +493,7 @@ class IntentConfirmationHandlerTest {
         val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -513,6 +526,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -533,6 +547,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -581,6 +596,7 @@ class IntentConfirmationHandlerTest {
         val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -614,6 +630,7 @@ class IntentConfirmationHandlerTest {
         val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
 
         intentConfirmationHandler.start(
+            initializationMode = INITIALIZATION_MODE,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
@@ -631,10 +648,7 @@ class IntentConfirmationHandlerTest {
     }
 
     private fun createIntentConfirmationHandler(
-        arguments: IntentConfirmationHandler.Args = IntentConfirmationHandler.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_1234_secret_1234"),
-            shippingDetails = null,
-        ),
+        arguments: IntentConfirmationHandler.Args = IntentConfirmationHandler.Args(shippingDetails = null),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -687,5 +701,9 @@ class IntentConfirmationHandlerTest {
 
     private fun IntentConfirmationHandler.Result?.asFailed(): IntentConfirmationHandler.Result.Failed {
         return this as IntentConfirmationHandler.Result.Failed
+    }
+
+    private companion object {
+        val INITIALIZATION_MODE = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456")
     }
 }
