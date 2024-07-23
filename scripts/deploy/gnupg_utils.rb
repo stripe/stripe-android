@@ -14,6 +14,7 @@ def ramdisk_env
   end
 
   ramdisk_utility = File.expand_path('bin/ramdisk', __dir__)
+  execute_or_fail("chmod 755 #{ramdisk_utility}")
   ramdisk_name = "stripe_android_deploy_#{Time.now.to_i}"
 
   # Create a ramdisk

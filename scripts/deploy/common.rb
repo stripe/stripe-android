@@ -26,3 +26,8 @@ def execute_or_fail(command)
     puts "Executing #{command}..."
     system(command) or raise "Failed to execute #{command}"
 end
+
+def open_url(url)
+    puts "Opening url #{url}"
+    `open #{url}`
+end

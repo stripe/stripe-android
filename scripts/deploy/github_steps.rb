@@ -59,8 +59,7 @@ def create_version_bump_pr()
     )
 
     pr_url = response.html_url
-    puts "Opening url #{pr_url}"
-    `open #{pr_url}`
+    open_url(pr_url)
 
     rputs "Merge the version bump PR"
     wait_for_user

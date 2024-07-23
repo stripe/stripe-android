@@ -67,9 +67,7 @@ steps = [
     method(:update_changelog),
     method(:create_version_bump_pr),
 
-    # TODO: Does this need to be done on @branch or should it be done on release/version branch?
-    # TODO: try it on release branch and see what it looks like
-    method(:create_github_release)
+    method(:create_github_release),
 ]
 
 execute_steps(steps, @step_index)
@@ -78,7 +76,8 @@ if (@is_dry_run)
     rputs "Please verify that the dry run worked as expected.
 
     You should see a PR opened that bumps version numbers in the stripe-android codebase on branch release/<new release number>.
-    There should also be a draft release opened in the stripe-android repo which includes a changelog for the new version.
+
+    You should also see a draft release opened in the stripe-android repo which includes a changelog and assets for the new version. It's expected that the draft release will be missing a version tag.
 
     When you're done, press enter to revert all changes."
     wait_for_user()

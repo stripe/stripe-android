@@ -8,21 +8,26 @@ require_relative 'gnupg_utils'
 
 @release_url = nil
 
-# TODO: need to add step to make ramdisk executable. chmod 755 ramdisk
 def create_github_release
-    # execute_or_fail("git checkout #{@branch}")
+    build_example_release_apk
     tag_release
 
     # TODO: generate assets and attach them to release -- before tagging? idk
-    release_response = octokit_client.create_release(
-      "stripe/stripe-android",
-      "v#{@version}",
-      name: "stripe-android v#{@version}",
-      body: release_description,
-      draft: @is_dry_run
-    )
+    begin
+        release_response = octokit_client.create_release(
+          "stripe/stripe-android",
+          "v#{@version}",
+          name: "stripe-android v#{@version}",
+          body: release_description,
+          draft: @is_dry_run
+        )
 
-    release_url = release_response[url]
+        @release_url = release_response.url
+        upload_assets_to_release(@release_url)
+        open_url(release_response.html_url)
+    rescue
+        delete_release_tag
+    end
 end
 
 def delete_github_release
@@ -77,21 +82,47 @@ private def changelog_entries_for_version
 
         # Start at the location of the title PLUS the length of the title so
         # that we can exclude it from the result.
-        start_pos = contents.index(line_title) + line_title.length
+        start_pos = changelog_contents.index(line_title) + line_title.length
 
         # Get the position of where the next entry starts so that we can scan just to
         # that.
         end_pos = -1 # By default, get everything to the end of the changelog file.
         if i != version_lines.count - 1
-          end_pos = contents.index(version_lines[i + 1][0])
+          end_pos = changelog_contents.index(version_lines[i + 1][0])
         end
 
         # Return what we found with all whitespace trimmed.
-        return contents[start_pos...end_pos].strip
+        return changelog_contents[start_pos...end_pos].strip
     end
 
-    # TODO: this is failing because I haven't yet moved over the changelog update into this branch
     raise ArgumentError.new("version #{@version} not found in changelog")
+end
+
+private def build_example_release_apk
+    gnupg_env do |env|
+        Subprocess.check_call(
+            ['./gradlew', ':paymentsheet-example:assembleRelease'],
+            env: env
+        )
+    end
+end
+
+private def upload_assets_to_release(release_url)
+    upload_asset(
+        release_url,
+        "../stripe-android/paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk",
+        "paymentsheet-example-release-#{@version}.apk",
+        "application/vnd.android.package-archive"
+    )
+end
+
+def upload_asset(release_url, source_name, dest_name, mime_type)
+      octokit_client.upload_asset(
+        release_url,
+        source_name,
+        content_type: mime_type,
+        name: dest_name
+      )
 end
 
 private def octokit_client
