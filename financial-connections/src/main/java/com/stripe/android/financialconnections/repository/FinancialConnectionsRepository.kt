@@ -55,7 +55,8 @@ internal interface FinancialConnectionsRepository {
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val apiOptions: ApiRequest.Options,
-    private val apiRequestFactory: ApiRequest.Factory
+    private val apiRequestFactory: ApiRequest.Factory,
+    private val consumerPublishableKeyProvider: ConsumerPublishableKeyProvider,
 ) : FinancialConnectionsRepository {
 
     override suspend fun getFinancialConnectionsAccounts(
@@ -92,9 +93,10 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         clientSecret: String,
         terminalError: String?
     ): FinancialConnectionsSession {
+        val consumerApiRequestOptions = consumerPublishableKeyProvider.createApiRequestOptions()
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
-            options = apiOptions,
+            options = consumerApiRequestOptions ?: apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "terminal_error" to terminalError

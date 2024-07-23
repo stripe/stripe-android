@@ -71,6 +71,7 @@ internal interface FinancialConnectionsAccountsRepository {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
             apiOptions: ApiRequest.Options,
+            consumerPublishableKeyProvider: ConsumerPublishableKeyProvider,
             logger: Logger,
             savedStateHandle: SavedStateHandle,
         ): FinancialConnectionsAccountsRepository =
@@ -78,6 +79,7 @@ internal interface FinancialConnectionsAccountsRepository {
                 requestExecutor,
                 apiRequestFactory,
                 apiOptions,
+                consumerPublishableKeyProvider,
                 logger,
                 savedStateHandle,
             )
@@ -85,12 +87,16 @@ internal interface FinancialConnectionsAccountsRepository {
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
-    val requestExecutor: FinancialConnectionsRequestExecutor,
-    val apiRequestFactory: ApiRequest.Factory,
-    val apiOptions: ApiRequest.Options,
-    val logger: Logger,
+    private val requestExecutor: FinancialConnectionsRequestExecutor,
+    private val apiRequestFactory: ApiRequest.Factory,
+    private val apiOptions: ApiRequest.Options,
+    private val consumerPublishableKeyProvider: ConsumerPublishableKeyProvider,
+    private val logger: Logger,
     private val savedStateHandle: SavedStateHandle,
 ) : FinancialConnectionsAccountsRepository {
+
+    private val consumerApiRequestOptions: ApiRequest.Options?
+        get() = consumerPublishableKeyProvider.createApiRequestOptions()
 
     override suspend fun getCachedAccounts(): List<CachedPartnerAccount>? {
         return savedStateHandle[CachedPartnerAccountsKey]
@@ -130,7 +136,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): NetworkedAccountsList {
         val request = apiRequestFactory.createGet(
             url = networkedAccountsUrl,
-            options = apiOptions,
+            options = consumerApiRequestOptions ?: apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
@@ -152,7 +158,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): InstitutionResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
-            options = apiOptions,
+            options = consumerApiRequestOptions ?: apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,

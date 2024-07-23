@@ -37,6 +37,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
+            consumerPublishableKeyStore: ConsumerPublishableKeyStore,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
@@ -44,6 +45,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
                 apiOptions = apiOptions,
+                consumerPublishableKeyStore = consumerPublishableKeyStore,
                 financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
                 locale = locale,
                 logger = logger,
@@ -55,6 +57,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
     private val apiOptions: ApiRequest.Options,
+    private val consumerPublishableKeyStore: ConsumerPublishableKeyStore,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
@@ -70,6 +73,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
         postConsumerSession(email, clientSecret).also { lookup ->
+            consumerPublishableKeyStore.setTentativeConsumerPublishableKey(lookup.publishableKey)
             updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
         }
     }
@@ -105,6 +109,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = CONSUMER_SURFACE,
             requestOptions = apiOptions
         ).also { session ->
+            consumerPublishableKeyStore.confirmConsumerPublishableKey()
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
     }

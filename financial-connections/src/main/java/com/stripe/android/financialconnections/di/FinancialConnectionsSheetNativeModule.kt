@@ -17,6 +17,8 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.ConsumerPublishableKeyProvider
+import com.stripe.android.financialconnections.repository.ConsumerPublishableKeyStore
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -99,6 +101,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesFinancialConnectionsConsumerSessionRepository(
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
+            consumerPublishableKeyStore: ConsumerPublishableKeyStore,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
@@ -106,6 +109,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             consumersApiService = consumersApiService,
             apiOptions = apiOptions,
+            consumerPublishableKeyStore = consumerPublishableKeyStore,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
         )
@@ -116,12 +120,14 @@ internal interface FinancialConnectionsSheetNativeModule {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiOptions: ApiRequest.Options,
             apiRequestFactory: ApiRequest.Factory,
+            consumerPublishableKeyProvider: ConsumerPublishableKeyProvider,
             logger: Logger,
             savedStateHandle: SavedStateHandle,
         ) = FinancialConnectionsAccountsRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
             apiOptions = apiOptions,
+            consumerPublishableKeyProvider = consumerPublishableKeyProvider,
             logger = logger,
             savedStateHandle = savedStateHandle,
         )

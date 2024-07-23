@@ -25,7 +25,12 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.RealIsLinkWithStripe
 import com.stripe.android.financialconnections.features.common.enableWorkManager
+import com.stripe.android.financialconnections.repository.ConsumerPublishableKeyManager
+import com.stripe.android.financialconnections.repository.ConsumerPublishableKeyProvider
+import com.stripe.android.financialconnections.repository.ConsumerPublishableKeyStore
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Binds
@@ -65,6 +70,15 @@ internal interface FinancialConnectionsSheetSharedModule {
     @Binds
     @Singleton
     fun bindsAnalyticsRequestV2Executor(impl: DefaultAnalyticsRequestV2Executor): AnalyticsRequestV2Executor
+
+    @Binds
+    fun bindsIsLinkWithStripe(impl: RealIsLinkWithStripe): IsLinkWithStripe
+
+    @Binds
+    fun bindsConsumerPublishableKeyStore(impl: ConsumerPublishableKeyManager): ConsumerPublishableKeyStore
+
+    @Binds
+    fun bindsConsumerPublishableKeyProvider(impl: ConsumerPublishableKeyManager): ConsumerPublishableKeyProvider
 
     companion object {
 
