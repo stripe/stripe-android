@@ -81,6 +81,34 @@ class PaymentOptionsTest {
     }
 
     @Test
+    fun `Does not update selection when item is pressed in edit mode`() {
+        var didCallOnItemSelected = false
+
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
+                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = { didCallOnItemSelected = true },
+                onModifyItem = {},
+                onItemRemoved = {},
+            )
+        }
+
+        val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay"
+
+        assertThat(didCallOnItemSelected).isFalse()
+
+        composeTestRule
+            .onNodeWithTag(testTag)
+            .performClick()
+
+        assertThat(didCallOnItemSelected).isFalse()
+    }
+
+    @Test
     fun `When items are removable & editing, should show removable badge`() {
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(

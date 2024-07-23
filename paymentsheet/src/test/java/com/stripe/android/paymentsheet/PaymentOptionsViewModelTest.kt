@@ -464,22 +464,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Ignores payment selection while in edit mode`() = runTest {
-        val viewModel = createViewModel().apply {
-            updateSelection(PaymentSelection.Link)
-        }
-
-        viewModel.savedPaymentMethodMutator.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-
-        viewModel.savedPaymentMethodMutator.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
     fun `Does not close the sheet if the selected payment method requires confirmation`() =
         runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
