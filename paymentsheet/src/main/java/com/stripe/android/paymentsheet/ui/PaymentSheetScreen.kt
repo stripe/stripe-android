@@ -267,7 +267,6 @@ private fun PaymentSheetContent(
                 LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
             ) {
                 currentScreen.Content(
-                    viewModel = viewModel,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }

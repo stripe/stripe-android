@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -67,7 +66,7 @@ internal sealed interface PaymentSheetScreen {
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
     @Composable
-    fun Content(viewModel: BaseSheetViewModel, modifier: Modifier)
+    fun Content(modifier: Modifier)
 
     object Loading : PaymentSheetScreen {
 
@@ -87,7 +86,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             BottomSheetLoadingIndicator(modifier)
         }
     }
@@ -136,7 +135,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             val state by interactor.state.collectAsState()
 
             SavedPaymentMethodTabLayoutUI(
@@ -222,7 +221,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -269,7 +268,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -305,7 +304,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             EditPaymentMethod(interactor, modifier)
         }
 
@@ -346,7 +345,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             PaymentMethodVerticalLayoutUI(interactor)
         }
     }
@@ -378,7 +377,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             VerticalModeFormUI(interactor)
         }
 
@@ -423,7 +422,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             ManageScreenUI(interactor = interactor)
         }
 
@@ -455,7 +454,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
     }
