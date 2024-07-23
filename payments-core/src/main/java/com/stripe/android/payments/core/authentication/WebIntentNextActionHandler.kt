@@ -44,76 +44,26 @@ internal class WebIntentNextActionHandler @Inject constructor(
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val authUrl: String
-        val returnUrl: String?
-        var shouldCancelSource = false
-        var shouldCancelIntentOnUserNavigation = true
-
-        var referrer: String? = null
-        var forceInAppWebView = false
-
-        when (val nextActionData = actionable.nextActionData) {
+        val webAuthParams = when (val nextActionData = actionable.nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
-                authUrl = nextActionData.url
-                returnUrl = actionable.id?.let {
-                    threeDs1IntentReturnUrlMap.remove(it)
-                }
-                // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-                shouldCancelSource = true
-                analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(
-                        PaymentAnalyticsEvent.Auth3ds1Sdk
-                    )
-                )
+                nextActionData.webAuthParams(actionable)
             }
             // can only triggered when `use_stripe_sdk=false`
             is StripeIntent.NextActionData.RedirectToUrl -> {
-                analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
-                )
-
-                returnUrl = nextActionData.returnUrl
-
-                if (actionable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
-                    val originalUrl = nextActionData.url.toString()
-
-                    authUrl = redirectResolver(originalUrl)
-                    shouldCancelIntentOnUserNavigation = false
-                    referrer = originalUrl
-
-                    // This is crucial so that we can set the "Referer" field in the web view activity.
-                    // WeChat will otherwise fail with an error indicating an incorrect configuration.
-                    forceInAppWebView = true
-                } else {
-                    authUrl = nextActionData.url.toString()
-                }
+                nextActionData.webAuthParams(actionable)
             }
             is StripeIntent.NextActionData.AlipayRedirect -> {
-                analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
-                )
-                authUrl = nextActionData.webViewUrl.toString()
-                returnUrl = nextActionData.returnUrl
+                nextActionData.webAuthParams()
             }
             is StripeIntent.NextActionData.DisplayVoucherDetails -> {
-                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
-                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException(
-                        "null hostedVoucherUrl for ${actionable.nextActionType?.code}"
-                    )
-                returnUrl = null
-                shouldCancelIntentOnUserNavigation = false
+                nextActionData.webAuthParams(actionable)
             }
             is StripeIntent.NextActionData.CashAppRedirect -> {
-                authUrl = nextActionData.mobileAuthUrl
-                returnUrl = defaultReturnUrl.value
-                shouldCancelIntentOnUserNavigation = false
+                nextActionData.webAuthParams()
             }
             is StripeIntent.NextActionData.SwishRedirect -> {
-                authUrl = nextActionData.mobileAuthUrl
-                returnUrl = defaultReturnUrl.value
-                shouldCancelIntentOnUserNavigation = false
+                nextActionData.webAuthParams()
             }
             else -> {
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
@@ -125,13 +75,13 @@ internal class WebIntentNextActionHandler @Inject constructor(
             stripeIntent = actionable,
             requestCode = StripePaymentController.getRequestCode(actionable),
             clientSecret = actionable.clientSecret.orEmpty(),
-            authUrl = authUrl,
+            authUrl = webAuthParams.authUrl,
             stripeAccount = requestOptions.stripeAccount,
-            returnUrl = returnUrl,
-            shouldCancelSource = shouldCancelSource,
-            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
-            referrer = referrer,
-            forceInAppWebView = forceInAppWebView,
+            returnUrl = webAuthParams.returnUrl,
+            shouldCancelSource = webAuthParams.shouldCancelSource,
+            shouldCancelIntentOnUserNavigation = webAuthParams.shouldCancelIntentOnUserNavigation,
+            referrer = webAuthParams.referrer,
+            forceInAppWebView = webAuthParams.forceInAppWebView,
         )
     }
 
@@ -168,4 +118,94 @@ internal class WebIntentNextActionHandler @Inject constructor(
             )
         )
     }
+
+    private fun StripeIntent.NextActionData.SdkData.Use3DS1.webAuthParams(actionable: StripeIntent): WebAuthParams {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds1Sdk
+            )
+        )
+        return WebAuthParams(
+            authUrl = url,
+            returnUrl = actionable.id?.let {
+                threeDs1IntentReturnUrlMap.remove(it)
+            },
+            // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
+            shouldCancelSource = true
+        )
+    }
+
+    private suspend fun StripeIntent.NextActionData.RedirectToUrl.webAuthParams(
+        actionable: StripeIntent
+    ): WebAuthParams {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
+        )
+        return if (actionable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
+            WebAuthParams(
+                authUrl = redirectResolver(url.toString()),
+                returnUrl = returnUrl,
+                shouldCancelIntentOnUserNavigation = false,
+                referrer = url.toString(),
+                // This is crucial so that we can set the "Referer" field in the web view activity.
+                // WeChat will otherwise fail with an error indicating an incorrect configuration.
+                forceInAppWebView = true
+            )
+        } else {
+            WebAuthParams(
+                authUrl = url.toString(),
+                returnUrl = returnUrl,
+            )
+        }
+    }
+
+    private fun StripeIntent.NextActionData.AlipayRedirect.webAuthParams(): WebAuthParams {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
+        )
+
+        return WebAuthParams(
+            authUrl = webViewUrl.toString(),
+            returnUrl = returnUrl,
+        )
+    }
+
+    private fun StripeIntent.NextActionData.DisplayVoucherDetails.webAuthParams(
+        actionable: StripeIntent
+    ): WebAuthParams {
+        return WebAuthParams(
+            // hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+            authUrl = hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
+                ?: throw IllegalArgumentException(
+                    "null hostedVoucherUrl for ${actionable.nextActionType?.code}"
+                ),
+            returnUrl = null,
+            shouldCancelIntentOnUserNavigation = false
+        )
+    }
+
+    private fun StripeIntent.NextActionData.CashAppRedirect.webAuthParams(): WebAuthParams {
+        return WebAuthParams(
+            authUrl = mobileAuthUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false
+        )
+    }
+
+    private fun StripeIntent.NextActionData.SwishRedirect.webAuthParams(): WebAuthParams {
+        return WebAuthParams(
+            authUrl = mobileAuthUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false
+        )
+    }
 }
+
+private data class WebAuthParams(
+    val authUrl: String,
+    val returnUrl: String?,
+    val shouldCancelSource: Boolean = false,
+    val shouldCancelIntentOnUserNavigation: Boolean = true,
+    val referrer: String? = null,
+    val forceInAppWebView: Boolean = false,
+)
