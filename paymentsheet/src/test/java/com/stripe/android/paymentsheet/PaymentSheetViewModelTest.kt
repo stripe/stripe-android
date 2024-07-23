@@ -2941,7 +2941,7 @@ internal class PaymentSheetViewModelTest {
                     savedStateHandle = thisSavedStateHandle,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
-                    statusBarColor = args.statusBarColor,
+                    statusBarColor = { args.statusBarColor },
                     application = application,
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
