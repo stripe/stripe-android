@@ -22,12 +22,14 @@ internal class NetworkingLinkVerificationPreviewParameterProvider :
 
     private fun canonical() = NetworkingLinkVerificationState(
         payload = payload(),
-        confirmVerification = Uninitialized
+        confirmVerification = Uninitialized,
+        isInstantDebits = false,
     )
 
     private fun submitting() = NetworkingLinkVerificationState(
         payload = payload(),
-        confirmVerification = Loading()
+        confirmVerification = Loading(),
+        isInstantDebits = false,
     )
 
     private fun otpError() = NetworkingLinkVerificationState(
@@ -37,14 +39,16 @@ internal class NetworkingLinkVerificationPreviewParameterProvider :
                 "12345678",
                 ConfirmVerification.OTPError.Type.EMAIL_CODE_EXPIRED
             )
-        )
+        ),
+        isInstantDebits = false,
     )
 
     private fun unknownError() = NetworkingLinkVerificationState(
         payload = payload(),
         confirmVerification = Fail(
             Exception("Random error")
-        )
+        ),
+        isInstantDebits = false,
     )
 
     private fun payload() = Success(
@@ -62,5 +66,6 @@ internal class NetworkingLinkVerificationPreviewParameterProvider :
 
     private fun loading() = NetworkingLinkVerificationState(
         payload = Loading(),
+        isInstantDebits = false,
     )
 }

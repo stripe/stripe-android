@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
@@ -97,7 +98,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     override fun updateTopAppBar(state: NetworkingLinkVerificationState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
             pane = PANE,
-            allowBackNavigation = false,
+            allowBackNavigation = state.isInstantDebits,
             error = state.payload.error,
         )
     }
@@ -175,9 +176,9 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent.networkingLinkVerificationViewModelFactory.create(
-                        NetworkingLinkVerificationState()
-                    )
+                    val parentState = parentComponent.viewModel.stateFlow.value
+                    val state = NetworkingLinkVerificationState(parentState)
+                    parentComponent.networkingLinkVerificationViewModelFactory.create(state)
                 }
             }
 
@@ -187,8 +188,13 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
 
 internal data class NetworkingLinkVerificationState(
     val payload: Async<Payload> = Uninitialized,
-    val confirmVerification: Async<Unit> = Uninitialized
+    val confirmVerification: Async<Unit> = Uninitialized,
+    val isInstantDebits: Boolean,
 ) {
+
+    constructor(parentState: FinancialConnectionsSheetNativeState) : this(
+        isInstantDebits = parentState.isLinkWithStripe,
+    )
 
     data class Payload(
         val email: String,

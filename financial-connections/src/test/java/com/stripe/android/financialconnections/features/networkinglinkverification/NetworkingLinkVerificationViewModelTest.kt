@@ -47,7 +47,7 @@ class NetworkingLinkVerificationViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
-        state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
+        state: NetworkingLinkVerificationState = NetworkingLinkVerificationState(isInstantDebits = false),
     ) = NetworkingLinkVerificationViewModel(
         navigationManager = navigationManager,
         getOrFetchSync = getOrFetchSync,
@@ -59,6 +59,24 @@ class NetworkingLinkVerificationViewModelTest {
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
+
+    @Test
+    fun `Allows back navigation if in Instant Debits flow`() = runTest {
+        val viewModel = buildViewModel(
+            state = NetworkingLinkVerificationState(isInstantDebits = true),
+        )
+        val topAppBarStateUpdate = viewModel.updateTopAppBar(viewModel.stateFlow.value)
+        assertThat(topAppBarStateUpdate.allowBackNavigation).isTrue()
+    }
+
+    @Test
+    fun `Allows back navigation if not in Instant Debits flow`() = runTest {
+        val viewModel = buildViewModel(
+            state = NetworkingLinkVerificationState(isInstantDebits = false),
+        )
+        val topAppBarStateUpdate = viewModel.updateTopAppBar(viewModel.stateFlow.value)
+        assertThat(topAppBarStateUpdate.allowBackNavigation).isFalse()
+    }
 
     @Test
     fun `init - starts SMS verification with consumer session secret`() = runTest {
