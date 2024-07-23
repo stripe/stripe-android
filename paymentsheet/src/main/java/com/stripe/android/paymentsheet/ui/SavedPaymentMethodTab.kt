@@ -99,7 +99,6 @@ internal fun SavedPaymentMethodTab(
             Column {
                 SavedPaymentMethodCard(
                     isSelected = isSelected,
-                    isEnabled = isEnabled,
                     isClickable = isClickable,
                     labelText = labelText,
                     iconRes = iconRes,
@@ -175,8 +174,7 @@ private fun SavedPaymentMethodBadge(
 @Composable
 private fun SavedPaymentMethodCard(
     isSelected: Boolean,
-    isEnabled: Boolean,
-    isClickable: Boolean = isEnabled,
+    isClickable: Boolean,
     iconRes: Int,
     iconTint: Color?,
     labelText: String,
