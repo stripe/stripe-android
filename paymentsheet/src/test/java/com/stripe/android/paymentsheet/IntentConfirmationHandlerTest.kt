@@ -7,17 +7,21 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -34,19 +38,26 @@ import org.mockito.kotlin.mock
 @RunWith(AndroidJUnit4::class)
 class IntentConfirmationHandlerTest {
     @Test
-    fun `On 'start', should call interceptor properly`() = runTest {
+    fun `On 'start' with existing payment method, should call interceptor properly`() = runTest {
         val interceptor = FakeIntentConfirmationInterceptor()
 
         val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123")
         val shippingDetails = AddressDetails(
             name = "John Doe",
+            phoneNumber = "11234567890",
             address = PaymentSheet.Address(
+                line1 = "123 Apple Street",
+                line2 = "Unit 47",
                 city = "South San Francisco",
                 state = "CA",
-                country = "US"
+                country = "US",
+                postalCode = "99899",
             )
         )
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+            cvc = "507"
+        )
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
@@ -58,7 +69,10 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Saved(savedPaymentMethod),
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = savedPaymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+            ),
         )
 
         val call = interceptor.calls.awaitItem()
@@ -66,11 +80,114 @@ class IntentConfirmationHandlerTest {
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
                 initializationMode = initializationMode,
-                shippingValues = shippingDetails.toConfirmPaymentIntentShipping(),
+                shippingValues = ConfirmPaymentIntentParams.Shipping(
+                    name = "John Doe",
+                    address = Address.Builder()
+                        .setLine1("123 Apple Street")
+                        .setLine2("Unit 47")
+                        .setCity("South San Francisco")
+                        .setState("CA")
+                        .setCountry("US")
+                        .setPostalCode("99899")
+                        .build(),
+                    phone = "11234567890"
+                ),
                 paymentMethod = savedPaymentMethod,
-                paymentMethodOptionsParams = null,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
             )
         )
+
+        interceptor.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `On 'start' with new payment method, should call interceptor properly`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123")
+        val newCard = PaymentMethodCreateParams.createCard(
+            CardParams(
+                number = "4242424242424242",
+                expMonth = 5,
+                expYear = 2035,
+            )
+        )
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            arguments = IntentConfirmationHandler.Args(
+                initializationMode = initializationMode,
+                shippingDetails = null
+            )
+        )
+
+        intentConfirmationHandler.start(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentSelection = PaymentSelection.New.Card(
+                paymentMethodCreateParams = newCard,
+                brand = CardBrand.Visa,
+                customerRequestedSave = customerRequestedSave,
+            ),
+        )
+
+        val call = interceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
+                initializationMode = initializationMode,
+                shippingValues = null,
+                paymentMethodCreateParams = newCard,
+                paymentMethodOptionsParams = null,
+                customerRequestedSave = true,
+            )
+        )
+
+        interceptor.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `On 'start' with deferred intent initialization, should call interceptor properly`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "CAD",
+                    setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync,
+                ),
+                paymentMethodTypes = listOf("card"),
+                onBehalfOf = "Merchant",
+            )
+        )
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            arguments = IntentConfirmationHandler.Args(
+                initializationMode = initializationMode,
+                shippingDetails = null
+            )
+        )
+
+        intentConfirmationHandler.start(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+
+        val call = interceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                paymentMethodOptionsParams = null,
+                shippingValues = null,
+            )
+        )
+
+        interceptor.calls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -92,7 +209,7 @@ class IntentConfirmationHandlerTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
-        interceptor.calls.expectNoEvents()
+        interceptor.calls.ensureAllEventsConsumed()
     }
 
     @Test
