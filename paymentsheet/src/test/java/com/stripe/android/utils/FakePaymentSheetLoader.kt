@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -23,6 +24,7 @@ internal class FakePaymentSheetLoader(
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
     private val validationError: PaymentSheetLoadingException? = null,
+    private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
 ) : PaymentSheetLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -59,6 +61,7 @@ internal class FakePaymentSheetLoader(
                         allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                             .allowsPaymentMethodsRequiringShippingAddress,
                         isGooglePayReady = isGooglePayAvailable,
+                        cbcEligibility = cbcEligibility,
                     ),
                 )
             )
