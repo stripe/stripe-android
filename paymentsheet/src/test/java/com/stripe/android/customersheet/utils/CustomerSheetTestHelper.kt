@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
@@ -28,6 +29,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -170,19 +172,24 @@ internal object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
-                override fun create(
-                    publishableKey: () -> String,
-                    stripeAccountId: () -> String?,
-                    statusBarColor: Int?,
-                    includePaymentSheetAuthenticators: Boolean,
-                    hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
-                ): StripePaymentLauncher {
-                    return mock()
-                }
-            },
-            statusBarColor = null,
+            intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                paymentConfigurationProvider = { paymentConfiguration },
+                stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
+                    override fun create(
+                        publishableKey: () -> String,
+                        stripeAccountId: () -> String?,
+                        statusBarColor: Int?,
+                        includePaymentSheetAuthenticators: Boolean,
+                        hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                    ): StripePaymentLauncher {
+                        return mock()
+                    }
+                },
+                statusBarColor = { null },
+                savedStateHandle = SavedStateHandle(),
+                application = application,
+            ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
