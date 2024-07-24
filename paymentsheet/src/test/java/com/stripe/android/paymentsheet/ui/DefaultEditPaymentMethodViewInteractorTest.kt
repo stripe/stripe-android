@@ -8,8 +8,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -19,7 +17,7 @@ import org.mockito.kotlin.verify
 import kotlin.coroutines.CoroutineContext
 
 class DefaultEditPaymentMethodViewInteractorTest {
-    private val testDispatcher = StandardTestDispatcher(TestCoroutineScheduler())
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun `on init, view state should be initialized properly`() = runTest {
@@ -38,7 +36,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = true,
                 )
             )
@@ -62,7 +60,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = false,
                 )
             )
@@ -121,7 +119,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                             VISA_BRAND_CHOICE,
                             CARTES_BANCAIRES_BRAND_CHOICE
                         ),
-                        displayName = "Card",
+                        displayName = "Card".resolvableString,
                         canRemove = true,
                     )
                 )
@@ -153,7 +151,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     canRemove = true,
                 )
             )
@@ -203,12 +201,10 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
-        testDispatcher.scheduler.advanceUntilIdle()
-
         interactor.viewState.test {
             val viewState = awaitItem()
 
-            assertThat(viewState.error).isEqualTo(resolvableString("Failed to remove"))
+            assertThat(viewState.error).isEqualTo("Failed to remove".resolvableString)
         }
     }
 
@@ -276,12 +272,10 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
 
-        testDispatcher.scheduler.advanceUntilIdle()
-
         interactor.viewState.test {
             val viewState = awaitItem()
 
-            assertThat(viewState.error).isEqualTo(resolvableString("Failed to update"))
+            assertThat(viewState.error).isEqualTo("Failed to update".resolvableString)
         }
     }
 
@@ -294,12 +288,13 @@ class DefaultEditPaymentMethodViewInteractorTest {
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             eventHandler = eventHandler,
             removeExecutor = onRemove,
             updateExecutor = onUpdate,
             workContext = workContext,
             canRemove = canRemove,
+            isLiveMode = true,
         )
     }
 

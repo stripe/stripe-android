@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -53,11 +54,13 @@ import kotlinx.coroutines.awaitAll
 private val LogoSize = 72.dp
 private val DotsContainerHeight = 6.dp
 private val DotsContainerWidth = 32.dp
+private val NoDotsSpacingWidth = 16.dp
 
 @Composable
 internal fun ConsentLogoHeader(
     modifier: Modifier = Modifier,
-    logos: List<String>
+    logos: List<String>,
+    showDots: Boolean,
 ) {
     val isPreview = LocalInspectionMode.current
     val localDensity = LocalDensity.current
@@ -91,8 +94,14 @@ internal fun ConsentLogoHeader(
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        BackgroundRow(images = bitmaps)
-        ForegroundRow(images = bitmaps)
+        if (showDots) {
+            BackgroundRow(images = bitmaps)
+        }
+
+        ForegroundRow(
+            images = bitmaps,
+            spacing = if (showDots) DotsContainerWidth else NoDotsSpacingWidth,
+        )
     }
 }
 
@@ -120,12 +129,15 @@ private fun BackgroundRow(images: List<ImageBitmap>) {
 }
 
 @Composable
-private fun ForegroundRow(images: List<ImageBitmap>) {
+private fun ForegroundRow(
+    images: List<ImageBitmap>,
+    spacing: Dp,
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         for ((index, image) in images.withIndex()) {
             Logo(image)
             if (index != images.lastIndex) {
-                Spacer(modifier = Modifier.width(DotsContainerWidth))
+                Spacer(modifier = Modifier.width(spacing))
             }
         }
     }

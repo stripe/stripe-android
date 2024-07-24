@@ -8,6 +8,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
@@ -84,7 +86,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = getSavedIcon(selection),
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = getSavedLabel(selection).orEmpty(),
+                    label = getSavedLabel(selection)?.resolve(context).orEmpty(),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -95,9 +97,8 @@ internal class PaymentOptionFactory @Inject constructor(
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     label = createCardLabel(
-                        resources,
                         selection.last4
-                    ),
+                    )?.resolve(context).orEmpty(),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -140,11 +141,11 @@ internal class PaymentOptionFactory @Inject constructor(
         }
     }
 
-    private fun getSavedLabel(selection: PaymentSelection.Saved): String? {
-        return selection.paymentMethod.getLabel(resources) ?: run {
+    private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
+        return selection.paymentMethod.getLabel() ?: run {
             when (selection.walletType) {
-                PaymentSelection.Saved.WalletType.Link -> resources.getString(StripeR.string.stripe_link)
-                PaymentSelection.Saved.WalletType.GooglePay -> resources.getString(StripeR.string.stripe_google_pay)
+                PaymentSelection.Saved.WalletType.Link -> StripeR.string.stripe_link.resolvableString
+                PaymentSelection.Saved.WalletType.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
                 else -> null
             }
         }

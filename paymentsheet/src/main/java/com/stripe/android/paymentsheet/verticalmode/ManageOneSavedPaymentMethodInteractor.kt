@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal interface ManageOneSavedPaymentMethodInteractor {
@@ -13,6 +16,7 @@ internal interface ManageOneSavedPaymentMethodInteractor {
 
     data class State(
         val paymentMethod: DisplayableSavedPaymentMethod,
+        val isLiveMode: Boolean,
     )
 
     sealed class ViewAction {
@@ -23,24 +27,16 @@ internal interface ManageOneSavedPaymentMethodInteractor {
 internal class DefaultManageOneSavedPaymentMethodInteractor(
     paymentMethod: PaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-    providePaymentMethodName: (PaymentMethodCode?) -> String,
+    providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
 ) : ManageOneSavedPaymentMethodInteractor {
-
-    constructor(sheetViewModel: BaseSheetViewModel) : this(
-        paymentMethod = sheetViewModel.paymentMethods.value.first(),
-        paymentMethodMetadata = sheetViewModel.paymentMethodMetadata.value!!,
-        providePaymentMethodName = sheetViewModel::providePaymentMethodName,
-        onDeletePaymentMethod = { sheetViewModel.removePaymentMethod(it) },
-        navigateBack = sheetViewModel::handleBackPressed,
-    )
-
     override val state = ManageOneSavedPaymentMethodInteractor.State(
-        paymentMethod.toDisplayableSavedPaymentMethod(
+        paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
             paymentMethodMetadata,
-        )
+        ),
+        isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
     )
 
     override fun handleViewAction(viewAction: ManageOneSavedPaymentMethodInteractor.ViewAction) {
@@ -49,6 +45,23 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
                 onDeletePaymentMethod(state.paymentMethod.paymentMethod)
                 navigateBack()
             }
+        }
+    }
+
+    companion object {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
+            savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        ): ManageOneSavedPaymentMethodInteractor {
+            return DefaultManageOneSavedPaymentMethodInteractor(
+                paymentMethod = customerStateHolder.paymentMethods.value.first(),
+                paymentMethodMetadata = paymentMethodMetadata,
+                providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
+                onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
+                navigateBack = viewModel::handleBackPressed,
+            )
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -20,8 +20,8 @@ internal interface FlowControllerComponent {
         fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
 
         @BindsInstance
-        fun activityResultRegistryOwner(
-            activityResultRegistryOwner: ActivityResultRegistryOwner,
+        fun activityResultCaller(
+            activityResultCaller: ActivityResultCaller,
         ): Builder
 
         @BindsInstance

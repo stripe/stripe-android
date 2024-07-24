@@ -2,10 +2,12 @@ package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
@@ -27,6 +29,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -107,7 +110,7 @@ internal object CustomerSheetTestHelper {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
+        primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
@@ -169,19 +172,24 @@ internal object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
-                override fun create(
-                    publishableKey: () -> String,
-                    stripeAccountId: () -> String?,
-                    statusBarColor: Int?,
-                    includePaymentSheetAuthenticators: Boolean,
-                    hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
-                ): StripePaymentLauncher {
-                    return mock()
-                }
-            },
-            statusBarColor = null,
+            intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                paymentConfigurationProvider = { paymentConfiguration },
+                stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
+                    override fun create(
+                        publishableKey: () -> String,
+                        stripeAccountId: () -> String?,
+                        statusBarColor: Int?,
+                        includePaymentSheetAuthenticators: Boolean,
+                        hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                    ): StripePaymentLauncher {
+                        return mock()
+                    }
+                },
+                statusBarColor = { null },
+                savedStateHandle = SavedStateHandle(),
+                application = application,
+            ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -190,7 +198,9 @@ internal object CustomerSheetTestHelper {
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = isGooglePayAvailable,
+            )
         }
     }
 
@@ -203,17 +213,19 @@ internal object CustomerSheetTestHelper {
                 eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
                 removeExecutor: PaymentMethodRemoveOperation,
                 updateExecutor: PaymentMethodUpdateOperation,
-                displayName: String,
+                displayName: ResolvableString,
                 canRemove: Boolean,
+                isLiveMode: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     removeExecutor = removeExecutor,
                     updateExecutor = updateExecutor,
                     eventHandler = eventHandler,
                     workContext = workContext,
                     canRemove = canRemove,
+                    isLiveMode = isLiveMode,
                 )
             }
         }

@@ -3,9 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.content.Context
 import android.graphics.Color
 import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -165,12 +164,7 @@ internal class DefaultFlowControllerTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    private val activityResultRegistry: ActivityResultRegistry = mock()
-
-    private val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
-        override val activityResultRegistry: ActivityResultRegistry
-            get() = this@DefaultFlowControllerTest.activityResultRegistry
-    }
+    private val activityResultCaller: ActivityResultCaller = mock()
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
@@ -181,64 +175,56 @@ internal class DefaultFlowControllerTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<PaymentOptionContract>(),
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<AddressElementActivityContract>(),
                 any()
             )
         ).thenReturn(addressElementActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<GooglePayPaymentMethodLauncherContractV2>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<LinkActivityContract>(),
                 any()
             )
         ).thenReturn(linkActivityResultLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<SepaMandateContract>(),
                 any()
             )
         ).thenReturn(sepaMandateActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<PaymentLauncherContract>(),
                 any()
             )
         ).thenReturn(mock())
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<BacsMandateConfirmationContract>(),
                 any()
             )
         ).thenReturn(mock())
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<ExternalPaymentMethodContract>(),
                 any()
             )
@@ -248,8 +234,7 @@ internal class DefaultFlowControllerTest {
             .thenReturn(paymentLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<CvcRecollectionContract>(),
                 any()
             )
@@ -431,10 +416,8 @@ internal class DefaultFlowControllerTest {
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
-                isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
@@ -646,10 +629,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -687,10 +668,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -731,10 +710,8 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
@@ -1621,8 +1598,7 @@ internal class DefaultFlowControllerTest {
         }
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<BacsMandateConfirmationContract>(),
                 onResult.capture()
             )
@@ -1676,8 +1652,7 @@ internal class DefaultFlowControllerTest {
         }
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<CvcRecollectionContract>(),
                 onResult.capture()
             )
@@ -2063,7 +2038,7 @@ internal class DefaultFlowControllerTest {
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
-        activityResultRegistryOwner = activityResultRegistryOwner,
+        activityResultCaller = activityResultCaller,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
             resources = context.resources,
@@ -2107,7 +2082,7 @@ internal class DefaultFlowControllerTest {
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
-            label = resolvableString("Test"),
+            label = "Test".resolvableString,
             iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
@@ -2133,7 +2108,7 @@ internal class DefaultFlowControllerTest {
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-            label = resolvableString("Bancontact"),
+            label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,

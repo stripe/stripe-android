@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Lütfen eyaletinizi girin</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt; ile zaman içinde ödeyin.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Affirm ile zaman içinde ödeyin.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Hesaptaki ad</string>
   <!-- Placeholder for AU BECS BSB number -->

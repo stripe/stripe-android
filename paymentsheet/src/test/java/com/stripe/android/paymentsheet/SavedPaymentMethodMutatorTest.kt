@@ -1,0 +1,146 @@
+package com.stripe.android.paymentsheet
+
+import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.mockito.Mockito.mock
+
+class SavedPaymentMethodMutatorTest {
+    @Test
+    fun `canEdit is correct when allowsRemovalOfLastSavedPaymentMethod is true`() = runScenario(
+        allowsRemovalOfLastSavedPaymentMethod = true,
+    ) {
+        savedPaymentMethodMutator.canEdit.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `canEdit is correct when allowsRemovalOfLastSavedPaymentMethod is false`() = runScenario(
+        allowsRemovalOfLastSavedPaymentMethod = false,
+    ) {
+        savedPaymentMethodMutator.canEdit.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+                )
+            )
+            assertThat(awaitItem()).isTrue()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+                )
+            )
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf()
+            )
+        }
+    }
+
+    @Test
+    fun `canEdit is correct CBC is enabled`() = runScenario(
+        allowsRemovalOfLastSavedPaymentMethod = false,
+        isCbcEligible = { true }
+    ) {
+        savedPaymentMethodMutator.canEdit.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+                )
+            )
+            assertThat(awaitItem()).isTrue()
+
+            customerStateHolder.customer = null
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
+                customerId = "cus_123",
+                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                paymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+                )
+            )
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    private fun runScenario(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        isCbcEligible: () -> Boolean = { false },
+        block: suspend Scenario.() -> Unit
+    ) {
+        runTest {
+            val selection: StateFlow<PaymentSelection?> = stateFlowOf(null)
+            val customerStateHolder = CustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selection,
+            )
+            val savedPaymentMethodMutator = SavedPaymentMethodMutator(
+                editInteractorFactory = mock(),
+                eventReporter = mock(),
+                savedStateHandle = savedStateHandle,
+                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                workContext = coroutineContext,
+                navigationHandler = mock(),
+                customerRepository = mock(),
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                selection = selection,
+                providePaymentMethodName = { it?.resolvableString.orEmpty() },
+                customerStateHolder = customerStateHolder,
+                addFirstPaymentMethodScreenFactory = { throw AssertionError("Not implemented") },
+                updateSelection = { throw AssertionError("Not implemented") },
+                isCbcEligible = isCbcEligible,
+                isGooglePayReady = stateFlowOf(false),
+                isLinkEnabled = stateFlowOf(false),
+                isNotPaymentFlow = true,
+                isLiveModeProvider = { true },
+            )
+            Scenario(
+                savedPaymentMethodMutator = savedPaymentMethodMutator,
+                customerStateHolder = customerStateHolder,
+            ).apply {
+                block()
+            }
+        }
+    }
+
+    private data class Scenario(
+        val savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        val customerStateHolder: CustomerStateHolder,
+    )
+}

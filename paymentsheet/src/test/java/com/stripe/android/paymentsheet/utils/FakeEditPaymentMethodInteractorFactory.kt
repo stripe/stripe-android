@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -17,8 +18,9 @@ internal class FakeEditPaymentMethodInteractorFactory(
         eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
         removeExecutor: PaymentMethodRemoveOperation,
         updateExecutor: PaymentMethodUpdateOperation,
-        displayName: String,
+        displayName: ResolvableString,
         canRemove: Boolean,
+        isLiveMode: Boolean,
     ): ModifiableEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = initialPaymentMethod,
@@ -28,6 +30,7 @@ internal class FakeEditPaymentMethodInteractorFactory(
             displayName = displayName,
             workContext = context,
             canRemove = canRemove,
+            isLiveMode = isLiveMode,
         )
     }
 }

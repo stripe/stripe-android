@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
@@ -12,7 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeEditPaymentMethodInteractor(
-    paymentMethod: PaymentMethod
+    paymentMethod: PaymentMethod,
+    override val isLiveMode: Boolean = true,
 ) : ModifiableEditPaymentMethodViewInteractor {
     override val viewState: StateFlow<EditPaymentMethodViewState> = MutableStateFlow(
         EditPaymentMethodViewState(
@@ -25,7 +28,7 @@ internal class FakeEditPaymentMethodInteractor(
             selectedBrand = paymentMethod.card?.networks?.preferred?.let { code ->
                 EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
             } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown),
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             canRemove = true,
         )
     )
@@ -44,8 +47,9 @@ internal class FakeEditPaymentMethodInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
         }

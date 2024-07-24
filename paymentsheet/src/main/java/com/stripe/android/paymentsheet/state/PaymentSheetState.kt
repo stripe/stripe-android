@@ -16,15 +16,13 @@ internal sealed interface PaymentSheetState : Parcelable {
     data class Full(
         val config: PaymentSheet.Configuration,
         val customer: CustomerState?,
-        val isGooglePayReady: Boolean,
         val linkState: LinkState?,
-        val isEligibleForCardBrandChoice: Boolean,
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
     ) : PaymentSheetState {
         val showSavedPaymentMethods: Boolean
-            get() = (customer != null && customer.paymentMethods.isNotEmpty()) || isGooglePayReady
+            get() = (customer != null && customer.paymentMethods.isNotEmpty()) || paymentMethodMetadata.isGooglePayReady
 
         val stripeIntent: StripeIntent
             get() = paymentMethodMetadata.stripeIntent

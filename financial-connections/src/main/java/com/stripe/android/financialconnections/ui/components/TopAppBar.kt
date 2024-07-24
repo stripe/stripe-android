@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.ui.components
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -37,13 +38,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.Attention200
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +69,7 @@ internal fun FinancialConnectionsTopAppBar(
     FinancialConnectionsTopAppBar(
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
         testMode = state.isTestMode,
+        theme = state.theme,
         elevation = elevation,
         allowBackNavigation = state.allowBackNavigation,
         onCloseClick = onCloseClick,
@@ -78,6 +80,7 @@ internal fun FinancialConnectionsTopAppBar(
 private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
     testMode: Boolean,
+    theme: Theme,
     elevation: State<Dp>,
     allowBackNavigation: Boolean,
     onCloseClick: () -> Unit,
@@ -96,7 +99,8 @@ private fun FinancialConnectionsTopAppBar(
         title = {
             Title(
                 hideStripeLogo = hideStripeLogo,
-                testmode = testMode
+                testmode = testMode,
+                theme = theme,
             )
         },
         elevation = 0.dp,
@@ -175,32 +179,38 @@ private fun CloseButton(
 }
 
 @Composable
-private fun Title(hideStripeLogo: Boolean, testmode: Boolean) = Row(
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun Title(
+    hideStripeLogo: Boolean,
+    testmode: Boolean,
+    theme: Theme,
 ) {
-    if (hideStripeLogo.not()) {
-        Icon(
-            modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
-            painter = painterResource(id = R.drawable.stripe_logo),
-            contentDescription = null // decorative element
-        )
-    }
-    // show a test mode pill if in test mode
-    if (testmode) {
-        Text(
-            modifier = Modifier
-                .drawBehind {
-                    drawRoundRect(
-                        color = Attention200,
-                        cornerRadius = CornerRadius(PILL_RADIUS)
-                    )
-                }
-                .padding(vertical = PILL_VERTICAL_PADDING, horizontal = PILL_HORIZONTAL_PADDING),
-            text = "Test",
-            style = FinancialConnectionsTheme.typography.labelMediumEmphasized,
-            color = FinancialConnectionsTheme.colors.textWhite
-        )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (hideStripeLogo.not()) {
+            Image(
+                modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
+                painter = painterResource(id = theme.icon),
+                contentDescription = null // decorative element
+            )
+        }
+        // show a test mode pill if in test mode
+        if (testmode) {
+            Text(
+                modifier = Modifier
+                    .drawBehind {
+                        drawRoundRect(
+                            color = Attention200,
+                            cornerRadius = CornerRadius(PILL_RADIUS)
+                        )
+                    }
+                    .padding(vertical = PILL_VERTICAL_PADDING, horizontal = PILL_HORIZONTAL_PADDING),
+                text = "Test",
+                style = FinancialConnectionsTheme.typography.labelMediumEmphasized,
+                color = FinancialConnectionsTheme.colors.textWhite
+            )
+        }
     }
 }
 
@@ -225,7 +235,7 @@ private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
 
 @Preview(group = "Components", name = "TopAppBar")
 @Composable
-internal fun TopAppBarNoStripeLogoPreview() {
+internal fun TopAppBarWithStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = false),
@@ -234,9 +244,23 @@ internal fun TopAppBarNoStripeLogoPreview() {
     }
 }
 
+@Preview(group = "Components", name = "TopAppBar - Instant Debits")
+@Composable
+internal fun TopAppBarWithLinkLogoPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(
+                hideStripeLogo = false,
+                theme = Theme.LinkLight,
+            ),
+            onCloseClick = {},
+        )
+    }
+}
+
 @Preview(group = "Components", name = "TopAppBar - no Stripe logo")
 @Composable
-internal fun FinancialConnectionsTopAppBarPreview() {
+internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = true),

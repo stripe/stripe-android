@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Introduceți statul în care locuiți</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Folosiți ca metodă de plată de-a lungul timpului &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Folosiți ca metodă de plată de-a lungul timpului Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Numele contului</string>
   <!-- Placeholder for AU BECS BSB number -->

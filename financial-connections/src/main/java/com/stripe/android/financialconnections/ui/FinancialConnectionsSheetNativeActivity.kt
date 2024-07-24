@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
@@ -52,6 +53,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -86,7 +88,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (getArgs(intent) == null) {
+        val args = getArgs(intent)
+        if (args == null) {
             finish()
             return
         }
@@ -98,7 +101,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         observeViewEffects()
 
         setContent {
-            FinancialConnectionsTheme {
+            FinancialConnectionsTheme(args.theme) {
                 val state by viewModel.stateFlow.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(
                     initialValue = ModalBottomSheetValue.Expanded,
@@ -376,6 +379,21 @@ private fun NavOptionsBuilder.apply(
     if (popUpToRoute != null) {
         popUpTo(popUpToRoute) {
             inclusive = popUpTo.inclusive
+        }
+    }
+}
+
+private val FinancialConnectionsSheetNativeActivityArgs.theme: Theme
+    get() = initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default
+
+internal fun FinancialConnectionsSessionManifest.Theme.toLocalTheme(): Theme {
+    return when (this) {
+        FinancialConnectionsSessionManifest.Theme.LIGHT,
+        FinancialConnectionsSessionManifest.Theme.DASHBOARD_LIGHT -> {
+            Theme.DefaultLight
+        }
+        FinancialConnectionsSessionManifest.Theme.LINK_LIGHT -> {
+            Theme.LinkLight
         }
     }
 }

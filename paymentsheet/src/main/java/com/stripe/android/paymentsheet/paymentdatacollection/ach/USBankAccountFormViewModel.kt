@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -279,7 +278,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             is CollectBankAccountResultInternal.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
@@ -296,7 +295,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
                 reset()
@@ -313,7 +312,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (usBankAccountData != null) {
             handleResultForACH(usBankAccountData, intentId)
         } else {
-            reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+            reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
         }
     }
 
@@ -365,7 +364,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             null -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
         }
     }
@@ -409,7 +408,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun reset(@StringRes error: Int? = null) {
+    fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)
@@ -417,9 +416,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
-                primaryButtonText = resolvableString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -444,9 +441,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = resolvableString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -615,21 +610,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 if (args.isPaymentFlow) {
                     args.formArgs.amount!!.buildPayButtonLabel()
                 } else {
-                    resolvableString(
-                        StripeUiCoreR.string.stripe_setup_button_label
-                    )
+                    StripeUiCoreR.string.stripe_setup_button_label.resolvableString
                 }
             }
 
-            else -> resolvableString(
-                StripeUiCoreR.string.stripe_continue_button_label
-            )
+            else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
         }
     }
 
-    private fun buildMandateText(): String {
+    private fun buildMandateText(): ResolvableString {
         return USBankAccountTextBuilder.getContinueMandateText(
-            context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
             isInstantDebits = args.instantDebits,

@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.res.Resources
 import androidx.annotation.DrawableRes
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethod
@@ -47,13 +48,13 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
-internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type) {
-    PaymentMethod.Type.Card -> createCardLabel(resources, card?.last4).takeIf { it.isNotEmpty() }
-    PaymentMethod.Type.SepaDebit -> resources.getString(
+internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
+    PaymentMethod.Type.Card -> createCardLabel(card?.last4)
+    PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
     )
-    PaymentMethod.Type.USBankAccount -> resources.getString(
+    PaymentMethod.Type.USBankAccount -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         usBankAccount?.last4
     )
@@ -65,11 +66,11 @@ internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
     else -> null
 }
 
-internal fun createCardLabel(resources: Resources, last4: String?): String {
+internal fun createCardLabel(last4: String?): ResolvableString? {
     return last4?.let {
-        resources.getString(
+        resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             last4
         )
-    }.orEmpty()
+    }
 }

@@ -44,7 +44,7 @@ internal data class SupportedPaymentMethod(
         subtitle: ResolvableString? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
-        displayName = resolvableString(id = displayNameResource),
+        displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
@@ -62,7 +62,7 @@ internal data class SupportedPaymentMethod(
         subtitle: ResolvableString? = null,
     ) : this(
         code = code,
-        displayName = resolvableString(id = displayNameResource),
+        displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,

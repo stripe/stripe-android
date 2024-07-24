@@ -490,7 +490,7 @@ class DefaultEventReporterTest {
 
         customEventReporter.onPressConfirmButton(
             PaymentSelection.New.GenericPaymentMethod(
-                label = resolvableString("Cash App Pay"),
+                label = "Cash App Pay".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
@@ -715,7 +715,7 @@ class DefaultEventReporterTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )

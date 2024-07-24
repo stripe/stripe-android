@@ -23,7 +23,8 @@ internal object PaymentMethodMetadataFactory {
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
-        externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList()
+        externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
+        isGooglePayReady: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -39,6 +40,7 @@ internal object PaymentMethodMetadataFactory {
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            isGooglePayReady = isGooglePayReady,
         )
     }
 

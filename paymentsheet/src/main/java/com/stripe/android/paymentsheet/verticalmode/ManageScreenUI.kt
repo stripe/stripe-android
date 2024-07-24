@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
@@ -35,8 +34,8 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
 
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
-                resources = LocalContext.current.resources,
                 isEnabled = true,
+                isClickable = !state.isEditing,
                 isSelected = isSelected,
                 trailingContent = {
                     TrailingContent(
@@ -58,9 +57,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 onClick = {
-                    if (!state.isEditing) {
-                        interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
-                    }
+                    interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
                 },
             )
         }

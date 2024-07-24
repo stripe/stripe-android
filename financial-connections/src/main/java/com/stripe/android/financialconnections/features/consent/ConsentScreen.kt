@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.consent.ConsentPreviewParameterProvider.ConsentPreviewState
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
 import com.stripe.android.financialconnections.model.ConsentPane
@@ -159,6 +160,7 @@ private fun LazyListScope.consentBody(
         ConsentLogoHeader(
             modifier = Modifier.fillMaxWidth(),
             logos = payload.merchantLogos,
+            showDots = payload.showAnimatedDots,
         )
         Spacer(modifier = Modifier.size(32.dp))
     }
@@ -235,11 +237,11 @@ private fun ConsentFooter(
 @Composable
 internal fun ContentPreview(
     @PreviewParameter(provider = ConsentPreviewParameterProvider::class)
-    state: ConsentState,
+    previewState: ConsentPreviewState,
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(theme = previewState.theme) {
         ConsentContent(
-            state = state,
+            state = previewState.state,
             onContinueClick = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {}

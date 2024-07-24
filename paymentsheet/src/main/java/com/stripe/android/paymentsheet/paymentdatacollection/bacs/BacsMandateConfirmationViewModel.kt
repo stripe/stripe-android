@@ -61,24 +61,24 @@ internal class BacsMandateConfirmationViewModel(
     }
 
     private fun buildPayer(): ResolvableString {
-        return resolvableString(R.string.stripe_paymentsheet_bacs_notice_default_payer)
+        return R.string.stripe_paymentsheet_bacs_notice_default_payer.resolvableString
     }
 
     private fun buildAddressAsHtml(): ResolvableString {
         return resolvableString(
             R.string.stripe_paymentsheet_bacs_support_address_format,
-            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
-            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
-            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email),
-            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email)
+            R.string.stripe_paymentsheet_bacs_support_default_address_line_one.resolvableString,
+            R.string.stripe_paymentsheet_bacs_support_default_address_line_two.resolvableString,
+            R.string.stripe_paymentsheet_bacs_support_default_email.resolvableString,
+            R.string.stripe_paymentsheet_bacs_support_default_email.resolvableString
         )
     }
 
     private fun buildGuarantee(): ResolvableString {
         return resolvableString(
             R.string.stripe_paymentsheet_bacs_guarantee_format,
-            resolvableString(R.string.stripe_paymentsheet_bacs_guarantee_url),
-            resolvableString(R.string.stripe_paymentsheet_bacs_guarantee)
+            R.string.stripe_paymentsheet_bacs_guarantee_url.resolvableString,
+            R.string.stripe_paymentsheet_bacs_guarantee.resolvableString
         )
     }
 

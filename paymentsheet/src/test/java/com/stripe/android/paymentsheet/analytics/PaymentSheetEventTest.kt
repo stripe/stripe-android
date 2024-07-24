@@ -505,7 +505,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = resolvableString("Fawry"),
+                label = "Fawry".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
@@ -544,7 +544,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
-                label = resolvableString("Fawry"),
+                label = "Fawry".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,

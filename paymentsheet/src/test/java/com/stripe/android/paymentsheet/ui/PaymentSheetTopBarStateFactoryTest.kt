@@ -1,264 +1,132 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import org.junit.Test
-import org.junit.runner.RunWith
 import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@RunWith(AndroidJUnit4::class)
 class PaymentSheetTopBarStateFactoryTest {
 
     @Test
-    fun `SelectSavedPaymentMethods shows correct navigation icon`() {
+    fun `navigation is close when canNavigateBack=false`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
+            canNavigateBack = false,
         )
 
         assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close)
+        assertThat(state.contentDescription).isEqualTo(R.string.stripe_paymentsheet_close)
     }
 
     @Test
-    fun `ManageSavedPaymentMethods shows correct navigation icon`() {
+    fun `navigation is back when canNavigateBack=true`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
+            canNavigateBack = true,
         )
 
         assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_back)
+        assertThat(state.contentDescription).isEqualTo(StripeUiCoreR.string.stripe_back)
     }
 
     @Test
-    fun `AddFirstPaymentMethod shows correct navigation icon`() {
+    fun `showTestModeLabel=true when isLiveMode=false`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddFirstPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
             isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
-        )
-
-        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close)
-    }
-
-    @Test
-    fun `AddAnotherPaymentMethod shows correct navigation icon`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
-        )
-
-        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_back)
-    }
-
-    @Test
-    fun `Shows test mode badge if not running in live mode`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
         )
 
         assertThat(state.showTestModeLabel).isTrue()
     }
 
     @Test
-    fun `Hide test mode badge if running in live mode`() {
+    fun `showTestModeLabel=false when isLiveMode=true`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
             isLiveMode = true,
-            isProcessing = false,
-            isEditing = false,
         )
 
         assertThat(state.showTestModeLabel).isFalse()
     }
 
     @Test
-    fun `Shows edit menu if displaying customer payment methods`() {
+    fun `showEditMenu=true when canEdit=true`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = true,
+                isEditing = false,
+                onEditIconPressed = {},
             ),
-            canEdit = true,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
         )
 
         assertThat(state.showEditMenu).isTrue()
     }
 
     @Test
-    fun `Shows edit menu if displaying customer payment methods in manage screen`() {
+    fun `showEditMenu=false when canEdit=false`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
-            canEdit = true,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
-        )
-
-        assertThat(state.showEditMenu).isTrue()
-    }
-
-    @Test
-    fun `Hides edit menu if customer has no payment methods`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = false,
+                onEditIconPressed = {},
             ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
         )
 
         assertThat(state.showEditMenu).isFalse()
     }
 
     @Test
-    fun `Hides edit menu if cannot edit on manage screen`() {
+    fun `showEditMenu=false when editable=Never`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
+            editable = PaymentSheetTopBarState.Editable.Never,
         )
 
         assertThat(state.showEditMenu).isFalse()
     }
 
     @Test
-    fun `Hides edit menu if not on the saved payment methods screen`() {
+    fun `editMenuLabel=edit when isEditing=false`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = false,
+                onEditIconPressed = {},
             ),
-            canEdit = true,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
         )
 
-        assertThat(state.showEditMenu).isFalse()
-    }
-
-    @Test
-    fun `Shows correct edit menu label when not in editing mode`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
-        )
-
+        assertThat(state.isEditing).isEqualTo(false)
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_edit)
     }
 
     @Test
-    fun `Shows correct edit menu label when in editing mode`() {
+    fun `editMenuLabel=done when isEditing=true`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                canEdit = false,
+                isEditing = true,
+                onEditIconPressed = {},
             ),
-            canEdit = false,
-            isLiveMode = true,
-            isProcessing = false,
-            isEditing = true,
         )
 
+        assertThat(state.isEditing).isEqualTo(true)
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_done)
     }
 
     @Test
-    fun `Shows correct edit menu label when in editing mode on manage screen`() {
+    fun `isEditing=false when editable=Never`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
-            canEdit = false,
-            isLiveMode = true,
-            isProcessing = false,
-            isEditing = true,
+            editable = PaymentSheetTopBarState.Editable.Never,
         )
 
-        assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_done)
-    }
-
-    @Test
-    fun `Enables menu when not processing`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = false,
-            isEditing = false,
-        )
-
-        assertThat(state.isEnabled).isTrue()
-    }
-
-    @Test
-    fun `Disables menu when processing`() {
-        val state = buildTopBarState(
-            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
-                interactor = FakeAddPaymentMethodInteractor
-            ),
-            canEdit = false,
-            isLiveMode = false,
-            isProcessing = true,
-            isEditing = false,
-        )
-
-        assertThat(state.isEnabled).isFalse()
+        assertThat(state.isEditing).isEqualTo(false)
     }
 
     private fun buildTopBarState(
-        screen: PaymentSheetScreen,
-        isLiveMode: Boolean,
-        isProcessing: Boolean,
-        isEditing: Boolean,
-        canEdit: Boolean,
+        canNavigateBack: Boolean = false,
+        isLiveMode: Boolean = false,
+        editable: PaymentSheetTopBarState.Editable = PaymentSheetTopBarState.Editable.Never,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarStateFactory.create(
-            screen = screen.sheetScreen,
-            hasBackStack = screen.canNavigateBack,
+            hasBackStack = canNavigateBack,
             isLiveMode = isLiveMode,
-            isProcessing = isProcessing,
-            isEditing = isEditing,
-            canEdit = canEdit,
+            editable,
         )
     }
 }

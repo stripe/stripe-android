@@ -126,9 +126,9 @@ class EditPaymentMethodUiScreenshotTest {
                     brand = CardBrand.CartesBancaires
                 )
             ),
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             confirmRemoval = confirmRemoval,
-            error = error?.let { resolvableString(it) },
+            error = error?.resolvableString,
             canRemove = canRemove,
         )
     }

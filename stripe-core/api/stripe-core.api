@@ -319,6 +319,14 @@ public final class com/stripe/android/core/strings/StaticResolvableString$Creato
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/core/strings/transformations/Replace$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/strings/transformations/Replace;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/strings/transformations/Replace;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
 	public static final field VERSION Ljava/lang/String;

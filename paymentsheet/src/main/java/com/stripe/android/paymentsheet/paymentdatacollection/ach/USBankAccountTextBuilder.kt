@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.content.Context
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.strings.transformations.Replace
 import com.stripe.android.paymentsheet.R
 
 /**
@@ -9,25 +11,28 @@ import com.stripe.android.paymentsheet.R
 internal object USBankAccountTextBuilder {
 
     fun getContinueMandateText(
-        context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
         isSetupFlow: Boolean,
-    ): String {
+    ): ResolvableString {
+        val transforms = listOf(
+            Replace(
+                original = "<terms>",
+                replacement = "<a href=\"${getTermsLink(isInstantDebits)}\">",
+            ),
+            Replace(
+                original = "</terms>",
+                replacement = "</a>",
+            ),
+        )
         val text = if (isSaveForFutureUseSelected || isSetupFlow) {
-            context.getString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName)
+            resolvableString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName, transformations = transforms)
         } else {
-            context.getString(R.string.stripe_paymentsheet_ach_continue_mandate)
+            resolvableString(R.string.stripe_paymentsheet_ach_continue_mandate, transformations = transforms)
         }
 
-        return text.replace(
-            oldValue = "<terms>",
-            newValue = "<a href=\"${getTermsLink(isInstantDebits)}\">",
-        ).replace(
-            oldValue = "</terms>",
-            newValue = "</a>",
-        )
+        return text
     }
 
     private fun getTermsLink(isInstantDebits: Boolean) = when (isInstantDebits) {

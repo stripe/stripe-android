@@ -36,6 +36,7 @@ GEM
     sawyer (0.8.2)
       addressable (>= 2.3.5)
       faraday (> 0.8, < 2.0)
+    subprocess (1.5.6)
 
 PLATFORMS
   ruby
@@ -43,6 +44,7 @@ PLATFORMS
 DEPENDENCIES
   colorize
   octokit
+  subprocess
 
 BUNDLED WITH
    2.1.2

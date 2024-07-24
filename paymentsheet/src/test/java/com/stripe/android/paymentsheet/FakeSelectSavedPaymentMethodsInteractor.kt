@@ -4,6 +4,8 @@ import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import kotlinx.coroutines.flow.StateFlow
 
 internal object FakeSelectSavedPaymentMethodsInteractor : SelectSavedPaymentMethodsInteractor {
+    override val isLiveMode: Boolean = true
+
     override val state: StateFlow<SelectSavedPaymentMethodsInteractor.State>
         get() = throw NotImplementedError(
             "State is not implemented for FakeSelectSavedPaymentMethodsInteractor"
