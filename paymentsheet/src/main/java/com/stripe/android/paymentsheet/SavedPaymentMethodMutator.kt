@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -18,7 +17,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -33,7 +31,6 @@ import kotlin.coroutines.CoroutineContext
 internal class SavedPaymentMethodMutator(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val eventReporter: EventReporter,
-    private val savedStateHandle: SavedStateHandle,
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
     private val navigationHandler: NavigationHandler,
@@ -42,7 +39,7 @@ internal class SavedPaymentMethodMutator(
     private val selection: StateFlow<PaymentSelection?>,
     val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
-    private val updateSelection: (PaymentSelection?) -> Unit,
+    private val clearSelection: () -> Unit,
     private val isLiveModeProvider: () -> Boolean,
     private val customerStateHolder: CustomerStateHolder,
     isCbcEligible: () -> Boolean,
@@ -134,7 +131,7 @@ internal class SavedPaymentMethodMutator(
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
-            updateSelection(null)
+            clearSelection()
         }
 
         return customerRepository.detachPaymentMethod(
@@ -160,7 +157,7 @@ internal class SavedPaymentMethodMutator(
         }
 
         if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            savedStateHandle[SAVE_SELECTION] = null
+            clearSelection()
         }
 
         val shouldResetToAddPaymentMethodForm = customerStateHolder.paymentMethods.value.isEmpty() &&
@@ -284,7 +281,6 @@ internal class SavedPaymentMethodMutator(
             return SavedPaymentMethodMutator(
                 editInteractorFactory = viewModel.editInteractorFactory,
                 eventReporter = viewModel.eventReporter,
-                savedStateHandle = viewModel.savedStateHandle,
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
                 navigationHandler = viewModel.navigationHandler,
@@ -304,7 +300,7 @@ internal class SavedPaymentMethodMutator(
                     )
                     PaymentSheetScreen.AddFirstPaymentMethod(interactor)
                 },
-                updateSelection = viewModel::updateSelection,
+                clearSelection = { viewModel.updateSelection(null) },
                 isCbcEligible = {
                     viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible
                 },
