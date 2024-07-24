@@ -349,6 +349,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
+        val customerStateHolder = CustomerStateHolder.create(this)
         customerStateHolder.customer = state.customer
 
         updateSelection(state.paymentSelection)
@@ -365,7 +366,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         navigationHandler.resetTo(
             determineInitialBackStack(
                 paymentMethodMetadata = state.paymentMethodMetadata,
-                savedPaymentMethods = state.customer?.paymentMethods.orEmpty(),
+                customerStateHolder = customerStateHolder,
             )
         )
     }
@@ -740,14 +741,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun determineInitialBackStack(
         paymentMethodMetadata: PaymentMethodMetadata,
-        savedPaymentMethods: List<PaymentMethod>,
+        customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
+        val savedPaymentMethodMutator = SavedPaymentMethodMutator.create(
+            viewModel = this,
+            customerStateHolder = customerStateHolder,
+        )
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(
                 VerticalModeInitialScreenFactory.create(
                     viewModel = this,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    savedPaymentMethods = savedPaymentMethods,
                     customerStateHolder = customerStateHolder,
                     savedPaymentMethodMutator = savedPaymentMethodMutator,
                 )

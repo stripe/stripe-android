@@ -280,7 +280,10 @@ internal class SavedPaymentMethodMutator(
     }
 
     companion object {
-        fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            customerStateHolder: CustomerStateHolder,
+        ): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
                 editInteractorFactory = viewModel.editInteractorFactory,
                 eventReporter = viewModel.eventReporter,
@@ -296,7 +299,7 @@ internal class SavedPaymentMethodMutator(
                         viewModel.paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
                     }?.displayName.orEmpty()
                 },
-                customerStateHolder = viewModel.customerStateHolder,
+                customerStateHolder = customerStateHolder,
                 addFirstPaymentMethodScreenFactory = {
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
