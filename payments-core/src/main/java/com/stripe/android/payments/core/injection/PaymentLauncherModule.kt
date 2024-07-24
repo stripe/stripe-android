@@ -8,8 +8,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -40,8 +40,8 @@ internal class PaymentLauncherModule {
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean,
-        @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) includePaymentSheetAuthenticators: Boolean,
-    ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
+        @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean,
+    ): PaymentNextActionHandlerRegistry = DefaultPaymentNextActionHandlerRegistry.createInstance(
         context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         enableLogging = enableLogging,
@@ -51,7 +51,7 @@ internal class PaymentLauncherModule {
         publishableKeyProvider = publishableKeyProvider,
         productUsage = productUsage,
         isInstantApp = isInstantApp,
-        includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+        includePaymentSheetNextActionHandlers = includePaymentSheetNextHandlers,
     )
 
     @Provides

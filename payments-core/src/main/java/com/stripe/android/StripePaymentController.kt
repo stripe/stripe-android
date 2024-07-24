@@ -30,8 +30,8 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -96,8 +96,8 @@ constructor(
      */
     private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    private val authenticatorRegistry: PaymentAuthenticatorRegistry =
-        DefaultPaymentAuthenticatorRegistry.createInstance(
+    private val authenticatorRegistry: PaymentNextActionHandlerRegistry =
+        DefaultPaymentNextActionHandlerRegistry.createInstance(
             context = context,
             paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
             enableLogging = enableLogging,
@@ -107,7 +107,7 @@ constructor(
             publishableKeyProvider = publishableKeyProvider,
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
-            includePaymentSheetAuthenticators = false, // StripePaymentController is not used in PaymentSheet.
+            includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -321,7 +321,7 @@ constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(source).performNextAction(
+        authenticatorRegistry.getNextActionHandler(source).performNextAction(
             host,
             source,
             requestOptions
@@ -448,7 +448,7 @@ constructor(
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(stripeIntent).performNextAction(
+        authenticatorRegistry.getNextActionHandler(stripeIntent).performNextAction(
             host,
             stripeIntent,
             requestOptions

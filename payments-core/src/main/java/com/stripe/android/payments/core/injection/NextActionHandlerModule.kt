@@ -6,7 +6,7 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.authentication.RealRedirectResolver
 import com.stripe.android.payments.core.authentication.RedirectResolver
@@ -25,75 +25,75 @@ import javax.inject.Singleton
  */
 @Module
 @SuppressWarnings("UnnecessaryAbstractClass")
-internal abstract class AuthenticationModule {
-    @IntentAuthenticatorMap
+internal abstract class NextActionHandlerModule {
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS1::class)
+    @IntentNextActionHandlerKey(NextActionData.SdkData.Use3DS1::class)
     abstract fun binds3DS1Authenticator(
         webIntentAuthenticator: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.RedirectToUrl::class)
+    @IntentNextActionHandlerKey(NextActionData.RedirectToUrl::class)
     abstract fun bindsRedirectAuthenticator(
         webIntentAuthenticator: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.AlipayRedirect::class)
+    @IntentNextActionHandlerKey(NextActionData.AlipayRedirect::class)
     abstract fun bindsAlipayRedirectAuthenticator(
         webIntentAuthenticator: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.DisplayMultibancoDetails::class)
+    @IntentNextActionHandlerKey(NextActionData.DisplayMultibancoDetails::class)
     abstract fun bindsMultibancoAuthenticator(
         voucherAuthenticator: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.DisplayOxxoDetails::class)
+    @IntentNextActionHandlerKey(NextActionData.DisplayOxxoDetails::class)
     abstract fun bindsOxxoAuthenticator(
         voucherAuthenticator: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.DisplayKonbiniDetails::class)
+    @IntentNextActionHandlerKey(NextActionData.DisplayKonbiniDetails::class)
     abstract fun bindsKonbiniAuthenticator(
         voucherAuthenticator: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.DisplayBoletoDetails::class)
+    @IntentNextActionHandlerKey(NextActionData.DisplayBoletoDetails::class)
     abstract fun bindsBoletoAuthenticator(
         voucherAuthenticator: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.CashAppRedirect::class)
+    @IntentNextActionHandlerKey(NextActionData.CashAppRedirect::class)
     abstract fun bindsCashAppRedirectAuthenticator(
         webIntentAuthenticator: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Binds
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.SwishRedirect::class)
+    @IntentNextActionHandlerKey(NextActionData.SwishRedirect::class)
     abstract fun bindsSwishRedirectAuthenticator(
         webIntentAuthenticator: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
@@ -111,7 +111,7 @@ internal abstract class AuthenticationModule {
         @Provides
         @Singleton
         fun providePaymentRelayStarterFactory(
-            lazyRegistry: Lazy<DefaultPaymentAuthenticatorRegistry>
+            lazyRegistry: Lazy<DefaultPaymentNextActionHandlerRegistry>
         ): (AuthActivityStarterHost) -> PaymentRelayStarter =
             { host: AuthActivityStarterHost ->
                 lazyRegistry.get().paymentRelayLauncher?.let {
@@ -122,7 +122,7 @@ internal abstract class AuthenticationModule {
         @Provides
         @Singleton
         fun providePaymentBrowserAuthStarterFactory(
-            lazyRegistry: Lazy<DefaultPaymentAuthenticatorRegistry>,
+            lazyRegistry: Lazy<DefaultPaymentNextActionHandlerRegistry>,
             defaultReturnUrl: DefaultReturnUrl
         ): (AuthActivityStarterHost) -> PaymentBrowserAuthStarter =
             { host: AuthActivityStarterHost ->

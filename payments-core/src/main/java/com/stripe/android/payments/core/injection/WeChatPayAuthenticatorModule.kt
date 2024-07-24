@@ -15,10 +15,10 @@ import dagger.multibindings.IntoMap
  */
 @Module
 internal class WeChatPayAuthenticatorModule {
-    @IntentAuthenticatorMap
+    @IntentNextActionHandlerMap
     @Provides
     @IntoMap
-    @IntentAuthenticatorKey(NextActionData.WeChatPayRedirect::class)
+    @IntentNextActionHandlerKey(NextActionData.WeChatPayRedirect::class)
     internal fun provideWeChatAuthenticator(
         unsupportedAuthenticator: UnsupportedNextActionHandler
     ): PaymentNextActionHandler<StripeIntent> {

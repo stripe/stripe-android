@@ -30,7 +30,7 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
@@ -61,7 +61,7 @@ class PaymentLauncherViewModelTest {
     internal class TestFragment : Fragment()
 
     private val stripeApiRepository = mock<StripeApiRepository>()
-    private val authenticatorRegistry = mock<PaymentAuthenticatorRegistry>()
+    private val authenticatorRegistry = mock<PaymentNextActionHandlerRegistry>()
     private val defaultReturnUrl =
         DefaultReturnUrl.create(ApplicationProvider.getApplicationContext())
     private val apiRequestOptions = mock<ApiRequest.Options>()
@@ -139,10 +139,10 @@ class PaymentLauncherViewModelTest {
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
         ).thenReturn(Result.success(setupIntent))
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(setupIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(setupIntent)))
             .thenReturn(siAuthenticator)
 
         whenever(
@@ -153,7 +153,7 @@ class PaymentLauncherViewModelTest {
             )
         ).thenReturn(Result.success(stripeIntent))
 
-        whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
+        whenever(authenticatorRegistry.getNextActionHandler(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
     }
 
@@ -499,7 +499,7 @@ class PaymentLauncherViewModelTest {
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
-                includePaymentSheetAuthenticators = false,
+                includePaymentSheetNextHandlers = false,
                 confirmStripeIntentParams = mock<ConfirmPaymentIntentParams>(),
                 statusBarColor = Color.RED,
             )
