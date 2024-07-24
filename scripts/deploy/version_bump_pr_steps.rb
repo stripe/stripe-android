@@ -19,7 +19,7 @@ def ensure_clean_repo()
 end
 
 def pull_latest()
-    execute_or_fail("git checkout #{@branch}")
+    execute_or_fail("git checkout #{@deploy_branch}")
     execute_or_fail("git pull")
 end
 

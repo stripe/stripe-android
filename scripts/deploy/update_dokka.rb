@@ -34,7 +34,7 @@ def generate_dokka()
         raise
     end
 
-    execute_or_fail("git checkout #{@branch}")
+    execute_or_fail("git checkout #{@deploy_branch}")
 end
 
 def revert_dokka_changes()

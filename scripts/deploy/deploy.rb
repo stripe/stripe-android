@@ -12,7 +12,7 @@ require_relative 'version_bump_pr_steps'
 
 @step_index = 1
 @is_dry_run = false
-@branch = 'master'
+@deploy_branch = 'master'
 
 def execute_steps(steps, step_index)
   step_count = steps.length
@@ -50,7 +50,7 @@ OptionParser.new do |opts|
   end
 
   opts.on('--branch BRANCH', "Branch to deploy from") do |t|
-      @branch = t
+      @deploy_branch = t
   end
 end.parse!
 
