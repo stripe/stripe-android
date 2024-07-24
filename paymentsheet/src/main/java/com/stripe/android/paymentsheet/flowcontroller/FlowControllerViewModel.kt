@@ -4,19 +4,18 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.analytics.SessionSavedStateHandler
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 
 internal class FlowControllerViewModel(
     application: Application,
-    private val handle: SavedStateHandle,
+    val handle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
     val flowControllerStateComponent: FlowControllerStateComponent =
         DaggerFlowControllerStateComponent
             .builder()
-            .appContext(application)
+            .application(application)
             .flowControllerViewModel(this)
             .build()
 
@@ -33,12 +32,6 @@ internal class FlowControllerViewModel(
             handle[STATE_KEY] = value
         }
 
-    var deferredIntentConfirmationType: DeferredIntentConfirmationType?
-        get() = handle[KEY_DEFERRED_INTENT_CONFIRMATION_TYPE]
-        set(value) {
-            handle[KEY_DEFERRED_INTENT_CONFIRMATION_TYPE] = value
-        }
-
     private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
 
     fun resetSession() {
@@ -47,6 +40,5 @@ internal class FlowControllerViewModel(
 
     private companion object {
         private const val STATE_KEY = "state"
-        private const val KEY_DEFERRED_INTENT_CONFIRMATION_TYPE = "KEY_DEFERRED_INTENT_CONFIRMATION_TYPE"
     }
 }
