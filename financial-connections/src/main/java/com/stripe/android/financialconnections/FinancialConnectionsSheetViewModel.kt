@@ -129,8 +129,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
         val manifest = sync.manifest
         val isInstantDebits = stateFlow.value.isInstantDebits
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
-        nativeRouter.logExposure(manifest, isInstantDebits)
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
+        nativeRouter.logExposure(manifest)
         val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
         if (hostedAuthUrl == null) {
             finishWithResult(

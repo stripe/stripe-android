@@ -135,7 +135,7 @@ class FinancialConnectionsSheetViewModelTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-            whenever(nativeRouter.nativeAuthFlowEnabled(any(), any())).thenReturn(false)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
             // When
             val viewModel = createViewModel(
@@ -158,7 +158,7 @@ class FinancialConnectionsSheetViewModelTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
         whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-        whenever(nativeRouter.nativeAuthFlowEnabled(any(), any())).thenReturn(false)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
         val viewModel = createViewModel(

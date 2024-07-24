@@ -19,26 +19,16 @@ internal class NativeAuthFlowRouter @Inject constructor(
 
     fun nativeAuthFlowEnabled(
         manifest: FinancialConnectionsSessionManifest,
-        isInstantDebits: Boolean
     ): Boolean {
         debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
-
-        return if (isInstantDebits) {
-            killSwitchEnabled.not()
-        } else {
-            killSwitchEnabled.not() && nativeExperimentEnabled(manifest)
-        }
+        return killSwitchEnabled.not() && nativeExperienceEnabled(manifest)
     }
 
     fun logExposure(
         manifest: FinancialConnectionsSessionManifest,
-        isInstantDebits: Boolean,
     ) {
-        if (isInstantDebits || debugConfiguration.overriddenNative != null) {
-            return
-        }
-        if (nativeKillSwitchActive(manifest).not()) {
+        if (shouldLogExposure(manifest)) {
             eventTracker.trackExposure(
                 experiment = CONNECTIONS_MOBILE_NATIVE,
                 manifest = manifest
@@ -51,10 +41,18 @@ internal class NativeAuthFlowRouter @Inject constructor(
             ?.any { it.key == FEATURE_KEY_NATIVE_KILLSWITCH && it.value }
             ?: true
 
-    private fun nativeExperimentEnabled(
+    private fun nativeExperienceEnabled(
         manifest: FinancialConnectionsSessionManifest,
     ): Boolean {
-        return manifest.experimentAssignment(CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
+        val isInstantDebits = manifest.isLinkWithStripe ?: false
+        return isInstantDebits ||
+            manifest.experimentAssignment(CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
+    }
+
+    private fun shouldLogExposure(manifest: FinancialConnectionsSessionManifest): Boolean {
+        val isForcingNative = debugConfiguration.overriddenNative != null
+        val isInstantDebits = manifest.isLinkWithStripe ?: false
+        return isForcingNative.not() && isInstantDebits.not() && nativeKillSwitchActive(manifest).not()
     }
 
     companion object {
