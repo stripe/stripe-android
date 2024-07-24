@@ -897,13 +897,15 @@ internal class CustomerSheetViewModel(
         clientSecret: String,
         paymentMethod: PaymentMethod
     ): Result<Unit> {
+        val selection = PaymentSelection.Saved(paymentMethod)
+
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
                 initializationMode = PaymentSheet.InitializationMode.SetupIntent(
                     clientSecret = clientSecret
                 ),
                 intent = stripeIntent,
-                paymentSelection = PaymentSelection.Saved(paymentMethod),
+                paymentSelection = selection,
                 shippingDetails = null,
             )
         )
@@ -913,7 +915,7 @@ internal class CustomerSheetViewModel(
                 safeUpdateSelectPaymentMethodState { viewState ->
                     viewState.copy(
                         savedPaymentMethods = listOf(paymentMethod) + viewState.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(paymentMethod = paymentMethod),
+                        paymentSelection = selection,
                         primaryButtonVisible = true,
                         primaryButtonLabel = resources.getString(
                             R.string.stripe_paymentsheet_confirm
