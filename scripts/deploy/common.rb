@@ -38,7 +38,14 @@ def delete_git_branch(branch_name)
 
     # Actually delete the branch
     execute("git push origin --delete #{branch_name}")
-    execute("git branch -d #{branch_name}")
+    execute("git branch -D #{branch_name}")
+end
+
+def switch_to_new_branch(branch_name)
+    # Ensure a different version of this branch doesn't already exist.
+    delete_git_branch(branch_name)
+
+    execute_or_fail("git checkout -b #{branch_name}")
 end
 
 def create_pr(

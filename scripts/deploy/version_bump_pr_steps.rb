@@ -24,14 +24,11 @@ def pull_latest()
 end
 
 def switch_to_release_branch()
-    # Ensure that the branch doesn't already exist locally or remotely before creating it here.
-    delete_release_branch
-    execute_or_fail("git checkout -b #{release_branch}")
+    switch_to_new_branch(release_branch)
 end
 
-def delete_release_branch()
-    execute("git push origin --delete #{release_branch}")
-    execute("git branch -d #{release_branch}")
+def revert_version_bump_changes()
+    delete_git_branch(release_branch)
 end
 
 def create_version_bump_pr()
@@ -62,14 +59,6 @@ def create_version_bump_pr()
 
     rputs "Merge the version bump PR"
     wait_for_user
-end
-
-def revert_all_changes()
-    execute_or_fail("git reset HEAD~")
-    execute_or_fail("git restore README.md")
-    execute_or_fail("git restore CHANGELOG.md")
-    execute_or_fail("git restore gradle.properties")
-    execute_or_fail("git restore stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt")
 end
 
 private def release_branch

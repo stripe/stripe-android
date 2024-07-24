@@ -85,9 +85,7 @@ if (@is_dry_run)
     When you're done, press enter to revert all changes."
     wait_for_user()
 
-    revert_all_changes()
     delete_github_release()
-    execute_or_fail("git checkout #{@branch}")
-    delete_release_branch()
+    revert_version_bump_changes()
     revert_dokka_changes()
 end

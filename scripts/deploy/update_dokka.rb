@@ -6,7 +6,7 @@ def generate_dokka()
     dokka_change_description = "Generate dokka for #{@version}"
 
     begin
-        execute_or_fail("git checkout -b #{dokka_branch_name}")
+        switch_to_new_branch(dokka_branch_name)
         execute_or_fail("rm -rf docs/")
         execute_or_fail("./gradlew clean")
         execute_or_fail("./gradlew dokkaHtmlMultiModule")
@@ -22,6 +22,7 @@ def generate_dokka()
             "Send the dokka PR for review and enable auto-merge. Then, continue with the next steps."
         )
     rescue
+        # TODO: this won't work as a clean up step.
         revert_dokka_changes
     end
 
@@ -29,10 +30,6 @@ def generate_dokka()
 end
 
 def revert_dokka_changes()
-    execute("git checkout #{dokka_branch_name}")
-    execute_or_fail("git reset HEAD~")
-    execute_or_fail("git restore docs/*")
-    execute_or_fail("git checkout #{@branch}")
     delete_git_branch(dokka_branch_name)
 end
 
