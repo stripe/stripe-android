@@ -304,7 +304,7 @@ internal class IntentConfirmationHandler(
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         private val savedStateHandle: SavedStateHandle,
-        private val statusBarColor: Int?,
+        private val statusBarColor: () -> Int?,
         private val application: Application,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
@@ -314,7 +314,7 @@ internal class IntentConfirmationHandler(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },
                         stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
                         hostActivityLauncher = hostActivityLauncher,
-                        statusBarColor = statusBarColor,
+                        statusBarColor = statusBarColor(),
                         includePaymentSheetAuthenticators = true,
                     )
                 },

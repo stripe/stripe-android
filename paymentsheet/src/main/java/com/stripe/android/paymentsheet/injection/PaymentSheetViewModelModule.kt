@@ -37,7 +37,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             paymentConfigurationProvider = paymentConfigurationProvider,
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
             application = application,
-            statusBarColor = starterArgs.statusBarColor,
+            statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
         )
     }

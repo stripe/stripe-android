@@ -1093,7 +1093,7 @@ internal class PaymentSheetActivityTest {
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                    statusBarColor = args.statusBarColor,
+                    statusBarColor = { args.statusBarColor },
                     application = application,
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
