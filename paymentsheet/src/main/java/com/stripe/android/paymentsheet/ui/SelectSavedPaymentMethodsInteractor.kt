@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
@@ -197,6 +198,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
@@ -206,8 +208,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,
-                mostRecentlySelectedSavedPaymentMethod =
-                savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
+                mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 onAddCardPressed = {
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,

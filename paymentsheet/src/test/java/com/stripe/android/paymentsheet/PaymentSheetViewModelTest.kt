@@ -498,7 +498,7 @@ internal class PaymentSheetViewModelTest {
             ).toParamMap()
         )
 
-        assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value).isEqualTo(
+        assertThat(viewModel.customerStateHolder.paymentMethods.value).isEqualTo(
             listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
         )
     }
@@ -1442,7 +1442,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
+        viewModel.customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isNotEmpty()
         }
     }
@@ -1451,7 +1451,7 @@ internal class PaymentSheetViewModelTest {
     fun `paymentMethods is empty if customer has no payment methods`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
+        viewModel.customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
         }
     }

@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -155,10 +156,11 @@ internal class DefaultManageScreenInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): ManageScreenInteractor {
             return DefaultManageScreenInteractor(
-                paymentMethods = savedPaymentMethodMutator.paymentMethods,
+                paymentMethods = customerStateHolder.paymentMethods,
                 paymentMethodMetadata = paymentMethodMetadata,
                 selection = viewModel.selection,
                 editing = savedPaymentMethodMutator.editing,

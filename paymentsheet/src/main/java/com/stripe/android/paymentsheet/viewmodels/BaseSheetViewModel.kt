@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
@@ -101,6 +102,7 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
+    val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
     val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     protected val buttonsEnabled = combineAsStateFlow(

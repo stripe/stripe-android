@@ -201,7 +201,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.savedPaymentMethodMutator.removePaymentMethod(cards[1])
 
-        assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value)
+        assertThat(viewModel.customerStateHolder.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
     }
 
@@ -232,7 +232,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethod)
 
-        assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value).isEmpty()
+        assertThat(viewModel.customerStateHolder.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
         assertThat(viewModel.mandateHandler.mandateText.value?.text).isNull()
     }
@@ -281,7 +281,7 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
+        viewModel.customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isNotEmpty()
         }
     }
@@ -294,7 +294,7 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
+        viewModel.customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
         }
     }
@@ -658,7 +658,7 @@ internal class PaymentOptionsViewModelTest {
 
         turbineScope {
             val screenTurbine = viewModel.navigationHandler.currentScreen.testIn(this)
-            val paymentMethodsTurbine = viewModel.savedPaymentMethodMutator.paymentMethods.testIn(this)
+            val paymentMethodsTurbine = viewModel.customerStateHolder.paymentMethods.testIn(this)
 
             assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
@@ -710,7 +710,7 @@ internal class PaymentOptionsViewModelTest {
 
         turbineScope {
             val screenTurbine = viewModel.navigationHandler.currentScreen.testIn(this)
-            val paymentMethodsTurbine = viewModel.savedPaymentMethodMutator.paymentMethods.testIn(this)
+            val paymentMethodsTurbine = viewModel.customerStateHolder.paymentMethods.testIn(this)
 
             assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
@@ -805,7 +805,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
+        viewModel.customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
         }
     }

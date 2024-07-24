@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -51,10 +52,11 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): ManageOneSavedPaymentMethodInteractor {
             return DefaultManageOneSavedPaymentMethodInteractor(
-                paymentMethod = savedPaymentMethodMutator.paymentMethods.value.first(),
+                paymentMethod = customerStateHolder.paymentMethods.value.first(),
                 paymentMethodMetadata = paymentMethodMetadata,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
