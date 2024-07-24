@@ -39,7 +39,7 @@ internal class NativeAuthFlowRouterTest {
     }
 
     @Test
-    fun `nativeAuthFlowEnabled - false if experiment is treatment but instant debits`() {
+    fun `nativeAuthFlowEnabled - true if experiment is treatment and no kill switch in instant debits`() {
         val syncResponse = syncWithAssignments(
             assignments = mapOf(
                 "connections_mobile_native" to "treatment"
@@ -48,7 +48,7 @@ internal class NativeAuthFlowRouterTest {
         )
         val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = true)
 
-        assertThat(nativeAuthFlowEnabled).isFalse()
+        assertThat(nativeAuthFlowEnabled).isTrue()
     }
 
     @Test
@@ -62,6 +62,21 @@ internal class NativeAuthFlowRouterTest {
             )
         )
         val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
+
+        assertThat(nativeAuthFlowEnabled).isFalse()
+    }
+
+    @Test
+    fun `nativeAuthFlowEnabled - false if experiment is treatment but kill switch is on in instant debits`() {
+        val syncResponse = syncWithAssignments(
+            assignments = mapOf(
+                "connections_mobile_native" to "treatment"
+            ),
+            features = mapOf(
+                "bank_connections_mobile_native_version_killswitch" to true
+            )
+        )
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = true)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
