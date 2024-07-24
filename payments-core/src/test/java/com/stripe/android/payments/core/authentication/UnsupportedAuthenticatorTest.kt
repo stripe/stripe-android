@@ -51,7 +51,7 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyWeChat() = runTest {
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
             REQUEST_OPTIONS
@@ -75,7 +75,7 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyNullNextActionType() = runTest {
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host,
             PI_SUCCEEDED,
             REQUEST_OPTIONS

@@ -177,7 +177,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator).nextAction(
+            verify(piAuthenticator).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -210,7 +210,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator).nextAction(
+            verify(piAuthenticator).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -244,7 +244,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(piAuthenticator, never()).nextAction(
+            verify(piAuthenticator, never()).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
                 eq(apiRequestOptions)
@@ -275,7 +275,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(siAuthenticator).nextAction(
+            verify(siAuthenticator).performNextAction(
                 eq(authHost),
                 eq(setupIntent),
                 eq(apiRequestOptions)
@@ -308,7 +308,7 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 eq(EXPAND_PAYMENT_METHOD)
             )
-            verify(siAuthenticator).nextAction(
+            verify(siAuthenticator).performNextAction(
                 eq(authHost),
                 eq(setupIntent),
                 eq(apiRequestOptions)
@@ -363,7 +363,7 @@ class PaymentLauncherViewModelTest {
             createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
-            verify(stripeIntentAuthenticator).nextAction(
+            verify(stripeIntentAuthenticator).performNextAction(
                 eq(authHost),
                 eq(stripeIntent),
                 eq(apiRequestOptions)

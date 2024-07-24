@@ -20,7 +20,7 @@ internal class VoucherNextActionHandler @Inject constructor(
     private val noOpIntentAuthenticator: NoOpIntentNextActionHandler,
     private val context: Context,
 ) : PaymentNextActionHandler<StripeIntent>() {
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -31,13 +31,13 @@ internal class VoucherNextActionHandler @Inject constructor(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))
             )
-            noOpIntentAuthenticator.nextAction(
+            noOpIntentAuthenticator.performNextAction(
                 host,
                 actionable,
                 requestOptions
             )
         } else {
-            webIntentAuthenticator.nextAction(
+            webIntentAuthenticator.performNextAction(
                 host,
                 actionable,
                 requestOptions

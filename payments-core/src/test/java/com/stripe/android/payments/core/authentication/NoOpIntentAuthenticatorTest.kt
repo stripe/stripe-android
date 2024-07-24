@@ -49,7 +49,7 @@ class NoOpIntentAuthenticatorTest {
             )
         )
 
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS
@@ -73,7 +73,7 @@ class NoOpIntentAuthenticatorTest {
                 host
             )
         )
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS

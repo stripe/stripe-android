@@ -62,7 +62,7 @@ class SourceAuthenticatorTest {
     @Test
     fun authenticate_withNoneFlowSource_shouldBypassAuth() =
         runTest {
-            authenticator.nextAction(
+            authenticator.performNextAction(
                 host = host,
                 actionable = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
                     flow = Source.Flow.None

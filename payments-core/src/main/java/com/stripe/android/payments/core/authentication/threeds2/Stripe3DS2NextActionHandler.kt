@@ -58,7 +58,7 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
         stripe3ds2CompletionLauncher = null
     }
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

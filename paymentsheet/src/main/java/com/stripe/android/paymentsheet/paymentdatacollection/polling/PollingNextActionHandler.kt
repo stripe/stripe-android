@@ -25,7 +25,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

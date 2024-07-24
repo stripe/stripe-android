@@ -19,7 +19,7 @@ import javax.inject.Singleton
 internal class UnsupportedNextActionHandler @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
 ) : PaymentNextActionHandler<StripeIntent>() {
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

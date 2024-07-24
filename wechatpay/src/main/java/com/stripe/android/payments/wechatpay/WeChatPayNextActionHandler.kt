@@ -52,7 +52,7 @@ class WeChatPayNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
         weChatPayAuthLauncher = null
     }
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

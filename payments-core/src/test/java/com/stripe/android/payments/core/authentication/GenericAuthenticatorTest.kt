@@ -32,7 +32,7 @@ class GenericAuthenticatorTest {
         val completable = CompletableDeferred<Unit>()
 
         launch(backgroundScope.coroutineContext) {
-            authenticator.nextAction(
+            authenticator.performNextAction(
                 host = host,
                 actionable = mock(),
                 requestOptions = mock(),
@@ -53,7 +53,7 @@ class GenericAuthenticatorTest {
         val authenticator = TestNextActionHandler()
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
 
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host = host,
             actionable = mock(),
             requestOptions = mock(),
@@ -68,7 +68,7 @@ private class TestNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
     var wasInvoked: Boolean = false
         private set
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

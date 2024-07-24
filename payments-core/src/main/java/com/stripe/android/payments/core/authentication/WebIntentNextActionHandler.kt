@@ -39,7 +39,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val redirectResolver: RedirectResolver,
 ) : PaymentNextActionHandler<StripeIntent>() {
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options

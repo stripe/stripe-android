@@ -321,7 +321,7 @@ constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(source).nextAction(
+        authenticatorRegistry.getAuthenticator(source).performNextAction(
             host,
             source,
             requestOptions
@@ -448,7 +448,7 @@ constructor(
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getAuthenticator(stripeIntent).nextAction(
+        authenticatorRegistry.getAuthenticator(stripeIntent).performNextAction(
             host,
             stripeIntent,
             requestOptions

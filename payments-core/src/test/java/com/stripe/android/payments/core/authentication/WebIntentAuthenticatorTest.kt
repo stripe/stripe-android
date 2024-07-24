@@ -176,7 +176,7 @@ class WebIntentAuthenticatorTest {
             redirectResolver = redirectResolver,
         )
 
-        authenticator.nextAction(
+        authenticator.performNextAction(
             host,
             stripeIntent,
             REQUEST_OPTIONS

@@ -36,7 +36,7 @@ internal class SourceNextActionHandler @Inject constructor(
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : PaymentNextActionHandler<Source>() {
 
-    override suspend fun performNextAction(
+    override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: Source,
         requestOptions: ApiRequest.Options

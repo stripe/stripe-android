@@ -25,7 +25,7 @@ abstract class PaymentNextActionHandler<Actionable> : ActivityResultLauncherHost
      * @param actionable the [StripeIntent] or [Source] object to perform next action on (e.g authenticate)
      * @param requestOptions configurations for the API request which triggers the authentication
      */
-    suspend fun nextAction(
+    suspend fun performNextAction(
         host: AuthActivityStarterHost,
         actionable: Actionable,
         requestOptions: ApiRequest.Options
@@ -33,10 +33,10 @@ abstract class PaymentNextActionHandler<Actionable> : ActivityResultLauncherHost
         val lifecycleOwner = host.lifecycleOwner
 
         lifecycleOwner.awaitResumed()
-        performNextAction(host, actionable, requestOptions)
+        performNextActionOnResumed(host, actionable, requestOptions)
     }
 
-    protected abstract suspend fun performNextAction(
+    protected abstract suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: Actionable,
         requestOptions: ApiRequest.Options
