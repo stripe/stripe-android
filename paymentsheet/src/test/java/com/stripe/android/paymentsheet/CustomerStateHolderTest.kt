@@ -18,6 +18,13 @@ internal class CustomerStateHolderTest {
     }
 
     @Test
+    fun `paymentMethod is initialized as emptyList`() = runScenario {
+        customerStateHolder.paymentMethods.test{
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
     fun `customer is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(

@@ -274,32 +274,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-        )
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                paymentMethods = listOf()
-            )
-        )
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
-        }
-    }
-
-    @Test
     fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -791,24 +765,6 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
         }
-
-    @Test
-    fun `paymentMethods is not null when loading is complete`() = runTest {
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-            isGooglePayReady = true,
-        ).run {
-            copy(state = state.copy(customer = null))
-        }
-
-        val viewModel = createViewModel(args = args)
-
-        viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
-        }
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
-        }
-    }
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
