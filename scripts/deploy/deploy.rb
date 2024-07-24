@@ -5,9 +5,10 @@ require 'optparse'
 
 require_relative 'common'
 require_relative 'create_github_release'
-require_relative 'version_bump_pr_steps'
+require_relative 'update_dokka'
 require_relative 'update_version_numbers'
 require_relative 'validate_version_number'
+require_relative 'version_bump_pr_steps'
 
 @step_index = 1
 @is_dry_run = false
@@ -68,6 +69,8 @@ steps = [
     method(:create_version_bump_pr),
 
     method(:create_github_release),
+
+    method(:generate_dokka),
 ]
 
 execute_steps(steps, @step_index)
@@ -86,4 +89,5 @@ if (@is_dry_run)
     delete_github_release()
     execute_or_fail("git checkout #{@branch}")
     delete_release_branch()
+    revert_dokka_changes()
 end
