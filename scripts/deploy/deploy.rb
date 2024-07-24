@@ -5,13 +5,14 @@ require 'optparse'
 
 require_relative 'common'
 require_relative 'create_github_release'
-require_relative 'version_bump_pr_steps'
+require_relative 'update_dokka'
 require_relative 'update_version_numbers'
 require_relative 'validate_version_number'
+require_relative 'version_bump_pr_steps'
 
 @step_index = 1
 @is_dry_run = false
-@branch = 'master'
+@deploy_branch = 'master'
 
 def execute_steps(steps, step_index)
   step_count = steps.length
@@ -49,7 +50,7 @@ OptionParser.new do |opts|
   end
 
   opts.on('--branch BRANCH', "Branch to deploy from") do |t|
-      @branch = t
+      @deploy_branch = t
   end
 end.parse!
 
@@ -68,6 +69,8 @@ steps = [
     method(:create_version_bump_pr),
 
     method(:create_github_release),
+
+    method(:generate_dokka),
 ]
 
 execute_steps(steps, @step_index)
@@ -82,8 +85,7 @@ if (@is_dry_run)
     When you're done, press enter to revert all changes."
     wait_for_user()
 
-    revert_all_changes()
     delete_github_release()
-    execute_or_fail("git checkout #{@branch}")
-    delete_release_branch()
+    revert_version_bump_changes()
+    revert_dokka_changes()
 end
