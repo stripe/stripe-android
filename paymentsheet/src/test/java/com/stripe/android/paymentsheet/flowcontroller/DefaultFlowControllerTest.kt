@@ -3,9 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.content.Context
 import android.graphics.Color
 import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -165,12 +164,7 @@ internal class DefaultFlowControllerTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    private val activityResultRegistry: ActivityResultRegistry = mock()
-
-    private val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
-        override val activityResultRegistry: ActivityResultRegistry
-            get() = this@DefaultFlowControllerTest.activityResultRegistry
-    }
+    private val activityResultCaller: ActivityResultCaller = mock()
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
@@ -181,64 +175,56 @@ internal class DefaultFlowControllerTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<PaymentOptionContract>(),
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<AddressElementActivityContract>(),
                 any()
             )
         ).thenReturn(addressElementActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<GooglePayPaymentMethodLauncherContractV2>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<LinkActivityContract>(),
                 any()
             )
         ).thenReturn(linkActivityResultLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<SepaMandateContract>(),
                 any()
             )
         ).thenReturn(sepaMandateActivityLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<PaymentLauncherContract>(),
                 any()
             )
         ).thenReturn(mock())
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<BacsMandateConfirmationContract>(),
                 any()
             )
         ).thenReturn(mock())
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<ExternalPaymentMethodContract>(),
                 any()
             )
@@ -248,8 +234,7 @@ internal class DefaultFlowControllerTest {
             .thenReturn(paymentLauncher)
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<CvcRecollectionContract>(),
                 any()
             )
@@ -1613,8 +1598,7 @@ internal class DefaultFlowControllerTest {
         }
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<BacsMandateConfirmationContract>(),
                 onResult.capture()
             )
@@ -1668,8 +1652,7 @@ internal class DefaultFlowControllerTest {
         }
 
         whenever(
-            activityResultRegistry.register(
-                any(),
+            activityResultCaller.registerForActivityResult(
                 any<CvcRecollectionContract>(),
                 onResult.capture()
             )
@@ -2055,7 +2038,7 @@ internal class DefaultFlowControllerTest {
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
-        activityResultRegistryOwner = activityResultRegistryOwner,
+        activityResultCaller = activityResultCaller,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
             resources = context.resources,

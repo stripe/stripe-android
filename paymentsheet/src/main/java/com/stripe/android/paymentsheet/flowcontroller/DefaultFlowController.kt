@@ -3,10 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
-import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -96,7 +94,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
-    activityResultRegistryOwner: ActivityResultRegistryOwner,
+    activityResultCaller: ActivityResultCaller,
     // Properties provided through injection
     private val context: Context,
     private val eventReporter: EventReporter,
@@ -152,27 +150,27 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
-        val paymentLauncherActivityResultLauncher = activityResultRegistryOwner.register(
+        val paymentLauncherActivityResultLauncher = activityResultCaller.registerForActivityResult(
             PaymentLauncherContract(),
             ::onInternalPaymentResult
         )
 
-        paymentOptionActivityLauncher = activityResultRegistryOwner.register(
+        paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
             PaymentOptionContract(),
             ::onPaymentOptionResult
         )
 
-        googlePayActivityLauncher = activityResultRegistryOwner.register(
+        googlePayActivityLauncher = activityResultCaller.registerForActivityResult(
             GooglePayPaymentMethodLauncherContractV2(),
             ::onGooglePayResult
         )
 
-        sepaMandateActivityLauncher = activityResultRegistryOwner.register(
+        sepaMandateActivityLauncher = activityResultCaller.registerForActivityResult(
             SepaMandateContract(),
             ::onSepaMandateResult,
         )
 
-        val bacsMandateConfirmationActivityLauncher = activityResultRegistryOwner.register(
+        val bacsMandateConfirmationActivityLauncher = activityResultCaller.registerForActivityResult(
             BacsMandateConfirmationContract(),
             ::onBacsMandateResult
         )
@@ -181,13 +179,13 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
-        val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
+        val externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
             ExternalPaymentMethodContract(errorReporter),
             ::onExternalPaymentMethodResult
         )
         this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
 
-        val cvcRecollectionActivityLauncher = activityResultRegistryOwner.register(
+        val cvcRecollectionActivityLauncher = activityResultCaller.registerForActivityResult(
             CvcRecollectionContract(),
             ::onCvcRecollectionResult
         )
@@ -207,7 +205,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         linkLauncher.register(
-            activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
+            activityResultCaller = activityResultCaller,
             callback = ::onLinkActivityResult,
         )
 
@@ -919,19 +917,11 @@ internal class DefaultFlowController @Inject internal constructor(
         val config: PaymentSheet.Configuration?
     ) : Parcelable
 
-    private fun <I, O> ActivityResultRegistryOwner.register(
-        contract: ActivityResultContract<I, O>,
-        callback: ActivityResultCallback<O>,
-    ): ActivityResultLauncher<I> {
-        val key = "FlowController_${contract::class.java.name}"
-        return activityResultRegistry.register(key, contract, callback)
-    }
-
     companion object {
         fun getInstance(
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            activityResultRegistryOwner: ActivityResultRegistryOwner,
+            activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback,
@@ -947,7 +937,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerComponent: FlowControllerComponent =
                 flowControllerStateComponent.flowControllerComponentBuilder
                     .lifeCycleOwner(lifecycleOwner)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
+                    .activityResultCaller(activityResultCaller)
                     .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
