@@ -35,8 +35,11 @@ def delete_github_release
    delete_release_tag
 
    if (@release_url != nil)
-       rputs "Deleting release..."
-       octokit_client.delete_release(@release_url)
+       puts "Deleting release..."
+       deleting_release_succeeded = octokit_client.delete_release("#{@release_url}__")
+       if (!deleting_release_succeeded)
+           rputs "Deleting release failed! Please manually delete release."
+       end
    end
 end
 
