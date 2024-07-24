@@ -19,7 +19,7 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `paymentMethod is initialized as emptyList`() = runScenario {
-        customerStateHolder.paymentMethods.test{
+        customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
         }
     }
