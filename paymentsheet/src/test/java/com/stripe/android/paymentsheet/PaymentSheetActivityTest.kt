@@ -13,6 +13,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -59,6 +60,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
@@ -184,7 +186,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.buyButton.isEnabled).isTrue()
 
-            viewModel.savedPaymentMethodMutator.toggleEditing()
+            startEditing()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -199,7 +201,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
-            viewModel.savedPaymentMethodMutator.toggleEditing()
+            startEditing()
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -436,7 +438,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            viewModel.savedPaymentMethodMutator.toggleEditing()
+            startEditing()
 
             composeTestRule.onNodeWithTag(
                 TEST_TAG_REMOVE_BADGE,
@@ -1116,6 +1118,13 @@ internal class PaymentSheetActivityTest {
                 return googlePayPaymentMethodLauncher
             }
         }
+
+    private fun startEditing() {
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodesWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
+    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
