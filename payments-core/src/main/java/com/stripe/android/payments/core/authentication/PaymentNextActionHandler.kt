@@ -16,29 +16,29 @@ import kotlinx.coroutines.CompletableDeferred
  * A class to authenticate a [StripeIntent] or [Source].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class PaymentAuthenticator<Authenticatable> : ActivityResultLauncherHost {
+abstract class PaymentNextActionHandler<Actionable> : ActivityResultLauncherHost {
 
     /**
      * Authenticates a [StripeIntent] or [Source].
      *
      * @param host the host([Activity] or [Fragment]) where client is calling from, used to redirect back to client
-     * @param authenticatable the [StripeIntent] or [Source] object to authenticate
+     * @param actionable the [StripeIntent] or [Source] object to perform next action on (e.g authenticate)
      * @param requestOptions configurations for the API request which triggers the authentication
      */
-    suspend fun authenticate(
+    suspend fun performNextAction(
         host: AuthActivityStarterHost,
-        authenticatable: Authenticatable,
+        actionable: Actionable,
         requestOptions: ApiRequest.Options
     ) {
         val lifecycleOwner = host.lifecycleOwner
 
         lifecycleOwner.awaitResumed()
-        performAuthentication(host, authenticatable, requestOptions)
+        performNextActionOnResumed(host, actionable, requestOptions)
     }
 
-    protected abstract suspend fun performAuthentication(
+    protected abstract suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
-        authenticatable: Authenticatable,
+        actionable: Actionable,
         requestOptions: ApiRequest.Options
     )
 }

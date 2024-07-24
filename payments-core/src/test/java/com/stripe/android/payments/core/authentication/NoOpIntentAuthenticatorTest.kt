@@ -35,7 +35,7 @@ class NoOpIntentAuthenticatorTest {
     private val paymentRelayStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
 
-    private val authenticator = NoOpIntentAuthenticator(
+    private val authenticator = NoOpIntentNextActionHandler(
         paymentRelayStarterFactory
     )
 
@@ -49,7 +49,7 @@ class NoOpIntentAuthenticatorTest {
             )
         )
 
-        authenticator.authenticate(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS
@@ -73,7 +73,7 @@ class NoOpIntentAuthenticatorTest {
                 host
             )
         )
-        authenticator.authenticate(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS

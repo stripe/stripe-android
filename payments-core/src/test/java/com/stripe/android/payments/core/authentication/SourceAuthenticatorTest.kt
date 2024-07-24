@@ -48,7 +48,7 @@ class SourceAuthenticatorTest {
     )
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val authenticator = SourceAuthenticator(
+    private val authenticator = SourceNextActionHandler(
         paymentBrowserAuthStarterFactory,
         paymentRelayStarterFactory,
         analyticsRequestExecutor,
@@ -62,9 +62,9 @@ class SourceAuthenticatorTest {
     @Test
     fun authenticate_withNoneFlowSource_shouldBypassAuth() =
         runTest {
-            authenticator.authenticate(
+            authenticator.performNextAction(
                 host = host,
-                authenticatable = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
+                actionable = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
                     flow = Source.Flow.None
                 ),
                 requestOptions = mock()
