@@ -169,7 +169,7 @@ internal fun PaymentSheetTopBar_Preview() {
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
             onEditIconPressed = {},
         )
 

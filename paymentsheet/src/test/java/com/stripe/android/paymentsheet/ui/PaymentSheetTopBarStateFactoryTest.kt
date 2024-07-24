@@ -91,6 +91,7 @@ class PaymentSheetTopBarStateFactoryTest {
             ),
         )
 
+        assertThat(state.isEditing).isEqualTo(false)
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_edit)
     }
 
@@ -104,7 +105,17 @@ class PaymentSheetTopBarStateFactoryTest {
             ),
         )
 
+        assertThat(state.isEditing).isEqualTo(true)
         assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_done)
+    }
+
+    @Test
+    fun `isEditing=false when editable=Never`() {
+        val state = buildTopBarState(
+            editable = PaymentSheetTopBarState.Editable.Never,
+        )
+
+        assertThat(state.isEditing).isEqualTo(false)
     }
 
     private fun buildTopBarState(

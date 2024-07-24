@@ -19,7 +19,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
@@ -111,7 +110,7 @@ class PaymentSheetTopBarTest {
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = false,
             showEditMenu = showEditMenu,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
             onEditIconPressed = onEditIconPressed,
         )
     }

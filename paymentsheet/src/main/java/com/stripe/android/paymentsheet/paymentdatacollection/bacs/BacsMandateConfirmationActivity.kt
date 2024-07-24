@@ -74,7 +74,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                     contentDescription = StripeUiCoreR.string.stripe_back,
                                     showEditMenu = false,
                                     showTestModeLabel = false,
-                                    editMenuLabel = StripeR.string.stripe_edit,
+                                    isEditing = false,
                                     onEditIconPressed = {},
                                 ),
                                 isEnabled = true,
