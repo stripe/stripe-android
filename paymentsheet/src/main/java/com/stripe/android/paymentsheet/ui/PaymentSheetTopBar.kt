@@ -33,7 +33,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
@@ -169,7 +168,7 @@ internal fun PaymentSheetTopBar_Preview() {
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
             onEditIconPressed = {},
         )
 

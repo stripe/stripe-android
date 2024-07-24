@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,7 +107,11 @@ internal abstract class BaseSheetViewModel(
 
     protected val buttonsEnabled = combineAsStateFlow(
         processing,
-        savedPaymentMethodMutator.editing,
+        navigationHandler.currentScreen.flatMapLatestAsStateFlow { currentScreen ->
+            currentScreen.topBarState().mapAsStateFlow { topBarState ->
+                topBarState?.isEditing == true
+            }
+        },
     ) { isProcessing, isEditing ->
         !isProcessing && !isEditing
     }

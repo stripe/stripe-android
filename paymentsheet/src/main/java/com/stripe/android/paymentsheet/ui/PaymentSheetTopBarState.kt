@@ -11,9 +11,18 @@ internal data class PaymentSheetTopBarState(
     @StringRes val contentDescription: Int,
     val showTestModeLabel: Boolean,
     val showEditMenu: Boolean,
-    @StringRes val editMenuLabel: Int,
+    val isEditing: Boolean,
     val onEditIconPressed: () -> Unit,
 ) {
+    @get:StringRes val editMenuLabel: Int
+        get() {
+            return if (isEditing) {
+                StripeR.string.stripe_done
+            } else {
+                StripeR.string.stripe_edit
+            }
+        }
+
     sealed interface Editable {
         data object Never : Editable
         data class Maybe(
@@ -42,18 +51,12 @@ internal object PaymentSheetTopBarStateFactory {
             R.string.stripe_paymentsheet_close
         }
 
-        val editMenuLabel = if ((editable as? PaymentSheetTopBarState.Editable.Maybe)?.isEditing == true) {
-            StripeR.string.stripe_done
-        } else {
-            StripeR.string.stripe_edit
-        }
-
         return PaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
             showEditMenu = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.canEdit == true,
-            editMenuLabel = editMenuLabel,
+            isEditing = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.isEditing == true,
             onEditIconPressed = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.onEditIconPressed
                 ?: {},
         )
