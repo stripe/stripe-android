@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.utils.Experiment
+import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_MOBILE_NATIVE
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
 import javax.inject.Inject
@@ -23,9 +23,12 @@ internal class NativeAuthFlowRouter @Inject constructor(
     ): Boolean {
         debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
-        val nativeExperimentEnabled = manifest
-            .experimentAssignment(Experiment.CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
-        return isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
+
+        return if (isInstantDebits) {
+            killSwitchEnabled.not()
+        } else {
+            killSwitchEnabled.not() && nativeExperimentEnabled(manifest)
+        }
     }
 
     fun logExposure(
@@ -37,7 +40,7 @@ internal class NativeAuthFlowRouter @Inject constructor(
         }
         if (nativeKillSwitchActive(manifest).not()) {
             eventTracker.trackExposure(
-                experiment = Experiment.CONNECTIONS_MOBILE_NATIVE,
+                experiment = CONNECTIONS_MOBILE_NATIVE,
                 manifest = manifest
             )
         }
@@ -47,6 +50,12 @@ internal class NativeAuthFlowRouter @Inject constructor(
         manifest.features
             ?.any { it.key == FEATURE_KEY_NATIVE_KILLSWITCH && it.value }
             ?: true
+
+    private fun nativeExperimentEnabled(
+        manifest: FinancialConnectionsSessionManifest,
+    ): Boolean {
+        return manifest.experimentAssignment(CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
+    }
 
     companion object {
         private const val FEATURE_KEY_NATIVE_KILLSWITCH =
