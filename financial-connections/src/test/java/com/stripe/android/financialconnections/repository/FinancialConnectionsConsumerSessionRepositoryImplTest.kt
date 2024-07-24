@@ -75,8 +75,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     fun `Stores tentative consumer publishable key on consumer session lookup`() = runTest {
         val consumerPublishableKey = "pk_123_consumer"
 
-        val apiOptionsProvider: ConsumerPublishableKeyStore = mock()
-        val repository = buildRepository(apiOptionsProvider)
+        val consumerPublishableKeyStore = mock<ConsumerPublishableKeyStore>()
+        val repository = buildRepository(consumerPublishableKeyStore)
 
         whenever(
             financialConnectionsConsumersApiService.postConsumerSession(any(), any(), any())
@@ -91,8 +91,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         repository.lookupConsumerSession("test@example.com", "client_secret")
 
-        verify(apiOptionsProvider).setTentativeConsumerPublishableKey(eq(consumerPublishableKey))
-        verify(apiOptionsProvider, never()).confirmConsumerPublishableKey()
+        verify(consumerPublishableKeyStore).setTentativeConsumerPublishableKey(eq(consumerPublishableKey))
+        verify(consumerPublishableKeyStore, never()).confirmConsumerPublishableKey()
     }
 
     @Test
@@ -182,8 +182,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
     @Test
     fun `Confirms tentative consumer publishable key on consumer verification`() = runTest {
-        val apiOptionsProvider: ConsumerPublishableKeyStore = mock()
-        val repository = buildRepository(apiOptionsProvider)
+        val consumerPublishableKeyStore = mock<ConsumerPublishableKeyStore>()
+        val repository = buildRepository(consumerPublishableKeyStore)
 
         whenever(
             consumersApiService.confirmConsumerVerification(
@@ -203,7 +203,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             type = VerificationType.SMS,
         )
 
-        verify(apiOptionsProvider).confirmConsumerPublishableKey()
+        verify(consumerPublishableKeyStore).confirmConsumerPublishableKey()
     }
 
     private fun buildRepository(

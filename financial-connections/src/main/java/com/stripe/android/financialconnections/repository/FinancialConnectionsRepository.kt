@@ -59,6 +59,9 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val consumerPublishableKeyProvider: ConsumerPublishableKeyProvider,
 ) : FinancialConnectionsRepository {
 
+    private val consumerApiRequestOptions: ApiRequest.Options?
+        get() = consumerPublishableKeyProvider.createApiRequestOptions()
+
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
     ): FinancialConnectionsAccountList {
@@ -93,7 +96,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         clientSecret: String,
         terminalError: String?
     ): FinancialConnectionsSession {
-        val consumerApiRequestOptions = consumerPublishableKeyProvider.createApiRequestOptions()
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
             options = consumerApiRequestOptions ?: apiOptions,
