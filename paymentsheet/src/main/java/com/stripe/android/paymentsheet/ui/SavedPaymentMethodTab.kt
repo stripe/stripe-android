@@ -50,6 +50,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
 
 internal const val TEST_TAG_REMOVE_BADGE = "remove_badge"
+internal const val TEST_TAG_MODIFY_BADGE = "modify_badge"
 
 private const val EDIT_ICON_SCALE = 0.6f
 private val editIconColorLight = Color(0x99000000)
@@ -268,7 +269,8 @@ private fun ModifyBadge(
             .size(20.dp)
             .clip(CircleShape)
             .background(color = backgroundColor)
-            .clickable(onClick = onPressed),
+            .clickable(onClick = onPressed)
+            .testTag(TEST_TAG_MODIFY_BADGE),
     )
 }
 

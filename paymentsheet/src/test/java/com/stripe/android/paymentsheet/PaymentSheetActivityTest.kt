@@ -65,8 +65,10 @@ import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -535,7 +537,12 @@ internal class PaymentSheetActivityTest {
         )
 
         val paymentMethods = listOf(card)
-        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val viewModel = createViewModel(
+            paymentMethods = paymentMethods,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(CardBrand.Visa, CardBrand.CartesBancaires)
+            ),
+        )
         val scenario = activityScenario(viewModel)
 
         viewModel.navigationHandler.currentScreen.test {
@@ -548,7 +555,8 @@ internal class PaymentSheetActivityTest {
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(card)
+            startEditing()
+            composeTestRule.onNodeWithTag(TEST_TAG_MODIFY_BADGE).performClick()
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             pressBack()
@@ -1057,6 +1065,7 @@ internal class PaymentSheetActivityTest {
         isLinkAvailable: Boolean = false,
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
@@ -1080,6 +1089,7 @@ internal class PaymentSheetActivityTest {
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
+                    cbcEligibility = cbcEligibility,
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
                 prefsRepository = FakePrefsRepository(),
