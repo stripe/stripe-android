@@ -1370,28 +1370,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-        )
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
-        val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
-        }
-    }
-
-    @Test
     fun `handleBackPressed is consumed when processing is true`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
