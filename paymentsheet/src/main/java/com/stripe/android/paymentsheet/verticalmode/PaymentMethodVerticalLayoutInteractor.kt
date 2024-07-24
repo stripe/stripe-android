@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.R
@@ -89,6 +90,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): PaymentMethodVerticalLayoutInteractor {
             val formHelper = FormHelper.create(viewModel = viewModel, paymentMethodMetadata = paymentMethodMetadata)
@@ -103,6 +105,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     val interactor = DefaultManageScreenInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        customerStateHolder = customerStateHolder,
                         savedPaymentMethodMutator = savedPaymentMethodMutator,
                     )
                     PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
@@ -111,6 +114,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     val interactor = DefaultManageOneSavedPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        customerStateHolder = customerStateHolder,
                         savedPaymentMethodMutator = savedPaymentMethodMutator,
                     )
                     PaymentSheetScreen.ManageOneSavedPaymentMethod(interactor = interactor)
@@ -123,9 +127,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                     PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                 },
-                paymentMethods = savedPaymentMethodMutator.paymentMethods,
-                mostRecentlySelectedSavedPaymentMethod =
-                savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
+                paymentMethods = customerStateHolder.paymentMethods,
+                mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },

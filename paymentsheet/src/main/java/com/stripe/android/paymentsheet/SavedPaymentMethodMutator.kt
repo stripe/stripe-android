@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -45,30 +44,15 @@ internal class SavedPaymentMethodMutator(
     private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isLiveModeProvider: () -> Boolean,
+    private val customerStateHolder: CustomerStateHolder,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
-    var customer: CustomerState?
-        get() = savedStateHandle[SAVED_CUSTOMER]
-        set(value) {
-            savedStateHandle[SAVED_CUSTOMER] = value
-        }
-
-    /**
-     * The list of saved payment methods for the current customer.
-     * Value is null until it's loaded, and non-null (could be empty) after that.
-     */
-    val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
-        .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
-        .mapAsStateFlow { state ->
-            state?.paymentMethods ?: emptyList()
-        }
-
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
-            paymentMethods = paymentMethods,
+            paymentMethods = customerStateHolder.paymentMethods,
             isGooglePayReady = isGooglePayReady,
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = isNotPaymentFlow,
@@ -93,11 +77,6 @@ internal class SavedPaymentMethodMutator(
         }
     }
 
-    val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
-        SAVED_PM_SELECTION,
-        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
-    )
-
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
 
@@ -105,7 +84,7 @@ internal class SavedPaymentMethodMutator(
         coroutineScope.launch {
             selection.collect { selection ->
                 if (selection is PaymentSelection.Saved) {
-                    savedStateHandle[SAVED_PM_SELECTION] = selection.paymentMethod
+                    customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(selection.paymentMethod)
                 }
             }
         }
@@ -119,7 +98,7 @@ internal class SavedPaymentMethodMutator(
         }
 
         coroutineScope.launch {
-            paymentMethods.collect { paymentMethods ->
+            customerStateHolder.paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty() && editing.value) {
                     _editing.value = false
                 }
@@ -142,7 +121,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customer ?: return Result.failure(
+        val currentCustomer = customerStateHolder.customer ?: return Result.failure(
             IllegalStateException(
                 "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -168,23 +147,23 @@ internal class SavedPaymentMethodMutator(
     }
 
     private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
-        val currentCustomer = customer ?: return
+        val currentCustomer = customerStateHolder.customer ?: return
 
-        customer = currentCustomer.copy(
+        customerStateHolder.customer = currentCustomer.copy(
             paymentMethods = currentCustomer.paymentMethods.filter {
                 it.id != paymentMethodId
             }
         )
 
-        if (mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
-            savedStateHandle[SAVED_PM_SELECTION] = null
+        if (customerStateHolder.mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
+            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(null)
         }
 
         if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
             savedStateHandle[SAVE_SELECTION] = null
         }
 
-        val shouldResetToAddPaymentMethodForm = paymentMethods.value.isEmpty() &&
+        val shouldResetToAddPaymentMethodForm = customerStateHolder.paymentMethods.value.isEmpty() &&
             navigationHandler.currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
         if (shouldResetToAddPaymentMethodForm) {
@@ -254,7 +233,7 @@ internal class SavedPaymentMethodMutator(
         brand: CardBrand
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customer ?: return Result.failure(
+        val currentCustomer = customerStateHolder.customer ?: return Result.failure(
             IllegalStateException(
                 "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -274,7 +253,7 @@ internal class SavedPaymentMethodMutator(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
-            customer = currentCustomer.copy(
+            customerStateHolder.customer = currentCustomer.copy(
                 paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
                     val savedId = savedMethod.id
                     val updatedId = updatedMethod.id
@@ -301,9 +280,6 @@ internal class SavedPaymentMethodMutator(
     }
 
     companion object {
-        const val SAVED_CUSTOMER = "customer_info"
-        private const val SAVED_PM_SELECTION = "saved_selection"
-
         fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
                 editInteractorFactory = viewModel.editInteractorFactory,
@@ -320,6 +296,7 @@ internal class SavedPaymentMethodMutator(
                         viewModel.paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
                     }?.displayName.orEmpty()
                 },
+                customerStateHolder = viewModel.customerStateHolder,
                 addFirstPaymentMethodScreenFactory = {
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,

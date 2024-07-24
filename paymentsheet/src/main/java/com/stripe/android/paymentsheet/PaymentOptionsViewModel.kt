@@ -156,7 +156,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         if (paymentMethodMetadata.value == null) {
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
-        savedPaymentMethodMutator.customer = args.state.customer
+        customerStateHolder.customer = args.state.customer
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
@@ -214,7 +214,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             PaymentOptionResult.Canceled(
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
-                paymentMethods = savedPaymentMethodMutator.paymentMethods.value,
+                paymentMethods = customerStateHolder.paymentMethods.value,
             )
         )
     }
@@ -230,7 +230,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
-        val paymentMethods = savedPaymentMethodMutator.paymentMethods.value
+        val paymentMethods = customerStateHolder.paymentMethods.value
         val isStillAround = paymentMethods.any { it.id == paymentMethod.id }
         return this.takeIf { isStillAround }
     }
@@ -282,7 +282,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
+                paymentMethods = customerStateHolder.paymentMethods.value
             )
         )
     }
@@ -291,7 +291,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = savedPaymentMethodMutator.paymentMethods.value
+                paymentMethods = customerStateHolder.paymentMethods.value
             )
         )
     }
@@ -306,6 +306,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     viewModel = this,
                     paymentMethodMetadata = paymentMethodMetadata,
                     savedPaymentMethods = savedPaymentMethods,
+                    customerStateHolder = customerStateHolder,
                     savedPaymentMethodMutator = savedPaymentMethodMutator,
                 )
             )
@@ -314,6 +315,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
             )
             SelectSavedPaymentMethods(interactor = interactor)
