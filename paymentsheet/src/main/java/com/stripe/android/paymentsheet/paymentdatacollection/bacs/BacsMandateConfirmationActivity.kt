@@ -21,7 +21,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class BacsMandateConfirmationActivity : AppCompatActivity() {
