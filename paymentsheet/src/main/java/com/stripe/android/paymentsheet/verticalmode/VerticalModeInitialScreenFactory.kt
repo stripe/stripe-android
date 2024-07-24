@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -11,13 +10,12 @@ internal object VerticalModeInitialScreenFactory {
     fun create(
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata,
-        savedPaymentMethods: List<PaymentMethod>,
         customerStateHolder: CustomerStateHolder,
         savedPaymentMethodMutator: SavedPaymentMethodMutator,
     ): PaymentSheetScreen {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
 
-        if (supportedPaymentMethodTypes.size == 1 && savedPaymentMethods.isEmpty()) {
+        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
             return PaymentSheetScreen.VerticalModeForm(
                 interactor = DefaultVerticalModeFormInteractor.create(
                     selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
