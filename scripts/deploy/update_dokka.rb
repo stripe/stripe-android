@@ -13,6 +13,13 @@ def generate_dokka()
 
         execute_or_fail("git add docs/*")
         execute_or_fail("git commit -m \"#{dokka_change_description}\"")
+    rescue
+         execute("git clean -fd docs") # remove any newly added docs files
+         execute("git restore docs") # revert any existing docs files
+         raise
+    end
+
+    begin
         execute_or_fail("git push -u origin")
 
         create_pr(
@@ -22,8 +29,8 @@ def generate_dokka()
             "Send the dokka PR for review and enable auto-merge. Then, continue with the next steps."
         )
     rescue
-        # TODO: this won't work as a clean up step.
         revert_dokka_changes
+        raise
     end
 
     execute_or_fail("git checkout #{@branch}")
