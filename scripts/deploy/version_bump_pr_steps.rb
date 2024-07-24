@@ -48,25 +48,19 @@ def create_version_bump_pr()
 
     pr_description = create_pr_description()
 
-    options = {}
-    if (@is_dry_run)
-        options["draft"] = true
-    end
-
     response = github_login.create_pull_request(
         "stripe/stripe-android",
         "master",
         release_branch,
         "Bump version to #{@version}",
         pr_description,
-        options
+        draft: @is_dry_run,
     )
 
-    rputs "Merge the version bump PR"
-
     pr_url = response.html_url
-    puts "Opening url #{pr_url}"
-    `open #{pr_url}`
+    open_url(pr_url)
+
+    rputs "Merge the version bump PR"
     wait_for_user
 end
 
