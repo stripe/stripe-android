@@ -15,6 +15,7 @@ def update_pay_server_docs()
           /sdk-version: [.\d]+/,
           "sdk-version: #{@version}",
         )
+        execute_or_fail("git -C ../pay-server add docs/content/constants.yaml")
         switch_to_new_branch(pay_server_branch, "master", repo: "../pay-server")
         execute_or_fail("git -C ../pay-server add docs/content/constants.yaml")
         execute_or_fail("git -C ../pay-server commit -m \"Update Android Payments SDK version to #{@version}\"")

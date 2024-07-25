@@ -37,7 +37,6 @@ def replace_in_file(filename, pattern, replacement)
   content = File.read(filename)
   new_content = content.sub(pattern, replacement)
   File.write(filename, new_content)
-  execute_or_fail("git add #{filename}")
 end
 
 def ensure_directory_is_clean()
@@ -59,7 +58,7 @@ end
 
 def switch_to_new_branch(branch_to_create, main_branch, repo: ".")
     # Ensure a different version of this branch doesn't already exist.
-    delete_git_branch(branch_to_create, main_branch, repo)
+    delete_git_branch(branch_to_create, main_branch, repo: repo)
 
     execute_or_fail("git -C #{repo} checkout -b #{branch_to_create}")
     execute_or_fail("git -C #{repo} branch -u #{main_branch}")
