@@ -1107,9 +1107,9 @@ internal class PaymentSheetActivityTest {
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                     statusBarColor = { args.statusBarColor },
                     application = application,
+                    errorReporter = FakeErrorReporter(),
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
-                errorReporter = FakeErrorReporter(),
             )
         }
     }

@@ -2807,9 +2807,9 @@ internal class PaymentSheetViewModelTest {
                     paymentConfigurationProvider = { paymentConfiguration },
                     statusBarColor = { args.statusBarColor },
                     application = application,
+                    errorReporter = FakeErrorReporter()
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
-                errorReporter = FakeErrorReporter(),
             ).apply {
                 if (shouldRegister) {
                     val activityResultCaller = mock<ActivityResultCaller> {

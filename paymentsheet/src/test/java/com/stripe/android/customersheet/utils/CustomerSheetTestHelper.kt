@@ -189,6 +189,7 @@ internal object CustomerSheetTestHelper {
                 statusBarColor = { null },
                 savedStateHandle = SavedStateHandle(),
                 application = application,
+                errorReporter = FakeErrorReporter(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

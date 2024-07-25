@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -21,9 +23,12 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
+import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -618,6 +623,170 @@ class IntentConfirmationHandlerTest {
         )
     }
 
+    @Test
+    fun `On external PM, should launch external PM handler with expected params`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val fakeExternalPaymentMethodLauncher = FakeExternalPaymentMethodLauncher()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            shouldRegister = false
+        ).apply {
+            setExternalPaymentMethodLauncher(fakeExternalPaymentMethodLauncher)
+        }
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD.copy(
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "John Doe",
+                        address = Address(
+                            city = "South San Francisco"
+                        )
+                    )
+                )
+            ),
+        )
+
+        val launch = fakeExternalPaymentMethodLauncher.calls.awaitItem()
+
+        assertThat(launch).isEqualTo(
+            FakeExternalPaymentMethodLauncher.Launch(
+                input = ExternalPaymentMethodInput(
+                    type = "paypal",
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "John Doe",
+                        address = Address(
+                            city = "South San Francisco",
+                        ),
+                    ),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `On external PM with no confirm handler, should return failed result`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            shouldRegister = false,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        val intentResult = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(intentResult.cause.message).isEqualTo(
+            "externalPaymentMethodConfirmHandler is null. Cannot process payment for payment selection: paypal"
+        )
+        assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(intentResult.type).isEqualTo(IntentConfirmationHandler.ErrorType.ExternalPaymentMethod)
+    }
+
+    @Test
+    fun `On external PM with no launcher, should return failed result`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            shouldRegister = false,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        val intentResult = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(intentResult.cause.message).isEqualTo(
+            "externalPaymentMethodLauncher is null. Cannot process payment for payment selection: paypal"
+        )
+        assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(intentResult.type).isEqualTo(IntentConfirmationHandler.ErrorType.ExternalPaymentMethod)
+    }
+
+    @Test
+    fun `On external PM succeeded result, should return intent succeeded result`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val intentConfirmationHandler = createIntentConfirmationHandler()
+
+        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        epmCallback(PaymentResult.Completed)
+
+        val intentResult = intentConfirmationHandler.awaitIntentResult()
+
+        assertThat(intentResult).isEqualTo(
+            IntentConfirmationHandler.Result.Succeeded(
+                intent = DEFAULT_ARGUMENTS.intent,
+                deferredIntentConfirmationType = null,
+            )
+        )
+    }
+
+    @Test
+    fun `On external PM failed result, should return intent failed result`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val intentConfirmationHandler = createIntentConfirmationHandler()
+
+        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        val exception = APIException()
+
+        epmCallback(PaymentResult.Failed(exception))
+
+        val intentResult = intentConfirmationHandler.awaitIntentResult()
+
+        assertThat(intentResult).isEqualTo(
+            IntentConfirmationHandler.Result.Failed(
+                cause = exception,
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                type = IntentConfirmationHandler.ErrorType.ExternalPaymentMethod,
+            )
+        )
+    }
+
+    @Test
+    fun `On external PM canceled result, should return intent canceled result`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val intentConfirmationHandler = createIntentConfirmationHandler()
+
+        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        epmCallback(PaymentResult.Canceled)
+
+        val intentResult = intentConfirmationHandler.awaitIntentResult()
+
+        assertThat(intentResult).isEqualTo(IntentConfirmationHandler.Result.Canceled)
+    }
+
     private fun createIntentConfirmationHandler(
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
@@ -629,6 +798,7 @@ class IntentConfirmationHandlerTest {
             paymentLauncherFactory = { paymentLauncher },
             context = ApplicationProvider.getApplicationContext(),
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            errorReporter = FakeErrorReporter(),
             savedStateHandle = savedStateHandle
         ).apply {
             if (shouldRegister) {
@@ -668,6 +838,43 @@ class IntentConfirmationHandlerTest {
         }
     }
 
+    private fun IntentConfirmationHandler.setExternalPaymentMethodLauncher(
+        launcher: ActivityResultLauncher<ExternalPaymentMethodInput>
+    ) {
+        register(
+            activityResultCaller = mock {
+                on {
+                    registerForActivityResult<ExternalPaymentMethodInput, PaymentResult>(
+                        any(),
+                        any()
+                    )
+                } doReturn launcher
+            },
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+    }
+
+    private fun IntentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback():
+        (result: PaymentResult) -> Unit {
+        val argumentCaptor = argumentCaptor<ActivityResultCallback<PaymentResult>>()
+
+        register(
+            activityResultCaller = mock {
+                on {
+                    registerForActivityResult<ExternalPaymentMethodInput, PaymentResult>(
+                        any(),
+                        argumentCaptor.capture()
+                    )
+                } doReturn mock()
+            },
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        return {
+            argumentCaptor.secondValue.onActivityResult(it)
+        }
+    }
+
     private fun IntentConfirmationHandler.Result?.asFailed(): IntentConfirmationHandler.Result.Failed {
         return this as IntentConfirmationHandler.Result.Failed
     }
@@ -679,5 +886,25 @@ class IntentConfirmationHandlerTest {
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
+
+        val EXTERNAL_PAYMENT_METHOD = PaymentSelection.ExternalPaymentMethod(
+            type = "paypal",
+            label = "Paypal".resolvableString,
+            iconResource = 0,
+            darkThemeIconUrl = null,
+            lightThemeIconUrl = null,
+            billingDetails = null
+        )
+
+        /**
+         * The external payment method confirm handler is not used in [ExternalPaymentMethodInterceptor] which is
+         * not tested here but is instead meant to be used in the launched activity the interceptor attempts to launch.
+         * Since we only care that [IntentConfirmationHandler] is actually attempting to launch the EPM handler as well
+         * as its interactions, we don't do anything here except for using the handler to validate that we can launch
+         * the EPM handler.
+         */
+        val EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER = ExternalPaymentMethodConfirmHandler { _, _ ->
+            // Do nothing
+        }
     }
 }
