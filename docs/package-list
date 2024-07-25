@@ -102,6 +102,7 @@ com.stripe.android.core.model.serializers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
 com.stripe.android.core.strings
+com.stripe.android.core.strings.transformations
 com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
