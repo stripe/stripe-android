@@ -48,21 +48,21 @@ def ensure_directory_is_clean()
     end
 end
 
-def delete_git_branch(branch_to_delete, main_branch)
+def delete_git_branch(branch_to_delete, main_branch, repo: ".")
     # Ensure we are not on the same branch that we're trying to delete
-    execute("git checkout #{main_branch}")
+    execute("git -C #{repo} checkout #{main_branch}")
 
     # Actually delete the branch
-    execute("git push origin --delete #{branch_to_delete}")
-    execute("git branch -D #{branch_to_delete}")
+    execute("git -C #{repo} push origin --delete #{branch_to_delete}")
+    execute("git -C #{repo} branch -D #{branch_to_delete}")
 end
 
-def switch_to_new_branch(branch_to_create, main_branch)
+def switch_to_new_branch(branch_to_create, main_branch, repo: ".")
     # Ensure a different version of this branch doesn't already exist.
-    delete_git_branch(branch_to_create, main_branch)
+    delete_git_branch(branch_to_create, main_branch, repo)
 
-    execute_or_fail("git checkout -b #{branch_to_create}")
-    execute_or_fail("git branch -u #{main_branch}")
+    execute_or_fail("git -C #{repo} checkout -b #{branch_to_create}")
+    execute_or_fail("git -C #{repo} branch -u #{main_branch}")
 end
 
 def create_pr(

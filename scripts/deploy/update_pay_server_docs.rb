@@ -6,27 +6,25 @@ require_relative 'common'
 
 def update_pay_server_docs()
     puts 'Ensuring pay-server repo is up-to-date.'
-    execute_or_fail("cd ../pay-server")
     begin
-        execute_or_fail("git checkout master")
-        execute_or_fail("git pull")
+        execute_or_fail("git -C ../pay-server checkout master")
+        execute_or_fail("git -C ../pay-server pull")
 
         puts '> Updating android SDK version in pay-server for latest release.'
         replace_in_file("../pay-server/docs/content/constants.yaml",
           /sdk-version: [.\d]+/,
           "sdk-version: #{@version}",
         )
-        switch_to_new_branch(pay_server_branch)
-        execute_or_fail("git add docs/content/constants.yaml")
-        execute_or_fail("git commit -m \"Update Android Payments SDK version to #{@version}\"")
+        switch_to_new_branch(pay_server_branch, "master", repo: "../pay-server")
+        execute_or_fail("git -C ../pay-server add docs/content/constants.yaml")
+        execute_or_fail("git -C ../pay-server commit -m \"Update Android Payments SDK version to #{@version}\"")
     rescue
-        execute("git restore docs")
-        execute("cd ../stripe-android")
+        execute("git -C ../pay-server restore docs")
         raise
     end
 
     begin
-        execute_or_fail("git push -u origin")
+        execute_or_fail("git -C ../pay-server push -u origin")
     rescue
         delete_pay_server_branch
         raise
@@ -40,15 +38,10 @@ def update_pay_server_docs()
 
     open_url("https://git.corp.stripe.com/stripe-internal/pay-server/compare/#{pay_server_branch}")
     wait_for_user
-
-    # Return to master + stripe-android
-    execute("git checkout master")
-    execute("cd ../stripe-android")
 end
 
 def delete_pay_server_branch
-    execute("cd ../pay-server")
-    delete_git_branch(pay_server_branch, "master")
+    delete_git_branch(pay_server_branch, "master", repo: "../pay-server")
 end
 
 private def pay_server_branch
