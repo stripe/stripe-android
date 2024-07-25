@@ -896,8 +896,15 @@ class IntentConfirmationHandlerTest {
             billingDetails = null
         )
 
+        /**
+         * The external payment method confirm handler is not used in [ExternalPaymentMethodInterceptor] which is
+         * not tested here but is instead meant to be used in the launched activity the interceptor attempts to launch.
+         * Since we only care that [IntentConfirmationHandler] is actually attempting to launch the EPM handler as well
+         * as its interactions, we don't do anything here except for using the handler to validate that we can launch
+         * the EPM handler.
+         */
         val EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER = ExternalPaymentMethodConfirmHandler { _, _ ->
-            // Do nothing since we aren't testing full EPM flow
+            // Do nothing
         }
     }
 }
