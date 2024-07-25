@@ -27,6 +27,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
+                selectedAccountIds = emptyList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -35,7 +36,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                selectedAccountIds = emptyList()
+                defaultDataAccessNotice = null
             )
         ),
     )
@@ -49,6 +50,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList().subList(0, 1),
+                selectedAccountIds = emptyList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -57,7 +59,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                selectedAccountIds = emptyList()
+                defaultDataAccessNotice = null
             )
         ),
     )
@@ -67,6 +69,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
+                selectedAccountIds = listOf(partnerAccountList().first().account.id),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
@@ -75,7 +78,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                selectedAccountIds = listOf(partnerAccountList().first().account.id)
+                defaultDataAccessNotice = null
             )
         ),
     )

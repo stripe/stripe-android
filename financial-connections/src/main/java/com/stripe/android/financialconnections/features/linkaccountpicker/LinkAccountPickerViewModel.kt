@@ -103,6 +103,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 aboveCta = display.aboveCta,
+                defaultDataAccessNotice = sync.text?.consent?.dataAccessNotice,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
                 addNewAccount = requireNotNull(display.addNewAccount),
@@ -369,11 +370,11 @@ internal data class LinkAccountPickerState(
         val singleAccount: Boolean,
         val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice?,
         val aboveCta: String?,
+        val defaultDataAccessNotice: DataAccessNotice?,
     ) {
 
         val selectedAccounts: List<LinkedAccount>
             get() = accounts.filter { it.account.id in selectedAccountIds }
-
     }
 
     val activeDataAccessNotice: DataAccessNotice?
@@ -388,6 +389,8 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
+                    // if no account was selected, use the consent
+                    ?: payload.defaultDataAccessNotice
             }
         }
 
