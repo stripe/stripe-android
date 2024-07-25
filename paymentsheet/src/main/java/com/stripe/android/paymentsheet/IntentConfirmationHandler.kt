@@ -166,14 +166,21 @@ internal class IntentConfirmationHandler(
                 confirmStripeIntent(nextStep.confirmParams)
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
-                onFailure(
-                    cause = nextStep.cause,
-                    message = nextStep.message,
-                    type = ErrorType.NextStep,
+                onIntentResult(
+                    Result.Failed(
+                        cause = nextStep.cause,
+                        message = nextStep.message,
+                        type = ErrorType.NextStep,
+                    )
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
-                onPaymentResult(InternalPaymentResult.Completed(arguments.intent))
+                onIntentResult(
+                    Result.Succeeded(
+                        intent = arguments.intent,
+                        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType,
+                    )
+                )
             }
         }
     }
@@ -282,28 +289,17 @@ internal class IntentConfirmationHandler(
         completableResult?.complete(result)
     }
 
-    private fun onFailure(
-        cause: Throwable,
-        message: ResolvableString,
-        type: ErrorType,
-    ) {
-        completableResult?.complete(
-            Result.Failed(
-                cause = cause,
-                message = message,
-                type = type,
-            )
-        )
-    }
-
     private fun withPaymentLauncher(action: (PaymentLauncher) -> Unit) {
         paymentLauncher?.let(action) ?: run {
-            onFailure(
-                cause = IllegalArgumentException(
-                    "No 'PaymentLauncher' instance was created before starting confirmation. Did you call register?"
-                ),
-                message = resolvableString(R.string.stripe_something_went_wrong),
-                type = ErrorType.Fatal,
+            onIntentResult(
+                Result.Failed(
+                    cause = IllegalArgumentException(
+                        "No 'PaymentLauncher' instance was created before starting confirmation. " +
+                            "Did you call register?"
+                    ),
+                    message = resolvableString(R.string.stripe_something_went_wrong),
+                    type = ErrorType.Fatal,
+                )
             )
         }
     }
