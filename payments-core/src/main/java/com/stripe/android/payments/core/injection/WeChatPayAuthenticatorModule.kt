@@ -14,20 +14,20 @@ import dagger.multibindings.IntoMap
  * Will register a [UnsupportedNextActionHandler] if the dependency is not added.
  */
 @Module
-internal class WeChatPayAuthenticatorModule {
+internal class WeChatPayNextActionHandlerModule {
     @IntentNextActionHandlerMap
     @Provides
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.WeChatPayRedirect::class)
-    internal fun provideWeChatAuthenticator(
-        unsupportedAuthenticator: UnsupportedNextActionHandler
+    internal fun provideWeChatNextActionHandler(
+        unsupportedNextActionHandler: UnsupportedNextActionHandler
     ): PaymentNextActionHandler<StripeIntent> {
         return runCatching {
             @Suppress("UNCHECKED_CAST")
             Class.forName(
-                "com.stripe.android.payments.wechatpay.WeChatPayAuthenticator"
+                "com.stripe.android.payments.wechatpay.WeChatPayNextActionHandler"
             ).getConstructor()
                 .newInstance() as PaymentNextActionHandler<StripeIntent>
-        }.getOrDefault(unsupportedAuthenticator)
+        }.getOrDefault(unsupportedNextActionHandler)
     }
 }

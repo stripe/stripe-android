@@ -30,72 +30,72 @@ internal abstract class NextActionHandlerModule {
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.SdkData.Use3DS1::class)
-    abstract fun binds3DS1Authenticator(
-        webIntentAuthenticator: WebIntentNextActionHandler
+    abstract fun binds3DS1NextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.RedirectToUrl::class)
-    abstract fun bindsRedirectAuthenticator(
-        webIntentAuthenticator: WebIntentNextActionHandler
+    abstract fun bindsRedirectNextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.AlipayRedirect::class)
-    abstract fun bindsAlipayRedirectAuthenticator(
-        webIntentAuthenticator: WebIntentNextActionHandler
+    abstract fun bindsAlipayRedirectNextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.DisplayMultibancoDetails::class)
-    abstract fun bindsMultibancoAuthenticator(
-        voucherAuthenticator: VoucherNextActionHandler
+    abstract fun bindsMultibancoNextActionHandler(
+        voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.DisplayOxxoDetails::class)
-    abstract fun bindsOxxoAuthenticator(
-        voucherAuthenticator: VoucherNextActionHandler
+    abstract fun bindsOxxoNextActionHandler(
+        voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.DisplayKonbiniDetails::class)
-    abstract fun bindsKonbiniAuthenticator(
-        voucherAuthenticator: VoucherNextActionHandler
+    abstract fun bindsKonbiniNextActionHandler(
+        voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.DisplayBoletoDetails::class)
-    abstract fun bindsBoletoAuthenticator(
-        voucherAuthenticator: VoucherNextActionHandler
+    abstract fun bindsBoletoNextActionHandler(
+        voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.CashAppRedirect::class)
-    abstract fun bindsCashAppRedirectAuthenticator(
-        webIntentAuthenticator: WebIntentNextActionHandler
+    abstract fun bindsCashAppRedirectNextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentNextActionHandlerMap
     @Binds
     @IntoMap
     @IntentNextActionHandlerKey(NextActionData.SwishRedirect::class)
-    abstract fun bindsSwishRedirectAuthenticator(
-        webIntentAuthenticator: WebIntentNextActionHandler
+    abstract fun bindsSwishRedirectNextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @Binds

@@ -25,8 +25,8 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         NextActionHandlerModule::class,
-        Stripe3DSAuthenticatorModule::class,
-        WeChatPayAuthenticatorModule::class,
+        Stripe3DSNextActionHandlerModule::class,
+        WeChatPayNextActionHandlerModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
     ]
