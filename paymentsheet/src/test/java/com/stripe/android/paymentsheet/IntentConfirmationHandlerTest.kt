@@ -517,6 +517,29 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
+    fun `On EPM confirm, should store 'isAwaitingPaymentResult' in 'SavedStateHandle'`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val savedStateHandle = SavedStateHandle()
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueConfirmStep(ConfirmPaymentIntentParams.create("pi_123"))
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            savedStateHandle = savedStateHandle,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+            ),
+        )
+
+        assertThat(savedStateHandle.get<Boolean>("AwaitingPaymentResult")).isTrue()
+    }
+
+    @Test
     fun `On payment handle next action, should store 'isAwaitingPaymentResult' in 'SavedStateHandle'`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val interceptor = FakeIntentConfirmationInterceptor().apply {

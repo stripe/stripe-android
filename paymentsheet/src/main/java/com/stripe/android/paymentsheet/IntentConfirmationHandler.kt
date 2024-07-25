@@ -220,6 +220,12 @@ internal class IntentConfirmationHandler(
     private fun handleExternalPaymentMethod(
         paymentSelection: PaymentSelection.ExternalPaymentMethod
     ) {
+        /*
+         * In case of process death, we should store that we waiting for a payment result to return from a
+         * payment confirmation activity
+         */
+        storeIsAwaitingForPaymentResult()
+
         ExternalPaymentMethodInterceptor.intercept(
             externalPaymentMethodType = paymentSelection.type,
             billingDetails = paymentSelection.billingDetails,
@@ -244,8 +250,6 @@ internal class IntentConfirmationHandler(
         }
 
         onIntentResult(intentResult)
-
-        removeIsAwaitingForPaymentResult()
     }
 
     private fun onExternalPaymentMethodResult(result: PaymentResult) {
@@ -280,6 +284,8 @@ internal class IntentConfirmationHandler(
         currentArguments = null
 
         completableResult?.complete(result)
+
+        removeIsAwaitingForPaymentResult()
     }
 
     private fun onFailure(
