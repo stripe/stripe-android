@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -76,7 +76,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         isProcessingPayment = args.state.stripeIntent is PaymentIntent,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
+        amountFlow = stateFlowOf(args.state.paymentMethodMetadata.amount()),
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
@@ -98,15 +98,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkHandler.isLinkEnabled,
         linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-        paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
-        paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
-    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, isGooglePayReady ->
+    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+        val paymentMethodMetadata = args.state.paymentMethodMetadata
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
-            isGooglePayReady = isGooglePayReady,
+            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
             buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
             googlePayButtonType = GooglePayButtonType.Pay,
             onGooglePayPressed = {
@@ -117,7 +116,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link)
                 onUserSelection()
             },
-            isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
         )
     }
 
