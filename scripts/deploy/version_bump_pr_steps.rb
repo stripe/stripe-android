@@ -24,11 +24,11 @@ def pull_latest()
 end
 
 def switch_to_release_branch()
-    switch_to_new_branch(release_branch)
+    switch_to_new_branch(release_branch, @deploy_branch)
 end
 
 def revert_version_bump_changes()
-    delete_git_branch(release_branch)
+    delete_git_branch(release_branch, @deploy_branch)
 end
 
 def create_version_bump_pr()

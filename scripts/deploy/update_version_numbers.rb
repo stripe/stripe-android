@@ -1,12 +1,6 @@
 #!/usr/bin/env ruby
 
-def replace_in_file(filename, pattern, replacement)
-  puts "> Updating #{filename}"
-  content = File.read(filename)
-  new_content = content.sub(pattern, replacement)
-  File.write(filename, new_content)
-  execute_or_fail("git add #{filename}")
-end
+require_relative 'common'
 
 def update_read_me()
   replace_in_file("README.md",
