@@ -36,6 +36,7 @@ import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeResultHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,6 +45,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class IntentConfirmationHandlerTest {
@@ -560,6 +562,92 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
+    fun `On start Bacs mandate, should store 'AwaitingPreConfirmResult' in 'SavedStateHandle'`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            savedStateHandle = savedStateHandle,
+
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = createBacsPaymentSelection(),
+            ),
+        )
+
+        assertThat(savedStateHandle.get<Boolean>("AwaitingPreConfirmResult")).isTrue()
+    }
+
+    @Test
+    fun `On init with 'SavedStateHandle' awaiting payment result, should timeout & cancel after 1 second`() = runTest {
+        val dispatcher = StandardTestDispatcher()
+
+        val savedStateHandle = SavedStateHandle().apply {
+            set("AwaitingPaymentResult", true)
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            savedStateHandle = savedStateHandle,
+            coroutineScope = CoroutineScope(dispatcher)
+        )
+
+        dispatcher.scheduler.advanceTimeBy(delayTime = 1.01.seconds)
+
+        val result = intentConfirmationHandler.awaitIntentResult()
+
+        assertThat(result).isEqualTo(
+            IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.None
+            )
+        )
+    }
+
+    @Test
+    fun `On init with 'SavedStateHandle' awaiting pre confirm result, continue to wait until result`() = runTest {
+        val dispatcher = StandardTestDispatcher()
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueCompleteStep()
+        }
+
+        val bacsArguments = DEFAULT_ARGUMENTS.copy(
+            paymentSelection = createBacsPaymentSelection()
+        )
+
+        val savedStateHandle = SavedStateHandle().apply {
+            set("AwaitingPreConfirmResult", true)
+            set("IntentConfirmationArguments", bacsArguments)
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            savedStateHandle = savedStateHandle,
+            intentConfirmationInterceptor = interceptor,
+            coroutineScope = CoroutineScope(dispatcher)
+        )
+
+        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler
+        )
+
+        dispatcher.scheduler.advanceTimeBy(delayTime = 200.seconds)
+
+        bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Confirmed)
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val result = intentConfirmationHandler.awaitIntentResult()
+
+        assertThat(result).isEqualTo(
+            IntentConfirmationHandler.Result.Succeeded(
+                intent = DEFAULT_ARGUMENTS.intent,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            )
+        )
+    }
+
+    @Test
     fun `On init with 'SavedStateHandle', should receive result through 'awaitIntentResult'`() = runTest {
         val savedStateHandle = SavedStateHandle().apply {
             set("AwaitingPaymentResult", true)
@@ -1064,13 +1152,14 @@ class IntentConfirmationHandlerTest {
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         shouldRegister: Boolean = true,
+        coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
     ): IntentConfirmationHandler {
         return IntentConfirmationHandler(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = { paymentLauncher },
             bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
             context = ApplicationProvider.getApplicationContext(),
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = coroutineScope,
             errorReporter = FakeErrorReporter(),
             savedStateHandle = savedStateHandle
         ).apply {
