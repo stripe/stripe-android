@@ -907,6 +907,7 @@ internal class CustomerSheetViewModel(
                 intent = stripeIntent,
                 paymentSelection = selection,
                 shippingDetails = null,
+                appearance = configuration.appearance,
             )
         )
 
