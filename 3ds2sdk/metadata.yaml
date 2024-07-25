@@ -1,0 +1,9 @@
+change_notifications:
+  slack: false
+responsible_team: elements-mobile
+review_requirements:
+- assignees:
+  - mshafrir
+  reviewers:
+  - codeowners-mobile-sdks
+  - codeowners-all

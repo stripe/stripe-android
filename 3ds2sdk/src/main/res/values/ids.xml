@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="stripe_3ds2_default_challenge_zone_select_view_id" type="id" />
+</resources>

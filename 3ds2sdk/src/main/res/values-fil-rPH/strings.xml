@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Imahe ng Tagapag-isyu</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Imahe ng Sistema ng Pagbabayad</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Hindi</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Oo</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Kanselahin</string>
+    <string name="stripe_3ds2_hzv_header_label">Ligtas na Pag-checkout</string>
+    <string name="stripe_3ds2_processing">Pinoproseso\u2026</string>
+</resources>
