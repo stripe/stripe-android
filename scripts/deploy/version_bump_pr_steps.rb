@@ -11,11 +11,7 @@ def ensure_clean_repo()
     abort("You must run this script from 'stripe-android'.")
   end
 
-  stdout, stderr, status = Open3.capture3("git status --porcelain")
-
-  if !stdout.empty?
-    abort("You must have a clean working directory to continue.")
-  end
+  ensure_directory_is_clean()
 end
 
 def pull_latest()
@@ -45,35 +41,16 @@ def create_version_bump_pr()
 
     pr_description = create_pr_description()
 
-    response = github_login.create_pull_request(
-        "stripe/stripe-android",
-        "master",
-        release_branch,
-        "Bump version to #{@version}",
-        pr_description,
-        draft: @is_dry_run,
+    create_pr(
+         release_branch,
+         "Bump version to #{@version}",
+         pr_description,
+         "Merge the version bump PR"
     )
-
-    pr_url = response.html_url
-    open_url(pr_url)
-
-    rputs "Merge the version bump PR"
-    wait_for_user
 end
 
 private def release_branch
     "release/#{@version}"
-end
-
-private def github_login
-  token = `fetch-password -q bindings/gh-tokens/$USER`
-  if $?.exitstatus != 0
-    puts "Couldn't fetch GitHub token. Follow the Android SDK Deploy Guide (https://go/android-sdk-deploy) to set up a token. \a".red
-    exit(1)
-  end
-  client = Octokit::Client.new(access_token: token)
-  abort('Invalid GitHub token. Follow the wiki instructions for setting up a GitHub token.') unless client.login
-  client
 end
 
 private def create_pr_description()
