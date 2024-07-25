@@ -2794,7 +2794,6 @@ internal class PaymentSheetViewModelTest {
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
-                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
@@ -2803,6 +2802,7 @@ internal class PaymentSheetViewModelTest {
                 intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
+                    bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
                     statusBarColor = { args.statusBarColor },
@@ -2939,7 +2939,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 
-        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        private val PAYMENT_METHODS = listOf(CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD

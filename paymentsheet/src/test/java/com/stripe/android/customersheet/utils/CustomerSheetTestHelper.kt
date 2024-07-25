@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -175,6 +176,9 @@ internal object CustomerSheetTestHelper {
             intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = { paymentConfiguration },
+                bacsMandateConfirmationLauncherFactory = {
+                    FakeBacsMandateConfirmationLauncher()
+                },
                 stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                     override fun create(
                         publishableKey: () -> String,

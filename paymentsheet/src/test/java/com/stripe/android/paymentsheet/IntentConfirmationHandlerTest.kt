@@ -26,6 +26,11 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
@@ -77,6 +82,7 @@ class IntentConfirmationHandlerTest {
                     paymentMethod = savedPaymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                 ),
+                appearance = APPEARANCE,
             ),
         )
 
@@ -133,6 +139,7 @@ class IntentConfirmationHandlerTest {
                     brand = CardBrand.Visa,
                     customerRequestedSave = customerRequestedSave,
                 ),
+                appearance = APPEARANCE,
             ),
         )
 
@@ -178,6 +185,7 @@ class IntentConfirmationHandlerTest {
                 shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                appearance = APPEARANCE,
             ),
         )
 
@@ -265,7 +273,7 @@ class IntentConfirmationHandlerTest {
             IntentConfirmationHandler.Result.Failed(
                 cause = cause,
                 message = message.resolvableString,
-                type = IntentConfirmationHandler.ErrorType.NextStep,
+                type = IntentConfirmationHandler.ErrorType.Internal,
             )
         )
     }
@@ -462,7 +470,11 @@ class IntentConfirmationHandlerTest {
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
-        assertThat(result).isEqualTo(IntentConfirmationHandler.Result.Canceled)
+        assertThat(result).isEqualTo(
+            IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.InformCancellation,
+            )
+        )
     }
 
     @Test
@@ -784,11 +796,226 @@ class IntentConfirmationHandlerTest {
 
         val intentResult = intentConfirmationHandler.awaitIntentResult()
 
-        assertThat(intentResult).isEqualTo(IntentConfirmationHandler.Result.Canceled)
+        assertThat(intentResult).isEqualTo(
+            IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.None,
+            )
+        )
+    }
+
+    @Test
+    fun `On bacs payment method, should launch mandate screen`() = runTest {
+        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
+        )
+
+        val appearance = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = createBacsPaymentSelection(),
+                appearance = appearance,
+            ),
+        )
+
+        val call = bacsMandateConfirmationLauncher.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeBacsMandateConfirmationLauncher.Call(
+                data = BacsMandateData(
+                    accountNumber = "00012345",
+                    sortCode = "108800",
+                    name = "John Doe",
+                    email = "johndoe@email.com",
+                ),
+                appearance = appearance,
+            )
+        )
+
+        bacsMandateConfirmationLauncher.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `On bacs payment method without registering callbacks, should fail intent confirmation`() = runTest {
+        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
+            shouldRegister = false
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = createBacsPaymentSelection(),
+            ),
+        )
+
+        bacsMandateConfirmationLauncher.calls.expectNoEvents()
+
+        val result = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.Internal)
+        assertThat(result.cause.message).isEqualTo("Required value was null.")
+    }
+
+    @Test
+    fun `On missing name for Bacs, should fail with internal error`() = runTest {
+        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = createBacsPaymentSelection(
+                    name = null,
+                ),
+            ),
+        )
+
+        bacsMandateConfirmationLauncher.calls.expectNoEvents()
+
+        val result = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.Internal)
+        assertThat(result.cause.message).isEqualTo(
+            "Given payment selection could not be converted to Bacs data!"
+        )
+    }
+
+    @Test
+    fun `On missing email for Bacs, should fail with internal error`() = runTest {
+        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = createBacsPaymentSelection(
+                    email = null,
+                ),
+            ),
+        )
+
+        bacsMandateConfirmationLauncher.calls.expectNoEvents()
+
+        val result = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.Internal)
+        assertThat(result.cause.message).isEqualTo(
+            "Given payment selection could not be converted to Bacs data!"
+        )
+    }
+
+    @Test
+    fun `On Bacs mandate confirmed, should continue confirmation process`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            shouldRegister = false,
+        )
+
+        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+
+        val paymentSelection = createBacsPaymentSelection()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = paymentSelection
+            ),
+        )
+
+        bacsMandateResultCallback(BacsMandateConfirmationResult.Confirmed)
+
+        val call = interceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
+                initializationMode = DEFAULT_ARGUMENTS.initializationMode,
+                paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                shippingValues = null,
+                paymentMethodOptionsParams = null,
+                customerRequestedSave = false,
+            )
+        )
+
+        interceptor.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `On modify Bacs data event, should return canceled result`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            shouldRegister = false,
+        )
+
+        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+
+        val paymentSelection = createBacsPaymentSelection()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = paymentSelection
+            ),
+        )
+
+        bacsMandateResultCallback(BacsMandateConfirmationResult.ModifyDetails)
+
+        interceptor.calls.expectNoEvents()
+
+        assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(
+            IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.ModifyPaymentDetails,
+            )
+        )
+    }
+
+    @Test
+    fun `On cancel Bacs data event, should return canceled result`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            shouldRegister = false,
+        )
+
+        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+
+        val paymentSelection = createBacsPaymentSelection()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = paymentSelection
+            ),
+        )
+
+        bacsMandateResultCallback(BacsMandateConfirmationResult.Cancelled)
+
+        interceptor.calls.expectNoEvents()
+
+        assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(
+            IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.None,
+            )
+        )
     }
 
     private fun createIntentConfirmationHandler(
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
+        bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher(),
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         shouldRegister: Boolean = true
@@ -796,6 +1023,7 @@ class IntentConfirmationHandlerTest {
         return IntentConfirmationHandler(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = { paymentLauncher },
+            bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
             context = ApplicationProvider.getApplicationContext(),
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = FakeErrorReporter(),
@@ -875,16 +1103,62 @@ class IntentConfirmationHandlerTest {
         }
     }
 
+    private fun IntentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback():
+        (result: BacsMandateConfirmationResult) -> Unit {
+        val argumentCaptor = argumentCaptor<ActivityResultCallback<BacsMandateConfirmationResult>>()
+
+        register(
+            activityResultCaller = mock {
+                on {
+                    registerForActivityResult<BacsMandateConfirmationContract.Args, BacsMandateConfirmationResult>(
+                        any(),
+                        argumentCaptor.capture()
+                    )
+                } doReturn mock()
+            },
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        return {
+            argumentCaptor.thirdValue.onActivityResult(it)
+        }
+    }
+
     private fun IntentConfirmationHandler.Result?.asFailed(): IntentConfirmationHandler.Result.Failed {
         return this as IntentConfirmationHandler.Result.Failed
     }
 
+    private fun createBacsPaymentSelection(
+        name: String? = "John Doe",
+        email: String? = "johndoe@email.com",
+    ): PaymentSelection.New.GenericPaymentMethod {
+        return PaymentSelection.New.GenericPaymentMethod(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = "00012345",
+                    sortCode = "108800"
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = name,
+                    email = email,
+                )
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            darkThemeIconUrl = null,
+            lightThemeIconUrl = null,
+            iconResource = 0,
+            label = "Bacs".resolvableString
+        )
+    }
+
     private companion object {
+        val APPEARANCE = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
         val DEFAULT_ARGUMENTS = IntentConfirmationHandler.Args(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
             shippingDetails = null,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            appearance = APPEARANCE
         )
 
         val EXTERNAL_PAYMENT_METHOD = PaymentSelection.ExternalPaymentMethod(

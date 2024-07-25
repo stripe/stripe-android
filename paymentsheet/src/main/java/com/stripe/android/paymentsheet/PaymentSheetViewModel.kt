@@ -40,11 +40,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -86,7 +81,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerRepository: CustomerRepository,
     private val prefsRepository: PrefsRepository,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
@@ -143,8 +137,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override var newPaymentSelection: NewOrExternalPaymentSelection? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
-
-    private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
@@ -421,28 +413,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     label = args.googlePayConfig?.label,
                 )
             }
-        } else if (
-            paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-            paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
-        ) {
-            BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
-                runCatching {
-                    requireNotNull(bacsMandateConfirmationLauncher)
-                }.onSuccess { launcher ->
-                    launcher.launch(
-                        data = data,
-                        appearance = config.appearance
-                    )
-                }.onFailure {
-                    resetViewState(
-                        userErrorMessage = R.string.stripe_something_went_wrong.resolvableString
-                    )
-                }
-            } ?: run {
-                resetViewState(
-                    userErrorMessage = R.string.stripe_something_went_wrong.resolvableString
-                )
-            }
         } else {
             confirmPaymentSelection(paymentSelection)
         }
@@ -476,22 +446,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
-        val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            BacsMandateConfirmationContract(),
-            ::onBacsMandateResult
-        )
-
         intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
-
-        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(
-            bacsActivityResultLauncher
-        )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    bacsMandateConfirmationLauncher = null
-                    bacsActivityResultLauncher.unregister()
                     linkHandler.unregisterFromActivity()
                     super.onDestroy(owner)
                 }
@@ -529,6 +488,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     shippingDetails = args.config.shippingDetails,
                     intent = stripeIntent,
                     paymentSelection = paymentSelectionWithCvcIfEnabled(paymentSelection),
+                    appearance = config.appearance,
                 ),
             )
 
@@ -624,7 +584,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 message = failure.message,
             )
             IntentConfirmationHandler.ErrorType.Fatal -> onFatal(failure.cause)
-            IntentConfirmationHandler.ErrorType.NextStep -> onError(failure.message)
+            IntentConfirmationHandler.ErrorType.Internal -> onError(failure.message)
         }
     }
 
@@ -677,23 +637,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                 resetViewState()
             }
-        }
-    }
-
-    private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
-        when (result) {
-            is BacsMandateConfirmationResult.Confirmed -> {
-                val paymentSelection = selection.value
-
-                if (
-                    paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-                    paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
-                ) {
-                    confirmPaymentSelection(paymentSelection)
-                }
-            }
-            is BacsMandateConfirmationResult.ModifyDetails,
-            is BacsMandateConfirmationResult.Cancelled -> resetViewState(userErrorMessage = null)
         }
     }
 

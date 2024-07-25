@@ -18,6 +18,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -29,6 +30,11 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -43,6 +49,7 @@ import javax.inject.Provider
 internal class IntentConfirmationHandler(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
+    private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
@@ -50,6 +57,7 @@ internal class IntentConfirmationHandler(
 ) {
     private var paymentLauncher: PaymentLauncher? = null
     private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
+    private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
         get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
@@ -94,11 +102,20 @@ internal class IntentConfirmationHandler(
             ::onExternalPaymentMethodResult
         )
 
+        val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            BacsMandateConfirmationContract(),
+            ::onBacsMandateResult
+        )
+
+        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(bacsActivityResultLauncher)
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher = null
                     externalPaymentMethodLauncher = null
+                    bacsMandateConfirmationLauncher = null
+                    bacsActivityResultLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
@@ -127,6 +144,11 @@ internal class IntentConfirmationHandler(
 
             if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
                 handleExternalPaymentMethod(paymentSelection)
+            } else if (
+                paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
+                paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+            ) {
+                launchBacsMandate(paymentSelection, arguments.appearance)
             } else {
                 confirm(arguments)
             }
@@ -170,7 +192,7 @@ internal class IntentConfirmationHandler(
                     Result.Failed(
                         cause = nextStep.cause,
                         message = nextStep.message,
-                        type = ErrorType.NextStep,
+                        type = ErrorType.Internal,
                     )
                 )
             }
@@ -236,6 +258,40 @@ internal class IntentConfirmationHandler(
         )
     }
 
+    private fun launchBacsMandate(
+        paymentSelection: PaymentSelection.New.GenericPaymentMethod,
+        appearance: PaymentSheet.Appearance,
+    ) {
+        BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+            runCatching {
+                requireNotNull(bacsMandateConfirmationLauncher)
+            }.onSuccess { launcher ->
+                launcher.launch(
+                    data = data,
+                    appearance = appearance
+                )
+            }.onFailure { cause ->
+                onIntentResult(
+                    Result.Failed(
+                        cause = cause,
+                        message = R.string.stripe_something_went_wrong.resolvableString,
+                        type = ErrorType.Internal
+                    )
+                )
+            }
+        } ?: run {
+            onIntentResult(
+                Result.Failed(
+                    cause = IllegalArgumentException(
+                        "Given payment selection could not be converted to Bacs data!"
+                    ),
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    type = ErrorType.Internal
+                )
+            )
+        }
+    }
+
     private fun onPaymentResult(result: InternalPaymentResult) {
         val intentResult = when (result) {
             is InternalPaymentResult.Completed -> Result.Succeeded(
@@ -247,12 +303,32 @@ internal class IntentConfirmationHandler(
                 message = result.throwable.stripeErrorMessage(),
                 type = ErrorType.Payment,
             )
-            is InternalPaymentResult.Canceled -> Result.Canceled
+            is InternalPaymentResult.Canceled -> Result.Canceled(action = CancellationAction.InformCancellation)
         }
 
         onIntentResult(intentResult)
 
         removeIsAwaitingForPaymentResult()
+    }
+
+    private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
+        coroutineScope.launch {
+            when (result) {
+                is BacsMandateConfirmationResult.Confirmed -> currentArguments?.let { arguments ->
+                    confirm(arguments)
+                }
+                is BacsMandateConfirmationResult.ModifyDetails -> onIntentResult(
+                    Result.Canceled(
+                        action = CancellationAction.ModifyPaymentDetails
+                    )
+                )
+                is BacsMandateConfirmationResult.Cancelled -> onIntentResult(
+                    Result.Canceled(
+                        action = CancellationAction.None
+                    )
+                )
+            }
+        }
     }
 
     private fun onExternalPaymentMethodResult(result: PaymentResult) {
@@ -267,7 +343,7 @@ internal class IntentConfirmationHandler(
                     message = result.throwable.stripeErrorMessage(),
                     type = ErrorType.ExternalPaymentMethod,
                 )
-                is PaymentResult.Canceled -> Result.Canceled
+                is PaymentResult.Canceled -> Result.Canceled(action = CancellationAction.None)
             }
         } ?: run {
             val cause = IllegalStateException("Arguments should have been initialized before handling EPM result!")
@@ -320,6 +396,7 @@ internal class IntentConfirmationHandler(
     internal data class Args(
         val initializationMode: PaymentSheet.InitializationMode,
         val shippingDetails: AddressDetails?,
+        val appearance: PaymentSheet.Appearance,
         val intent: StripeIntent,
         val paymentSelection: PaymentSelection?
     ) : Parcelable
@@ -331,7 +408,9 @@ internal class IntentConfirmationHandler(
         /**
          * Indicates that the confirmation process was canceled by the customer.
          */
-        data object Canceled : Result
+        data class Canceled(
+            val action: CancellationAction
+        ) : Result
 
         /**
          * Indicates that the confirmation process has been successfully completed. A [StripeIntent] with an updated
@@ -354,6 +433,27 @@ internal class IntentConfirmationHandler(
     }
 
     /**
+     * Action to perform if a user cancels a running confirmation process.
+     */
+    enum class CancellationAction {
+        /**
+         * This actions means the user has cancels a critical confirmation step and that the user should be notified
+         * of the cancellation if relevant.
+         */
+        InformCancellation,
+
+        /**
+         * This action means that the user has asked to modify the payment details of their selected payment option.
+         */
+        ModifyPaymentDetails,
+
+        /**
+         * Means no action should be taken if the user cancels a step in the confirmation process.
+         */
+        None,
+    }
+
+    /**
      * Types of errors that can occur when confirming an intent.
      */
     enum class ErrorType {
@@ -368,9 +468,9 @@ internal class IntentConfirmationHandler(
         Payment,
 
         /**
-         * Indicates an error occurred when determining the next step for the confirmation process.
+         * Indicates an internal process error occurred during the confirmation process.
          */
-        NextStep,
+        Internal,
 
         /**
          * Indicates an error occurred when confirming with external payment methods
@@ -381,6 +481,7 @@ internal class IntentConfirmationHandler(
     class Factory(
         private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
+        private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
@@ -389,6 +490,7 @@ internal class IntentConfirmationHandler(
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 paymentLauncherFactory = { hostActivityLauncher ->
                     stripePaymentLauncherAssistedFactory.create(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },

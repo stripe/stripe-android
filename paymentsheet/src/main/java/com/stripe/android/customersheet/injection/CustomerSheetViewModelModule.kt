@@ -34,6 +34,8 @@ import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
@@ -134,10 +136,15 @@ internal interface CustomerSheetViewModelModule {
         )
 
         @Provides
+        fun providesBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory =
+            DefaultBacsMandateConfirmationLauncherFactory
+
+        @Provides
         fun providesIntentConfirmationHandlerFactory(
             application: Application,
             savedStateHandle: SavedStateHandle,
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
+            bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -147,6 +154,7 @@ internal interface CustomerSheetViewModelModule {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 application = application,
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,

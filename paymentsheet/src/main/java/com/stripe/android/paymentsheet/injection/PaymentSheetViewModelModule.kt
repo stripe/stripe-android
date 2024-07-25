@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -30,6 +31,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         application: Application,
         savedStateHandle: SavedStateHandle,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
         errorReporter: ErrorReporter,
@@ -38,6 +40,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentConfigurationProvider = paymentConfigurationProvider,
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+            bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             application = application,
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
