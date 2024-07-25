@@ -60,7 +60,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
 
     @Test
     fun `verify Source gets a SourceAuthenticator`() {
-        assertThat(registry.getAuthenticator(mock<Source>())).isEqualTo(sourceAuthenticator)
+        assertThat(registry.getNextActionHandler(mock<Source>())).isEqualTo(sourceAuthenticator)
     }
 
     @Test
@@ -104,7 +104,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         whenever(stripeIntent.requiresAction()).thenReturn(true)
         whenever(stripeIntent.nextActionData).thenReturn(nextActionData)
         assertThat(
-            registry.getAuthenticator(stripeIntent)
+            registry.getNextActionHandler(stripeIntent)
         ).isEqualTo(
             paymentNextActionHandler
         )
@@ -115,7 +115,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         val stripeIntent = mock<StripeIntent>()
         whenever(stripeIntent.requiresAction()).thenReturn(false)
         assertThat(
-            registry.getAuthenticator(stripeIntent)
+            registry.getNextActionHandler(stripeIntent)
         ).isEqualTo(
             noOpIntentAuthenticator
         )
@@ -128,7 +128,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         assertFailsWith<IllegalStateException>(
             "No suitable PaymentAuthenticator for $incompatibleType}"
         ) {
-            registry.getAuthenticator(incompatibleType)
+            registry.getNextActionHandler(incompatibleType)
         }
     }
 
