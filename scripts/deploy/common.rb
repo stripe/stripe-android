@@ -32,20 +32,36 @@ def open_url(url)
     `open #{url}`
 end
 
-def delete_git_branch(branch_name)
-    # Ensure we are not on the same branch that we're trying to delete
-    execute("git checkout #{@deploy_branch}")
-
-    # Actually delete the branch
-    execute("git push origin --delete #{branch_name}")
-    execute("git branch -D #{branch_name}")
+def replace_in_file(filename, pattern, replacement)
+  puts "> Updating #{filename}"
+  content = File.read(filename)
+  new_content = content.sub(pattern, replacement)
+  File.write(filename, new_content)
 end
 
-def switch_to_new_branch(branch_name)
-    # Ensure a different version of this branch doesn't already exist.
-    delete_git_branch(branch_name)
+def ensure_directory_is_clean()
+    stdout, stderr, status = Open3.capture3("git status --porcelain")
 
-    execute_or_fail("git checkout -b #{branch_name} -u #{@deploy_branch}")
+    if !stdout.empty?
+        abort("You must have a clean working directory to continue.")
+    end
+end
+
+def delete_git_branch(branch_to_delete, main_branch, repo: ".")
+    # Ensure we are not on the same branch that we're trying to delete
+    execute("git -C #{repo} checkout #{main_branch}")
+
+    # Actually delete the branch
+    execute("git -C #{repo} push origin --delete #{branch_to_delete}")
+    execute("git -C #{repo} branch -D #{branch_to_delete}")
+end
+
+def switch_to_new_branch(branch_to_create, main_branch, repo: ".")
+    # Ensure a different version of this branch doesn't already exist.
+    delete_git_branch(branch_to_create, main_branch, repo: repo)
+
+    execute_or_fail("git -C #{repo} checkout -b #{branch_to_create}")
+    execute_or_fail("git -C #{repo} branch -u #{main_branch}")
 end
 
 def create_pr(

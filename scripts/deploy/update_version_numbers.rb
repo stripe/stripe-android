@@ -1,18 +1,13 @@
 #!/usr/bin/env ruby
 
-def replace_in_file(filename, pattern, replacement)
-  puts "> Updating #{filename}"
-  content = File.read(filename)
-  new_content = content.sub(pattern, replacement)
-  File.write(filename, new_content)
-  execute_or_fail("git add #{filename}")
-end
+require_relative 'common'
 
 def update_read_me()
   replace_in_file("README.md",
       /implementation 'com.stripe:stripe-android:[.\d]+'/,
       "implementation 'com.stripe:stripe-android:#{@version}'",
   )
+  execute_or_fail("git add README.md")
  end
 
 def update_stripe_sdk_version()
@@ -20,6 +15,7 @@ def update_stripe_sdk_version()
       /const val VERSION_NAME = "[.\d]+"/,
       %Q{const val VERSION_NAME = "#{@version}"},
   )
+  execute_or_fail("git add stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt")
 end
 
 def update_gradle_properties()
@@ -27,6 +23,7 @@ def update_gradle_properties()
       /VERSION_NAME=[.\d]+/,
       "VERSION_NAME=#{@version}",
   )
+  execute_or_fail("git add gradle.properties")
 end
 
 def update_changelog()
@@ -37,4 +34,6 @@ def update_changelog()
         /## XX.XX.XX - 20XX-XX-XX/,
         "## XX.XX.XX - 20XX-XX-XX\n\n## #{@version} - #{date}"
     )
+
+    execute_or_fail("git add CHANGELOG.md")
 end

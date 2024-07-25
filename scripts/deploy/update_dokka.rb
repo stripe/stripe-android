@@ -6,7 +6,7 @@ def generate_dokka()
     dokka_change_description = "Generate dokka for #{@version}"
 
     begin
-        switch_to_new_branch(dokka_branch_name)
+        switch_to_new_branch(dokka_branch_name, @deploy_branch)
         execute_or_fail("rm -rf docs/")
         execute_or_fail("./gradlew clean")
         execute_or_fail("./gradlew dokkaHtmlMultiModule")
@@ -38,7 +38,7 @@ def generate_dokka()
 end
 
 def revert_dokka_changes()
-    delete_git_branch(dokka_branch_name)
+    delete_git_branch(dokka_branch_name, @deploy_branch)
 end
 
 private def dokka_branch_name
