@@ -31,8 +31,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
-import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
@@ -131,10 +129,9 @@ internal class DefaultFlowController @Inject internal constructor(
         statusBarColor = statusBarColor,
         savedStateHandle = viewModel.handle,
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
+        errorReporter = errorReporter,
         application = application,
     ).create(viewModelScope)
-
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -179,12 +176,6 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
-        val externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(errorReporter),
-            ::onExternalPaymentMethodResult
-        )
-        this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
-
         val cvcRecollectionActivityLauncher = activityResultCaller.registerForActivityResult(
             CvcRecollectionContract(),
             ::onCvcRecollectionResult
@@ -199,7 +190,6 @@ internal class DefaultFlowController @Inject internal constructor(
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
             bacsMandateConfirmationActivityLauncher,
-            externalPaymentMethodLauncher,
             cvcRecollectionActivityLauncher
         )
 
@@ -363,15 +353,10 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay -> launchGooglePay(state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodInterceptor.intercept(
-                externalPaymentMethodType = paymentSelection.type,
-                billingDetails = paymentSelection.billingDetails,
-                onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
-                errorReporter = errorReporter,
-            )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
-            is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.New,
+            null -> confirmPaymentSelection(paymentSelection, state)
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state)
         }
     }
@@ -665,7 +650,7 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun onIntentResult(result: IntentConfirmationHandler.Result) {
-        val (paymentResult, deferredIntentConfirmationType) = when (result) {
+        val paymentResult = when (result) {
             is IntentConfirmationHandler.Result.Succeeded -> {
                 val stripeIntent = result.intent
                 val currentSelection = viewModel.paymentSelection
@@ -696,39 +681,40 @@ internal class DefaultFlowController @Inject internal constructor(
                     prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
                 }
 
-                PaymentResult.Completed to result.deferredIntentConfirmationType
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = viewModel.paymentSelection,
+                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                )
+
+                PaymentResult.Completed
             }
-            is IntentConfirmationHandler.Result.Failed -> PaymentResult.Failed(result.cause) to null
-            is IntentConfirmationHandler.Result.Canceled -> PaymentResult.Canceled to null
+            is IntentConfirmationHandler.Result.Failed -> {
+                val error = result.type.toConfirmationError(result.cause)
+
+                error?.let {
+                    eventReporter.onPaymentFailure(
+                        paymentSelection = viewModel.paymentSelection,
+                        error = it
+                    )
+                }
+
+                PaymentResult.Failed(result.cause)
+            }
+            is IntentConfirmationHandler.Result.Canceled -> PaymentResult.Canceled
         }
 
-        onPaymentResult(paymentResult, deferredIntentConfirmationType)
-    }
-
-    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
-        val selection = viewModel.paymentSelection
-        when (paymentResult) {
-            is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
-                selection,
-                deferredIntentConfirmationType = null
-            )
-
-            is PaymentResult.Failed -> eventReporter.onPaymentFailure(
-                selection,
-                error = PaymentSheetConfirmationError.ExternalPaymentMethod
-            )
-
-            is PaymentResult.Canceled -> Unit
-        }
-        onPaymentResult(paymentResult)
+        onPaymentResult(paymentResult, shouldLog = false)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     internal fun onPaymentResult(
         paymentResult: PaymentResult,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+        deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
+        shouldLog: Boolean = true,
     ) {
-        logPaymentResult(paymentResult, deferredIntentConfirmationType)
+        if (shouldLog) {
+            logPaymentResult(paymentResult, deferredIntentConfirmationType)
+        }
 
         val selection = viewModel.paymentSelection
 
@@ -826,6 +812,19 @@ internal class DefaultFlowController @Inject internal constructor(
             transactionId = state.stripeIntent.id,
             label = googlePayConfig.label,
         )
+    }
+
+    private fun IntentConfirmationHandler.ErrorType.toConfirmationError(
+        cause: Throwable
+    ): PaymentSheetConfirmationError? {
+        return when (this) {
+            IntentConfirmationHandler.ErrorType.ExternalPaymentMethod ->
+                PaymentSheetConfirmationError.Stripe(cause)
+            IntentConfirmationHandler.ErrorType.Payment ->
+                PaymentSheetConfirmationError.ExternalPaymentMethod
+            IntentConfirmationHandler.ErrorType.NextStep,
+            IntentConfirmationHandler.ErrorType.Fatal -> null
+        }
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {

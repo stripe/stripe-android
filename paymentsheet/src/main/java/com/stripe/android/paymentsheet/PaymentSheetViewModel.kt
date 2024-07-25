@@ -30,7 +30,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -95,7 +94,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
-    private val errorReporter: ErrorReporter,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -147,8 +145,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
-
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
@@ -426,14 +422,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     label = args.googlePayConfig?.label,
                 )
             }
-        } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
-            ExternalPaymentMethodInterceptor.intercept(
-                externalPaymentMethodType = paymentSelection.type,
-                billingDetails = paymentSelection.billingDetails,
-                onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
-                errorReporter = errorReporter,
-            )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
             paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
@@ -500,11 +488,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             bacsActivityResultLauncher
         )
 
-        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(errorReporter),
-            ::onExternalPaymentMethodResult
-        )
-
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -556,24 +539,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
-        val selection = selection.value
-        when (paymentResult) {
-            is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
-                selection,
-                deferredIntentConfirmationType = null
-            )
-
-            is PaymentResult.Failed -> eventReporter.onPaymentFailure(
-                selection,
-                error = PaymentSheetConfirmationError.ExternalPaymentMethod
-            )
-
-            is PaymentResult.Canceled -> Unit
-        }
-        onPaymentResult(paymentResult)
-    }
-
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
@@ -581,10 +546,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun handlePaymentFailed(error: Throwable, message: ResolvableString) {
+    private fun handlePaymentFailed(
+        error: PaymentSheetConfirmationError,
+        message: ResolvableString
+    ) {
         eventReporter.onPaymentFailure(
             paymentSelection = selection.value,
-            error = PaymentSheetConfirmationError.Stripe(error),
+            error = error,
         )
 
         resetViewState(
@@ -649,7 +617,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processIntentFailure(failure: IntentConfirmationHandler.Result.Failed) {
         when (failure.type) {
             IntentConfirmationHandler.ErrorType.Payment -> handlePaymentFailed(
-                error = failure.cause,
+                error = PaymentSheetConfirmationError.Stripe(failure.cause),
+                message = failure.message,
+            )
+            IntentConfirmationHandler.ErrorType.ExternalPaymentMethod -> handlePaymentFailed(
+                error = PaymentSheetConfirmationError.ExternalPaymentMethod,
                 message = failure.message,
             )
             IntentConfirmationHandler.ErrorType.Fatal -> onFatal(failure.cause)
@@ -668,7 +640,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             is PaymentResult.Failed -> {
                 handlePaymentFailed(
-                    error = paymentResult.throwable,
+                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                     message = paymentResult.throwable.stripeErrorMessage(),
                 )
             }

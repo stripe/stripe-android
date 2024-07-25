@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -19,9 +20,11 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
@@ -29,6 +32,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+import java.lang.IllegalStateException
 import javax.inject.Provider
 
 /**
@@ -41,12 +46,21 @@ internal class IntentConfirmationHandler(
     private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
+    private val errorReporter: ErrorReporter,
 ) {
     private var paymentLauncher: PaymentLauncher? = null
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
+
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
         get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
         set(value) {
             savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE] = value
+        }
+
+    private var currentArguments: Args?
+        get() = savedStateHandle[ARGUMENTS_KEY]
+        set(value) {
+            savedStateHandle[ARGUMENTS_KEY] = value
         }
 
     private var completableResult: CompletableDeferred<Result>? = if (isAwaitingForPaymentResult()) {
@@ -75,10 +89,16 @@ internal class IntentConfirmationHandler(
             )
         )
 
+        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
+            ExternalPaymentMethodContract(errorReporter),
+            ::onExternalPaymentMethodResult
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher = null
+                    externalPaymentMethodLauncher = null
                     super.onDestroy(owner)
                 }
             }
@@ -99,38 +119,16 @@ internal class IntentConfirmationHandler(
             return
         }
 
+        currentArguments = arguments
         completableResult = CompletableDeferred()
 
         coroutineScope.launch {
-            val nextStep = intentConfirmationInterceptor.intercept(
-                initializationMode = arguments.initializationMode,
-                paymentSelection = arguments.paymentSelection,
-                shippingValues = arguments.shippingDetails?.toConfirmPaymentIntentShipping(),
-                context = context,
-            )
+            val paymentSelection = arguments.paymentSelection
 
-            deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
-
-            when (nextStep) {
-                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    handleNextAction(
-                        clientSecret = nextStep.clientSecret,
-                        stripeIntent = arguments.intent,
-                    )
-                }
-                is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                    confirmStripeIntent(nextStep.confirmParams)
-                }
-                is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onFailure(
-                        cause = nextStep.cause,
-                        message = nextStep.message,
-                        type = ErrorType.NextStep,
-                    )
-                }
-                is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    onPaymentResult(InternalPaymentResult.Completed(arguments.intent))
-                }
+            if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
+                handleExternalPaymentMethod(paymentSelection)
+            } else {
+                confirm(arguments)
             }
         }
     }
@@ -143,6 +141,41 @@ internal class IntentConfirmationHandler(
      */
     suspend fun awaitIntentResult(): Result? {
         return completableResult?.await()
+    }
+
+    private suspend fun confirm(
+        arguments: Args
+    ) {
+        val nextStep = intentConfirmationInterceptor.intercept(
+            initializationMode = arguments.initializationMode,
+            paymentSelection = arguments.paymentSelection,
+            shippingValues = arguments.shippingDetails?.toConfirmPaymentIntentShipping(),
+            context = context,
+        )
+
+        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+
+        when (nextStep) {
+            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                handleNextAction(
+                    clientSecret = nextStep.clientSecret,
+                    stripeIntent = arguments.intent,
+                )
+            }
+            is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                confirmStripeIntent(nextStep.confirmParams)
+            }
+            is IntentConfirmationInterceptor.NextStep.Fail -> {
+                onFailure(
+                    cause = nextStep.cause,
+                    message = nextStep.message,
+                    type = ErrorType.NextStep,
+                )
+            }
+            is IntentConfirmationInterceptor.NextStep.Complete -> {
+                onPaymentResult(InternalPaymentResult.Completed(arguments.intent))
+            }
+        }
     }
 
     private fun handleNextAction(
@@ -184,6 +217,18 @@ internal class IntentConfirmationHandler(
         }
     }
 
+    private fun handleExternalPaymentMethod(
+        paymentSelection: PaymentSelection.ExternalPaymentMethod
+    ) {
+        ExternalPaymentMethodInterceptor.intercept(
+            externalPaymentMethodType = paymentSelection.type,
+            billingDetails = paymentSelection.billingDetails,
+            onPaymentResult = ::onExternalPaymentMethodResult,
+            externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+            errorReporter = errorReporter,
+        )
+    }
+
     private fun onPaymentResult(result: InternalPaymentResult) {
         val intentResult = when (result) {
             is InternalPaymentResult.Completed -> Result.Succeeded(
@@ -198,11 +243,43 @@ internal class IntentConfirmationHandler(
             is InternalPaymentResult.Canceled -> Result.Canceled
         }
 
-        deferredIntentConfirmationType = null
-
-        completableResult?.complete(intentResult)
+        onIntentResult(intentResult)
 
         removeIsAwaitingForPaymentResult()
+    }
+
+    private fun onExternalPaymentMethodResult(result: PaymentResult) {
+        val intentResult = currentArguments?.let { arguments ->
+            when (result) {
+                is PaymentResult.Completed -> Result.Succeeded(
+                    intent = arguments.intent,
+                    deferredIntentConfirmationType = null
+                )
+                is PaymentResult.Failed -> Result.Failed(
+                    cause = result.throwable,
+                    message = result.throwable.stripeErrorMessage(),
+                    type = ErrorType.ExternalPaymentMethod,
+                )
+                is PaymentResult.Canceled -> Result.Canceled
+            }
+        } ?: run {
+            val cause = IllegalStateException("Arguments should have been initialized before handling EPM result!")
+
+            Result.Failed(
+                cause = cause,
+                message = cause.stripeErrorMessage(),
+                type = ErrorType.ExternalPaymentMethod,
+            )
+        }
+
+        onIntentResult(intentResult)
+    }
+
+    private fun onIntentResult(result: Result) {
+        deferredIntentConfirmationType = null
+        currentArguments = null
+
+        completableResult?.complete(result)
     }
 
     private fun onFailure(
@@ -243,12 +320,13 @@ internal class IntentConfirmationHandler(
         return savedStateHandle.get<Boolean>(AWAITING_PAYMENT_RESULT_KEY) ?: false
     }
 
+    @Parcelize
     internal data class Args(
         val initializationMode: PaymentSheet.InitializationMode,
         val shippingDetails: AddressDetails?,
         val intent: StripeIntent,
         val paymentSelection: PaymentSelection?
-    )
+    ) : Parcelable
 
     /**
      * Defines the result types that [IntentConfirmationHandler] can return after completing the confirmation process.
@@ -297,6 +375,11 @@ internal class IntentConfirmationHandler(
          * Indicates an error occurred when determining the next step for the confirmation process.
          */
         NextStep,
+
+        /**
+         * Indicates an error occurred when confirming with external payment methods
+         */
+        ExternalPaymentMethod,
     }
 
     class Factory(
@@ -306,6 +389,7 @@ internal class IntentConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val application: Application,
+        private val errorReporter: ErrorReporter,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
@@ -321,6 +405,7 @@ internal class IntentConfirmationHandler(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 context = application,
                 coroutineScope = scope,
+                errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
             )
         }
@@ -329,5 +414,6 @@ internal class IntentConfirmationHandler(
     internal companion object {
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
         private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
+        private const val ARGUMENTS_KEY = "IntentConfirmationArguments"
     }
 }

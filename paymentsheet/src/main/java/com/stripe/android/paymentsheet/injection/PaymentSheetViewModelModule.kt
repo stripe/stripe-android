@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
@@ -31,6 +32,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
+        errorReporter: ErrorReporter,
     ): IntentConfirmationHandler.Factory {
         return IntentConfirmationHandler.Factory(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
@@ -39,6 +41,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             application = application,
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
+            errorReporter = errorReporter,
         )
     }
 

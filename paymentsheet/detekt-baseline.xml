@@ -18,6 +18,7 @@
     <ID>LargeClass:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
+    <ID>LargeClass:IntentConfirmationHandlerTest.kt$IntentConfirmationHandlerTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
