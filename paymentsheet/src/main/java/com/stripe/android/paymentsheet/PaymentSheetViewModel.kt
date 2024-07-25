@@ -195,21 +195,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
         linkConfigurationCoordinator.emailFlow,
-        paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
         buttonsEnabled,
-        paymentMethodMetadata.mapAsStateFlow { it?.supportedPaymentMethodTypes().orEmpty() },
-    ) { isLinkAvailable, linkEmail, isGooglePayReady, buttonsEnabled, paymentMethodTypes ->
+        paymentMethodMetadata,
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
-            isGooglePayReady = isGooglePayReady,
+            isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
-            isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
         )
     }
 
