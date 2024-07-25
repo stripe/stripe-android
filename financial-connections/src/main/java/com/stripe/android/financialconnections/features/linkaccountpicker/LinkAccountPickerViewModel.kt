@@ -113,11 +113,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 singleAccount = manifest.singleAccount,
                 selectedAccountIds = selectedAccountIds
             )
-        }.execute { payload ->
-            copy(
-                payload = payload,
-
-            )
+        }.execute {
+            copy(payload = it)
         }
     }
 
