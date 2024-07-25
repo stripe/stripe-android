@@ -193,35 +193,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `removePaymentMethod removes it from payment methods list`() = runTest {
-        val cards = PaymentMethodFixtures.createCards(3)
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
-        )
-
-        viewModel.savedPaymentMethodMutator.removePaymentMethod(cards[1])
-
-        assertThat(viewModel.customerStateHolder.paymentMethods.value)
-            .containsExactly(cards[0], cards[2])
-    }
-
-    @Test
-    fun `Removing selected payment method clears selection`() = runTest {
-        val cards = PaymentMethodFixtures.createCards(3)
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
-        )
-
-        val selection = PaymentSelection.Saved(cards[1])
-        viewModel.updateSelection(selection)
-        assertThat(viewModel.selection.value).isEqualTo(selection)
-
-        viewModel.savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
-
-        assertThat(viewModel.selection.value).isNull()
-    }
-
-    @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
@@ -270,32 +241,6 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
 
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
-        }
-    }
-
-    @Test
-    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-        )
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                paymentMethods = listOf()
-            )
-        )
-
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
         }
     }
 
@@ -791,24 +736,6 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
         }
-
-    @Test
-    fun `paymentMethods is not null when loading is complete`() = runTest {
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-            isGooglePayReady = true,
-        ).run {
-            copy(state = state.copy(customer = null))
-        }
-
-        val viewModel = createViewModel(args = args)
-
-        viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
-        }
-        viewModel.customerStateHolder.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
-        }
-    }
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
