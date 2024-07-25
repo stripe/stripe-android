@@ -12,7 +12,7 @@ def update_pay_server_docs()
         execute_or_fail("git pull")
 
         puts '> Updating android SDK version in pay-server for latest release.'
-        replace_in_file("docs/content/constants.yaml",
+        replace_in_file("../pay-server/docs/content/constants.yaml",
           /sdk-version: [.\d]+/,
           "sdk-version: #{@version}",
         )
