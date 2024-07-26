@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -22,11 +23,9 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
@@ -35,6 +34,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeResultHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -431,13 +431,17 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS,
         )
 
-        callback(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -460,13 +464,17 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS,
         )
 
-        callback(InternalPaymentResult.Canceled)
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -488,7 +496,11 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS,
@@ -496,7 +508,7 @@ class IntentConfirmationHandlerTest {
 
         val cause = IllegalStateException("This is a failure!")
 
-        callback(InternalPaymentResult.Failed(cause))
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Failed(cause))
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -557,9 +569,13 @@ class IntentConfirmationHandlerTest {
             savedStateHandle = savedStateHandle,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
 
-        callback(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
+
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -585,13 +601,17 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS,
         )
 
-        callback(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -617,13 +637,17 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val callback = intentConfirmationHandler.registerAndRetrievePaymentResultCallback()
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS,
         )
 
-        callback(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
         val result = intentConfirmationHandler.awaitIntentResult()
 
@@ -641,9 +665,7 @@ class IntentConfirmationHandlerTest {
 
         val fakeExternalPaymentMethodLauncher = FakeExternalPaymentMethodLauncher()
 
-        val intentConfirmationHandler = createIntentConfirmationHandler(
-            shouldRegister = false
-        ).apply {
+        val intentConfirmationHandler = createIntentConfirmationHandler().apply {
             setExternalPaymentMethodLauncher(fakeExternalPaymentMethodLauncher)
         }
 
@@ -681,9 +703,7 @@ class IntentConfirmationHandlerTest {
     fun `On external PM with no confirm handler, should return failed result`() = runTest {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
 
-        val intentConfirmationHandler = createIntentConfirmationHandler(
-            shouldRegister = false,
-        )
+        val intentConfirmationHandler = createIntentConfirmationHandler()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
@@ -729,7 +749,11 @@ class IntentConfirmationHandlerTest {
 
         val intentConfirmationHandler = createIntentConfirmationHandler()
 
-        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
@@ -737,7 +761,7 @@ class IntentConfirmationHandlerTest {
             ),
         )
 
-        epmCallback(PaymentResult.Completed)
+        epmsCallbackHandler.onResult(PaymentResult.Completed)
 
         val intentResult = intentConfirmationHandler.awaitIntentResult()
 
@@ -755,7 +779,11 @@ class IntentConfirmationHandlerTest {
 
         val intentConfirmationHandler = createIntentConfirmationHandler()
 
-        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
@@ -765,7 +793,7 @@ class IntentConfirmationHandlerTest {
 
         val exception = APIException()
 
-        epmCallback(PaymentResult.Failed(exception))
+        epmsCallbackHandler.onResult(PaymentResult.Failed(exception))
 
         val intentResult = intentConfirmationHandler.awaitIntentResult()
 
@@ -784,7 +812,11 @@ class IntentConfirmationHandlerTest {
 
         val intentConfirmationHandler = createIntentConfirmationHandler()
 
-        val epmCallback = intentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback()
+        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
@@ -792,7 +824,7 @@ class IntentConfirmationHandlerTest {
             ),
         )
 
-        epmCallback(PaymentResult.Canceled)
+        epmsCallbackHandler.onResult(PaymentResult.Canceled)
 
         val intentResult = intentConfirmationHandler.awaitIntentResult()
 
@@ -811,7 +843,9 @@ class IntentConfirmationHandlerTest {
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
             bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
-        )
+        ).apply {
+            registerWithCallbacks()
+        }
 
         val appearance = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
 
@@ -923,10 +957,13 @@ class IntentConfirmationHandlerTest {
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
         )
 
-        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
+        )
 
         val paymentSelection = createBacsPaymentSelection()
 
@@ -936,7 +973,7 @@ class IntentConfirmationHandlerTest {
             ),
         )
 
-        bacsMandateResultCallback(BacsMandateConfirmationResult.Confirmed)
+        bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Confirmed)
 
         val call = interceptor.calls.awaitItem()
 
@@ -962,7 +999,11 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
+        )
 
         val paymentSelection = createBacsPaymentSelection()
 
@@ -972,7 +1013,7 @@ class IntentConfirmationHandlerTest {
             ),
         )
 
-        bacsMandateResultCallback(BacsMandateConfirmationResult.ModifyDetails)
+        bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.ModifyDetails)
 
         interceptor.calls.expectNoEvents()
 
@@ -992,7 +1033,11 @@ class IntentConfirmationHandlerTest {
             shouldRegister = false,
         )
 
-        val bacsMandateResultCallback = intentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback()
+        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
+        )
 
         val paymentSelection = createBacsPaymentSelection()
 
@@ -1002,7 +1047,7 @@ class IntentConfirmationHandlerTest {
             ),
         )
 
-        bacsMandateResultCallback(BacsMandateConfirmationResult.Cancelled)
+        bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Cancelled)
 
         interceptor.calls.expectNoEvents()
 
@@ -1018,7 +1063,7 @@ class IntentConfirmationHandlerTest {
         bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher(),
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        shouldRegister: Boolean = true
+        shouldRegister: Boolean = true,
     ): IntentConfirmationHandler {
         return IntentConfirmationHandler(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
@@ -1030,39 +1075,8 @@ class IntentConfirmationHandlerTest {
             savedStateHandle = savedStateHandle
         ).apply {
             if (shouldRegister) {
-                register(
-                    activityResultCaller = mock {
-                        on {
-                            registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(
-                                any(),
-                                any()
-                            )
-                        } doReturn mock()
-                    },
-                    lifecycleOwner = TestLifecycleOwner(),
-                )
+                registerWithCallbacks()
             }
-        }
-    }
-
-    private fun IntentConfirmationHandler.registerAndRetrievePaymentResultCallback():
-        (result: InternalPaymentResult) -> Unit {
-        val argumentCaptor = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
-
-        register(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(
-                        any(),
-                        argumentCaptor.capture()
-                    )
-                } doReturn mock()
-            },
-            lifecycleOwner = TestLifecycleOwner(),
-        )
-
-        return {
-            argumentCaptor.firstValue.onActivityResult(it)
         }
     }
 
@@ -1082,46 +1096,39 @@ class IntentConfirmationHandlerTest {
         )
     }
 
-    private fun IntentConfirmationHandler.registerAndRetrieveExternalPaymentMethodCallback():
-        (result: PaymentResult) -> Unit {
-        val argumentCaptor = argumentCaptor<ActivityResultCallback<PaymentResult>>()
-
+    private fun IntentConfirmationHandler.registerWithCallbacks(
+        paymentResultCallbackHandler: FakeResultHandler<InternalPaymentResult> =
+            FakeResultHandler(),
+        externalPaymentMethodsCallbackHandler: FakeResultHandler<PaymentResult> =
+            FakeResultHandler(),
+        bacsMandateConfirmationCallbackHandler: FakeResultHandler<BacsMandateConfirmationResult> =
+            FakeResultHandler()
+    ) {
         register(
             activityResultCaller = mock {
+                val captor = argumentCaptor<ActivityResultCallback<Any>>()
+
                 on {
-                    registerForActivityResult<ExternalPaymentMethodInput, PaymentResult>(
-                        any(),
-                        argumentCaptor.capture()
+                    registerForActivityResult(
+                        any<ActivityResultContract<Any, Any>>(),
+                        captor.capture()
                     )
                 } doReturn mock()
+
+                paymentResultCallbackHandler.register {
+                    captor.firstValue.onActivityResult(it)
+                }
+
+                externalPaymentMethodsCallbackHandler.register {
+                    captor.secondValue.onActivityResult(it)
+                }
+
+                bacsMandateConfirmationCallbackHandler.register {
+                    captor.thirdValue.onActivityResult(it)
+                }
             },
             lifecycleOwner = TestLifecycleOwner(),
         )
-
-        return {
-            argumentCaptor.secondValue.onActivityResult(it)
-        }
-    }
-
-    private fun IntentConfirmationHandler.registerAndRetrieveBacsMandateResultCallback():
-        (result: BacsMandateConfirmationResult) -> Unit {
-        val argumentCaptor = argumentCaptor<ActivityResultCallback<BacsMandateConfirmationResult>>()
-
-        register(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<BacsMandateConfirmationContract.Args, BacsMandateConfirmationResult>(
-                        any(),
-                        argumentCaptor.capture()
-                    )
-                } doReturn mock()
-            },
-            lifecycleOwner = TestLifecycleOwner(),
-        )
-
-        return {
-            argumentCaptor.thirdValue.onActivityResult(it)
-        }
     }
 
     private fun IntentConfirmationHandler.Result?.asFailed(): IntentConfirmationHandler.Result.Failed {
