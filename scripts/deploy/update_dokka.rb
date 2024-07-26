@@ -23,11 +23,17 @@ def generate_dokka()
     begin
         execute_or_fail("git push -u origin")
 
+        if (@is_dry_run)
+            user_message = "Verify that a draft PR was opened containing only docs updates."
+        else
+            user_message = "Send the dokka PR for review and enable auto-merge. Then, continue with the next steps."
+        end
+
         create_pr(
             dokka_branch_name,
             dokka_change_description,
             dokka_change_description,
-            "Send the dokka PR for review and enable auto-merge. Then, continue with the next steps."
+            user_message
         )
     rescue
         revert_dokka_changes
