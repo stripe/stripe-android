@@ -28,30 +28,40 @@ def revert_version_bump_changes()
 end
 
 def create_version_bump_pr()
+    switch_to_release_branch()
+    update_read_me()
+    update_stripe_sdk_version()
+    update_gradle_properties()
+    update_changelog()
+    execute_or_fail("git commit -m \"Bump version to #{@version}\"")
+
     begin
-        execute_or_fail("git commit -m \"Bump version to #{@version}\"")
         execute_or_fail("git push -u origin")
+    
+        pr_description = create_pr_description()
+        if (@is_dry_run)
+          user_message = "Verify that a draft PR containing version number bumps was opened. If this was a real release, you would need to wait for this PR to merge before continuing."
+        else
+          user_message = "Verify that a PR containing version number bumps was opened. Merge this PR before continuing to the next steps."
+        end
+
+        create_pr(
+           release_branch,
+           "Bump version to #{@version}",
+           pr_description,
+           user_message
+        )
     rescue
-        # Undo all of the above if any of the steps fail.
-        execute("git reset HEAD~")
-        # Don't continue if any of the above failed.
+        revert_version_bump_changes()
+        execute("git checkout #{@deploy_branch}")
         raise
     end
 
-
-    pr_description = create_pr_description()
-    if (@is_dry_run)
-        user_message = "Verify that a draft PR containing version number bumps was opened. If this was a real release, you would need to wait for this PR to merge before continuing."
-    else
-        user_message = "Verify that a PR containing version number bumps was opened. Merge this PR before continuing to the next steps."
+    # If this is a dry run, we need to stay on the release/ branch to do a github release. This is
+    # because the github release depends on the changes we made to the CHANGELOG.
+    if (!@is_dry_run)
+        execute_or_fail("git checkout #{@deploy_branch}")
     end
-
-    create_pr(
-         release_branch,
-         "Bump version to #{@version}",
-         pr_description,
-         user_message
-    )
 end
 
 private def release_branch

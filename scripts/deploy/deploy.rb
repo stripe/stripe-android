@@ -61,13 +61,8 @@ steps = [
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
-    method(:switch_to_release_branch),
 
     # Update version number
-    method(:update_read_me),
-    method(:update_stripe_sdk_version),
-    method(:update_gradle_properties),
-    method(:update_changelog),
     method(:create_version_bump_pr),
 
     # Actually release a new SDK version
