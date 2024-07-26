@@ -30,6 +30,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -37,6 +38,7 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
@@ -566,6 +568,7 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
+            workContext = coroutineContext,
         )
 
         val completable = CompletableDeferred<Unit>()
@@ -603,6 +606,7 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
+            workContext = coroutineContext,
         )
 
         val result = loader.load(configuration)
@@ -722,6 +726,7 @@ class DefaultCustomerSheetLoaderTest {
         ),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
             isLiveModeProvider = isLiveModeProvider,
@@ -733,6 +738,7 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = customerAdapterProvider,
             errorReporter = errorReporter,
+            workContext = workContext,
         )
     }
 

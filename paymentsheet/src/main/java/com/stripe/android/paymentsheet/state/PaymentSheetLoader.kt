@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -30,12 +31,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -84,7 +82,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = withContextCatching(::reportFailedLoad) {
+    ): Result<PaymentSheetState.Full> = workContext.runCatching(::reportFailedLoad) {
         eventReporter.onLoadStarted(initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
@@ -160,7 +158,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             initializationMode = initializationMode,
         )
 
-        return@withContextCatching state
+        return@runCatching state
     }
 
     private suspend fun retrieveElementsSession(
@@ -562,33 +560,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                         "available-external-payment-methods"
                 )
             }
-        }
-    }
-
-    /*
-     * This is a helper for catching thrown exceptions from 'async' calls within a suspendable function.
-     *
-     * If a 'runCatching' task wraps a task with 'async' calls, any 'async' failures are not caught by 'runCatching'
-     * but instead by the coroutine, causing the whole coroutine scope to fail and close which propagates the uncaught
-     * exception to the caller. This is counter-intuitive to the idea of catching all exceptions that occur from a
-     * task.
-     *
-     * This function instead launches inside one coroutine scope a 'runCatching' call that creates its own coroutine
-     * scope to launch the task in. If the inner coroutine scope fails and throws an exception, the 'runCatching' call
-     * will be able to catch the exception and return a 'Result' type to the caller rather than throw an exception to
-     * it. If a failure occurs, we can also run the 'onFailure' logic inside the outer work coroutine rather than the
-     * caller's coroutine.
-     */
-    private suspend fun <T> withContextCatching(
-        onFailure: (error: Throwable) -> Unit,
-        task: suspend CoroutineScope.() -> T
-    ): Result<T> {
-        return withContext(workContext) {
-            runCatching {
-                coroutineScope {
-                    task()
-                }
-            }.onFailure(onFailure)
         }
     }
 }
