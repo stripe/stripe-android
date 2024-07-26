@@ -72,7 +72,7 @@ private fun NoticeSheetContent(
                 onClickableTextClick = onClickableTextClick
             )
             is Generic -> GenericBottomSheetContent(
-                generic = content.generic,
+                screen = content.generic,
                 onClickableTextClick = onClickableTextClick,
                 onConfirmModalClick = onConfirmModalClick
             )
