@@ -30,4 +30,5 @@ internal enum class ConsentClickableText(val value: String) {
     DATA("stripe://data-access-notice"),
     LEGAL_DETAILS("stripe://legal-details-notice"),
     MANUAL_ENTRY("stripe://manual-entry"),
+    LINK_LOGIN_WARMUP("stripe://link-login"),
 }
