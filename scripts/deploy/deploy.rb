@@ -5,6 +5,7 @@ require 'optparse'
 
 require_relative 'common'
 require_relative 'create_github_release'
+require_relative 'publish_to_sonatype'
 require_relative 'update_dokka'
 require_relative 'update_pay_server_docs'
 require_relative 'update_version_numbers'
@@ -69,8 +70,13 @@ steps = [
     method(:update_changelog),
     method(:create_version_bump_pr),
 
+    # Actually release a new SDK version
+    method(:publish_to_sonatype),
+
+    # Create a Github release
     method(:create_github_release),
 
+    # Do docs updates
     method(:generate_dokka),
     method(:update_pay_server_docs),
 ]
