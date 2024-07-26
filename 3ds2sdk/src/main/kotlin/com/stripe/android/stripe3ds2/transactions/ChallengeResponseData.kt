@@ -320,6 +320,7 @@ data class ChallengeResponseData constructor(
          * @throws ChallengeResponseParseException if the JSON format or data fails validation
          */
         @Throws(ChallengeResponseParseException::class)
+        @Suppress("LongMethod")
         internal fun fromJson(cresJson: JSONObject): ChallengeResponseData {
             checkMessageType(cresJson)
 

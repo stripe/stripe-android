@@ -386,7 +386,8 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.showChallengeProgressView
             .setOnClickListener {
-                val context = ContextThemeWrapper(this@MainActivity, com.stripe.android.stripe3ds2.R.style.Stripe3DS2Theme)
+                val context =
+                    ContextThemeWrapper(this@MainActivity, com.stripe.android.stripe3ds2.R.style.Stripe3DS2Theme)
                 val progressDialog =
                     ChallengeSubmitDialogFactory(context, defaultUiCustomization).create()
                 progressDialog.setCancelable(true)

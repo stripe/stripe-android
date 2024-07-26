@@ -55,8 +55,8 @@ internal enum class Brand(
             errorReporter: ErrorReporter
         ): Brand {
             val brand = entries.firstOrNull {
-                    it.directoryServerName.equals(directoryServerName.trim(), ignoreCase = true)
-                }
+                it.directoryServerName.equals(directoryServerName.trim(), ignoreCase = true)
+            }
 
             return when {
                 brand != null -> Result.success(brand)
@@ -64,7 +64,8 @@ internal enum class Brand(
                     val supportedNames = entries.map { it.directoryServerName }
                     Result.failure(
                         SDKRuntimeException(
-                            "Directory server name '$directoryServerName' is not supported. Must be one of $supportedNames."
+                            "Directory server name '$directoryServerName' is not supported." +
+                                " Must be one of $supportedNames."
                         )
                     )
                 }

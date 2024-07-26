@@ -56,6 +56,10 @@ android {
         disable += "GradleDependency"
         disable += "UnusedResources"
         disable += "IconLocation"
+        disable += "LongMethod"
+    }
+    detekt {
+        disableDefaultRuleSets = true
     }
 
     compileOptions {

@@ -119,7 +119,9 @@ internal class ChallengeFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val nullableCres = arguments?.let { BundleCompat.getParcelable(it, ARG_CRES, ChallengeResponseData::class.java) }
+        val nullableCres = arguments?.let {
+            BundleCompat.getParcelable(it, ARG_CRES, ChallengeResponseData::class.java)
+        }
         if (nullableCres == null) {
             onError(
                 IllegalArgumentException("Could not start challenge screen. Challenge response data was null.")
