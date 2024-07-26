@@ -147,6 +147,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     }
 }
 
+@Suppress("TooGenericExceptionCaught")
 private fun paymentSheetNextActionHandlers(
     includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context

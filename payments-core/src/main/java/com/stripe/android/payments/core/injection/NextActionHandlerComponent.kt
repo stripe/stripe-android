@@ -34,6 +34,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface NextActionHandlerComponent {
     val registry: DefaultPaymentNextActionHandlerRegistry
 
+    @Suppress("TooManyFunctions")
     @Component.Builder
     interface Builder {
         @BindsInstance
