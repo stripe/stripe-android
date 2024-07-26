@@ -10,12 +10,12 @@ import kotlin.reflect.KClass
  * [Qualifier] for the multibinding map between [NextActionData] and [PaymentNextActionHandler].
  */
 @Qualifier
-annotation class IntentNextActionHandlerMap
+annotation class IntentAuthenticatorMap
 
 /**
- * [MapKey] for the [IntentNextActionHandlerMap], encapsulating the [NextActionData] class type.
+ * [MapKey] for the [IntentAuthenticatorMap], encapsulating the [NextActionData] class type.
  */
 @MapKey
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class IntentNextActionHandlerKey(val value: KClass<out NextActionData>)
+annotation class IntentAuthenticatorKey(val value: KClass<out NextActionData>)

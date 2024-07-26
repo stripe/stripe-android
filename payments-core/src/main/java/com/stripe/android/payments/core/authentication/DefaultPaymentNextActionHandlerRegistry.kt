@@ -17,7 +17,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.DaggerNextActionHandlerComponent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
-import com.stripe.android.payments.core.injection.IntentNextActionHandlerMap
+import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -34,7 +34,7 @@ private typealias NextActionHandler = @JvmSuppressWildcards PaymentNextActionHan
 internal class DefaultPaymentNextActionHandlerRegistry @Inject internal constructor(
     private val noOpIntentNextActionHandler: NoOpIntentNextActionHandler,
     private val sourceNextActionHandler: SourceNextActionHandler,
-    @IntentNextActionHandlerMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
+    @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
 ) : PaymentNextActionHandlerRegistry {
