@@ -61,7 +61,7 @@ class PaymentLauncherViewModelTest {
     internal class TestFragment : Fragment()
 
     private val stripeApiRepository = mock<StripeApiRepository>()
-    private val authenticatorRegistry = mock<PaymentNextActionHandlerRegistry>()
+    private val nextActionHandlerRegistry = mock<PaymentNextActionHandlerRegistry>()
     private val defaultReturnUrl =
         DefaultReturnUrl.create(ApplicationProvider.getApplicationContext())
     private val apiRequestOptions = mock<ApiRequest.Options>()
@@ -111,7 +111,7 @@ class PaymentLauncherViewModelTest {
         PaymentLauncherViewModel(
             isPaymentIntent,
             stripeApiRepository,
-            authenticatorRegistry,
+            nextActionHandlerRegistry,
             defaultReturnUrl,
             { apiRequestOptions },
             threeDs1IntentReturnUrlMap,
@@ -139,10 +139,10 @@ class PaymentLauncherViewModelTest {
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
         ).thenReturn(Result.success(setupIntent))
 
-        whenever(authenticatorRegistry.getNextActionHandler(eq(paymentIntent)))
+        whenever(nextActionHandlerRegistry.getNextActionHandler(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
 
-        whenever(authenticatorRegistry.getNextActionHandler(eq(setupIntent)))
+        whenever(nextActionHandlerRegistry.getNextActionHandler(eq(setupIntent)))
             .thenReturn(siAuthenticator)
 
         whenever(
@@ -153,7 +153,7 @@ class PaymentLauncherViewModelTest {
             )
         ).thenReturn(Result.success(stripeIntent))
 
-        whenever(authenticatorRegistry.getNextActionHandler(eq(stripeIntent)))
+        whenever(nextActionHandlerRegistry.getNextActionHandler(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
     }
 
@@ -488,7 +488,7 @@ class PaymentLauncherViewModelTest {
     fun `Invalidates launcher when lifecycle owner is destroyed`() = runTest {
         createViewModel()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        verify(authenticatorRegistry).onLauncherInvalidated()
+        verify(nextActionHandlerRegistry).onLauncherInvalidated()
     }
 
     @Test

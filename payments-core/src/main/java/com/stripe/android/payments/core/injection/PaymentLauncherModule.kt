@@ -30,7 +30,7 @@ internal class PaymentLauncherModule {
 
     @Provides
     @Singleton
-    fun providePaymentAuthenticatorRegistry(
+    fun providePaymentNextActionHandlerRegistry(
         context: Context,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
         @IOContext workContext: CoroutineContext,

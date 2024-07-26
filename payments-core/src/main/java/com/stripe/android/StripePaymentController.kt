@@ -96,7 +96,7 @@ constructor(
      */
     private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    private val authenticatorRegistry: PaymentNextActionHandlerRegistry =
+    private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
         DefaultPaymentNextActionHandlerRegistry.createInstance(
             context = context,
             paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
@@ -118,7 +118,7 @@ constructor(
             PaymentRelayContract(),
             activityResultCallback
         )
-        authenticatorRegistry.onNewActivityResultCaller(
+        nextActionHandlerRegistry.onNewActivityResultCaller(
             activityResultCaller,
             activityResultCallback
         )
@@ -127,7 +127,7 @@ constructor(
     override fun unregisterLaunchers() {
         paymentRelayLauncher?.unregister()
         paymentRelayLauncher = null
-        authenticatorRegistry.onLauncherInvalidated()
+        nextActionHandlerRegistry.onLauncherInvalidated()
     }
 
     /**
@@ -321,7 +321,7 @@ constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getNextActionHandler(source).performNextAction(
+        nextActionHandlerRegistry.getNextActionHandler(source).performNextAction(
             host,
             source,
             requestOptions
@@ -448,7 +448,7 @@ constructor(
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.getNextActionHandler(stripeIntent).performNextAction(
+        nextActionHandlerRegistry.getNextActionHandler(stripeIntent).performNextAction(
             host,
             stripeIntent,
             requestOptions

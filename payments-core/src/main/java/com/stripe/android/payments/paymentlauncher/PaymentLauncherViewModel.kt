@@ -51,7 +51,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentLauncherViewModel @Inject constructor(
     @Named(IS_PAYMENT_INTENT) private val isPaymentIntent: Boolean,
     private val stripeApiRepository: StripeRepository,
-    private val authenticatorRegistry: PaymentNextActionHandlerRegistry,
+    private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
@@ -87,7 +87,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        authenticatorRegistry.onNewActivityResultCaller(
+        nextActionHandlerRegistry.onNewActivityResultCaller(
             activityResultCaller = activityResultCaller,
             activityResultCallback = ::onPaymentFlowResult,
         )
@@ -95,7 +95,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    authenticatorRegistry.onLauncherInvalidated()
+                    nextActionHandlerRegistry.onLauncherInvalidated()
                     super.onDestroy(owner)
                 }
             }
@@ -141,7 +141,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        authenticatorRegistry.getNextActionHandler(intent).performNextAction(
+                        nextActionHandlerRegistry.getNextActionHandler(intent).performNextAction(
                             host,
                             intent,
                             apiRequestOptionsProvider.get()
@@ -216,7 +216,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 options = apiRequestOptionsProvider.get(),
             ).fold(
                 onSuccess = { intent ->
-                    authenticatorRegistry
+                    nextActionHandlerRegistry
                         .getNextActionHandler(intent)
                         .performNextAction(
                             host,
