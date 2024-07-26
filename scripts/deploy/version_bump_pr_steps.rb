@@ -37,14 +37,19 @@ def create_version_bump_pr()
 
     begin
         execute_or_fail("git push -u origin")
-
+    
         pr_description = create_pr_description()
+        if (@is_dry_run)
+          user_message = "Verify that a draft PR containing version number bumps was opened. If this was a real release, you would need to wait for this PR to merge before continuing."
+        else
+          user_message = "Verify that a PR containing version number bumps was opened. Merge this PR before continuing to the next steps."
+        end
 
         create_pr(
-             release_branch,
-             "Bump version to #{@version}",
-             pr_description,
-             "Merge the version bump PR"
+           release_branch,
+           "Bump version to #{@version}",
+           pr_description,
+           user_message
         )
     rescue
         revert_version_bump_changes()

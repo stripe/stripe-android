@@ -26,6 +26,12 @@ def create_github_release
 
         rputs "Created new release"
         open_url(release_response.html_url)
+
+        if (@is_dry_run)
+            rputs "Please verify that the release was opened + created properly. It should contain a changelog of the changes for this release."
+            rputs "Since this is a dry run, you should see the release as a draft. It will be missing a tag + source code attachments."
+            wait_for_user
+        end
     rescue
         delete_release_tag
     end

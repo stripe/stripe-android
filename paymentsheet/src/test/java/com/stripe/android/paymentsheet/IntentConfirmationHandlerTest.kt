@@ -562,6 +562,29 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
+    fun `On launch EPMs handler, should store 'AwaitingPaymentResult' in 'SavedStateHandle'`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
+
+        val savedStateHandle = SavedStateHandle()
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueNextActionStep("pi_123")
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+            savedStateHandle = savedStateHandle,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                paymentSelection = EXTERNAL_PAYMENT_METHOD
+            ),
+        )
+
+        assertThat(savedStateHandle.get<Boolean>("AwaitingPaymentResult")).isTrue()
+    }
+
+    @Test
     fun `On start Bacs mandate, should store 'AwaitingPreConfirmResult' in 'SavedStateHandle'`() = runTest {
         val savedStateHandle = SavedStateHandle()
 
