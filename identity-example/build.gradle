@@ -1,8 +1,13 @@
 apply from: configs.androidApplication
 
+apply plugin: 'com.emergetools.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 assemble.dependsOn('lint')
+
+emerge {
+    apiToken.set(System.getenv("EMERGE_API_KEY"))
+}
 
 android {
     defaultConfig {

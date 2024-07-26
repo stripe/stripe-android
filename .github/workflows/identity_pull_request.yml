@@ -88,11 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
-      - name: Generate Android release bundle
-        run: ./gradlew :identity-example:bundleRelease
-      - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
-        with:
-          artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
-          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
-          build_type: pull_request
+      - name: Upload release bundle to Emerge
+        run: ./gradlew :identity-example:emergeUploadReleaseAab
+        env:
+          EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
