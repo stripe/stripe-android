@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.52.5 - 2024-07-26
+
+## 20.52.5 - 2024-07-26
+
 ### PaymentSheet
 * [FIXED][8825](https://github.com/stripe/stripe-android/pull/8825) Fixed an issue the amount in the buy button in `PaymentSheet` did not formatted with set per-application locale.
 * [FIXED][8928](https://github.com/stripe/stripe-android/pull/8928) Fixed an issue in where changing country from the US to Canada would crash if certain states were selected.
