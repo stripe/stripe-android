@@ -78,13 +78,7 @@ steps = [
 execute_steps(steps, @step_index)
 
 if (@is_dry_run)
-    rputs "Please verify that the dry run worked as expected.
-
-    You should see a PR opened that bumps version numbers in the stripe-android codebase on branch release/<new release number>.
-
-    You should also see a draft release opened in the stripe-android repo which includes a changelog and example app apk for the new version. It's expected that the draft release will be missing a version tag and source code zip files.
-
-    When you're done, press enter to revert all changes."
+    rputs "Press enter to revert all changes made during the dry run."
     wait_for_user()
 
     delete_github_release()
