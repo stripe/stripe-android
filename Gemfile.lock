@@ -29,7 +29,7 @@ GEM
     faraday-retry (1.0.3)
     mini_portile2 (2.8.7)
     multipart-post (2.1.1)
-    nokogiri (1.15.6)
+    nokogiri (1.16.5)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     octokit (4.22.0)
