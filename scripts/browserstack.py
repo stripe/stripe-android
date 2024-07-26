@@ -15,6 +15,9 @@ from collections import defaultdict
 user = os.getenv("BROWSERSTACK_USERNAME")
 authKey = os.getenv("BROWSERSTACK_ACCESS_KEY")
 
+googlePlayEmail = os.getenv("GOOGLE_PLAY_TESTING_EMAIL")
+googlePlaySecret = os.getenv("GOOGLE_PLAY_TESTING_SECRET")
+
 PROJECT_NAME = "Mobile Payments"
 
 
@@ -226,6 +229,10 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         "acceptInsecureCerts": True,
         "locale": "en_US",
         "enableSpoonFramework": False,
+        "appStoreConfiguration": {
+            "username": googlePlayEmail,
+            "password": googlePlaySecret,
+        },
         "project": PROJECT_NAME,
     }
     json = {**baseParams, **addedParams}
@@ -540,6 +547,12 @@ if __name__ == "__main__":
         print("You must set the environment variables: ")
         print("   export BROWSERSTACK_USERNAME=<user>")
         print("   export BROWSERSTACK_ACCESS_KEY=<authkey>")
+        sys.exit(1)
+
+    if (not googlePlayEmail or googlePlayEmail == "") or (not googlePlaySecret or googlePlaySecret == ""):
+        print("You must set the environment variables: ")
+        print("   export GOOGLE_PLAY_TESTING_EMAIL=<google_play_email>")
+        print("   export GOOGLE_PLAY_TESTING_SECRET=<google_play_secret>")
         sys.exit(1)
 
     elif args.list:
