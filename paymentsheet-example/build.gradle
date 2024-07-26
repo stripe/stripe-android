@@ -1,5 +1,6 @@
 apply from: configs.androidApplication
 
+apply plugin: 'com.emergetools.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'shot'
 
@@ -10,6 +11,10 @@ def getBackendUrl() {
 
 def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
+}
+
+emerge {
+    apiToken = System.getenv("EMERGE_API_KEY")
 }
 
 dependencies {
