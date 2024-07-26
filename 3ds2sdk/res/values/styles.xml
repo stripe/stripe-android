@@ -87,7 +87,7 @@
     </style>
 
     <style name="Stripe3DS2FooterHeader">
-        <item name="android:textColor">@color/info_zone_header_text</item>
+        <item name="android:textColor">@color/stripe_info_zone_header_text</item>
     </style>
 
     <style name="Stripe3DS2FooterText"/>
