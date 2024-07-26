@@ -37,10 +37,12 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.lang.IllegalStateException
 import javax.inject.Provider
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This interface handles the process of confirming a [StripeIntent]. This interface can only handle confirming one
@@ -71,17 +73,32 @@ internal class IntentConfirmationHandler(
             savedStateHandle[ARGUMENTS_KEY] = value
         }
 
-    private var completableResult: CompletableDeferred<Result>? = if (isAwaitingForPaymentResult()) {
-        CompletableDeferred()
-    } else {
-        null
-    }
+    private val hasReloadedWhileAwaitingPreConfirm = isAwaitingForPreConfirmResult()
+    private val hasReloadedWhileAwaitingConfirm = isAwaitingForPaymentResult()
 
     /**
      * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
      * an intent before did not complete the process before process death.
      */
-    val hasReloadedFromProcessDeath = isAwaitingForPaymentResult()
+    val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
+
+    private var completableResult: CompletableDeferred<Result>? = if (hasReloadedFromProcessDeath) {
+        CompletableDeferred()
+    } else {
+        null
+    }
+
+    init {
+        if (hasReloadedWhileAwaitingConfirm) {
+            coroutineScope.launch {
+                delay(1.seconds)
+
+                if (completableResult?.isActive == true) {
+                    onIntentResult(Result.Canceled(action = CancellationAction.None))
+                }
+            }
+        }
+    }
 
     /**
      * Registers activities tied to confirmation process to the lifecycle.
@@ -140,18 +157,7 @@ internal class IntentConfirmationHandler(
         completableResult = CompletableDeferred()
 
         coroutineScope.launch {
-            val paymentSelection = arguments.paymentSelection
-
-            if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
-                handleExternalPaymentMethod(paymentSelection)
-            } else if (
-                paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-                paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
-            ) {
-                launchBacsMandate(paymentSelection, arguments.appearance)
-            } else {
-                confirm(arguments)
-            }
+            preconfirm(arguments)
         }
     }
 
@@ -165,7 +171,36 @@ internal class IntentConfirmationHandler(
         return completableResult?.await()
     }
 
+    private suspend fun preconfirm(
+        arguments: Args
+    ) {
+        val paymentSelection = arguments.paymentSelection
+
+        if (
+            paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
+            paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+        ) {
+            storeIsAwaitingForPreConfirmResult()
+
+            launchBacsMandate(paymentSelection, arguments.appearance)
+        } else {
+            confirm(arguments)
+        }
+    }
+
     private suspend fun confirm(
+        arguments: Args
+    ) {
+        val paymentSelection = arguments.paymentSelection
+
+        if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
+            confirmExternalPaymentMethod(paymentSelection)
+        } else {
+            confirmIntent(arguments)
+        }
+    }
+
+    private suspend fun confirmIntent(
         arguments: Args
     ) {
         val nextStep = intentConfirmationInterceptor.intercept(
@@ -246,7 +281,7 @@ internal class IntentConfirmationHandler(
         }
     }
 
-    private fun handleExternalPaymentMethod(
+    private fun confirmExternalPaymentMethod(
         paymentSelection: PaymentSelection.ExternalPaymentMethod
     ) {
         ExternalPaymentMethodInterceptor.intercept(
@@ -307,12 +342,12 @@ internal class IntentConfirmationHandler(
         }
 
         onIntentResult(intentResult)
-
-        removeIsAwaitingForPaymentResult()
     }
 
     private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
         coroutineScope.launch {
+            removeIsAwaitingForPreConfirmResult()
+
             when (result) {
                 is BacsMandateConfirmationResult.Confirmed -> currentArguments?.let { arguments ->
                     confirm(arguments)
@@ -363,6 +398,9 @@ internal class IntentConfirmationHandler(
         currentArguments = null
 
         completableResult?.complete(result)
+
+        removeIsAwaitingForPaymentResult()
+        removeIsAwaitingForPreConfirmResult()
     }
 
     private fun withPaymentLauncher(action: (PaymentLauncher) -> Unit) {
@@ -378,6 +416,18 @@ internal class IntentConfirmationHandler(
                 )
             )
         }
+    }
+
+    private fun storeIsAwaitingForPreConfirmResult() {
+        savedStateHandle[AWAITING_PRE_CONFIRM_RESULT_KEY] = true
+    }
+
+    private fun removeIsAwaitingForPreConfirmResult() {
+        savedStateHandle.remove<Boolean>(AWAITING_PRE_CONFIRM_RESULT_KEY)
+    }
+
+    private fun isAwaitingForPreConfirmResult(): Boolean {
+        return savedStateHandle.get<Boolean>(AWAITING_PRE_CONFIRM_RESULT_KEY) ?: false
     }
 
     private fun storeIsAwaitingForPaymentResult() {
@@ -510,6 +560,7 @@ internal class IntentConfirmationHandler(
     }
 
     internal companion object {
+        private const val AWAITING_PRE_CONFIRM_RESULT_KEY = "AwaitingPreConfirmResult"
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
         private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
         private const val ARGUMENTS_KEY = "IntentConfirmationArguments"

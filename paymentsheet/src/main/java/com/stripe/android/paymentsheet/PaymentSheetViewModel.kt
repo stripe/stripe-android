@@ -66,10 +66,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 
 internal class PaymentSheetViewModel @Inject internal constructor(
@@ -308,19 +306,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        if (state.validationError != null) {
-            handlePaymentSheetStateLoadedWithInvalidIntent(error = state.validationError)
-        } else {
-            initializeWithState(state)
-        }
-    }
-
-    private suspend fun handlePaymentSheetStateLoadedWithInvalidIntent(
-        error: Throwable,
-    ) {
-        val pendingResult = withTimeoutOrNull(1.seconds) {
-            intentConfirmationHandler.awaitIntentResult()
-        }
+        val pendingResult = intentConfirmationHandler.awaitIntentResult()
 
         if (pendingResult is IntentConfirmationHandler.Result.Succeeded) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
@@ -330,8 +316,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 finishImmediately = true
             )
+        } else if (state.validationError != null) {
+            handlePaymentSheetStateLoadFailure(state.validationError)
         } else {
-            handlePaymentSheetStateLoadFailure(error)
+            initializeWithState(state)
         }
     }
 

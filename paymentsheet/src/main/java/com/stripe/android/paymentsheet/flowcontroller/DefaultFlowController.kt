@@ -65,12 +65,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCvcRecollectionApi::class)
 @FlowControllerScope
@@ -198,11 +196,9 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         viewModelScope.launch {
-            val result = withTimeoutOrNull(1.seconds) {
-                intentConfirmationHandler.awaitIntentResult()
-            }
+            val result = intentConfirmationHandler.awaitIntentResult()
 
-            if (result != null) {
+            result?.let {
                 onIntentResult(result)
             }
         }
