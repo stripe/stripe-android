@@ -7206,11 +7206,11 @@ public final class com/stripe/android/payments/core/authentication/threeds2/Stri
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {
+public abstract interface annotation class com/stripe/android/payments/core/injection/IntentNextActionHandlerKey : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/Class;
 }
 
-public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorMap : java/lang/annotation/Annotation {
+public abstract interface annotation class com/stripe/android/payments/core/injection/IntentNextActionHandlerMap : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
