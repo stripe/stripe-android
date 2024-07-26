@@ -89,6 +89,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Upload release bundle to Emerge
-        run: ./gradlew :identity-example:emergeUploadReleaseAab
+        run: ./gradlew :identity-example:emergeUploadTheme1ReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
