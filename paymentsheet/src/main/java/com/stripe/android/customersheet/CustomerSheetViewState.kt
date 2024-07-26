@@ -29,13 +29,17 @@ internal sealed class CustomerSheetViewState(
     open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     open val canRemovePaymentMethods: Boolean,
 ) {
-    val topBarState: PaymentSheetTopBarState
-        get() = PaymentSheetTopBarStateFactory.create(
+    fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+        return PaymentSheetTopBarStateFactory.create(
             hasBackStack = canNavigateBack,
             isLiveMode = isLiveMode,
-            isEditing = isEditing,
-            canEdit = canEdit(allowsRemovalOfLastSavedPaymentMethod, savedPaymentMethods, cbcEligibility),
+            editable = PaymentSheetTopBarState.Editable.Maybe(
+                isEditing = isEditing,
+                canEdit = canEdit(allowsRemovalOfLastSavedPaymentMethod, savedPaymentMethods, cbcEligibility),
+                onEditIconPressed = onEditIconPressed,
+            ),
         )
+    }
 
     fun shouldDisplayDismissConfirmationModal(
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,

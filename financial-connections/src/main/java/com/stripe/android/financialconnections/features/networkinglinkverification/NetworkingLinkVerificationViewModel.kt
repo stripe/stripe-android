@@ -97,7 +97,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     override fun updateTopAppBar(state: NetworkingLinkVerificationState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
             pane = PANE,
-            allowBackNavigation = false,
+            allowBackNavigation = true,
             error = state.payload.error,
         )
     }

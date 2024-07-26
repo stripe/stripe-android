@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -25,7 +26,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
     )
 
     private val savedVisa = DisplayableSavedPaymentMethod(
-        displayName = "····4242",
+        displayName = "····4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",
             created = null,
@@ -44,7 +45,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
-                resources = null,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -56,7 +56,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
-                resources = null,
                 isEnabled = true,
                 isSelected = true,
             )
@@ -68,7 +67,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
-                resources = null,
                 isEnabled = false,
                 isSelected = false,
             )

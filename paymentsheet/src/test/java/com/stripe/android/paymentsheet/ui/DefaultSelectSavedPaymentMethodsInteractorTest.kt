@@ -204,6 +204,20 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     }
 
     @Test
+    fun handleViewAction_ToggleEdit_calls_toggleEdit() {
+        var hasCalledToggleEdit = false
+        runScenario(
+            toggleEdit = { hasCalledToggleEdit = true }
+        ) {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit
+            )
+
+            assertThat(hasCalledToggleEdit).isTrue()
+        }
+    }
+
+    @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink() {
         val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link)
 
@@ -426,7 +440,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            nameProvider = { it!! },
+            nameProvider = { it!!.resolvableString },
             canRemovePaymentMethods = true,
             isCbcEligible = true,
         ).items
@@ -463,6 +477,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = MutableStateFlow(emptyList()),
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         canEdit: StateFlow<Boolean> = MutableStateFlow(true),
+        toggleEdit: () -> Unit = { notImplemented() },
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
@@ -476,6 +491,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = paymentOptionsItems,
             editing = editing,
             canEdit = canEdit,
+            toggleEdit = toggleEdit,
             isProcessing = isProcessing,
             currentSelection = currentSelection,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,

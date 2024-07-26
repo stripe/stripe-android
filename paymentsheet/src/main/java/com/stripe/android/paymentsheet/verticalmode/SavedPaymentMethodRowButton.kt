@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import android.content.res.Resources
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -8,34 +7,36 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.uicore.strings.resolve
 
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    resources: Resources?,
     isEnabled: Boolean,
+    isClickable: Boolean = isEnabled,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val paymentMethodTitle =
-        resources?.let { displayableSavedPaymentMethod.paymentMethod.getLabel(resources) }
+        displayableSavedPaymentMethod.paymentMethod.getLabel()
             ?: displayableSavedPaymentMethod.displayName
 
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
+        isClickable = isClickable,
         iconContent = {
             PaymentMethodIconFromResource(
                 iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
@@ -44,7 +45,7 @@ internal fun SavedPaymentMethodRowButton(
                 modifier = Modifier.padding(4.dp).height(16.dp).width(24.dp)
             )
         },
-        title = paymentMethodTitle,
+        title = paymentMethodTitle.resolve(),
         subtitle = null,
         onClick = onClick,
         modifier = modifier.testTag(
@@ -58,7 +59,7 @@ internal fun SavedPaymentMethodRowButton(
 @Composable
 internal fun PreviewCardSavedPaymentMethodRowButton() {
     val cardSavedPaymentMethod = DisplayableSavedPaymentMethod(
-        displayName = "4242",
+        displayName = "4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",
             created = null,
@@ -74,7 +75,6 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
 
     SavedPaymentMethodRowButton(
         displayableSavedPaymentMethod = cardSavedPaymentMethod,
-        resources = LocalContext.current.resources,
         isEnabled = true,
         isSelected = true,
     )

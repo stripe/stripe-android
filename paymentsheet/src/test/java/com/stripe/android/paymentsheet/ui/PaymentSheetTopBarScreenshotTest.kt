@@ -31,7 +31,8 @@ class PaymentSheetTopBarScreenshotTest {
             contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = false,
             showEditMenu = false,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -40,7 +41,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -52,7 +52,8 @@ class PaymentSheetTopBarScreenshotTest {
             contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -61,7 +62,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -73,7 +73,8 @@ class PaymentSheetTopBarScreenshotTest {
             contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = StripeR.string.stripe_done,
+            isEditing = true,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -82,7 +83,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }
@@ -94,7 +94,8 @@ class PaymentSheetTopBarScreenshotTest {
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = false,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
+            onEditIconPressed = {},
         )
 
         paparazzi.snapshot {
@@ -103,7 +104,6 @@ class PaymentSheetTopBarScreenshotTest {
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = {},
-                onEditIconPressed = {},
             )
         }
     }

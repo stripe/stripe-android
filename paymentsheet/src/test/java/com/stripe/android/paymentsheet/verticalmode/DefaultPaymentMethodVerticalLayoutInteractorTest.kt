@@ -967,7 +967,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formScreenFactory = formScreenFactory,
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            providePaymentMethodName = { it!! },
+            providePaymentMethodName = { it!!.resolvableString },
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             onEditPaymentMethod = onEditPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,

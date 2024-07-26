@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
@@ -32,6 +33,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -266,7 +268,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         val name = viewModel.providePaymentMethodName(PaymentMethod.Type.Card.code)
-        assertThat(name)
+        assertThat(name.resolve(ApplicationProvider.getApplicationContext()))
             .isEqualTo("Card")
     }
 
@@ -478,19 +480,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -508,19 +510,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -3169,14 +3171,14 @@ class CustomerSheetViewModelTest {
             viewModel.viewState.test {
                 val viewState = awaitViewState<SelectPaymentMethod>()
 
-                assertThat(viewState.topBarState.showEditMenu).isTrue()
+                assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
                 val viewStateAfterClickingEdit = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterClickingEdit.isEditing).isTrue()
-                assertThat(viewStateAfterClickingEdit.topBarState.showEditMenu).isTrue()
+                assertThat(viewStateAfterClickingEdit.topBarState {}.showEditMenu).isTrue()
             }
 
             viewModel.removePaymentMethodFromEditScreen(paymentMethodToRemove)
@@ -3185,7 +3187,7 @@ class CustomerSheetViewModelTest {
                 val viewStateAfterRemoval = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterRemoval.isEditing).isFalse()
-                assertThat(viewStateAfterRemoval.topBarState.showEditMenu).isFalse()
+                assertThat(viewStateAfterRemoval.topBarState {}.showEditMenu).isFalse()
             }
         }
 
@@ -3202,6 +3204,48 @@ class CustomerSheetViewModelTest {
 
         verify(eventReporter).onCardNumberCompleted()
     }
+
+    @Test
+    fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
+        runTest(testDispatcher) {
+            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                initialBackStack = listOf(
+                    selectPaymentMethodViewState,
+                    addPaymentMethodViewState,
+                ),
+                stripeRepository = FakeStripeRepository(
+                    createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                    retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                ),
+                customerAdapter = FakeCustomerAdapter(
+                    onSetupIntentClientSecretForCustomerAttach = {
+                        CustomerAdapter.Result.success("seti_123")
+                    },
+                    canCreateSetupIntents = true,
+                ),
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val call = intentConfirmationInterceptor.calls.awaitItem()
+
+            assertThat(call).isEqualTo(
+                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                        clientSecret = "seti_123"
+                    ),
+                    paymentMethod = CARD_PAYMENT_METHOD,
+                    shippingValues = null,
+                    paymentMethodOptionsParams = null,
+                )
+            )
+
+            intentConfirmationInterceptor.calls.ensureAllEventsConsumed()
+        }
 
     private fun mockUSBankAccountResult(
         isVerified: Boolean

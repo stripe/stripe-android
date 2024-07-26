@@ -19,7 +19,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
@@ -43,7 +42,6 @@ class PaymentSheetTopBarTest {
                     isEnabled = true,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -71,7 +69,6 @@ class PaymentSheetTopBarTest {
                     isEnabled = false,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -90,11 +87,10 @@ class PaymentSheetTopBarTest {
 
         composeTestRule.setContent {
             PaymentSheetTopBar(
-                state = mockState(showEditMenu = true),
+                state = mockState(showEditMenu = true, onEditIconPressed = { didCallOnEditIconPressed = true }),
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = { throw AssertionError("Not expected") },
-                onEditIconPressed = { didCallOnEditIconPressed = true },
             )
         }
 
@@ -107,13 +103,15 @@ class PaymentSheetTopBarTest {
 
     private fun mockState(
         showEditMenu: Boolean = false,
+        onEditIconPressed: () -> Unit = { throw AssertionError("Not expected") }
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = false,
             showEditMenu = showEditMenu,
-            editMenuLabel = StripeR.string.stripe_edit,
+            isEditing = false,
+            onEditIconPressed = onEditIconPressed,
         )
     }
 }

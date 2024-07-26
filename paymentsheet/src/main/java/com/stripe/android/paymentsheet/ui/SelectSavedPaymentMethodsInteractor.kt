@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -36,11 +39,10 @@ internal interface SelectSavedPaymentMethodsInteractor {
 
     sealed class ViewAction {
         data object AddCardPressed : ViewAction()
-
         data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
-
         data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
         data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
+        data object ToggleEdit : ViewAction()
     }
 }
 
@@ -48,6 +50,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>,
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
+    private val toggleEdit: () -> Unit,
     private val isProcessing: StateFlow<Boolean>,
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
@@ -57,25 +60,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     override val isLiveMode: Boolean,
 ) : SelectSavedPaymentMethodsInteractor {
-    constructor(viewModel: BaseSheetViewModel) : this(
-        paymentOptionsItems = viewModel.savedPaymentMethodMutator.paymentOptionsItems,
-        editing = viewModel.editing,
-        canEdit = viewModel.savedPaymentMethodMutator.canEdit,
-        isProcessing = viewModel.processing,
-        currentSelection = viewModel.selection,
-        mostRecentlySelectedSavedPaymentMethod =
-        viewModel.savedPaymentMethodMutator.mostRecentlySelectedSavedPaymentMethod,
-        onAddCardPressed = {
-            viewModel.navigationHandler.transitionTo(
-                AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(viewModel))
-            )
-        },
-        onEditPaymentMethod = viewModel.savedPaymentMethodMutator::modifyPaymentMethod,
-        onDeletePaymentMethod = viewModel.savedPaymentMethodMutator::removePaymentMethod,
-        onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
-        isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
-    )
-
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
     private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
@@ -202,10 +186,43 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             )
 
             SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed -> onAddCardPressed()
+            SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
     }
 
     override fun close() {
         coroutineScope.cancel()
+    }
+
+    companion object {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
+            savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        ): SelectSavedPaymentMethodsInteractor {
+            return DefaultSelectSavedPaymentMethodsInteractor(
+                paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
+                editing = savedPaymentMethodMutator.editing,
+                canEdit = savedPaymentMethodMutator.canEdit,
+                toggleEdit = savedPaymentMethodMutator::toggleEditing,
+                isProcessing = viewModel.processing,
+                currentSelection = viewModel.selection,
+                mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
+                onAddCardPressed = {
+                    val interactor = DefaultAddPaymentMethodInteractor.create(
+                        viewModel = viewModel,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                    )
+                    viewModel.navigationHandler.transitionTo(
+                        AddAnotherPaymentMethod(interactor = interactor)
+                    )
+                },
+                onEditPaymentMethod = savedPaymentMethodMutator::modifyPaymentMethod,
+                onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
+                onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            )
+        }
     }
 }

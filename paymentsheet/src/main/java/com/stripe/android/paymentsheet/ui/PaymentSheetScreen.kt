@@ -120,7 +120,6 @@ private fun PaymentSheetScreen(
                 state = topBarState,
                 isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
-                toggleEditing = viewModel::toggleEditing,
             )
         },
         content = content,
@@ -268,7 +267,6 @@ private fun PaymentSheetContent(
                 LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
             ) {
                 currentScreen.Content(
-                    viewModel = viewModel,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }

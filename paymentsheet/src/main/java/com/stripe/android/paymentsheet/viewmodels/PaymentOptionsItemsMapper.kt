@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -11,7 +12,7 @@ internal class PaymentOptionsItemsMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
-    private val nameProvider: (PaymentMethodCode?) -> String,
+    private val nameProvider: (PaymentMethodCode?) -> ResolvableString,
     private val isNotPaymentFlow: Boolean,
     private val isCbcEligible: () -> Boolean
 ) {

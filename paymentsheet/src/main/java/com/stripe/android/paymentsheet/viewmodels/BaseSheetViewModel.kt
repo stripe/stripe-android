@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
@@ -28,6 +29,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,9 +68,6 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    private val _editing = MutableStateFlow(false)
-    internal val editing: StateFlow<Boolean> = _editing
-
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
 
@@ -104,14 +104,19 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
+    val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
+    val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
+
     protected val buttonsEnabled = combineAsStateFlow(
         processing,
-        editing,
+        navigationHandler.currentScreen.flatMapLatestAsStateFlow { currentScreen ->
+            currentScreen.topBarState().mapAsStateFlow { topBarState ->
+                topBarState?.isEditing == true
+            }
+        },
     ) { isProcessing, isEditing ->
         !isProcessing && !isEditing
     }
-
-    val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
         get() = newPaymentSelection?.getPaymentMethodCode()
@@ -119,34 +124,12 @@ internal abstract class BaseSheetViewModel(
 
     init {
         viewModelScope.launch {
-            savedPaymentMethodMutator.canEdit.collect { canEdit ->
-                if (!canEdit && editing.value) {
-                    toggleEditing()
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            savedPaymentMethodMutator.paymentMethods.collect { paymentMethods ->
-                if (paymentMethods.isEmpty() && editing.value) {
-                    toggleEditing()
-                }
-            }
-        }
-
-        viewModelScope.launch {
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
             navigationHandler.currentScreen.drop(1).collect {
                 clearErrorMessages()
                 mandateHandler.updateMandateText(mandateText = null, showAbove = false)
             }
         }
-    }
-
-    internal fun providePaymentMethodName(code: PaymentMethodCode?): String {
-        return code?.let {
-            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-        }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
@@ -175,10 +158,6 @@ internal abstract class BaseSheetViewModel(
 
         updateCvcFlows(selection)
         clearErrorMessages()
-    }
-
-    fun toggleEditing() {
-        _editing.value = !editing.value
     }
 
     private fun updateCvcFlows(selection: PaymentSelection?) {

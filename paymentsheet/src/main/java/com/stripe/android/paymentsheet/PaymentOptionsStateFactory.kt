@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -15,7 +16,7 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
-        nameProvider: (PaymentMethodCode?) -> String,
+        nameProvider: (PaymentMethodCode?) -> ResolvableString,
         canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): List<PaymentOptionsItem> {
@@ -49,7 +50,7 @@ internal object PaymentOptionsStateFactory {
         showGooglePay: Boolean,
         showLink: Boolean,
         currentSelection: PaymentSelection?,
-        nameProvider: (PaymentMethodCode?) -> String,
+        nameProvider: (PaymentMethodCode?) -> ResolvableString,
         canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): PaymentOptionsState {

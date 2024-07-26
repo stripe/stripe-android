@@ -48,7 +48,7 @@ internal class FlowControllerFactory(
         DefaultFlowController.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
-            activityResultRegistryOwner = activityResultRegistryOwner,
+            activityResultCaller = FlowControllerActivityResultCaller(activityResultRegistryOwner),
             statusBarColor = statusBarColor,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,

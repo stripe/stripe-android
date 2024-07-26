@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -19,6 +20,9 @@ import javax.inject.Singleton
     ]
 )
 internal object FlowControllerModule {
+    @Provides
+    @Singleton
+    fun providesAppContext(application: Application): Context = application.applicationContext
 
     @Provides
     @Singleton

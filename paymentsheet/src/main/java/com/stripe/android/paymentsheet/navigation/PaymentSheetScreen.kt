@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -9,11 +8,9 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -29,9 +26,7 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +40,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         }
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.VerticalMode,
-        is PaymentSheetScreen.Form,
+        is PaymentSheetScreen.VerticalModeForm,
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.ManageSavedPaymentMethods,
@@ -67,7 +62,7 @@ internal sealed interface PaymentSheetScreen {
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
     @Composable
-    fun Content(viewModel: BaseSheetViewModel, modifier: Modifier)
+    fun Content(modifier: Modifier)
 
     object Loading : PaymentSheetScreen {
 
@@ -87,13 +82,13 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             BottomSheetLoadingIndicator(modifier)
         }
     }
 
     class SelectSavedPaymentMethods(
-        private val selectSavedPaymentMethodsInteractor: SelectSavedPaymentMethodsInteractor,
+        private val interactor: SelectSavedPaymentMethodsInteractor,
         val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
     ) : PaymentSheetScreen, Closeable {
 
@@ -106,12 +101,17 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return selectSavedPaymentMethodsInteractor.state.mapAsStateFlow { state ->
+            return interactor.state.mapAsStateFlow { state ->
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
-                    isLiveMode = selectSavedPaymentMethodsInteractor.isLiveMode,
-                    isEditing = state.isEditing,
-                    canEdit = state.canEdit,
+                    isLiveMode = interactor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Maybe(
+                        isEditing = state.isEditing,
+                        canEdit = state.canEdit,
+                        onEditIconPressed = {
+                            interactor.handleViewAction(SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit)
+                        },
+                    ),
                 )
             }
         }
@@ -131,53 +131,16 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val state by selectSavedPaymentMethodsInteractor.state.collectAsState()
-
+        override fun Content(modifier: Modifier) {
             SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = state.paymentOptionsItems,
-                selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
-                isEditing = state.isEditing,
-                isProcessing = state.isProcessing,
-                onAddCardPressed = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
-                    )
-                },
-                onItemSelected = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
-                            it
-                        )
-                    )
-                },
-                onModifyItem = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
-                    )
-                },
-                onItemRemoved = {
-                    selectSavedPaymentMethodsInteractor.handleViewAction(
-                        SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
-                    )
-                },
+                interactor = interactor,
+                cvcRecollectionState = cvcRecollectionState,
                 modifier = modifier,
             )
-
-            if (
-                cvcRecollectionState is CvcRecollectionState.Required &&
-                (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.paymentMethod?.type == PaymentMethod.Type.Card
-            ) {
-                CvcRecollectionField(
-                    cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
-                    state.isProcessing
-                )
-            }
         }
 
         override fun close() {
-            selectSavedPaymentMethodsInteractor.close()
+            interactor.close()
         }
     }
 
@@ -193,8 +156,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -218,7 +180,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -239,8 +201,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -266,7 +227,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -288,8 +249,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -303,7 +263,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             EditPaymentMethod(interactor, modifier)
         }
 
@@ -322,8 +282,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -345,12 +304,12 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             PaymentMethodVerticalLayoutUI(interactor)
         }
     }
 
-    class Form(
+    class VerticalModeForm(
         private val interactor: VerticalModeFormInteractor,
         private val showsWalletHeader: Boolean = false,
     ) : PaymentSheetScreen, Closeable {
@@ -361,10 +320,9 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
+                    hasBackStack = interactor.canGoBack(),
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -378,7 +336,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             VerticalModeFormUI(interactor)
         }
 
@@ -396,8 +354,13 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
-                    isEditing = state.isEditing,
-                    canEdit = state.canEdit,
+                    editable = PaymentSheetTopBarState.Editable.Maybe(
+                        isEditing = state.isEditing,
+                        canEdit = state.canEdit,
+                        onEditIconPressed = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
+                        },
+                    ),
                 )
             }
         }
@@ -418,7 +381,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             ManageScreenUI(interactor = interactor)
         }
 
@@ -437,8 +400,7 @@ internal sealed interface PaymentSheetScreen {
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
                     isLiveMode = interactor.state.isLiveMode,
-                    isEditing = false,
-                    canEdit = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
         }
@@ -451,7 +413,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+        override fun Content(modifier: Modifier) {
             ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
     }

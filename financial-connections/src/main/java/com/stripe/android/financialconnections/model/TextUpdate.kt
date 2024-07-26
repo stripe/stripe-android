@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
 internal data class TextUpdate(
     @SerialName("consent_pane")
     val consent: ConsentPane? = null,
+    @SerialName("link_login_pane")
+    val linkLoginPane: LinkLoginPane? = null,
     @SerialName("networking_link_signup_pane")
     val networkingLinkSignupPane: NetworkingLinkSignupPane? = null,
     @SerialName("oauth_prepane")
@@ -156,6 +158,23 @@ internal data class NetworkingLinkSignupBody(
 
 @Serializable
 @Parcelize
+internal data class LinkLoginPane(
+    @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val title: String,
+    @SerialName("body")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val body: String,
+    @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val aboveCta: String,
+    @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val cta: String,
+) : Parcelable
+
+@Serializable
+@Parcelize
 internal data class ConsentPaneBody(
     @SerialName("bullets")
     val bullets: List<Bullet>
@@ -259,7 +278,12 @@ internal data class ReturningNetworkingUserAccountPicker(
     @SerialName("title") val title: String,
     @SerialName("default_cta") val defaultCta: String,
     @SerialName("add_new_account") val addNewAccount: AddNewAccount,
-    @SerialName("accounts") val accounts: List<NetworkedAccount>
+    @SerialName("accounts") val accounts: List<NetworkedAccount>,
+    @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val aboveCta: String? = null,
+    @SerialName("multiple_account_types_selected_data_access_notice")
+    val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice? = null
 ) : Parcelable
 
 @Serializable
@@ -272,6 +296,7 @@ internal data class NetworkedAccount(
     @SerialName("icon") val icon: Image? = null,
     @SerialName("selection_cta_icon") val selectionCtaIcon: Image? = null,
     @SerialName("account_icon") val accountIcon: Image? = null,
+    @SerialName("data_access_notice") val dataAccessNotice: DataAccessNotice? = null,
     @SerialName("drawer_on_selection") val drawerOnSelection: FinancialConnectionsGenericInfoScreen? = null
 ) : Parcelable
 

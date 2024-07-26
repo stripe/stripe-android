@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
 
@@ -17,7 +16,6 @@ internal fun ManageOneSavedPaymentMethodUI(interactor: ManageOneSavedPaymentMeth
 
     SavedPaymentMethodRowButton(
         displayableSavedPaymentMethod = paymentMethod,
-        resources = LocalContext.current.resources,
         isEnabled = true,
         isSelected = true,
         trailingContent = {

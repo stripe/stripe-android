@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -10,9 +11,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -97,7 +96,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = emptyList()
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
         }
     }
@@ -121,7 +119,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
         }
     }
@@ -147,7 +144,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(cbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             interactor.state.test {
@@ -185,12 +181,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(cbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isTrue()
             assertThat(selectedPaymentMethod?.paymentMethod).isEqualTo(cbcCard)
         }
@@ -218,12 +212,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(nonCbcCard)
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
         }
     }
@@ -248,12 +240,10 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
         }
     }
@@ -277,7 +267,6 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
 
-            dispatcher.scheduler.advanceUntilIdle()
             assertThat(backPressed).isFalse()
 
             interactor.state.test {
@@ -288,12 +277,27 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `handleViewAction ToggleEdit calls toggleEdit`() {
+        var hasCalledToggleEdit = false
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(
+            initialPaymentMethods = initialPaymentMethods,
+            currentSelection = null,
+            toggleEdit = { hasCalledToggleEdit = true },
+        ) {
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
+            assertThat(hasCalledToggleEdit).isTrue()
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
         initialPaymentMethods: List<PaymentMethod>?,
         currentSelection: PaymentSelection?,
         isEditing: Boolean = false,
+        toggleEdit: () -> Unit = { notImplemented() },
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         handleBackPressed: () -> Unit = { notImplemented() },
@@ -303,7 +307,7 @@ class DefaultManageScreenInteractorTest {
         val selection = MutableStateFlow(currentSelection)
         val editing = MutableStateFlow(isEditing)
         val canEdit = MutableStateFlow(true)
-        val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
+        val dispatcher = UnconfinedTestDispatcher()
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -314,8 +318,9 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
+            toggleEdit = toggleEdit,
             allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
-            providePaymentMethodName = { it ?: "Missing name" },
+            providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,
             onDeletePaymentMethod = { notImplemented() },
             onEditPaymentMethod = { notImplemented() },
@@ -329,7 +334,6 @@ class DefaultManageScreenInteractorTest {
             paymentMethodsSource = paymentMethods,
             editingSource = editing,
             canEditSource = canEdit,
-            dispatcher = dispatcher,
         ).apply {
             runTest {
                 testBlock()
@@ -339,7 +343,6 @@ class DefaultManageScreenInteractorTest {
 
     private data class TestParams(
         val interactor: ManageScreenInteractor,
-        val dispatcher: TestDispatcher,
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -34,7 +34,7 @@ internal interface FlowControllerStateComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun appContext(appContext: Context): Builder
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun flowControllerViewModel(viewModel: FlowControllerViewModel): Builder

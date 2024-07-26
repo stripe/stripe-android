@@ -5,7 +5,9 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal fun BaseSheetViewModel.transitionToAddPaymentScreen() {
-    navigationHandler.transitionTo(
-        AddAnotherPaymentMethod(interactor = DefaultAddPaymentMethodInteractor.create(this))
+    val interactor = DefaultAddPaymentMethodInteractor.create(
+        viewModel = this,
+        paymentMethodMetadata = requireNotNull(paymentMethodMetadata.value),
     )
+    navigationHandler.transitionTo(AddAnotherPaymentMethod(interactor = interactor))
 }

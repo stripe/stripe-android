@@ -95,7 +95,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -192,21 +191,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `removePaymentMethod triggers async removal`() = runTest {
-        val customerRepository = spy(FakeCustomerRepository())
-        val viewModel = createViewModel(
-            customerRepository = customerRepository
-        )
-
-        viewModel.savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
-        verify(customerRepository).detachPaymentMethod(
-            any(),
-            eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
-        )
-    }
-
-    @Test
     fun `correct event is sent when dropdown is opened in EditPaymentMethod`() = runTest {
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
@@ -268,55 +252,6 @@ internal class PaymentSheetViewModelTest {
                 )
             }
         }
-    }
-
-    @Test
-    fun `removePaymentMethod should use loaded customer info when removing payment methods`() = runTest {
-        val paymentMethods = PaymentMethodFactory.cards(1)
-
-        val customerRepository = spy(
-            FakeCustomerRepository(
-                onDetachPaymentMethod = {
-                    Result.success(paymentMethods.first())
-                }
-            )
-        )
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key_1"
-                    )
-                )
-            ),
-            customer = CustomerState(
-                id = "cus_2",
-                ephemeralKeySecret = "ephemeral_key_2",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = true,
-                    canRemoveDuplicates = false,
-                ),
-            ),
-            customerRepository = customerRepository
-        )
-
-        viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethods.first())
-
-        val customerInfoCaptor = argumentCaptor<CustomerRepository.CustomerInfo>()
-
-        verify(customerRepository).detachPaymentMethod(
-            customerInfoCaptor.capture(),
-            any(),
-        )
-
-        assertThat(customerInfoCaptor.firstValue).isEqualTo(
-            CustomerRepository.CustomerInfo(
-                id = "cus_2",
-                ephemeralKeySecret = "ephemeral_key_2",
-            )
-        )
     }
 
     @Test
@@ -498,7 +433,7 @@ internal class PaymentSheetViewModelTest {
             ).toParamMap()
         )
 
-        assertThat(viewModel.savedPaymentMethodMutator.paymentMethods.value).isEqualTo(
+        assertThat(viewModel.customerStateHolder.paymentMethods.value).isEqualTo(
             listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
         )
     }
@@ -570,7 +505,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -592,7 +527,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -615,7 +550,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(paymentSelection)
             viewModel.checkout()
 
-            verify(viewModel).confirmStripeIntent(confirmParams)
+            verify(paymentLauncher).confirm(eq(confirmParams))
         }
 
     @Test
@@ -642,7 +577,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -688,7 +623,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(viewModel).confirmStripeIntent(eq(expectedParams))
+        verify(paymentLauncher).confirm(eq(expectedParams))
     }
 
     @Test
@@ -1435,28 +1370,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-        )
-
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
-            assertThat(awaitItem()).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
-        val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
-
-        viewModel.savedPaymentMethodMutator.paymentMethods.test {
-            assertThat(awaitItem()).isEmpty()
-        }
-    }
-
-    @Test
     fun `handleBackPressed is consumed when processing is true`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
@@ -1521,7 +1434,10 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
         )
 
-        val observedArgs = FormHelper.create(viewModel).createFormArguments(
+        val observedArgs = FormHelper.create(
+            viewModel = viewModel,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+        ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
 
@@ -1625,40 +1541,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sets editing to false when removing the last payment method while editing`() = runTest {
-        val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = customerPaymentMethods)
-        )
-
-        viewModel.editing.test {
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.toggleEditing()
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.savedPaymentMethodMutator.removePaymentMethod(customerPaymentMethods.single())
-            assertThat(awaitItem()).isFalse()
-        }
-    }
-
-    @Test
-    fun `Ignores payment selection while in edit mode`() = runTest {
-        val viewModel = createViewModel().apply {
-            updateSelection(PaymentSelection.Link)
-        }
-
-        viewModel.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-
-        viewModel.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
     fun `updateSelection with new payment method updates the current selection`() = runTest {
         val viewModel = createViewModel(initialPaymentSelection = null)
 
@@ -1716,20 +1598,6 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(savedSelection)
             assertThat(awaitItem()).isEqualTo(savedSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(null)
-        }
-    }
-
-    @Test
-    fun `Resets the backstack if the last customer payment method is removed`() = runTest {
-        val paymentMethods = PaymentMethodFixtures.createCards(1)
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
-        )
-
-        viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
-            viewModel.savedPaymentMethodMutator.removePaymentMethod(paymentMethods.single())
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
         }
     }
 
@@ -2032,6 +1900,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
+        val callback = viewModel.capturePaymentResultListener()
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2048,7 +1917,7 @@ internal class PaymentSheetViewModelTest {
             confirmParams = confirmParams,
             isDeferred = true,
         )
-        viewModel.onPaymentResult(PaymentResult.Completed)
+        callback.onActivityResult(InternalPaymentResult.Completed(PAYMENT_INTENT))
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
@@ -2059,6 +1928,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
+        val callback = viewModel.capturePaymentResultListener()
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2067,7 +1937,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout()
 
         fakeIntentConfirmationInterceptor.enqueueNextActionStep("pi_123_secret_456")
-        viewModel.onPaymentResult(PaymentResult.Completed)
+        callback.onActivityResult(InternalPaymentResult.Completed(PAYMENT_INTENT))
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
@@ -2259,7 +2129,8 @@ internal class PaymentSheetViewModelTest {
         }
 
         val viewModel = createViewModel(
-            bacsMandateConfirmationLauncherFactory = launcherFactory
+            bacsMandateConfirmationLauncherFactory = launcherFactory,
+            shouldRegister = false,
         ).apply {
             registerFromActivity(activityResultCaller, TestLifecycleOwner())
         }
@@ -2622,23 +2493,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `on 'removePaymentMethod' with no CustomerConfiguration available, should not attempt detach`() = runTest {
-        val customerRepository = spy(FakeCustomerRepository())
-        val viewModel = createViewModel(
-            customer = null,
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    customer = null
-                )
-            ),
-        )
-
-        viewModel.savedPaymentMethodMutator.removePaymentMethod(PAYMENT_METHODS.first())
-
-        verify(customerRepository, never()).detachPaymentMethod(any(), any())
-    }
-
-    @Test
     fun `on 'modifyPaymentMethod' with no customer available, should not attempt update`() = runTest {
         val customerRepository = spy(FakeCustomerRepository())
 
@@ -2746,6 +2600,35 @@ internal class PaymentSheetViewModelTest {
             .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
     }
 
+    @Test
+    fun `On confirm with existing payment method, calls interceptor with expected parameters`() = runTest {
+        val initializationMode = InitializationMode.PaymentIntent(clientSecret = "pi_123")
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                initializationMode = initializationMode,
+            ),
+            stripeIntent = intent,
+            intentConfirmationInterceptor = intentConfirmationInterceptor
+        )
+
+        val paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout()
+
+        val call = intentConfirmationInterceptor.calls.awaitItem()
+
+        assertThat(call).isEqualTo(
+            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                initializationMode = initializationMode,
+                paymentMethod = CARD_PAYMENT_METHOD,
+                paymentMethodOptionsParams = null,
+                shippingValues = null,
+            )
+        )
+    }
+
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `getCvcRecollectionState returns correct state for deferred flow`() = runTest {
@@ -2838,6 +2721,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.updateSelection(selection)
+        viewModel.checkout()
 
         paymentResultListener.onActivityResult(InternalPaymentResult.Completed(intent))
 
@@ -2882,6 +2766,7 @@ internal class PaymentSheetViewModelTest {
         initialPaymentSelection: PaymentSelection? =
             customer?.paymentMethods?.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        paymentLauncherFactory: StripePaymentLauncherAssistedFactory = this.paymentLauncherFactory,
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         paymentSheetLoader: PaymentSheetLoader = FakePaymentSheetLoader(
@@ -2894,6 +2779,7 @@ internal class PaymentSheetViewModelTest {
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
         ),
+        shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -2904,22 +2790,37 @@ internal class PaymentSheetViewModelTest {
                 application = application,
                 args = args,
                 eventReporter = eventReporter,
-                lazyPaymentConfig = { paymentConfiguration },
                 paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
-                paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
-                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                    intentConfirmationInterceptor = intentConfirmationInterceptor,
+                    savedStateHandle = thisSavedStateHandle,
+                    bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+                    stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
+                    paymentConfigurationProvider = { paymentConfiguration },
+                    statusBarColor = { args.statusBarColor },
+                    application = application,
+                    errorReporter = FakeErrorReporter()
+                ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
-                errorReporter = FakeErrorReporter(),
-            )
+            ).apply {
+                if (shouldRegister) {
+                    val activityResultCaller = mock<ActivityResultCaller> {
+                        on {
+                            registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
+                        } doReturn mock()
+                    }
+
+                    registerFromActivity(activityResultCaller, TestLifecycleOwner())
+                }
+            }
         }
     }
 
@@ -3038,7 +2939,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 
-        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        private val PAYMENT_METHODS = listOf(CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD

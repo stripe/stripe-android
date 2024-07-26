@@ -28,6 +28,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -72,11 +73,16 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun NetworkingLinkSignupScreen() {
     val viewModel: NetworkingLinkSignupViewModel = paneViewModel(NetworkingLinkSignupViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
-    val state = viewModel.stateFlow.collectAsState()
-    BackHandler(enabled = true) {}
+
+    val state by viewModel.stateFlow.collectAsState()
     val uriHandler = LocalUriHandler.current
 
-    state.value.viewEffect?.let { viewEffect ->
+    BackHandler(enabled = !state.isInstantDebits) {
+        // Block back navigation if not in the Instant Debits flow. The consumer has already
+        // connected their bank accounts, so allowing to go back doesn't make a lot of sense.
+    }
+
+    state.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
@@ -86,7 +92,7 @@ internal fun NetworkingLinkSignupScreen() {
     }
 
     NetworkingLinkSignupContent(
-        state = state.value,
+        state = state,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -130,10 +136,17 @@ private fun NetworkingLinkSignupLoaded(
     showFullForm: Boolean,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
-    onSkipClick: () -> Unit
+    onSkipClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val emailFocusRequester = remember { FocusRequester() }
     val phoneNumberFocusRequester = remember { FocusRequester() }
+
+    if (payload.focusEmailField) {
+        LaunchedEffect(Unit) {
+            emailFocusRequester.requestFocus()
+        }
+    }
 
     LaunchedEffect(showFullForm) {
         if (showFullForm) {
@@ -148,7 +161,12 @@ private fun NetworkingLinkSignupLoaded(
             Title(payload.content.title)
             Spacer(modifier = Modifier.size(24.dp))
 
-            for (bullet in payload.content.body.bullets) {
+            if (payload.content.message != null) {
+                Body(payload.content.message)
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+
+            for (bullet in payload.content.bullets) {
                 ListItem(
                     bullet = BulletUI.from(bullet),
                     onClickableTextClick = onClickableTextClick
@@ -161,6 +179,7 @@ private fun NetworkingLinkSignupLoaded(
                 loading = lookupAccountSync is Loading,
                 emailController = payload.emailController,
                 enabled = true,
+                focusRequester = emailFocusRequester,
             )
 
             AnimatedVisibility(showFullForm) {
@@ -213,16 +232,20 @@ private fun NetworkingLinkSignupFooter(
     ) {
         Text(text = payload.content.cta)
     }
-    Spacer(modifier = Modifier.size(8.dp))
-    FinancialConnectionsButton(
-        type = FinancialConnectionsButton.Type.Secondary,
-        onClick = onSkipClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics { testTagsAsResourceId = true }
-            .testTag("skip_cta")
-    ) {
-        Text(text = payload.content.skipCta)
+
+    if (payload.content.skipCta != null) {
+        Spacer(modifier = Modifier.size(8.dp))
+
+        FinancialConnectionsButton(
+            type = FinancialConnectionsButton.Type.Secondary,
+            onClick = onSkipClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { testTagsAsResourceId = true }
+                .testTag("skip_cta")
+        ) {
+            Text(text = payload.content.skipCta)
+        }
     }
 }
 
@@ -268,11 +291,21 @@ private fun Title(title: String) {
 }
 
 @Composable
+private fun Body(body: String) {
+    AnnotatedText(
+        text = TextResource.Text(fromHtml(body)),
+        defaultStyle = typography.bodyMedium,
+        onClickableTextClick = {},
+    )
+}
+
+@Composable
 internal fun EmailSection(
     enabled: Boolean,
     emailController: TextFieldController,
     showFullForm: Boolean,
-    loading: Boolean
+    loading: Boolean,
+    focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
     StripeThemeForConnections {
@@ -283,7 +316,9 @@ internal fun EmailSection(
             contentAlignment = Alignment.CenterEnd
         ) {
             TextFieldSection(
-                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focused = it.isFocused },
                 isSelected = focused,
                 textFieldController = emailController,
                 imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
