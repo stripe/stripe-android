@@ -120,6 +120,10 @@ internal class ConsentViewModel @AssistedInject constructor(
                 ConsentClickableText.MANUAL_ENTRY.value to {
                     navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
                 },
+                // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
+                ConsentClickableText.LINK_LOGIN_WARMUP.value to {
+                    navigationManager.tryNavigateTo(Destination.NetworkingLinkLoginWarmup(referrer = Pane.CONSENT))
+                },
             )
         )
     }
