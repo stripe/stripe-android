@@ -99,7 +99,7 @@ private def changelog_entries_for_version
         return changelog_contents[start_pos...end_pos].strip
     end
 
-    raise ArgumentError.new("version #{@version} not found in changelog")
+    raise ArgumentError.new("Version #{@version} not found in changelog. Have you finished merging the version bump PR?")
 end
 
 private def build_example_release_apk
