@@ -57,9 +57,7 @@ android {
         disable += "UnusedResources"
         disable += "IconLocation"
         disable += "LongMethod"
-    }
-    detekt {
-        disableDefaultRuleSets = true
+        disable += "ResourceName"
     }
 
     compileOptions {

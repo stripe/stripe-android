@@ -25,9 +25,6 @@ android {
         disable += "ObsoleteLintCustomCheck"
         disable += "MonochromeLauncherIcon"
     }
-    detekt {
-        disableDefaultRuleSets = true
-    }
 
     kotlin {
         compilerOptions {
