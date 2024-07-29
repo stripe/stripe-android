@@ -157,6 +157,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             state = state,
             isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
+            initializationMode = initializationMode,
         )
 
         return@withContextCatching state
@@ -512,6 +513,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         state: PaymentSheetState.Full,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
+        initializationMode: PaymentSheet.InitializationMode,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
@@ -527,6 +529,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 googlePaySupported = isGooglePaySupported,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
+                initializationMode = initializationMode,
             )
         }
     }

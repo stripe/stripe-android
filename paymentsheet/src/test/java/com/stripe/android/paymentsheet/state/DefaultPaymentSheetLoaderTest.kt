@@ -804,9 +804,10 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
         val loader = createPaymentSheetLoader()
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
@@ -825,6 +826,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
         )
     }
 
@@ -854,16 +856,17 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
         val loader = createPaymentSheetLoader()
-
-        loader.load(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1234,
-                        currency = "cad",
-                    ),
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
                 ),
             ),
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             initializedViaCompose = true,
         )
@@ -874,6 +877,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
         )
     }
 
@@ -1649,9 +1653,10 @@ internal class DefaultPaymentSheetLoaderTest {
         prefsRepository.savePaymentSelection(paymentSelection)
 
         val loader = createPaymentSheetLoader()
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
@@ -1668,6 +1673,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
         )
     }
 
