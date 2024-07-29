@@ -102,6 +102,7 @@ import com.stripe.android.utils.mapResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.RawValue
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -1131,6 +1132,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String> {
         return fetchStripeModelResult(
@@ -1144,7 +1146,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "id" to id,
                     buildPaymentUserAgentPair(),
-                )
+                ).plus(extraParams ?: emptyMap())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.id }

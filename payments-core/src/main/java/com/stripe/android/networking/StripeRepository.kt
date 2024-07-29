@@ -37,6 +37,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import kotlinx.parcelize.RawValue
 import java.util.Locale
 
 /**
@@ -293,6 +294,7 @@ interface StripeRepository {
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String>
 
