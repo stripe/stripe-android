@@ -11,7 +11,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -25,7 +24,6 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
@@ -80,9 +78,9 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = shippingDetails,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentSelection = PaymentSelection.Saved(
+                confirmationOption = PaymentConfirmationOption.Saved(
                     paymentMethod = savedPaymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    optionsParams = paymentMethodOptionsParams,
                 ),
                 appearance = APPEARANCE,
             ),
@@ -125,7 +123,6 @@ class IntentConfirmationHandlerTest {
                 expYear = 2035,
             )
         )
-        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
             intentConfirmationInterceptor = interceptor,
@@ -136,10 +133,10 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentSelection = PaymentSelection.New.Card(
-                    paymentMethodCreateParams = newCard,
-                    brand = CardBrand.Visa,
-                    customerRequestedSave = customerRequestedSave,
+                confirmationOption = PaymentConfirmationOption.New(
+                    createParams = newCard,
+                    optionsParams = null,
+                    shouldSave = true,
                 ),
                 appearance = APPEARANCE,
             ),
@@ -186,7 +183,10 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                confirmationOption = PaymentConfirmationOption.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    optionsParams = null,
+                ),
                 appearance = APPEARANCE,
             ),
         )
@@ -577,7 +577,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD
+                confirmationOption = EXTERNAL_PAYMENT_METHOD
             ),
         )
 
@@ -595,7 +595,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = createBacsPaymentSelection(),
+                confirmationOption = createBacsPaymentConfirmationOption(),
             ),
         )
 
@@ -634,7 +634,7 @@ class IntentConfirmationHandlerTest {
         }
 
         val bacsArguments = DEFAULT_ARGUMENTS.copy(
-            paymentSelection = createBacsPaymentSelection()
+            confirmationOption = createBacsPaymentConfirmationOption()
         )
 
         val savedStateHandle = SavedStateHandle().apply {
@@ -782,7 +782,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD.copy(
+                confirmationOption = EXTERNAL_PAYMENT_METHOD.copy(
                     billingDetails = PaymentMethod.BillingDetails(
                         name = "John Doe",
                         address = Address(
@@ -818,7 +818,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+                confirmationOption = EXTERNAL_PAYMENT_METHOD,
             ),
         )
 
@@ -841,7 +841,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+                confirmationOption = EXTERNAL_PAYMENT_METHOD,
             ),
         )
 
@@ -868,7 +868,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+                confirmationOption = EXTERNAL_PAYMENT_METHOD,
             ),
         )
 
@@ -898,7 +898,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+                confirmationOption = EXTERNAL_PAYMENT_METHOD,
             ),
         )
 
@@ -931,7 +931,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = EXTERNAL_PAYMENT_METHOD,
+                confirmationOption = EXTERNAL_PAYMENT_METHOD,
             ),
         )
 
@@ -962,7 +962,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = createBacsPaymentSelection(),
+                confirmationOption = createBacsPaymentConfirmationOption(),
                 appearance = appearance,
             ),
         )
@@ -995,7 +995,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = createBacsPaymentSelection(),
+                confirmationOption = createBacsPaymentConfirmationOption(),
             ),
         )
 
@@ -1018,7 +1018,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = createBacsPaymentSelection(
+                confirmationOption = createBacsPaymentConfirmationOption(
                     name = null,
                 ),
             ),
@@ -1045,7 +1045,7 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = createBacsPaymentSelection(
+                confirmationOption = createBacsPaymentConfirmationOption(
                     email = null,
                 ),
             ),
@@ -1076,11 +1076,11 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentSelection()
+        val paymentSelection = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = paymentSelection
+                confirmationOption = paymentSelection
             ),
         )
 
@@ -1091,7 +1091,7 @@ class IntentConfirmationHandlerTest {
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
                 initializationMode = DEFAULT_ARGUMENTS.initializationMode,
-                paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                paymentMethodCreateParams = paymentSelection.createParams,
                 shippingValues = null,
                 paymentMethodOptionsParams = null,
                 customerRequestedSave = false,
@@ -1116,11 +1116,11 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentSelection()
+        val paymentSelection = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = paymentSelection
+                confirmationOption = paymentSelection
             ),
         )
 
@@ -1150,11 +1150,11 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentSelection()
+        val paymentSelection = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                paymentSelection = paymentSelection
+                confirmationOption = paymentSelection
             ),
         )
 
@@ -1247,12 +1247,12 @@ class IntentConfirmationHandlerTest {
         return this as IntentConfirmationHandler.Result.Failed
     }
 
-    private fun createBacsPaymentSelection(
+    private fun createBacsPaymentConfirmationOption(
         name: String? = "John Doe",
         email: String? = "johndoe@email.com",
-    ): PaymentSelection.New.GenericPaymentMethod {
-        return PaymentSelection.New.GenericPaymentMethod(
-            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+    ): PaymentConfirmationOption.New {
+        return PaymentConfirmationOption.New(
+            createParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
                     sortCode = "108800"
@@ -1262,11 +1262,8 @@ class IntentConfirmationHandlerTest {
                     email = email,
                 )
             ),
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            darkThemeIconUrl = null,
-            lightThemeIconUrl = null,
-            iconResource = 0,
-            label = "Bacs".resolvableString
+            optionsParams = null,
+            shouldSave = false,
         )
     }
 
@@ -1276,16 +1273,15 @@ class IntentConfirmationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
             shippingDetails = null,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            confirmationOption = PaymentConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+            ),
             appearance = APPEARANCE
         )
 
-        val EXTERNAL_PAYMENT_METHOD = PaymentSelection.ExternalPaymentMethod(
+        val EXTERNAL_PAYMENT_METHOD = PaymentConfirmationOption.ExternalPaymentMethod(
             type = "paypal",
-            label = "Paypal".resolvableString,
-            iconResource = 0,
-            darkThemeIconUrl = null,
-            lightThemeIconUrl = null,
             billingDetails = null
         )
 

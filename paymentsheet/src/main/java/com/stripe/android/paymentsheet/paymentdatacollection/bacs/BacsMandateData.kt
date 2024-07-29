@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.PaymentConfirmationOption
 
 internal data class BacsMandateData(
     val name: String,
@@ -10,10 +10,10 @@ internal data class BacsMandateData(
     val sortCode: String
 ) {
     companion object {
-        fun fromPaymentSelection(
-            paymentSelection: PaymentSelection.New.GenericPaymentMethod
+        fun fromConfirmationOption(
+            confirmationOption: PaymentConfirmationOption.New,
         ): BacsMandateData? {
-            val overrideParams = paymentSelection.paymentMethodCreateParams
+            val overrideParams = confirmationOption.createParams
 
             val bacsDebit = PaymentMethodCreateParams.createBacsFromParams(overrideParams)
             val name = PaymentMethodCreateParams.getNameFromParams(overrideParams)

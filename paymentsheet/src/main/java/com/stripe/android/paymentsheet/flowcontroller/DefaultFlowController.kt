@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
@@ -396,7 +397,7 @@ internal class DefaultFlowController @Inject internal constructor(
             intentConfirmationHandler.start(
                 arguments = IntentConfirmationHandler.Args(
                     initializationMode = initializationMode!!,
-                    paymentSelection = paymentSelection,
+                    confirmationOption = paymentSelection?.toPaymentConfirmationOption(),
                     intent = stripeIntent,
                     shippingDetails = state.config.shippingDetails,
                     appearance = state.config.appearance,

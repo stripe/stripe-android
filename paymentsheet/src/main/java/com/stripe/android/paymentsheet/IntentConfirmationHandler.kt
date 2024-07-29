@@ -29,7 +29,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -174,15 +173,15 @@ internal class IntentConfirmationHandler(
     private suspend fun preconfirm(
         arguments: Args
     ) {
-        val paymentSelection = arguments.paymentSelection
+        val confirmationOption = arguments.confirmationOption
 
         if (
-            paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-            paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+            confirmationOption is PaymentConfirmationOption.New &&
+            confirmationOption.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
         ) {
             storeIsAwaitingForPreConfirmResult()
 
-            launchBacsMandate(paymentSelection, arguments.appearance)
+            launchBacsMandate(confirmationOption, arguments.appearance)
         } else {
             confirm(arguments)
         }
@@ -191,10 +190,10 @@ internal class IntentConfirmationHandler(
     private suspend fun confirm(
         arguments: Args
     ) {
-        val paymentSelection = arguments.paymentSelection
+        val confirmationOption = arguments.confirmationOption
 
-        if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
-            confirmExternalPaymentMethod(paymentSelection)
+        if (confirmationOption is PaymentConfirmationOption.ExternalPaymentMethod) {
+            confirmExternalPaymentMethod(confirmationOption)
         } else {
             confirmIntent(arguments)
         }
@@ -205,7 +204,7 @@ internal class IntentConfirmationHandler(
     ) {
         val nextStep = intentConfirmationInterceptor.intercept(
             initializationMode = arguments.initializationMode,
-            paymentSelection = arguments.paymentSelection,
+            confirmationOption = arguments.confirmationOption,
             shippingValues = arguments.shippingDetails?.toConfirmPaymentIntentShipping(),
             context = context,
         )
@@ -282,7 +281,7 @@ internal class IntentConfirmationHandler(
     }
 
     private fun confirmExternalPaymentMethod(
-        paymentSelection: PaymentSelection.ExternalPaymentMethod
+        confirmationOption: PaymentConfirmationOption.ExternalPaymentMethod
     ) {
         /*
          * In case of process death, we should store that we waiting for a payment result to return from a
@@ -291,8 +290,8 @@ internal class IntentConfirmationHandler(
         storeIsAwaitingForPaymentResult()
 
         ExternalPaymentMethodInterceptor.intercept(
-            externalPaymentMethodType = paymentSelection.type,
-            billingDetails = paymentSelection.billingDetails,
+            externalPaymentMethodType = confirmationOption.type,
+            billingDetails = confirmationOption.billingDetails,
             onPaymentResult = ::onExternalPaymentMethodResult,
             externalPaymentMethodLauncher = externalPaymentMethodLauncher,
             errorReporter = errorReporter,
@@ -300,10 +299,10 @@ internal class IntentConfirmationHandler(
     }
 
     private fun launchBacsMandate(
-        paymentSelection: PaymentSelection.New.GenericPaymentMethod,
+        confirmationOption: PaymentConfirmationOption.New,
         appearance: PaymentSheet.Appearance,
     ) {
-        BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+        BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             runCatching {
                 requireNotNull(bacsMandateConfirmationLauncher)
             }.onSuccess { launcher ->
@@ -454,7 +453,7 @@ internal class IntentConfirmationHandler(
         val shippingDetails: AddressDetails?,
         val appearance: PaymentSheet.Appearance,
         val intent: StripeIntent,
-        val paymentSelection: PaymentSelection?
+        val confirmationOption: PaymentConfirmationOption?
     ) : Parcelable
 
     /**
