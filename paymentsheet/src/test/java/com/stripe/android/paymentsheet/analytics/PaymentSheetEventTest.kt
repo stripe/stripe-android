@@ -9,12 +9,14 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -271,7 +273,8 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             duration = (5L).seconds,
-            paymentSelection = null
+            paymentSelection = null,
+            initializationMode = paymentIntentInitializationMode,
         )
 
         assertThat(event.eventName).isEqualTo("mc_load_succeeded")
@@ -281,7 +284,8 @@ class PaymentSheetEventTest {
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "duration" to 5f,
-                "selected_lpm" to "none"
+                "selected_lpm" to "none",
+                "intent_type" to "payment_intent",
             )
         )
     }
@@ -293,7 +297,8 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             duration = (5L).seconds,
-            paymentSelection = PaymentSelection.GooglePay
+            paymentSelection = PaymentSelection.GooglePay,
+            initializationMode = paymentIntentInitializationMode,
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "google_pay")
@@ -306,7 +311,8 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             duration = (5L).seconds,
-            paymentSelection = PaymentSelection.Link
+            paymentSelection = PaymentSelection.Link,
+            initializationMode = paymentIntentInitializationMode,
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "link")
@@ -321,10 +327,49 @@ class PaymentSheetEventTest {
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
-            )
+            ),
+            initializationMode = paymentIntentInitializationMode,
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")
+    }
+
+    @Test
+    fun `LoadSucceeded initialization mode is correct for setup intents`() {
+        val event = createLoadSucceededEvent(
+            initializationMode = PaymentSheet.InitializationMode.SetupIntent(clientSecret = "cs_example")
+        )
+
+        assertThat(event.params).containsEntry("intent_type", "setup_intent")
+    }
+
+    @Test
+    fun `LoadSucceeded initialization mode is correct for deferred setup intents`() {
+        val event = createLoadSucceededEvent(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                )
+            )
+        )
+
+        assertThat(event.params).containsEntry("intent_type", "deferred_setup_intent")
+    }
+
+    @Test
+    fun `LoadSucceeded initialization mode is correct for deferred payment intents`() {
+        val event = createLoadSucceededEvent(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 50,
+                        currency = "usd",
+                    )
+                )
+            )
+        )
+
+        assertThat(event.params).containsEntry("intent_type", "deferred_payment_intent")
     }
 
     @Test
@@ -1292,6 +1337,28 @@ class PaymentSheetEventTest {
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
+        )
+    }
+
+    private val paymentIntentInitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+        clientSecret = "cs_example"
+    )
+
+    private fun createLoadSucceededEvent(
+        isDeferred: Boolean = false,
+        linkEnabled: Boolean = false,
+        googlePaySupported: Boolean = false,
+        duration: Duration = (5L).seconds,
+        paymentSelection: PaymentSelection? = null,
+        initializationMode: PaymentSheet.InitializationMode = paymentIntentInitializationMode,
+    ): PaymentSheetEvent.LoadSucceeded {
+        return PaymentSheetEvent.LoadSucceeded(
+            isDeferred = isDeferred,
+            linkEnabled = linkEnabled,
+            googlePaySupported = googlePaySupported,
+            duration = duration,
+            paymentSelection = paymentSelection,
+            initializationMode = initializationMode,
         )
     }
 }

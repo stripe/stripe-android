@@ -36,6 +36,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LoadSucceeded(
         paymentSelection: PaymentSelection?,
+        initializationMode: PaymentSheet.InitializationMode,
         duration: Duration?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -45,6 +46,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
             FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
+            FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
         )
 
         private val PaymentSelection?.defaultAnalyticsValue: String
@@ -53,6 +55,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 is PaymentSelection.Link -> "link"
                 is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
                 else -> "none"
+            }
+
+        private val PaymentSheet.InitializationMode.defaultAnalyticsValue: String
+            get() = when (this) {
+                is PaymentSheet.InitializationMode.DeferredIntent -> {
+                    when (this.intentConfiguration.mode) {
+                        is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
+                        is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
+                    }
+                }
+                is PaymentSheet.InitializationMode.PaymentIntent -> "payment_intent"
+                is PaymentSheet.InitializationMode.SetupIntent -> "setup_intent"
             }
     }
 
@@ -465,6 +479,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
         const val FIELD_COMPOSE = "compose"
+        const val FIELD_INTENT_TYPE = "intent_type"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

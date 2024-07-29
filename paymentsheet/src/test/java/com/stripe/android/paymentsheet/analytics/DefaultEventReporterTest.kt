@@ -683,6 +683,9 @@ class DefaultEventReporterTest {
         linkEnabled: Boolean = true,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
+        initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            clientSecret = "cs_example"
+        ),
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
@@ -690,7 +693,8 @@ class DefaultEventReporterTest {
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
-            currency = currency
+            currency = currency,
+            initializationMode = initializationMode,
         )
     }
 
