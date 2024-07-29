@@ -61,7 +61,6 @@ steps = [
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
-    method(:switch_to_release_branch),
 
     # Update version number
     method(:create_version_bump_pr),
@@ -70,7 +69,6 @@ steps = [
     method(:publish_to_sonatype),
 
     # Create a Github release
-
     method(:create_github_release),
 
     # Do docs updates
