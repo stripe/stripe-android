@@ -37,6 +37,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         ),
         requestExecutor = mockRequestExecutor,
+        provideConsumerApiOptions = { null },
         apiRequestFactory = apiRequestFactory,
         logger = Logger.noop(),
         savedStateHandle = SavedStateHandle(),

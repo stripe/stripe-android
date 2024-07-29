@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccc
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.repository.api.ProvideConsumerApiOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import javax.inject.Inject
 
@@ -54,6 +55,7 @@ internal interface FinancialConnectionsRepository {
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
+    private val provideConsumerApiOptions: ProvideConsumerApiOptions,
     private val apiOptions: ApiRequest.Options,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsRepository {
@@ -94,7 +96,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
-            options = apiOptions,
+            options = provideConsumerApiOptions() ?: apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "terminal_error" to terminalError

@@ -32,6 +32,7 @@ class FinancialConnectionsRepositoryImplTest {
             stripeNetworkClient = mockStripeNetworkClient,
             logger = Logger.noop(),
         ),
+        provideConsumerApiOptions = { null },
         apiRequestFactory = apiRequestFactory,
         apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     )

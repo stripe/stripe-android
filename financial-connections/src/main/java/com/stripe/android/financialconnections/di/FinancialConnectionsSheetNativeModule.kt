@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
+import com.stripe.android.financialconnections.repository.api.ProvideConsumerApiOptions
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -117,12 +118,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsAccountsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
+            provideConsumerApiOptions: ProvideConsumerApiOptions,
             apiOptions: ApiRequest.Options,
             apiRequestFactory: ApiRequest.Factory,
             logger: Logger,
             savedStateHandle: SavedStateHandle,
         ) = FinancialConnectionsAccountsRepository(
             requestExecutor = requestExecutor,
+            provideConsumerApiOptions = provideConsumerApiOptions,
             apiRequestFactory = apiRequestFactory,
             apiOptions = apiOptions,
             logger = logger,
