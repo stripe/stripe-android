@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ConsumerSession
 import org.junit.Test
 
-class RealConsumerSessionStoreTest {
+class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `Returns correct cached session that is verified`() {
@@ -23,7 +23,7 @@ class RealConsumerSessionStoreTest {
             ),
         )
 
-        val store = RealConsumerSessionStore(savedStateHandle = SavedStateHandle())
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
         store.storeConsumerSession(session)
 
         val cachedSession = store.provideConsumerSession()
@@ -54,7 +54,7 @@ class RealConsumerSessionStoreTest {
             ),
         )
 
-        val store = RealConsumerSessionStore(savedStateHandle = SavedStateHandle())
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
         store.storeConsumerSession(session)
 
         val cachedSession = store.provideConsumerSession()

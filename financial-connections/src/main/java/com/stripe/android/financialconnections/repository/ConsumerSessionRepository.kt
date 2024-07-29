@@ -18,14 +18,14 @@ internal data class CachedConsumerSession(
     val isVerified: Boolean,
 ) : Parcelable
 
-internal interface ConsumerSessionStore {
+internal interface ConsumerSessionRepository {
     fun provideConsumerSession(): CachedConsumerSession?
     fun storeConsumerSession(consumerSession: ConsumerSession?)
 }
 
-internal class RealConsumerSessionStore @Inject constructor(
+internal class RealConsumerSessionRepository @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-) : ConsumerSessionStore {
+) : ConsumerSessionRepository {
 
     override fun provideConsumerSession(): CachedConsumerSession? {
         return savedStateHandle[KeyConsumerSession]

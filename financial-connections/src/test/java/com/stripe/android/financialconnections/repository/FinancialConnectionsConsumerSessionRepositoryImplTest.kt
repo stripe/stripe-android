@@ -31,13 +31,13 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val apiOptions: ApiRequest.Options = mock()
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
-    private val consumerSessionStore = RealConsumerSessionStore(SavedStateHandle())
+    private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
 
     private fun buildRepository() =
         FinancialConnectionsConsumerSessionRepository(
             consumersApiService = consumersApiService,
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
-            consumerSessionStore = consumerSessionStore,
+            consumerSessionRepository = consumerSessionRepository,
             apiOptions = apiOptions,
             locale = locale,
             logger = logger

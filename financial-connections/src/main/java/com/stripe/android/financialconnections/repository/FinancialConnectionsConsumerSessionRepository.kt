@@ -38,7 +38,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
-            consumerSessionStore: ConsumerSessionStore,
+            consumerSessionRepository: ConsumerSessionRepository,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
@@ -47,7 +47,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
                 consumersApiService = consumersApiService,
                 apiOptions = apiOptions,
                 financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
-                consumerSessionStore = consumerSessionStore,
+                consumerSessionRepository = consumerSessionRepository,
                 locale = locale,
                 logger = logger,
             )
@@ -57,7 +57,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
-    private val consumerSessionStore: ConsumerSessionStore,
+    private val consumerSessionRepository: ConsumerSessionRepository,
     private val apiOptions: ApiRequest.Options,
     private val locale: Locale?,
     private val logger: Logger,
@@ -66,7 +66,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val mutex = Mutex()
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
-        consumerSessionStore.provideConsumerSession()
+        consumerSessionRepository.provideConsumerSession()
     }
 
     override suspend fun lookupConsumerSession(
@@ -127,7 +127,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSession: ConsumerSession?
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from $source")
-        consumerSessionStore.storeConsumerSession(consumerSession)
+        consumerSessionRepository.storeConsumerSession(consumerSession)
     }
 
     private companion object {
