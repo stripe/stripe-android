@@ -94,7 +94,10 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             // When accounts load, preselect the first selectable account
             val selectedAccountIds = listOfNotNull(
                 accounts
-                    .firstOrNull { account -> account.display.allowSelection }
+                    .firstOrNull { account ->
+                        account.display.allowSelection &&
+                            account.display.drawerOnSelection == null
+                    }
                     ?.account?.id
             )
 
