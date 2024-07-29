@@ -126,12 +126,13 @@ internal fun LegalDetailsBottomSheetContent(
 internal fun GenericBottomSheetContent(
     screen: FinancialConnectionsGenericInfoScreen,
     onClickableTextClick: (String) -> Unit,
-    onConfirmModalClick: () -> Unit
+    onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
 ) {
     GenericScreen(
         state = GenericScreenState(screen, inModal = true),
-        onPrimaryButtonClick = onConfirmModalClick,
-        onSecondaryButtonClick = { TODO("Secondary button click not yet implemented") },
+        onPrimaryButtonClick = onPrimaryButtonClick,
+        onSecondaryButtonClick = onSecondaryButtonClick,
         onClickableTextClick = onClickableTextClick,
     )
 }
