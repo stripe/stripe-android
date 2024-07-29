@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.notice
 
+import FinancialConnectionsGenericInfoScreen
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
@@ -118,6 +119,11 @@ internal data class NoticeSheetState(
     )
 
     internal sealed interface NoticeSheetContent : Parcelable {
+
+        @Parcelize
+        data class Generic(
+            val generic: FinancialConnectionsGenericInfoScreen,
+        ) : NoticeSheetContent
 
         @Parcelize
         data class Legal(

@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -46,7 +46,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -130,7 +130,7 @@ internal class ConsentViewModel @AssistedInject constructor(
 
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(dataAccessNotice),
             referrer = Pane.CONSENT,
         )
@@ -138,7 +138,7 @@ internal class ConsentViewModel @AssistedInject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = Legal(notice),
             referrer = Pane.CONSENT,
         )

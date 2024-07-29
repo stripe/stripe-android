@@ -31,7 +31,7 @@ import com.stripe.android.financialconnections.features.common.MerchantDataAcces
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -67,7 +67,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -359,7 +359,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(dataAccessNotice),
             referrer = PANE,
         )

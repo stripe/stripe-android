@@ -287,7 +287,7 @@ private fun PrePaneContent(
 }
 
 @Composable
-private fun PrepaneImage(bodyItem: Entry.Image) {
+internal fun PrepaneImage(bodyItem: Entry.Image) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier

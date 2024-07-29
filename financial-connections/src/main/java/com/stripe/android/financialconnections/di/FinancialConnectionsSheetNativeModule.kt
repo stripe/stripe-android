@@ -11,8 +11,8 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
-import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
@@ -36,7 +36,7 @@ import javax.inject.Singleton
 internal interface FinancialConnectionsSheetNativeModule {
 
     @Binds
-    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
+    fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
     @Binds
     fun bindsPresentAccountUpdateRequiredSheet(

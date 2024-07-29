@@ -10,9 +10,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
+import com.stripe.android.financialconnections.features.common.GenericBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
@@ -68,6 +70,11 @@ private fun NoticeSheetContent(
                 dataDialog = content.dataAccess,
                 onConfirmModalClick = onConfirmModalClick,
                 onClickableTextClick = onClickableTextClick
+            )
+            is Generic -> GenericBottomSheetContent(
+                screen = content.generic,
+                onClickableTextClick = onClickableTextClick,
+                onConfirmModalClick = onConfirmModalClick
             )
         }
         onViewEffectLaunched()

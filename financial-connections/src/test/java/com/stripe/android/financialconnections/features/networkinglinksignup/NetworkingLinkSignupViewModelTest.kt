@@ -58,7 +58,7 @@ class NetworkingLinkSignupViewModelTest {
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         saveAccountToLink = saveAccountToLink,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        presentNoticeSheet = mock(),
+        presentSheet = mock(),
     )
 
     @Test

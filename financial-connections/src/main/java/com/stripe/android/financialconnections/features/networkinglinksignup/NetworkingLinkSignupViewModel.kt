@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -70,7 +70,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
@@ -281,7 +281,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.payload()?.content?.legalDetailsNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = Legal(notice),
             referrer = PANE,
         )

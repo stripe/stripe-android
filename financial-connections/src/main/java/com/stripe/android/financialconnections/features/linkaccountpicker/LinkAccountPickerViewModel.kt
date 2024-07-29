@@ -28,8 +28,9 @@ import com.stripe.android.financialconnections.features.accountupdate.AccountUpd
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -68,7 +69,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
     private val presentUpdateRequiredSheet: PresentAccountUpdateRequiredSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -171,7 +172,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.activeDataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(dataAccessNotice),
             referrer = PANE,
         )
@@ -288,8 +289,10 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         val drawerOnSelection = accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
 
         if (drawerOnSelection != null) {
-            // TODO@carlosmuvi handle drawer display.
-            logger.debug("Drawer on selection: $drawerOnSelection")
+            presentSheet(
+                content = NoticeSheetState.NoticeSheetContent.Generic(drawerOnSelection),
+                referrer = PANE,
+            )
             return
         }
 
