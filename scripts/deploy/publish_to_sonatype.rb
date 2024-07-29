@@ -6,6 +6,10 @@ require_relative 'common'
 require_relative 'gnupg_utils'
 
 def publish_to_sonatype
+    # Must be run on the release branch, because it depends on changes made in
+    # create_version_bump_pr (updating the VERSION file)
+    switch_to_release_branch()
+
     m2_settings = Nokogiri::XML(fetch_password("bindings/java-maven-api-token"))
 
     # Required in order to use xpath sanely (the commands below would

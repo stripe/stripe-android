@@ -19,10 +19,6 @@ def pull_latest()
     execute_or_fail("git pull")
 end
 
-def switch_to_release_branch()
-    switch_to_new_branch(release_branch, @deploy_branch)
-end
-
 def revert_version_bump_changes()
     delete_git_branch(release_branch, @deploy_branch)
 end
@@ -56,12 +52,6 @@ def create_version_bump_pr()
         revert_version_bump_changes()
         execute("git checkout #{@deploy_branch}")
         raise
-    end
-
-    # If this is a dry run, we need to stay on the release/ branch to do a github release. This is
-    # because the github release depends on the changes we made to the CHANGELOG.
-    if (!@is_dry_run)
-        execute_or_fail("git checkout #{@deploy_branch}")
     end
 end
 

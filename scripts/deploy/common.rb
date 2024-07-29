@@ -39,6 +39,10 @@ def replace_in_file(filename, pattern, replacement)
   File.write(filename, new_content)
 end
 
+def switch_to_release_branch()
+    switch_to_new_branch(release_branch, @deploy_branch)
+end
+
 def ensure_directory_is_clean()
     stdout, stderr, status = Open3.capture3("git status --porcelain")
 
