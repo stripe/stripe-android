@@ -2210,6 +2210,7 @@ internal class DefaultFlowControllerTest {
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
         application = ApplicationProvider.getApplicationContext(),
         initializedViaCompose = false,
+        workContext = testScope.coroutineContext,
     )
 
     private fun createViewModel(): FlowControllerViewModel {
