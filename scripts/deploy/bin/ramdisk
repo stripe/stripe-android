@@ -1,0 +1,138 @@
+#!/bin/bash
+set -e
+
+# Note that ramdisk size is specified in megabytes. It defaults to 4 MB.
+if [ -z "$STRIPE_RAMDISK_SIZE_MB" ]; then
+  STRIPE_RAMDISK_SIZE_MB=4
+fi
+
+set -u
+
+usage () {
+    cat >&2 <<EOM
+usage: $0 create|destroy|path [NAME]
+
+If NAME is not given and \$STRIPE_RAMDISK_NAME is not set, use a name of
+"stripe_ramdisk" for the ramdisk.
+
+A created Ramdisk's size will default to 4 MB. Specify a different number in
+megabytes using \$STRIPE_RAMDISK_SIZE_MB. e.g. `STRIPE_RAMDISK_SIZE_MB=8`.
+
+Version 1.0
+EOM
+}
+
+create_ramdisk() {
+  case "$(uname -s)" in
+    'Darwin')
+      # Size in Mac OS is specified using something like a number of sectors
+      # that can be calculated by multiplying desired MBs by 2048.
+      NUM_SECTORS=$(($STRIPE_RAMDISK_SIZE_MB * 2048))
+
+      diskutil erasevolume HFS+ "$STRIPE_RAMDISK_NAME" $(hdiutil attach -nomount ram://$NUM_SECTORS)
+      chown $USER "$RAMDISK_PATH"
+      chmod 0700 "$RAMDISK_PATH"
+      ;;
+    'Linux')
+      if [ "$(ls -A "$RAMDISK_PATH" 2>/dev/null)" ]; then
+        echo "error: $RAMDISK_PATH is not empty!"
+        exit 2
+      fi
+      sudo mkdir -p "$RAMDISK_PATH"
+      sudo mount -t ramfs -o size="$STRIPE_RAMDISK_SIZE_MB"m none "$RAMDISK_PATH"
+      sudo chown $USER "$RAMDISK_PATH"
+      sudo chmod 0700 "$RAMDISK_PATH"
+      ;;
+    *)
+      echo "create_ramdisk() is not supported on platform '$(uname -s)'."
+      exit 1
+      ;;
+  esac
+}
+
+destroy_ramdisk() {
+  case "$(uname -s)" in
+    'Darwin')
+      hdiutil eject "$RAMDISK_PATH"
+      ;;
+    'Linux')
+      sudo umount "$RAMDISK_PATH"
+      sudo rmdir "$RAMDISK_PATH"
+      ;;
+    *)
+      echo "destroy_ramdisk() is not supported on platform '$(uname -s)'."
+      exit 1
+      ;;
+  esac
+}
+
+is_ramdisk_mounted() {
+  case "$(uname -s)" in
+    'Darwin'|'Linux')
+      return $(mount | grep -q "$RAMDISK_PATH")
+      ;;
+    *)
+      echo "is_ramdisk_mounted() is not supported on platform '$(uname -s)'."
+      exit 1
+      ;;
+  esac
+}
+
+# main
+
+if [ $# -lt 1 ]; then
+    usage
+    exit 1
+fi
+
+if [ $# -ge 2 ]; then
+  STRIPE_RAMDISK_NAME="$2"
+else
+  STRIPE_RAMDISK_NAME="${STRIPE_RAMDISK_NAME-stripe_ramdisk}"
+fi
+
+set -x
+
+case "$(uname -s)" in
+  'Darwin')
+    RAMDISK_PATH="/Volumes/$STRIPE_RAMDISK_NAME"
+    ;;
+  'Linux')
+    RAMDISK_PATH="/mnt/$STRIPE_RAMDISK_NAME"
+    ;;
+  *)
+    echo "I don't know how to control ramdisks on your OS."
+    exit 1
+    ;;
+esac
+
+case "$1" in
+  'create')
+    if is_ramdisk_mounted; then
+      echo "$STRIPE_RAMDISK_NAME is already mounted."
+      exit 1
+    else
+      create_ramdisk
+    fi
+    ;;
+  'destroy')
+    if is_ramdisk_mounted; then
+      destroy_ramdisk
+    else
+      echo "$STRIPE_RAMDISK_NAME does not appear to be mounted."
+      exit 1
+    fi
+    ;;
+  'path')
+    if is_ramdisk_mounted; then
+      echo "$RAMDISK_PATH"
+    else
+      echo "$STRIPE_RAMDISK_NAME does not appear to be mounted."
+      exit 1
+    fi
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
