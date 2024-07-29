@@ -275,6 +275,7 @@ class PaymentSheetEventTest {
             duration = (5L).seconds,
             paymentSelection = null,
             initializationMode = paymentIntentInitializationMode,
+            orderedLpms = listOf("card", "klarna")
         )
 
         assertThat(event.eventName).isEqualTo("mc_load_succeeded")
@@ -286,6 +287,7 @@ class PaymentSheetEventTest {
                 "duration" to 5f,
                 "selected_lpm" to "none",
                 "intent_type" to "payment_intent",
+                "ordered_lpms" to "card,klarna"
             )
         )
     }
@@ -299,6 +301,7 @@ class PaymentSheetEventTest {
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.GooglePay,
             initializationMode = paymentIntentInitializationMode,
+            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "google_pay")
@@ -313,6 +316,7 @@ class PaymentSheetEventTest {
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.Link,
             initializationMode = paymentIntentInitializationMode,
+            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "link")
@@ -329,6 +333,7 @@ class PaymentSheetEventTest {
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
             ),
             initializationMode = paymentIntentInitializationMode,
+            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")
@@ -1351,6 +1356,7 @@ class PaymentSheetEventTest {
         duration: Duration = (5L).seconds,
         paymentSelection: PaymentSelection? = null,
         initializationMode: PaymentSheet.InitializationMode = paymentIntentInitializationMode,
+        orderedLpms: List<String> = listOf("card"),
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1359,6 +1365,7 @@ class PaymentSheetEventTest {
             duration = duration,
             paymentSelection = paymentSelection,
             initializationMode = initializationMode,
+            orderedLpms = orderedLpms,
         )
     }
 }

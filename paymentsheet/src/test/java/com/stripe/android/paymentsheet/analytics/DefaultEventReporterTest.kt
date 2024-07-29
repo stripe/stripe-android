@@ -695,6 +695,7 @@ class DefaultEventReporterTest {
             linkEnabled = linkEnabled,
             currency = currency,
             initializationMode = initializationMode,
+            orderedLpms = listOf("card", "klarna"),
         )
     }
 
