@@ -21,13 +21,16 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.NextPaneOnDisableNetworkingRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
+import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
@@ -45,6 +48,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
+    private val nextPaneOnDisableNetworkingRepository: NextPaneOnDisableNetworkingRepository,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
@@ -118,11 +122,13 @@ internal class ConsentViewModel @AssistedInject constructor(
                 },
                 // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
                 ConsentClickableText.MANUAL_ENTRY.value to {
-                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                    nextPaneOnDisableNetworkingRepository.set(it.nextPaneOrDrawerOnSecondaryCta)
+                    navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
                 },
                 // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
                 ConsentClickableText.LINK_LOGIN_WARMUP.value to {
-                    navigationManager.tryNavigateTo(Destination.NetworkingLinkLoginWarmup(referrer = Pane.CONSENT))
+                    nextPaneOnDisableNetworkingRepository.set(it.nextPaneOrDrawerOnSecondaryCta)
+                    navigationManager.tryNavigateTo(NetworkingLinkLoginWarmup(referrer = Pane.CONSENT))
                 },
             )
         )

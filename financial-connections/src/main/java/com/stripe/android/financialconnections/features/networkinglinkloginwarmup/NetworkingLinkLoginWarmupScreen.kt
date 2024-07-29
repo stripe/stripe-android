@@ -48,7 +48,7 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen(
-    backStackEntry: NavBackStackEntry,
+    backStackEntry: NavBackStackEntry
 ) {
     val viewModel: NetworkingLinkLoginWarmupViewModel = paneViewModel {
         NetworkingLinkLoginWarmupViewModel.factory(it, backStackEntry.arguments)

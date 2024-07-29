@@ -111,6 +111,7 @@ internal class SaveAccountToLink @Inject constructor(
         repository.disableNetworking(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             disabledReason = "account_numbers_not_available",
+            clientSuggestedNextPaneOnDisableNetworking = TODO()
         )
     }
 

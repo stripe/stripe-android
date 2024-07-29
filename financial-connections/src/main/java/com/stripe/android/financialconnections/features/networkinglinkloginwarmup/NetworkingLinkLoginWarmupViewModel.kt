@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.NextPaneOnDisableNetworkingRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -39,6 +40,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val handleError: HandleError,
     private val getOrFetchSync: GetOrFetchSync,
     private val disableNetworking: DisableNetworking,
+    private val nextPaneOnDisableNetworkingRepository: NextPaneOnDisableNetworkingRepository,
     private val navigationManager: NavigationManager
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -98,10 +100,17 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        nextPaneOnDisableNetworkingRepository.clear()
+    }
+
     private fun skipNetworking() {
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
-            disableNetworking().also {
+            disableNetworking(
+                clientSuggestedNextPaneOnDisableNetworking = nextPaneOnDisableNetworkingRepository.get()?.nextPane
+            ).also {
                 val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
                     route = it.nextPane.destination(referrer = PANE),
