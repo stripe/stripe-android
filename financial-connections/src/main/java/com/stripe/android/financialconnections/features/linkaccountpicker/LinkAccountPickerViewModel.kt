@@ -451,7 +451,7 @@ private fun createUpdateRequiredContent(
     return when (partnerAccount.nextPaneOnSelection) {
         BANK_AUTH_REPAIR -> {
             AccountUpdateRequiredState.Payload(
-                generic = genericContent.withIcon(partnerAccount.institution?.icon?.default),
+                generic = genericContent,
                 type = Repair(
                     authorization = partnerAccount.authorization?.let { partnerToCoreAuths?.getValue(it) },
                 ),
@@ -459,7 +459,7 @@ private fun createUpdateRequiredContent(
         }
         PARTNER_AUTH -> {
             AccountUpdateRequiredState.Payload(
-                generic = genericContent.withIcon(partnerAccount.institution?.icon?.default),
+                generic = genericContent,
                 type = PartnerAuth(
                     institution = partnerAccount.institution,
                 ),
