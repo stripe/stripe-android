@@ -638,6 +638,7 @@ internal class PlaygroundTestDriver(
 
         pressBuy()
 
+        button.waitForEnabled()
         button.click()
     }
 

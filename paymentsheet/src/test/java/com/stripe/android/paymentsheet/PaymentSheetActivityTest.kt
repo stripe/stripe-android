@@ -797,9 +797,10 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
-            viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
+            fakeIntentConfirmationInterceptor.enqueueFailureStep(
+                IllegalStateException(errorMessage),
+                errorMessage
+            )
 
             composeTestRule
                 .onNodeWithText(errorMessage)
