@@ -18,7 +18,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
@@ -98,9 +97,9 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-                paymentSelection = PaymentSelection.Saved(
+                confirmationOption = PaymentConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                    optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),

@@ -470,12 +470,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
 
+            val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
+                ?.toPaymentConfirmationOption()
+
             intentConfirmationHandler.start(
                 arguments = IntentConfirmationHandler.Args(
                     initializationMode = args.initializationMode,
                     shippingDetails = args.config.shippingDetails,
                     intent = stripeIntent,
-                    paymentSelection = paymentSelectionWithCvcIfEnabled(paymentSelection),
+                    confirmationOption = confirmationOption,
                     appearance = config.appearance,
                 ),
             )

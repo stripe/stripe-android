@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -905,7 +906,7 @@ internal class CustomerSheetViewModel(
                     clientSecret = clientSecret
                 ),
                 intent = stripeIntent,
-                paymentSelection = selection,
+                confirmationOption = selection.toPaymentConfirmationOption(),
                 shippingDetails = null,
                 appearance = configuration.appearance,
             )
