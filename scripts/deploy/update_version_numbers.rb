@@ -26,6 +26,14 @@ def update_gradle_properties()
   execute_or_fail("git add gradle.properties")
 end
 
+def update_version()
+    replace_in_file("VERSION",
+        /.*/,
+        @version
+    )
+    execute_or_fail("git add VERSION")
+end
+
 def update_changelog()
     date = Time.now.strftime("%Y-%m-%d")
 
