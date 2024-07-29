@@ -1,2 +1,7 @@
 # 3ds2playground
-App to test `3ds2sdk`
+Playground app for `3ds2sdk`
+
+## Install
+1. Clone the `stripe-android` repository.
+2. Open the project in Android Studio.
+3. Build and run the `3ds2playground` project.

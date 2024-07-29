@@ -100,4 +100,5 @@ dependencies {
     testImplementation testLibs.androidx.archCore
 }
 
-apply from: "${rootDir}/3ds2sdk/publish.gradle"
+// Uncomment to publish locally with `./gradlew publishToMavenLocal`
+// apply from: "${rootDir}/3ds2sdk/publish.gradle"

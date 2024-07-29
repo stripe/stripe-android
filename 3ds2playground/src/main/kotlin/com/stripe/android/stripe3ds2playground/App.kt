@@ -14,8 +14,6 @@ class App : Application() {
                 .detectDiskWrites()
                 .detectAll()
                 .penaltyLog()
-                // penaltyDeath() causes tests to fail in CI
-                // .penaltyDeath()
                 .build()
         )
 
@@ -24,8 +22,6 @@ class App : Application() {
                 .detectLeakedSqlLiteObjects()
                 .detectLeakedClosableObjects()
                 .penaltyLog()
-                // penaltyDeath() causes tests to fail in CI
-                // .penaltyDeath()
                 .build()
         )
     }
