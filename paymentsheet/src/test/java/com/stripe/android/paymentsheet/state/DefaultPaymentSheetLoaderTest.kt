@@ -827,6 +827,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 
@@ -878,6 +879,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 
@@ -1674,6 +1676,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 

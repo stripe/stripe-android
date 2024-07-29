@@ -32,6 +32,7 @@ internal interface EventReporter {
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
+        orderedLpms: List<String>,
     )
 
     /**
