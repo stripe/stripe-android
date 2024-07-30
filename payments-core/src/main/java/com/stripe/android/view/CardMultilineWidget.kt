@@ -46,7 +46,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
+) : LifecycleOwnerLayout(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this

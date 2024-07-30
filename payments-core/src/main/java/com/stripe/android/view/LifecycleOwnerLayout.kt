@@ -17,7 +17,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
-open class ComposeLifecycleOwner(
+open class LifecycleOwnerLayout(
     context: Context,
     attributeSet: AttributeSet?,
     defStyleAttr: Int

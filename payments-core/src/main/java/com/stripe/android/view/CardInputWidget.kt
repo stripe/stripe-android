@@ -16,7 +16,6 @@ import android.view.animation.AnimationSet
 import android.view.animation.Transformation
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -60,7 +59,7 @@ class CardInputWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
+) : LifecycleOwnerLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),

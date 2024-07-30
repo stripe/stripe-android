@@ -11,7 +11,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
@@ -49,7 +48,7 @@ class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ComposeLifecycleOwner(context, attrs, defStyleAttr) {
+) : LifecycleOwnerLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
     private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
 
