@@ -78,7 +78,7 @@ class ConsumersApiServiceImpl(
                     "email_address" to email.lowercase()
                 )
             ),
-            responseJsonParser = ConsumerSessionLookupJsonParser()
+            responseJsonParser = ConsumerSessionLookupJsonParser,
         )
     }
 

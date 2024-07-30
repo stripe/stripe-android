@@ -11,7 +11,7 @@ class ConsumerSessionLookupJsonParserTest {
     @Test
     fun `Parse lookup when consumer does not exist`() {
         assertEquals(
-            ConsumerSessionLookupJsonParser().parse(ConsumerFixtures.NO_EXISTING_CONSUMER_JSON),
+            ConsumerSessionLookupJsonParser.parse(ConsumerFixtures.NO_EXISTING_CONSUMER_JSON),
             ConsumerSessionLookup(
                 exists = false,
                 consumerSession = null,
@@ -23,7 +23,7 @@ class ConsumerSessionLookupJsonParserTest {
     @Test
     fun `Parse lookup when consumer exists`() {
         assertEquals(
-            ConsumerSessionLookupJsonParser().parse(ConsumerFixtures.EXISTING_CONSUMER_JSON),
+            ConsumerSessionLookupJsonParser.parse(ConsumerFixtures.EXISTING_CONSUMER_JSON),
             ConsumerSessionLookup(
                 exists = true,
                 consumerSession = ConsumerSession(
