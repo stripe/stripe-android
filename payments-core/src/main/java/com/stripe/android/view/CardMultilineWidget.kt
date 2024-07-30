@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -394,8 +393,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.possibleCardBrandsCallback = { brands ->
-            val currentBrand = cardBrandView.brand
             cardBrandView.possibleBrands = brands
+            val currentBrand = cardBrandView.brand
 
             if (currentBrand !in brands) {
                 cardBrandView.brand = CardBrand.Unknown

@@ -1,6 +1,9 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -18,7 +21,6 @@ import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
-
 
 internal class CardBrandViewRebuild @JvmOverloads constructor(
     context: Context,
@@ -51,13 +53,14 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         get() = state.isCbcEligible
         set(value) {
             state = state.copy(isCbcEligible = value)
+            updateBrandSpinner()
         }
 
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
         state = state.copy(isLoading = isLoading)
-
+        setCardBrandIconAndTint()
         if (wasLoading != isLoading) {
             if (isLoading) {
                 progressView.visibility = VISIBLE
@@ -78,6 +81,7 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         get() = state.possibleBrands
         set(value) {
             state = state.copy(possibleBrands = value)
+            determineCardBrandToDisplay()
             updateBrandSpinner()
         }
 
@@ -85,17 +89,20 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         get() = state.merchantPreferredNetworks
         set(value) {
             state = state.copy(merchantPreferredNetworks = value)
+            determineCardBrandToDisplay()
         }
 
     var shouldShowCvc: Boolean
         get() = state.shouldShowCvc
         set(value) {
+            setCardBrandIconAndTint()
             state = state.copy(shouldShowCvc = value)
         }
 
     var shouldShowErrorIcon: Boolean
         get() = state.shouldShowErrorIcon
         set(value) {
+            setCardBrandIconAndTint()
             state = state.copy(shouldShowErrorIcon = value)
         }
 
@@ -108,14 +115,8 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     init {
         isClickable = false
         isFocusable = false
-        iconView.setBackgroundResource(com.stripe.payments.model.R.drawable.stripe_ic_unknown)
 
-        determineCardBrandToDisplay(
-            state.userSelectedBrand,
-            state.brand,
-            state.possibleBrands,
-            state.merchantPreferredNetworks
-        )
+        determineCardBrandToDisplay()
         updateBrandSpinner()
     }
 
@@ -130,66 +131,69 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     private fun handleBrandSelected(brand: CardBrand?) {
         brand?.let {
             state = state.copy(userSelectedBrand = brand)
+            determineCardBrandToDisplay()
         }
     }
 
-    private fun determineCardBrandToDisplay(
-        userSelectedBrand: CardBrand?,
-        autoDeterminedBrand: CardBrand,
-        possibleBrands: List<CardBrand>,
-        merchantPreferredBrands: List<CardBrand>,
-    ) {
-        brand = if (possibleBrands.size > 1) {
-            selectCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
-        } else {
-            autoDeterminedBrand
-        }
-    }
-
-    override fun onSaveInstanceState(): Parcelable {
-        val superState = super.onSaveInstanceState()
-        return SavedState(superState, state)
-    }
-
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        val savedState = state as? SavedState
-        this.state = savedState?.state ?: State()
-        determineCardBrandToDisplay(
-            this.state.userSelectedBrand,
-            this.state.brand,
-            this.state.possibleBrands,
-            this.state.merchantPreferredNetworks
+    private fun setCardBrandIconAndTint() {
+        iconView.setBackgroundResource(
+            when {
+                isLoading -> state.brand.icon
+                shouldShowErrorIcon -> state.brand.errorIcon
+                shouldShowCvc -> state.brand.cvcIcon
+                else -> state.brand.icon
+            }
         )
-        updateBrandSpinner()
-        super.onRestoreInstanceState(savedState?.superState)
+
+        val tint = when {
+            isLoading -> tintColorInt.takeIf { state.brand == Unknown }
+            shouldShowErrorIcon -> null
+            shouldShowCvc -> tintColorInt
+            else -> tintColorInt.takeIf { state.brand == Unknown }
+        }
+
+        iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
     }
 
-    @Parcelize
-    internal data class SavedState(
-        val superSavedState: Parcelable?,
-        val state: State,
-    ) : BaseSavedState(superSavedState), Parcelable
+    private fun determineCardBrandToDisplay() {
+        brand = if (state.possibleBrands.size > 1) {
+            selectCardBrandToDisplay(state.userSelectedBrand, state.possibleBrands, state.merchantPreferredNetworks)
+        } else {
+            state.brand
+        }
+        setCardBrandIconAndTint()
+    }
 
     private fun updateBrandSpinner() {
-        chevron.visibility = if (possibleBrands.size > 1)  View.VISIBLE else View.GONE
-        if (possibleBrands.size > 1) {
-            val adapter = BrandAdapter(context, possibleBrands)
-            this.setOnClickListener { listPopup.show() }
-            listPopup.setAdapter(adapter)
-
-            listPopup.setOnItemClickListener { parent, view, position, id ->
-                possibleBrands.getOrNull(position - 1)?.let {
-                    iconView.setBackgroundResource(it.icon)
-                    handleBrandSelected(it)
+        val showDropdown = isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+        if (showDropdown) {
+            initListPopup()
+            this.setOnClickListener {
+                if (listPopup.isShowing) {
+                    listPopup.dismiss()
+                } else {
+                    listPopup.show()
                 }
-                listPopup.dismiss()
             }
-            listPopup.anchorView = iconView
-            listPopup.width = measureContentWidth(adapter)
-            listPopup.setSelection(possibleBrands.indexOf(brand))
+            chevron.visibility = View.VISIBLE
         } else {
             this.setOnClickListener(null)
+            chevron.visibility = View.GONE
         }
+    }
+
+    private fun initListPopup() {
+        val adapter = BrandAdapter(context, possibleBrands, brand)
+        listPopup.setAdapter(adapter)
+        listPopup.isModal = true
+        listPopup.width = measureContentWidth(adapter)
+        listPopup.setOnItemClickListener { _, _, position, _ ->
+            possibleBrands.getOrNull(position - 1)?.let {
+                handleBrandSelected(it)
+            }
+            listPopup.dismiss()
+        }
+        listPopup.anchorView = iconView
     }
 
     private fun measureContentWidth(adapter: BrandAdapter): Int {
@@ -206,26 +210,65 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
 
         return maxWidth
     }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return SavedState(superState, state)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val savedState = state as? SavedState
+        this.state = savedState?.state ?: State()
+        determineCardBrandToDisplay()
+        updateBrandSpinner()
+        super.onRestoreInstanceState(savedState?.superState)
+    }
+
+    @Parcelize
+    internal data class SavedState(
+        val superSavedState: Parcelable?,
+        val state: State,
+    ) : BaseSavedState(superSavedState), Parcelable
 }
 
 class BrandAdapter(
     context: Context,
     private val brands: List<CardBrand?>,
+    private val selectedBrand: CardBrand?
 ) : ArrayAdapter<CardBrand?>(context, 0, brands) {
 
     private val inflater = LayoutInflater.from(context)
+    private val colorUtils = StripeColorUtils(context)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = if (position == 0) {
             inflater.inflate(R.layout.stripe_select_card_brand_view, parent, false)
         } else {
-            inflater.inflate(R.layout.stripe_card_brand_spinner_view, parent, false)
+            inflater.inflate(R.layout.stripe_card_brand_choice_list_view, parent, false)
         }
 
         if (position > 0) {
             brands.getOrNull(position - 1)?.let {
+                val isSelected = it == selectedBrand
                 view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(it.icon)
-                view.findViewById<TextView>(R.id.brand_text)?.text = it.displayName
+                view.findViewById<ImageView>(R.id.brand_check).apply {
+                    if (isSelected) {
+                        visibility = View.VISIBLE
+                        setColorFilter(colorUtils.colorPrimary)
+                    } else {
+                        visibility = View.GONE
+                    }
+                }
+                view.findViewById<TextView>(R.id.brand_text)?.apply {
+                    text = it.displayName
+                    if (isSelected) {
+                        setTextColor(colorUtils.colorPrimary)
+                        typeface = Typeface.DEFAULT_BOLD
+                    } else {
+                        setTextColor(colorUtils.textColorPrimary)
+                        typeface = Typeface.DEFAULT
+                    }
+                }
             }
         }
         return view

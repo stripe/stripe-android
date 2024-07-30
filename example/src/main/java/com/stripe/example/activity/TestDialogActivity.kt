@@ -1,12 +1,11 @@
 package com.stripe.example.activity
 
 import android.app.Activity
-import android.app.Dialog
 import android.os.Bundle
 import android.widget.FrameLayout
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.CardBrand
 import com.stripe.android.view.CardFormView
-import com.stripe.android.view.CardInputWidget
 import com.stripe.example.Settings
 
 class TestDialogActivity : Activity() {
@@ -19,9 +18,8 @@ class TestDialogActivity : Activity() {
         val frame = FrameLayout(this)
 
         val cardFormView = CardFormView(this)
+        cardFormView.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
         frame.addView(cardFormView)
         setContentView(frame)
-//        dialog.setContentView(cardFormView)
-//        dialog.show()
     }
 }
