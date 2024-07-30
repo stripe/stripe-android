@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.networkingsavetolinkver
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccount
-import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
@@ -21,6 +20,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
+import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -228,6 +228,16 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         navigationManager.assertNavigatedTo(
             destination = Destination.Success,
             pane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
+        )
+    }
+
+    private fun consumerSession(): CachedConsumerSession {
+        return CachedConsumerSession(
+            clientSecret = "clientSecret",
+            emailAddress = "test@test.com",
+            phoneNumber = "(***) *** **12",
+            isVerified = false,
+            publishableKey = null
         )
     }
 }

@@ -26,8 +26,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.common.enableWorkManager
+import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
+import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -65,6 +67,10 @@ internal interface FinancialConnectionsSheetSharedModule {
     @Binds
     @Singleton
     fun bindsAnalyticsRequestV2Executor(impl: DefaultAnalyticsRequestV2Executor): AnalyticsRequestV2Executor
+
+    @Binds
+    @Singleton
+    fun bindsConsumerSessionRepository(impl: RealConsumerSessionRepository): ConsumerSessionRepository
 
     companion object {
 

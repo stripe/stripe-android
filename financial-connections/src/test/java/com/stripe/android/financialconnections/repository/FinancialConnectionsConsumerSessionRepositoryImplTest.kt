@@ -1,8 +1,11 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -11,7 +14,6 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -19,7 +21,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.Locale
-import kotlin.test.assertNull
 
 @ExperimentalCoroutinesApi
 class FinancialConnectionsConsumerSessionRepositoryImplTest {
@@ -30,11 +31,13 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val apiOptions: ApiRequest.Options = mock()
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
+    private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
 
     private fun buildRepository() =
         FinancialConnectionsConsumerSessionRepository(
             consumersApiService = consumersApiService,
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+            consumerSessionRepository = consumerSessionRepository,
             apiOptions = apiOptions,
             locale = locale,
             logger = logger
@@ -61,11 +64,11 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         ).thenReturn(consumerSessionLookup)
 
         // ensures there's no cached consumer session
-        assertNull(repository.getCachedConsumerSession())
+        assertThat(repository.getCachedConsumerSession()).isNull()
 
         val result = repository.lookupConsumerSession(email, clientSecret)
 
-        assertEquals(consumerSessionLookup, result)
+        assertThat(result).isEqualTo(consumerSessionLookup)
 
         verify(financialConnectionsConsumersApiService).postConsumerSession(
             email = email,
@@ -74,7 +77,15 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         )
 
         // ensures there's a cached consumer session after the lookup call.
-        assertEquals(repository.getCachedConsumerSession(), consumerSession)
+        assertThat(repository.getCachedConsumerSession()).isEqualTo(
+            CachedConsumerSession(
+                clientSecret = "clientSecret",
+                emailAddress = "test@test.com",
+                phoneNumber = "(•••) ••• ••12",
+                publishableKey = null,
+                isVerified = false,
+            )
+        )
     }
 
     @Test
@@ -99,7 +110,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         ).thenReturn(consumerSession)
 
         // ensures there's no cached consumer session
-        assertNull(repository.getCachedConsumerSession())
+        assertThat(repository.getCachedConsumerSession()).isNull()
 
         val result: ConsumerSession = repository.startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -108,7 +119,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             customEmailType = customEmailType
         )
 
-        assertEquals(consumerSession, result)
+        assertThat(result).isEqualTo(consumerSession)
+
         verify(consumersApiService).startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale,
@@ -119,8 +131,16 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             requestOptions = apiOptions
         )
 
-        // ensures there's a cached consumer session after the lookup call.
-        assertEquals(repository.getCachedConsumerSession(), consumerSession)
+        // ensures there's a cached consumer session after the start-verification call.
+        assertThat(repository.getCachedConsumerSession()).isEqualTo(
+            CachedConsumerSession(
+                clientSecret = "clientSecret",
+                emailAddress = "test@test.com",
+                phoneNumber = "(•••) ••• ••12",
+                publishableKey = null,
+                isVerified = false,
+            )
+        )
     }
 
     @Test
@@ -128,7 +148,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         val consumerSessionClientSecret = "clientSecret"
         val verificationCode = "123456"
         val type = VerificationType.EMAIL
-        val consumerSession = consumerSession()
+        val consumerSession = verifiedConsumerSession()
         val repository = buildRepository()
 
         whenever(
@@ -142,14 +162,16 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         ).thenReturn(consumerSession)
 
         // ensures there's no cached consumer session
-        assertNull(repository.getCachedConsumerSession())
+        assertThat(repository.getCachedConsumerSession()).isNull()
 
         val result = repository.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
             type = type
         )
-        assertEquals(consumerSession, result)
+
+        assertThat(result).isEqualTo(consumerSession)
+
         verify(consumersApiService).confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
@@ -158,7 +180,15 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             apiOptions
         )
 
-        // ensures there's a cached consumer session after the lookup call.
-        assertEquals(repository.getCachedConsumerSession(), consumerSession)
+        // ensures there's a cached consumer session after the confirm-verification call.
+        assertThat(repository.getCachedConsumerSession()).isEqualTo(
+            CachedConsumerSession(
+                clientSecret = "clientSecret",
+                emailAddress = "test@test.com",
+                phoneNumber = "(•••) ••• ••12",
+                publishableKey = null,
+                isVerified = true,
+            )
+        )
     }
 }
