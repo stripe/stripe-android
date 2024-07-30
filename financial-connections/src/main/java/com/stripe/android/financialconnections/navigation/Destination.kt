@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -253,15 +254,13 @@ internal sealed class Destination(
     }
 }
 
-internal fun String.appendParamValues(params: Map<String, String?>) = buildString {
-    append(this@appendParamValues)
-    if (params.isNotEmpty()) {
-        append("?")
-        params.entries
-            .filter { it.value != null }
-            .joinToString("&") { (key, value) -> "$key=$value" }
-            .let { append(it) }
+internal fun String.appendParamValues(params: Map<String, String?>): String {
+    if (params.isEmpty()) return this
+    val uriBuilder = Uri.parse(this).buildUpon()
+    params.forEach { (key, value) ->
+        if (value != null) uriBuilder.appendQueryParameter(key, value)
     }
+    return uriBuilder.build().toString()
 }
 
 internal fun NavGraphBuilder.composable(
