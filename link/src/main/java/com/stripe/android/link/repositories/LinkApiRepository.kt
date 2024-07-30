@@ -115,6 +115,7 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
+            extraParams = mapOf("payment_method_options" to extraConfirmationParams(paymentMethodCreateParams)),
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))

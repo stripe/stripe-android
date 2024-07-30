@@ -1131,6 +1131,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String> {
         return fetchStripeModelResult(
@@ -1144,7 +1145,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "id" to id,
                     buildPaymentUserAgentPair(),
-                )
+                ).plus(extraParams ?: emptyMap())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.id }
