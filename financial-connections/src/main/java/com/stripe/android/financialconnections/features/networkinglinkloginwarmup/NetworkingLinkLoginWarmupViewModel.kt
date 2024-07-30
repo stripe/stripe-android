@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
@@ -27,7 +28,6 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.NextPaneOnDisableNetworkingRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -40,7 +40,6 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val handleError: HandleError,
     private val getOrFetchSync: GetOrFetchSync,
     private val disableNetworking: DisableNetworking,
-    private val nextPaneOnDisableNetworkingRepository: NextPaneOnDisableNetworkingRepository,
     private val navigationManager: NavigationManager
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -100,16 +99,11 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        nextPaneOnDisableNetworkingRepository.clear()
-    }
-
     private fun skipNetworking() {
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking(
-                clientSuggestedNextPaneOnDisableNetworking = nextPaneOnDisableNetworkingRepository.get()?.nextPane
+                clientSuggestedNextPaneOnDisableNetworking = stateFlow.value.nextPaneOnDisableNetworking
             ).also {
                 val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
@@ -162,6 +156,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
 internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
+    val nextPaneOnDisableNetworking: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val isInstantDebits: Boolean = false,
@@ -179,6 +174,7 @@ internal data class NetworkingLinkLoginWarmupState(
         state: FinancialConnectionsSheetNativeState,
     ) : this(
         referrer = Destination.referrer(args),
+        nextPaneOnDisableNetworking = args?.getString(KEY_NEXT_PANE_ON_DISABLE_NETWORKING),
         payload = Uninitialized,
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = state.isLinkWithStripe,
