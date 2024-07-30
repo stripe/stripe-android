@@ -40,7 +40,6 @@ internal class HandleClickableUrl @Inject constructor(
             ?.let { internalLinkToPaneId[it] }
     )
 
-    //  this mapping is a bit unfortunate but this is what stripe.js decided to do:
     private val internalLinkToPaneId = mapOf(
         InternalLink.MANUAL_ENTRY to Pane.MANUAL_ENTRY.value,
     )
