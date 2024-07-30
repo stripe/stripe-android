@@ -71,7 +71,6 @@ internal class PollAttachPaymentAccountTest {
         verify(attachedPaymentAccountRepository).set(params)
     }
 
-
     @Test
     fun `Handles manual entry error correctly`() = runTest {
         val sync = syncResponse()

@@ -31,7 +31,6 @@ internal interface ConsumerSessionRepository {
             it.state == ConsumerSession.VerificationSession.SessionState.Verified
         },
     )
-
 }
 
 internal class RealConsumerSessionRepository @Inject constructor(
