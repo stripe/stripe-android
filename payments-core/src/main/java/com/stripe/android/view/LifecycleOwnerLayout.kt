@@ -28,7 +28,7 @@ open class LifecycleOwnerLayout(
         (parent as? View)?.findViewTreeLifecycleOwner() ?: run {
             savedStateRegistryController.performRestore(null)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-            attachToDecorView((parent as? View))
+            attachToParent((parent as? View))
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         }
     }
@@ -42,19 +42,14 @@ open class LifecycleOwnerLayout(
         }
     }
 
-    /**
-    Compose uses the Window's decor view to locate the
-    Lifecycle/ViewModel/SavedStateRegistry owners.
-    Therefore, we need to set this class as the "owner" for the decor view.
-     */
-    private fun attachToDecorView(decorView: View?) {
-        if (decorView == null) {
+    private fun attachToParent(parent: View?) {
+        if (parent == null) {
             return
         }
 
-        decorView.setViewTreeLifecycleOwner(this)
-        decorView.setViewTreeViewModelStoreOwner(this)
-        decorView.setViewTreeSavedStateRegistryOwner(this)
+        parent.setViewTreeLifecycleOwner(this)
+        parent.setViewTreeViewModelStoreOwner(this)
+        parent.setViewTreeSavedStateRegistryOwner(this)
     }
 
     // LifecycleOwner methods

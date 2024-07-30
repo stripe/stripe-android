@@ -372,7 +372,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
-        //cardBrandView.reserveSpaceForCbcDropdown = false
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         cardNumberEditText.completionCallback = {
