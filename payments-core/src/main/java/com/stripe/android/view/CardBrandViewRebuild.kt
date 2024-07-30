@@ -247,29 +247,7 @@ class BrandAdapter(
             inflater.inflate(R.layout.stripe_card_brand_choice_list_view, parent, false)
         }
 
-        if (position > 0) {
-            brands.getOrNull(position - 1)?.let { brand ->
-                val isSelected = brand == selectedBrand
-                view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
-                view.findViewById<ImageView>(R.id.brand_check).apply {
-                    if (isSelected) {
-                        visibility = View.VISIBLE
-                        setColorFilter(colorUtils.colorPrimary)
-                    } else {
-                        visibility = View.GONE
-                    }
-                }
-                view.findViewById<TextView>(R.id.brand_text)?.apply {
-                    text = brand.displayName
-                    if (isSelected) {
-                        setTextColor(colorUtils.colorPrimary)
-                        typeface = Typeface.DEFAULT_BOLD
-                    } else {
-                        typeface = Typeface.DEFAULT
-                    }
-                }
-            }
-        }
+        if (position > 0) updateView(view, position)
         return view
     }
 
@@ -287,5 +265,29 @@ class BrandAdapter(
 
     override fun isEnabled(position: Int): Boolean {
         return position != 0
+    }
+
+    private fun updateView(view: View, position: Int) {
+        brands.getOrNull(position - 1)?.let { brand ->
+            val isSelected = brand == selectedBrand
+            view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_check).apply {
+                if (isSelected) {
+                    visibility = View.VISIBLE
+                    setColorFilter(colorUtils.colorPrimary)
+                } else {
+                    visibility = View.GONE
+                }
+            }
+            view.findViewById<TextView>(R.id.brand_text)?.apply {
+                text = brand.displayName
+                if (isSelected) {
+                    setTextColor(colorUtils.colorPrimary)
+                    typeface = Typeface.DEFAULT_BOLD
+                } else {
+                    typeface = Typeface.DEFAULT
+                }
+            }
+        }
     }
 }
