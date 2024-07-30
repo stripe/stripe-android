@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/why_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:focusable="true"
+        android:clickable="true"
+        tools:visibility="visible">
+
+        <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
+            android:id="@+id/why_label"
+            style="@style/Stripe3DS2FooterHeader"
+            android:enabled="false"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:text="Why Label" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/why_arrow"
+            style="@style/Stripe3DS2FooterChevron"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:srcCompat="@drawable/stripe_3ds2_ic_arrow"
+            android:enabled="false" />
+    </LinearLayout>
+
+
+    <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
+        android:id="@+id/why_text"
+        style="@style/Stripe3DS2FooterText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_3ds2_information_zone_label_padding"
+        android:visibility="gone"
+        android:accessibilityLiveRegion="polite"
+        tools:text="Why Text"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/expand_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_3ds2_information_zone_vertical_padding"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:focusable="true"
+        android:clickable="true"
+        tools:visibility="visible">
+
+        <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
+            android:id="@+id/expand_label"
+            style="@style/Stripe3DS2FooterHeader"
+            android:enabled="false"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:text="Expand Label" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/expand_arrow"
+            style="@style/Stripe3DS2FooterChevron"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:srcCompat="@drawable/stripe_3ds2_ic_arrow"
+            android:enabled="false" />
+    </LinearLayout>
+
+
+    <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
+        android:id="@+id/expand_text"
+        style="@style/Stripe3DS2FooterText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_3ds2_information_zone_label_padding"
+        android:visibility="gone"
+        android:accessibilityLiveRegion="polite"
+        tools:text="Expand Text"
+        tools:visibility="visible" />
+
+</LinearLayout>

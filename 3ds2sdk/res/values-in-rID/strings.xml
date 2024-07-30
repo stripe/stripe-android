@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Gambar Penerbit</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Gambar Sistem Pembayaran</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Tidak</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Ya</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Batalkan</string>
+    <string name="stripe_3ds2_hzv_header_label">Checkout Aman</string>
+    <string name="stripe_3ds2_processing">Memproses\u2026</string>
+</resources>
