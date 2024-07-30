@@ -17,7 +17,6 @@ import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.ParameterDestination
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
