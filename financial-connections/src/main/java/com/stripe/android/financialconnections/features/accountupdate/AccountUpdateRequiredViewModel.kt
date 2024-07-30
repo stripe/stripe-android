@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.accountupdate
 
+import FinancialConnectionsGenericInfoScreen
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
@@ -46,11 +47,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     }
 
     private fun loadContent() {
-        suspend {
-            requireNotNull(updateRequiredContentRepository.get()?.payload)
-        }.execute {
-            copy(payload = it)
-        }
+        suspend { requireNotNull(updateRequiredContentRepository.get()?.payload) }.execute { copy(payload = it) }
     }
 
     override fun updateTopAppBar(state: AccountUpdateRequiredState): TopAppBarStateUpdate? {
@@ -61,9 +58,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val state = stateFlow.value
             val referrer = state.referrer
-            val type = requireNotNull(state.payload()?.type)
-
-            when (type) {
+            when (val type = requireNotNull(state.payload()?.type)) {
                 is AccountUpdateRequiredState.Type.Repair -> {
                     handleUnsupportedRepairAction(referrer)
                 }
@@ -142,7 +137,7 @@ internal data class AccountUpdateRequiredState(
 
     @Parcelize
     data class Payload(
-        val iconUrl: String? = null,
+        val generic: FinancialConnectionsGenericInfoScreen,
         val type: Type,
     ) : Parcelable
 

@@ -74,7 +74,8 @@ private fun NoticeSheetContent(
             is Generic -> GenericBottomSheetContent(
                 screen = content.generic,
                 onClickableTextClick = onClickableTextClick,
-                onConfirmModalClick = onConfirmModalClick
+                onPrimaryButtonClick = onConfirmModalClick,
+                onSecondaryButtonClick = {} // TODO handle secondary button clicks.
             )
         }
         onViewEffectLaunched()

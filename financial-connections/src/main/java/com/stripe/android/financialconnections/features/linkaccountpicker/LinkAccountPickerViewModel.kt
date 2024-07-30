@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
+import FinancialConnectionsGenericInfoScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -28,8 +29,8 @@ import com.stripe.android.financialconnections.features.accountupdate.AccountUpd
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -37,6 +38,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.BANK_AUTH_REPAIR
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
@@ -290,23 +292,26 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
         val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
         val drawerOnSelection = accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
-
-        if (drawerOnSelection != null) {
-            presentSheet(
-                content = NoticeSheetState.NoticeSheetContent.Generic(drawerOnSelection),
-                referrer = PANE,
-            )
-            return
-        }
-
-        val updateRequired = createUpdateRequiredContent(
+        val updateRequired: AccountUpdateRequiredState.Payload? = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
+            // Use selected account icon (not coming on the SDU response as selection is not known by backend)
+            genericContent = drawerOnSelection?.withIcon(partnerAccount.institution?.icon?.default),
             partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
         )
 
         if (updateRequired != null) {
             logUpdateRequired(updateRequired)
-            presentUpdateRequiredSheet(updateRequired, referrer = PANE)
+            presentUpdateRequiredSheet(
+                updateRequired,
+                referrer = PANE,
+            )
+            return
+        }
+        if (drawerOnSelection != null) {
+            presentSheet(
+                content = Generic(drawerOnSelection),
+                referrer = PANE,
+            )
             return
         }
 
@@ -440,11 +445,13 @@ internal data class LinkedAccount(
 private fun createUpdateRequiredContent(
     partnerAccount: PartnerAccount,
     partnerToCoreAuths: Map<String, String>?,
+    genericContent: FinancialConnectionsGenericInfoScreen?,
 ): AccountUpdateRequiredState.Payload? {
+    if (genericContent == null) return null
     return when (partnerAccount.nextPaneOnSelection) {
         BANK_AUTH_REPAIR -> {
             AccountUpdateRequiredState.Payload(
-                iconUrl = partnerAccount.institution?.icon?.default,
+                generic = genericContent,
                 type = Repair(
                     authorization = partnerAccount.authorization?.let { partnerToCoreAuths?.getValue(it) },
                 ),
@@ -452,7 +459,7 @@ private fun createUpdateRequiredContent(
         }
         PARTNER_AUTH -> {
             AccountUpdateRequiredState.Payload(
-                iconUrl = partnerAccount.institution?.icon?.default,
+                generic = genericContent,
                 type = PartnerAuth(
                     institution = partnerAccount.institution,
                 ),
@@ -463,3 +470,7 @@ private fun createUpdateRequiredContent(
         }
     }
 }
+
+private fun FinancialConnectionsGenericInfoScreen.withIcon(iconUrl: String?) = copy(
+    header = header?.copy(icon = Image(default = iconUrl)),
+)
