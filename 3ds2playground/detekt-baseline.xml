@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:MainActivity.kt$MainActivity.FakeErrorReporter${ }</ID>
+    <ID>LongMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>MagicNumber:ChallengeProgressActivity.kt$ChallengeProgressActivity$4000</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$16</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$18</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$20</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$4</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$5</ID>
+    <ID>SerialVersionUIDInSerializableClass:MainActivity.kt$MainActivity$FakeChallengeRequestExecutor : ChallengeRequestExecutorSerializable</ID>
+  </CurrentIssues>
+</SmellBaseline>

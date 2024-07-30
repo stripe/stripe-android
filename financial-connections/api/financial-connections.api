@@ -1926,6 +1926,14 @@ public final class com/stripe/android/financialconnections/repository/AttachedPa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/financialconnections/repository/CachedConsumerSession$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/CachedConsumerSession;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/repository/CachedConsumerSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/financialconnections/repository/CoreAuthorizationPendingNetworkingRepairRepository$State$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/CoreAuthorizationPendingNetworkingRepairRepository$State;

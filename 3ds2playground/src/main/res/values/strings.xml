@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Stripe 3DS2 SDK Playground</string>
+    <string name="launch_challenge">Launch Text Challenge Activity</string>
+    <string name="launch_default_custom_challenge">Launch Default Custom Text Challenge Activity</string>
+    <string name="launch_custom_challenge">Launch Custom Text Challenge Activity</string>
+    <string name="launch_single_select_challenge">Launch Single Select Challenge Activity</string>
+    <string name="launch_custom_single_select_challenge">Launch Custom Single Select Challenge Activity</string>
+    <string name="launch_multi_select_challenge">Launch Multi Select Challenge Activity</string>
+    <string name="launch_custom_multi_select_challenge">Launch Custom Multi Select Challenge Activity</string>
+    <string name="launch_oob_challenge">Launch OOB Challenge Activity</string>
+    <string name="launch_custom_oob_challenge">Launch Custom OOB Challenge Activity</string>
+    <string name="launch_html_challenge">Launch HTML Challenge Activity</string>
+    <string name="show_progress_view">Show Areq Progress View</string>
+    <string name="show_challenge_progress_view">Show Challenge Progress View</string>
+</resources>

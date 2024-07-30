@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Изображение на издателя</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Изображение на системата на плащане</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Не</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Да</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Отмяна</string>
+    <string name="stripe_3ds2_hzv_header_label">Защитено финализиране</string>
+    <string name="stripe_3ds2_processing">Обработване\u2026</string>
+</resources>

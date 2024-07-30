@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -100,11 +101,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
+            consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
             logger: Logger,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             consumersApiService = consumersApiService,
+            consumerSessionRepository = consumerSessionRepository,
             apiOptions = apiOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,

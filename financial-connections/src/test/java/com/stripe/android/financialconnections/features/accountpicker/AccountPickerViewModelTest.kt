@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.accountpicker
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
-import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
@@ -23,8 +22,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
-import com.stripe.android.model.ConsumerSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -278,7 +277,13 @@ internal class AccountPickerViewModelTest {
 
     @Test
     fun `Saves selected accounts to Link if we have a consumer session`() = runTest {
-        val consumerSession = consumerSession()
+        val consumerSession = CachedConsumerSession(
+            clientSecret = "clientSecret",
+            emailAddress = "test@test.com",
+            phoneNumber = "(***) *** **12",
+            publishableKey = null,
+            isVerified = true,
+        )
         val accounts = partnerAccountList("id_1", "id2").copy(
             nextPane = Pane.SUCCESS,
         )
@@ -339,7 +344,7 @@ internal class AccountPickerViewModelTest {
         ).thenReturn(response)
     }
 
-    private suspend fun givenGetCachedConsumerSessionReturns(response: ConsumerSession?) {
+    private suspend fun givenGetCachedConsumerSessionReturns(response: CachedConsumerSession?) {
         whenever(getCachedConsumerSession()).thenReturn(response)
     }
 }
