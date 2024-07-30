@@ -60,7 +60,7 @@ class CardInputWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+) : ComposeLifecycleOwner(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),

@@ -36,7 +36,6 @@ class LauncherActivity : AppCompatActivity() {
         private val activity: Activity
     ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
-            Item("Test Dialog", TestDialogActivity::class.java),
             Item(
                 activity.getString(R.string.payment_auth_example),
                 PaymentAuthActivity::class.java

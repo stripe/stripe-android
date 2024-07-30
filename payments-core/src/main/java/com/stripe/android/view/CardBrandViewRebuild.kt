@@ -265,7 +265,6 @@ class BrandAdapter(
                         setTextColor(colorUtils.colorPrimary)
                         typeface = Typeface.DEFAULT_BOLD
                     } else {
-                        setTextColor(colorUtils.textColorPrimary)
                         typeface = Typeface.DEFAULT
                     }
                 }

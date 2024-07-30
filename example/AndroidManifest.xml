@@ -89,7 +89,6 @@
         <activity android:name=".activity.BillieActivity"/>
         <activity android:name=".activity.SatispayActivity"/>
         <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
-        <activity android:name=".activity.TestDialogActivity"/>
     </application>
 
 </manifest>
