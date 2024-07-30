@@ -29,7 +29,6 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
@@ -46,7 +45,6 @@ internal class ManualEntryViewModel @AssistedInject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val successContentRepository: SuccessContentRepository,
-    private val consumerSessionRepository: ConsumerSessionRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
