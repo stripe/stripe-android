@@ -597,7 +597,7 @@ internal class IntentConfirmationHandler(
                         stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
                         hostActivityLauncher = hostActivityLauncher,
                         statusBarColor = statusBarColor(),
-                        includePaymentSheetAuthenticators = true,
+                        includePaymentSheetNextHandlers = true,
                     )
                 },
                 intentConfirmationInterceptor = intentConfirmationInterceptor,

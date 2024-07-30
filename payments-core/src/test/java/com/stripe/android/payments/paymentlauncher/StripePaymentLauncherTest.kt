@@ -20,7 +20,7 @@ class StripePaymentLauncherTest {
         hostActivityLauncher = mockHostActivityLauncher,
         enableLogging = false,
         productUsage = mock(),
-        includePaymentSheetAuthenticators = false,
+        includePaymentSheetNextHandlers = false,
         statusBarColor = Color.RED,
     )
 
