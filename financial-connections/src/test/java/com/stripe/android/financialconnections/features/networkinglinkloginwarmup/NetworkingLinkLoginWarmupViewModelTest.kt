@@ -77,7 +77,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val referrer = Pane.CONSENT
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState(referrer))
 
-        whenever(disableNetworking()).thenReturn(
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
             ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
@@ -102,7 +102,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
             )
         )
 
-        whenever(disableNetworking()).thenReturn(
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
             ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
@@ -115,13 +115,13 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
         val expectedNextPane = Pane.INSTITUTION_PICKER
 
-        whenever(disableNetworking()).thenReturn(
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
             ApiKeyFixtures.sessionManifest().copy(nextPane = expectedNextPane)
         )
 
         viewModel.onSecondaryButtonClicked()
 
-        verify(disableNetworking).invoke()
+        verify(disableNetworking).invoke(clientSuggestedNextPaneOnDisableNetworking = null)
         navigationManager.assertNavigatedTo(
             destination = expectedNextPane.destination,
             popUpTo = PopUpToBehavior.Current(inclusive = true),
