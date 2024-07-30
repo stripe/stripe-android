@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -343,6 +344,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        viewModelScope.launch {
+            intentConfirmationHandler.state.collectLatest { state ->
+                when (state) {
+                    is IntentConfirmationHandler.State.Idle -> Unit
+                    is IntentConfirmationHandler.State.Confirming -> startProcessing(checkoutIdentifier)
+                    is IntentConfirmationHandler.State.Complete -> processIntentResult(state.result)
+                }
+            }
+        }
     }
 
     fun setupGooglePay(
@@ -386,9 +397,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
     ) {
-        startProcessing(identifier)
-
         if (paymentSelection is PaymentSelection.GooglePay) {
+            startProcessing(identifier)
+
             paymentMethodMetadata.value?.stripeIntent?.let { stripeIntent ->
                 googlePayPaymentMethodLauncher?.present(
                     currencyCode = (stripeIntent as? PaymentIntent)?.currency
@@ -402,6 +413,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         } else {
+            this.checkoutIdentifier = identifier
+
             confirmPaymentSelection(paymentSelection)
         }
     }
@@ -482,10 +495,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     appearance = config.appearance,
                 ),
             )
-
-            val result = intentConfirmationHandler.awaitIntentResult()
-
-            processIntentResult(result)
         }
     }
 

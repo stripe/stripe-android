@@ -34,9 +34,13 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.lang.IllegalStateException
@@ -81,18 +85,21 @@ internal class IntentConfirmationHandler(
      */
     val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
 
-    private var completableResult: CompletableDeferred<Result>? = if (hasReloadedFromProcessDeath) {
-        CompletableDeferred()
-    } else {
-        null
-    }
+    private val _state = MutableStateFlow(
+        if (hasReloadedFromProcessDeath) {
+            State.Confirming
+        } else {
+            State.Idle
+        }
+    )
+    val state: StateFlow<State> = _state.asStateFlow()
 
     init {
         if (hasReloadedWhileAwaitingConfirm) {
             coroutineScope.launch {
                 delay(1.seconds)
 
-                if (completableResult?.isActive == true) {
+                if (_state.value == State.Confirming) {
                     onIntentResult(Result.Canceled(action = CancellationAction.None))
                 }
             }
@@ -148,12 +155,12 @@ internal class IntentConfirmationHandler(
     fun start(
         arguments: Args,
     ) {
-        if (completableResult?.isActive == true) {
+        if (_state.value == State.Confirming) {
             return
         }
 
+        _state.value = State.Confirming
         currentArguments = arguments
-        completableResult = CompletableDeferred()
 
         coroutineScope.launch {
             preconfirm(arguments)
@@ -167,7 +174,15 @@ internal class IntentConfirmationHandler(
      * @return result of intent confirmation process or null if not started.
      */
     suspend fun awaitIntentResult(): Result? {
-        return completableResult?.await()
+        return when (val state = _state.value) {
+            is State.Idle -> null
+            is State.Complete -> state.result
+            is State.Confirming -> {
+                val complete = _state.firstInstanceOf<State.Complete>()
+
+                complete.result
+            }
+        }
     }
 
     private suspend fun preconfirm(
@@ -402,7 +417,7 @@ internal class IntentConfirmationHandler(
         deferredIntentConfirmationType = null
         currentArguments = null
 
-        completableResult?.complete(result)
+        _state.value = State.Complete(result)
 
         removeIsAwaitingForPaymentResult()
         removeIsAwaitingForPreConfirmResult()
@@ -447,6 +462,12 @@ internal class IntentConfirmationHandler(
         return savedStateHandle.get<Boolean>(AWAITING_PAYMENT_RESULT_KEY) ?: false
     }
 
+    private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {
+        return first {
+            it is T
+        } as T
+    }
+
     @Parcelize
     internal data class Args(
         val initializationMode: PaymentSheet.InitializationMode,
@@ -455,6 +476,30 @@ internal class IntentConfirmationHandler(
         val intent: StripeIntent,
         val confirmationOption: PaymentConfirmationOption?
     ) : Parcelable
+
+    /**
+     * Defines the state types that [IntentConfirmationHandler] can be in with regards to payment confirmation.
+     */
+    sealed interface State {
+        /**
+         * Indicates that the handler is currently idle. This is normally the initial state of the handler unless the
+         * handler is reloaded after being destroyed by process death while confirming an intent.
+         */
+        data object Idle : State
+
+        /**
+         * Indicates the the handler is currently confirming a payment.
+         */
+        data object Confirming : State
+
+        /**
+         * Indicates that the handler has completed confirming a payment and contains a [Result] regarding
+         * the confirmation process final result.
+         */
+        data class Complete(
+            val result: Result,
+        ) : State
+    }
 
     /**
      * Defines the result types that [IntentConfirmationHandler] can return after completing the confirmation process.

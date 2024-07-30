@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -66,6 +67,7 @@ import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.parcelize.Parcelize
@@ -124,7 +126,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val intentConfirmationHandler = IntentConfirmationHandler.Factory(
         intentConfirmationInterceptor = intentConfirmationInterceptor,
         paymentConfigurationProvider = lazyPaymentConfiguration,
-        statusBarColor = statusBarColor,
+        statusBarColor = { null },
         savedStateHandle = viewModel.handle,
         bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
@@ -200,11 +202,13 @@ internal class DefaultFlowController @Inject internal constructor(
             }
         )
 
-        viewModelScope.launch {
-            val result = intentConfirmationHandler.awaitIntentResult()
-
-            result?.let {
-                onIntentResult(result)
+        lifecycleOwner.lifecycleScope.launch {
+            intentConfirmationHandler.state.collectLatest { state ->
+                when (state) {
+                    is IntentConfirmationHandler.State.Idle,
+                    is IntentConfirmationHandler.State.Confirming -> Unit
+                    is IntentConfirmationHandler.State.Complete -> onIntentResult(state.result)
+                }
             }
         }
     }
@@ -403,10 +407,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     appearance = state.config.appearance,
                 )
             )
-
-            intentConfirmationHandler.awaitIntentResult()?.let { result ->
-                onIntentResult(result)
-            }
         }
     }
 
