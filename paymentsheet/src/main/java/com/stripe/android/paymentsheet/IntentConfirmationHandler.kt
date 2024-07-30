@@ -12,8 +12,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -43,8 +48,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import java.lang.IllegalStateException
 import javax.inject.Provider
+import kotlin.IllegalStateException
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -55,14 +60,24 @@ internal class IntentConfirmationHandler(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
     private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
+    private val logger: Logger,
 ) {
     private var paymentLauncher: PaymentLauncher? = null
     private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
+    private var googlePayPaymentMethodLauncher:
+        ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
+
+    private var contentVisible: Boolean
+        get() = savedStateHandle[CONTENT_VISIBLE_KEY] ?: true
+        set(value) {
+            savedStateHandle[CONTENT_VISIBLE_KEY] = value
+        }
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
         get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
@@ -87,7 +102,7 @@ internal class IntentConfirmationHandler(
 
     private val _state = MutableStateFlow(
         if (hasReloadedFromProcessDeath) {
-            State.Confirming
+            State.Confirming(contentVisible)
         } else {
             State.Idle
         }
@@ -99,7 +114,7 @@ internal class IntentConfirmationHandler(
             coroutineScope.launch {
                 delay(1.seconds)
 
-                if (_state.value == State.Confirming) {
+                if (_state.value is State.Confirming) {
                     onIntentResult(Result.Canceled(action = CancellationAction.None))
                 }
             }
@@ -132,12 +147,18 @@ internal class IntentConfirmationHandler(
 
         bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(bacsActivityResultLauncher)
 
+        googlePayPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
+            GooglePayPaymentMethodLauncherContractV2(),
+            ::onGooglePayResult
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher = null
                     externalPaymentMethodLauncher = null
                     bacsMandateConfirmationLauncher = null
+                    googlePayPaymentMethodLauncher = null
                     bacsActivityResultLauncher.unregister()
                     super.onDestroy(owner)
                 }
@@ -155,11 +176,11 @@ internal class IntentConfirmationHandler(
     fun start(
         arguments: Args,
     ) {
-        if (_state.value == State.Confirming) {
+        if (_state.value is State.Confirming) {
             return
         }
 
-        _state.value = State.Confirming
+        _state.value = State.Confirming(contentVisible = true)
         currentArguments = arguments
 
         coroutineScope.launch {
@@ -190,7 +211,14 @@ internal class IntentConfirmationHandler(
     ) {
         val confirmationOption = arguments.confirmationOption
 
-        if (
+        if (confirmationOption is PaymentConfirmationOption.GooglePay) {
+            storeIsAwaitingForPreConfirmResult()
+
+            launchGooglePay(
+                googlePay = confirmationOption,
+                arguments = arguments,
+            )
+        } else if (
             confirmationOption is PaymentConfirmationOption.New &&
             confirmationOption.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
         ) {
@@ -313,6 +341,75 @@ internal class IntentConfirmationHandler(
         )
     }
 
+    private fun launchGooglePay(
+        googlePay: PaymentConfirmationOption.GooglePay,
+        arguments: Args,
+    ) {
+        if (googlePay.config.merchantCurrencyCode == null && !arguments.initializationMode.isProcessingPayment) {
+            val message = "GooglePayConfig.currencyCode is required in order to use " +
+                "Google Pay when processing a Setup Intent"
+
+            logger.warning(message)
+
+            onIntentResult(
+                Result.Failed(
+                    cause = IllegalStateException(message),
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    type = ErrorType.Internal,
+                )
+            )
+
+            return
+        }
+
+        _state.value = State.Confirming(contentVisible = false)
+
+        runCatching {
+            requireNotNull(googlePayPaymentMethodLauncher)
+        }.onSuccess { activityLauncher ->
+            val config = googlePay.config
+
+            val launcher = googlePayPaymentMethodLauncherFactory.create(
+                lifecycleScope = coroutineScope,
+                config = GooglePayPaymentMethodLauncher.Config(
+                    environment = when (config.environment) {
+                        PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                        else -> GooglePayEnvironment.Test
+                    },
+                    merchantCountryCode = config.merchantCountryCode,
+                    merchantName = config.merchantName,
+                    isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
+                    billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                ),
+                readyCallback = {
+                    // Do nothing since we are skipping the ready check below
+                },
+                activityResultLauncher = activityLauncher,
+                skipReadyCheck = true
+            )
+
+            val intent = arguments.intent
+            launcher.present(
+                currencyCode = intent.asPaymentIntent()?.currency
+                    ?: config.merchantCurrencyCode.orEmpty(),
+                amount = when (intent) {
+                    is PaymentIntent -> intent.amount ?: 0L
+                    is SetupIntent -> config.customAmount ?: 0L
+                },
+                transactionId = intent.id,
+                label = config.customLabel,
+            )
+        }.onFailure { cause ->
+            onIntentResult(
+                Result.Failed(
+                    cause = cause,
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    type = ErrorType.Internal
+                )
+            )
+        }
+    }
+
     private fun launchBacsMandate(
         confirmationOption: PaymentConfirmationOption.New,
         appearance: PaymentSheet.Appearance,
@@ -413,6 +510,45 @@ internal class IntentConfirmationHandler(
         onIntentResult(intentResult)
     }
 
+    private fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            when (result) {
+                is GooglePayPaymentMethodLauncher.Result.Completed -> {
+                    currentArguments?.let { arguments ->
+                        _state.value = State.Confirming(contentVisible = true)
+
+                        val confirmationOption = PaymentConfirmationOption.Saved(
+                            paymentMethod = result.paymentMethod,
+                            optionsParams = null,
+                        )
+
+                        confirm(
+                            arguments.copy(
+                                confirmationOption = confirmationOption,
+                            )
+                        )
+                    }
+                }
+                is GooglePayPaymentMethodLauncher.Result.Failed -> {
+                    onIntentResult(
+                        Result.Failed(
+                            cause = result.error,
+                            message = when (result.errorCode) {
+                                GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                                    com.stripe.android.R.string.stripe_failure_connection_error.resolvableString
+                                else -> com.stripe.android.R.string.stripe_internal_error.resolvableString
+                            },
+                            type = ErrorType.GooglePay(result.errorCode),
+                        )
+                    )
+                }
+                is GooglePayPaymentMethodLauncher.Result.Canceled -> {
+                    onIntentResult(Result.Canceled(action = CancellationAction.InformCancellation))
+                }
+            }
+        }
+    }
+
     private fun onIntentResult(result: Result) {
         deferredIntentConfirmationType = null
         currentArguments = null
@@ -462,11 +598,24 @@ internal class IntentConfirmationHandler(
         return savedStateHandle.get<Boolean>(AWAITING_PAYMENT_RESULT_KEY) ?: false
     }
 
+    private fun StripeIntent.asPaymentIntent(): PaymentIntent? {
+        return this as? PaymentIntent
+    }
+
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {
         return first {
             it is T
         } as T
     }
+
+    private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
+        get() = when (this) {
+            is PaymentSheet.InitializationMode.PaymentIntent -> true
+            is PaymentSheet.InitializationMode.SetupIntent -> false
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+            }
+        }
 
     @Parcelize
     internal data class Args(
@@ -490,7 +639,9 @@ internal class IntentConfirmationHandler(
         /**
          * Indicates the the handler is currently confirming a payment.
          */
-        data object Confirming : State
+        data class Confirming(
+            val contentVisible: Boolean,
+        ) : State
 
         /**
          * Indicates that the handler has completed confirming a payment and contains a [Result] regarding
@@ -556,26 +707,31 @@ internal class IntentConfirmationHandler(
     /**
      * Types of errors that can occur when confirming an intent.
      */
-    enum class ErrorType {
+    sealed interface ErrorType {
         /**
          * Fatal confirmation error that occurred while confirming a payment. This should never happen.
          */
-        Fatal,
+        data object Fatal : ErrorType
 
         /**
          * Indicates an error when processing a payment during the confirmation process.
          */
-        Payment,
+        data object Payment : ErrorType
 
         /**
          * Indicates an internal process error occurred during the confirmation process.
          */
-        Internal,
+        data object Internal : ErrorType
 
         /**
          * Indicates an error occurred when confirming with external payment methods
          */
-        ExternalPaymentMethod,
+        data object ExternalPaymentMethod : ErrorType
+
+        /**
+         * Indicates an error occurred when confirming with Google Pay
+         */
+        data class GooglePay(val errorCode: Int) : ErrorType
     }
 
     class Factory(
@@ -583,14 +739,17 @@ internal class IntentConfirmationHandler(
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
         private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
+        private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val application: Application,
         private val errorReporter: ErrorReporter,
+        private val logger: Logger,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                 paymentLauncherFactory = { hostActivityLauncher ->
                     stripePaymentLauncherAssistedFactory.create(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },
@@ -605,6 +764,7 @@ internal class IntentConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
+                logger = logger,
             )
         }
     }
@@ -614,5 +774,6 @@ internal class IntentConfirmationHandler(
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
         private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
         private const val ARGUMENTS_KEY = "IntentConfirmationArguments"
+        private const val CONTENT_VISIBLE_KEY = "ContentVisibleDuringIntentConfirmation"
     }
 }

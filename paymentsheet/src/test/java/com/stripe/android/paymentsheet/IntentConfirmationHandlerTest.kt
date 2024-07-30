@@ -9,8 +9,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -43,7 +48,9 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
@@ -143,7 +150,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             ensureAllEventsConsumed()
         }
@@ -484,7 +491,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
@@ -524,7 +531,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
 
@@ -563,7 +570,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             val cause = IllegalStateException("This is a failure!")
 
@@ -662,6 +669,23 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
+    fun `On start Google Pay, should store 'AwaitingPreConfirmResult' in 'SavedStateHandle'`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            savedStateHandle = savedStateHandle,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                confirmationOption = GOOGLE_PAY_OPTION,
+            ),
+        )
+
+        assertThat(savedStateHandle.get<Boolean>("AwaitingPreConfirmResult")).isTrue()
+    }
+
+    @Test
     fun `On init with 'SavedStateHandle' awaiting payment result, should timeout & cancel after 1 second`() = runTest {
         val dispatcher = StandardTestDispatcher()
 
@@ -675,7 +699,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             dispatcher.scheduler.advanceTimeBy(delayTime = 1.01.seconds)
 
@@ -719,7 +743,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             dispatcher.scheduler.advanceTimeBy(delayTime = 200.seconds)
 
@@ -830,7 +854,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
@@ -951,7 +975,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             epmsCallbackHandler.onResult(PaymentResult.Completed)
 
@@ -988,7 +1012,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             val exception = APIException()
 
@@ -1028,7 +1052,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             epmsCallbackHandler.onResult(PaymentResult.Canceled)
 
@@ -1224,7 +1248,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.ModifyDetails)
 
@@ -1267,7 +1291,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
 
             bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Cancelled)
 
@@ -1284,11 +1308,269 @@ class IntentConfirmationHandlerTest {
         }
     }
 
+    @Test
+    fun `On start Google Pay with no currency and setup intent, should fail`() = runTest {
+        val intentConfirmationHandler = createIntentConfirmationHandler()
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                    clientSecret = "si_123_secret_123",
+                ),
+                confirmationOption = GOOGLE_PAY_OPTION.copy(
+                    config = GOOGLE_PAY_OPTION.config.copy(
+                        merchantCurrencyCode = null,
+                    )
+                ),
+            ),
+        )
+
+        val result = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(result.cause.message).isEqualTo(
+            "GooglePayConfig.currencyCode is required in order to use " +
+                "Google Pay when processing a Setup Intent"
+        )
+        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.Internal)
+        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+    }
+
+    @Test
+    fun `On start Google Pay with PI, should create and launch Google Pay launcher properly`() = runTest {
+        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
+            on { create(any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                intent = paymentIntent,
+                confirmationOption = GOOGLE_PAY_OPTION.copy(
+                    config = GOOGLE_PAY_OPTION.config.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                        )
+                    )
+                ),
+            ),
+        )
+
+        verify(googlePayPaymentMethodLauncherFactory).create(
+            lifecycleScope = any(),
+            config = eq(
+                GooglePayPaymentMethodLauncher.Config(
+                    environment = GooglePayEnvironment.Production,
+                    merchantName = "Merchant, Inc.",
+                    merchantCountryCode = "US",
+                    isEmailRequired = true,
+                    billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                        isRequired = true,
+                        format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                        isPhoneNumberRequired = true,
+                    )
+                )
+            ),
+            readyCallback = any(),
+            activityResultLauncher = any(),
+            skipReadyCheck = eq(true)
+        )
+
+        verify(googlePayPaymentMethodLauncher).present(
+            currencyCode = paymentIntent.currency!!,
+            amount = paymentIntent.amount!!,
+            label = "Merchant Payments",
+            transactionId = paymentIntent.id
+        )
+    }
+
+    @Test
+    fun `On start Google Pay with SI, should create and launch Google Pay launcher properly`() = runTest {
+        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+        val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
+            on { create(any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory
+        )
+
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS.copy(
+                intent = setupIntent,
+                confirmationOption = GOOGLE_PAY_OPTION,
+            ),
+        )
+
+        verify(googlePayPaymentMethodLauncherFactory).create(
+            lifecycleScope = any(),
+            config = eq(
+                GooglePayPaymentMethodLauncher.Config(
+                    environment = GooglePayEnvironment.Production,
+                    merchantName = "Merchant, Inc.",
+                    merchantCountryCode = "US",
+                    isEmailRequired = false,
+                    billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig()
+                )
+            ),
+            readyCallback = any(),
+            activityResultLauncher = any(),
+            skipReadyCheck = eq(true)
+        )
+
+        verify(googlePayPaymentMethodLauncher).present(
+            currencyCode = "USD",
+            amount = 5000,
+            label = "Merchant Payments",
+            transactionId = setupIntent.id
+        )
+    }
+
+    @Test
+    fun `On Google Pay cancel, should return expected result`() = runTest {
+        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
+        val intentConfirmationHandler = createIntentConfirmationHandler().apply {
+            registerWithCallbacks(
+                googlePayCallbackHandler = googlePayCallbackHandler,
+            )
+        }
+
+        intentConfirmationHandler.state.test {
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
+
+            intentConfirmationHandler.start(
+                arguments = DEFAULT_ARGUMENTS.copy(
+                    confirmationOption = GOOGLE_PAY_OPTION
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = false))
+
+            googlePayCallbackHandler.onResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+            val expectedResult = IntentConfirmationHandler.Result.Canceled(
+                action = IntentConfirmationHandler.CancellationAction.InformCancellation,
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Complete(expectedResult))
+            assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `On Google Pay failed, should return expected result`() = runTest {
+        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
+        val intentConfirmationHandler = createIntentConfirmationHandler().apply {
+            registerWithCallbacks(
+                googlePayCallbackHandler = googlePayCallbackHandler,
+            )
+        }
+
+        intentConfirmationHandler.state.test {
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
+
+            intentConfirmationHandler.start(
+                arguments = DEFAULT_ARGUMENTS.copy(
+                    confirmationOption = GOOGLE_PAY_OPTION
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = false))
+
+            val exception = IllegalStateException("Failed!")
+
+            googlePayCallbackHandler.onResult(
+                GooglePayPaymentMethodLauncher.Result.Failed(
+                    error = exception,
+                    errorCode = 127,
+                )
+            )
+
+            val expectedResult = IntentConfirmationHandler.Result.Failed(
+                cause = exception,
+                message = com.stripe.android.R.string.stripe_internal_error.resolvableString,
+                type = IntentConfirmationHandler.ErrorType.GooglePay(127),
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Complete(expectedResult))
+            assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `On Google Pay succeeded, should proceed to intent confirmation`() = runTest {
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
+        ).apply {
+            registerWithCallbacks(
+                googlePayCallbackHandler = googlePayCallbackHandler,
+            )
+        }
+
+        intentConfirmationHandler.state.test {
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
+
+            intentConfirmationHandler.start(
+                arguments = DEFAULT_ARGUMENTS.copy(
+                    confirmationOption = GOOGLE_PAY_OPTION
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = false))
+
+            googlePayCallbackHandler.onResult(
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                )
+            )
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(contentVisible = true))
+
+            val call = intentConfirmationInterceptor.calls.awaitItem()
+
+            assertThat(call).isEqualTo(
+                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = "pi_456_secret_456"
+                    ),
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    paymentMethodOptionsParams = null,
+                    shippingValues = null,
+                )
+            )
+        }
+    }
+
     private fun createIntentConfirmationHandler(
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
         bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher(),
+        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory =
+            object : GooglePayPaymentMethodLauncherFactory {
+                override fun create(
+                    lifecycleScope: CoroutineScope,
+                    config: GooglePayPaymentMethodLauncher.Config,
+                    readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                    activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                    skipReadyCheck: Boolean
+                ): GooglePayPaymentMethodLauncher = mock()
+            },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        logger: Logger = Logger.noop(),
         shouldRegister: Boolean = true,
         coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
     ): IntentConfirmationHandler {
@@ -1296,10 +1578,12 @@ class IntentConfirmationHandlerTest {
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = { paymentLauncher },
             bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
+            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             context = ApplicationProvider.getApplicationContext(),
             coroutineScope = coroutineScope,
             errorReporter = FakeErrorReporter(),
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            logger = logger,
         ).apply {
             if (shouldRegister) {
                 registerWithCallbacks()
@@ -1329,6 +1613,8 @@ class IntentConfirmationHandlerTest {
         externalPaymentMethodsCallbackHandler: FakeResultHandler<PaymentResult> =
             FakeResultHandler(),
         bacsMandateConfirmationCallbackHandler: FakeResultHandler<BacsMandateConfirmationResult> =
+            FakeResultHandler(),
+        googlePayCallbackHandler: FakeResultHandler<GooglePayPaymentMethodLauncher.Result> =
             FakeResultHandler()
     ) {
         register(
@@ -1352,6 +1638,10 @@ class IntentConfirmationHandlerTest {
 
                 bacsMandateConfirmationCallbackHandler.register {
                     captor.thirdValue.onActivityResult(it)
+                }
+
+                googlePayCallbackHandler.register {
+                    captor.allValues[3].onActivityResult(it)
                 }
             },
             lifecycleOwner = TestLifecycleOwner(),
@@ -1398,6 +1688,18 @@ class IntentConfirmationHandlerTest {
         val EXTERNAL_PAYMENT_METHOD = PaymentConfirmationOption.ExternalPaymentMethod(
             type = "paypal",
             billingDetails = null
+        )
+
+        val GOOGLE_PAY_OPTION = PaymentConfirmationOption.GooglePay(
+            config = PaymentConfirmationOption.GooglePay.Config(
+                environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                merchantName = "Merchant, Inc.",
+                merchantCurrencyCode = "USD",
+                merchantCountryCode = "US",
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                customAmount = 5000,
+                customLabel = "Merchant Payments"
+            )
         )
 
         /**
