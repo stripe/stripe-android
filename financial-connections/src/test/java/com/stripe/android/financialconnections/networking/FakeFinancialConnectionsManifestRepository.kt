@@ -83,7 +83,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }

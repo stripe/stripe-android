@@ -21,7 +21,9 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -118,11 +120,16 @@ internal class ConsentViewModel @AssistedInject constructor(
                 },
                 // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
                 ConsentClickableText.MANUAL_ENTRY.value to {
-                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                    navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
                 },
                 // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
                 ConsentClickableText.LINK_LOGIN_WARMUP.value to {
-                    navigationManager.tryNavigateTo(Destination.NetworkingLinkLoginWarmup(referrer = Pane.CONSENT))
+                    navigationManager.tryNavigateTo(
+                        NetworkingLinkLoginWarmup(
+                            referrer = Pane.CONSENT,
+                            extraArgs = mapOf(KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta)
+                        )
+                    )
                 },
             )
         )

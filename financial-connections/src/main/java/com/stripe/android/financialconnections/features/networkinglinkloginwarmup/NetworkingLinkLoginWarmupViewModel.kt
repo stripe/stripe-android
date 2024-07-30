@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
@@ -101,7 +102,9 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private fun skipNetworking() {
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
-            disableNetworking().also {
+            disableNetworking(
+                clientSuggestedNextPaneOnDisableNetworking = stateFlow.value.nextPaneOnDisableNetworking
+            ).also {
                 val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
                     route = it.nextPane.destination(referrer = PANE),
@@ -153,6 +156,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
 internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
+    val nextPaneOnDisableNetworking: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val isInstantDebits: Boolean = false,
@@ -170,6 +174,7 @@ internal data class NetworkingLinkLoginWarmupState(
         state: FinancialConnectionsSheetNativeState,
     ) : this(
         referrer = Destination.referrer(args),
+        nextPaneOnDisableNetworking = args?.getString(KEY_NEXT_PANE_ON_DISABLE_NETWORKING),
         payload = Uninitialized,
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = state.isLinkWithStripe,
