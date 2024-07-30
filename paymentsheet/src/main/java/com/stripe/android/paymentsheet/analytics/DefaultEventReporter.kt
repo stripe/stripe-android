@@ -56,6 +56,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkEnabled: Boolean,
         googlePaySupported: Boolean,
         currency: String?,
+        initializationMode: PaymentSheet.InitializationMode,
+        orderedLpms: List<String>,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -72,6 +74,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                initializationMode = initializationMode,
+                orderedLpms = orderedLpms,
             )
         )
     }

@@ -1948,6 +1948,7 @@ internal class StripeApiRepositoryTest {
                 consumerSessionClientSecret = clientSecret,
                 id = id,
                 requestOptions = DEFAULT_OPTIONS,
+                extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123")))
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1960,6 +1961,11 @@ internal class StripeApiRepositoryTest {
                 }
                 assertThat(this["id"]).isEqualTo(id)
                 assertThat(this["payment_user_agent"].toString()).startsWith("stripe-android/")
+                withNestedParams("payment_method_options") {
+                    withNestedParams("card") {
+                        assertThat(this["cvc"]).isEqualTo("123")
+                    }
+                }
             }
         }
 

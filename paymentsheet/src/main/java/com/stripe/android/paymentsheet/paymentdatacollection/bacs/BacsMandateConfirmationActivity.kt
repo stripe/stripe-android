@@ -21,7 +21,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class BacsMandateConfirmationActivity : AppCompatActivity() {
@@ -72,15 +71,15 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                 state = PaymentSheetTopBarState(
                                     icon = R.drawable.stripe_ic_paymentsheet_close,
                                     contentDescription = StripeUiCoreR.string.stripe_back,
-                                    isEnabled = true,
                                     showEditMenu = false,
                                     showTestModeLabel = false,
-                                    editMenuLabel = StripeR.string.stripe_edit
+                                    isEditing = false,
+                                    onEditIconPressed = {},
                                 ),
+                                isEnabled = true,
                                 handleBackPressed = {
                                     viewModel.handleViewAction(OnBackPressed)
                                 },
-                                toggleEditing = {},
                             )
                         },
                         content = {

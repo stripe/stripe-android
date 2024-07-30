@@ -35,6 +35,8 @@ internal interface EditPaymentMethodViewInteractor {
 }
 
 internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethodViewInteractor {
+    val isLiveMode: Boolean
+
     fun close()
 
     interface Factory {
@@ -43,19 +45,21 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
 
 internal class DefaultEditPaymentMethodViewInteractor(
     initialPaymentMethod: PaymentMethod,
-    displayName: String,
+    displayName: ResolvableString,
     private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
+    override val isLiveMode: Boolean,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : ModifiableEditPaymentMethodViewInteractor {
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
@@ -194,8 +198,9 @@ internal class DefaultEditPaymentMethodViewInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -204,6 +209,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 updateExecutor = updateExecutor,
                 displayName = displayName,
                 canRemove = canRemove,
+                isLiveMode = isLiveMode,
             )
         }
     }

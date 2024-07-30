@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
@@ -17,7 +18,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
@@ -43,7 +43,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -69,7 +68,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Returns confirm as next step if invoked with client secret for new payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -99,9 +97,9 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-                paymentSelection = PaymentSelection.Saved(
+                confirmationOption = PaymentConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                    optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
@@ -124,7 +122,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -155,7 +152,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if invoked without a confirm callback for new payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -192,7 +188,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -216,7 +211,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = apiException,
-                message = "Something went wrong",
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         )
     }
@@ -232,7 +227,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -259,7 +253,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = apiException,
-                message = "Something went wrong",
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         )
     }
@@ -267,7 +261,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if callback returns failure with custom error message`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -288,7 +281,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = TestException("that didn't work…"),
-                message = "that didn't work…",
+                message = resolvableString("that didn't work…"),
             )
         )
     }
@@ -296,7 +289,6 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if callback returns failure without custom error message`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -315,7 +307,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = TestException(),
-                message = "Something went wrong",
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         )
     }
@@ -325,7 +317,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -368,7 +359,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -409,7 +399,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -455,7 +444,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val observedValues = mutableListOf<Boolean>()
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -505,7 +493,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val stripeRepository = mock<StripeRepository>()
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -543,7 +530,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val clientSecret = "pi_1234_secret_4321"
 
         val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
@@ -600,7 +586,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
     private fun createIntentConfirmationInterceptor(): DefaultIntentConfirmationInterceptor {
         return DefaultIntentConfirmationInterceptor(
-            context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },

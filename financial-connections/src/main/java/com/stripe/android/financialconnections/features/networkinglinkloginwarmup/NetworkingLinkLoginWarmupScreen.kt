@@ -48,7 +48,7 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen(
-    backStackEntry: NavBackStackEntry,
+    backStackEntry: NavBackStackEntry
 ) {
     val viewModel: NetworkingLinkLoginWarmupViewModel = paneViewModel {
         NetworkingLinkLoginWarmupViewModel.factory(it, backStackEntry.arguments)
@@ -56,7 +56,7 @@ internal fun NetworkingLinkLoginWarmupScreen(
     val state by viewModel.stateFlow.collectAsState()
     NetworkingLinkLoginWarmupContent(
         state = state,
-        onSkipClicked = viewModel::onSkipClicked,
+        onSkipClicked = viewModel::onSecondaryButtonClicked,
         onContinueClick = viewModel::onContinueClick,
     )
 }
@@ -82,8 +82,9 @@ private fun NetworkingLinkLoginWarmupContent(
         footer = {
             Footer(
                 loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+                secondaryButtonLabel = state.secondaryButtonLabel,
                 onContinueClick = onContinueClick,
-                onSkipClicked = onSkipClicked
+                onSkipClicked = onSkipClicked,
             )
         }
     )
@@ -113,6 +114,7 @@ private fun HeaderSection() {
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
     loading: Boolean,
+    secondaryButtonLabel: Int,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
@@ -140,7 +142,7 @@ private fun Footer(
                 .testTag("skip-button")
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.stripe_networking_link_login_warmup_cta_skip))
+            Text(text = stringResource(id = secondaryButtonLabel))
         }
     }
 }

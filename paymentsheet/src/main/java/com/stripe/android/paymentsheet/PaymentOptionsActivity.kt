@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
@@ -70,7 +69,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     state = bottomSheetState,
                     onDismissed = viewModel::onUserCancel,
                 ) {
-                    PaymentSheetScreen(viewModel, type = Custom)
+                    PaymentSheetScreen(viewModel)
                 }
             }
         }

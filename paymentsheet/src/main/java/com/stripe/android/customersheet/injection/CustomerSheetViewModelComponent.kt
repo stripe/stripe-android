@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -32,6 +33,9 @@ internal interface CustomerSheetViewModelComponent {
 
         @BindsInstance
         fun statusBarColor(statusBarColor: Int?): Builder
+
+        @BindsInstance
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         fun build(): CustomerSheetViewModelComponent
     }

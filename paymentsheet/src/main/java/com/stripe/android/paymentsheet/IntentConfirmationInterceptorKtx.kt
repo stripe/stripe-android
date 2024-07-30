@@ -2,45 +2,45 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
 internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
-    paymentSelection: PaymentSelection?,
+    confirmationOption: PaymentConfirmationOption?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
     context: Context,
 ): IntentConfirmationInterceptor.NextStep {
-    return when (paymentSelection) {
-        is PaymentSelection.New -> {
+    return when (confirmationOption) {
+        is PaymentConfirmationOption.New -> {
             intercept(
                 initializationMode = initializationMode,
-                paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
-                paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                paymentMethodOptionsParams = confirmationOption.optionsParams,
+                paymentMethodCreateParams = confirmationOption.createParams,
                 shippingValues = shippingValues,
-                customerRequestedSave = paymentSelection.customerRequestedSave == CustomerRequestedSave.RequestReuse,
+                customerRequestedSave = confirmationOption.shouldSave,
             )
         }
-        is PaymentSelection.Saved -> {
+        is PaymentConfirmationOption.Saved -> {
             intercept(
                 initializationMode = initializationMode,
-                paymentMethod = paymentSelection.paymentMethod,
-                paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
+                paymentMethod = confirmationOption.paymentMethod,
+                paymentMethodOptionsParams = confirmationOption.optionsParams,
                 shippingValues = shippingValues,
             )
         }
         null -> {
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = IllegalStateException("Nothing selected."),
-                message = context.getString(R.string.stripe_something_went_wrong),
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         }
         else -> {
-            val exception =
-                IllegalStateException("Attempting to confirm intent for invalid payment selection: $paymentSelection")
+            val exception = IllegalStateException(
+                "Attempting to confirm intent for invalid confirmation option: $confirmationOption"
+            )
             val errorReporter = ErrorReporter.createFallbackInstance(context)
             errorReporter.report(
                 errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION,
@@ -48,7 +48,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
             )
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = exception,
-                message = context.getString(R.string.stripe_something_went_wrong),
+                message = resolvableString(R.string.stripe_something_went_wrong),
             )
         }
     }

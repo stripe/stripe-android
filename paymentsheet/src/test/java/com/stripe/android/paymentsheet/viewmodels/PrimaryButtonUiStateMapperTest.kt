@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -27,7 +29,7 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `Chooses custom button over default one`() = runTest {
         val usBankButton = PrimaryButton.UIState(
-            label = resolvableString("US Bank Account FTW"),
+            label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
             lockVisible = true,
@@ -319,6 +321,68 @@ class PrimaryButtonUiStateMapperTest {
 
         result.test {
             assertThat(awaitItem()?.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Formats currency correctly based on per app localization`() = runTest {
+        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags("fr")
+        AppCompatDelegate.setApplicationLocales(appLocale)
+
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            assertThat(
+                awaitItem()?.label
+            ).isEqualTo(
+                resolvableString(
+                    id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("12,34 \$US")
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Formats currency correctly with no per app localization`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+        assertThat(AppCompatDelegate.getApplicationLocales()).isEqualTo(LocaleListCompat.getEmptyLocaleList())
+
+        result.test {
+            assertThat(
+                awaitItem()?.label
+            ).isEqualTo(
+                resolvableString(
+                    id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("\$12.34")
+                )
+            )
         }
     }
 

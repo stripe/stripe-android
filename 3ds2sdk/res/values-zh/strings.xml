@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Challenge screen -->
+    <string name="stripe_3ds2_bzv_issuer_image_description">发布者映像</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">支付系统映像</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">否</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">是</string>
+    <string name="stripe_3ds2_hzv_cancel_label">取消</string>
+    <string name="stripe_3ds2_hzv_header_label">安全的支付流程</string>
+    <!-- Progress dialog -->
+    <string name="stripe_3ds2_processing">正在处理\u2026</string>
+</resources>

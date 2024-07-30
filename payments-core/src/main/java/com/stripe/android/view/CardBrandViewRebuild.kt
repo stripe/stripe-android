@@ -248,9 +248,9 @@ class BrandAdapter(
         }
 
         if (position > 0) {
-            brands.getOrNull(position - 1)?.let {
-                val isSelected = it == selectedBrand
-                view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(it.icon)
+            brands.getOrNull(position - 1)?.let { brand ->
+                val isSelected = brand == selectedBrand
+                view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
                 view.findViewById<ImageView>(R.id.brand_check).apply {
                     if (isSelected) {
                         visibility = View.VISIBLE
@@ -260,7 +260,7 @@ class BrandAdapter(
                     }
                 }
                 view.findViewById<TextView>(R.id.brand_text)?.apply {
-                    text = it.displayName
+                    text = brand.displayName
                     if (isSelected) {
                         setTextColor(colorUtils.colorPrimary)
                         typeface = Typeface.DEFAULT_BOLD

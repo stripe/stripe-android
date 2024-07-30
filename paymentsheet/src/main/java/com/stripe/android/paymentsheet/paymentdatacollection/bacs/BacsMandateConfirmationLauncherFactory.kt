@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import androidx.activity.result.ActivityResultLauncher
 
-internal interface BacsMandateConfirmationLauncherFactory {
+internal fun interface BacsMandateConfirmationLauncherFactory {
     fun create(
         activityResultLauncher: ActivityResultLauncher<BacsMandateConfirmationContract.Args>
     ): BacsMandateConfirmationLauncher

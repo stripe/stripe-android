@@ -1,7 +1,18 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 20.48.2 - 2024-07-29
+
+### PaymentSheet
+* [FIXED][8825](https://github.com/stripe/stripe-android/pull/8825) Fixed an issue the amount in the buy button in `PaymentSheet` did not formatted with set per-application locale.
+* [FIXED][8928](https://github.com/stripe/stripe-android/pull/8928) Fixed an issue in where changing country from the US to Canada would crash if certain states were selected.
+
+## 20.48.1 - 2024-07-15
+
+### PaymentSheet
 * [FIXED][8746](https://github.com/stripe/stripe-android/pull/8746) Fixed an issue where successful TWINT payments were sometimes incorrectly considered 'canceled'.
+* [FIXED][8670](https://github.com/stripe/stripe-android/pull/8670) Fixed `PaymentSheet` PrimaryButton text not translating for per app localization.
 
 ## 20.48.0 - 2024-07-01
 

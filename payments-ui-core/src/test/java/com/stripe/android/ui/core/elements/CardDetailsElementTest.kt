@@ -208,7 +208,7 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.numberElement.controller.onDropdownItemClicked(
             TextFieldIcon.Dropdown.Item(
                 id = CardBrand.CartesBancaires.code,
-                label = resolvableString(CardBrand.CartesBancaires.displayName),
+                label = CardBrand.CartesBancaires.displayName.resolvableString,
                 icon = CardBrand.CartesBancaires.icon
             )
         )

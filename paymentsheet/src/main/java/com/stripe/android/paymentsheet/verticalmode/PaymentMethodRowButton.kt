@@ -23,6 +23,7 @@ import com.stripe.android.uicore.stripeColors
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
+    isClickable: Boolean = isEnabled,
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
@@ -39,6 +40,7 @@ internal fun PaymentMethodRowButton(
     RowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
+        isClickable = isClickable,
         onClick = onClick,
         contentPaddingValues = PaddingValues(horizontal = 12.dp, vertical = contentPaddingValues),
         modifier = modifier.fillMaxWidth().heightIn(48.dp),

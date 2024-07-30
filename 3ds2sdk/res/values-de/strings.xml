@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Challenge screen -->
+    <string name="stripe_3ds2_bzv_issuer_image_description">Bild des Ausstellers</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Bild des Zahlungssystems</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Nein</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Ja</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Abbrechen</string>
+    <string name="stripe_3ds2_hzv_header_label">Sicherer Bezahlvorgang</string>
+    <!-- Progress dialog -->
+    <string name="stripe_3ds2_processing">Wird verarbeitet\u2026</string>
+</resources>

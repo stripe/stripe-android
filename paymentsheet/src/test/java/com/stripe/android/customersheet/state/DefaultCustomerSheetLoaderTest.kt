@@ -100,12 +100,12 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.paymentMethodMetadata.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -152,12 +152,12 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -190,11 +190,11 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata).isNotNull()
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
@@ -289,13 +289,13 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
@@ -325,13 +325,13 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()

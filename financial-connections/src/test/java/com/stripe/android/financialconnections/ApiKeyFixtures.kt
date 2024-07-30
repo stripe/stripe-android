@@ -135,4 +135,18 @@ internal object ApiKeyFixtures {
         verificationSessions = emptyList(),
         publishableKey = null
     )
+
+    fun verifiedConsumerSession() = ConsumerSession(
+        clientSecret = "clientSecret",
+        emailAddress = "test@test.com",
+        redactedPhoneNumber = "+1********12",
+        redactedFormattedPhoneNumber = "(***) *** **12",
+        verificationSessions = listOf(
+            ConsumerSession.VerificationSession(
+                type = ConsumerSession.VerificationSession.SessionType.Sms,
+                state = ConsumerSession.VerificationSession.SessionState.Verified,
+            )
+        ),
+        publishableKey = null
+    )
 }

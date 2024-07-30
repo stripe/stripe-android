@@ -133,7 +133,8 @@ internal interface FinancialConnectionsManifestRepository {
      */
     suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -415,7 +416,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = disableNetworking,
@@ -423,6 +425,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("active_auth_session"),
+                "client_requested_next_pane_on_disable_networking" to clientSuggestedNextPaneOnDisableNetworking,
                 "disabled_reason" to disabledReason,
             ).filterNotNullValues()
         )

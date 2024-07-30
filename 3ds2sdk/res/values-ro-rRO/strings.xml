@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Imagine emitent</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Imagine sistem de plată</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Nu</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Da</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Anulare</string>
+    <string name="stripe_3ds2_hzv_header_label">Validare securizată</string>
+    <string name="stripe_3ds2_processing">Se procesează\u2026</string>
+</resources>

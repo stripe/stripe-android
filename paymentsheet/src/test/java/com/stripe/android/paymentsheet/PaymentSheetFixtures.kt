@@ -127,10 +127,8 @@ internal object PaymentSheetFixtures {
         state = PaymentSheetState.Full(
             customer = EMPTY_CUSTOMER_STATE,
             config = CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
-            isEligibleForCardBrandChoice = false,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
@@ -141,7 +139,7 @@ internal object PaymentSheetFixtures {
 
     internal fun PaymentOptionContract.Args.updateState(
         paymentMethods: List<PaymentMethod> = state.customer?.paymentMethods ?: emptyList(),
-        isGooglePayReady: Boolean = state.isGooglePayReady,
+        isGooglePayReady: Boolean = state.paymentMethodMetadata.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration = state.config,
         paymentSelection: PaymentSelection? = state.paymentSelection,
@@ -158,11 +156,13 @@ internal object PaymentSheetFixtures {
                         canRemoveDuplicates = false,
                     )
                 ),
-                isGooglePayReady = isGooglePayReady,
                 config = config,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = stripeIntent,
+                    isGooglePayReady = isGooglePayReady,
+                ),
             ),
         )
     }

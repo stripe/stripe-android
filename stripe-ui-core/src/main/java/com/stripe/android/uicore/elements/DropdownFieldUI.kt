@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @Preview
 @Composable
@@ -91,7 +92,9 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
-    val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
+    val selectedItemLabel by controller.selectedIndex.mapAsStateFlow {
+        controller.getSelectedItemLabel(selectedIndex)
+    }.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent

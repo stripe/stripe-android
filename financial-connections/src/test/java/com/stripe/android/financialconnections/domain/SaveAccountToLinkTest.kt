@@ -217,7 +217,8 @@ internal class SaveAccountToLinkTest {
 
             override suspend fun disableNetworking(
                 clientSecret: String,
-                disabledReason: String?
+                disabledReason: String?,
+                clientSuggestedNextPaneOnDisableNetworking: String?
             ): FinancialConnectionsSessionManifest {
                 onDisabledNetworking()
                 return sessionManifest()

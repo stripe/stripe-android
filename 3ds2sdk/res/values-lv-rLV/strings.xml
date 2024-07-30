@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Izsniedzēja attēls</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Maksājumu sistēmas attēls</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Nē</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Jā</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Atcelt</string>
+    <string name="stripe_3ds2_hzv_header_label">Droša norēķināšanās</string>
+    <string name="stripe_3ds2_processing">Apstrādā\u2026</string>
+</resources>

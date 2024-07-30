@@ -58,7 +58,7 @@ class NetworkingLinkSignupViewModelTest {
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         saveAccountToLink = saveAccountToLink,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        presentNoticeSheet = mock(),
+        presentSheet = mock(),
     )
 
     @Test
@@ -83,6 +83,52 @@ class NetworkingLinkSignupViewModelTest {
         val state = viewModel.stateFlow.value
         val payload = requireNotNull(state.payload())
         assertThat(payload.emailController.fieldValue.value).isEqualTo("test@test.com")
+    }
+
+    @Test
+    fun `init - focuses email field if no email provided in Instant Debits flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "",
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest.copy(isLinkWithStripe = true),
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState(isInstantDebits = true))
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.focusEmailField).isTrue()
+    }
+
+    @Test
+    fun `init - does not focus email field if no email provided in Financial Connections flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "",
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest.copy(isLinkWithStripe = false),
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState(isInstantDebits = false))
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.focusEmailField).isFalse()
     }
 
     @Test

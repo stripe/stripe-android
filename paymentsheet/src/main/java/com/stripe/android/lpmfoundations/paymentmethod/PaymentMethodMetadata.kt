@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -10,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
@@ -37,6 +40,7 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val hasCustomerConfiguration: Boolean,
+    val isGooglePayReady: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -194,6 +198,7 @@ internal data class PaymentMethodMetadata(
             configuration: PaymentSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+            isGooglePayReady: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -211,7 +216,37 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = configuration.shippingDetails,
                 hasCustomerConfiguration = configuration.customer != null,
                 sharedDataSpecs = sharedDataSpecs,
-                externalPaymentMethodSpecs = externalPaymentMethodSpecs
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                isGooglePayReady = isGooglePayReady,
+            )
+        }
+
+        @OptIn(ExperimentalCustomerSheetApi::class)
+        internal fun create(
+            elementsSession: ElementsSession,
+            configuration: CustomerSheet.Configuration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            isGooglePayReady: Boolean,
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    preferredNetworks = configuration.preferredNetworks,
+                ),
+                merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = null,
+                hasCustomerConfiguration = true,
+                sharedDataSpecs = sharedDataSpecs,
+                isGooglePayReady = isGooglePayReady,
+                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                externalPaymentMethodSpecs = emptyList(),
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
+import FinancialConnectionsGenericInfoScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -26,17 +27,18 @@ import com.stripe.android.financialconnections.features.accountupdate.AccountUpd
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.PartnerAuth
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.Repair
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.BANK_AUTH_REPAIR
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
@@ -45,6 +47,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -68,7 +71,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
     private val presentUpdateRequiredSheet: PresentAccountUpdateRequiredSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -77,12 +80,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val sync = getSync()
             val manifest = sync.manifest
-            val dataAccessNotice = sync.text?.consent?.dataAccessNotice
-            val merchantDataAccess = MerchantDataAccessModel(
-                businessName = manifest.businessName,
-                permissions = manifest.permissions,
-                isStripeDirect = manifest.isStripeDirect ?: false
-            )
             val consumerSession = requireNotNull(getCachedConsumerSession())
             val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val display = requireNotNull(
@@ -93,25 +90,38 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val accounts = display.accounts.mapNotNull { networkedAccount: NetworkedAccount ->
                 accountsResponse.data.firstOrNull { it.id == networkedAccount.id }
                     ?.let { matchingPartnerAccount ->
-                        Pair(matchingPartnerAccount, networkedAccount)
+                        LinkedAccount(matchingPartnerAccount, networkedAccount)
                     }
             }
 
+            // When accounts load, preselect the first selectable account
+            val selectedAccountIds = listOfNotNull(
+                accounts
+                    .firstOrNull { account ->
+                        account.display.allowSelection &&
+                            account.display.drawerOnSelection == null
+                    }
+                    ?.account?.id
+            )
+
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                dataAccessNotice = dataAccessNotice,
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
+                aboveCta = display.aboveCta,
+                defaultDataAccessNotice = sync.text?.consent?.dataAccessNotice,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
+                multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
-                // We always want to refer to Link rather than Stripe on Link panes.
-                merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false),
                 singleAccount = manifest.singleAccount,
+                selectedAccountIds = selectedAccountIds
             )
-        }.execute { copy(payload = it) }
+        }.execute {
+            copy(payload = it)
+        }
     }
 
     override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
@@ -133,7 +143,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     pane = PANE
                 )
                 navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-            },
+            }
         )
         onAsync(
             LinkAccountPickerState::selectNetworkedAccountAsync,
@@ -165,9 +175,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     }
 
     private fun presentDataAccessBottomSheet() {
-        val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
+        val dataAccessNotice = stateFlow.value.activeDataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(dataAccessNotice),
             referrer = PANE,
         )
@@ -184,7 +194,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val payload = requireNotNull(state.payload())
 
-            val accounts = payload.selectedPartnerAccounts(state.selectedAccountIds)
+            val accounts = payload.selectedAccounts.map { it.account }
             updateCachedAccounts(accounts)
 
             // We assume that at this point, all selected accounts have the same next pane.
@@ -265,7 +275,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private fun logAccountClick(partnerAccount: PartnerAccount) {
         val state = stateFlow.value
         val payload = state.payload() ?: return
-        val isNewSelection = partnerAccount.id !in state.selectedAccountIds
+        val isNewSelection = partnerAccount.id !in payload.selectedAccountIds
 
         val event = FinancialConnectionsAnalyticsEvent.AccountSelected(
             pane = PANE,
@@ -281,33 +291,40 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         logAccountClick(partnerAccount)
 
         val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
-        val drawerOnSelection = accounts.firstOrNull { it.first.id == partnerAccount.id }?.second?.drawerOnSelection
-
-        if (drawerOnSelection != null) {
-            // TODO@carlosmuvi handle drawer display.
-            logger.debug("Drawer on selection: $drawerOnSelection")
-            return
-        }
-
-        val updateRequired = createUpdateRequiredContent(
+        val drawerOnSelection = accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
+        val updateRequired: AccountUpdateRequiredState.Payload? = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
+            // Use selected account icon (not coming on the SDU response as selection is not known by backend)
+            genericContent = drawerOnSelection?.withIcon(partnerAccount.institution?.icon?.default),
             partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
         )
 
         if (updateRequired != null) {
             logUpdateRequired(updateRequired)
-            presentUpdateRequiredSheet(updateRequired, referrer = PANE)
+            presentUpdateRequiredSheet(
+                updateRequired,
+                referrer = PANE,
+            )
+            return
+        }
+        if (drawerOnSelection != null) {
+            presentSheet(
+                content = Generic(drawerOnSelection),
+                referrer = PANE,
+            )
             return
         }
 
+        val payload = requireNotNull(stateFlow.value.payload())
+        val selectedAccountIds = when {
+            payload.singleAccount -> listOf(partnerAccount.id)
+            partnerAccount.id in payload.selectedAccountIds -> payload.selectedAccountIds - partnerAccount.id
+            else -> payload.selectedAccountIds + partnerAccount.id
+        }
+
         setState {
-            val payload = requireNotNull(payload())
             copy(
-                selectedAccountIds = when {
-                    payload.singleAccount -> listOf(partnerAccount.id)
-                    partnerAccount.id in selectedAccountIds -> selectedAccountIds - partnerAccount.id
-                    else -> selectedAccountIds + partnerAccount.id
-                }
+                payload = Success(payload.copy(selectedAccountIds = selectedAccountIds))
             )
         }
     }
@@ -346,36 +363,51 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 internal data class LinkAccountPickerState(
     val payload: Async<Payload> = Uninitialized,
     val selectNetworkedAccountAsync: Async<Unit> = Uninitialized,
-    val selectedAccountIds: List<String> = emptyList(),
     val viewEffect: ViewEffect? = null,
 ) {
 
     data class Payload(
         val title: String,
-        val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
-        val dataAccessNotice: DataAccessNotice?,
+        val accounts: List<LinkedAccount>,
+        val selectedAccountIds: List<String>,
         val addNewAccount: AddNewAccount,
-        val merchantDataAccess: MerchantDataAccessModel,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
         val nextPaneOnNewAccount: Pane?,
         val partnerToCoreAuths: Map<String, String>?,
         val singleAccount: Boolean,
+        val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice?,
+        val aboveCta: String?,
+        val defaultDataAccessNotice: DataAccessNotice?,
     ) {
 
-        fun selectedPartnerAccounts(selected: List<String>): List<PartnerAccount> {
-            return accounts.filter { it.first.id in selected }.map { it.first }
-        }
+        val selectedAccounts: List<LinkedAccount>
+            get() = accounts.filter { it.account.id in selectedAccountIds }
     }
+
+    val activeDataAccessNotice: DataAccessNotice?
+        get() {
+            val payload = payload() ?: return null
+            val selectedAccountTypes = payload.selectedAccounts.mapNotNull { it.type }.toSet()
+            return if (selectedAccountTypes.size > 1) {
+                // if user selected multiple different account types, present a special data access notice
+                payload.multipleAccountTypesSelectedDataAccessNotice
+            } else {
+                // we get here if user selected:
+                // 1) one account
+                // 2) or, multiple accounts of the same account type
+                payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
+                    // if no account was selected, use the consent
+                    ?: payload.defaultDataAccessNotice
+            }
+        }
 
     val cta: TextResource
         get() {
             val payload = payload()
 
             return if (payload?.singleAccount == true) {
-                val selectedAccount = payload.accounts.singleOrNull { (partnerAccount, _) ->
-                    partnerAccount.id in selectedAccountIds
-                }?.second
+                val selectedAccount = payload.selectedAccounts.singleOrNull()?.display
 
                 TextResource.Text(
                     value = selectedAccount?.selectionCta ?: payload.defaultCta,
@@ -399,14 +431,27 @@ internal enum class LinkAccountPickerClickableText(val value: String) {
     DATA("stripe://data-access-notice"),
 }
 
+internal data class LinkedAccount(
+    val account: PartnerAccount,
+    val display: NetworkedAccount
+) {
+
+    // Bank accounts can have multiple types, determined by their prefixes.
+    // (ex. linked account "bctmacct", manual account "csmrbankacct").
+    val type: String?
+        get() = account.id.split("_").firstOrNull()
+}
+
 private fun createUpdateRequiredContent(
     partnerAccount: PartnerAccount,
     partnerToCoreAuths: Map<String, String>?,
+    genericContent: FinancialConnectionsGenericInfoScreen?,
 ): AccountUpdateRequiredState.Payload? {
+    if (genericContent == null) return null
     return when (partnerAccount.nextPaneOnSelection) {
         BANK_AUTH_REPAIR -> {
             AccountUpdateRequiredState.Payload(
-                iconUrl = partnerAccount.institution?.icon?.default,
+                generic = genericContent,
                 type = Repair(
                     authorization = partnerAccount.authorization?.let { partnerToCoreAuths?.getValue(it) },
                 ),
@@ -414,7 +459,7 @@ private fun createUpdateRequiredContent(
         }
         PARTNER_AUTH -> {
             AccountUpdateRequiredState.Payload(
-                iconUrl = partnerAccount.institution?.icon?.default,
+                generic = genericContent,
                 type = PartnerAuth(
                     institution = partnerAccount.institution,
                 ),
@@ -425,3 +470,7 @@ private fun createUpdateRequiredContent(
         }
     }
 }
+
+private fun FinancialConnectionsGenericInfoScreen.withIcon(iconUrl: String?) = copy(
+    header = header?.copy(icon = Image(default = iconUrl)),
+)

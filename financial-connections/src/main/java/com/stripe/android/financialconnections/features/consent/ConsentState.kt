@@ -14,7 +14,8 @@ internal data class ConsentState(
     data class Payload(
         val consent: ConsentPane,
         val merchantLogos: List<String>,
-        val shouldShowMerchantLogos: Boolean
+        val shouldShowMerchantLogos: Boolean,
+        val showAnimatedDots: Boolean,
     )
 
     sealed class ViewEffect {
@@ -29,4 +30,5 @@ internal enum class ConsentClickableText(val value: String) {
     DATA("stripe://data-access-notice"),
     LEGAL_DETAILS("stripe://legal-details-notice"),
     MANUAL_ENTRY("stripe://manual-entry"),
+    LINK_LOGIN_WARMUP("stripe://link-login"),
 }

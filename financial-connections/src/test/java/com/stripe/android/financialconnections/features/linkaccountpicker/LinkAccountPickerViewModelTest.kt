@@ -2,9 +2,9 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
@@ -15,6 +15,8 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.AddNewAccount
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
@@ -25,6 +27,7 @@ import com.stripe.android.financialconnections.model.ReturningNetworkingUserAcco
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -65,7 +68,7 @@ class LinkAccountPickerViewModelTest {
         initialState = state,
         handleClickableUrl = mock(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        presentNoticeSheet = mock(),
+        presentSheet = mock(),
         presentUpdateRequiredSheet = mock(),
     )
 
@@ -95,12 +98,18 @@ class LinkAccountPickerViewModelTest {
         assertThat(viewModel.stateFlow.value.payload()!!.accounts)
             .isEqualTo(
                 listOf(
-                    partnerAccount().copy(id = "id1", _allowSelection = null) to
-                        NetworkedAccount(id = "id1", allowSelection = true),
-                    partnerAccount().copy(id = "id2", _allowSelection = null) to
-                        NetworkedAccount(id = "id2", allowSelection = false),
-                    partnerAccount().copy(id = "id3", _allowSelection = null) to
-                        NetworkedAccount(id = "id3", allowSelection = false)
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id1", _allowSelection = null),
+                        display = NetworkedAccount(id = "id1", allowSelection = true)
+                    ),
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id2", _allowSelection = null),
+                        display = NetworkedAccount(id = "id2", allowSelection = false)
+                    ),
+                    LinkedAccount(
+                        account = partnerAccount().copy(id = "id3", _allowSelection = null),
+                        display = NetworkedAccount(id = "id3", allowSelection = false)
+                    )
                 )
             )
     }
@@ -200,6 +209,73 @@ class LinkAccountPickerViewModelTest {
             navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
+    @Test
+    fun `init - first selectable account is pre-selected`() = runTest {
+        // Given a list of networked accounts with mixed selection permissions
+        val accountsData = listOf(
+            partnerAccount().copy(id = "id1", _allowSelection = null),
+            partnerAccount().copy(id = "id2", _allowSelection = null),
+            partnerAccount().copy(id = "id3", _allowSelection = null)
+        )
+        val displayAccounts = listOf(
+            NetworkedAccount(id = "id1", allowSelection = false),
+            NetworkedAccount(id = "id2", allowSelection = false),
+            NetworkedAccount(id = "id3", allowSelection = true)
+        )
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = accountsData,
+                display = display(displayAccounts)
+            )
+        )
+
+        // When initializing the ViewModel
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        val expectedPreselectedAccountId = "id3"
+        val actualPreselectedAccountId = viewModel.stateFlow.value.payload()!!.selectedAccountIds.firstOrNull()
+
+        assertThat(actualPreselectedAccountId).isEqualTo(expectedPreselectedAccountId)
+    }
+
+    @Test
+    fun `onAccountClick - uses data access notice for multiple selected account types`() = runTest {
+        val accountsData = listOf(
+            partnerAccount().copy(id = "type1_1", _allowSelection = true),
+            partnerAccount().copy(id = "type2_1", _allowSelection = true)
+        )
+        val displayAccounts = listOf(
+            NetworkedAccount(id = "type1_1", allowSelection = true),
+            NetworkedAccount(id = "type2_1", allowSelection = true)
+        )
+        val expectedDataAccessNotice = DataAccessNotice(
+            title = "Generic Notice",
+            body = DataAccessNoticeBody(bullets = listOf()),
+            cta = "Generic CTA"
+        )
+        whenever(getSync()).thenReturn(
+            syncResponse().copy(manifest = sessionManifest().copy(singleAccount = false))
+        )
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = accountsData,
+                display = display(displayAccounts, expectedDataAccessNotice)
+            )
+        )
+
+        // When selecting an additional account of a different type (there's a preselection)
+        val viewModel = buildViewModel(LinkAccountPickerState())
+        viewModel.onAccountClick(partnerAccount().copy(id = "type2_1", _allowSelection = true))
+
+        // generic data access notice for multiple selected accounts
+        val actualDataAccessNotice = viewModel.stateFlow.value.activeDataAccessNotice
+
+        assertThat(actualDataAccessNotice).isEqualTo(expectedDataAccessNotice)
+    }
+
     private fun twoAccounts() = NetworkedAccountsList(
         nextPaneOnAddAccount = null,
         data = listOf(
@@ -224,7 +300,10 @@ class LinkAccountPickerViewModelTest {
         )
     )
 
-    private fun display(networkedAccounts: List<NetworkedAccount> = emptyList()) = Display(
+    private fun display(
+        networkedAccounts: List<NetworkedAccount> = emptyList(),
+        multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice? = null
+    ) = Display(
         text = TextUpdate(
             returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
                 title = "Select account",
@@ -235,8 +314,19 @@ class LinkAccountPickerViewModelTest {
                     icon = Image(
                         default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
                     ),
-                )
+                ),
+                multipleAccountTypesSelectedDataAccessNotice = multipleAccountTypesSelectedDataAccessNotice
             )
         )
     )
+
+    private fun consumerSession(): CachedConsumerSession {
+        return CachedConsumerSession(
+            clientSecret = "clientSecret",
+            emailAddress = "test@test.com",
+            phoneNumber = "(***) *** **12",
+            isVerified = false,
+            publishableKey = null
+        )
+    }
 }

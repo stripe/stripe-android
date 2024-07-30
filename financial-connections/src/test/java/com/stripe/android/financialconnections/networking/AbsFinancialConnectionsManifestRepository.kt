@@ -71,7 +71,8 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
 
     override suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }

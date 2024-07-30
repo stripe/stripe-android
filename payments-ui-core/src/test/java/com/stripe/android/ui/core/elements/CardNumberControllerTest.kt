@@ -207,21 +207,21 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
-                            label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                            label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
                             icon = CardBrand.Unknown.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -247,21 +247,21 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -285,7 +285,7 @@ internal class CardNumberControllerTest {
             cardNumberController.onDropdownItemClicked(
                 TextFieldIcon.Dropdown.Item(
                     id = CardBrand.CartesBancaires.code,
-                    label = resolvableString("Cartes Bancaires"),
+                    label = "Cartes Bancaires".resolvableString,
                     icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
                 )
             )
@@ -294,21 +294,21 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
@@ -332,7 +332,7 @@ internal class CardNumberControllerTest {
             cardNumberController.onDropdownItemClicked(
                 TextFieldIcon.Dropdown.Item(
                     id = CardBrand.CartesBancaires.code,
-                    label = resolvableString("Cartes Bancaires"),
+                    label = "Cartes Bancaires".resolvableString,
                     icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
                 )
             )
@@ -343,21 +343,21 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
                     TextFieldIcon.Dropdown(
-                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
+                            label = "Cartes Bancaires".resolvableString,
                             icon = CardBrand.CartesBancaires.icon
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = resolvableString("Cartes Bancaires"),
+                                label = "Cartes Bancaires".resolvableString,
                                 icon = CardBrand.CartesBancaires.icon
                             ),
                             TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
+                                label = "Visa".resolvableString,
                                 icon = CardBrand.Visa.icon
                             ),
                         ),

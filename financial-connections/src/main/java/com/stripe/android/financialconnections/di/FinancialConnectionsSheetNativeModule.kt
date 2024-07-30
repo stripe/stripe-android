@@ -11,12 +11,13 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
-import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -36,7 +37,7 @@ import javax.inject.Singleton
 internal interface FinancialConnectionsSheetNativeModule {
 
     @Binds
-    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
+    fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
     @Binds
     fun bindsPresentAccountUpdateRequiredSheet(
@@ -100,11 +101,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
+            consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
             logger: Logger,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             consumersApiService = consumersApiService,
+            consumerSessionRepository = consumerSessionRepository,
             apiOptions = apiOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,

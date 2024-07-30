@@ -217,8 +217,7 @@ private fun LinkCheckbox(
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface
-                    .copy(alpha = contentAlpha)
+                color = MaterialTheme.stripeColors.subtitle
             )
         }
     }

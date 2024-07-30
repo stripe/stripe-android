@@ -490,7 +490,7 @@ class DefaultEventReporterTest {
 
         customEventReporter.onPressConfirmButton(
             PaymentSelection.New.GenericPaymentMethod(
-                label = resolvableString("Cash App Pay"),
+                label = "Cash App Pay".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
@@ -683,6 +683,9 @@ class DefaultEventReporterTest {
         linkEnabled: Boolean = true,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
+        initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            clientSecret = "cs_example"
+        ),
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
@@ -690,7 +693,9 @@ class DefaultEventReporterTest {
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
-            currency = currency
+            currency = currency,
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "klarna"),
         )
     }
 
@@ -715,7 +720,7 @@ class DefaultEventReporterTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )

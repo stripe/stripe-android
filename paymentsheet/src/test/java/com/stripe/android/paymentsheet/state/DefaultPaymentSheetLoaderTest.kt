@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Paymen
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -121,18 +122,17 @@ internal class DefaultPaymentSheetLoaderTest {
                         canRemoveDuplicates = false,
                     ),
                 ),
-                isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
                 linkState = null,
-                isEligibleForCardBrandChoice = false,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
                     hasCustomerConfiguration = true,
+                    isGooglePayReady = true,
                 ),
             )
         )
@@ -173,7 +173,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 initializedViaCompose = false,
-            ).getOrThrow().isGooglePayReady
+            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
         ).isFalse()
     }
 
@@ -804,9 +804,10 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
         val loader = createPaymentSheetLoader()
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
@@ -825,6 +826,8 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 
@@ -854,16 +857,17 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
         val loader = createPaymentSheetLoader()
-
-        loader.load(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1234,
-                        currency = "cad",
-                    ),
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
                 ),
             ),
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             initializedViaCompose = true,
         )
@@ -874,6 +878,8 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 
@@ -970,7 +976,8 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.isEligibleForCardBrandChoice).isTrue()
+        assertThat(result.paymentMethodMetadata.cbcEligibility)
+            .isEqualTo(CardBrandChoiceEligibility.Eligible(listOf()))
     }
 
     @Test
@@ -1648,9 +1655,10 @@ internal class DefaultPaymentSheetLoaderTest {
         prefsRepository.savePaymentSelection(paymentSelection)
 
         val loader = createPaymentSheetLoader()
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
@@ -1667,6 +1675,8 @@ internal class DefaultPaymentSheetLoaderTest {
             linkEnabled = true,
             googlePaySupported = true,
             currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
         )
     }
 

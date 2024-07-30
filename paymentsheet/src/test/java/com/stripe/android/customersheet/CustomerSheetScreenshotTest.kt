@@ -92,7 +92,7 @@ internal class CustomerSheetScreenshotTest {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString("Save"),
+        primaryButtonLabel = "Save".resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
@@ -106,7 +106,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -140,7 +140,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -177,7 +177,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -194,7 +194,7 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -215,9 +215,9 @@ internal class CustomerSheetScreenshotTest {
                     isGooglePayEnabled = false,
                     primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
-                    mandateText = "Some mandate text."
+                    mandateText = "Some mandate text.".resolvableString
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -230,10 +230,10 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -247,10 +247,10 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = false,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -264,7 +264,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
                     displayDismissConfirmationModal = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -284,11 +284,12 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
                 canRemove = true,
+                isLiveMode = true,
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
@@ -300,7 +301,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -319,11 +320,12 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
                 canRemove = false,
+                isLiveMode = true,
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
@@ -335,7 +337,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }

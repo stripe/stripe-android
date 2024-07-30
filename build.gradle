@@ -98,6 +98,7 @@ apiValidation {
             "paymentsheet-example",
             "stripecardscan-example",
             "screenshot-testing",
+            "3ds2playground",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

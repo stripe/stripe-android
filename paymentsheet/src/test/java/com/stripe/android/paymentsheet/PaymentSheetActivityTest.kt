@@ -1,20 +1,19 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -31,6 +30,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -57,15 +57,19 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -185,12 +189,11 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.buyButton.isEnabled).isTrue()
 
-            viewModel.toggleEditing()
+            startEditing()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
 
-    @OptIn(ExperimentalTestApi::class)
     @Test
     fun `link button should not be enabled when editing`() {
         val viewModel = createViewModel(isLinkAvailable = true)
@@ -201,11 +204,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
-            viewModel.toggleEditing()
-            composeTestRule.waitUntilAtLeastOneExists(
-                hasTestTag(LinkButtonTestTag).and(isNotEnabled()),
-                timeoutMillis = 5_000
-            )
+            startEditing()
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -243,7 +242,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -269,7 +268,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -296,7 +295,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -330,7 +329,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -367,7 +366,7 @@ internal class PaymentSheetActivityTest {
             viewModel.transitionToAddPaymentScreen()
             composeTestRule.waitForIdle()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -394,7 +393,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertDoesNotExist()
 
-            viewModel.onError(error)
+            viewModel.onError(error.resolvableString)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -442,7 +441,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            viewModel.toggleEditing()
+            startEditing()
 
             composeTestRule.onNodeWithTag(
                 TEST_TAG_REMOVE_BADGE,
@@ -539,7 +538,12 @@ internal class PaymentSheetActivityTest {
         )
 
         val paymentMethods = listOf(card)
-        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val viewModel = createViewModel(
+            paymentMethods = paymentMethods,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(CardBrand.Visa, CardBrand.CartesBancaires)
+            ),
+        )
         val scenario = activityScenario(viewModel)
 
         viewModel.navigationHandler.currentScreen.test {
@@ -552,7 +556,8 @@ internal class PaymentSheetActivityTest {
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
-            viewModel.modifyPaymentMethod(card)
+            startEditing()
+            composeTestRule.onNodeWithTag(TEST_TAG_MODIFY_BADGE).performClick()
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
 
             pressBack()
@@ -709,25 +714,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify ProcessResult state closes the sheet`() {
-        val viewModel = createViewModel()
-        val scenario = activityScenario(viewModel)
-
-        scenario.launchForResult(intent).onActivity {
-            viewModel.onFinish()
-        }
-
-        composeTestRule.waitForIdle()
-
-        val result = contract.parseResult(
-            scenario.getResult().resultCode,
-            scenario.getResult().resultData
-        )
-
-        assertThat(result).isEqualTo(PaymentSheetResult.Completed)
-    }
-
-    @Test
     fun `successful payment should dismiss bottom sheet`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
@@ -779,7 +765,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -799,7 +785,7 @@ internal class PaymentSheetActivityTest {
                 .assertDoesNotExist()
 
             viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage.resolvableString))
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -811,9 +797,10 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
-            viewModel.viewState.value =
-                PaymentSheetViewState.Reset(PaymentSheetViewState.UserErrorMessage(errorMessage))
+            fakeIntentConfirmationInterceptor.enqueueFailureStep(
+                IllegalStateException(errorMessage),
+                errorMessage
+            )
 
             composeTestRule
                 .onNodeWithText(errorMessage)
@@ -833,11 +820,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
-            viewModel.updateMandateText(text, false)
+            val text = StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account.resolvableString
+            viewModel.mandateHandler.updateMandateText(text, false)
 
             composeTestRule
-                .onNodeWithText(text)
+                .onNodeWithText(text.resolve(context))
                 .assertIsDisplayed()
         }
     }
@@ -853,14 +840,14 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, false)
+            viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
             val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
             assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-            viewModel.updateMandateText(null, false)
+            viewModel.mandateHandler.updateMandateText(null, false)
             mandateNode.assertDoesNotExist()
         }
     }
@@ -876,14 +863,14 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, true)
+            viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
             val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
             assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-            viewModel.updateMandateText(null, true)
+            viewModel.mandateHandler.updateMandateText(null, true)
             mandateNode.assertDoesNotExist()
         }
     }
@@ -904,14 +891,14 @@ internal class PaymentSheetActivityTest {
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, false)
+            viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
             val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
             assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-            viewModel.updateMandateText(null, false)
+            viewModel.mandateHandler.updateMandateText(null, false)
             mandateNode.assertDoesNotExist()
         }
     }
@@ -1080,6 +1067,7 @@ internal class PaymentSheetActivityTest {
         isLinkAvailable: Boolean = false,
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
@@ -1087,11 +1075,12 @@ internal class PaymentSheetActivityTest {
                 on { emailFlow } doReturn stateFlowOf("email@email.com")
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
+            val application = ApplicationProvider.getApplicationContext<Application>()
+
             PaymentSheetViewModel(
-                application = ApplicationProvider.getApplicationContext(),
+                application = application,
                 args = args,
                 eventReporter = eventReporter,
-                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
@@ -1102,20 +1091,27 @@ internal class PaymentSheetActivityTest {
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
+                    cbcEligibility = cbcEligibility,
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
                 prefsRepository = FakePrefsRepository(),
-                paymentLauncherFactory = stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-                bacsMandateConfirmationLauncherFactory = mock(),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                    intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                    savedStateHandle = savedStateHandle,
+                    stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                    bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
+                    paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                    statusBarColor = { args.statusBarColor },
+                    application = application,
+                    errorReporter = FakeErrorReporter(),
+                ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
-                errorReporter = FakeErrorReporter(),
             )
         }
     }
@@ -1134,6 +1130,13 @@ internal class PaymentSheetActivityTest {
                 return googlePayPaymentMethodLauncher
             }
         }
+
+    private fun startEditing() {
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodesWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
+    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD

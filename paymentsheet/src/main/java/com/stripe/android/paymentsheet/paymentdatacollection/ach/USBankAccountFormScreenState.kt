@@ -1,26 +1,25 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
-import androidx.annotation.StringRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
-    @StringRes open val error: Int? = null,
+    open val error: ResolvableString? = null,
     open val isProcessing: Boolean = false
 ) : Parcelable {
     abstract val primaryButtonText: ResolvableString
-    abstract val mandateText: String?
+    abstract val mandateText: ResolvableString?
 
     @Parcelize
     data class BillingDetailsCollection(
-        @StringRes override val error: Int? = null,
+        override val error: ResolvableString? = null,
         override val primaryButtonText: ResolvableString,
         override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {
 
-        override val mandateText: String?
+        override val mandateText: ResolvableString?
             get() = null
     }
 
@@ -31,7 +30,7 @@ internal sealed class USBankAccountFormScreenState(
         val last4: String?,
         val intentId: String?,
         override val primaryButtonText: ResolvableString,
-        override val mandateText: String?,
+        override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()
 
     @Parcelize
@@ -40,7 +39,7 @@ internal sealed class USBankAccountFormScreenState(
         val financialConnectionsSessionId: String,
         val intentId: String?,
         override val primaryButtonText: ResolvableString,
-        override val mandateText: String?,
+        override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()
 
     @Parcelize
@@ -50,7 +49,7 @@ internal sealed class USBankAccountFormScreenState(
         val bankName: String,
         val last4: String?,
         override val primaryButtonText: ResolvableString,
-        override val mandateText: String?,
+        override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()
 
     internal sealed interface ResultIdentifier : Parcelable {

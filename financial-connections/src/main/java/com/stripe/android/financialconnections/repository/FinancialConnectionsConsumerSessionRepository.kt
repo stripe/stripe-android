@@ -14,7 +14,8 @@ import java.util.Locale
 
 internal interface FinancialConnectionsConsumerSessionRepository {
 
-    suspend fun getCachedConsumerSession(): ConsumerSession?
+    suspend fun getCachedConsumerSession(): CachedConsumerSession?
+
     suspend fun lookupConsumerSession(
         email: String,
         clientSecret: String
@@ -37,6 +38,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
+            consumerSessionRepository: ConsumerSessionRepository,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
@@ -45,6 +47,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
                 consumersApiService = consumersApiService,
                 apiOptions = apiOptions,
                 financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+                consumerSessionRepository = consumerSessionRepository,
                 locale = locale,
                 logger = logger,
             )
@@ -54,16 +57,17 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
+    private val consumerSessionRepository: ConsumerSessionRepository,
     private val apiOptions: ApiRequest.Options,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
 
     private val mutex = Mutex()
-    private var cachedConsumerSession: ConsumerSession? = null
 
-    override suspend fun getCachedConsumerSession(): ConsumerSession? =
-        mutex.withLock { cachedConsumerSession }
+    override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
+        consumerSessionRepository.provideConsumerSession()
+    }
 
     override suspend fun lookupConsumerSession(
         email: String,
@@ -123,7 +127,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSession: ConsumerSession?
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from $source")
-        cachedConsumerSession = consumerSession
+        consumerSessionRepository.storeConsumerSession(consumerSession)
     }
 
     private companion object {

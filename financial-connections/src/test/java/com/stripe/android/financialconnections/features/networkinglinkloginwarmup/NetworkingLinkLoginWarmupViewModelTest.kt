@@ -73,15 +73,15 @@ class NetworkingLinkLoginWarmupViewModelTest {
     }
 
     @Test
-    fun `onSkipClicked - navigates to institution picker and clears back stack`() = runTest {
+    fun `onSecondaryButtonClicked - navigates to institution picker and clears back stack`() = runTest {
         val referrer = Pane.CONSENT
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState(referrer))
 
-        whenever(disableNetworking()).thenReturn(
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
             ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
-        viewModel.onSkipClicked()
+        viewModel.onSecondaryButtonClicked()
         navigationManager.assertNavigatedTo(
             destination = Destination.InstitutionPicker,
             popUpTo = PopUpToBehavior.Route(
@@ -93,17 +93,35 @@ class NetworkingLinkLoginWarmupViewModelTest {
     }
 
     @Test
+    fun `onSecondaryButtonClicked with Instant Debits - closes bottom sheet`() = runTest {
+        val referrer = Pane.CONSENT
+        val viewModel = buildViewModel(
+            NetworkingLinkLoginWarmupState(
+                referrer = referrer,
+                isInstantDebits = true,
+            )
+        )
+
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+        )
+
+        viewModel.onSecondaryButtonClicked()
+        navigationManager.assertNavigatedBack()
+    }
+
+    @Test
     fun `onClickableTextClick - skip_login disables networking and navigates`() = runTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
         val expectedNextPane = Pane.INSTITUTION_PICKER
 
-        whenever(disableNetworking()).thenReturn(
+        whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
             ApiKeyFixtures.sessionManifest().copy(nextPane = expectedNextPane)
         )
 
-        viewModel.onSkipClicked()
+        viewModel.onSecondaryButtonClicked()
 
-        verify(disableNetworking).invoke()
+        verify(disableNetworking).invoke(clientSuggestedNextPaneOnDisableNetworking = null)
         navigationManager.assertNavigatedTo(
             destination = expectedNextPane.destination,
             popUpTo = PopUpToBehavior.Current(inclusive = true),

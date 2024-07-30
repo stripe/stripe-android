@@ -1,18 +1,18 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class PaymentOptionsItemsMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
-    private val googlePayState: StateFlow<GooglePayState>,
+    private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
-    private val nameProvider: (PaymentMethodCode?) -> String,
+    private val nameProvider: (PaymentMethodCode?) -> ResolvableString,
     private val isNotPaymentFlow: Boolean,
     private val isCbcEligible: () -> Boolean
 ) {
@@ -21,14 +21,14 @@ internal class PaymentOptionsItemsMapper(
         return combineAsStateFlow(
             paymentMethods,
             isLinkEnabled,
-            googlePayState,
-        ) { paymentMethods, isLinkEnabled, googlePayState ->
+            isGooglePayReady,
+        ) { paymentMethods, isLinkEnabled, isGooglePayReady ->
             createPaymentOptionsItems(
                 paymentMethods = paymentMethods,
                 isLinkEnabled = isLinkEnabled,
                 // TODO(samer-stripe): Set this based on customer_session permissions
                 canRemovePaymentMethods = true,
-                googlePayState = googlePayState,
+                isGooglePayReady = isGooglePayReady,
             ) ?: emptyList()
         }
     }
@@ -38,13 +38,13 @@ internal class PaymentOptionsItemsMapper(
         paymentMethods: List<PaymentMethod>,
         isLinkEnabled: Boolean?,
         canRemovePaymentMethods: Boolean?,
-        googlePayState: GooglePayState,
+        isGooglePayReady: Boolean,
     ): List<PaymentOptionsItem>? {
         if (isLinkEnabled == null) return null
 
         return PaymentOptionsStateFactory.createPaymentOptionsList(
             paymentMethods = paymentMethods,
-            showGooglePay = (googlePayState is GooglePayState.Available) && isNotPaymentFlow,
+            showGooglePay = isGooglePayReady && isNotPaymentFlow,
             showLink = isLinkEnabled && isNotPaymentFlow,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible(),

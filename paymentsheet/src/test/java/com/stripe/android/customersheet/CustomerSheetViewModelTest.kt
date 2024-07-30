@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
@@ -32,6 +33,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -266,7 +268,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher
         )
         val name = viewModel.providePaymentMethodName(PaymentMethod.Type.Card.code)
-        assertThat(name)
+        assertThat(name.resolve(ApplicationProvider.getApplicationContext()))
             .isEqualTo("Card")
     }
 
@@ -478,19 +480,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -508,19 +510,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isTrue()
-            assertThat(viewState.topBarState.showEditMenu).isTrue()
+            assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
             assertThat(viewState.isEditing).isFalse()
-            assertThat(viewState.topBarState.showEditMenu).isFalse()
+            assertThat(viewState.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -559,6 +561,7 @@ class CustomerSheetViewModelTest {
     fun `When removing last payment method & google pay disabled, should transition to add payment screen`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            isGooglePayAvailable = false,
             customerSheetLoader = FakeCustomerSheetLoader(
                 isGooglePayAvailable = false,
                 customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
@@ -739,7 +742,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.")
+            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -843,7 +846,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
+            assertThat(viewState.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(viewState.enabled).isTrue()
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -875,7 +878,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message")
+            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -915,7 +918,8 @@ class CustomerSheetViewModelTest {
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("We couldn't save this payment method. Please try again.")
+            assertThat(viewState.errorMessage)
+                .isEqualTo("We couldn't save this payment method. Please try again.".resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -1853,7 +1857,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -1863,7 +1867,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+                .isEqualTo(UiCoreR.string.stripe_continue_button_label.resolvableString)
         }
     }
 
@@ -1909,7 +1913,7 @@ class CustomerSheetViewModelTest {
                 CustomerSheetViewAction.OnUpdateCustomButtonUIState(
                     callback = {
                         PrimaryButton.UIState(
-                            label = resolvableString("Continue"),
+                            label = "Continue".resolvableString,
                             enabled = true,
                             lockVisible = false,
                             onClick = {}
@@ -1942,7 +1946,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnUpdateMandateText(
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showAbovePrimaryButton = true,
                 )
             )
@@ -1975,7 +1979,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -2035,13 +2039,13 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormError(
-                    error = "This is an error."
+                    error = "This is an error.".resolvableString
                 )
             )
 
             viewState = awaitViewState()
             assertThat(viewState.errorMessage)
-                .isEqualTo("This is an error.")
+                .isEqualTo("This is an error.".resolvableString)
         }
     }
 
@@ -2338,7 +2342,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
         }
     }
 
@@ -2358,7 +2362,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
@@ -2368,7 +2372,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+                .isEqualTo(UiCoreR.string.stripe_continue_button_label.resolvableString)
         }
     }
 
@@ -2390,7 +2394,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2400,7 +2404,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2410,7 +2414,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
         }
     }
 
@@ -2443,7 +2447,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnUpdateMandateText(
-                    mandateText = "Mandate",
+                    mandateText = "Mandate".resolvableString,
                     showAbovePrimaryButton = false
                 )
             )
@@ -2594,7 +2598,7 @@ class CustomerSheetViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = resolvableString("Continue"),
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -2641,6 +2645,7 @@ class CustomerSheetViewModelTest {
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            isGooglePayAvailable = false,
             initialBackStack = listOf(
                 selectPaymentMethodViewState.copy(
                     savedPaymentMethods = paymentMethods,
@@ -2663,9 +2668,6 @@ class CustomerSheetViewModelTest {
             // once we return to the SPM screen.
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             // Show users that the payment method was removed briefly
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
@@ -2701,9 +2703,6 @@ class CustomerSheetViewModelTest {
             // once we return to the SPM screen.
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).containsExactly(paymentMethods.last())
@@ -2767,9 +2766,6 @@ class CustomerSheetViewModelTest {
                 // once we return to the SPM screen.
                 val updatedViewState = awaitViewState<SelectPaymentMethod>()
                 assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
-                // Simulate the delay
-                testDispatcher.scheduler.advanceUntilIdle()
 
                 verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
 
@@ -2962,9 +2958,6 @@ class CustomerSheetViewModelTest {
                 )
             )
             editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             verify(eventReporter).onUpdatePaymentMethodFailed(
                 eq(CardBrand.Visa),
@@ -3178,14 +3171,14 @@ class CustomerSheetViewModelTest {
             viewModel.viewState.test {
                 val viewState = awaitViewState<SelectPaymentMethod>()
 
-                assertThat(viewState.topBarState.showEditMenu).isTrue()
+                assertThat(viewState.topBarState {}.showEditMenu).isTrue()
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
                 val viewStateAfterClickingEdit = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterClickingEdit.isEditing).isTrue()
-                assertThat(viewStateAfterClickingEdit.topBarState.showEditMenu).isTrue()
+                assertThat(viewStateAfterClickingEdit.topBarState {}.showEditMenu).isTrue()
             }
 
             viewModel.removePaymentMethodFromEditScreen(paymentMethodToRemove)
@@ -3194,7 +3187,7 @@ class CustomerSheetViewModelTest {
                 val viewStateAfterRemoval = awaitViewState<SelectPaymentMethod>()
 
                 assertThat(viewStateAfterRemoval.isEditing).isFalse()
-                assertThat(viewStateAfterRemoval.topBarState.showEditMenu).isFalse()
+                assertThat(viewStateAfterRemoval.topBarState {}.showEditMenu).isFalse()
             }
         }
 
@@ -3211,6 +3204,48 @@ class CustomerSheetViewModelTest {
 
         verify(eventReporter).onCardNumberCompleted()
     }
+
+    @Test
+    fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
+        runTest(testDispatcher) {
+            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                initialBackStack = listOf(
+                    selectPaymentMethodViewState,
+                    addPaymentMethodViewState,
+                ),
+                stripeRepository = FakeStripeRepository(
+                    createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                    retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                ),
+                customerAdapter = FakeCustomerAdapter(
+                    onSetupIntentClientSecretForCustomerAttach = {
+                        CustomerAdapter.Result.success("seti_123")
+                    },
+                    canCreateSetupIntents = true,
+                ),
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val call = intentConfirmationInterceptor.calls.awaitItem()
+
+            assertThat(call).isEqualTo(
+                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
+                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                        clientSecret = "seti_123"
+                    ),
+                    paymentMethod = CARD_PAYMENT_METHOD,
+                    shippingValues = null,
+                    paymentMethodOptionsParams = null,
+                )
+            )
+
+            intentConfirmationInterceptor.calls.ensureAllEventsConsumed()
+        }
 
     private fun mockUSBankAccountResult(
         isVerified: Boolean
@@ -3306,9 +3341,6 @@ class CustomerSheetViewModelTest {
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).contains(originalPaymentMethod)
 
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
-
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).contains(updatedPaymentMethod)
         }
@@ -3327,9 +3359,6 @@ class CustomerSheetViewModelTest {
 
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(updatedViewState.savedPaymentMethods).contains(paymentMethodToRemove)
-
-            // Simulate the delay
-            testDispatcher.scheduler.advanceUntilIdle()
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).doesNotContain(paymentMethodToRemove)

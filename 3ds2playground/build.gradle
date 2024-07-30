@@ -1,0 +1,64 @@
+apply from: configs.androidApplication
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
+android {
+    defaultConfig {
+        applicationId = "com.stripe.android.stripe3ds2playground"
+        minSdk = 21
+
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device's CPU and memory after each test,
+        // > use the clearPackageData flag.
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    lint {
+        checkDependencies = true
+        disable += "UnusedResources"
+        disable += "VectorPath"
+        disable += "ObsoleteLintCustomCheck"
+        disable += "MonochromeLauncherIcon"
+    }
+
+    kotlin {
+        compilerOptions {
+            allWarningsAsErrors = true
+        }
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+
+    useLibrary("android.test.runner")
+    useLibrary("android.test.base")
+    useLibrary("android.test.mock")
+}
+
+dependencies {
+    implementation project(":3ds2sdk")
+
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.activity
+    implementation libs.androidx.fragment
+
+    implementation libs.material
+
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.espresso.core
+}

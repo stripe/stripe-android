@@ -30,7 +30,7 @@ class UnsupportedAuthenticatorTest {
     private val paymentRelayStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
 
-    private val authenticator = UnsupportedAuthenticator(
+    private val authenticator = UnsupportedNextActionHandler(
         paymentRelayStarterFactory
     )
 
@@ -51,7 +51,7 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyWeChat() = runTest {
-        authenticator.authenticate(
+        authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
             REQUEST_OPTIONS
@@ -75,7 +75,7 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyNullNextActionType() = runTest {
-        authenticator.authenticate(
+        authenticator.performNextAction(
             host,
             PI_SUCCEEDED,
             REQUEST_OPTIONS

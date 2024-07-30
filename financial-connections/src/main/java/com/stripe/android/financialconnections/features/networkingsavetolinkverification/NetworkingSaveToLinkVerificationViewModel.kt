@@ -38,7 +38,6 @@ import com.stripe.android.uicore.elements.OTPElement
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
@@ -74,7 +73,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
             NetworkingSaveToLinkVerificationState.Payload(
                 showNotNowButton = showNotNowButton,
                 email = consumerSession.emailAddress,
-                phoneNumber = consumerSession.getRedactedPhoneNumber(),
+                phoneNumber = consumerSession.phoneNumber,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
                     IdentifierSpec.Generic("otp"),

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
@@ -35,6 +36,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         assertThat(
@@ -55,6 +57,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         assertThat(
@@ -76,6 +79,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canDelete = true,
+                canEdit = true,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -91,6 +95,26 @@ class ManageScreenUITest {
         }
 
     @Test
+    fun clickingPaymentMethod_whenInEditMode_doesNothing() =
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = displayableSavedPaymentMethods,
+                currentSelection = null,
+                isEditing = true,
+                canDelete = true,
+                canEdit = true,
+            )
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[0].paymentMethod.id}"
+            ).performClick()
+
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+
+    @Test
     fun clickingPaymentMethod_inEditMode_doesNothing() =
         runScenario(
             initialState = ManageScreenInteractor.State(
@@ -98,6 +122,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canDelete = true,
+                canEdit = true,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -116,6 +141,7 @@ class ManageScreenUITest {
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -133,6 +159,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -151,6 +178,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = false,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(cbcEligibleSavedPaymentMethod).assertDoesNotExist()
@@ -164,6 +192,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -185,6 +214,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -203,6 +233,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canDelete = true,
+            canEdit = true,
         )
     ) {
         val editablePaymentMethod = displayableSavedPaymentMethods[2]
@@ -234,7 +265,7 @@ class ManageScreenUITest {
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
                 DisplayableSavedPaymentMethod(
-                    displayName = it.card!!.last4!!,
+                    displayName = it.card!!.last4!!.resolvableString,
                     paymentMethod = it,
                     isCbcEligible = true
                 )
