@@ -10,9 +10,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -48,14 +46,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.registerFromActivity(
             activityResultCaller = this,
             lifecycleOwner = this,
-        )
-
-        viewModel.setupGooglePay(
-            lifecycleScope,
-            registerForActivityResult(
-                GooglePayPaymentMethodLauncherContractV2(),
-                viewModel::onGooglePayResult
-            )
         )
 
         if (!applicationIsTaskOwner()) {

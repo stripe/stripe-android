@@ -319,6 +319,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String> {
         TODO("Not yet implemented")

@@ -14,6 +14,22 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
     ) : PaymentConfirmationOption
 
     @Parcelize
+    data class GooglePay(
+        val config: Config,
+    ) : PaymentConfirmationOption {
+        @Parcelize
+        data class Config(
+            val environment: PaymentSheet.GooglePayConfiguration.Environment?,
+            val merchantName: String,
+            val merchantCountryCode: String,
+            val merchantCurrencyCode: String?,
+            val customAmount: Long?,
+            val customLabel: String?,
+            val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        ) : Parcelable
+    }
+
+    @Parcelize
     data class ExternalPaymentMethod(
         val type: String,
         val billingDetails: PaymentMethod.BillingDetails?,

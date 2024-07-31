@@ -21,13 +21,13 @@ import javax.inject.Singleton
     ]
 )
 @SuppressWarnings("UnnecessaryAbstractClass")
-internal abstract class Stripe3DSAuthenticatorModule {
+internal abstract class Stripe3DSNextActionHandlerModule {
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS2::class)
-    abstract fun bindsStripe3DSAuthenticator(
-        stripe3ds2Authenticator: Stripe3DS2NextActionHandler
+    abstract fun bindsStripe3DSNextActionHandler(
+        stripe3ds2NextActionHandler: Stripe3DS2NextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     companion object {

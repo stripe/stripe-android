@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][8971](https://github.com/stripe/stripe-android/pull/8971) Fixed a crash caused by an index out of bounds exception
+
 ## 20.48.2 - 2024-07-29
 
 ### PaymentSheet

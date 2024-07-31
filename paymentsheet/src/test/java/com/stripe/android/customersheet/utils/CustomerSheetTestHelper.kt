@@ -18,6 +18,9 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -47,6 +50,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
@@ -184,16 +188,26 @@ internal object CustomerSheetTestHelper {
                         publishableKey: () -> String,
                         stripeAccountId: () -> String?,
                         statusBarColor: Int?,
-                        includePaymentSheetAuthenticators: Boolean,
+                        includePaymentSheetNextHandlers: Boolean,
                         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
                     ): StripePaymentLauncher {
                         return mock()
                     }
                 },
+                googlePayPaymentMethodLauncherFactory = object : GooglePayPaymentMethodLauncherFactory {
+                    override fun create(
+                        lifecycleScope: CoroutineScope,
+                        config: GooglePayPaymentMethodLauncher.Config,
+                        readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                        skipReadyCheck: Boolean
+                    ): GooglePayPaymentMethodLauncher = mock()
+                },
                 statusBarColor = { null },
                 savedStateHandle = SavedStateHandle(),
                 application = application,
                 errorReporter = FakeErrorReporter(),
+                logger = Logger.noop(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

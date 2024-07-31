@@ -34,17 +34,17 @@ class DefaultPaymentNextActionHandlerRegistryTest {
     private val alipayRedirectAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val dispayOxxoDetailsAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
 
-    private val registry = DefaultPaymentAuthenticatorRegistry(
-        noOpIntentAuthenticator = noOpIntentAuthenticator,
-        sourceAuthenticator = sourceAuthenticator,
-        paymentAuthenticators = mapOf(
+    private val registry = DefaultPaymentNextActionHandlerRegistry(
+        noOpIntentNextActionHandler = noOpIntentAuthenticator,
+        sourceNextActionHandler = sourceAuthenticator,
+        paymentNextActionHandlers = mapOf(
             NextActionData.SdkData.Use3DS1::class.java to threeDs1lAuthenticator,
             NextActionData.SdkData.Use3DS2::class.java to threeDs2lAuthenticator,
             NextActionData.RedirectToUrl::class.java to redirectToUrlAuthenticator,
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
             NextActionData.DisplayOxxoDetails::class.java to dispayOxxoDetailsAuthenticator
         ),
-        includePaymentSheetAuthenticators = false,
+        includePaymentSheetNextActionHandlers = false,
         applicationContext = ApplicationProvider.getApplicationContext(),
     )
 
@@ -60,7 +60,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
 
     @Test
     fun `verify Source gets a SourceAuthenticator`() {
-        assertThat(registry.getAuthenticator(mock<Source>())).isEqualTo(sourceAuthenticator)
+        assertThat(registry.getNextActionHandler(mock<Source>())).isEqualTo(sourceAuthenticator)
     }
 
     @Test
@@ -104,7 +104,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         whenever(stripeIntent.requiresAction()).thenReturn(true)
         whenever(stripeIntent.nextActionData).thenReturn(nextActionData)
         assertThat(
-            registry.getAuthenticator(stripeIntent)
+            registry.getNextActionHandler(stripeIntent)
         ).isEqualTo(
             paymentNextActionHandler
         )
@@ -115,7 +115,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         val stripeIntent = mock<StripeIntent>()
         whenever(stripeIntent.requiresAction()).thenReturn(false)
         assertThat(
-            registry.getAuthenticator(stripeIntent)
+            registry.getNextActionHandler(stripeIntent)
         ).isEqualTo(
             noOpIntentAuthenticator
         )
@@ -128,7 +128,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         assertFailsWith<IllegalStateException>(
             "No suitable PaymentAuthenticator for $incompatibleType}"
         ) {
-            registry.getAuthenticator(incompatibleType)
+            registry.getNextActionHandler(incompatibleType)
         }
     }
 

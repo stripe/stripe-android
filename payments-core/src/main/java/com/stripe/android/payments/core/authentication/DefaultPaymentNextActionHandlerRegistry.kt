@@ -15,41 +15,41 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
-import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_AUTHENTICATORS
+import com.stripe.android.payments.core.injection.DaggerNextActionHandlerComponent
+import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-private typealias AuthenticatorKey = Class<out StripeIntent.NextActionData>
-private typealias Authenticator = @JvmSuppressWildcards PaymentNextActionHandler<StripeIntent>
+private typealias NextActionHandlerKey = Class<out StripeIntent.NextActionData>
+private typealias NextActionHandler = @JvmSuppressWildcards PaymentNextActionHandler<StripeIntent>
 
 /**
  * Default registry to provide look ups for [PaymentNextActionHandler].
- * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
+ * Should be only accessed through [DefaultPaymentNextActionHandlerRegistry.createInstance].
  */
 @Singleton
-internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
-    private val noOpIntentAuthenticator: NoOpIntentNextActionHandler,
-    private val sourceAuthenticator: SourceNextActionHandler,
-    @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>,
-    @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
+internal class DefaultPaymentNextActionHandlerRegistry @Inject internal constructor(
+    private val noOpIntentNextActionHandler: NoOpIntentNextActionHandler,
+    private val sourceNextActionHandler: SourceNextActionHandler,
+    @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
+    @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
-) : PaymentAuthenticatorRegistry {
+) : PaymentNextActionHandlerRegistry {
 
-    private val paymentSheetAuthenticators: Map<AuthenticatorKey, Authenticator> by lazy {
-        paymentSheetAuthenticators(includePaymentSheetAuthenticators, applicationContext)
+    private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
+        paymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers, applicationContext)
     }
 
     @VisibleForTesting
-    internal val allAuthenticators: Set<PaymentNextActionHandler<out StripeModel>>
+    internal val allNextActionHandlers: Set<PaymentNextActionHandler<out StripeModel>>
         get() = buildSet {
-            add(noOpIntentAuthenticator)
-            add(sourceAuthenticator)
-            addAll(paymentAuthenticators.values)
-            addAll(paymentSheetAuthenticators.values)
+            add(noOpIntentNextActionHandler)
+            add(sourceNextActionHandler)
+            addAll(paymentNextActionHandlers.values)
+            addAll(paymentSheetNextActionHandlers.values)
         }
 
     /**
@@ -65,27 +65,27 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         null
 
     @Suppress("UNCHECKED_CAST")
-    override fun <Authenticatable> getAuthenticator(
-        authenticatable: Authenticatable
-    ): PaymentNextActionHandler<Authenticatable> {
-        return when (authenticatable) {
+    override fun <Actionable> getNextActionHandler(
+        actionable: Actionable
+    ): PaymentNextActionHandler<Actionable> {
+        return when (actionable) {
             is StripeIntent -> {
-                if (!authenticatable.requiresAction()) {
-                    return noOpIntentAuthenticator as PaymentNextActionHandler<Authenticatable>
+                if (!actionable.requiresAction()) {
+                    return noOpIntentNextActionHandler as PaymentNextActionHandler<Actionable>
                 }
 
-                val allAuthenticators = paymentAuthenticators + paymentSheetAuthenticators
-                val authenticator = authenticatable.nextActionData?.let {
-                    allAuthenticators[it::class.java]
-                } ?: noOpIntentAuthenticator
+                val allNextActionHandlers = paymentNextActionHandlers + paymentSheetNextActionHandlers
+                val nextActionHandler = actionable.nextActionData?.let {
+                    allNextActionHandlers[it::class.java]
+                } ?: noOpIntentNextActionHandler
 
-                return authenticator as PaymentNextActionHandler<Authenticatable>
+                return nextActionHandler as PaymentNextActionHandler<Actionable>
             }
             is Source -> {
-                sourceAuthenticator as PaymentNextActionHandler<Authenticatable>
+                sourceNextActionHandler as PaymentNextActionHandler<Actionable>
             }
             else -> {
-                error("No suitable PaymentAuthenticator for $authenticatable")
+                error("No suitable PaymentNextActionHandler for $actionable")
             }
         }
     }
@@ -94,7 +94,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
-        allAuthenticators.forEach {
+        allNextActionHandlers.forEach {
             it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)
         }
         paymentRelayLauncher = activityResultCaller.registerForActivityResult(
@@ -108,7 +108,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     }
 
     override fun onLauncherInvalidated() {
-        allAuthenticators.forEach {
+        allNextActionHandlers.forEach {
             it.onLauncherInvalidated()
         }
         paymentRelayLauncher?.unregister()
@@ -128,9 +128,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             publishableKeyProvider: () -> String,
             productUsage: Set<String>,
             isInstantApp: Boolean,
-            includePaymentSheetAuthenticators: Boolean,
-        ): PaymentAuthenticatorRegistry {
-            val component = DaggerAuthenticationComponent.builder()
+            includePaymentSheetNextActionHandlers: Boolean,
+        ): PaymentNextActionHandlerRegistry {
+            val component = DaggerNextActionHandlerComponent.builder()
                 .context(context)
                 .analyticsRequestFactory(paymentAnalyticsRequestFactory)
                 .enableLogging(enableLogging)
@@ -140,30 +140,32 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 .publishableKeyProvider(publishableKeyProvider)
                 .productUsage(productUsage)
                 .isInstantApp(isInstantApp)
-                .includePaymentSheetAuthenticators(includePaymentSheetAuthenticators)
+                .includePaymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers)
                 .build()
             return component.registry
         }
     }
 }
 
-private fun paymentSheetAuthenticators(
-    includePaymentSheetAuthenticators: Boolean,
+@Suppress("TooGenericExceptionCaught")
+private fun paymentSheetNextActionHandlers(
+    includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context
-): Map<AuthenticatorKey, Authenticator> {
+): Map<NextActionHandlerKey, NextActionHandler> {
     return try {
-        if (includePaymentSheetAuthenticators) {
-            val className = "com.stripe.android.paymentsheet.PaymentSheetAuthenticators"
-            val authenticatorsObject = Class.forName(className).getDeclaredField("INSTANCE").get(null)
-            val getMethod = authenticatorsObject.javaClass.getDeclaredMethod("get")
+        if (includePaymentSheetNextActionHandlers) {
+            val className = "com.stripe.android.paymentsheet.PaymentSheetNextActionHandlers"
+            val nextActionHandlersObject = Class.forName(className).getDeclaredField("INSTANCE").get(null)
+            val getMethod = nextActionHandlersObject.javaClass.getDeclaredMethod("get")
             @Suppress("UNCHECKED_CAST")
-            return getMethod.invoke(authenticatorsObject) as Map<AuthenticatorKey, Authenticator>
+            return getMethod.invoke(nextActionHandlersObject) as Map<NextActionHandlerKey, NextActionHandler>
         } else {
             emptyMap()
         }
     } catch (e: Exception) {
         ErrorReporter.createFallbackInstance(applicationContext)
             .report(
+                // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,
                 stripeException = StripeException.create(e),
             )

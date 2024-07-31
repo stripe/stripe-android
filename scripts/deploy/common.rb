@@ -5,6 +5,10 @@ require 'open3'
 def fetch_password(password)
     stdout, stderr, status = Open3.capture3("fetch-password --raw #{password}")
 
+    if !stderr.empty?
+        raise("Failed to retrieve password: #{password}")
+    end
+
     stdout
 end
 
@@ -37,6 +41,10 @@ def replace_in_file(filename, pattern, replacement)
   content = File.read(filename)
   new_content = content.sub(pattern, replacement)
   File.write(filename, new_content)
+end
+
+def switch_to_release_branch()
+    switch_to_new_branch(release_branch, @deploy_branch)
 end
 
 def ensure_directory_is_clean()

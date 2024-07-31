@@ -174,7 +174,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
         actionable: StripeIntent
     ): WebAuthParams {
         return WebAuthParams(
-            // hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+            // hostedVoucherUrl will never be null as NextActionHandlerRegistry won't direct it here
             authUrl = hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
                 ?: throw IllegalArgumentException(
                     "null hostedVoucherUrl for ${actionable.nextActionType?.code}"

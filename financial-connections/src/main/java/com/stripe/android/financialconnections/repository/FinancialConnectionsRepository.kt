@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccc
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import javax.inject.Inject
 
@@ -54,7 +55,7 @@ internal interface FinancialConnectionsRepository {
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
-    private val apiOptions: ApiRequest.Options,
+    private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsRepository {
 
@@ -63,7 +64,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): FinancialConnectionsAccountList {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = getFinancialConnectionsAcccountsParams.toParamMap()
         )
         return requestExecutor.execute(
@@ -77,7 +78,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = sessionReceiptUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
@@ -94,7 +95,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "terminal_error" to terminalError
@@ -112,7 +113,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): MixedOAuthParams {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionOAuthResultsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret

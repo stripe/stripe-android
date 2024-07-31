@@ -906,7 +906,7 @@ internal class CustomerSheetViewModel(
                     clientSecret = clientSecret
                 ),
                 intent = stripeIntent,
-                confirmationOption = selection.toPaymentConfirmationOption(),
+                confirmationOption = selection.toPaymentConfirmationOption(configuration = null),
                 shippingDetails = null,
                 appearance = configuration.appearance,
             )

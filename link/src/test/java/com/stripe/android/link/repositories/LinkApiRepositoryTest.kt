@@ -335,11 +335,13 @@ class LinkApiRepositoryTest {
     @Test
     fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
+        val id = "csmrpd*AYq4D_sXdAAAAOQ0"
 
         whenever(
             stripeRepository.sharePaymentDetails(
                 consumerSessionClientSecret = any(),
                 id = any(),
+                extraParams = anyOrNull(),
                 requestOptions = any(),
             )
         ).thenReturn(Result.success("pm_123"))
@@ -347,13 +349,19 @@ class LinkApiRepositoryTest {
         val result = linkRepository.shareCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
-            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            id = id,
             last4 = "4242",
         )
 
         assertThat(result.isSuccess).isTrue()
         val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
 
+        verify(stripeRepository).sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionSecret,
+            id = id,
+            extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123"))),
+            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+        )
         assertThat(savedLinkPaymentDetails.paymentDetails)
             .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
@@ -374,6 +382,7 @@ class LinkApiRepositoryTest {
             stripeRepository.sharePaymentDetails(
                 consumerSessionClientSecret = any(),
                 id = any(),
+                extraParams = anyOrNull(),
                 requestOptions = any(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))

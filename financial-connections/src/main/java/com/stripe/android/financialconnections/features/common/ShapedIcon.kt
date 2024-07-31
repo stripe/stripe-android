@@ -8,6 +8,7 @@ import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -33,7 +34,7 @@ internal fun ShapedIcon(
     backgroundShape: Shape = CircleShape,
     contentDescription: String?,
 ) {
-    CircleBox(
+    IconWrapperBox(
         modifier = modifier,
         iconSize = iconSize,
         backgroundShape = backgroundShape,
@@ -50,6 +51,11 @@ internal fun ShapedIcon(
  * A circular icon with a branded background color.
  *
  * @param url the URL to use for the icon
+ * @param modifier to apply to the icon wrapper
+ * @param iconSize the size of the icon
+ * @param backgroundShape the shape of the icon wrapper
+ * @param contentDescription the content description for the icon
+ * @param flushed whether the icon should be flushed to the edge of the wrapper
  * @param errorPainter the [Painter] to use for the icon if the URL fails to load. If null,
  *        no icon will be rendered inside the circle.
  */
@@ -60,15 +66,18 @@ internal fun ShapedIcon(
     iconSize: IconSize = IconSize.Medium,
     backgroundShape: Shape = CircleShape,
     contentDescription: String?,
-    errorPainter: Painter? = null
+    errorPainter: Painter? = null,
+    flushed: Boolean = false
 ) {
-    CircleBox(
+    IconWrapperBox(
         modifier = modifier,
         backgroundShape = backgroundShape,
         iconSize = iconSize
     ) {
         StripeImage(
-            modifier = Modifier.size(iconSize.paddedSize),
+            modifier = Modifier.size(
+                if (flushed) iconSize.size else iconSize.paddedSize
+            ),
             url = url,
             imageLoader = LocalImageLoader.current,
             debugPainter = painterResource(id = R.drawable.stripe_ic_person),
@@ -102,7 +111,7 @@ private fun LocalIcon(
 }
 
 @Composable
-private fun CircleBox(
+private fun IconWrapperBox(
     modifier: Modifier = Modifier,
     iconSize: IconSize,
     backgroundShape: Shape,
@@ -113,6 +122,7 @@ private fun CircleBox(
         modifier = modifier
             .size(iconSize.size)
             .background(color = Brand50, shape = backgroundShape)
+            .clip(backgroundShape)
     ) {
         content()
     }

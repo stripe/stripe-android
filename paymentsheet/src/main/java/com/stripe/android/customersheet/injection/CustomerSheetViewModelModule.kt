@@ -149,16 +149,19 @@ internal interface CustomerSheetViewModelModule {
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
             errorReporter: ErrorReporter,
+            logger: Logger,
         ): IntentConfirmationHandler.Factory {
             return IntentConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory = null,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 application = application,
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
+                logger = logger,
             )
         }
 

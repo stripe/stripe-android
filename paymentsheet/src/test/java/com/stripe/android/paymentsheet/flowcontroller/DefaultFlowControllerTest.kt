@@ -14,6 +14,7 @@ import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -172,6 +173,7 @@ internal class DefaultFlowControllerTest {
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
     private var paymentLauncherResultCallback: ((InternalPaymentResult) -> Unit)? = null
+    private var googlePayLauncherResultCallback: ((GooglePayPaymentMethodLauncher.Result) -> Unit)? = null
 
     @Suppress("LongMethod")
     @BeforeTest
@@ -193,12 +195,18 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(addressElementActivityLauncher)
 
+        val googlePayCallbackCaptor = argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
+
         whenever(
             activityResultCaller.registerForActivityResult(
                 any<GooglePayPaymentMethodLauncherContractV2>(),
-                any()
+                googlePayCallbackCaptor.capture()
             )
         ).thenReturn(googlePayActivityLauncher)
+
+        googlePayLauncherResultCallback = {
+            googlePayCallbackCaptor.firstValue.onActivityResult(it)
+        }
 
         whenever(
             activityResultCaller.registerForActivityResult(
@@ -315,7 +323,7 @@ internal class DefaultFlowControllerTest {
 
         val errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
 
-        flowController.onGooglePayResult(
+        googlePayLauncherResultCallback?.invoke(
             GooglePayPaymentMethodLauncher.Result.Failed(
                 error = RuntimeException(),
                 errorCode = errorCode,
@@ -325,27 +333,6 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
             error = eq(PaymentSheetConfirmationError.GooglePay(errorCode)),
-        )
-    }
-
-    @Test
-    fun `Sends correct event for invalid local state when confirming payment`() = runTest {
-        val viewModel = createViewModel()
-        val flowController = createFlowController(viewModel = viewModel)
-
-        flowController.configureExpectingSuccess()
-
-        viewModel.state = null
-
-        flowController.onGooglePayResult(
-            GooglePayPaymentMethodLauncher.Result.Completed(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            )
-        )
-
-        verify(eventReporter).onPaymentFailure(
-            paymentSelection = isA<PaymentSelection.GooglePay>(),
-            error = eq(PaymentSheetConfirmationError.InvalidState),
         )
     }
 
@@ -1038,7 +1025,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        flowController.onGooglePayResult(
+        googlePayLauncherResultCallback?.invoke(
             GooglePayPaymentMethodLauncher.Result.Canceled
         )
 
@@ -1063,7 +1050,10 @@ internal class DefaultFlowControllerTest {
                 )
             )
 
-            flowController.onGooglePayResult(
+            flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(PaymentSelection.GooglePay))
+            flowController.confirm()
+
+            googlePayLauncherResultCallback?.invoke(
                 GooglePayPaymentMethodLauncher.Result.Completed(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
@@ -1781,10 +1771,14 @@ internal class DefaultFlowControllerTest {
         fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
         flowController.configureWithPaymentIntent(
-            paymentIntentClientSecret = "pi_12345"
+            paymentIntentClientSecret = "pi_12345",
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         ) { _, _ -> }
 
-        flowController.onGooglePayResult(
+        flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(PaymentSelection.GooglePay))
+        flowController.confirm()
+
+        googlePayLauncherResultCallback?.invoke(
             GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                     card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
@@ -2211,6 +2205,7 @@ internal class DefaultFlowControllerTest {
         application = ApplicationProvider.getApplicationContext(),
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
+        logger = Logger.noop(),
     )
 
     private fun createViewModel(): FlowControllerViewModel {

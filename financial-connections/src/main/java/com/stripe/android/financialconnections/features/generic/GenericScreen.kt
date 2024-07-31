@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -144,6 +147,8 @@ internal fun GenericHeader(
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isBrandIcon: Boolean =
+        remember(payload.icon?.default) { payload.icon?.default?.contains("BrandIcon") == true }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -151,6 +156,8 @@ internal fun GenericHeader(
         payload.icon?.default?.let { iconUrl ->
             ShapedIcon(
                 modifier = Modifier.align(payload.alignment.toComposeAlignment()),
+                backgroundShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape,
+                flushed = isBrandIcon,
                 url = iconUrl,
                 contentDescription = null,
                 iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
