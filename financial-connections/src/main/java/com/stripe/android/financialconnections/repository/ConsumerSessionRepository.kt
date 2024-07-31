@@ -21,16 +21,6 @@ internal data class CachedConsumerSession(
 internal interface ConsumerSessionRepository {
     fun provideConsumerSession(): CachedConsumerSession?
     fun storeConsumerSession(consumerSession: ConsumerSession?)
-
-    fun ConsumerSession.toCached() = CachedConsumerSession(
-        emailAddress = emailAddress,
-        phoneNumber = getRedactedPhoneNumber(),
-        clientSecret = clientSecret,
-        publishableKey = publishableKey,
-        isVerified = verificationSessions.any {
-            it.state == ConsumerSession.VerificationSession.SessionState.Verified
-        },
-    )
 }
 
 internal class RealConsumerSessionRepository @Inject constructor(
@@ -46,4 +36,14 @@ internal class RealConsumerSessionRepository @Inject constructor(
     ) {
         savedStateHandle[KeyConsumerSession] = consumerSession?.toCached()
     }
+
+    private fun ConsumerSession.toCached() = CachedConsumerSession(
+        emailAddress = emailAddress,
+        phoneNumber = getRedactedPhoneNumber(),
+        clientSecret = clientSecret,
+        publishableKey = publishableKey,
+        isVerified = verificationSessions.any {
+            it.state == ConsumerSession.VerificationSession.SessionState.Verified
+        },
+    )
 }

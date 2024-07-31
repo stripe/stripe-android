@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -13,7 +14,7 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAc
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
-import com.stripe.android.financialconnections.repository.TestConsumerSessionRepository
+import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.anyString
@@ -26,7 +27,7 @@ import org.mockito.kotlin.whenever
 internal class PollAttachPaymentAccountTest {
 
     private val repository = mock(FinancialConnectionsAccountsRepository::class.java)
-    private val consumerSessionRepository = TestConsumerSessionRepository()
+    private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
     private val configuration = FinancialConnectionsSheet.Configuration(
         financialConnectionsSessionClientSecret = "client_secret",
