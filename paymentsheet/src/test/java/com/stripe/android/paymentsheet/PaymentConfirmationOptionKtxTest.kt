@@ -21,7 +21,7 @@ class PaymentConfirmationOptionKtxTest {
             ),
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
@@ -36,7 +36,7 @@ class PaymentConfirmationOptionKtxTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
@@ -51,7 +51,7 @@ class PaymentConfirmationOptionKtxTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
@@ -66,7 +66,7 @@ class PaymentConfirmationOptionKtxTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
@@ -84,7 +84,7 @@ class PaymentConfirmationOptionKtxTest {
             ),
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = PaymentMethodOptionsParams.Card(
@@ -110,7 +110,7 @@ class PaymentConfirmationOptionKtxTest {
             iconResource = 0,
         )
 
-        assertThat(paymentSelection.toPaymentConfirmationOption()).isEqualTo(
+        assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.ExternalPaymentMethod(
                 type = "paypal",
                 billingDetails = PaymentMethod.BillingDetails(
@@ -124,13 +124,49 @@ class PaymentConfirmationOptionKtxTest {
     }
 
     @Test
-    fun `On Google Pay selection, should return null`() {
-        assertThat(PaymentSelection.GooglePay.toPaymentConfirmationOption()).isNull()
+    fun `On Google Pay selection with a null configuration, should return null`() {
+        assertThat(PaymentSelection.GooglePay.toPaymentConfirmationOption(configuration = null)).isNull()
+    }
+
+    @Test
+    fun `On Google Pay selection with config with null google pay config, should return null`() {
+        assertThat(
+            PaymentSelection.GooglePay.toPaymentConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+            )
+        ).isNull()
+    }
+
+    @Test
+    fun `On Google Pay selection with config with google pay config, should return expected option`() {
+        assertThat(
+            PaymentSelection.GooglePay.toPaymentConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.copy(
+                    googlePay = PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
+                        label = "Merchant Payments",
+                        amount = 5000,
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production
+                    )
+                )
+            )
+        ).isEqualTo(
+            PaymentConfirmationOption.GooglePay(
+                config = PaymentConfirmationOption.GooglePay.Config(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    merchantName = "Merchant, Inc.",
+                    merchantCountryCode = "US",
+                    merchantCurrencyCode = "USD",
+                    customAmount = 5000,
+                    customLabel = "Merchant Payments",
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
+                )
+            )
+        )
     }
 
     @Test
     fun `On Link selection, should return null`() {
-        assertThat(PaymentSelection.Link.toPaymentConfirmationOption()).isNull()
+        assertThat(PaymentSelection.Link.toPaymentConfirmationOption(configuration = null)).isNull()
     }
 
     private fun createNewPaymentSelection(
