@@ -13,11 +13,13 @@ internal class SelectNetworkedAccounts @Inject constructor(
     suspend operator fun invoke(
         consumerSessionClientSecret: String,
         selectedAccountIds: Set<String>,
+        consentAcquired: Boolean
     ): InstitutionResponse {
         return repository.postShareNetworkedAccounts(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             consumerSessionClientSecret = consumerSessionClientSecret,
             selectedAccountIds = selectedAccountIds,
+            consentAcquired = consentAcquired
         )
     }
 }

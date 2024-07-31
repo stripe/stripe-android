@@ -62,6 +62,7 @@ internal interface FinancialConnectionsAccountsRepository {
         clientSecret: String,
         consumerSessionClientSecret: String,
         selectedAccountIds: Set<String>,
+        consentAcquired: Boolean?
     ): InstitutionResponse
 
     suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
@@ -148,7 +149,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     override suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountIds: Set<String>
+        selectedAccountIds: Set<String>,
+        consentAcquired: Boolean?
     ): InstitutionResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
@@ -156,7 +158,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
-            ) + selectedAccountIds.mapIndexed { index, selectedAccountId ->
+                "consent_acquired" to consentAcquired,
+            ).filterNotNullValues() + selectedAccountIds.mapIndexed { index, selectedAccountId ->
                 "$PARAM_SELECTED_ACCOUNTS[$index]" to selectedAccountId
             },
         )

@@ -36,7 +36,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                defaultDataAccessNotice = null
+                defaultDataAccessNotice = null,
+                acquireConsentOnPrimaryCtaClick = false
             )
         ),
     )
@@ -59,7 +60,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                defaultDataAccessNotice = null
+                defaultDataAccessNotice = null,
+                acquireConsentOnPrimaryCtaClick = false
             )
         ),
     )
@@ -78,7 +80,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 singleAccount = true,
                 multipleAccountTypesSelectedDataAccessNotice = display().multipleAccountTypesSelectedDataAccessNotice,
                 aboveCta = display().aboveCta,
-                defaultDataAccessNotice = null
+                defaultDataAccessNotice = null,
+                acquireConsentOnPrimaryCtaClick = false
             )
         ),
     )
