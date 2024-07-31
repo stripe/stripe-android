@@ -150,6 +150,12 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             ensureAllEventsConsumed()
@@ -491,6 +497,12 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
@@ -531,6 +543,12 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
@@ -570,6 +588,12 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val cause = IllegalStateException("This is a failure!")
@@ -862,6 +886,12 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
@@ -983,6 +1013,12 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             epmsCallbackHandler.onResult(PaymentResult.Completed)
@@ -1020,6 +1056,12 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val exception = APIException()
@@ -1060,6 +1102,12 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
+                    inPreconfirmFlow = false,
+                )
+            )
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             epmsCallbackHandler.onResult(PaymentResult.Canceled)

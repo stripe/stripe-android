@@ -181,28 +181,15 @@ internal class IntentConfirmationHandler(
             return
         }
 
-        val confirmationOption = arguments.confirmationOption
-
-        val requiresPreconfirm = confirmationOption is PaymentConfirmationOption.GooglePay ||
-            confirmationOption.isBacs()
-
-        _state.value = if (requiresPreconfirm) {
-            State.Preconfirming(
-                confirmationOption = arguments.confirmationOption,
-                inPreconfirmFlow = false,
-            )
-        } else {
-            State.Confirming
-        }
+        _state.value = State.Preconfirming(
+            confirmationOption = arguments.confirmationOption,
+            inPreconfirmFlow = false,
+        )
 
         currentArguments = arguments
 
         coroutineScope.launch {
-            if (requiresPreconfirm) {
-                preconfirm(arguments)
-            } else {
-                confirm(arguments)
-            }
+            preconfirm(arguments)
         }
     }
 
@@ -225,7 +212,7 @@ internal class IntentConfirmationHandler(
         }
     }
 
-    private fun preconfirm(
+    private suspend fun preconfirm(
         arguments: Args
     ) {
         val confirmationOption = arguments.confirmationOption
@@ -240,6 +227,8 @@ internal class IntentConfirmationHandler(
             confirmationOption.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
         ) {
             launchBacsMandate(confirmationOption, arguments.appearance)
+        } else {
+            confirm(arguments)
         }
     }
 
@@ -657,10 +646,6 @@ internal class IntentConfirmationHandler(
         return first {
             it is T
         } as T
-    }
-
-    private fun PaymentConfirmationOption?.isBacs(): Boolean {
-        return this is PaymentConfirmationOption.New && createParams.typeCode == PaymentMethod.Type.BacsDebit.code
     }
 
     private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
