@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
@@ -37,7 +37,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
     companion object {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             consumerSessionRepository: ConsumerSessionRepository,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
@@ -45,7 +45,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
-                apiOptions = apiOptions,
+                provideApiRequestOptions = provideApiRequestOptions,
                 financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
                 consumerSessionRepository = consumerSessionRepository,
                 locale = locale,
@@ -58,7 +58,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
     private val consumerSessionRepository: ConsumerSessionRepository,
-    private val apiOptions: ApiRequest.Options,
+    private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
@@ -74,7 +74,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
         postConsumerSession(email, clientSecret).also { lookup ->
-            updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
+            updateCachedConsumerSession("lookupConsumerSession", lookup)
         }
     }
 
@@ -91,7 +91,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = CONSUMER_SURFACE,
             type = type,
             customEmailType = customEmailType,
-            requestOptions = apiOptions
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
         }
@@ -107,7 +107,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = CONSUMER_SURFACE,
-            requestOptions = apiOptions
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
@@ -124,10 +124,18 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     private fun updateCachedConsumerSession(
         source: String,
-        consumerSession: ConsumerSession?
+        consumerSession: ConsumerSession,
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from $source")
-        consumerSessionRepository.storeConsumerSession(consumerSession)
+        consumerSessionRepository.storeConsumerSession(consumerSession, publishableKey = null)
+    }
+
+    private fun updateCachedConsumerSession(
+        source: String,
+        lookup: ConsumerSessionLookup,
+    ) {
+        logger.debug("SYNC_CACHE: updating local consumer session from $source")
+        consumerSessionRepository.storeConsumerSession(lookup.consumerSession, lookup.publishableKey)
     }
 
     private companion object {

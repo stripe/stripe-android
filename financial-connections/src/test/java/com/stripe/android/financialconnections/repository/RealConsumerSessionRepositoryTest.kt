@@ -9,21 +9,13 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `Returns correct cached session that is verified`() {
-        val session = ConsumerSession(
+        val session = makeConsumerSession(
             clientSecret = "abc_123",
-            emailAddress = "email@email.com",
-            redactedFormattedPhoneNumber = "(***) ***-1234",
-            redactedPhoneNumber = "******1234",
-            verificationSessions = listOf(
-                ConsumerSession.VerificationSession(
-                    type = ConsumerSession.VerificationSession.SessionType.Sms,
-                    state = ConsumerSession.VerificationSession.SessionState.Verified,
-                ),
-            ),
+            isVerified = true,
         )
 
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-        store.storeConsumerSession(session)
+        store.storeConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
@@ -31,7 +23,7 @@ class RealConsumerSessionRepositoryTest {
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
-                publishableKey = null,
+                publishableKey = "pk_123",
                 isVerified = true,
             )
         )
@@ -39,21 +31,13 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `Returns correct cached session that is not verified`() {
-        val session = ConsumerSession(
+        val session = makeConsumerSession(
             clientSecret = "abc_123",
-            emailAddress = "email@email.com",
-            redactedFormattedPhoneNumber = "(***) ***-1234",
-            redactedPhoneNumber = "******1234",
-            verificationSessions = listOf(
-                ConsumerSession.VerificationSession(
-                    type = ConsumerSession.VerificationSession.SessionType.Sms,
-                    state = ConsumerSession.VerificationSession.SessionState.Started,
-                ),
-            ),
+            isVerified = false,
         )
 
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-        store.storeConsumerSession(session)
+        store.storeConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
@@ -61,9 +45,89 @@ class RealConsumerSessionRepositoryTest {
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
-                publishableKey = null,
+                publishableKey = "pk_123",
                 isVerified = false,
             )
+        )
+    }
+
+    @Test
+    fun `Keeps existing publishable key when storing updated consumer session`() {
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+
+        val session1 = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = false,
+        )
+
+        val session2 = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = true,
+        )
+
+        store.storeConsumerSession(session1, publishableKey = "pk_123")
+        store.storeConsumerSession(session2, publishableKey = null)
+
+        val cachedSession = store.provideConsumerSession()
+        assertThat(cachedSession).isEqualTo(
+            CachedConsumerSession(
+                emailAddress = "email@email.com",
+                phoneNumber = "(•••) •••-1234",
+                clientSecret = "abc_123",
+                publishableKey = "pk_123",
+                isVerified = true,
+            )
+        )
+    }
+
+    @Test
+    fun `Overrides existing publishable key when storing new consumer session`() {
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+
+        val session1 = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = false,
+        )
+
+        val session2 = makeConsumerSession(
+            clientSecret = "abc_456",
+            isVerified = false,
+        )
+
+        store.storeConsumerSession(session1, publishableKey = "pk_123")
+        store.storeConsumerSession(session2, publishableKey = "pk_456")
+
+        val cachedSession = store.provideConsumerSession()
+        assertThat(cachedSession).isEqualTo(
+            CachedConsumerSession(
+                emailAddress = "email@email.com",
+                phoneNumber = "(•••) •••-1234",
+                clientSecret = "abc_456",
+                publishableKey = "pk_456",
+                isVerified = false,
+            )
+        )
+    }
+
+    private fun makeConsumerSession(
+        clientSecret: String,
+        isVerified: Boolean
+    ): ConsumerSession {
+        return ConsumerSession(
+            clientSecret = clientSecret,
+            emailAddress = "email@email.com",
+            redactedFormattedPhoneNumber = "(***) ***-1234",
+            redactedPhoneNumber = "******1234",
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Sms,
+                    state = if (isVerified) {
+                        ConsumerSession.VerificationSession.SessionState.Verified
+                    } else {
+                        ConsumerSession.VerificationSession.SessionState.Started
+                    },
+                ),
+            ),
         )
     }
 }

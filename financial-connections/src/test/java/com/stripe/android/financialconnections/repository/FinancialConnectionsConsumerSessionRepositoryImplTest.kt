@@ -36,9 +36,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private fun buildRepository() =
         FinancialConnectionsConsumerSessionRepository(
             consumersApiService = consumersApiService,
+            provideApiRequestOptions = { apiOptions },
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             consumerSessionRepository = consumerSessionRepository,
-            apiOptions = apiOptions,
             locale = locale,
             logger = logger
         )
