@@ -33,8 +33,8 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionReposit
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
-import com.stripe.android.financialconnections.repository.api.ProvideConsumerApiOptions
-import com.stripe.android.financialconnections.repository.api.RealProvideConsumerApiOptions
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
+import com.stripe.android.financialconnections.repository.api.RealProvideApiRequestOptions
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -83,7 +83,7 @@ internal interface FinancialConnectionsSheetSharedModule {
 
     @Binds
     @Singleton
-    fun bindsProvideConsumerApiOptions(impl: RealProvideConsumerApiOptions): ProvideConsumerApiOptions
+    fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
 
     @Binds
     fun bindsIsLinkWithStripe(impl: RealIsLinkWithStripe): IsLinkWithStripe
