@@ -117,6 +117,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 singleAccount = manifest.singleAccount,
+                acquireConsentOnPrimaryCtaClick = accountsResponse.acquireConsentOnPrimaryCtaClick ?: false,
                 selectedAccountIds = selectedAccountIds
             )
         }.execute {
@@ -215,6 +216,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
 
             if (nextPane == SUCCESS) {
                 selectAccounts(
+                    acquireConsentOnPrimaryCtaClick = payload.acquireConsentOnPrimaryCtaClick,
                     consumerSessionClientSecret = payload.consumerSessionClientSecret,
                     accountIds = accountIds,
                 )
@@ -225,12 +227,14 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     }
 
     private suspend fun selectAccounts(
+        acquireConsentOnPrimaryCtaClick: Boolean,
         consumerSessionClientSecret: String,
         accountIds: Set<String>,
     ) {
         selectNetworkedAccounts(
             consumerSessionClientSecret = consumerSessionClientSecret,
             selectedAccountIds = accountIds,
+            consentAcquired = acquireConsentOnPrimaryCtaClick,
         )
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
@@ -379,6 +383,7 @@ internal data class LinkAccountPickerState(
         val multipleAccountTypesSelectedDataAccessNotice: DataAccessNotice?,
         val aboveCta: String?,
         val defaultDataAccessNotice: DataAccessNotice?,
+        val acquireConsentOnPrimaryCtaClick: Boolean,
     ) {
 
         val selectedAccounts: List<LinkedAccount>

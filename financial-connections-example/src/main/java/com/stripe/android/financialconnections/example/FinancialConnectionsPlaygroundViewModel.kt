@@ -385,6 +385,7 @@ enum class Merchant(
     Networking("networking"),
     LiveTesting("live_testing", canSwitchBetweenTestAndLive = false),
     TestMode("testmode", canSwitchBetweenTestAndLive = false),
+    NME("nme", canSwitchBetweenTestAndLive = true),
     Custom("other");
 
     companion object {
