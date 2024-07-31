@@ -342,7 +342,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 when (state) {
                     is IntentConfirmationHandler.State.Idle -> Unit
                     is IntentConfirmationHandler.State.Confirming -> {
-                        setContentVisible(state.contentVisible)
+                        setContentVisible(state.isPaymentSheetVisible)
 
                         if (viewState.value !is PaymentSheetViewState.StartProcessing) {
                             startProcessing(checkoutIdentifier)

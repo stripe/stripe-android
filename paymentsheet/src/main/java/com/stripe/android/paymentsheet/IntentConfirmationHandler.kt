@@ -73,10 +73,10 @@ internal class IntentConfirmationHandler(
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
 
-    private var contentVisible: Boolean
-        get() = savedStateHandle[CONTENT_VISIBLE_KEY] ?: true
+    private var isPaymentSheetVisible: Boolean
+        get() = savedStateHandle[IS_PAYMENT_SHEET_VISIBLE_KEY] ?: true
         set(value) {
-            savedStateHandle[CONTENT_VISIBLE_KEY] = value
+            savedStateHandle[IS_PAYMENT_SHEET_VISIBLE_KEY] = value
         }
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
@@ -102,7 +102,7 @@ internal class IntentConfirmationHandler(
 
     private val _state = MutableStateFlow(
         if (hasReloadedFromProcessDeath) {
-            State.Confirming(contentVisible)
+            State.Confirming(isPaymentSheetVisible)
         } else {
             State.Idle
         }
@@ -180,7 +180,7 @@ internal class IntentConfirmationHandler(
             return
         }
 
-        _state.value = State.Confirming(contentVisible = true)
+        _state.value = State.Confirming(isPaymentSheetVisible = true)
         currentArguments = arguments
 
         coroutineScope.launch {
@@ -362,7 +362,7 @@ internal class IntentConfirmationHandler(
             return
         }
 
-        _state.value = State.Confirming(contentVisible = false)
+        _state.value = State.Confirming(isPaymentSheetVisible = false)
 
         val activityLauncher = runCatching {
             requireNotNull(googlePayPaymentMethodLauncher)
@@ -544,7 +544,7 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     currentArguments?.let { arguments ->
-                        _state.value = State.Confirming(contentVisible = true)
+                        _state.value = State.Confirming(isPaymentSheetVisible = true)
 
                         val confirmationOption = PaymentConfirmationOption.Saved(
                             paymentMethod = result.paymentMethod,
@@ -669,7 +669,7 @@ internal class IntentConfirmationHandler(
          * Indicates the the handler is currently confirming a payment.
          */
         data class Confirming(
-            val contentVisible: Boolean,
+            val isPaymentSheetVisible: Boolean,
         ) : State
 
         /**
@@ -808,6 +808,6 @@ internal class IntentConfirmationHandler(
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
         private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
         private const val ARGUMENTS_KEY = "IntentConfirmationArguments"
-        private const val CONTENT_VISIBLE_KEY = "ContentVisibleDuringIntentConfirmation"
+        private const val IS_PAYMENT_SHEET_VISIBLE_KEY = "PaymentSheetVisibleDuringIntentConfirmation"
     }
 }
