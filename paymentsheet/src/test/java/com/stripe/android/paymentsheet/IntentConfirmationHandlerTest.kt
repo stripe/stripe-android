@@ -9,9 +9,9 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
@@ -1309,8 +1310,11 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
-    fun `On start Google Pay with no currency and setup intent, should fail`() = runTest {
-        val intentConfirmationHandler = createIntentConfirmationHandler()
+    fun `On start Google Pay with no currency and setup intent, should fail and log`() = runTest {
+        val logger = FakeUserFacingLogger()
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            logger = logger
+        )
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
@@ -1327,12 +1331,14 @@ class IntentConfirmationHandlerTest {
 
         val result = intentConfirmationHandler.awaitIntentResult().asFailed()
 
-        assertThat(result.cause.message).isEqualTo(
-            "GooglePayConfig.currencyCode is required in order to use " +
-                "Google Pay when processing a Setup Intent"
-        )
+        val message = "GooglePayConfig.currencyCode is required in order to use " +
+            "Google Pay when processing a Setup Intent"
+
+        assertThat(result.cause.message).isEqualTo(message)
         assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.MerchantIntegration)
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+
+        assertThat(logger.getLoggedMessages()).contains(message)
     }
 
     @Test
@@ -1570,7 +1576,7 @@ class IntentConfirmationHandlerTest {
             },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        logger: Logger = Logger.noop(),
+        logger: UserFacingLogger = FakeUserFacingLogger(),
         shouldRegister: Boolean = true,
         coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
     ): IntentConfirmationHandler {

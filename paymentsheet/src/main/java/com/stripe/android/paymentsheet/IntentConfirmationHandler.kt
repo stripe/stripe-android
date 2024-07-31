@@ -12,9 +12,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -65,7 +65,7 @@ internal class IntentConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val logger: Logger,
+    private val logger: UserFacingLogger?,
 ) {
     private var paymentLauncher: PaymentLauncher? = null
     private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
@@ -349,7 +349,7 @@ internal class IntentConfirmationHandler(
             val message = "GooglePayConfig.currencyCode is required in order to use " +
                 "Google Pay when processing a Setup Intent"
 
-            logger.warning(message)
+            logger?.logWarningWithoutPii(message)
 
             onIntentResult(
                 Result.Failed(
@@ -778,7 +778,7 @@ internal class IntentConfirmationHandler(
         private val statusBarColor: () -> Int?,
         private val application: Application,
         private val errorReporter: ErrorReporter,
-        private val logger: Logger,
+        private val logger: UserFacingLogger?,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
