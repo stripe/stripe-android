@@ -19,13 +19,13 @@ internal class RealProvideApiRequestOptions @Inject constructor(
         useConsumerPublishableKey: Boolean,
     ): ApiRequest.Options {
         return if (useConsumerPublishableKey) {
-            consumerPublishableKey() ?: apiRequestOptions
+            consumerApiRequestOptions() ?: apiRequestOptions
         } else {
             apiRequestOptions
         }
     }
 
-    private fun consumerPublishableKey(): ApiRequest.Options? {
+    private fun consumerApiRequestOptions(): ApiRequest.Options? {
         val session = consumerSessionProvider.provideConsumerSession()?.takeIf { it.isVerified }
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 
