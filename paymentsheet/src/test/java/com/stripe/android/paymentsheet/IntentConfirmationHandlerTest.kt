@@ -150,7 +150,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             ensureAllEventsConsumed()
         }
@@ -491,7 +491,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
@@ -531,7 +531,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
 
@@ -570,7 +570,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val cause = IllegalStateException("This is a failure!")
 
@@ -699,7 +699,7 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             dispatcher.scheduler.advanceTimeBy(delayTime = 1.01.seconds)
 
@@ -721,8 +721,9 @@ class IntentConfirmationHandlerTest {
             enqueueCompleteStep()
         }
 
+        val confirmationOption = createBacsPaymentConfirmationOption()
         val bacsArguments = DEFAULT_ARGUMENTS.copy(
-            confirmationOption = createBacsPaymentConfirmationOption()
+            confirmationOption = confirmationOption
         )
 
         val savedStateHandle = SavedStateHandle().apply {
@@ -743,13 +744,20 @@ class IntentConfirmationHandlerTest {
         )
 
         intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             dispatcher.scheduler.advanceTimeBy(delayTime = 200.seconds)
 
             bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Confirmed)
 
             dispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val expectedResult = IntentConfirmationHandler.Result.Succeeded(
                 intent = DEFAULT_ARGUMENTS.intent,
@@ -854,7 +862,7 @@ class IntentConfirmationHandlerTest {
                 arguments = DEFAULT_ARGUMENTS,
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
 
@@ -975,7 +983,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             epmsCallbackHandler.onResult(PaymentResult.Completed)
 
@@ -1012,7 +1020,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val exception = APIException()
 
@@ -1052,7 +1060,7 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             epmsCallbackHandler.onResult(PaymentResult.Canceled)
 
@@ -1237,18 +1245,29 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentConfirmationOption()
+        val confirmationOption = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.state.test {
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
 
             intentConfirmationHandler.start(
                 arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = paymentSelection
+                    confirmationOption = confirmationOption
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.ModifyDetails)
 
@@ -1280,18 +1299,29 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentConfirmationOption()
+        val confirmationOption = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.state.test {
             assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
 
             intentConfirmationHandler.start(
                 arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = paymentSelection,
+                    confirmationOption = confirmationOption,
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Cancelled)
 
@@ -1453,8 +1483,18 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = false))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             googlePayCallbackHandler.onResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
@@ -1485,8 +1525,18 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = false))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             val exception = IllegalStateException("Failed!")
 
@@ -1529,8 +1579,18 @@ class IntentConfirmationHandlerTest {
                 ),
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = false))
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = true,
+                )
+            )
 
             googlePayCallbackHandler.onResult(
                 GooglePayPaymentMethodLauncher.Result.Completed(
@@ -1538,7 +1598,7 @@ class IntentConfirmationHandlerTest {
                 )
             )
 
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming(isPaymentSheetVisible = true))
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
 
             val call = intentConfirmationInterceptor.calls.awaitItem()
 
