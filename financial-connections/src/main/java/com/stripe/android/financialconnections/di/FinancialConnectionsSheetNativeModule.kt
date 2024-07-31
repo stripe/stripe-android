@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsIn
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
+import com.stripe.android.financialconnections.repository.api.RealProvideApiRequestOptions
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -56,6 +57,10 @@ internal interface FinancialConnectionsSheetNativeModule {
         impl: RealHandleError
     ): HandleError
 
+    @Binds
+    @Singleton
+    fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
+
     companion object {
         @Provides
         @Singleton
@@ -83,14 +88,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesFinancialConnectionsManifestRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             locale: Locale?,
             logger: Logger,
             @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
         ) = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
-            apiOptions = apiOptions,
+            provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
             initialSync = initialSynchronizeSessionResponse

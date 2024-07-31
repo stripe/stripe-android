@@ -1,16 +1,17 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import javax.inject.Inject
 
 internal fun interface IsLinkWithStripe {
-    suspend operator fun invoke(): Boolean
+    operator fun invoke(): Boolean
 }
 
 internal class RealIsLinkWithStripe @Inject constructor(
-    private val getOrFetchSync: GetOrFetchSync,
+    private val initialState: FinancialConnectionsSheetNativeState,
 ) : IsLinkWithStripe {
 
-    override suspend operator fun invoke(): Boolean {
-        return getOrFetchSync().manifest.isLinkWithStripe ?: false
+    override operator fun invoke(): Boolean {
+        return initialState.isLinkWithStripe
     }
 }

@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionProvide
 import javax.inject.Inject
 
 internal fun interface ProvideApiRequestOptions {
-    suspend operator fun invoke(useConsumerPublishableKey: Boolean): ApiRequest.Options
+    operator fun invoke(useConsumerPublishableKey: Boolean): ApiRequest.Options
 }
 
 internal class RealProvideApiRequestOptions @Inject constructor(
@@ -15,7 +15,7 @@ internal class RealProvideApiRequestOptions @Inject constructor(
     private val apiRequestOptions: ApiRequest.Options,
 ) : ProvideApiRequestOptions {
 
-    override suspend fun invoke(
+    override fun invoke(
         useConsumerPublishableKey: Boolean,
     ): ApiRequest.Options {
         return if (useConsumerPublishableKey) {
@@ -25,7 +25,7 @@ internal class RealProvideApiRequestOptions @Inject constructor(
         }
     }
 
-    private suspend fun consumerPublishableKey(): ApiRequest.Options? {
+    private fun consumerPublishableKey(): ApiRequest.Options? {
         val session = consumerSessionProvider.provideConsumerSession()?.takeIf { it.isVerified }
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 
