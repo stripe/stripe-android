@@ -117,7 +117,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 singleAccount = manifest.singleAccount,
-                acquireConsentOnPrimaryCtaClick = accountsResponse.acquireCtaOnPrimaryCtaClick ?: false,
+                acquireConsentOnPrimaryCtaClick = accountsResponse.acquireConsentOnPrimaryCtaClick ?: false,
                 selectedAccountIds = selectedAccountIds
             )
         }.execute {
