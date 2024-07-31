@@ -53,7 +53,8 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
     override suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountIds: Set<String>
+        selectedAccountIds: Set<String>,
+        consentAcquired: Boolean?
     ): InstitutionResponse {
         TODO("Not yet implemented")
     }
