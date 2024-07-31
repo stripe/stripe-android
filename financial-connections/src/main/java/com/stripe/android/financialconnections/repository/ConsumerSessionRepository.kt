@@ -37,17 +37,16 @@ internal class RealConsumerSessionRepository @Inject constructor(
     override fun storeConsumerSession(
         consumerSession: ConsumerSession?,
     ) {
-        val cachedSession = consumerSession?.let { session ->
-            CachedConsumerSession(
-                emailAddress = session.emailAddress,
-                phoneNumber = session.getRedactedPhoneNumber(),
-                clientSecret = session.clientSecret,
-                publishableKey = session.publishableKey,
-                isVerified = session.verificationSessions.any {
-                    it.state == ConsumerSession.VerificationSession.SessionState.Verified
-                },
-            )
-        }
-        savedStateHandle[KeyConsumerSession] = cachedSession
+        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached()
     }
+
+    private fun ConsumerSession.toCached() = CachedConsumerSession(
+        emailAddress = emailAddress,
+        phoneNumber = getRedactedPhoneNumber(),
+        clientSecret = clientSecret,
+        publishableKey = publishableKey,
+        isVerified = verificationSessions.any {
+            it.state == ConsumerSession.VerificationSession.SessionState.Verified
+        },
+    )
 }

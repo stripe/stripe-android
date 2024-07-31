@@ -10,7 +10,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
@@ -42,7 +41,6 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
     private val getOrFetchSync: GetOrFetchSync,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -51,7 +49,6 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
-            val consumerSession = getCachedConsumerSession()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
             val accounts = getCachedAccounts()
@@ -60,7 +57,6 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
                 pollAttachPaymentAccount(
                     sync = sync,
                     activeInstitution = activeInstitution,
-                    consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 )
             }

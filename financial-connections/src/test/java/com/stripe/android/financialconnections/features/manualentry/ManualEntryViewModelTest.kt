@@ -39,14 +39,14 @@ class ManualEntryViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel() = ManualEntryViewModel(
+        initialState = ManualEntryState(),
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        pollAttachPaymentAccount = pollAttachPaymentAccount,
+        successContentRepository = SuccessContentRepository(SavedStateHandle()),
+        eventTracker = eventTracker,
         getOrFetchSync = getSync,
         navigationManager = navigationManager,
         logger = Logger.noop(),
-        eventTracker = eventTracker,
-        initialState = ManualEntryState(),
-        pollAttachPaymentAccount = pollAttachPaymentAccount,
-        successContentRepository = SuccessContentRepository(SavedStateHandle()),
-        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test
