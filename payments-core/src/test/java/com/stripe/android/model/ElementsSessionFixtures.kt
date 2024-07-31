@@ -1361,7 +1361,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_walley": false,
                     "elements_enable_external_payment_method_wechat_mobile": false,
                     "elements_enable_external_payment_method_younitedpay": false,
-                    "elements_enable_external_payment_methods": true,
                     "elements_enable_klarna_unified_offer": true,
                     "elements_enable_link_spm": true,
                     "elements_enable_mobilepay": false,
