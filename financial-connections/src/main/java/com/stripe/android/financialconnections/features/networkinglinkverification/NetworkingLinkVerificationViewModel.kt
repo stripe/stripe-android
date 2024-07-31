@@ -14,8 +14,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -56,7 +58,9 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
-    private val logger: Logger
+    private val logger: Logger,
+    private val isLinkWithStripe: IsLinkWithStripe,
+    private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
 ) : FinancialConnectionsViewModel<NetworkingLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -142,27 +146,32 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
             verificationCode = otp
         )
 
-        runCatching { markLinkVerified() }
-            .fold(
-                // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
-                onSuccess = {
-                    analyticsTracker.track(VerificationSuccess(PANE))
-                    navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
-                },
-                onFailure = {
-                    analyticsTracker.logError(
-                        extraMessage = "Error confirming verification or marking link as verified",
-                        error = it,
-                        logger = logger,
-                        pane = PANE
-                    )
-                    val nextPaneOnFailure = payload.initialInstitution
-                        ?.let { Pane.PARTNER_AUTH }
-                        ?: Pane.INSTITUTION_PICKER
-                    analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
-                    navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
-                }
-            )
+        runCatching {
+            if (isLinkWithStripe()) {
+                attachConsumerToLinkAccountSession(payload.consumerSessionClientSecret)
+            } else {
+                markLinkVerified()
+            }
+        }.fold(
+            // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
+            onSuccess = {
+                analyticsTracker.track(VerificationSuccess(PANE))
+                navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
+            },
+            onFailure = {
+                analyticsTracker.logError(
+                    extraMessage = "Error confirming verification or marking link as verified",
+                    error = it,
+                    logger = logger,
+                    pane = PANE
+                )
+                val nextPaneOnFailure = payload.initialInstitution
+                    ?.let { Pane.PARTNER_AUTH }
+                    ?: Pane.INSTITUTION_PICKER
+                analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
+                navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
+            }
+        )
     }.execute { copy(confirmVerification = it) }
 
     @AssistedFactory

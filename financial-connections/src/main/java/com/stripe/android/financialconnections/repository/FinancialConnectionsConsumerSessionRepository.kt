@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
+import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
@@ -33,6 +34,11 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         verificationCode: String,
         type: VerificationType,
     ): ConsumerSession
+
+    suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+    ): AttachConsumerToLinkAccountSession
 
     companion object {
         operator fun invoke(
@@ -111,6 +117,18 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
+    }
+
+    override suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+    ): AttachConsumerToLinkAccountSession {
+        return consumersApiService.attachLinkConsumerToLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            clientSecret = clientSecret,
+            requestSurface = CONSUMER_SURFACE,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+        )
     }
 
     private suspend fun postConsumerSession(
