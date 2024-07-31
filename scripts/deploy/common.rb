@@ -5,6 +5,10 @@ require 'open3'
 def fetch_password(password)
     stdout, stderr, status = Open3.capture3("fetch-password --raw #{password}")
 
+    if !stderr.empty?
+        raise("Failed to retrieve password: #{password}")
+    end
+
     stdout
 end
 

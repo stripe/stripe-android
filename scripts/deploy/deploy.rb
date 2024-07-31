@@ -5,6 +5,7 @@ require 'optparse'
 
 require_relative 'common'
 require_relative 'create_github_release'
+require_relative 'permissions_check'
 require_relative 'publish_to_sonatype'
 require_relative 'update_dokka'
 require_relative 'update_pay_server_docs'
@@ -58,6 +59,7 @@ end.parse!
 
 steps = [
     # Prep for making changes
+    method(:check_permissions),
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
