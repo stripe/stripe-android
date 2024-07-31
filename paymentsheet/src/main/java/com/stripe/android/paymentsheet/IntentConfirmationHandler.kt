@@ -73,12 +73,6 @@ internal class IntentConfirmationHandler(
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
 
-    private var isPaymentSheetVisible: Boolean
-        get() = savedStateHandle[IS_PAYMENT_SHEET_VISIBLE_KEY] ?: true
-        set(value) {
-            savedStateHandle[IS_PAYMENT_SHEET_VISIBLE_KEY] = value
-        }
-
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
         get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
         set(value) {
@@ -101,8 +95,13 @@ internal class IntentConfirmationHandler(
     val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
 
     private val _state = MutableStateFlow(
-        if (hasReloadedFromProcessDeath) {
-            State.Confirming(isPaymentSheetVisible)
+        if (hasReloadedWhileAwaitingPreConfirm) {
+            State.Preconfirming(
+                confirmationOption = currentArguments?.confirmationOption,
+                inPreconfirmFlow = true,
+            )
+        } else if (hasReloadedWhileAwaitingConfirm) {
+            State.Confirming
         } else {
             State.Idle
         }
@@ -176,11 +175,17 @@ internal class IntentConfirmationHandler(
     fun start(
         arguments: Args,
     ) {
-        if (_state.value is State.Confirming) {
+        val currentState = _state.value
+
+        if (currentState is State.Preconfirming || currentState is State.Confirming) {
             return
         }
 
-        _state.value = State.Confirming(isPaymentSheetVisible = true)
+        _state.value = State.Preconfirming(
+            confirmationOption = arguments.confirmationOption,
+            inPreconfirmFlow = false,
+        )
+
         currentArguments = arguments
 
         coroutineScope.launch {
@@ -198,6 +203,7 @@ internal class IntentConfirmationHandler(
         return when (val state = _state.value) {
             is State.Idle -> null
             is State.Complete -> state.result
+            is State.Preconfirming,
             is State.Confirming -> {
                 val complete = _state.firstInstanceOf<State.Complete>()
 
@@ -212,8 +218,6 @@ internal class IntentConfirmationHandler(
         val confirmationOption = arguments.confirmationOption
 
         if (confirmationOption is PaymentConfirmationOption.GooglePay) {
-            storeIsAwaitingForPreConfirmResult()
-
             launchGooglePay(
                 googlePay = confirmationOption,
                 arguments = arguments,
@@ -222,8 +226,6 @@ internal class IntentConfirmationHandler(
             confirmationOption is PaymentConfirmationOption.New &&
             confirmationOption.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
         ) {
-            storeIsAwaitingForPreConfirmResult()
-
             launchBacsMandate(confirmationOption, arguments.appearance)
         } else {
             confirm(arguments)
@@ -233,6 +235,8 @@ internal class IntentConfirmationHandler(
     private suspend fun confirm(
         arguments: Args
     ) {
+        _state.value = State.Confirming
+
         val confirmationOption = arguments.confirmationOption
 
         if (confirmationOption is PaymentConfirmationOption.ExternalPaymentMethod) {
@@ -362,8 +366,6 @@ internal class IntentConfirmationHandler(
             return
         }
 
-        _state.value = State.Confirming(isPaymentSheetVisible = false)
-
         val activityLauncher = runCatching {
             requireNotNull(googlePayPaymentMethodLauncher)
         }.getOrElse {
@@ -401,6 +403,10 @@ internal class IntentConfirmationHandler(
         )
 
         val intent = arguments.intent
+
+        storeIsAwaitingForPreConfirmResult()
+
+        _state.value = State.Preconfirming(confirmationOption = googlePay, inPreconfirmFlow = true)
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
@@ -447,6 +453,13 @@ internal class IntentConfirmationHandler(
             runCatching {
                 requireNotNull(bacsMandateConfirmationLauncher)
             }.onSuccess { launcher ->
+                _state.value = State.Preconfirming(
+                    confirmationOption = confirmationOption,
+                    inPreconfirmFlow = true,
+                )
+
+                storeIsAwaitingForPreConfirmResult()
+
                 launcher.launch(
                     data = data,
                     appearance = appearance
@@ -544,8 +557,6 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     currentArguments?.let { arguments ->
-                        _state.value = State.Confirming(isPaymentSheetVisible = true)
-
                         val confirmationOption = PaymentConfirmationOption.Saved(
                             paymentMethod = result.paymentMethod,
                             optionsParams = null,
@@ -666,11 +677,18 @@ internal class IntentConfirmationHandler(
         data object Idle : State
 
         /**
+         * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation of
+         * a payment.
+         */
+        data class Preconfirming(
+            val confirmationOption: PaymentConfirmationOption?,
+            val inPreconfirmFlow: Boolean,
+        ) : State
+
+        /**
          * Indicates the the handler is currently confirming a payment.
          */
-        data class Confirming(
-            val isPaymentSheetVisible: Boolean,
-        ) : State
+        data object Confirming : State
 
         /**
          * Indicates that the handler has completed confirming a payment and contains a [Result] regarding
@@ -808,6 +826,5 @@ internal class IntentConfirmationHandler(
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
         private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
         private const val ARGUMENTS_KEY = "IntentConfirmationArguments"
-        private const val IS_PAYMENT_SHEET_VISIBLE_KEY = "PaymentSheetVisibleDuringIntentConfirmation"
     }
 }
