@@ -60,7 +60,7 @@ internal class IntentConfirmationHandler(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
     private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
     private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
@@ -355,7 +355,7 @@ internal class IntentConfirmationHandler(
                 Result.Failed(
                     cause = IllegalStateException(message),
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = ErrorType.Internal,
+                    type = ErrorType.MerchantIntegration,
                 )
             )
 
@@ -364,50 +364,79 @@ internal class IntentConfirmationHandler(
 
         _state.value = State.Confirming(contentVisible = false)
 
-        runCatching {
+        val activityLauncher = runCatching {
             requireNotNull(googlePayPaymentMethodLauncher)
-        }.onSuccess { activityLauncher ->
-            val config = googlePay.config
-
-            val launcher = googlePayPaymentMethodLauncherFactory.create(
-                lifecycleScope = coroutineScope,
-                config = GooglePayPaymentMethodLauncher.Config(
-                    environment = when (config.environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
-                        else -> GooglePayEnvironment.Test
-                    },
-                    merchantCountryCode = config.merchantCountryCode,
-                    merchantName = config.merchantName,
-                    isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
-                    billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
-                ),
-                readyCallback = {
-                    // Do nothing since we are skipping the ready check below
-                },
-                activityResultLauncher = activityLauncher,
-                skipReadyCheck = true
-            )
-
-            val intent = arguments.intent
-            launcher.present(
-                currencyCode = intent.asPaymentIntent()?.currency
-                    ?: config.merchantCurrencyCode.orEmpty(),
-                amount = when (intent) {
-                    is PaymentIntent -> intent.amount ?: 0L
-                    is SetupIntent -> config.customAmount ?: 0L
-                },
-                transactionId = intent.id,
-                label = config.customLabel,
-            )
-        }.onFailure { cause ->
+        }.getOrElse {
             onIntentResult(
                 Result.Failed(
-                    cause = cause,
+                    cause = it,
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = ErrorType.Internal
                 )
             )
+
+            return
         }
+
+        val factory = runCatching {
+            requireNotNull(googlePayPaymentMethodLauncherFactory)
+        }.getOrElse {
+            onIntentResult(
+                Result.Failed(
+                    cause = it,
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    type = ErrorType.Internal
+                )
+            )
+
+            return
+        }
+
+        val config = googlePay.config
+
+        val launcher = createGooglePayLauncher(
+            factory = factory,
+            activityLauncher = activityLauncher,
+            config = config,
+        )
+
+        val intent = arguments.intent
+
+        launcher.present(
+            currencyCode = intent.asPaymentIntent()?.currency
+                ?: config.merchantCurrencyCode.orEmpty(),
+            amount = when (intent) {
+                is PaymentIntent -> intent.amount ?: 0L
+                is SetupIntent -> config.customAmount ?: 0L
+            },
+            transactionId = intent.id,
+            label = config.customLabel,
+        )
+    }
+
+    private fun createGooglePayLauncher(
+        factory: GooglePayPaymentMethodLauncherFactory,
+        activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+        config: PaymentConfirmationOption.GooglePay.Config,
+    ): GooglePayPaymentMethodLauncher {
+        return factory.create(
+            lifecycleScope = coroutineScope,
+            config = GooglePayPaymentMethodLauncher.Config(
+                environment = when (config.environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                    else -> GooglePayEnvironment.Test
+                },
+                merchantCountryCode = config.merchantCountryCode,
+                merchantName = config.merchantName,
+                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
+                billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+            ),
+            readyCallback = {
+                // Do nothing since we are skipping the ready check below
+            },
+            activityResultLauncher = activityLauncher,
+            skipReadyCheck = true
+        )
     }
 
     private fun launchBacsMandate(
@@ -724,6 +753,11 @@ internal class IntentConfirmationHandler(
         data object Internal : ErrorType
 
         /**
+         * Indicates a merchant integration error occurred during the confirmation process.
+         */
+        data object MerchantIntegration : ErrorType
+
+        /**
          * Indicates an error occurred when confirming with external payment methods
          */
         data object ExternalPaymentMethod : ErrorType
@@ -739,7 +773,7 @@ internal class IntentConfirmationHandler(
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
         private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-        private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+        private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val application: Application,

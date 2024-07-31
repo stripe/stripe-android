@@ -23,7 +23,6 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -146,7 +145,6 @@ internal interface CustomerSheetViewModelModule {
             savedStateHandle: SavedStateHandle,
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
             bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-            googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -157,7 +155,7 @@ internal interface CustomerSheetViewModelModule {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
-                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+                googlePayPaymentMethodLauncherFactory = null,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 application = application,
                 statusBarColor = { statusBarColor },

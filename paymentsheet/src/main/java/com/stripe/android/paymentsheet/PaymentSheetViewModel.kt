@@ -556,6 +556,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 message = failure.message,
             )
             IntentConfirmationHandler.ErrorType.Fatal -> onFatal(failure.cause)
+            IntentConfirmationHandler.ErrorType.MerchantIntegration,
             IntentConfirmationHandler.ErrorType.Internal -> onError(failure.message)
         }
     }

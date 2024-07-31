@@ -1331,7 +1331,7 @@ class IntentConfirmationHandlerTest {
             "GooglePayConfig.currencyCode is required in order to use " +
                 "Google Pay when processing a Setup Intent"
         )
-        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.Internal)
+        assertThat(result.type).isEqualTo(IntentConfirmationHandler.ErrorType.MerchantIntegration)
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
     }
 

@@ -683,6 +683,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is IntentConfirmationHandler.ErrorType.GooglePay ->
                 PaymentSheetConfirmationError.GooglePay(errorCode)
             IntentConfirmationHandler.ErrorType.Internal,
+            IntentConfirmationHandler.ErrorType.MerchantIntegration,
             IntentConfirmationHandler.ErrorType.Fatal -> null
         }
     }
