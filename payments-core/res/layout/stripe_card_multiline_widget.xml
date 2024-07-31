@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/stripe_card_brand_view_height"
             android:layout_marginTop="@dimen/stripe_card_icon_padding"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="@dimen/stripe_card_icon_padding_multiline_bottom"
             android:layout_marginEnd="@dimen/stripe_card_icon_padding"
             android:layout_gravity="center_vertical|end" />
 
