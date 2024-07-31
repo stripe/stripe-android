@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_C
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
 /**
@@ -69,15 +70,15 @@ internal interface FinancialConnectionsAccountsRepository {
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options,
             logger: Logger,
             savedStateHandle: SavedStateHandle,
         ): FinancialConnectionsAccountsRepository =
             FinancialConnectionsAccountsRepositoryImpl(
                 requestExecutor,
+                provideApiRequestOptions,
                 apiRequestFactory,
-                apiOptions,
                 logger,
                 savedStateHandle,
             )
@@ -85,10 +86,10 @@ internal interface FinancialConnectionsAccountsRepository {
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
-    val requestExecutor: FinancialConnectionsRequestExecutor,
-    val apiRequestFactory: ApiRequest.Factory,
-    val apiOptions: ApiRequest.Options,
-    val logger: Logger,
+    private val requestExecutor: FinancialConnectionsRequestExecutor,
+    private val provideApiRequestOptions: ProvideApiRequestOptions,
+    private val apiRequestFactory: ApiRequest.Factory,
+    private val logger: Logger,
     private val savedStateHandle: SavedStateHandle,
 ) : FinancialConnectionsAccountsRepository {
 
@@ -109,7 +110,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -130,7 +131,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): NetworkedAccountsList {
         val request = apiRequestFactory.createGet(
             url = networkedAccountsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
@@ -152,7 +153,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): InstitutionResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
@@ -173,7 +174,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): LinkAccountSessionPaymentAccount {
         val request = apiRequestFactory.createPost(
             url = attachPaymentAccountUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 PARAMS_CLIENT_SECRET to clientSecret
@@ -193,7 +194,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -220,7 +221,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
         val request = apiRequestFactory.createGet(
             url = pollAccountsNumbersUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = accounts,
         )
 

@@ -18,8 +18,11 @@ internal data class CachedConsumerSession(
     val isVerified: Boolean,
 ) : Parcelable
 
-internal interface ConsumerSessionRepository {
+internal fun interface ConsumerSessionProvider {
     fun provideConsumerSession(): CachedConsumerSession?
+}
+
+internal interface ConsumerSessionRepository : ConsumerSessionProvider {
     fun storeConsumerSession(consumerSession: ConsumerSession?)
 }
 
