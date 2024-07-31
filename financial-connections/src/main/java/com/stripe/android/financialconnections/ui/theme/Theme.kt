@@ -52,36 +52,51 @@ internal enum class Theme {
     }
 }
 
-private val Colors = FinancialConnectionsColors(
-    textDefault = Neutral800,
-    textSubdued = Neutral600,
-    textDisabled = Neutral300,
-    textWhite = Neutral0,
-    textBrand = Brand600,
-    textCritical = Critical500,
-    iconDefault = Neutral700,
-    iconWhite = Neutral0,
-    iconBrand = Brand500,
-    iconCaution = Attention300,
-    buttonPrimary = Brand500,
-    buttonSecondary = Neutral25,
-    background = Neutral25,
-    backgroundSurface = Neutral0,
-    backgroundOffset = Neutral50,
-    backgroundBrand = Neutral25,
-    backgroundCaution = Attention50,
-    border = Neutral100,
-    borderBrand = Brand500,
-    contentOnBrand = Neutral0,
-)
+private val Colors = object : FinancialConnectionsColors {
+    override val textDefault = Neutral800
+    override val textSubdued = Neutral600
+    override val textDisabled = Neutral300
+    override val textWhite = Neutral0
+    override val textBrand = Brand600
+    override val textCritical = Critical500
+    override val iconDefault = Neutral700
+    override val iconWhite = Neutral0
+    override val iconBrand = Brand500
+    override val iconCaution = Attention300
+    override val buttonPrimary = Brand500
+    override val buttonSecondary = Neutral25
+    override val background = Neutral25
+    override val backgroundSurface = Neutral0
+    override val backgroundOffset = Neutral50
+    override val backgroundBrand = Neutral25
+    override val backgroundCaution = Attention50
+    override val border = Neutral100
+    override val borderBrand = Brand500
+    override val contentOnBrand = Neutral0
+}
 
-private val InstantDebitsColors = Colors.copy(
-    textBrand = LinkGreen500,
-    iconBrand = LinkGreen500,
-    buttonPrimary = LinkGreen200,
-    borderBrand = LinkGreen200,
-    contentOnBrand = LinkGreen900,
-)
+private val InstantDebitsColors = object : FinancialConnectionsColors {
+    override val textDefault = Neutral800
+    override val textSubdued = Neutral600
+    override val textDisabled = Neutral300
+    override val textWhite = Neutral0
+    override val textBrand = LinkGreen500
+    override val textCritical = Critical500
+    override val iconDefault = Neutral700
+    override val iconWhite = Neutral0
+    override val iconBrand = LinkGreen500
+    override val iconCaution = Attention300
+    override val buttonPrimary = LinkGreen200
+    override val buttonSecondary = Neutral25
+    override val background = Neutral25
+    override val backgroundSurface = Neutral0
+    override val backgroundOffset = Neutral50
+    override val backgroundBrand = Neutral25
+    override val backgroundCaution = Attention50
+    override val border = Neutral100
+    override val borderBrand = LinkGreen200
+    override val contentOnBrand = LinkGreen900
+}
 
 private val lineHeightStyle = LineHeightStyle(
     alignment = LineHeightStyle.Alignment.Center,

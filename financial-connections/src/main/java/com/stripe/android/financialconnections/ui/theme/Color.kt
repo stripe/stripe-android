@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,29 +40,28 @@ internal val LinkGreen200 = Color(0xff00D66F)
 internal val LinkGreen500 = Color(0xff008545)
 internal val LinkGreen900 = Color(0xff011E0F)
 
-@Immutable
-internal data class FinancialConnectionsColors(
-    val textDefault: Color,
-    val textSubdued: Color,
-    val textDisabled: Color,
-    val textWhite: Color,
-    val textBrand: Color,
-    val textCritical: Color,
-    val iconDefault: Color,
-    val iconWhite: Color,
-    val iconBrand: Color,
-    val iconCaution: Color,
-    val buttonPrimary: Color,
-    val buttonSecondary: Color,
-    val backgroundSurface: Color,
-    val background: Color,
-    val backgroundOffset: Color,
-    val backgroundBrand: Color,
-    val backgroundCaution: Color,
-    val border: Color,
-    val borderBrand: Color,
-    val contentOnBrand: Color,
-)
+internal interface FinancialConnectionsColors {
+    val textDefault: Color
+    val textSubdued: Color
+    val textDisabled: Color
+    val textWhite: Color
+    val textBrand: Color
+    val textCritical: Color
+    val iconDefault: Color
+    val iconWhite: Color
+    val iconBrand: Color
+    val iconCaution: Color
+    val buttonPrimary: Color
+    val buttonSecondary: Color
+    val backgroundSurface: Color
+    val background: Color
+    val backgroundOffset: Color
+    val backgroundBrand: Color
+    val backgroundCaution: Color
+    val border: Color
+    val borderBrand: Color
+    val contentOnBrand: Color
+}
 
 @Preview(group = "Components", name = "Colors")
 @Composable
