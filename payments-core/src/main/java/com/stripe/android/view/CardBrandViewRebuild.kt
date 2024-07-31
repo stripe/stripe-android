@@ -19,6 +19,8 @@ import com.stripe.android.databinding.StripeCardBrandViewRebuildBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
 
@@ -47,19 +49,25 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         val tintColor: Int = 0,
     ) : Parcelable
 
-    private var state: State = State()
+    private var stateFlow = MutableStateFlow(State())
+
+    private var state: State
+        get() = stateFlow.value
+        set(value) {
+            stateFlow.value = value
+        }
 
     var isCbcEligible: Boolean
         get() = state.isCbcEligible
         set(value) {
-            state = state.copy(isCbcEligible = value)
+            stateFlow.update { it.copy(isCbcEligible = value) }
             updateBrandSpinner()
         }
 
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        state = state.copy(isLoading = isLoading)
+        stateFlow.update { it.copy(isLoading = isLoading) }
         setCardBrandIconAndTint()
         if (wasLoading != isLoading) {
             if (isLoading) {
@@ -73,14 +81,15 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     var brand: CardBrand
         get() = state.brand
         set(value) {
-            state = state.copy(brand = value)
+            stateFlow.update { it.copy(brand = value) }
+            determineCardBrandToDisplay()
             updateBrandSpinner()
         }
 
     var possibleBrands: List<CardBrand>
         get() = state.possibleBrands
         set(value) {
-            state = state.copy(possibleBrands = value)
+            stateFlow.update { it.copy(possibleBrands = value) }
             determineCardBrandToDisplay()
             updateBrandSpinner()
         }
@@ -88,28 +97,28 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     var merchantPreferredNetworks: List<CardBrand>
         get() = state.merchantPreferredNetworks
         set(value) {
-            state = state.copy(merchantPreferredNetworks = value)
+            stateFlow.update { it.copy(merchantPreferredNetworks = value) }
             determineCardBrandToDisplay()
         }
 
     var shouldShowCvc: Boolean
         get() = state.shouldShowCvc
         set(value) {
+            stateFlow.update { it.copy(shouldShowCvc = value) }
             setCardBrandIconAndTint()
-            state = state.copy(shouldShowCvc = value)
         }
 
     var shouldShowErrorIcon: Boolean
         get() = state.shouldShowErrorIcon
         set(value) {
+            stateFlow.update { it.copy(shouldShowErrorIcon = value) }
             setCardBrandIconAndTint()
-            state = state.copy(shouldShowErrorIcon = value)
         }
 
     internal var tintColorInt: Int
         get() = state.tintColor
         set(value) {
-            state = state.copy(tintColor = value)
+            stateFlow.update { it.copy(tintColor = value) }
         }
 
     init {
@@ -130,7 +139,7 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
 
     private fun handleBrandSelected(brand: CardBrand?) {
         brand?.let {
-            state = state.copy(userSelectedBrand = brand)
+            stateFlow.update { it.copy(userSelectedBrand = brand) }
             determineCardBrandToDisplay()
         }
     }
@@ -156,11 +165,12 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     }
 
     private fun determineCardBrandToDisplay() {
-        brand = if (state.possibleBrands.size > 1) {
+        val newBrand = if (state.possibleBrands.size > 1) {
             selectCardBrandToDisplay(state.userSelectedBrand, state.possibleBrands, state.merchantPreferredNetworks)
         } else {
             state.brand
         }
+        if (brand != newBrand) brand = newBrand
         setCardBrandIconAndTint()
     }
 
@@ -221,7 +231,7 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         this.state = savedState?.state ?: State()
         determineCardBrandToDisplay()
         updateBrandSpinner()
-        super.onRestoreInstanceState(savedState?.superState)
+        super.onRestoreInstanceState(savedState?.superState ?: state)
     }
 
     @Parcelize

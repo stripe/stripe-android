@@ -392,8 +392,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.possibleCardBrandsCallback = { brands ->
-            cardBrandView.possibleBrands = brands
             val currentBrand = cardBrandView.brand
+            cardBrandView.possibleBrands = brands
 
             if (currentBrand !in brands) {
                 cardBrandView.brand = CardBrand.Unknown

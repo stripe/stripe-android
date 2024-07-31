@@ -830,8 +830,8 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun handlePossibleCardBrandsChanged(brands: List<CardBrand>) {
-        cardBrandView.possibleBrands = brands
         val currentBrand = cardBrandView.brand
+        cardBrandView.possibleBrands = brands
 
         if (currentBrand !in brands) {
             // The brand is no longer available, so we reset to an unknown brand
