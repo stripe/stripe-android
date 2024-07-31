@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAc
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
-import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class PollAttachPaymentAccount @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
-    private val consumerSessionRepository: ConsumerSessionRepository,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
@@ -42,7 +42,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
                     paymentAccount = params,
                     // null, if account should not be saved to Link user.
-                    consumerSessionClientSecret = consumerSessionRepository.provideConsumerSession()?.clientSecret,
+                    consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret,
                 ).also {
                     attachedPaymentAccountRepository.set(params)
                 }
