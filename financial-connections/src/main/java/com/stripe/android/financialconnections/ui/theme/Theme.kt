@@ -75,10 +75,25 @@ private val Colors = FinancialConnectionsColors(
     contentOnBrand = Neutral0,
 )
 
-private val InstantDebitsColors = Colors.copy(
+private val InstantDebitsColors = FinancialConnectionsColors(
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
     textBrand = LinkGreen500,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
     iconBrand = LinkGreen500,
+    iconCaution = Attention300,
     buttonPrimary = LinkGreen200,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
     borderBrand = LinkGreen200,
     contentOnBrand = LinkGreen900,
 )
