@@ -334,7 +334,8 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
-        style = typography.headingXLarge
+        style = typography.headingXLarge,
+        color = colors.textDefault,
     )
 }
 
