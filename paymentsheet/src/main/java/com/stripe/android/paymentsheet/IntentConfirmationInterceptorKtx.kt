@@ -9,25 +9,29 @@ import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorE
 
 internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
-    confirmationOption: PaymentConfirmationOption?,
+    confirmationOption: PaymentConfirmationOption<*>?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
     context: Context,
 ): IntentConfirmationInterceptor.NextStep {
     return when (confirmationOption) {
-        is PaymentConfirmationOption.New -> {
+        is PaymentConfirmationOption.PaymentMethod.New -> {
+            val arguments = confirmationOption.arguments
+
             intercept(
                 initializationMode = initializationMode,
-                paymentMethodOptionsParams = confirmationOption.optionsParams,
-                paymentMethodCreateParams = confirmationOption.createParams,
+                paymentMethodOptionsParams = arguments.optionsParams,
+                paymentMethodCreateParams = arguments.createParams,
                 shippingValues = shippingValues,
-                customerRequestedSave = confirmationOption.shouldSave,
+                customerRequestedSave = arguments.shouldSave,
             )
         }
-        is PaymentConfirmationOption.Saved -> {
+        is PaymentConfirmationOption.PaymentMethod.Saved -> {
+            val arguments = confirmationOption.arguments
+
             intercept(
                 initializationMode = initializationMode,
-                paymentMethod = confirmationOption.paymentMethod,
-                paymentMethodOptionsParams = confirmationOption.optionsParams,
+                paymentMethod = arguments.paymentMethod,
+                paymentMethodOptionsParams = arguments.optionsParams,
                 shippingValues = shippingValues,
             )
         }

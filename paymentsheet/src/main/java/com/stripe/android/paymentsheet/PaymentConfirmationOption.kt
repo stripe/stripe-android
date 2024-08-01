@@ -1,24 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
-internal sealed interface PaymentConfirmationOption : Parcelable {
-    @Parcelize
-    data class Saved(
-        val paymentMethod: PaymentMethod,
-        val optionsParams: PaymentMethodOptionsParams?,
-    ) : PaymentConfirmationOption
+internal sealed interface PaymentConfirmationOption<TArgs : Parcelable> : Parcelable {
+    val arguments: TArgs
 
     @Parcelize
     data class GooglePay(
-        val config: Config,
-    ) : PaymentConfirmationOption {
+        override val arguments: Args,
+    ) : PaymentConfirmationOption<GooglePay.Args> {
         @Parcelize
-        data class Config(
+        data class Args(
             val environment: PaymentSheet.GooglePayConfiguration.Environment?,
             val merchantName: String,
             val merchantCountryCode: String,
@@ -31,14 +27,38 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
 
     @Parcelize
     data class ExternalPaymentMethod(
-        val type: String,
-        val billingDetails: PaymentMethod.BillingDetails?,
-    ) : PaymentConfirmationOption
+        override val arguments: Args,
+    ) : PaymentConfirmationOption<ExternalPaymentMethod.Args> {
+        @Parcelize
+        data class Args(
+            val type: String,
+            val billingDetails: PaymentMethodModel.BillingDetails?,
+        ) : Parcelable
+    }
 
     @Parcelize
-    data class New(
-        val createParams: PaymentMethodCreateParams,
-        val optionsParams: PaymentMethodOptionsParams?,
-        val shouldSave: Boolean
-    ) : PaymentConfirmationOption
+    sealed interface PaymentMethod<TArgs : Parcelable> : PaymentConfirmationOption<TArgs> {
+        @Parcelize
+        data class New(
+            override val arguments: Args,
+        ) : PaymentMethod<New.Args> {
+            @Parcelize
+            data class Args(
+                val createParams: PaymentMethodCreateParams,
+                val optionsParams: PaymentMethodOptionsParams?,
+                val shouldSave: Boolean
+            ) : Parcelable
+        }
+
+        @Parcelize
+        data class Saved(
+            override val arguments: Args,
+        ) : PaymentMethod<Saved.Args> {
+            @Parcelize
+            data class Args(
+                val paymentMethod: PaymentMethodModel,
+                val optionsParams: PaymentMethodOptionsParams?,
+            ) : Parcelable
+        }
+    }
 }

@@ -223,8 +223,8 @@ internal class IntentConfirmationHandler(
                 arguments = arguments,
             )
         } else if (
-            confirmationOption is PaymentConfirmationOption.New &&
-            confirmationOption.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
+            confirmationOption is PaymentConfirmationOption.PaymentMethod.New &&
+            confirmationOption.arguments.createParams.typeCode == PaymentMethod.Type.BacsDebit.code
         ) {
             launchBacsMandate(confirmationOption, arguments.appearance)
         } else {
@@ -337,8 +337,8 @@ internal class IntentConfirmationHandler(
         storeIsAwaitingForPaymentResult()
 
         ExternalPaymentMethodInterceptor.intercept(
-            externalPaymentMethodType = confirmationOption.type,
-            billingDetails = confirmationOption.billingDetails,
+            externalPaymentMethodType = confirmationOption.arguments.type,
+            billingDetails = confirmationOption.arguments.billingDetails,
             onPaymentResult = ::onExternalPaymentMethodResult,
             externalPaymentMethodLauncher = externalPaymentMethodLauncher,
             errorReporter = errorReporter,
@@ -349,19 +349,11 @@ internal class IntentConfirmationHandler(
         googlePay: PaymentConfirmationOption.GooglePay,
         arguments: Args,
     ) {
-        if (googlePay.config.merchantCurrencyCode == null && !arguments.initializationMode.isProcessingPayment) {
-            val message = "GooglePayConfig.currencyCode is required in order to use " +
-                "Google Pay when processing a Setup Intent"
-
-            logger?.logWarningWithoutPii(message)
-
-            onIntentResult(
-                Result.Failed(
-                    cause = IllegalStateException(message),
-                    message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = ErrorType.MerchantIntegration,
-                )
-            )
+        if (
+            googlePay.arguments.merchantCurrencyCode == null &&
+            !arguments.initializationMode.isProcessingPayment
+        ) {
+            handleGooglePayError()
 
             return
         }
@@ -394,12 +386,12 @@ internal class IntentConfirmationHandler(
             return
         }
 
-        val config = googlePay.config
+        val googlePayArguments = googlePay.arguments
 
         val launcher = createGooglePayLauncher(
             factory = factory,
             activityLauncher = activityLauncher,
-            config = config,
+            arguments = googlePayArguments,
         )
 
         val intent = arguments.intent
@@ -410,32 +402,32 @@ internal class IntentConfirmationHandler(
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
-                ?: config.merchantCurrencyCode.orEmpty(),
+                ?: googlePayArguments.merchantCurrencyCode.orEmpty(),
             amount = when (intent) {
                 is PaymentIntent -> intent.amount ?: 0L
-                is SetupIntent -> config.customAmount ?: 0L
+                is SetupIntent -> googlePayArguments.customAmount ?: 0L
             },
             transactionId = intent.id,
-            label = config.customLabel,
+            label = googlePayArguments.customLabel,
         )
     }
 
     private fun createGooglePayLauncher(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        config: PaymentConfirmationOption.GooglePay.Config,
+        arguments: PaymentConfirmationOption.GooglePay.Args,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = coroutineScope,
             config = GooglePayPaymentMethodLauncher.Config(
-                environment = when (config.environment) {
+                environment = when (arguments.environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
                     else -> GooglePayEnvironment.Test
                 },
-                merchantCountryCode = config.merchantCountryCode,
-                merchantName = config.merchantName,
-                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
-                billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                merchantCountryCode = arguments.merchantCountryCode,
+                merchantName = arguments.merchantName,
+                isEmailRequired = arguments.billingDetailsCollectionConfiguration.collectsEmail,
+                billingAddressConfig = arguments.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
             ),
             readyCallback = {
                 // Do nothing since we are skipping the ready check below
@@ -445,8 +437,23 @@ internal class IntentConfirmationHandler(
         )
     }
 
+    private fun handleGooglePayError() {
+        val message = "GooglePayConfig.currencyCode is required in order to use " +
+            "Google Pay when processing a Setup Intent"
+
+        logger?.logWarningWithoutPii(message)
+
+        onIntentResult(
+            Result.Failed(
+                cause = IllegalStateException(message),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                type = ErrorType.MerchantIntegration,
+            )
+        )
+    }
+
     private fun launchBacsMandate(
-        confirmationOption: PaymentConfirmationOption.New,
+        confirmationOption: PaymentConfirmationOption.PaymentMethod.New,
         appearance: PaymentSheet.Appearance,
     ) {
         BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
@@ -557,9 +564,11 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     currentArguments?.let { arguments ->
-                        val confirmationOption = PaymentConfirmationOption.Saved(
-                            paymentMethod = result.paymentMethod,
-                            optionsParams = null,
+                        val confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                            arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                                paymentMethod = result.paymentMethod,
+                                optionsParams = null,
+                            )
                         )
 
                         confirm(
@@ -663,7 +672,7 @@ internal class IntentConfirmationHandler(
         val shippingDetails: AddressDetails?,
         val appearance: PaymentSheet.Appearance,
         val intent: StripeIntent,
-        val confirmationOption: PaymentConfirmationOption?
+        val confirmationOption: PaymentConfirmationOption<*>?
     ) : Parcelable
 
     /**
@@ -681,7 +690,7 @@ internal class IntentConfirmationHandler(
          * a payment.
          */
         data class Preconfirming(
-            val confirmationOption: PaymentConfirmationOption?,
+            val confirmationOption: PaymentConfirmationOption<*>?,
             val inPreconfirmFlow: Boolean,
         ) : State
 

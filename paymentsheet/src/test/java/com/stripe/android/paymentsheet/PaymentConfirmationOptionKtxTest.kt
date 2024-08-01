@@ -22,10 +22,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
-            PaymentConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
-                shouldSave = false,
+            PaymentConfirmationOption.PaymentMethod.New(
+                arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
+                    shouldSave = false,
+                )
             )
         )
     }
@@ -37,10 +39,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
-            PaymentConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                shouldSave = false,
+            PaymentConfirmationOption.PaymentMethod.New(
+                arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = null,
+                    shouldSave = false,
+                )
             )
         )
     }
@@ -52,10 +56,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
-            PaymentConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                shouldSave = true,
+            PaymentConfirmationOption.PaymentMethod.New(
+                arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = null,
+                    shouldSave = true,
+                )
             )
         )
     }
@@ -67,10 +73,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
-            PaymentConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                shouldSave = false,
+            PaymentConfirmationOption.PaymentMethod.New(
+                arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = null,
+                    shouldSave = false,
+                )
             )
         )
     }
@@ -85,11 +93,13 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
-            PaymentConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = PaymentMethodOptionsParams.Card(
-                    cvc = "505"
-                ),
+            PaymentConfirmationOption.PaymentMethod.Saved(
+                arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    optionsParams = PaymentMethodOptionsParams.Card(
+                        cvc = "505"
+                    ),
+                )
             )
         )
     }
@@ -112,11 +122,13 @@ class PaymentConfirmationOptionKtxTest {
 
         assertThat(paymentSelection.toPaymentConfirmationOption(configuration = null)).isEqualTo(
             PaymentConfirmationOption.ExternalPaymentMethod(
-                type = "paypal",
-                billingDetails = PaymentMethod.BillingDetails(
-                    name = "John Doe",
-                    address = Address(
-                        city = "South San Francisco"
+                arguments = PaymentConfirmationOption.ExternalPaymentMethod.Args(
+                    type = "paypal",
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "John Doe",
+                        address = Address(
+                            city = "South San Francisco"
+                        )
                     )
                 )
             )
@@ -151,7 +163,7 @@ class PaymentConfirmationOptionKtxTest {
             )
         ).isEqualTo(
             PaymentConfirmationOption.GooglePay(
-                config = PaymentConfirmationOption.GooglePay.Config(
+                arguments = PaymentConfirmationOption.GooglePay.Args(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                     merchantName = "Merchant, Inc.",
                     merchantCountryCode = "US",

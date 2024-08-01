@@ -61,11 +61,13 @@ class BacsMandateDataTest {
 
     private fun createPaymentConfirmationOption(
         createParams: PaymentMethodCreateParams,
-    ): PaymentConfirmationOption.New {
-        return PaymentConfirmationOption.New(
-            createParams = createParams,
-            optionsParams = null,
-            shouldSave = false,
+    ): PaymentConfirmationOption.PaymentMethod.New {
+        return PaymentConfirmationOption.PaymentMethod.New(
+            arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                createParams = createParams,
+                optionsParams = null,
+                shouldSave = false,
+            )
         )
     }
 }

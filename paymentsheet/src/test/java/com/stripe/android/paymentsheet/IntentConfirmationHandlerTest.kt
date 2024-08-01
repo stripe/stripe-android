@@ -98,9 +98,11 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = shippingDetails,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.Saved(
-                    paymentMethod = savedPaymentMethod,
-                    optionsParams = paymentMethodOptionsParams,
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                        paymentMethod = savedPaymentMethod,
+                        optionsParams = paymentMethodOptionsParams,
+                    )
                 ),
                 appearance = APPEARANCE,
             ),
@@ -143,9 +145,11 @@ class IntentConfirmationHandlerTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123"),
                     shippingDetails = null,
                     intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    confirmationOption = PaymentConfirmationOption.Saved(
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        optionsParams = null,
+                    confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                        arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                            optionsParams = null,
+                        )
                     ),
                     appearance = APPEARANCE,
                 ),
@@ -185,10 +189,12 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.New(
-                    createParams = newCard,
-                    optionsParams = null,
-                    shouldSave = true,
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
+                    arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                        createParams = newCard,
+                        optionsParams = null,
+                        shouldSave = true,
+                    )
                 ),
                 appearance = APPEARANCE,
             ),
@@ -235,9 +241,11 @@ class IntentConfirmationHandlerTest {
                 initializationMode = initializationMode,
                 shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    optionsParams = null,
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        optionsParams = null,
+                    )
                 ),
                 appearance = APPEARANCE,
             ),
@@ -922,10 +930,12 @@ class IntentConfirmationHandlerTest {
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
                 confirmationOption = EXTERNAL_PAYMENT_METHOD.copy(
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = "John Doe",
-                        address = Address(
-                            city = "South San Francisco"
+                    arguments = EXTERNAL_PAYMENT_METHOD.arguments.copy(
+                        billingDetails = PaymentMethod.BillingDetails(
+                            name = "John Doe",
+                            address = Address(
+                                city = "South San Francisco"
+                            )
                         )
                     )
                 )
@@ -1254,11 +1264,11 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentConfirmationOption()
+        val confirmationOption = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = paymentSelection
+                confirmationOption = confirmationOption
             ),
         )
 
@@ -1269,7 +1279,7 @@ class IntentConfirmationHandlerTest {
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
                 initializationMode = DEFAULT_ARGUMENTS.initializationMode,
-                paymentMethodCreateParams = paymentSelection.createParams,
+                paymentMethodCreateParams = confirmationOption.arguments.createParams,
                 shippingValues = null,
                 paymentMethodOptionsParams = null,
                 customerRequestedSave = false,
@@ -1400,7 +1410,7 @@ class IntentConfirmationHandlerTest {
                     clientSecret = "si_123_secret_123",
                 ),
                 confirmationOption = GOOGLE_PAY_OPTION.copy(
-                    config = GOOGLE_PAY_OPTION.config.copy(
+                    arguments = GOOGLE_PAY_OPTION.arguments.copy(
                         merchantCurrencyCode = null,
                     )
                 ),
@@ -1436,7 +1446,7 @@ class IntentConfirmationHandlerTest {
             arguments = DEFAULT_ARGUMENTS.copy(
                 intent = paymentIntent,
                 confirmationOption = GOOGLE_PAY_OPTION.copy(
-                    config = GOOGLE_PAY_OPTION.config.copy(
+                    arguments = GOOGLE_PAY_OPTION.arguments.copy(
                         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -1769,20 +1779,22 @@ class IntentConfirmationHandlerTest {
     private fun createBacsPaymentConfirmationOption(
         name: String? = "John Doe",
         email: String? = "johndoe@email.com",
-    ): PaymentConfirmationOption.New {
-        return PaymentConfirmationOption.New(
-            createParams = PaymentMethodCreateParams.create(
-                bacsDebit = PaymentMethodCreateParams.BacsDebit(
-                    accountNumber = "00012345",
-                    sortCode = "108800"
+    ): PaymentConfirmationOption.PaymentMethod.New {
+        return PaymentConfirmationOption.PaymentMethod.New(
+            arguments = PaymentConfirmationOption.PaymentMethod.New.Args(
+                createParams = PaymentMethodCreateParams.create(
+                    bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                        accountNumber = "00012345",
+                        sortCode = "108800"
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = name,
+                        email = email,
+                    )
                 ),
-                billingDetails = PaymentMethod.BillingDetails(
-                    name = name,
-                    email = email,
-                )
-            ),
-            optionsParams = null,
-            shouldSave = false,
+                optionsParams = null,
+                shouldSave = false,
+            )
         )
     }
 
@@ -1792,20 +1804,24 @@ class IntentConfirmationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
             shippingDetails = null,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            confirmationOption = PaymentConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = null,
+            confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                arguments = PaymentConfirmationOption.PaymentMethod.Saved.Args(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    optionsParams = null,
+                )
             ),
             appearance = APPEARANCE
         )
 
         val EXTERNAL_PAYMENT_METHOD = PaymentConfirmationOption.ExternalPaymentMethod(
-            type = "paypal",
-            billingDetails = null
+            arguments = PaymentConfirmationOption.ExternalPaymentMethod.Args(
+                type = "paypal",
+                billingDetails = null
+            )
         )
 
         val GOOGLE_PAY_OPTION = PaymentConfirmationOption.GooglePay(
-            config = PaymentConfirmationOption.GooglePay.Config(
+            arguments = PaymentConfirmationOption.GooglePay.Args(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                 merchantName = "Merchant, Inc.",
                 merchantCurrencyCode = "USD",
