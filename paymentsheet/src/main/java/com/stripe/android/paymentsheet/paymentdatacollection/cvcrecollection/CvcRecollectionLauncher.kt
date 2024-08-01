@@ -20,7 +20,7 @@ internal class DefaultCvcRecollectionLauncher(
                 lastFour = data.lastFour ?: "",
                 cardBrand = data.brand,
                 appearance = appearance,
-                isTestMode = isLiveMode.not()
+                displayMode = CvcRecollectionContract.Args.DisplayMode.Activity(isLiveMode)
             )
         )
     }

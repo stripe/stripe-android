@@ -58,6 +58,7 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                         lastFour = state.value.lastFour,
                         isTestMode = state.value.isTestMode,
                         controller = state.value.controller,
+                        displayMode = state.value.displayMode,
                         viewActionHandler = viewModel::handleViewAction
                     )
                 }

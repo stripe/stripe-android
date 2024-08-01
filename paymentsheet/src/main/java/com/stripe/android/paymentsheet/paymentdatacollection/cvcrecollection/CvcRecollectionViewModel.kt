@@ -21,8 +21,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
             cardBrand = args.cardBrand,
             lastFour = args.lastFour,
             cvc = null,
-            isTestMode = args.isTestMode,
-            controller = controller
+            controller = controller,
+            displayMode = args.displayMode
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState>
@@ -50,9 +50,21 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         }
     }
 
-    class Factory(
-        private val args: CvcRecollectionContract.Args,
-    ) : ViewModelProvider.Factory {
+    data class Args(
+        val lastFour: String,
+        val cardBrand: CardBrand,
+        val cvc: String? = null,
+        val displayMode: DisplayMode
+    ) {
+        sealed interface DisplayMode {
+            val isLiveMode: Boolean
+
+            data class Activity(override val isLiveMode: Boolean) : DisplayMode
+            data class PaymentScreen(override val isLiveMode: Boolean) : DisplayMode
+        }
+    }
+
+    class Factory(private val args: CvcRecollectionContract.Args) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return CvcRecollectionViewModel(
@@ -60,9 +72,20 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
                     cvc = null,
-                    isTestMode = args.isTestMode
+                    displayMode = args.displayMode.toDisplayMode()
                 )
             ) as T
+        }
+    }
+}
+
+internal fun CvcRecollectionContract.Args.DisplayMode.toDisplayMode(): CvcRecollectionViewModel.Args.DisplayMode {
+    return when (this) {
+        is CvcRecollectionContract.Args.DisplayMode.Activity -> {
+            CvcRecollectionViewModel.Args.DisplayMode.Activity(isLiveMode)
+        }
+        is CvcRecollectionContract.Args.DisplayMode.PaymentScreen -> {
+            CvcRecollectionViewModel.Args.DisplayMode.PaymentScreen(isLiveMode)
         }
     }
 }

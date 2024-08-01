@@ -57,6 +57,7 @@ internal fun CvcRecollectionScreen(
     lastFour: String,
     isTestMode: Boolean,
     controller: CvcController,
+    displayMode: CvcRecollectionViewModel.Args.DisplayMode,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     val element = rememberElement(controller)
@@ -66,7 +67,7 @@ internal fun CvcRecollectionScreen(
                 .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
-            CvcRecollectionTopBar(isTestMode) {
+            CvcRecollectionHeader(displayMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionTitle()
@@ -176,24 +177,26 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionTopBar(
-    isTestMode: Boolean,
+private fun CvcRecollectionHeader(
+    displayMode: CvcRecollectionViewModel.Args.DisplayMode,
     onClosePressed: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .padding(0.dp, 16.dp, 0.dp, 0.dp)
-            .height(32.dp)
-    ) {
-        if (isTestMode) {
-            TestModeBadge()
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(
-            onClick = { onClosePressed.invoke() },
-            Modifier.offset(16.dp, -8.dp)
+    if (displayMode is CvcRecollectionViewModel.Args.DisplayMode.Activity) {
+        Row(
+            modifier = Modifier
+                .padding(0.dp, 16.dp, 0.dp, 0.dp)
+                .height(32.dp)
         ) {
-            Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+            if (displayMode.isLiveMode.not()) {
+                TestModeBadge()
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = { onClosePressed.invoke() },
+                Modifier.offset(16.dp, -8.dp)
+            ) {
+                Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+            }
         }
     }
 }
@@ -248,6 +251,7 @@ private fun CvcRecollectionFieldPreview() {
             controller = CvcController(
                 cardBrandFlow = stateFlowOf(CardBrand.Visa)
             ),
+            displayMode = CvcRecollectionViewModel.Args.DisplayMode.Activity(true),
             viewActionHandler = { }
         )
     }
