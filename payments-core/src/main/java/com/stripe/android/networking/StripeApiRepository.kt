@@ -53,6 +53,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -81,6 +82,7 @@ import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
@@ -1078,7 +1080,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         locale: Locale?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): Result<ConsumerSession> {
+    ): Result<ConsumerSessionSignup> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = consumerSignUpUrl,
@@ -1100,7 +1102,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     } ?: emptyMap()
                 )
             ),
-            jsonParser = ConsumerSessionJsonParser(),
+            jsonParser = ConsumerSessionSignupJsonParser,
         )
     }
 

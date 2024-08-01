@@ -13,6 +13,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -279,7 +280,7 @@ interface StripeRepository {
         locale: Locale?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): Result<ConsumerSession>
+    ): Result<ConsumerSessionSignup>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentDetails(

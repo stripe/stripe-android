@@ -44,7 +44,7 @@ internal class RealConsumerSessionRepository @Inject constructor(
         emailAddress = emailAddress,
         phoneNumber = getRedactedPhoneNumber(),
         clientSecret = clientSecret,
-        publishableKey = publishableKey,
+        publishableKey = null, // TODO(tillh-stripe): Coming in the follow-up
         isVerified = verificationSessions.any {
             it.state == ConsumerSession.VerificationSession.SessionState.Verified
         },

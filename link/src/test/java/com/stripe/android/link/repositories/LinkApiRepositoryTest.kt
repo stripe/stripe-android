@@ -6,8 +6,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -132,7 +132,7 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `consumerSignUp returns successful result`() = runTest {
-        val consumerSession = mock<ConsumerSession>()
+        val consumerSession = mock<ConsumerSessionSignup>()
         whenever(
             stripeRepository.consumerSignUp(
                 email = any(),
