@@ -241,7 +241,7 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     ) : BaseSavedState(superSavedState), Parcelable
 }
 
-class BrandAdapter(
+internal class BrandAdapter(
     context: Context,
     private val brands: List<CardBrand?>,
     private val selectedBrand: CardBrand?
