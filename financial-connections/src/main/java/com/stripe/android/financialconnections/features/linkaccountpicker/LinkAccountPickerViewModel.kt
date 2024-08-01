@@ -213,7 +213,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 acceptConsent()
                 val accountWithDrawerOnSelection = accountsWithDrawerOnSelection.first()
                 presentDrawerIfRequired(accountWithDrawerOnSelection.account, payload)
-            }  else {
+            } else {
                 // NO ACCOUNTS WITH DRAWER ON SELECTION
                 // We assume that at this point, all selected accounts have the same next pane.
                 // Otherwise, the user would have been presented with an update-required bottom
@@ -314,11 +314,10 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         logAccountClick(partnerAccount)
 
         val payload = requireNotNull(stateFlow.value.payload())
-        val accounts = payload.accounts
 
-        // Don't present the drawer if we need to acquire consent still;
-        // we don't want to take the shortcut then, and instead want the user to click the CTA.
-        if (payload.acquireConsentOnPrimaryCtaClick) {
+        // Don't present the drawer if we need to acquire consent still, since the user has to explicitly consent
+        // clicking the pane CTA.
+        if (payload.acquireConsentOnPrimaryCtaClick.not()) {
             if (presentDrawerIfRequired(partnerAccount, payload)) return
         }
 
@@ -348,6 +347,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             partnerToCoreAuths = payload.partnerToCoreAuths,
         )
         return when {
+            // [updateRequired] has to be checked before [drawerOnSelection].
+            // The update required modal basically uses [drawerOnSelection] to render content,
+            // and has specific logic handling for CTAs).
             updateRequired != null -> {
                 logUpdateRequired(updateRequired)
                 presentUpdateRequiredSheet(
@@ -436,7 +438,7 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
-                // if no account was selected, use the consent
+                    // if no account was selected, use the consent
                     ?: payload.defaultDataAccessNotice
             }
         }

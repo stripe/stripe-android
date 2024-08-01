@@ -69,6 +69,7 @@ class LinkAccountPickerViewModelTest {
         handleClickableUrl = mock(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
+        acceptConsent = mock(),
         presentUpdateRequiredSheet = mock(),
     )
 
