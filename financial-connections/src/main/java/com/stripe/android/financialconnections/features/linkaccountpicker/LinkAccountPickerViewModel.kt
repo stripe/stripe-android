@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -71,6 +72,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
+    private val acceptConsent: AcceptConsent,
     private val presentSheet: PresentSheet,
     private val presentUpdateRequiredSheet: PresentAccountUpdateRequiredSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
@@ -194,35 +196,52 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val state = stateFlow.value
             val payload = requireNotNull(state.payload())
-
             val accounts = payload.selectedAccounts.map { it.account }
+            val accountsWithDrawerOnSelection = payload.selectedAccounts.filter { it.display.drawerOnSelection != null }
             updateCachedAccounts(accounts)
 
-            // We assume that at this point, all selected accounts have the same next pane.
-            // Otherwise, the user would have been presented with an update-required bottom
-            // sheet before.
-            val nextPane = accounts.lastOrNull()?.nextPaneOnSelection
-            val accountIds = accounts.map { it.id }.toSet()
-
-            eventTracker.track(
-                AccountsSubmitted(
-                    accountIds = accountIds,
-                    isSkipAccountSelection = false,
+            if (accountsWithDrawerOnSelection.size > 1) {
+                // MULTIPLE ACCOUNTS WITH DRAWER ON SELECTION: log error.
+                eventTracker.logError(
+                    extraMessage = "Multiple accounts with drawers on selection",
+                    error = UnclassifiedError("MultipleAccountsSelectedError"),
+                    logger = logger,
                     pane = PANE
                 )
-            )
+            } else if (accountsWithDrawerOnSelection.size == 1) {
+                // AN ACCOUNT WITH DRAWER ON SELECTION -> accept consent and present it.
+                acceptConsent()
+                val accountWithDrawerOnSelection = accountsWithDrawerOnSelection.first()
+                presentDrawerIfRequired(accountWithDrawerOnSelection.account, payload)
+            }  else {
+                // NO ACCOUNTS WITH DRAWER ON SELECTION
+                // We assume that at this point, all selected accounts have the same next pane.
+                // Otherwise, the user would have been presented with an update-required bottom
+                // sheet before.
+                val nextPane = accounts.lastOrNull()?.nextPaneOnSelection
+                val accountIds = accounts.map { it.id }.toSet()
 
-            eventTracker.track(Click("click.link_accounts", PANE))
-
-            if (nextPane == SUCCESS) {
-                selectAccounts(
-                    acquireConsentOnPrimaryCtaClick = payload.acquireConsentOnPrimaryCtaClick,
-                    consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                    accountIds = accountIds,
+                eventTracker.track(
+                    AccountsSubmitted(
+                        accountIds = accountIds,
+                        isSkipAccountSelection = false,
+                        pane = PANE
+                    )
                 )
-            } else {
-                handleUnsupportedNextPane(nextPane)
+
+                eventTracker.track(Click("click.link_accounts", PANE))
+
+                if (nextPane == SUCCESS) {
+                    selectAccounts(
+                        acquireConsentOnPrimaryCtaClick = payload.acquireConsentOnPrimaryCtaClick,
+                        consumerSessionClientSecret = payload.consumerSessionClientSecret,
+                        accountIds = accountIds,
+                    )
+                } else {
+                    handleNonSuccessNextPane(payload, nextPane)
+                }
             }
+            Unit
         }.execute { copy(selectNetworkedAccountAsync = it) }
     }
 
@@ -240,7 +259,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
     }
 
-    private fun handleUnsupportedNextPane(nextPane: Pane?) {
+    private suspend fun handleNonSuccessNextPane(payload: LinkAccountPickerState.Payload, nextPane: Pane?) {
         when (nextPane) {
             PARTNER_AUTH -> {
                 eventTracker.logError(
@@ -270,7 +289,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 // Nothing to log here
             }
         }
-
+        if (payload.acquireConsentOnPrimaryCtaClick) acceptConsent()
         // Fall back to the institution picker
         val destination = nextPane?.destination?.invoke(referrer = PANE) ?: InstitutionPicker(referrer = PANE)
         navigationManager.tryNavigateTo(destination)
@@ -294,32 +313,15 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     fun onAccountClick(partnerAccount: PartnerAccount) {
         logAccountClick(partnerAccount)
 
-        val accounts = requireNotNull(stateFlow.value.payload()?.accounts)
-        val drawerOnSelection = accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
-        val updateRequired: AccountUpdateRequiredState.Payload? = createUpdateRequiredContent(
-            partnerAccount = partnerAccount,
-            // Use selected account icon (not coming on the SDU response as selection is not known by backend)
-            genericContent = drawerOnSelection?.withIcon(partnerAccount.institution?.icon?.default),
-            partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
-        )
-
-        if (updateRequired != null) {
-            logUpdateRequired(updateRequired)
-            presentUpdateRequiredSheet(
-                updateRequired,
-                referrer = PANE,
-            )
-            return
-        }
-        if (drawerOnSelection != null) {
-            presentSheet(
-                content = Generic(drawerOnSelection),
-                referrer = PANE,
-            )
-            return
-        }
-
         val payload = requireNotNull(stateFlow.value.payload())
+        val accounts = payload.accounts
+
+        // Don't present the drawer if we need to acquire consent still;
+        // we don't want to take the shortcut then, and instead want the user to click the CTA.
+        if (payload.acquireConsentOnPrimaryCtaClick) {
+            if (presentDrawerIfRequired(partnerAccount, payload)) return
+        }
+
         val selectedAccountIds = when {
             payload.singleAccount -> listOf(partnerAccount.id)
             partnerAccount.id in payload.selectedAccountIds -> payload.selectedAccountIds - partnerAccount.id
@@ -330,6 +332,38 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             copy(
                 payload = Success(payload.copy(selectedAccountIds = selectedAccountIds))
             )
+        }
+    }
+
+    private fun presentDrawerIfRequired(
+        partnerAccount: PartnerAccount,
+        payload: LinkAccountPickerState.Payload
+    ): Boolean {
+        val drawerOnSelection =
+            payload.accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
+        val updateRequired: AccountUpdateRequiredState.Payload? = createUpdateRequiredContent(
+            partnerAccount = partnerAccount,
+            // Use selected account icon (not coming on the SDU response as selection is not known by backend)
+            genericContent = drawerOnSelection?.withIcon(partnerAccount.institution?.icon?.default),
+            partnerToCoreAuths = payload.partnerToCoreAuths,
+        )
+        return when {
+            updateRequired != null -> {
+                logUpdateRequired(updateRequired)
+                presentUpdateRequiredSheet(
+                    updateRequired,
+                    referrer = PANE,
+                )
+                true
+            }
+            drawerOnSelection != null -> {
+                presentSheet(
+                    content = Generic(drawerOnSelection),
+                    referrer = PANE,
+                )
+                true
+            }
+            else -> false
         }
     }
 
@@ -402,7 +436,7 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
-                    // if no account was selected, use the consent
+                // if no account was selected, use the consent
                     ?: payload.defaultDataAccessNotice
             }
         }
