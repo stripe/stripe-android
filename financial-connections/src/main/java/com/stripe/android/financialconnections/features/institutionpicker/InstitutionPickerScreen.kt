@@ -402,13 +402,13 @@ private fun ClearSearchButton(
             .size(16.dp)
             .clickable { onQueryChanged("") }
             .background(
-                color = colors.border,
+                color = colors.textSubdued,
                 shape = CircleShape
             )
             .padding(2.dp)
     ) {
         Icon(
-            Icons.Filled.Clear,
+            imageVector = Icons.Filled.Clear,
             tint = colors.backgroundSurface,
             contentDescription = "Clear search",
         )

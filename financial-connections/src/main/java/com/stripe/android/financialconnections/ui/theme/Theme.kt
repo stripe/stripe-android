@@ -184,11 +184,11 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
-private val TextSelectionColors: TextSelectionColors
+internal val TextSelectionColors: TextSelectionColors
     @Composable
     get() = TextSelectionColors(
-        handleColor = FinancialConnectionsTheme.colors.textBrand,
-        backgroundColor = FinancialConnectionsTheme.colors.textBrand.copy(alpha = 0.4f)
+        handleColor = FinancialConnectionsTheme.colors.textDefault,
+        backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
 @Immutable
