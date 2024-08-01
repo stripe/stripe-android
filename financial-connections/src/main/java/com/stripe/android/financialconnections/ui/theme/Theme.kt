@@ -108,14 +108,14 @@ private val lineHeightStyle = LineHeightStyle(
 private val Typography = FinancialConnectionsTypography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
     ).toCompat(),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
