@@ -63,6 +63,7 @@ private val Colors = FinancialConnectionsColors(
     iconWhite = Neutral0,
     iconBrand = Brand500,
     iconCaution = Attention300,
+    iconBackground = Brand50,
     buttonPrimary = Brand500,
     buttonSecondary = Neutral25,
     background = Neutral25,
@@ -75,10 +76,26 @@ private val Colors = FinancialConnectionsColors(
     contentOnBrand = Neutral0,
 )
 
-private val InstantDebitsColors = Colors.copy(
+private val InstantDebitsColors = FinancialConnectionsColors(
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
     textBrand = LinkGreen500,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
     iconBrand = LinkGreen500,
+    iconCaution = Attention300,
+    iconBackground = LinkGreen50,
     buttonPrimary = LinkGreen200,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
     borderBrand = LinkGreen200,
     contentOnBrand = LinkGreen900,
 )
@@ -91,14 +108,14 @@ private val lineHeightStyle = LineHeightStyle(
 private val Typography = FinancialConnectionsTypography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
     ).toCompat(),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
@@ -167,11 +184,11 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
-private val TextSelectionColors: TextSelectionColors
+internal val TextSelectionColors: TextSelectionColors
     @Composable
     get() = TextSelectionColors(
-        handleColor = FinancialConnectionsTheme.colors.textBrand,
-        backgroundColor = FinancialConnectionsTheme.colors.textBrand.copy(alpha = 0.4f)
+        handleColor = FinancialConnectionsTheme.colors.textDefault,
+        backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
 @Immutable

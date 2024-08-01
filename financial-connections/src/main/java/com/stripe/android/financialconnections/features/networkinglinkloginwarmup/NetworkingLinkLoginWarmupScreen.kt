@@ -45,6 +45,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.LinkGreen200
 import com.stripe.android.financialconnections.ui.theme.LinkGreen900
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -195,7 +196,9 @@ internal fun ExistingEmailSection(
 internal fun NetworkingLinkLoginWarmupScreenPreview(
     @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(
+        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+    ) {
         NetworkingLinkLoginWarmupContent(
             state = state,
             onContinueClick = {},

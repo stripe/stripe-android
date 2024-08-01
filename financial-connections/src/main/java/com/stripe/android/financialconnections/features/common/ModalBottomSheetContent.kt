@@ -145,7 +145,7 @@ private fun Links(
     Column {
         val linkStyle = typography.labelLargeEmphasized.copy(color = colors.textBrand)
         links.forEachIndexed { index, link ->
-            Divider(color = colors.border)
+            Divider(color = colors.border, thickness = 0.5.dp)
             AnnotatedText(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,7 +158,7 @@ private fun Links(
                 onClickableTextClick = onClickableTextClick,
             )
             if (links.lastIndex == index) {
-                Divider(color = colors.border)
+                Divider(color = colors.border, thickness = 0.5.dp)
             }
         }
     }
@@ -171,7 +171,7 @@ private fun Title(
 ) {
     AnnotatedText(
         text = title,
-        defaultStyle = typography.headingMedium.copy(
+        defaultStyle = typography.headingLarge.copy(
             color = colors.textDefault
         ),
         onClickableTextClick = onClickableTextClick
