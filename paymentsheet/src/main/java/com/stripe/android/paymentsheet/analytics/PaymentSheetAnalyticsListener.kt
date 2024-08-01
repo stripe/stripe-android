@@ -83,6 +83,7 @@ internal class PaymentSheetAnalyticsListener(
                 reportFormShown(currentPaymentMethodTypeProvider())
                 eventReporter.onShowNewPaymentOptionForm()
             }
+            is PaymentSheetScreen.CvcRecollection -> Unit
         }
     }
 

@@ -1,14 +1,19 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionViewModel
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
@@ -18,6 +23,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.verticalmode.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -27,9 +33,11 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
@@ -45,7 +53,8 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.ManageSavedPaymentMethods,
         is PaymentSheetScreen.ManageOneSavedPaymentMethod,
-        is PaymentSheetScreen.EditPaymentMethod -> {
+        is PaymentSheetScreen.EditPaymentMethod,
+        is PaymentSheetScreen.CvcRecollection -> {
             0.dp
         }
     }
@@ -416,5 +425,52 @@ internal sealed interface PaymentSheetScreen {
         override fun Content(modifier: Modifier) {
             ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
+    }
+
+    class CvcRecollection(
+        private val args: CvcRecollectionContract.Args,
+        private val interactor: CvcRecollectionInteractor
+    ) : PaymentSheetScreen, Closeable {
+        override val showsBuyButton = false
+        override val showsContinueButton = false
+
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+            return stateFlowOf(
+                PaymentSheetTopBarStateFactory.create(
+                    hasBackStack = false,
+                    isLiveMode = false,
+                    editable = PaymentSheetTopBarState.Editable.Never,
+                )
+            )
+        }
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean) = stateFlowOf(null)
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean) = stateFlowOf(false)
+
+        @Composable
+        override fun Content(modifier: Modifier) {
+            val viewModel = viewModel<CvcRecollectionViewModel>(
+                factory = CvcRecollectionViewModel.Factory(args)
+            )
+            val state = viewModel.viewState.collectAsState()
+
+            LaunchedEffect(state) {
+                viewModel.result.collectLatest { result ->
+                    interactor.handleEffect(CvcRecollectionInteractor.Effect.SendCvcRecollectionEffect(result))
+                }
+            }
+
+            CvcRecollectionScreen(
+                cardBrand = state.value.cardBrand,
+                lastFour = state.value.lastFour,
+                displayMode = state.value.displayMode,
+                viewActionHandler = viewModel::handleViewAction
+            )
+        }
+
+        override fun close() {
+        }
+
     }
 }

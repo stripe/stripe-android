@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.verticalmode.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -398,10 +399,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             if (isCvcRecollectionEnabled() && isCard) {
                 CvcRecollectionData.fromPaymentSelection(card)?.let {
-                    cvcRecollectionLauncher.launch(
-                        data = it,
-                        appearance = PaymentSheet.Appearance(),
-                        isLiveMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
+//                    cvcRecollectionLauncher.launch(
+//                        data = it,
+//                        appearance = PaymentSheet.Appearance(),
+//                        isLiveMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
+//                    )
+                    navigationHandler.transitionTo(
+                        target = PaymentSheetScreen.CvcRecollection(
+                            args = CvcRecollectionContract.Args(
+                                lastFour = it.lastFour ?: "",
+                                cardBrand = it.brand,
+                                appearance = PaymentSheet.Appearance(),
+                                displayMode = CvcRecollectionContract.Args.DisplayMode.PaymentScreen(
+                                    paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
+                                ),
+                            ),
+                            interactor = DefaultCvcRecollectionInteractor(
+                                onCvcRecollectionResult = ::onCvcRecollectionResult,
+                            )
+                        )
                     )
                 }
 
@@ -427,6 +443,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal fun onCvcRecollectionResult(
         result: CvcRecollectionResult
     ) {
+        navigationHandler.pop()
         when (result) {
             is CvcRecollectionResult.Cancelled -> Unit
             is CvcRecollectionResult.Confirmed -> {
