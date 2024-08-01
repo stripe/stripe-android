@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
+import FinancialConnectionsGenericInfoScreen
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
@@ -14,6 +15,9 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
+import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
@@ -34,6 +38,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -53,25 +58,29 @@ class LinkAccountPickerViewModelTest {
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val presentUpdateRequiredSheet = mock<PresentAccountUpdateRequiredSheet>()
+    private val presentSheet = mock<PresentSheet>()
 
     private fun buildViewModel(
         state: LinkAccountPickerState
-    ) = LinkAccountPickerViewModel(
-        navigationManager = navigationManager,
-        getSync = getSync,
-        logger = Logger.noop(),
-        eventTracker = eventTracker,
-        getCachedConsumerSession = getCachedConsumerSession,
-        fetchNetworkedAccounts = fetchNetworkedAccounts,
-        selectNetworkedAccounts = selectNetworkedAccounts,
-        updateCachedAccounts = updateCachedAccounts,
-        initialState = state,
-        handleClickableUrl = mock(),
-        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        presentSheet = mock(),
-        acceptConsent = mock(),
-        presentUpdateRequiredSheet = mock(),
-    )
+    ): LinkAccountPickerViewModel {
+        return LinkAccountPickerViewModel(
+            navigationManager = navigationManager,
+            getSync = getSync,
+            logger = Logger.noop(),
+            eventTracker = eventTracker,
+            getCachedConsumerSession = getCachedConsumerSession,
+            fetchNetworkedAccounts = fetchNetworkedAccounts,
+            selectNetworkedAccounts = selectNetworkedAccounts,
+            updateCachedAccounts = updateCachedAccounts,
+            initialState = state,
+            handleClickableUrl = mock(),
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+            presentSheet = presentSheet,
+            acceptConsent = mock(),
+            presentUpdateRequiredSheet = presentUpdateRequiredSheet,
+        )
+    }
 
     @Test
     fun `init - Fetches existing accounts and zips them by id`() = runTest {
@@ -277,6 +286,102 @@ class LinkAccountPickerViewModelTest {
         val actualDataAccessNotice = viewModel.stateFlow.value.activeDataAccessNotice
 
         assertThat(actualDataAccessNotice).isEqualTo(expectedDataAccessNotice)
+    }
+
+    @Test
+    fun `onSelectAccountsClick - acquires consent when no drawer on selection and acquireConsentOnCta is true`() =
+        runTest {
+            val accounts = NetworkedAccountsList(
+                acquireConsentOnPrimaryCtaClick = true,
+                data = listOf(
+                    partnerAccount().copy(id = "id1", nextPaneOnSelection = Pane.SUCCESS)
+                ),
+                display = display(
+                    listOf(
+                        NetworkedAccount(id = "id1", allowSelection = true)
+                    )
+                )
+            )
+            val selectedAccount = accounts.data.first()
+            whenever(getSync()).thenReturn(syncResponse())
+            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+            whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+
+            val viewModel = buildViewModel(LinkAccountPickerState())
+
+            viewModel.onAccountClick(selectedAccount)
+            viewModel.onSelectAccountsClick()
+
+            verify(selectNetworkedAccounts).invoke(
+                consumerSessionClientSecret = eq("clientSecret"),
+                selectedAccountIds = eq(setOf("id1")),
+                consentAcquired = eq(true)
+            )
+        }
+
+    @Test
+    fun `onAccountClick - do not present drawer on click if acquireConsentOnCta is true`() = runTest {
+        val accounts = NetworkedAccountsList(
+            acquireConsentOnPrimaryCtaClick = true,
+            data = listOf(
+                partnerAccount().copy(id = "id1", nextPaneOnSelection = Pane.SUCCESS)
+            ),
+            display = display(
+                listOf(
+                    NetworkedAccount(
+                        id = "id1",
+                        allowSelection = true,
+                        drawerOnSelection = FinancialConnectionsGenericInfoScreen(id = "id")
+                    )
+                )
+            )
+        )
+        val selectedAccount = accounts.data.first()
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        viewModel.onAccountClick(selectedAccount)
+
+        verifyNoInteractions(presentSheet)
+        verifyNoInteractions(presentUpdateRequiredSheet)
+    }
+
+
+    @Test
+    fun `onAccountClick - present drawer on click if acquireConsentOnCta is false`() = runTest {
+        val drawerOnSelection = FinancialConnectionsGenericInfoScreen(id = "id")
+        val accounts = NetworkedAccountsList(
+            acquireConsentOnPrimaryCtaClick = false,
+            data = listOf(
+                partnerAccount().copy(id = "id1", nextPaneOnSelection = Pane.SUCCESS)
+            ),
+            display = display(
+                listOf(
+                    NetworkedAccount(
+                        id = "id1",
+                        allowSelection = true,
+                        drawerOnSelection = drawerOnSelection
+                    )
+                )
+            )
+        )
+        val selectedAccount = accounts.data.first()
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        viewModel.onAccountClick(selectedAccount)
+
+        verify(presentSheet).invoke(
+            eq(NoticeSheetState.NoticeSheetContent.Generic(drawerOnSelection)),
+            eq(Pane.LINK_ACCOUNT_PICKER),
+        )
+        verifyNoInteractions(presentUpdateRequiredSheet)
     }
 
     private fun twoAccounts() = NetworkedAccountsList(
