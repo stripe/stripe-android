@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -207,7 +208,7 @@ internal object CustomerSheetTestHelper {
                 savedStateHandle = SavedStateHandle(),
                 application = application,
                 errorReporter = FakeErrorReporter(),
-                logger = Logger.noop(),
+                logger = FakeUserFacingLogger(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

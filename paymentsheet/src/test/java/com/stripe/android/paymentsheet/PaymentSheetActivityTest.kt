@@ -71,6 +71,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -1119,7 +1120,7 @@ internal class PaymentSheetActivityTest {
                     statusBarColor = { args.statusBarColor },
                     application = application,
                     errorReporter = FakeErrorReporter(),
-                    logger = Logger.noop(),
+                    logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
             )
