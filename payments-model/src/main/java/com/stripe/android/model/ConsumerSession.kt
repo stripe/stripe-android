@@ -7,9 +7,6 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * The result of a call to Link consumer sign up.
- */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
@@ -24,8 +21,6 @@ data class ConsumerSession(
     val redactedPhoneNumber: String,
     @SerialName("verification_sessions")
     val verificationSessions: List<VerificationSession> = emptyList(),
-    @SerialName("publishable_key")
-    val publishableKey: String? = null
 ) : StripeModel {
 
     @Parcelize

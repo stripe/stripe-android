@@ -15,6 +15,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -39,12 +40,25 @@ class LinkAccountManagerTest {
         whenever(type).thenReturn(ConsumerSession.VerificationSession.SessionType.Sms)
         whenever(state).thenReturn(ConsumerSession.VerificationSession.SessionState.Verified)
     }
-    private val mockConsumerSession = mock<ConsumerSession>().apply {
-        whenever(emailAddress).thenReturn(EMAIL)
-        whenever(clientSecret).thenReturn(CLIENT_SECRET)
-        whenever(verificationSessions).thenReturn(listOf(verifiedSession))
-        whenever(publishableKey).thenReturn(PUBLISHABLE_KEY)
-    }
+
+    private val mockConsumerSession = ConsumerSession(
+        emailAddress = EMAIL,
+        clientSecret = CLIENT_SECRET,
+        verificationSessions = listOf(verifiedSession),
+        redactedPhoneNumber = "+1********42",
+        redactedFormattedPhoneNumber = "+1 (***) ***-**42",
+    )
+
+    private val mockConsumerSessionSignup = ConsumerSessionSignup(
+        consumerSession = mockConsumerSession,
+        publishableKey = PUBLISHABLE_KEY,
+    )
+
+    private val mockConsumerSessionLookup = ConsumerSessionLookup(
+        exists = true,
+        consumerSession = mockConsumerSession,
+        publishableKey = PUBLISHABLE_KEY,
+    )
 
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
@@ -69,26 +83,42 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `When ConsumerSession contains consumerPublishableKey then key is updated`() {
+    fun `When ConsumerSession contains consumerPublishableKey then key is updated`() = runTest {
         val accountManager = accountManager()
 
         assertThat(accountManager.consumerPublishableKey).isNull()
 
-        accountManager.setAccountNullable(mockConsumerSession)
+        whenever(linkRepository.lookupConsumer(any())).thenReturn(
+            Result.success(mockConsumerSessionLookup)
+        )
+
+        accountManager.lookupConsumer(
+            email = "email",
+            startSession = true,
+        )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
     }
 
     @Test
-    fun `When ConsumerSession is updated with the same email then consumerPublishableKey is kept`() {
+    fun `When ConsumerSession is updated with the same email then consumerPublishableKey is kept`() = runTest {
         val accountManager = accountManager()
 
-        accountManager.setAccountNullable(mockConsumerSession)
+        whenever(linkRepository.lookupConsumer(any())).thenReturn(
+            Result.success(mockConsumerSessionLookup)
+        )
+
+        accountManager.lookupConsumer(
+            email = "email",
+            startSession = true,
+        )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
 
-        whenever(mockConsumerSession.publishableKey).thenReturn(null)
-        accountManager.setAccountNullable(mockConsumerSession)
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = mockConsumerSessionLookup.copy(publishableKey = null),
+            startSession = true,
+        )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
     }
@@ -96,14 +126,20 @@ class LinkAccountManagerTest {
     @Test
     fun `When ConsumerSession is updated with different email then consumerPublishableKey is removed`() {
         val accountManager = accountManager()
-
-        accountManager.setAccountNullable(mockConsumerSession)
+        accountManager.setLinkAccountFromLookupResult(
+            mockConsumerSessionLookup,
+            startSession = true,
+        )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
 
-        whenever(mockConsumerSession.publishableKey).thenReturn(null)
-        whenever(mockConsumerSession.emailAddress).thenReturn("different@email.com")
-        accountManager.setAccountNullable(mockConsumerSession)
+        accountManager.setLinkAccountFromLookupResult(
+            mockConsumerSessionLookup.copy(
+                consumerSession = mockConsumerSession.copy(emailAddress = "different@email.com"),
+                publishableKey = null,
+            ),
+            startSession = true,
+        )
 
         assertThat(accountManager.consumerPublishableKey).isNull()
     }
@@ -228,7 +264,10 @@ class LinkAccountManagerTest {
         runSuspendTest {
             val manager = accountManager()
 
-            manager.setAccountNullable(mockConsumerSession)
+            manager.setLinkAccountFromLookupResult(
+                mockConsumerSessionLookup,
+                startSession = true,
+            )
 
             val result = manager.signInWithUserInput(
                 UserInput.SignUp(
@@ -253,7 +292,10 @@ class LinkAccountManagerTest {
         runSuspendTest {
             val manager = accountManager()
 
-            manager.setAccountNullable(mockConsumerSession)
+            manager.setLinkAccountFromLookupResult(
+                mockConsumerSessionLookup,
+                startSession = true,
+            )
 
             manager.signInWithUserInput(
                 UserInput.SignUp(
@@ -298,7 +340,11 @@ class LinkAccountManagerTest {
     fun `createPaymentDetails for card does not retry on auth error`() =
         runSuspendTest {
             val accountManager = accountManager()
-            accountManager.setAccountNullable(mockConsumerSession)
+
+            accountManager.setLinkAccountFromLookupResult(
+                mockConsumerSessionLookup,
+                startSession = true,
+            )
 
             whenever(
                 linkRepository.createCardPaymentDetails(
@@ -332,7 +378,11 @@ class LinkAccountManagerTest {
     fun `createCardPaymentDetails makes correct calls in passthrough mode`() =
         runSuspendTest {
             val accountManager = accountManager(passthroughModeEnabled = true)
-            accountManager.setAccountNullable(mockConsumerSession)
+
+            accountManager.setLinkAccountFromLookupResult(
+                mockConsumerSessionLookup,
+                startSession = true,
+            )
 
             val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
                 whenever(id).thenReturn("csmrpd*AYq4D_sXdAAAAOQ0")
@@ -400,7 +450,7 @@ class LinkAccountManagerTest {
                 name = anyOrNull(),
                 consentAction = any()
             )
-        ).thenReturn(Result.success(mockConsumerSession))
+        ).thenReturn(Result.success(mockConsumerSessionSignup))
         whenever(
             linkRepository.shareCardPaymentDetails(
                 paymentMethodCreateParams = anyOrNull(),

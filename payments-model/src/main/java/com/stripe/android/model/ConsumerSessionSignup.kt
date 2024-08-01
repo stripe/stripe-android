@@ -7,18 +7,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * The result of a call to retrieve the [ConsumerSession] for a Link user.
+ * The result of a call to Link consumer sign up.
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-data class ConsumerSessionLookup(
-    @SerialName("exists")
-    val exists: Boolean,
+data class ConsumerSessionSignup(
     @SerialName("consumer_session")
-    val consumerSession: ConsumerSession? = null,
-    @SerialName("error_message")
-    val errorMessage: String? = null,
+    val consumerSession: ConsumerSession,
     @SerialName("publishable_key")
     val publishableKey: String? = null,
 ) : StripeModel

@@ -3,6 +3,7 @@ package com.stripe.android.link.repositories
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -28,7 +29,7 @@ internal interface LinkRepository {
         country: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
-    ): Result<ConsumerSession>
+    ): Result<ConsumerSessionSignup>
 
     /**
      * Create a new card payment method in the consumer account.
