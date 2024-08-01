@@ -23,7 +23,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
-                publishableKey = "asdfg123"
             )
         )
     }
@@ -44,7 +43,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Verified
                     )
                 ),
-                publishableKey = null
             )
         )
     }
@@ -65,7 +63,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
-                publishableKey = null
             )
         )
     }

@@ -14,7 +14,6 @@ class RealConsumerSessionRepositoryTest {
             emailAddress = "email@email.com",
             redactedFormattedPhoneNumber = "(***) ***-1234",
             redactedPhoneNumber = "******1234",
-            publishableKey = "pk_123",
             verificationSessions = listOf(
                 ConsumerSession.VerificationSession(
                     type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -32,7 +31,7 @@ class RealConsumerSessionRepositoryTest {
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
-                publishableKey = "pk_123",
+                publishableKey = null,
                 isVerified = true,
             )
         )
@@ -45,7 +44,6 @@ class RealConsumerSessionRepositoryTest {
             emailAddress = "email@email.com",
             redactedFormattedPhoneNumber = "(***) ***-1234",
             redactedPhoneNumber = "******1234",
-            publishableKey = "pk_123",
             verificationSessions = listOf(
                 ConsumerSession.VerificationSession(
                     type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -63,7 +61,7 @@ class RealConsumerSessionRepositoryTest {
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
-                publishableKey = "pk_123",
+                publishableKey = null,
                 isVerified = false,
             )
         )

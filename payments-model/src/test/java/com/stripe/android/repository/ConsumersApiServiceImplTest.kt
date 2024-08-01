@@ -57,7 +57,6 @@ class ConsumersApiServiceImplTest {
 
         assertThat(lookup.exists).isTrue()
         assertThat(lookup.errorMessage).isNull()
-        assertThat(lookup.consumerSession?.publishableKey).isNull()
         assertThat(lookup.consumerSession?.verificationSessions).isEmpty()
         assertThat(lookup.consumerSession?.emailAddress).isEqualTo(email)
         assertThat(lookup.consumerSession?.redactedPhoneNumber).isEqualTo("+1********68")
