@@ -411,6 +411,9 @@ class CardInputWidget @JvmOverloads constructor(
         super.onAttachedToWindow()
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            if (onBehalfOf != null && viewModel.onBehalfOf != onBehalfOf) {
+                viewModel.setOnBehalfOf(onBehalfOf)
+            }
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }

@@ -228,7 +228,6 @@ class CardMultilineWidget @JvmOverloads constructor(
                         viewModel.setOnBehalfOf(value)
                     }
                 }
-
                 field = value
             }
         }
@@ -475,6 +474,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.hint = null
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            if (onBehalfOf != null && viewModel.onBehalfOf != onBehalfOf) {
+                viewModel.setOnBehalfOf(onBehalfOf)
+            }
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }

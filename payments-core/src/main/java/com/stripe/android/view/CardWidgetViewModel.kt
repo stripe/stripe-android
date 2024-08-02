@@ -2,21 +2,17 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.view.View
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.enableSavedStateHandles
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
@@ -40,7 +36,7 @@ internal class CardWidgetViewModel(
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
 
     private var _onBehalfOf: String? = null
-    private val onBehalfOf: String?
+    val onBehalfOf: String?
         get() = _onBehalfOf
 
     init {
@@ -89,10 +85,6 @@ internal class CardWidgetViewModel(
                 stripeRepository = stripeRepository,
             ) as T
         }
-    }
-
-    companion object {
-        internal const val ON_BEHALF_OF = "on_behalf_of"
     }
 }
 

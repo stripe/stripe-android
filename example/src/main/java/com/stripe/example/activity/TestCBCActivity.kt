@@ -2,6 +2,7 @@ package com.stripe.example.activity
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Button
 import android.widget.LinearLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.CardBrand
@@ -19,12 +20,8 @@ class TestCBCActivity : Activity() {
 
         cardFormView = CardInputWidget(this)
         cardFormView.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+        cardFormView.onBehalfOf = "test"
         frame.addView(cardFormView)
         setContentView(frame)
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        cardFormView.onBehalfOf = "test"
     }
 }
