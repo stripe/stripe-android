@@ -8,8 +8,10 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -29,6 +31,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -45,9 +48,11 @@ class NetworkingLinkVerificationViewModelTest {
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val attachConsumerToLinkAccountSession = mock<AttachConsumerToLinkAccountSession>()
 
     private fun buildViewModel(
-        state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
+        state: NetworkingLinkVerificationState = NetworkingLinkVerificationState(),
+        isLinkWithStripe: Boolean = false,
     ) = NetworkingLinkVerificationViewModel(
         navigationManager = navigationManager,
         getOrFetchSync = getOrFetchSync,
@@ -58,6 +63,8 @@ class NetworkingLinkVerificationViewModelTest {
         logger = Logger.noop(),
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        isLinkWithStripe = { isLinkWithStripe },
+        attachConsumerToLinkAccountSession = attachConsumerToLinkAccountSession,
     )
 
     @Test
@@ -234,4 +241,50 @@ class NetworkingLinkVerificationViewModelTest {
                 pane = NETWORKING_LINK_VERIFICATION
             )
         }
+
+    @Test
+    fun `otpEntered - attaches consumer to LAS and navigates to account picker in Instant Debits`() = runTest {
+        val email = "email@email.com"
+        val consumerSession = consumerSession()
+        val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
+        val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = email))
+        )
+        whenever(attachConsumerToLinkAccountSession.invoke(any())).thenReturn(Unit)
+
+        val viewModel = buildViewModel(isLinkWithStripe = true)
+
+        verify(lookupConsumerAndStartVerification).invoke(
+            email = eq(email),
+            businessName = anyOrNull(),
+            verificationType = eq(VerificationType.SMS),
+            onConsumerNotFound = any(),
+            onLookupError = any(),
+            onStartVerification = onStartVerificationCaptor.capture(),
+            onVerificationStarted = onVerificationStartedCaptor.capture(),
+            onStartVerificationError = any()
+        )
+
+        onStartVerificationCaptor.firstValue()
+        onVerificationStartedCaptor.firstValue(consumerSession)
+
+        val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
+
+        val otpCode = "111111"
+
+        for (index in otpCode.indices) {
+            otpController.onValueChanged(index, otpCode[index].toString())
+        }
+
+        verify(attachConsumerToLinkAccountSession).invoke(consumerSession.clientSecret)
+        verify(getOrFetchSync).invoke(RefetchCondition.Always)
+        verify(markLinkVerified, never()).invoke()
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.LinkAccountPicker,
+            pane = NETWORKING_LINK_VERIFICATION,
+        )
+    }
 }

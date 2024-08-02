@@ -112,9 +112,9 @@ internal interface FinancialConnectionsSheetNativeModule {
             logger: Logger,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+            provideApiRequestOptions = provideApiRequestOptions,
             consumersApiService = consumersApiService,
             consumerSessionRepository = consumerSessionRepository,
-            provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
         )
