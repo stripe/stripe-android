@@ -27,7 +27,7 @@ class DropdownFieldController(
     val selectedIndex: StateFlow<Int> = _selectedIndex
     override val label: StateFlow<Int> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { displayItems[it] }
-    override val rawFieldValue = selectedIndex.mapAsStateFlow { config.rawItems[it] }
+    override val rawFieldValue = selectedIndex.mapAsStateFlow { config.rawItems.getOrNull(it) }
     override val error: StateFlow<FieldError?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false // not supported yet
     override val isComplete: StateFlow<Boolean> = MutableStateFlow(true)
@@ -51,15 +51,20 @@ class DropdownFieldController(
      * This is called when the value changed to is a display value.
      */
     fun onValueChange(index: Int) {
-        _selectedIndex.value = index
+        safelyUpdateSelectedIndex(index)
     }
 
     /**
      * This is called when the value changed to is a raw backing value, not a display value.
      */
     override fun onRawValueChange(rawValue: String) {
-        _selectedIndex.value =
-            displayItems.indexOf(config.convertFromRaw(rawValue)).takeUnless { it == -1 } ?: 0
+        safelyUpdateSelectedIndex(displayItems.indexOf(config.convertFromRaw(rawValue)).takeUnless { it == -1 } ?: 0)
+    }
+
+    private fun safelyUpdateSelectedIndex(index: Int) {
+        if (index < displayItems.size) {
+            _selectedIndex.value = index
+        }
     }
 
     @Composable

@@ -42,7 +42,7 @@ import com.stripe.android.financialconnections.navigation.bottomsheet.BottomShee
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.financialconnections.ui.theme.Attention200
+import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.KeyboardController
@@ -201,7 +201,7 @@ private fun Title(
                 modifier = Modifier
                     .drawBehind {
                         drawRoundRect(
-                            color = Attention200,
+                            color = Attention300,
                             cornerRadius = CornerRadius(PILL_RADIUS)
                         )
                     }

@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertAny
@@ -20,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
@@ -68,6 +71,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -91,6 +95,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
@@ -319,6 +324,7 @@ internal class PaymentSheetActivityTest {
             paymentMethods = paymentMethods,
             isGooglePayAvailable = true,
         )
+        val googlePayListener = viewModel.captureGooglePayListener()
 
         val scenario = activityScenario(viewModel)
 
@@ -342,7 +348,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             composeTestRule
                 .onNodeWithText(error)
@@ -467,6 +473,7 @@ internal class PaymentSheetActivityTest {
         Dispatchers.setMain(testDispatcher)
 
         val viewModel = createViewModel(paymentMethods = emptyList())
+        val googlePayListener = viewModel.captureGooglePayListener()
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // Initially empty card
@@ -479,7 +486,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.buyButton.isEnabled).isFalse()
             assertThat(viewModel.contentVisible.value).isFalse()
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(viewModel.contentVisible.value).isTrue()
 
             // Update to saved card
@@ -661,6 +668,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `google pay flow updates the scroll view before and after`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
+        val googlePayListener = viewModel.captureGooglePayListener()
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
@@ -675,7 +683,9 @@ internal class PaymentSheetActivityTest {
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHODS.first()))
+            googlePayListener.onActivityResult(
+                GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHODS.first())
+            )
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(true)
@@ -1095,7 +1105,6 @@ internal class PaymentSheetActivityTest {
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
                 prefsRepository = FakePrefsRepository(),
-                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
@@ -1106,14 +1115,40 @@ internal class PaymentSheetActivityTest {
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
+                    googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                     statusBarColor = { args.statusBarColor },
                     application = application,
                     errorReporter = FakeErrorReporter(),
+                    logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
             )
         }
+    }
+
+    private fun PaymentSheetViewModel.captureGooglePayListener():
+        ActivityResultCallback<GooglePayPaymentMethodLauncher.Result> {
+        val mockActivityResultCaller = mock<ActivityResultCaller> {
+            on {
+                registerForActivityResult<
+                    GooglePayPaymentMethodLauncherContractV2.Args,
+                    GooglePayPaymentMethodLauncher.Result
+                    >(any(), any())
+            } doReturn mock()
+        }
+
+        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+
+        val googlePayListenerCaptor =
+            argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
+
+        verify(mockActivityResultCaller).registerForActivityResult(
+            any<GooglePayPaymentMethodLauncherContractV2>(),
+            googlePayListenerCaptor.capture(),
+        )
+
+        return googlePayListenerCaptor.firstValue
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =

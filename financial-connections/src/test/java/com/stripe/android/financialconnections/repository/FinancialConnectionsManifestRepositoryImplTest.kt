@@ -36,7 +36,11 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
-        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+        provideApiRequestOptions = {
+            ApiRequest.Options(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            )
+        },
         logger = Logger.noop(),
         initialSync = initialSync,
         locale = Locale.US

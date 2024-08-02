@@ -18,18 +18,29 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 internal val Neutral0 = Color(0xffFFFFFF)
-internal val Neutral50 = Color(0xffF5F6F8)
+internal val Neutral25 = Color(0xffF5F6F8)
+internal val Neutral50 = Color(0xffF6F8FA)
+internal val Neutral100 = Color(0xffD8DEE4)
+internal val Neutral300 = Color(0xffA3ACBA)
+internal val Neutral600 = Color(0xff596171)
+internal val Neutral700 = Color(0xff474E5A)
+internal val Neutral800 = Color(0xff353A44)
 internal val Neutral900 = Color(0xff21252C)
 
 internal val Brand50 = Color(0xffF7F5FD)
 internal val Brand400 = Color(0xff8D7FFA)
+internal val Brand500 = Color(0xff675dff)
+internal val Brand600 = Color(0xff533AFD)
 
-internal val Attention200 = Color(0xffFCAF4F)
+internal val Critical500 = Color(0xffDF1B41)
 
-internal object LinkColors {
-    val Brand200 = Color(0xff00D66F)
-    val Brand900 = Color(0xff011E0F)
-}
+internal val Attention50 = Color(0xffFEF9DA)
+internal val Attention300 = Color(0xffF7870F)
+
+internal val LinkGreen50 = Color(0xffE6FFED)
+internal val LinkGreen200 = Color(0xff00D66F)
+internal val LinkGreen500 = Color(0xff008545)
+internal val LinkGreen900 = Color(0xff011E0F)
 
 @Immutable
 internal data class FinancialConnectionsColors(
@@ -40,16 +51,12 @@ internal data class FinancialConnectionsColors(
     val textBrand: Color,
     val textCritical: Color,
     val iconDefault: Color,
-    val iconSubdued: Color,
     val iconWhite: Color,
     val iconBrand: Color,
     val iconCaution: Color,
+    val iconBackground: Color,
     val buttonPrimary: Color,
-    val buttonPrimaryHover: Color,
-    val buttonPrimaryPressed: Color,
     val buttonSecondary: Color,
-    val buttonSecondaryHover: Color,
-    val buttonSecondaryPressed: Color,
     val backgroundSurface: Color,
     val background: Color,
     val backgroundOffset: Color,
@@ -57,12 +64,8 @@ internal data class FinancialConnectionsColors(
     val backgroundCaution: Color,
     val border: Color,
     val borderBrand: Color,
-    val useDarkColorOnBrand: Boolean,
-) {
-
-    val contentOnBrand: Color
-        get() = if (useDarkColorOnBrand) textDefault else textWhite
-}
+    val contentOnBrand: Color,
+)
 
 @Preview(group = "Components", name = "Colors")
 @Composable
@@ -78,15 +81,10 @@ internal fun ColorsPreview() {
             ColorPreview("textBrand", colors.textBrand)
             ColorPreview("textCritical", colors.textCritical)
             ColorPreview("iconDefault", colors.iconDefault)
-            ColorPreview("iconSubdued", colors.iconSubdued)
             ColorPreview("iconWhite", colors.iconWhite)
             ColorPreview("iconBrand", colors.iconBrand)
             ColorPreview("buttonPrimary", colors.buttonPrimary)
-            ColorPreview("buttonPrimaryHover", colors.buttonPrimaryHover)
-            ColorPreview("buttonPrimaryPressed", colors.buttonPrimaryPressed)
             ColorPreview("buttonSecondary", colors.buttonSecondary)
-            ColorPreview("buttonSecondaryHover", colors.buttonSecondaryHover)
-            ColorPreview("buttonSecondaryPressed", colors.buttonSecondaryPressed)
             ColorPreview("background", colors.background)
             ColorPreview("backgroundBrand", colors.backgroundBrand)
             ColorPreview("border", colors.border)

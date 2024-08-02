@@ -33,10 +33,12 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private val authSessionId = "AuthSessionId"
 
     private fun buildRepository() = FinancialConnectionsAccountsRepository(
-        apiOptions = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        ),
         requestExecutor = mockRequestExecutor,
+        provideApiRequestOptions = {
+            ApiRequest.Options(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            )
+        },
         apiRequestFactory = apiRequestFactory,
         logger = Logger.noop(),
         savedStateHandle = SavedStateHandle(),

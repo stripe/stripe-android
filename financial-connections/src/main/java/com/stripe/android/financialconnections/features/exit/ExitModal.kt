@@ -67,10 +67,14 @@ private fun ExitModalContent(
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
-            style = typography.headingMedium,
+            style = typography.headingLarge,
         )
         Spacer(modifier = Modifier.size(8.dp))
-        Text(text = description.toText().toString())
+        Text(
+            text = description.toText().toString(),
+            style = typography.bodyMedium,
+            color = colors.textDefault,
+        )
         Spacer(modifier = Modifier.size(24.dp))
         FinancialConnectionsButton(
             modifier = Modifier.fillMaxWidth(),

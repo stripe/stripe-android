@@ -171,6 +171,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
         selectNetworkedAccounts(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             selectedAccountIds = selectedAccounts.map { it.id }.toSet(),
+            consentAcquired = null
         )
 
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))

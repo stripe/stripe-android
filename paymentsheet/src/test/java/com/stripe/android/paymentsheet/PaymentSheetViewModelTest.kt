@@ -21,6 +21,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
@@ -90,6 +91,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -650,6 +652,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Google Pay checkout cancelled returns to Idle state`() = runTest {
         val viewModel = createViewModel()
+        val googlePayListener = viewModel.captureGooglePayListener()
 
         viewModel.checkoutWithGooglePay()
 
@@ -661,7 +664,7 @@ internal class PaymentSheetViewModelTest {
                 .isEqualTo(WalletsProcessingState.Processing)
             assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(viewModel.contentVisible.value).isTrue()
 
             assertThat(walletsProcessingStateTurbine.awaitItem())
@@ -702,6 +705,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Google Pay checkout failed returns to Idle state and shows error`() = runTest {
         val viewModel = createViewModel()
+        val googlePayListener = viewModel.captureGooglePayListener()
 
         viewModel.checkoutWithGooglePay()
 
@@ -713,7 +717,7 @@ internal class PaymentSheetViewModelTest {
                 .isEqualTo(WalletsProcessingState.Processing)
             assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(
+            googlePayListener.onActivityResult(
                 GooglePayPaymentMethodLauncher.Result.Failed(
                     Exception("Test exception"),
                     Status.RESULT_INTERNAL_ERROR.statusCode
@@ -1260,6 +1264,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Resets selection correctly after cancelling Google Pay`() = runTest {
         val viewModel = createViewModel(initialPaymentSelection = null)
+        val googlePayListener = viewModel.captureGooglePayListener()
 
         val initialSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -1274,7 +1279,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(initialSelection)
             viewModel.checkoutWithGooglePay()
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             // Still using the initial PaymentSelection
             expectNoEvents()
@@ -1360,11 +1365,12 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Content should be hidden when Google Pay is visible`() = runTest {
         val viewModel = createViewModel()
+        val googlePayListener = viewModel.captureGooglePayListener()
         viewModel.contentVisible.test {
             assertThat(awaitItem()).isTrue()
             viewModel.checkoutWithGooglePay()
             assertThat(awaitItem()).isFalse()
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(awaitItem()).isTrue()
         }
     }
@@ -2053,11 +2059,6 @@ internal class PaymentSheetViewModelTest {
             isGooglePayReady = true,
         )
 
-        viewModel.setupGooglePay(
-            lifecycleScope = mock(),
-            activityResultLauncher = mock(),
-        )
-
         viewModel.checkoutWithGooglePay()
 
         verify(googlePayLauncher).present(
@@ -2089,11 +2090,6 @@ internal class PaymentSheetViewModelTest {
             args = args,
             isGooglePayReady = true,
             stripeIntent = SETUP_INTENT,
-        )
-
-        viewModel.setupGooglePay(
-            lifecycleScope = mock(),
-            activityResultLauncher = mock(),
         )
 
         viewModel.checkoutWithGooglePay()
@@ -2793,7 +2789,6 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
-                googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
@@ -2804,10 +2799,12 @@ internal class PaymentSheetViewModelTest {
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
+                    googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
                     statusBarColor = { args.statusBarColor },
                     application = application,
-                    errorReporter = FakeErrorReporter()
+                    errorReporter = FakeErrorReporter(),
+                    logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
             ).apply {
@@ -2925,6 +2922,30 @@ internal class PaymentSheetViewModelTest {
         )
 
         return paymentResultListenerCaptor.firstValue
+    }
+
+    private fun PaymentSheetViewModel.captureGooglePayListener():
+        ActivityResultCallback<GooglePayPaymentMethodLauncher.Result> {
+        val mockActivityResultCaller = mock<ActivityResultCaller> {
+            on {
+                registerForActivityResult<
+                    GooglePayPaymentMethodLauncherContractV2.Args,
+                    GooglePayPaymentMethodLauncher.Result
+                    >(any(), any())
+            } doReturn mock()
+        }
+
+        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+
+        val googlePayListenerCaptor =
+            argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
+
+        verify(mockActivityResultCaller).registerForActivityResult(
+            any<GooglePayPaymentMethodLauncherContractV2>(),
+            googlePayListenerCaptor.capture(),
+        )
+
+        return googlePayListenerCaptor.firstValue
     }
 
     private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {

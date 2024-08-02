@@ -43,7 +43,9 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
-import com.stripe.android.financialconnections.ui.theme.LinkColors
+import com.stripe.android.financialconnections.ui.theme.LinkGreen200
+import com.stripe.android.financialconnections.ui.theme.LinkGreen900
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -169,12 +171,12 @@ internal fun ExistingEmailSection(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(32.dp)
-                .background(color = LinkColors.Brand200, shape = CircleShape)
+                .background(color = LinkGreen200, shape = CircleShape)
         ) {
             Text(
                 text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
                 style = typography.bodySmall,
-                color = LinkColors.Brand900,
+                color = LinkGreen900,
             )
         }
         Spacer(modifier = Modifier.size(12.dp))
@@ -194,7 +196,9 @@ internal fun ExistingEmailSection(
 internal fun NetworkingLinkLoginWarmupScreenPreview(
     @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(
+        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+    ) {
         NetworkingLinkLoginWarmupContent(
             state = state,
             onContinueClick = {},

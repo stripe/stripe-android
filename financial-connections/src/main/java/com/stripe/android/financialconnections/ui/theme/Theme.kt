@@ -53,40 +53,51 @@ internal enum class Theme {
 }
 
 private val Colors = FinancialConnectionsColors(
-    textDefault = Color(0xFF353A44),
-    textSubdued = Color(0xFF596171),
-    textDisabled = Color(0xFF818DA0),
-    textWhite = Color(0xFFFFFFFF),
-    textBrand = Color(0xFF533AFD),
-    textCritical = Color(0xFFC0123C),
-    iconDefault = Color(0xFF474E5A),
-    iconSubdued = Color(0xFF6C7688),
-    iconWhite = Color(0xFFFFFFFF),
-    iconBrand = Color(0xFF675DFF),
-    iconCaution = Color(0xFFFF8F0E),
-    buttonPrimary = Color(0xFF675DFF),
-    buttonPrimaryHover = Color(0xFF857AFE),
-    buttonPrimaryPressed = Color(0xFF533AFD),
-    buttonSecondary = Color(0xFFF5F6F8),
-    buttonSecondaryHover = Color(0xFFF5F6F8),
-    buttonSecondaryPressed = Color(0xFFEBEEF1),
-    background = Color(0xFFF5F6F8),
-    backgroundSurface = Color(0xFFFFFFFF),
-    backgroundOffset = Color(0xFFF6F8FA),
-    backgroundBrand = Color(0xFFF5F6F8),
-    backgroundCaution = Color(0xFFFEF9DA),
-    border = Color(0xFFD8DEE4),
-    borderBrand = Color(0xFF675DFF),
-    useDarkColorOnBrand = false,
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
+    textBrand = Brand600,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
+    iconBrand = Brand500,
+    iconCaution = Attention300,
+    iconBackground = Brand50,
+    buttonPrimary = Brand500,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
+    borderBrand = Brand500,
+    contentOnBrand = Neutral0,
 )
 
-private val InstantDebitsColors = Colors.copy(
-    textBrand = Color(0XFF00A355),
-    iconBrand = Color(0XFF00D66F),
-    buttonPrimary = Color(0XFF00D66F),
-    buttonPrimaryPressed = Color(0XFF00D66F),
-    borderBrand = Color(0XFF00D66F),
-    useDarkColorOnBrand = true,
+private val InstantDebitsColors = FinancialConnectionsColors(
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
+    textBrand = LinkGreen500,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
+    iconBrand = LinkGreen500,
+    iconCaution = Attention300,
+    iconBackground = LinkGreen50,
+    buttonPrimary = LinkGreen200,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
+    borderBrand = LinkGreen200,
+    contentOnBrand = LinkGreen900,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -97,14 +108,14 @@ private val lineHeightStyle = LineHeightStyle(
 private val Typography = FinancialConnectionsTypography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
     ).toCompat(),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
@@ -173,11 +184,11 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
-private val TextSelectionColors: TextSelectionColors
+internal val TextSelectionColors: TextSelectionColors
     @Composable
     get() = TextSelectionColors(
-        handleColor = FinancialConnectionsTheme.colors.textBrand,
-        backgroundColor = FinancialConnectionsTheme.colors.textBrand.copy(alpha = 0.4f)
+        handleColor = FinancialConnectionsTheme.colors.textDefault,
+        backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
 @Immutable

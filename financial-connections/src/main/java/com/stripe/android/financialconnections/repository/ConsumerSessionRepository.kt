@@ -18,8 +18,11 @@ internal data class CachedConsumerSession(
     val isVerified: Boolean,
 ) : Parcelable
 
-internal interface ConsumerSessionRepository {
+internal fun interface ConsumerSessionProvider {
     fun provideConsumerSession(): CachedConsumerSession?
+}
+
+internal interface ConsumerSessionRepository : ConsumerSessionProvider {
     fun storeConsumerSession(consumerSession: ConsumerSession?)
 }
 
@@ -34,17 +37,16 @@ internal class RealConsumerSessionRepository @Inject constructor(
     override fun storeConsumerSession(
         consumerSession: ConsumerSession?,
     ) {
-        val cachedSession = consumerSession?.let { session ->
-            CachedConsumerSession(
-                emailAddress = session.emailAddress,
-                phoneNumber = session.getRedactedPhoneNumber(),
-                clientSecret = session.clientSecret,
-                publishableKey = session.publishableKey,
-                isVerified = session.verificationSessions.any {
-                    it.state == ConsumerSession.VerificationSession.SessionState.Verified
-                },
-            )
-        }
-        savedStateHandle[KeyConsumerSession] = cachedSession
+        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached()
     }
+
+    private fun ConsumerSession.toCached() = CachedConsumerSession(
+        emailAddress = emailAddress,
+        phoneNumber = getRedactedPhoneNumber(),
+        clientSecret = clientSecret,
+        publishableKey = null, // TODO(tillh-stripe): Coming in the follow-up
+        isVerified = verificationSessions.any {
+            it.state == ConsumerSession.VerificationSession.SessionState.Verified
+        },
+    )
 }

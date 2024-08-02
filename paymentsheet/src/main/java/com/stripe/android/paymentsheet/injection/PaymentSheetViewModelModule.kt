@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -32,19 +34,23 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         savedStateHandle: SavedStateHandle,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
+        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
         errorReporter: ErrorReporter,
+        logger: UserFacingLogger,
     ): IntentConfirmationHandler.Factory {
         return IntentConfirmationHandler.Factory(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentConfigurationProvider = paymentConfigurationProvider,
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             application = application,
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,
+            logger = logger,
         )
     }
 

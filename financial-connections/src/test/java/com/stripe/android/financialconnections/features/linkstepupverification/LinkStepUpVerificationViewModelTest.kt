@@ -181,8 +181,9 @@ class LinkStepUpVerificationViewModelTest {
             verify(confirmVerification).email(any(), eq("111111"))
             verify(markLinkVerified).invoke()
             verify(selectNetworkedAccounts).invoke(
-                consumerSession.clientSecret,
-                setOf(selectedAccount.id)
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                selectedAccountIds = setOf(selectedAccount.id),
+                consentAcquired = null
             )
             navigationManager.assertNavigatedTo(
                 Destination.Success,

@@ -154,11 +154,13 @@ internal interface CustomerSheetViewModelModule {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory = null,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 application = application,
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
+                logger = null,
             )
         }
 

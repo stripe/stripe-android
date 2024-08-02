@@ -143,7 +143,6 @@ internal class ManualEntryViewModel @AssistedInject constructor(
             pollAttachPaymentAccount(
                 sync = sync,
                 activeInstitution = null,
-                consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
                     routingNumber = routing,
                     accountNumber = account

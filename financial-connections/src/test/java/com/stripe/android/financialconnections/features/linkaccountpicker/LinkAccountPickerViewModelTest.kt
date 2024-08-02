@@ -156,6 +156,7 @@ class LinkAccountPickerViewModelTest {
             selectNetworkedAccounts(
                 consumerSessionClientSecret = any(),
                 selectedAccountIds = any(),
+                consentAcquired = any()
             )
         ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
@@ -196,6 +197,7 @@ class LinkAccountPickerViewModelTest {
                 selectNetworkedAccounts(
                     consumerSessionClientSecret = any(),
                     selectedAccountIds = any(),
+                    consentAcquired = any()
                 )
             ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
