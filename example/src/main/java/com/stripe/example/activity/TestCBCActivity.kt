@@ -2,7 +2,6 @@ package com.stripe.example.activity
 
 import android.app.Activity
 import android.os.Bundle
-import android.widget.Button
 import android.widget.LinearLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.CardBrand
