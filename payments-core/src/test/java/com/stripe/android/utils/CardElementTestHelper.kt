@@ -1,6 +1,5 @@
 package com.stripe.android.utils
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ApiKeyFixtures
@@ -35,8 +34,7 @@ internal object CardElementTestHelper {
                         )
                     )
                 }
-            },
-            handle = SavedStateHandle()
+            }
         )
 
         val viewModelStore = ViewModelStore().apply {

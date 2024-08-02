@@ -1725,7 +1725,8 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append("123")
 
-            cardBrandView.brand = CardBrand.CartesBancaires
+            onView(withId(R.id.card_brand_view)).perform(click())
+            onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
 
             val expectedNetworks = PaymentMethodCreateParams.Card.Networks(
                 preferred = "cartes_bancaires",
@@ -1752,6 +1753,19 @@ internal class CardInputWidgetTest {
             },
             afterRecreation = {
                 assertThat(cardBrandView.brand).isEqualTo(CardBrand.CartesBancaires)
+            },
+        )
+    }
+
+    @Test
+    fun `Restores onBehalfOf correctly on activity recreation`() {
+        runCardInputWidgetTest(
+            isCbcEligible = true,
+            block = {
+                onBehalfOf = "test"
+            },
+            afterRecreation = {
+                assertThat(onBehalfOf).isEqualTo("test")
             },
         )
     }
