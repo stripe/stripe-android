@@ -13,7 +13,6 @@ internal fun interface AttachConsumerToLinkAccountSession {
 internal class RealAttachConsumerToLinkAccountSession @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
-    private val getOrFetchSync: GetOrFetchSync,
 ) : AttachConsumerToLinkAccountSession {
 
     override suspend operator fun invoke(
@@ -23,7 +22,5 @@ internal class RealAttachConsumerToLinkAccountSession @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             clientSecret = configuration.financialConnectionsSessionClientSecret,
         )
-
-        getOrFetchSync(refetchCondition = GetOrFetchSync.RefetchCondition.Always)
     }
 }

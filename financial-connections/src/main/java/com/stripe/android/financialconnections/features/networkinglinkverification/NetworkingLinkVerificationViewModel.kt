@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
@@ -149,6 +150,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         runCatching {
             if (isLinkWithStripe()) {
                 attachConsumerToLinkAccountSession(payload.consumerSessionClientSecret)
+                getOrFetchSync(refetchCondition = Always).manifest
             } else {
                 markLinkVerified()
             }

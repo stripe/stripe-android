@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -248,7 +249,7 @@ class NetworkingLinkVerificationViewModelTest {
         val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
         val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
 
-        whenever(getOrFetchSync()).thenReturn(
+        whenever(getOrFetchSync(any())).thenReturn(
             syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = email))
         )
         whenever(attachConsumerToLinkAccountSession.invoke(any())).thenReturn(Unit)
@@ -278,6 +279,7 @@ class NetworkingLinkVerificationViewModelTest {
         }
 
         verify(attachConsumerToLinkAccountSession).invoke(consumerSession.clientSecret)
+        verify(getOrFetchSync).invoke(RefetchCondition.Always)
         verify(markLinkVerified, never()).invoke()
 
         navigationManager.assertNavigatedTo(
