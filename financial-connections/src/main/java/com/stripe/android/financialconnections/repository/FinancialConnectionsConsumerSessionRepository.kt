@@ -127,7 +127,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSession: ConsumerSession,
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from $source")
-        consumerSessionRepository.storeConsumerSession(consumerSession, publishableKey = null)
+        consumerSessionRepository.updateConsumerSession(consumerSession)
     }
 
     private fun updateCachedConsumerSession(
@@ -135,7 +135,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         lookup: ConsumerSessionLookup,
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from $source")
-        consumerSessionRepository.storeConsumerSession(lookup.consumerSession, lookup.publishableKey)
+        consumerSessionRepository.storeNewConsumerSession(lookup.consumerSession, lookup.publishableKey)
     }
 
     private companion object {

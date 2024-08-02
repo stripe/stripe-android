@@ -15,7 +15,7 @@ class RealConsumerSessionRepositoryTest {
         )
 
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-        store.storeConsumerSession(session, "pk_123")
+        store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
@@ -37,7 +37,7 @@ class RealConsumerSessionRepositoryTest {
         )
 
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-        store.storeConsumerSession(session, "pk_123")
+        store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
@@ -65,8 +65,8 @@ class RealConsumerSessionRepositoryTest {
             isVerified = true,
         )
 
-        store.storeConsumerSession(session1, publishableKey = "pk_123")
-        store.storeConsumerSession(session2, publishableKey = null)
+        store.storeNewConsumerSession(session1, publishableKey = "pk_123")
+        store.updateConsumerSession(session2)
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
@@ -94,8 +94,8 @@ class RealConsumerSessionRepositoryTest {
             isVerified = false,
         )
 
-        store.storeConsumerSession(session1, publishableKey = "pk_123")
-        store.storeConsumerSession(session2, publishableKey = "pk_456")
+        store.storeNewConsumerSession(session1, publishableKey = "pk_123")
+        store.storeNewConsumerSession(session2, publishableKey = "pk_456")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(

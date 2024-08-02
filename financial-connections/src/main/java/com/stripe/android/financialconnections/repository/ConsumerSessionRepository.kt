@@ -23,9 +23,13 @@ internal fun interface ConsumerSessionProvider {
 }
 
 internal interface ConsumerSessionRepository : ConsumerSessionProvider {
-    fun storeConsumerSession(
+    fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
+    )
+
+    fun updateConsumerSession(
+        consumerSession: ConsumerSession,
     )
 }
 
@@ -37,13 +41,17 @@ internal class RealConsumerSessionRepository @Inject constructor(
         return savedStateHandle[KeyConsumerSession]
     }
 
-    override fun storeConsumerSession(
+    override fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ) {
+        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached(publishableKey)
+    }
+
+    override fun updateConsumerSession(consumerSession: ConsumerSession) {
         val existingSession = provideConsumerSession()
-        val newPublishableKey = publishableKey ?: existingSession?.publishableKey
-        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached(newPublishableKey)
+        val publishableKey = existingSession?.publishableKey
+        savedStateHandle[KeyConsumerSession] = consumerSession.toCached(publishableKey)
     }
 
     private fun ConsumerSession.toCached(
