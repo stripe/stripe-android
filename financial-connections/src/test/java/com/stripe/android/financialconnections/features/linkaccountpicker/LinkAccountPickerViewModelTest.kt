@@ -349,7 +349,6 @@ class LinkAccountPickerViewModelTest {
         verifyNoInteractions(presentUpdateRequiredSheet)
     }
 
-
     @Test
     fun `onAccountClick - present drawer on click if acquireConsentOnCta is false`() = runTest {
         val drawerOnSelection = FinancialConnectionsGenericInfoScreen(id = "id")
