@@ -62,6 +62,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -354,7 +355,9 @@ internal fun NetworkingLinkSignupScreenPreview(
     @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
     state: NetworkingLinkSignupState
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(
+        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+    ) {
         NetworkingLinkSignupContent(
             state = state,
             onSaveToLink = {},
