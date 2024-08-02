@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
@@ -48,11 +49,12 @@ class NetworkingLinkVerificationViewModelTest {
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val attachConsumerToLinkAccountSession = mock<AttachConsumerToLinkAccountSession>()
 
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState(),
-        isLinkWithStripe: Boolean = false,
+        isInstantDebits: Boolean = false,
     ) = NetworkingLinkVerificationViewModel(
         navigationManager = navigationManager,
         getOrFetchSync = getOrFetchSync,
@@ -63,7 +65,8 @@ class NetworkingLinkVerificationViewModelTest {
         logger = Logger.noop(),
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        isLinkWithStripe = { isLinkWithStripe },
+        getCachedConsumerSession = getCachedConsumerSession,
+        isLinkWithStripe = { isInstantDebits },
         attachConsumerToLinkAccountSession = attachConsumerToLinkAccountSession,
     )
 
@@ -254,7 +257,7 @@ class NetworkingLinkVerificationViewModelTest {
         )
         whenever(attachConsumerToLinkAccountSession.invoke(any())).thenReturn(Unit)
 
-        val viewModel = buildViewModel(isLinkWithStripe = true)
+        val viewModel = buildViewModel(isInstantDebits = true)
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
