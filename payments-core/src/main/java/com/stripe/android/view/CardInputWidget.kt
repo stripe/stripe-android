@@ -354,12 +354,15 @@ class CardInputWidget @JvmOverloads constructor(
      */
     var onBehalfOf: String? = null
         set(value) {
-            if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-                    viewModel.onBehalfOf = value
+            if (field != value) {
+                if (isAttachedToWindow) {
+                    doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                        viewModel.setOnBehalfOf(value)
+                    }
                 }
+
+                field = value
             }
-            field = value
         }
 
     private fun updatePostalRequired() {
@@ -584,7 +587,8 @@ class CardInputWidget @JvmOverloads constructor(
         return bundleOf(
             STATE_SUPER_STATE to super.onSaveInstanceState(),
             STATE_CARD_VIEWED to isShowingFullCard,
-            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled
+            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
+            STATE_ON_BEHALF_OF to onBehalfOf
         )
     }
 
@@ -592,6 +596,7 @@ class CardInputWidget @JvmOverloads constructor(
         if (state is Bundle) {
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
+            onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
@@ -1267,6 +1272,7 @@ class CardInputWidget @JvmOverloads constructor(
         private const val STATE_CARD_VIEWED = "state_card_viewed"
         private const val STATE_SUPER_STATE = "state_super_state"
         private const val STATE_POSTAL_CODE_ENABLED = "state_postal_code_enabled"
+        private const val STATE_ON_BEHALF_OF = "state_on_behalf_of"
 
         // This value is used to ensure that onSaveInstanceState is called
         // in the event that the user doesn't give this control an ID.

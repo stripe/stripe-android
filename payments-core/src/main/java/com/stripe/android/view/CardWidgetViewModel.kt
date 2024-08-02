@@ -2,18 +2,21 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.enableSavedStateHandles
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
@@ -31,19 +34,21 @@ internal class CardWidgetViewModel(
     private val paymentConfigProvider: Provider<PaymentConfiguration>,
     private val stripeRepository: StripeRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val handle: SavedStateHandle
 ) : ViewModel() {
 
     private val _isCbcEligible = MutableStateFlow(false)
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
-    var onBehalfOf: String? = handle[ON_BEHALF_OF]
-        set(value) {
-            field = value
-            handle[ON_BEHALF_OF] = value
-            getEligibility()
-        }
+
+    private var _onBehalfOf: String? = null
+    private val onBehalfOf: String?
+        get() = _onBehalfOf
 
     init {
+        getEligibility()
+    }
+
+    fun setOnBehalfOf(onBehalfOf: String? = null) {
+        _onBehalfOf = onBehalfOf
         getEligibility()
     }
 
@@ -82,7 +87,6 @@ internal class CardWidgetViewModel(
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
                 stripeRepository = stripeRepository,
-                handle = SavedStateHandle()
             ) as T
         }
     }
