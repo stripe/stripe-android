@@ -7,15 +7,19 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.LinkLoginPane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.model.TextUpdate
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
@@ -132,7 +136,7 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     @Test
-    fun `Redirects to verification screen if entering returning user email`() = runTest {
+    fun `Redirects to save-to-link verification screen if entering returning user email`() = runTest {
         val manifest = ApiKeyFixtures.sessionManifest()
 
         whenever(getOrFetchSync(any())).thenReturn(
@@ -156,6 +160,41 @@ class NetworkingLinkSignupViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(
                     route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
+                    popUpTo = null,
+                    isSingleTop = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Redirects to verification screen if entering returning user email in Instant Debits`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            isLinkWithStripe = true,
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    linkLoginPane = linkLoginPane(),
+                ),
+            )
+        )
+
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState(isInstantDebits = true))
+
+        navigationManager.navigationFlow.test {
+            val state = viewModel.stateFlow.value
+            val payload = requireNotNull(state.payload())
+            payload.emailController.onValueChange("email@email.com")
+
+            assertThat(awaitItem()).isEqualTo(
+                NavigationIntent.NavigateTo(
+                    route = NetworkingLinkVerification(referrer = LINK_LOGIN),
                     popUpTo = null,
                     isSingleTop = true,
                 )
@@ -208,11 +247,68 @@ class NetworkingLinkSignupViewModelTest {
         }
     }
 
+    @Test
+    fun `Reports correct pane in analytics events in Financial Connections flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            isLinkWithStripe = false,
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane(),
+                ),
+            )
+        )
+
+        buildViewModel(NetworkingLinkSignupState(isInstantDebits = false))
+        eventTracker.assertContainsEvent(
+            expectedEventName = "linked_accounts.pane.loaded",
+            expectedParams = mapOf(
+                "pane" to NETWORKING_LINK_SIGNUP_PANE.analyticsValue,
+            ),
+        )
+    }
+
+    @Test
+    fun `Reports correct pane in analytics events in Instant Debits flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            isLinkWithStripe = true,
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    linkLoginPane = linkLoginPane(),
+                ),
+            )
+        )
+
+        buildViewModel(NetworkingLinkSignupState(isInstantDebits = true))
+        eventTracker.assertContainsEvent(
+            expectedEventName = "linked_accounts.pane.loaded",
+            expectedParams = mapOf(
+                "pane" to LINK_LOGIN.analyticsValue,
+            ),
+        )
+    }
+
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
         aboveCta = "Above CTA",
         body = NetworkingLinkSignupBody(emptyList()),
         cta = "CTA",
         skipCta = "Skip CTA",
         title = "Title"
+    )
+
+    private fun linkLoginPane() = LinkLoginPane(
+        title = "Title",
+        body = "Body",
+        aboveCta = "Above CTA",
+        cta = "CTA",
     )
 }
