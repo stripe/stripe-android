@@ -105,7 +105,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsConsumerSessionRepository(
             consumersApiService: ConsumersApiService,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
@@ -114,7 +114,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             consumersApiService = consumersApiService,
             consumerSessionRepository = consumerSessionRepository,
-            apiOptions = apiOptions,
+            provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
         )

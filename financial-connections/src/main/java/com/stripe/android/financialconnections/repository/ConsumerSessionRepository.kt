@@ -23,7 +23,14 @@ internal fun interface ConsumerSessionProvider {
 }
 
 internal interface ConsumerSessionRepository : ConsumerSessionProvider {
-    fun storeConsumerSession(consumerSession: ConsumerSession?)
+    fun storeNewConsumerSession(
+        consumerSession: ConsumerSession?,
+        publishableKey: String?,
+    )
+
+    fun updateConsumerSession(
+        consumerSession: ConsumerSession,
+    )
 }
 
 internal class RealConsumerSessionRepository @Inject constructor(
@@ -34,17 +41,26 @@ internal class RealConsumerSessionRepository @Inject constructor(
         return savedStateHandle[KeyConsumerSession]
     }
 
-    override fun storeConsumerSession(
+    override fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
+        publishableKey: String?,
     ) {
-        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached()
+        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached(publishableKey)
     }
 
-    private fun ConsumerSession.toCached() = CachedConsumerSession(
+    override fun updateConsumerSession(consumerSession: ConsumerSession) {
+        val existingSession = provideConsumerSession()
+        val publishableKey = existingSession?.publishableKey
+        savedStateHandle[KeyConsumerSession] = consumerSession.toCached(publishableKey)
+    }
+
+    private fun ConsumerSession.toCached(
+        publishableKey: String?,
+    ) = CachedConsumerSession(
         emailAddress = emailAddress,
         phoneNumber = getRedactedPhoneNumber(),
         clientSecret = clientSecret,
-        publishableKey = null, // TODO(tillh-stripe): Coming in the follow-up
+        publishableKey = publishableKey,
         isVerified = verificationSessions.any {
             it.state == ConsumerSession.VerificationSession.SessionState.Verified
         },
