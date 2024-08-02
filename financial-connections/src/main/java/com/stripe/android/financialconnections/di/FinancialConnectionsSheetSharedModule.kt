@@ -27,8 +27,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
-import com.stripe.android.financialconnections.domain.RealIsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.RealIsLinkWithStripe
 import com.stripe.android.financialconnections.features.common.enableWorkManager
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
