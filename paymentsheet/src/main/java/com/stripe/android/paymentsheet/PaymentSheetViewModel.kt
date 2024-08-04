@@ -27,10 +27,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandler
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.CvcRecollectionException
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -40,7 +40,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
@@ -89,7 +88,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
-    private val cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory
+    private val cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
+    private val cvcRecollectionHandler: CVCRecollectionHandler
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -393,35 +393,33 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkout() {
         val paymentSelection = selection.value
-        val isCard =
-            (paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.type == PaymentMethod.Type.Card == true
-        val card = (paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.card
-        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            if (isCvcRecollectionEnabled() && isCard) {
-                CvcRecollectionData.fromPaymentSelection(card)?.let {
-//                    cvcRecollectionLauncher.launch(
-//                        data = it,
-//                        appearance = PaymentSheet.Appearance(),
-//                        isLiveMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
-//                    )
-                    navigationHandler.transitionTo(
-                        target = PaymentSheetScreen.CvcRecollection(
-                            args = CvcRecollectionContract.Args(
-                                lastFour = it.lastFour ?: "",
-                                cardBrand = it.brand,
-                                appearance = PaymentSheet.Appearance(),
-                                displayMode = CvcRecollectionContract.Args.DisplayMode.PaymentScreen(
-                                    paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
-                                ),
+        val requiresCVCRecollection = cvcRecollectionHandler.requiresCVCRecollection(
+            stripeIntent = paymentMethodMetadata.value?.stripeIntent,
+            paymentSelection = paymentSelection,
+            initializationMode = args.initializationMode,
+            extraRequirements = {
+                config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical
+            }
+        )
+        if (requiresCVCRecollection) {
+            cvcRecollectionHandler.launch(
+                paymentSelection = selection.value
+            ) { cvcRecollectionData ->
+                navigationHandler.transitionTo(
+                    target = PaymentSheetScreen.CvcRecollection(
+                        args = CvcRecollectionContract.Args(
+                            lastFour = cvcRecollectionData.lastFour ?: "",
+                            cardBrand = cvcRecollectionData.brand,
+                            appearance = config.appearance,
+                            displayMode = CvcRecollectionContract.Args.DisplayMode.PaymentScreen(
+                                paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
                             ),
-                            interactor = DefaultCvcRecollectionInteractor(
-                                onCvcRecollectionResult = ::onCvcRecollectionResult,
-                            )
+                        ),
+                        interactor = DefaultCvcRecollectionInteractor(
+                            onCvcRecollectionResult = ::onCvcRecollectionResult,
                         )
                     )
-                }
-
-                return
+                )
             }
         }
         checkout(paymentSelection, CheckoutIdentifier.SheetBottomBuy)
@@ -440,43 +438,29 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         confirmPaymentSelection(paymentSelection)
     }
 
-    internal fun onCvcRecollectionResult(
+    private fun onCvcRecollectionResult(
         result: CvcRecollectionResult
     ) {
         navigationHandler.pop()
         when (result) {
             is CvcRecollectionResult.Cancelled -> Unit
             is CvcRecollectionResult.Confirmed -> {
-                runCatching {
-                    requireNotNull(viewState)
-                }.fold(
-                    onSuccess = { state ->
-                        val paymentSelection = selection.value
-                        (paymentSelection as? PaymentSelection.Saved)?.let {
-                            val selection = PaymentSelection.Saved(
-                                paymentMethod = it.paymentMethod,
-                                walletType = it.walletType,
-                                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                                    cvc = result.cvc,
-                                )
-                            )
-                            confirmPaymentSelection(selection)
-                        } ?: _paymentSheetResult.tryEmit(
-                            PaymentSheetResult.Failed(
-                                CvcRecollectionException(
-                                    type = CvcRecollectionException.Type.IncorrectSelection
-                                )
-                            )
+                val paymentSelection = selection.value
+                (paymentSelection as? PaymentSelection.Saved)?.let {
+                    val selection = PaymentSelection.Saved(
+                        paymentMethod = it.paymentMethod,
+                        walletType = it.walletType,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                            cvc = result.cvc,
                         )
-//                        errorReporter.report(
-//                            ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
-//                        )
-                    },
-                    onFailure = { error ->
-                        _paymentSheetResult.tryEmit(
-                            PaymentSheetResult.Failed(error)
+                    )
+                    confirmPaymentSelection(selection)
+                } ?: _paymentSheetResult.tryEmit(
+                    PaymentSheetResult.Failed(
+                        CvcRecollectionException(
+                            type = CvcRecollectionException.Type.IncorrectSelection
                         )
-                    }
+                    )
                 )
             }
         }
