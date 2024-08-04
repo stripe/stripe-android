@@ -49,10 +49,12 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
@@ -64,6 +66,7 @@ import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.verticalmode.DefaultCvcRecollectionInteractor
 import com.stripe.android.uicore.utils.AnimationConstants
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -112,6 +115,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @IOContext workContext: CoroutineContext,
     logger: UserFacingLogger,
+    private val cvcRecollectionHandler: CVCRecollectionHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -351,6 +355,11 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full
     ) {
+        val requiresCVCRecollection = cvcRecollectionHandler.requiresCVCRecollection(
+            stripeIntent = state.stripeIntent,
+            paymentSelection = paymentSelection,
+            initializationMode = initializationMode,
+        )
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
         ) {
@@ -362,13 +371,12 @@ internal class DefaultFlowController @Inject internal constructor(
                     merchantName = state.config.merchantDisplayName
                 )
             )
-        } else if (
-            isCvcRecollectionEnabled(state) &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
-        ) {
-            CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
+        } else if (requiresCVCRecollection) {
+            cvcRecollectionHandler.launch(
+                paymentSelection = paymentSelection
+            ) { cvcRecollectionData ->
                 cvcRecollectionLauncher.launch(
-                    data = it,
+                    data = cvcRecollectionData,
                     appearance = getPaymentAppearance(),
                     state.stripeIntent.isLiveMode
                 )
@@ -376,14 +384,6 @@ internal class DefaultFlowController @Inject internal constructor(
         } else {
             confirmPaymentSelection(paymentSelection, state)
         }
-    }
-
-    private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
-        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
-            (
-                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
-                    initializationMode is PaymentSheet.InitializationMode.DeferredIntent
-                )
     }
 
     @VisibleForTesting

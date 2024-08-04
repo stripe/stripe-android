@@ -27,6 +27,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -152,6 +154,12 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
             return DefaultCvcRecollectionLauncherFactory
+        }
+
+        @Provides
+        @Singleton
+        fun provideCVCRecollectionHandler(): CVCRecollectionHandler {
+            return CVCRecollectionHandlerImpl()
         }
 
         @Provides
