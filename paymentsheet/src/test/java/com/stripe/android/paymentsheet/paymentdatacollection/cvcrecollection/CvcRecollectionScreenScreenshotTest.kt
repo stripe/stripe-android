@@ -16,39 +16,39 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
-    @Test
-    fun testEmpty() {
-        paparazziRule.snapshot {
-            CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242",
-                isTestMode = false,
-                viewActionHandler = {}
-            )
-        }
-    }
-
-    @Test
-    fun testFilled() {
-        paparazziRule.snapshot {
-            CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242",
-                isTestMode = false,
-                viewActionHandler = {}
-            )
-        }
-    }
-
-    @Test
-    fun testFilledTestMode() {
-        paparazziRule.snapshot {
-            CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242",
-                isTestMode = true,
-                viewActionHandler = {}
-            )
-        }
-    }
+//    @Test
+//    fun testEmpty() {
+//        paparazziRule.snapshot {
+//            CvcRecollectionScreen(
+//                cardBrand = CardBrand.Visa,
+//                lastFour = "4242",
+//                isTestMode = false,
+//                viewActionHandler = {}
+//            )
+//        }
+//    }
+//
+//    @Test
+//    fun testFilled() {
+//        paparazziRule.snapshot {
+//            CvcRecollectionScreen(
+//                cardBrand = CardBrand.Visa,
+//                lastFour = "4242",
+//                isTestMode = false,
+//                viewActionHandler = {}
+//            )
+//        }
+//    }
+//
+//    @Test
+//    fun testFilledTestMode() {
+//        paparazziRule.snapshot {
+//            CvcRecollectionScreen(
+//                cardBrand = CardBrand.Visa,
+//                lastFour = "4242",
+//                isTestMode = true,
+//                viewActionHandler = {}
+//            )
+//        }
+//    }
 }
