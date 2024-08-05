@@ -221,6 +221,18 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 "Card Input Widget Compose Example",
                 CardInputWidgetComposeExampleActivity::class.java
+            ),
+            Item(
+                "Card Input Widget Test Activity",
+                CardInputWidgetActivity::class.java
+            ),
+            Item(
+                "Card Multiline Widget Test Activity",
+                CardMultilineWidgetActivity::class.java
+            ),
+            Item(
+                "Card Form View Test Activity",
+                CardFormViewActivity::class.java
             )
         )
 
