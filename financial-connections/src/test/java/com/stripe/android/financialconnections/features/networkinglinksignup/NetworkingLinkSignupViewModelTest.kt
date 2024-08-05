@@ -63,6 +63,8 @@ class NetworkingLinkSignupViewModelTest {
         saveAccountToLink = saveAccountToLink,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
+        signUpToLink = mock(),
+        attachConsumerToLinkAccountSession = mock(),
     )
 
     @Test

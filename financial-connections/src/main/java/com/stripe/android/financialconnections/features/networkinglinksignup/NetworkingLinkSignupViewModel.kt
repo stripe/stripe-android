@@ -14,12 +14,14 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.SignUpToLink
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -34,6 +36,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
@@ -72,6 +75,8 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
+    private val signUpToLink: SignUpToLink,
+    private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private val pane: Pane by lazy {
@@ -151,19 +156,35 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     }
 
     private fun observeSaveAccountResult() {
+        val isInstantDebits = stateFlow.value.isInstantDebits
+
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = {
-                navigationManager.tryNavigateTo(SuccessDestination(referrer = pane))
+            onSuccess = { manifest ->
+                val destination = if (isInstantDebits) {
+                    manifest.nextPane.destination(referrer = pane)
+                } else {
+                    SuccessDestination(referrer = pane)
+                }
+                navigationManager.tryNavigateTo(destination)
             },
             onFail = { error ->
                 eventTracker.logError(
-                    extraMessage = "Error saving account to Link",
+                    extraMessage = if (isInstantDebits) {
+                        "Error creating a Link account"
+                    } else {
+                        "Error saving account to Link"
+                    },
                     error = error,
                     logger = logger,
                     pane = pane
                 )
-                navigationManager.tryNavigateTo(SuccessDestination(referrer = pane))
+
+                if (isInstantDebits) {
+                    // TODO(tillh-stripe) Display error message
+                } else {
+                    navigationManager.tryNavigateTo(SuccessDestination(referrer = pane))
+                }
             },
         )
     }
@@ -242,6 +263,16 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     }
 
     private fun saveNewAccount() {
+        val isInstantDebits = stateFlow.value.isInstantDebits
+
+        if (isInstantDebits) {
+            saveNewAccountInInstantDebits()
+        } else {
+            saveNewAccountInFinancialConnections()
+        }
+    }
+
+    private fun saveNewAccountInFinancialConnections() {
         suspend {
             eventTracker.track(Click(eventName = "click.save_to_link", pane = pane))
             val state = stateFlow.value
@@ -256,6 +287,34 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
             )
+        }.execute { copy(saveAccountToLink = it) }
+    }
+
+    private fun saveNewAccountInInstantDebits() {
+        suspend {
+            val state = stateFlow.value
+
+            if (!state.isInstantDebits) {
+                // For the time being, we don't send events for this in the Instant Debits flow
+                eventTracker.track(Click(eventName = "click.save_to_link", pane = pane))
+            }
+
+            val phoneController = state.payload()!!.phoneController
+
+            val signup = signUpToLink(
+                email = state.validEmail!!,
+                phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
+                country = stateFlow.value.payload()!!.phoneController.getCountryCode(),
+            )
+
+            attachConsumerToLinkAccountSession(
+                consumerSessionClientSecret = signup.consumerSession.clientSecret,
+            )
+
+            val manifest = getOrFetchSync(refetchCondition = RefetchCondition.Always).manifest
+            navigationManager.tryNavigateTo(manifest.nextPane.destination(referrer = pane))
+
+            manifest
         }.execute { copy(saveAccountToLink = it) }
     }
 
@@ -312,17 +371,17 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    @AssistedFactory
-    interface Factory {
-        fun create(initialState: NetworkingLinkSignupState): NetworkingLinkSignupViewModel
-    }
-
     private fun determinePane(isInstantDebits: Boolean): Pane {
         return if (isInstantDebits) {
             Pane.LINK_LOGIN
         } else {
             Pane.NETWORKING_LINK_SIGNUP_PANE
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkSignupState): NetworkingLinkSignupViewModel
     }
 
     companion object {
