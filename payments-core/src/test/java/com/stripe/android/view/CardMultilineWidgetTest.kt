@@ -9,6 +9,11 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onData
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
+import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -38,6 +43,8 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.parcelize.Parcelize
+import org.hamcrest.CoreMatchers.anything
+import org.hamcrest.Matchers
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -1215,8 +1222,10 @@ internal class CardMultilineWidgetTest {
             cardMultilineWidget.setCardNumber("4000002500001001")
             cardMultilineWidget.setExpiryDate(12, 2030)
             cardMultilineWidget.setCvcCode("123")
+            cardMultilineWidget.cardBrandView.tag = "card_brand_view"
 
-            cardMultilineWidget.cardBrandView.brand = CardBrand.CartesBancaires
+            onView(withTagValue(Matchers.`is`("card_brand_view"))).perform(click())
+            onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
 
             val cardParams = cardMultilineWidget.paymentMethodCard
             assertThat(cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)

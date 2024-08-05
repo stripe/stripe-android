@@ -1,13 +1,14 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -16,6 +17,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import androidx.core.os.bundleOf
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
@@ -47,7 +49,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+) : LifecycleOwnerLayout(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -56,7 +58,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val cardNumberEditText = viewBinding.etCardNumber
 
-    internal val cardBrandView: CardBrandView = viewBinding.cardBrandView
+    internal val cardBrandView: CardBrandViewRebuild = viewBinding.cardBrandView
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val expiryDateEditText = viewBinding.etExpiry
@@ -220,12 +222,14 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     var onBehalfOf: String? = null
         set(value) {
-            if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-                    viewModel.onBehalfOf = value
+            if (field != value) {
+                if (isAttachedToWindow) {
+                    doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                        viewModel.setOnBehalfOf(value)
+                    }
                 }
+                field = value
             }
-            field = value
         }
 
     /**
@@ -373,7 +377,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
-        cardBrandView.reserveSpaceForCbcDropdown = false
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         cardNumberEditText.completionCallback = {
@@ -471,6 +474,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.hint = null
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            if (onBehalfOf != null && viewModel.onBehalfOf != onBehalfOf) {
+                viewModel.setOnBehalfOf(onBehalfOf)
+            }
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }
@@ -548,6 +554,25 @@ class CardMultilineWidget @JvmOverloads constructor(
         allFields.firstOrNull { it.shouldShowError }?.requestFocus()
 
         return cardNumberIsValid && expiryIsValid && cvcIsValid && !postalCodeEditText.shouldShowError
+    }
+
+    override fun onSaveInstanceState(): Parcelable {
+        super.onSaveInstanceState()
+
+        return bundleOf(
+            STATE_REMAINING_STATE to super.onSaveInstanceState(),
+            STATE_ON_BEHALF_OF to onBehalfOf
+        )
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable) {
+        if (state is Bundle) {
+            onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
+
+            super.onRestoreInstanceState(state.getParcelable(STATE_REMAINING_STATE))
+        } else {
+            super.onRestoreInstanceState(state)
+        }
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -809,5 +834,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
+        private const val STATE_REMAINING_STATE = "state_remaining_state"
+        private const val STATE_ON_BEHALF_OF = "state_on_behalf_of"
     }
 }

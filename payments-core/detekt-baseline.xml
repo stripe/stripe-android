@@ -24,7 +24,7 @@
     <ID>EmptyFunctionBlock:PaymentSessionViewModel.kt$PaymentSessionViewModel${ }</ID>
     <ID>EmptyFunctionBlock:StripeTextWatcher.kt$StripeTextWatcher${ }</ID>
     <ID>ExplicitGarbageCollectionCall:WeakMapInjectorRegistryTest.kt$WeakMapInjectorRegistryTest$gc()</ID>
-    <ID>LargeClass:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
+    <ID>LargeClass:CardInputWidget.kt$CardInputWidget : LifecycleOwnerLayoutCardWidget</ID>
     <ID>LargeClass:CardInputWidgetTest.kt$CardInputWidgetTest</ID>
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
@@ -54,7 +54,6 @@
     <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
     <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
-    <ID>LongMethod:WebIntentAuthenticator.kt$WebIntentAuthenticator$override suspend fun performAuthentication( host: AuthActivityStarterHost, authenticatable: StripeIntent, requestOptions: ApiRequest.Options )</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText$3</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText.&lt;no name provided>$4</ID>
     <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$4</ID>
@@ -165,14 +164,12 @@
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
-    <ID>TooGenericExceptionCaught:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
     <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder</ID>
-    <ID>TooManyFunctions:AuthenticationComponent.kt$AuthenticationComponent$Builder</ID>
-    <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
-    <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LinearLayoutCardWidget</ID>
+    <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LifecycleOwnerLayoutCardWidget</ID>
+    <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LifecycleOwnerLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardWidget.kt$CardWidget</ID>
     <ID>TooManyFunctions:CountryTextInputLayout.kt$CountryTextInputLayout : TextInputLayout</ID>
     <ID>TooManyFunctions:CustomerSession.kt$CustomerSession</ID>

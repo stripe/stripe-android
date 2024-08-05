@@ -8,12 +8,14 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onData
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
@@ -43,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.parcelize.Parcelize
+import org.hamcrest.CoreMatchers.anything
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -1722,7 +1725,8 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append("123")
 
-            cardBrandView.brand = CardBrand.CartesBancaires
+            onView(withId(R.id.card_brand_view)).perform(click())
+            onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
 
             val expectedNetworks = PaymentMethodCreateParams.Card.Networks(
                 preferred = "cartes_bancaires",
@@ -1740,13 +1744,8 @@ internal class CardInputWidgetTest {
             block = {
                 cardNumberEditText.setText("4000 0025 0000 1001")
 
-                composeTestRule
-                    .onNodeWithTag(CardBrandDropdownTestTag)
-                    .performClick()
-
-                composeTestRule
-                    .onNodeWithText("Cartes Bancaires")
-                    .performClick()
+                onView(withId(R.id.card_brand_view)).perform(click())
+                onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
 
                 expiryDateEditText.append("12")
                 expiryDateEditText.append("50")
@@ -1754,6 +1753,19 @@ internal class CardInputWidgetTest {
             },
             afterRecreation = {
                 assertThat(cardBrandView.brand).isEqualTo(CardBrand.CartesBancaires)
+            },
+        )
+    }
+
+    @Test
+    fun `Restores onBehalfOf correctly on activity recreation`() {
+        runCardInputWidgetTest(
+            isCbcEligible = true,
+            block = {
+                onBehalfOf = "test"
+            },
+            afterRecreation = {
+                assertThat(onBehalfOf).isEqualTo("test")
             },
         )
     }

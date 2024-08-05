@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <com.stripe.android.view.CardBrandView
+    <com.stripe.android.view.CardBrandViewRebuild
         android:id="@+id/card_brand_view"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stripe_card_brand_view_height"

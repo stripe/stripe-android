@@ -11,7 +11,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
@@ -49,7 +48,7 @@ class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr) {
+) : LifecycleOwnerLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
     private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
 
@@ -192,12 +191,15 @@ class CardFormView @JvmOverloads constructor(
      */
     var onBehalfOf: String? = null
         set(value) {
-            if (isAttachedToWindow) {
-                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-                    viewModel.onBehalfOf = value
+            if (field != value) {
+                if (isAttachedToWindow) {
+                    doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                        viewModel.setOnBehalfOf(value)
+                    }
                 }
+
+                field = value
             }
-            field = value
         }
 
     init {
@@ -413,7 +415,8 @@ class CardFormView @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         return bundleOf(
             STATE_SUPER_STATE to super.onSaveInstanceState(),
-            STATE_ENABLED to isEnabled
+            STATE_ENABLED to isEnabled,
+            STATE_ON_BEHALF_OF to onBehalfOf,
         )
     }
 
@@ -421,6 +424,7 @@ class CardFormView @JvmOverloads constructor(
         if (state is Bundle) {
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
             isEnabled = state.getBoolean(STATE_ENABLED)
+            onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
         } else {
             super.onRestoreInstanceState(state)
         }
@@ -538,5 +542,6 @@ class CardFormView @JvmOverloads constructor(
         const val CARD_FORM_VIEW = "CardFormView"
         private const val STATE_ENABLED = "state_enabled"
         private const val STATE_SUPER_STATE = "state_super_state"
+        private const val STATE_ON_BEHALF_OF = "state_on_behalf_of"
     }
 }
