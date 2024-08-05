@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.FakeCVCRecollectionHandler
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -2253,6 +2254,7 @@ internal class DefaultFlowControllerTest {
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
         logger = FakeUserFacingLogger(),
+        cvcRecollectionHandler = FakeCVCRecollectionHandler()
     )
 
     private fun createViewModel(): FlowControllerViewModel {

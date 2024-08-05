@@ -1123,6 +1123,7 @@ internal class PaymentSheetActivityTest {
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
                 errorReporter = FakeErrorReporter(),
+                cvcRecollectionHandler = FakeCVCRecollectionHandler()
             )
         }
     }
