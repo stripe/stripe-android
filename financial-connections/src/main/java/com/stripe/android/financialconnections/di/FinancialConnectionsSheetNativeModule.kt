@@ -7,8 +7,12 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.domain.RealSignUpToLink
+import com.stripe.android.financialconnections.domain.SignUpToLink
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.notice.PresentSheet
@@ -60,6 +64,16 @@ internal interface FinancialConnectionsSheetNativeModule {
     @Binds
     @Singleton
     fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
+
+    @Binds
+    fun bindsAttachConsumerToLinkAccountSession(
+        impl: RealAttachConsumerToLinkAccountSession,
+    ): AttachConsumerToLinkAccountSession
+
+    @Binds
+    fun bindsSignUpToLink(
+        impl: RealSignUpToLink,
+    ): SignUpToLink
 
     companion object {
         @Provides
@@ -139,11 +153,11 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsInstitutionsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options
         ) = FinancialConnectionsInstitutionsRepository(
             requestExecutor = requestExecutor,
-            apiOptions = apiOptions,
+            provideApiRequestOptions = provideApiRequestOptions,
             apiRequestFactory = apiRequestFactory
         )
 
