@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -48,6 +50,7 @@ class NetworkingLinkVerificationViewModelTest {
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val attachConsumerToLinkAccountSession = mock<AttachConsumerToLinkAccountSession>()
 
     private fun buildViewModel(
@@ -63,9 +66,70 @@ class NetworkingLinkVerificationViewModelTest {
         logger = Logger.noop(),
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        getCachedConsumerSession = getCachedConsumerSession,
         isLinkWithStripe = { isLinkWithStripe },
         attachConsumerToLinkAccountSession = attachConsumerToLinkAccountSession,
     )
+
+    @Test
+    fun `init - uses consumersession email over accountholder customer email if in Instant Debits`() = runTest {
+        val manifest = sessionManifest().copy(
+            accountholderCustomerEmailAddress = "email@email.com",
+        )
+
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse(manifest)
+        )
+
+        whenever(getCachedConsumerSession()).thenReturn(
+            CachedConsumerSession(
+                emailAddress = "cached@consumer.com",
+                phoneNumber = "+1********42",
+                clientSecret = "client_secret",
+                publishableKey = "pk_123",
+                isVerified = false,
+            )
+        )
+
+        buildViewModel(isLinkWithStripe = true)
+
+        verify(lookupConsumerAndStartVerification).invoke(
+            email = eq("cached@consumer.com"),
+            businessName = anyOrNull(),
+            verificationType = any(),
+            onConsumerNotFound = any(),
+            onLookupError = any(),
+            onStartVerification = any(),
+            onVerificationStarted = any(),
+            onStartVerificationError = any(),
+        )
+    }
+
+    @Test
+    fun `init - falls back to accountholder customer email if no consumer session in Instant Debits`() = runTest {
+        val manifest = sessionManifest().copy(
+            accountholderCustomerEmailAddress = "email@email.com",
+        )
+
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse(manifest)
+        )
+
+        whenever(getCachedConsumerSession.invoke()).thenReturn(null)
+
+        buildViewModel(isLinkWithStripe = true)
+
+        verify(lookupConsumerAndStartVerification).invoke(
+            email = eq("email@email.com"),
+            businessName = anyOrNull(),
+            verificationType = any(),
+            onConsumerNotFound = any(),
+            onLookupError = any(),
+            onStartVerification = any(),
+            onVerificationStarted = any(),
+            onStartVerificationError = any(),
+        )
+    }
 
     @Test
     fun `init - starts SMS verification with consumer session secret`() = runTest {

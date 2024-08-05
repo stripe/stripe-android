@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -24,7 +25,6 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
@@ -62,41 +62,72 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val isLinkWithStripe: IsLinkWithStripe,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
+    private val getCachedConsumerSession: GetCachedConsumerSession,
 ) : FinancialConnectionsViewModel<NetworkingLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-            runCatching { getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) } }
-                .onSuccess { manifest ->
-                    lookupConsumerAndStartVerification(
-                        email = requireNotNull(manifest.accountholderCustomerEmailAddress),
-                        businessName = manifest.businessName,
-                        verificationType = VerificationType.SMS,
-                        onConsumerNotFound = {
-                            analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
-                            navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-                        },
-                        onLookupError = { error ->
-                            analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
-                            setState { copy(payload = Fail(error)) }
-                        },
-                        onStartVerification = { /* no-op */ },
-                        onVerificationStarted = { consumerSession ->
-                            val payload = buildPayload(consumerSession, manifest)
-                            setState { copy(payload = Success(payload)) }
-                        },
-                        onStartVerificationError = { error ->
-                            analyticsTracker.track(
-                                VerificationError(PANE, StartVerificationSessionError)
-                            )
-                            setState { copy(payload = Fail(error)) }
-                        }
-                    )
-                }
-                .onFailure { setState { copy(payload = Fail(it)) } }
+
+            runCatching {
+                buildInitData()
+            }.onSuccess {
+                startVerification(it)
+            }.onFailure {
+                setState { copy(payload = Fail(it)) }
+            }
         }
+    }
+
+    private suspend fun buildInitData(): InitData {
+        val manifest = getOrFetchSync().manifest
+        val isInstantDebits = isLinkWithStripe()
+
+        val email = if (isInstantDebits) {
+            // This pane can appear in two different places in the flow,
+            // and it might not have the consumer session created when launched from the
+            // Link warmup sheet. Therefore, we need to fall back to the customer email.
+            val consumerSession = getCachedConsumerSession()
+            consumerSession?.emailAddress ?: manifest.accountholderCustomerEmailAddress
+        } else {
+            manifest.accountholderCustomerEmailAddress
+        }
+
+        return InitData(
+            businessName = manifest.businessName,
+            emailAddress = requireNotNull(email),
+            initialInstitution = manifest.initialInstitution,
+        )
+    }
+
+    private suspend fun startVerification(
+        initData: InitData,
+    ) {
+        lookupConsumerAndStartVerification(
+            email = initData.emailAddress,
+            businessName = initData.businessName,
+            verificationType = VerificationType.SMS,
+            onConsumerNotFound = {
+                analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
+                navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
+            },
+            onLookupError = { error ->
+                analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
+                setState { copy(payload = Fail(error)) }
+            },
+            onStartVerification = { /* no-op */ },
+            onVerificationStarted = { consumerSession ->
+                val payload = buildPayload(consumerSession, initData.initialInstitution)
+                setState { copy(payload = Success(payload)) }
+            },
+            onStartVerificationError = { error ->
+                analyticsTracker.track(
+                    VerificationError(PANE, StartVerificationSessionError)
+                )
+                setState { copy(payload = Fail(error)) }
+            }
+        )
     }
 
     override fun updateTopAppBar(state: NetworkingLinkVerificationState): TopAppBarStateUpdate {
@@ -109,11 +140,11 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
 
     private fun buildPayload(
         consumerSession: ConsumerSession,
-        manifest: FinancialConnectionsSessionManifest
+        initialInstitution: FinancialConnectionsInstitution?,
     ) = Payload(
         email = consumerSession.emailAddress,
         phoneNumber = consumerSession.getRedactedPhoneNumber(),
-        initialInstitution = manifest.initialInstitution,
+        initialInstitution = initialInstitution,
         consumerSessionClientSecret = consumerSession.clientSecret,
         otpElement = OTPElement(
             IdentifierSpec.Generic("otp"),
@@ -180,6 +211,12 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     interface Factory {
         fun create(initialState: NetworkingLinkVerificationState): NetworkingLinkVerificationViewModel
     }
+
+    private data class InitData(
+        val businessName: String?,
+        val emailAddress: String,
+        val initialInstitution: FinancialConnectionsInstitution?,
+    )
 
     companion object {
 
