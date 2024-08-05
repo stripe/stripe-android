@@ -10,15 +10,29 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface ConsumersApiService {
+
+    suspend fun signUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        name: String?,
+        locale: Locale?,
+        requestSurface: String,
+        consentAction: ConsumerSignUpConsentAction,
+        requestOptions: ApiRequest.Options,
+    ): ConsumerSessionSignup
 
     suspend fun lookupConsumerSession(
         email: String,
@@ -67,6 +81,43 @@ class ConsumersApiServiceImpl(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
+
+    override suspend fun signUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        name: String?,
+        locale: Locale?,
+        requestSurface: String,
+        consentAction: ConsumerSignUpConsentAction,
+        requestOptions: ApiRequest.Options,
+    ): ConsumerSessionSignup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consumerAccountsSignUpUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "email_address" to email.lowercase(),
+                    "phone_number" to phoneNumber,
+                    "country" to country,
+                    "country_inferring_method" to "PHONE_NUMBER",
+                    "consent_action" to consentAction.value,
+                    "request_surface" to requestSurface,
+                ).plus(
+                    locale?.let {
+                        mapOf("locale" to it.toLanguageTag())
+                    } ?: emptyMap()
+                ).plus(
+                    name?.let {
+                        mapOf("legal_name" to it)
+                    } ?: emptyMap()
+                ),
+            ),
+            responseJsonParser = ConsumerSessionSignupJsonParser,
+        )
+    }
 
     /**
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
@@ -176,6 +227,13 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
+         */
+        internal val consumerAccountsSignUpUrl: String =
+            getApiUrl("consumers/accounts/sign_up")
+
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
          */

@@ -119,14 +119,15 @@ class LinkApiRepositoryTest {
             ConsumerSignUpConsentAction.Checkbox
         )
 
-        verify(stripeRepository).consumerSignUp(
-            eq(email),
-            eq(phone),
-            eq(country),
-            eq(name),
-            eq(Locale.US),
-            eq(ConsumerSignUpConsentAction.Checkbox),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        verify(consumersApiService).signUp(
+            email = email,
+            phoneNumber = phone,
+            country = country,
+            name = name,
+            locale = Locale.US,
+            requestSurface = "android_payment_element",
+            consentAction = ConsumerSignUpConsentAction.Checkbox,
+            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
         )
     }
 
@@ -134,16 +135,17 @@ class LinkApiRepositoryTest {
     fun `consumerSignUp returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSessionSignup>()
         whenever(
-            stripeRepository.consumerSignUp(
+            consumersApiService.signUp(
                 email = any(),
                 phoneNumber = any(),
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                requestSurface = any(),
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenReturn(Result.success(consumerSession))
+        ).thenReturn(consumerSession)
 
         val result = linkRepository.consumerSignUp(
             "email",
@@ -160,16 +162,17 @@ class LinkApiRepositoryTest {
     @Test
     fun `consumerSignUp catches exception and returns failure`() = runTest {
         whenever(
-            stripeRepository.consumerSignUp(
+            consumersApiService.signUp(
                 email = any(),
                 phoneNumber = any(),
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                requestSurface = any(),
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenReturn(Result.failure(RuntimeException("error")))
+        ).thenThrow(RuntimeException("error"))
 
         val result = linkRepository.consumerSignUp(
             "email",
