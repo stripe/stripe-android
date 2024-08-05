@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
@@ -30,7 +29,6 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
 
     @Provides
     fun providesIntentConfirmationHandlerFactory(
-        application: Application,
         savedStateHandle: SavedStateHandle,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -46,7 +44,6 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            application = application,
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,

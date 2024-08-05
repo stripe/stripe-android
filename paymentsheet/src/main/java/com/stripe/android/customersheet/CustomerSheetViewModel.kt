@@ -40,6 +40,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
+import com.stripe.android.paymentsheet.PaymentConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -47,7 +48,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -898,17 +898,17 @@ internal class CustomerSheetViewModel(
         clientSecret: String,
         paymentMethod: PaymentMethod
     ): Result<Unit> {
-        val selection = PaymentSelection.Saved(paymentMethod)
-
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = PaymentSheet.InitializationMode.SetupIntent(
-                    clientSecret = clientSecret
-                ),
                 intent = stripeIntent,
-                confirmationOption = selection.toPaymentConfirmationOption(configuration = null),
-                shippingDetails = null,
-                appearance = configuration.appearance,
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                        clientSecret = clientSecret
+                    ),
+                    shippingDetails = null,
+                    paymentMethod = paymentMethod,
+                    optionsParams = null,
+                ),
             )
         )
 
@@ -917,7 +917,7 @@ internal class CustomerSheetViewModel(
                 safeUpdateSelectPaymentMethodState { viewState ->
                     viewState.copy(
                         savedPaymentMethods = listOf(paymentMethod) + viewState.savedPaymentMethods,
-                        paymentSelection = selection,
+                        paymentSelection = PaymentSelection.Saved(paymentMethod),
                         primaryButtonVisible = true,
                         primaryButtonLabel = resources.getString(
                             R.string.stripe_paymentsheet_confirm

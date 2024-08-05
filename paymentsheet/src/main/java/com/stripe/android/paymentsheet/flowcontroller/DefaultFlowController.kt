@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -87,7 +86,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     activityResultCaller: ActivityResultCaller,
     // Properties provided through injection
-    application: Application,
     private val context: Context,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
@@ -129,7 +127,6 @@ internal class DefaultFlowController @Inject internal constructor(
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
         googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
         errorReporter = errorReporter,
-        application = application,
         logger = logger,
     ).create(viewModelScope.plus(workContext))
 
@@ -391,14 +388,15 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(state.stripeIntent)
+            val initializationMode = requireNotNull(initializationMode)
 
             intentConfirmationHandler.start(
                 arguments = IntentConfirmationHandler.Args(
-                    initializationMode = initializationMode!!,
-                    confirmationOption = paymentSelection?.toPaymentConfirmationOption(state.config),
+                    confirmationOption = paymentSelection?.toPaymentConfirmationOption(
+                        initializationMode = initializationMode,
+                        configuration = state.config,
+                    ),
                     intent = stripeIntent,
-                    shippingDetails = state.config.shippingDetails,
-                    appearance = state.config.appearance,
                 )
             )
         }

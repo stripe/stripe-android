@@ -2802,7 +2802,6 @@ internal class PaymentSheetViewModelTest {
                     googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
                     statusBarColor = { args.statusBarColor },
-                    application = application,
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),

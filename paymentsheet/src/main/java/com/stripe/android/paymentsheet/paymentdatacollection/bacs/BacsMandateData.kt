@@ -11,7 +11,7 @@ internal data class BacsMandateData(
 ) {
     companion object {
         fun fromConfirmationOption(
-            confirmationOption: PaymentConfirmationOption.New,
+            confirmationOption: PaymentConfirmationOption.BacsPaymentMethod,
         ): BacsMandateData? {
             val overrideParams = confirmationOption.createParams
 
