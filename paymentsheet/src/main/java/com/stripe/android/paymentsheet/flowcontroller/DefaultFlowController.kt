@@ -34,6 +34,9 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentCancellationAction
+import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
+import com.stripe.android.paymentsheet.PaymentConfirmationResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -516,9 +519,9 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun onIntentResult(result: IntentConfirmationHandler.Result) {
+    private fun onIntentResult(result: PaymentConfirmationResult) {
         when (result) {
-            is IntentConfirmationHandler.Result.Succeeded -> {
+            is PaymentConfirmationResult.Succeeded -> {
                 val stripeIntent = result.intent
                 val currentSelection = viewModel.paymentSelection
                 val currentInitializationMode = initializationMode
@@ -559,7 +562,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     shouldLog = false,
                 )
             }
-            is IntentConfirmationHandler.Result.Failed -> {
+            is PaymentConfirmationResult.Failed -> {
                 val error = result.type.toConfirmationError(result.cause)
 
                 error?.let {
@@ -575,23 +578,23 @@ internal class DefaultFlowController @Inject internal constructor(
                     shouldLog = false,
                 )
             }
-            is IntentConfirmationHandler.Result.Canceled -> {
+            is PaymentConfirmationResult.Canceled -> {
                 handleCancellation(result)
             }
         }
     }
 
-    private fun handleCancellation(canceled: IntentConfirmationHandler.Result.Canceled) {
+    private fun handleCancellation(canceled: PaymentConfirmationResult.Canceled) {
         when (canceled.action) {
-            IntentConfirmationHandler.CancellationAction.InformCancellation -> {
+            PaymentCancellationAction.InformCancellation -> {
                 onPaymentResult(
                     paymentResult = PaymentResult.Canceled,
                     deferredIntentConfirmationType = null,
                     shouldLog = false,
                 )
             }
-            IntentConfirmationHandler.CancellationAction.ModifyPaymentDetails -> presentPaymentOptions()
-            IntentConfirmationHandler.CancellationAction.None -> Unit
+            PaymentCancellationAction.ModifyPaymentDetails -> presentPaymentOptions()
+            PaymentCancellationAction.None -> Unit
         }
     }
 
@@ -671,19 +674,16 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun IntentConfirmationHandler.ErrorType.toConfirmationError(
+    private fun PaymentConfirmationErrorType.toConfirmationError(
         cause: Throwable
     ): PaymentSheetConfirmationError? {
         return when (this) {
-            IntentConfirmationHandler.ErrorType.ExternalPaymentMethod ->
-                PaymentSheetConfirmationError.Stripe(cause)
-            IntentConfirmationHandler.ErrorType.Payment ->
-                PaymentSheetConfirmationError.ExternalPaymentMethod
-            is IntentConfirmationHandler.ErrorType.GooglePay ->
-                PaymentSheetConfirmationError.GooglePay(errorCode)
-            IntentConfirmationHandler.ErrorType.Internal,
-            IntentConfirmationHandler.ErrorType.MerchantIntegration,
-            IntentConfirmationHandler.ErrorType.Fatal -> null
+            PaymentConfirmationErrorType.ExternalPaymentMethod -> PaymentSheetConfirmationError.Stripe(cause)
+            PaymentConfirmationErrorType.Payment -> PaymentSheetConfirmationError.ExternalPaymentMethod
+            is PaymentConfirmationErrorType.GooglePay -> PaymentSheetConfirmationError.GooglePay(errorCode)
+            PaymentConfirmationErrorType.Internal,
+            PaymentConfirmationErrorType.MerchantIntegration,
+            PaymentConfirmationErrorType.Fatal -> null
         }
     }
 

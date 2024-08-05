@@ -41,6 +41,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentConfirmationOption
+import com.stripe.android.paymentsheet.PaymentConfirmationResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -913,7 +914,7 @@ internal class CustomerSheetViewModel(
         )
 
         return when (val result = intentConfirmationHandler.awaitIntentResult()) {
-            is IntentConfirmationHandler.Result.Succeeded -> {
+            is PaymentConfirmationResult.Succeeded -> {
                 safeUpdateSelectPaymentMethodState { viewState ->
                     viewState.copy(
                         savedPaymentMethods = listOf(paymentMethod) + viewState.savedPaymentMethods,
@@ -927,7 +928,7 @@ internal class CustomerSheetViewModel(
                 onBackPressed()
                 Result.success(Unit)
             }
-            is IntentConfirmationHandler.Result.Failed -> {
+            is PaymentConfirmationResult.Failed -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
@@ -937,7 +938,7 @@ internal class CustomerSheetViewModel(
                 }
                 Result.failure(result.cause)
             }
-            is IntentConfirmationHandler.Result.Canceled -> {
+            is PaymentConfirmationResult.Canceled -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         enabled = true,
