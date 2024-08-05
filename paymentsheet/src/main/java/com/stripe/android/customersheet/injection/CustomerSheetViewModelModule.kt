@@ -141,7 +141,6 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun providesIntentConfirmationHandlerFactory(
-            application: Application,
             savedStateHandle: SavedStateHandle,
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
             bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -156,7 +155,6 @@ internal interface CustomerSheetViewModelModule {
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory = null,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-                application = application,
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,

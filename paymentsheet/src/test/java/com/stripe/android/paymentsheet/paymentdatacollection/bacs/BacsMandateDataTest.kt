@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.junit.Test
 
 class BacsMandateDataTest {
@@ -61,11 +63,15 @@ class BacsMandateDataTest {
 
     private fun createPaymentConfirmationOption(
         createParams: PaymentMethodCreateParams,
-    ): PaymentConfirmationOption.New {
-        return PaymentConfirmationOption.New(
+    ): PaymentConfirmationOption.BacsPaymentMethod {
+        return PaymentConfirmationOption.BacsPaymentMethod(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123",
+            ),
+            shippingDetails = null,
             createParams = createParams,
             optionsParams = null,
-            shouldSave = false,
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
     }
 }

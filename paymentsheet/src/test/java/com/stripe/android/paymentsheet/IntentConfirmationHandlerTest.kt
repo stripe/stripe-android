@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -95,14 +94,13 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
-                shippingDetails = shippingDetails,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.Saved(
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    initializationMode = initializationMode,
+                    shippingDetails = shippingDetails,
                     paymentMethod = savedPaymentMethod,
                     optionsParams = paymentMethodOptionsParams,
                 ),
-                appearance = APPEARANCE,
             ),
         )
 
@@ -140,14 +138,15 @@ class IntentConfirmationHandlerTest {
 
             intentConfirmationHandler.start(
                 arguments = IntentConfirmationHandler.Args(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123"),
-                    shippingDetails = null,
                     intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    confirmationOption = PaymentConfirmationOption.Saved(
+                    confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                        initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                            clientSecret = "pi_456_secret_456"
+                        ),
+                        shippingDetails = null,
                         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         optionsParams = null,
                     ),
-                    appearance = APPEARANCE,
                 ),
             )
 
@@ -182,15 +181,14 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
-                shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.New(
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
+                    initializationMode = initializationMode,
+                    shippingDetails = null,
                     createParams = newCard,
                     optionsParams = null,
                     shouldSave = true,
                 ),
-                appearance = APPEARANCE,
             ),
         )
 
@@ -232,14 +230,13 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
-                initializationMode = initializationMode,
-                shippingDetails = null,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentConfirmationOption.Saved(
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    initializationMode = initializationMode,
+                    shippingDetails = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = null,
                 ),
-                appearance = APPEARANCE,
             ),
         )
 
@@ -1136,12 +1133,9 @@ class IntentConfirmationHandlerTest {
             registerWithCallbacks()
         }
 
-        val appearance = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
-
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
                 confirmationOption = createBacsPaymentConfirmationOption(),
-                appearance = appearance,
             ),
         )
 
@@ -1155,7 +1149,7 @@ class IntentConfirmationHandlerTest {
                     name = "John Doe",
                     email = "johndoe@email.com",
                 ),
-                appearance = appearance,
+                appearance = APPEARANCE,
             )
         )
 
@@ -1254,11 +1248,11 @@ class IntentConfirmationHandlerTest {
             bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
         )
 
-        val paymentSelection = createBacsPaymentConfirmationOption()
+        val confirmationOption = createBacsPaymentConfirmationOption()
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = paymentSelection
+                confirmationOption = confirmationOption
             ),
         )
 
@@ -1268,8 +1262,8 @@ class IntentConfirmationHandlerTest {
 
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
-                initializationMode = DEFAULT_ARGUMENTS.initializationMode,
-                paymentMethodCreateParams = paymentSelection.createParams,
+                initializationMode = confirmationOption.initializationMode,
+                paymentMethodCreateParams = confirmationOption.createParams,
                 shippingValues = null,
                 paymentMethodOptionsParams = null,
                 customerRequestedSave = false,
@@ -1396,10 +1390,10 @@ class IntentConfirmationHandlerTest {
 
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
-                initializationMode = PaymentSheet.InitializationMode.SetupIntent(
-                    clientSecret = "si_123_secret_123",
-                ),
                 confirmationOption = GOOGLE_PAY_OPTION.copy(
+                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                        clientSecret = "si_123_secret_123",
+                    ),
                     config = GOOGLE_PAY_OPTION.config.copy(
                         merchantCurrencyCode = null,
                     )
@@ -1693,7 +1687,6 @@ class IntentConfirmationHandlerTest {
             paymentLauncherFactory = { paymentLauncher },
             bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            context = ApplicationProvider.getApplicationContext(),
             coroutineScope = coroutineScope,
             errorReporter = FakeErrorReporter(),
             savedStateHandle = savedStateHandle,
@@ -1769,8 +1762,10 @@ class IntentConfirmationHandlerTest {
     private fun createBacsPaymentConfirmationOption(
         name: String? = "John Doe",
         email: String? = "johndoe@email.com",
-    ): PaymentConfirmationOption.New {
-        return PaymentConfirmationOption.New(
+    ): PaymentConfirmationOption.BacsPaymentMethod {
+        return PaymentConfirmationOption.BacsPaymentMethod(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            shippingDetails = null,
             createParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
@@ -1781,22 +1776,21 @@ class IntentConfirmationHandlerTest {
                     email = email,
                 )
             ),
+            appearance = APPEARANCE,
             optionsParams = null,
-            shouldSave = false,
         )
     }
 
     private companion object {
         val APPEARANCE = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
         val DEFAULT_ARGUMENTS = IntentConfirmationHandler.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
-            shippingDetails = null,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            confirmationOption = PaymentConfirmationOption.Saved(
+            confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+                shippingDetails = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
             ),
-            appearance = APPEARANCE
         )
 
         val EXTERNAL_PAYMENT_METHOD = PaymentConfirmationOption.ExternalPaymentMethod(
@@ -1805,6 +1799,8 @@ class IntentConfirmationHandlerTest {
         )
 
         val GOOGLE_PAY_OPTION = PaymentConfirmationOption.GooglePay(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            shippingDetails = null,
             config = PaymentConfirmationOption.GooglePay.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                 merchantName = "Merchant, Inc.",
