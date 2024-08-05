@@ -32,6 +32,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -39,6 +40,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -84,6 +86,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
+    private val cvcRecollectionHandler: CVCRecollectionHandler
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -386,6 +389,56 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkout() {
         val paymentSelection = selection.value
+
+        val requiresCVCRecollection = cvcRecollectionHandler.requiresCVCRecollection(
+            stripeIntent = paymentMethodMetadata.value?.stripeIntent,
+            paymentSelection = paymentSelection,
+            initializationMode = args.initializationMode,
+            extraRequirements = {
+                config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical
+            }
+        )
+        if (requiresCVCRecollection && navigationHandler.currentScreen.value !is PaymentSheetScreen.CvcRecollection) {
+            cvcRecollectionHandler.launch(
+                paymentSelection = selection.value
+            ) { cvcRecollectionData ->
+                val interactor = DefaultCvcRecollectionInteractor(
+                    args = Args(
+                        lastFour = cvcRecollectionData.lastFour ?: "",
+                        cardBrand = cvcRecollectionData.brand,
+                        isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false,
+                    )
+                )
+                viewModelScope.launch {
+                    interactor.cvcCompletionState.collectLatest { completionState ->
+                        (selection.value as? PaymentSelection.Saved)?.let {
+                            val paymentMethodOptionsParams = when (completionState) {
+                                is CvcCompletionState.Completed -> {
+                                    PaymentMethodOptionsParams.Card(
+                                        cvc = completionState.cvc,
+                                    )
+                                }
+                                CvcCompletionState.Incomplete -> {
+                                    PaymentMethodOptionsParams.Card(
+                                        cvc = "",
+                                    )
+                                }
+                            }
+                            updateSelection(
+                                selection = PaymentSelection.Saved(
+                                    paymentMethod = it.paymentMethod,
+                                    walletType = it.walletType,
+                                    paymentMethodOptionsParams = paymentMethodOptionsParams
+                                )
+                            )
+                        }
+                    }
+                }
+                navigationHandler.transitionTo()
+            }
+            return
+        }
+
         checkout(paymentSelection, CheckoutIdentifier.SheetBottomBuy)
     }
 
