@@ -67,10 +67,10 @@ internal class IntentConfirmationHandler(
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
 
-    private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
-        get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
+    private var currentExtras: PaymentConfirmationExtras?
+        get() = savedStateHandle[PAYMENT_CONFIRMATION_EXTRAS_KEY]
         set(value) {
-            savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE] = value
+            savedStateHandle[PAYMENT_CONFIRMATION_EXTRAS_KEY] = value
         }
 
     private var currentArguments: Args?
@@ -265,7 +265,9 @@ internal class IntentConfirmationHandler(
     ) {
         val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = paymentMethod)
 
-        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+        currentExtras = nextStep.deferredIntentConfirmationType?.let {
+            PaymentConfirmationExtras.Intent(deferredIntentConfirmationType = it)
+        }
 
         when (nextStep) {
             is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
@@ -290,7 +292,7 @@ internal class IntentConfirmationHandler(
                 onIntentResult(
                     PaymentConfirmationResult.Succeeded(
                         intent = intent,
-                        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType,
+                        extras = currentExtras,
                     )
                 )
             }
@@ -496,7 +498,7 @@ internal class IntentConfirmationHandler(
         val intentResult = when (result) {
             is InternalPaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = deferredIntentConfirmationType
+                extras = currentExtras,
             )
             is InternalPaymentResult.Failed -> PaymentConfirmationResult.Failed(
                 cause = result.throwable,
@@ -553,7 +555,7 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is PaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
                     intent = arguments.intent,
-                    deferredIntentConfirmationType = null
+                    extras = currentExtras,
                 )
                 is PaymentResult.Failed -> PaymentConfirmationResult.Failed(
                     cause = result.throwable,
@@ -622,7 +624,7 @@ internal class IntentConfirmationHandler(
     }
 
     private fun onIntentResult(result: PaymentConfirmationResult) {
-        deferredIntentConfirmationType = null
+        currentExtras = null
         currentArguments = null
 
         _state.value = State.Complete(result)
@@ -764,7 +766,7 @@ internal class IntentConfirmationHandler(
     internal companion object {
         private const val AWAITING_PRE_CONFIRM_RESULT_KEY = "AwaitingPreConfirmResult"
         private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
-        private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DeferredIntentConfirmationType"
+        private const val PAYMENT_CONFIRMATION_EXTRAS_KEY = "PaymentConfirmationExtras"
         private const val ARGUMENTS_KEY = "IntentConfirmationArguments"
     }
 }

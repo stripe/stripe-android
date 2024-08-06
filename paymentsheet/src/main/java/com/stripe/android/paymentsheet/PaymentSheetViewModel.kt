@@ -306,7 +306,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
                 intent = pendingResult.intent,
-                deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
+                deferredIntentConfirmationType = retrieveDeferredIntentConfirmationType(pendingResult.extras),
                 finishImmediately = true
             )
         } else if (state.validationError != null) {
@@ -541,12 +541,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (result) {
             is PaymentConfirmationResult.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                deferredIntentConfirmationType = retrieveDeferredIntentConfirmationType(result.extras),
                 finishImmediately = false,
             )
             is PaymentConfirmationResult.Failed -> processIntentFailure(result)
             is PaymentConfirmationResult.Canceled,
             null -> resetViewState()
+        }
+    }
+
+    private fun retrieveDeferredIntentConfirmationType(
+        extras: PaymentConfirmationExtras?
+    ): DeferredIntentConfirmationType? {
+        return when (extras) {
+            is PaymentConfirmationExtras.Intent -> extras.deferredIntentConfirmationType
+            else -> null
         }
     }
 

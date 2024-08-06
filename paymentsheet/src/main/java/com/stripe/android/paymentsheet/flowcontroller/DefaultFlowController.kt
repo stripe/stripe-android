@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentCancellationAction
 import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
+import com.stripe.android.paymentsheet.PaymentConfirmationExtras
 import com.stripe.android.paymentsheet.PaymentConfirmationResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -551,14 +552,16 @@ internal class DefaultFlowController @Inject internal constructor(
                     prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
                 }
 
+                val deferredIntentConfirmationType = retrieveDeferredIntentConfirmationType(result.extras)
+
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
                     shouldLog = false,
                 )
             }
@@ -684,6 +687,15 @@ internal class DefaultFlowController @Inject internal constructor(
             PaymentConfirmationErrorType.Internal,
             PaymentConfirmationErrorType.MerchantIntegration,
             PaymentConfirmationErrorType.Fatal -> null
+        }
+    }
+
+    private fun retrieveDeferredIntentConfirmationType(
+        extras: PaymentConfirmationExtras?
+    ): DeferredIntentConfirmationType? {
+        return when (extras) {
+            is PaymentConfirmationExtras.Intent -> extras.deferredIntentConfirmationType
+            else -> null
         }
     }
 

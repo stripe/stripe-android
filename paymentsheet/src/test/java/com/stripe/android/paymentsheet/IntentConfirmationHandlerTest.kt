@@ -293,7 +293,9 @@ class IntentConfirmationHandlerTest {
         assertThat(result).isEqualTo(
             PaymentConfirmationResult.Succeeded(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                extras = PaymentConfirmationExtras.Intent(
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                ),
             )
         )
     }
@@ -507,7 +509,7 @@ class IntentConfirmationHandlerTest {
 
             val expectedResult = PaymentConfirmationResult.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
+                extras = null,
             )
 
             assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -783,7 +785,9 @@ class IntentConfirmationHandlerTest {
 
             val expectedResult = PaymentConfirmationResult.Succeeded(
                 intent = DEFAULT_ARGUMENTS.intent,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                extras = PaymentConfirmationExtras.Intent(
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                ),
             )
 
             assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -816,7 +820,7 @@ class IntentConfirmationHandlerTest {
         assertThat(result).isEqualTo(
             PaymentConfirmationResult.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
+                extras = null,
             )
         )
     }
@@ -852,7 +856,9 @@ class IntentConfirmationHandlerTest {
         assertThat(result).isEqualTo(
             PaymentConfirmationResult.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                extras = PaymentConfirmationExtras.Intent(
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                ),
             )
         )
     }
@@ -896,7 +902,7 @@ class IntentConfirmationHandlerTest {
 
             val expectedResult = PaymentConfirmationResult.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
+                extras = null,
             )
 
             assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1023,7 +1029,7 @@ class IntentConfirmationHandlerTest {
 
             val expectedResult = PaymentConfirmationResult.Succeeded(
                 intent = DEFAULT_ARGUMENTS.intent,
-                deferredIntentConfirmationType = null,
+                extras = null,
             )
 
             assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
