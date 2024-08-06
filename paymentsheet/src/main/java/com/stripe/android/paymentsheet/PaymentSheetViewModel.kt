@@ -301,7 +301,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         val pendingResult = intentConfirmationHandler.awaitIntentResult()
 
-        if (pendingResult is IntentConfirmationHandler.Result.Succeeded) {
+        if (pendingResult is PaymentConfirmationResult.Succeeded) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
@@ -326,7 +326,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLink(state.linkState)
 
         val pendingFailedPaymentResult = intentConfirmationHandler.awaitIntentResult()
-            as? IntentConfirmationHandler.Result.Failed
+            as? PaymentConfirmationResult.Failed
         val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
         resetViewState(errorMessage)
@@ -464,15 +464,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val stripeIntent = awaitStripeIntent()
 
             val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toPaymentConfirmationOption(config)
+                ?.toPaymentConfirmationOption(args.initializationMode, config)
 
             intentConfirmationHandler.start(
                 arguments = IntentConfirmationHandler.Args(
-                    initializationMode = args.initializationMode,
-                    shippingDetails = args.config.shippingDetails,
                     intent = stripeIntent,
                     confirmationOption = confirmationOption,
-                    appearance = config.appearance,
                 ),
             )
         }
@@ -540,36 +537,36 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun processIntentResult(result: IntentConfirmationHandler.Result?) {
+    private fun processIntentResult(result: PaymentConfirmationResult?) {
         when (result) {
-            is IntentConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
+            is PaymentConfirmationResult.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
             )
-            is IntentConfirmationHandler.Result.Failed -> processIntentFailure(result)
-            is IntentConfirmationHandler.Result.Canceled,
+            is PaymentConfirmationResult.Failed -> processIntentFailure(result)
+            is PaymentConfirmationResult.Canceled,
             null -> resetViewState()
         }
     }
 
-    private fun processIntentFailure(failure: IntentConfirmationHandler.Result.Failed) {
+    private fun processIntentFailure(failure: PaymentConfirmationResult.Failed) {
         when (failure.type) {
-            IntentConfirmationHandler.ErrorType.Payment -> handlePaymentFailed(
+            PaymentConfirmationErrorType.Payment -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.Stripe(failure.cause),
                 message = failure.message,
             )
-            IntentConfirmationHandler.ErrorType.ExternalPaymentMethod -> handlePaymentFailed(
+            PaymentConfirmationErrorType.ExternalPaymentMethod -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.ExternalPaymentMethod,
                 message = failure.message,
             )
-            is IntentConfirmationHandler.ErrorType.GooglePay -> handlePaymentFailed(
+            is PaymentConfirmationErrorType.GooglePay -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.GooglePay(failure.type.errorCode),
                 message = failure.message,
             )
-            IntentConfirmationHandler.ErrorType.Fatal -> onFatal(failure.cause)
-            IntentConfirmationHandler.ErrorType.MerchantIntegration,
-            IntentConfirmationHandler.ErrorType.Internal -> onError(failure.message)
+            PaymentConfirmationErrorType.Fatal -> onFatal(failure.cause)
+            PaymentConfirmationErrorType.MerchantIntegration,
+            PaymentConfirmationErrorType.Internal -> onError(failure.message)
         }
     }
 

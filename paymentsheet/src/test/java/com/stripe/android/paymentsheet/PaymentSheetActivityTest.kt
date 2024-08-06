@@ -1118,7 +1118,6 @@ internal class PaymentSheetActivityTest {
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                     statusBarColor = { args.statusBarColor },
-                    application = application,
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),

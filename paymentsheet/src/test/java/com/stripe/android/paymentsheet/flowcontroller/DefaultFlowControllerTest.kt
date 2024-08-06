@@ -2202,7 +2202,6 @@ internal class DefaultFlowControllerTest {
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
         errorReporter = FakeErrorReporter(),
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
-        application = ApplicationProvider.getApplicationContext(),
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
         logger = FakeUserFacingLogger(),

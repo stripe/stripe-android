@@ -113,16 +113,16 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         body = NetworkingLinkSignupBody(
             listOf(
                 Bullet(
-                    title = "Connect your account faster on RandomBusiness and everywhere Link is accepted.",
+                    title = "Connect your account faster everywhere Link is accepted.",
                 ),
                 Bullet(
                     title = "Link encrypts your data and never shares your login details.",
                 ),
             )
         ),
-        cta = "Save to Link",
+        cta = "Save with Link",
         skipCta = "Not now",
-        title = "Save your account to Link"
+        title = "Save account with Link"
     ).toContent()
 
     private fun linkLoginPane() = LinkLoginPane(
