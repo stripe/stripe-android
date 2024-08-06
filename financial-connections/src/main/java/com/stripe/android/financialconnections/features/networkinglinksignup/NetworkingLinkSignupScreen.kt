@@ -44,7 +44,6 @@ import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -115,7 +114,7 @@ private fun NetworkingLinkSignupContent(
                 validForm = state.valid,
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
-                saveAccountToLinkSync = state.saveAccountToLink,
+                isLoading = state.saveAccountToLink is Loading,
                 showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
@@ -131,7 +130,7 @@ private fun NetworkingLinkSignupContent(
 private fun NetworkingLinkSignupLoaded(
     validForm: Boolean,
     payload: Payload,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    isLoading: Boolean,
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
     onClickableTextClick: (String) -> Unit,
@@ -193,7 +192,7 @@ private fun NetworkingLinkSignupLoaded(
             NetworkingLinkSignupFooter(
                 payload = payload,
                 onClickableTextClick = onClickableTextClick,
-                saveAccountToLinkSync = saveAccountToLinkSync,
+                isLoading = isLoading,
                 validForm = validForm,
                 onSaveToLink = onSaveToLink,
                 onSkipClick = onSkipClick
@@ -207,7 +206,7 @@ private fun NetworkingLinkSignupLoaded(
 private fun NetworkingLinkSignupFooter(
     payload: Payload,
     onClickableTextClick: (String) -> Unit,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    isLoading: Boolean,
     validForm: Boolean,
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
@@ -223,7 +222,7 @@ private fun NetworkingLinkSignupFooter(
     )
     Spacer(modifier = Modifier.size(16.dp))
     FinancialConnectionsButton(
-        loading = saveAccountToLinkSync is Loading,
+        loading = isLoading,
         enabled = validForm,
         type = FinancialConnectionsButton.Type.Primary,
         onClick = onSaveToLink,
