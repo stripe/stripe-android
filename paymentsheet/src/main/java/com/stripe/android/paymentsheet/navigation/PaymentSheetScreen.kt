@@ -292,7 +292,7 @@ internal sealed interface PaymentSheetScreen {
                 if (isWalletEnabled) {
                     null
                 } else if (isCompleteFlow) {
-                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
                 } else {
                     R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                 }
