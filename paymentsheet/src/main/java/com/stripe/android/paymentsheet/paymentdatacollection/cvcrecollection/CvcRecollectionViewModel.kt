@@ -55,7 +55,10 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         sealed interface DisplayMode {
             val isLiveMode: Boolean
 
+            // Activity should show TopBar
             data class Activity(override val isLiveMode: Boolean) : DisplayMode
+
+            // PaymentScreen should not show TopBar
             data class PaymentScreen(override val isLiveMode: Boolean) : DisplayMode
         }
     }

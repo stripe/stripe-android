@@ -165,6 +165,7 @@ private fun CvcRecollectionHeader(
     displayMode: CvcRecollectionViewModel.Args.DisplayMode,
     onClosePressed: () -> Unit
 ) {
+    // Only Activity should show TopBar because PaymentScreen has a TopBar
     if (displayMode is CvcRecollectionViewModel.Args.DisplayMode.Activity) {
         Row(
             modifier = Modifier
