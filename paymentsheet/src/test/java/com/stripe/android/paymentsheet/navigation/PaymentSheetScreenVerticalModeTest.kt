@@ -19,7 +19,7 @@ internal class PaymentSheetScreenVerticalModeTest {
     @Test
     fun `title returns select payment method when isCompleteFlow=true`() = runTest {
         PaymentSheetScreen.VerticalMode(mock()).title(isCompleteFlow = true, isWalletEnabled = false).test {
-            assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_select_payment_method.resolvableString)
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_select_your_payment_method.resolvableString)
         }
     }
 
