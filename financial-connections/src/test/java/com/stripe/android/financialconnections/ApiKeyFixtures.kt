@@ -133,7 +133,6 @@ internal object ApiKeyFixtures {
         redactedPhoneNumber = "+1********12",
         redactedFormattedPhoneNumber = "(***) *** **12",
         verificationSessions = emptyList(),
-        publishableKey = null
     )
 
     fun verifiedConsumerSession() = ConsumerSession(
@@ -147,6 +146,5 @@ internal object ApiKeyFixtures {
                 state = ConsumerSession.VerificationSession.SessionState.Verified,
             )
         ),
-        publishableKey = null
     )
 }

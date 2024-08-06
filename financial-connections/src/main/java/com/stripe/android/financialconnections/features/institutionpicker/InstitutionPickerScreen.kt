@@ -334,7 +334,8 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
-        style = typography.headingXLarge
+        style = typography.headingXLarge,
+        color = colors.textDefault,
     )
 }
 
@@ -401,13 +402,13 @@ private fun ClearSearchButton(
             .size(16.dp)
             .clickable { onQueryChanged("") }
             .background(
-                color = colors.border,
+                color = colors.textSubdued,
                 shape = CircleShape
             )
             .padding(2.dp)
     ) {
         Icon(
-            Icons.Filled.Clear,
+            imageVector = Icons.Filled.Clear,
             tint = colors.backgroundSurface,
             contentDescription = "Clear search",
         )

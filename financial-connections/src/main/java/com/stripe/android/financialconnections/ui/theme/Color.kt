@@ -37,6 +37,7 @@ internal val Critical500 = Color(0xffDF1B41)
 internal val Attention50 = Color(0xffFEF9DA)
 internal val Attention300 = Color(0xffF7870F)
 
+internal val LinkGreen50 = Color(0xffE6FFED)
 internal val LinkGreen200 = Color(0xff00D66F)
 internal val LinkGreen500 = Color(0xff008545)
 internal val LinkGreen900 = Color(0xff011E0F)
@@ -53,6 +54,7 @@ internal data class FinancialConnectionsColors(
     val iconWhite: Color,
     val iconBrand: Color,
     val iconCaution: Color,
+    val iconBackground: Color,
     val buttonPrimary: Color,
     val buttonSecondary: Color,
     val backgroundSurface: Color,

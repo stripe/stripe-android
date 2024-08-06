@@ -7,10 +7,12 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
+import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import java.util.Locale
@@ -41,6 +43,13 @@ interface ConsumersApiService {
         type: VerificationType,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
+
+    suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): AttachConsumerToLinkAccountSession
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -142,6 +151,30 @@ class ConsumersApiServiceImpl(
         responseJsonParser = ConsumerSessionJsonParser()
     )
 
+    override suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): AttachConsumerToLinkAccountSession {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                attachLinkConsumerToLinkAccountSession,
+                requestOptions,
+                mapOf(
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret,
+                    ),
+                    "link_account_session" to clientSecret,
+                )
+            ),
+            responseJsonParser = AttachConsumerToLinkAccountSessionJsonParser,
+        )
+    }
+
     internal companion object {
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
@@ -160,6 +193,12 @@ class ConsumersApiServiceImpl(
          */
         internal val confirmConsumerVerificationUrl: String =
             getApiUrl("consumers/sessions/confirm_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/attach_link_consumer_to_link_account_session`
+         */
+        internal val attachLinkConsumerToLinkAccountSession: String =
+            getApiUrl("consumers/attach_link_consumer_to_link_account_session")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

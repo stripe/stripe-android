@@ -28,6 +28,14 @@ public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/model/AttachConsumerToLinkAccountSession$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/AttachConsumerToLinkAccountSession;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/AttachConsumerToLinkAccountSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/BankAccount : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun component1 ()Ljava/lang/String;
@@ -272,6 +280,29 @@ public final class com/stripe/android/model/ConsumerSessionLookup$Creator : andr
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerSessionLookup;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerSessionLookup;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionSignup$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionSignup;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionSignup;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/ConsumerSessionSignup$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/ConsumerSessionSignup$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerSessionSignup;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerSessionSignup;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

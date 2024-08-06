@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
-import com.stripe.android.financialconnections.ui.theme.Brand50
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.uicore.image.StripeImage
 
 /**
@@ -104,7 +103,7 @@ private fun LocalIcon(
 ) {
     Icon(
         painter = painter,
-        tint = FinancialConnectionsTheme.colors.iconBrand,
+        tint = colors.iconBrand,
         contentDescription = contentDescription,
         modifier = Modifier.size(iconSize.paddedSize),
     )
@@ -121,7 +120,7 @@ private fun IconWrapperBox(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(iconSize.size)
-            .background(color = Brand50, shape = backgroundShape)
+            .background(color = colors.iconBackground, shape = backgroundShape)
             .clip(backgroundShape)
     ) {
         content()

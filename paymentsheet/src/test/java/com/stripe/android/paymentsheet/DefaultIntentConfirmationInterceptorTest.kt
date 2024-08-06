@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
@@ -37,8 +35,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
-
-    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() = runTest {
@@ -96,15 +92,14 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptor = createIntentConfirmationInterceptor()
 
             val nextStep = interceptor.intercept(
-                initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-                confirmationOption = PaymentConfirmationOption.Saved(
+                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+                    shippingDetails = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
-                shippingValues = null,
-                context = context,
             )
 
             val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm

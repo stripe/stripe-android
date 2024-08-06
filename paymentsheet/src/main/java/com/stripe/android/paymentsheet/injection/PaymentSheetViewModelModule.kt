@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -30,7 +29,6 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
 
     @Provides
     fun providesIntentConfirmationHandlerFactory(
-        application: Application,
         savedStateHandle: SavedStateHandle,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -38,7 +36,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
         errorReporter: ErrorReporter,
-        logger: Logger,
+        logger: UserFacingLogger,
     ): IntentConfirmationHandler.Factory {
         return IntentConfirmationHandler.Factory(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
@@ -46,7 +44,6 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            application = application,
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,

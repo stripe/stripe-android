@@ -91,6 +91,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -2801,9 +2802,8 @@ internal class PaymentSheetViewModelTest {
                     googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
                     statusBarColor = { args.statusBarColor },
-                    application = application,
                     errorReporter = FakeErrorReporter(),
-                    logger = Logger.noop(),
+                    logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
             ).apply {

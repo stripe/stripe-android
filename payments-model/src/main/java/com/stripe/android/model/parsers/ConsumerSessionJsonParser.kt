@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
@@ -25,7 +24,6 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
             verificationSessions = verificationSession,
-            publishableKey = optString(json, FIELD_PUBLISHABLE_KEY)
         )
     }
 
@@ -41,7 +39,6 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
 
     private companion object {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
-        private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
 
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
