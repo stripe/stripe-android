@@ -570,6 +570,12 @@ internal class PaymentSheetActivityTest {
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
+            viewModel.transitionToCVCRecollection()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.CvcRecollection>()
+
+            pressBack()
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
+
             pressBack()
             expectNoEvents()
         }

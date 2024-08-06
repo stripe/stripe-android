@@ -29,7 +29,7 @@ class CvcRecollectionViewModelTest {
                 lastFour = "4242",
                 cardBrand = CardBrand.Visa,
                 cvc = null,
-                isLiveMode = false
+                displayMode = CvcRecollectionViewModel.Args.DisplayMode.Activity(false),
             )
         )
     }
@@ -43,7 +43,7 @@ class CvcRecollectionViewModelTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 cvc = null,
-                isLiveMode = false
+                displayMode = CvcRecollectionViewModel.Args.DisplayMode.Activity(false),
             )
         )
     }
