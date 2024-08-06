@@ -41,7 +41,7 @@ tags:
     element:
       text: ".*555.*" # wait for placeholder to be visible
 - inputText: "6223115555"
-- tapOn: "Save to Link"
+- tapOn: "Save with Link"
 # CONFIRM AND COMPLETE
 - assertVisible: "Your account was connected and saved with Link."
 - tapOn:
