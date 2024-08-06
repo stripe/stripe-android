@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="21dp"
-        android:layout_marginEnd="8dp"
-        android:layout_gravity="start|center"
-        android:background="@drawable/stripe_ic_unknown"/>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:animateLayoutChanges="true">
 
-    <ImageView
-        android:id="@+id/chevron"
-        android:layout_width="8dp"
-        android:layout_height="8dp"
-        android:src="@drawable/stripe_ic_chevron_down"
-        android:layout_marginStart="4dp"
-        android:layout_gravity="end|center"
-        android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="32dp"
+            android:layout_height="21dp"
+            android:visibility="visible"
+            android:background="@drawable/stripe_ic_unknown"/>
 
-    <com.stripe.android.view.CardWidgetProgressView
-        android:id="@+id/progress"
-        android:layout_width="@dimen/stripe_card_widget_progress_size"
-        android:layout_height="@dimen/stripe_card_widget_progress_size"
-        android:layout_gravity="top|end" />
+        <ImageView
+            android:id="@+id/chevron"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:src="@drawable/stripe_ic_chevron_down"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 </merge>

@@ -23,6 +23,7 @@
         app:layout_constraintStart_toEndOf="@id/brand_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/stripe_card_form_view_text_color"
         android:paddingStart="16dp"/>
 
     <ImageView

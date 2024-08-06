@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
-import kotlin.properties.Delegates
 
 internal class CardBrandViewRebuild @JvmOverloads constructor(
     context: Context,
@@ -32,7 +31,6 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     private val viewBinding: StripeCardBrandViewRebuildBinding =
         StripeCardBrandViewRebuildBinding.inflate(LayoutInflater.from(context), this)
     private val iconView = viewBinding.icon
-    private val progressView = viewBinding.progress
     private val chevron = viewBinding.chevron
     private val listPopup = ListPopupWindow(context)
 
@@ -63,20 +61,6 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
             stateFlow.update { it.copy(isCbcEligible = value) }
             updateBrandSpinner()
         }
-
-    var isLoading: Boolean by Delegates.observable(
-        false
-    ) { _, wasLoading, isLoading ->
-        stateFlow.update { it.copy(isLoading = isLoading) }
-        setCardBrandIconAndTint()
-        if (wasLoading != isLoading) {
-            if (isLoading) {
-                progressView.visibility = VISIBLE
-            } else {
-                progressView.visibility = GONE
-            }
-        }
-    }
 
     var brand: CardBrand
         get() = state.brand
@@ -147,7 +131,6 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
     private fun setCardBrandIconAndTint() {
         iconView.setBackgroundResource(
             when {
-                isLoading -> state.brand.icon
                 shouldShowErrorIcon -> state.brand.errorIcon
                 shouldShowCvc -> state.brand.cvcIcon
                 else -> state.brand.icon
@@ -155,7 +138,6 @@ internal class CardBrandViewRebuild @JvmOverloads constructor(
         )
 
         val tint = when {
-            isLoading -> tintColorInt.takeIf { state.brand == Unknown }
             shouldShowErrorIcon -> null
             shouldShowCvc -> tintColorInt
             else -> tintColorInt.takeIf { state.brand == Unknown }
