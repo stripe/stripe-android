@@ -108,9 +108,9 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = CONSUMER_SURFACE,
             consentAction = EnteredPhoneNumberClickedSaveToLink,
-        ).also { signup ->
+        ).onSuccess { signup ->
             updateCachedConsumerSessionFromSignup(signup)
-        }
+        }.getOrThrow()
     }
 
     override suspend fun startConsumerVerification(

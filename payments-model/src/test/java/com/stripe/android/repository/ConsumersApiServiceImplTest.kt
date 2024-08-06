@@ -63,7 +63,7 @@ class ConsumersApiServiceImplTest {
             consentAction = ConsumerSignUpConsentAction.Checkbox,
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
-        )
+        ).getOrThrow()
 
         assertThat(signup.consumerSession.verificationSessions).isEmpty()
         assertThat(signup.consumerSession.emailAddress).isEqualTo(email)

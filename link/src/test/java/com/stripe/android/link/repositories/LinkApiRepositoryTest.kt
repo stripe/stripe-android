@@ -145,7 +145,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenReturn(consumerSession)
+        ).thenReturn(Result.success(consumerSession))
 
         val result = linkRepository.consumerSignUp(
             "email",

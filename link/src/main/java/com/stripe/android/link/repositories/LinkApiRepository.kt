@@ -60,18 +60,16 @@ internal class LinkApiRepository @Inject constructor(
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
-        runCatching {
-            consumersApiService.signUp(
-                email = email,
-                phoneNumber = phone,
-                country = country,
-                name = name,
-                locale = locale,
-                consentAction = consentAction,
-                requestOptions = buildRequestOptions(),
-                requestSurface = REQUEST_SURFACE,
-            )
-        }
+        consumersApiService.signUp(
+            email = email,
+            phoneNumber = phone,
+            country = country,
+            name = name,
+            locale = locale,
+            consentAction = consentAction,
+            requestOptions = buildRequestOptions(),
+            requestSurface = REQUEST_SURFACE,
+        )
     }
 
     override suspend fun createCardPaymentDetails(

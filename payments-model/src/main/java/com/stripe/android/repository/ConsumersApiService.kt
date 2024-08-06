@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
+import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerSession
@@ -32,7 +33,7 @@ interface ConsumersApiService {
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
-    ): ConsumerSessionSignup
+    ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
         email: String,
@@ -91,8 +92,8 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
-    ): ConsumerSessionSignup {
-        return executeRequestWithModelJsonParser(
+    ): Result<ConsumerSessionSignup> {
+        return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(
