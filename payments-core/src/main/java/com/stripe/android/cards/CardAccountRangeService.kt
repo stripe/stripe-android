@@ -24,6 +24,7 @@ class CardAccountRangeService(
 ) {
 
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
+    private var lastBin: Bin? = null
 
     var accountRanges: List<AccountRange> = emptyList()
         private set
@@ -113,9 +114,12 @@ class CardAccountRangeService(
     }
 
     private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        return accountRange == null ||
+        val shouldQuery =  accountRange == null ||
             cardNumber.bin == null ||
-            accountRange?.binRange?.matches(cardNumber) == false
+            accountRange?.binRange?.matches(cardNumber) == false ||
+            cardNumber.bin != lastBin
+        lastBin = cardNumber.bin
+        return shouldQuery
     }
 
     interface AccountRangeResultListener {
