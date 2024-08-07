@@ -182,6 +182,47 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
+    @Test
+    fun `On detach without remove duplicate permissions, should not attempt to remove duplicates in repository`() {
+        removeDuplicatesTest(shouldRemoveDuplicates = false)
+    }
+
+    @Test
+    fun `On detach with remove duplicate permissions, should attempt to remove duplicates in repository`() {
+        removeDuplicatesTest(shouldRemoveDuplicates = true)
+    }
+
+    private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
+        val repository = FakeCustomerRepository()
+
+        runScenario(repository) {
+            customerStateHolder.customer = CustomerState(
+                id = "cus_1",
+                ephemeralKeySecret = "ek_1",
+                paymentMethods = listOf(),
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveDuplicates = shouldRemoveDuplicates,
+                )
+            )
+
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+            savedPaymentMethodMutator.removePaymentMethod(paymentMethod)
+
+            assertThat(repository.detachRequests.awaitItem()).isEqualTo(
+                FakeCustomerRepository.DetachRequest(
+                    paymentMethodId = paymentMethod.id!!,
+                    customerInfo = CustomerRepository.CustomerInfo(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_1",
+                    ),
+                    canRemoveDuplicates = shouldRemoveDuplicates,
+                )
+            )
+        }
+    }
+
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
