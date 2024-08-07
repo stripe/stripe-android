@@ -20,6 +20,7 @@ internal sealed interface PaymentConfirmationResult {
      */
     data class Succeeded(
         val intent: StripeIntent,
+        val confirmationOption: PaymentConfirmationOption,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentConfirmationResult
 
