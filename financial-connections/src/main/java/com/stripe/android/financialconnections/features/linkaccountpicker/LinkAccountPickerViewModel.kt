@@ -136,6 +136,12 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private fun observeAsyncs() {
         onAsync(
             LinkAccountPickerState::payload,
+            onSuccess = { payload ->
+                if (payload.accounts.isEmpty()) {
+                    val nextPane = payload.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
+                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
+                }
+            },
             onFail = { error ->
                 eventTracker.logError(
                     extraMessage = "Error fetching payload",
