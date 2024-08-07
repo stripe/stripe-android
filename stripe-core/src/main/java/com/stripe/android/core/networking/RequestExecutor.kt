@@ -42,3 +42,49 @@ suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
         }
     )
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+suspend fun <Response : StripeModel> executeRequestWithResultParser(
+    stripeNetworkClient: StripeNetworkClient,
+    stripeErrorJsonParser: StripeErrorJsonParser,
+    request: StripeRequest,
+    responseJsonParser: ModelJsonParser<Response>,
+): Result<Response> {
+    return runCatching {
+        stripeNetworkClient.executeRequest(request)
+    }.fold(
+        onSuccess = { response ->
+            if (response.isError) {
+                Result.failure(
+                    APIException(
+                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                        requestId = response.requestId?.value,
+                        statusCode = response.code
+                    )
+                )
+            } else {
+                val parsedResponse = runCatching {
+                    responseJsonParser.parse(response.responseJson())
+                }.getOrNull()
+
+                if (parsedResponse != null) {
+                    Result.success(parsedResponse)
+                } else {
+                    Result.failure(
+                        APIException(
+                            message = "$responseJsonParser returns null for ${response.responseJson()}"
+                        )
+                    )
+                }
+            }
+        },
+        onFailure = {
+            Result.failure(
+                APIConnectionException(
+                    "Failed to execute $request",
+                    cause = it
+                )
+            )
+        }
+    )
+}

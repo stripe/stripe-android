@@ -25,6 +25,7 @@ internal object PaymentMethodMetadataFactory {
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         isGooglePayReady: Boolean = false,
+        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -39,6 +40,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
         )

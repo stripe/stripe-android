@@ -92,7 +92,7 @@
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">保存済み</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
+  <string name="stripe_paymentsheet_select_your_payment_method">支払い方法を選択してください</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合計: %s</string>
   <!-- Generic failure message -->

@@ -60,7 +60,7 @@ internal class LinkApiRepository @Inject constructor(
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
-        stripeRepository.consumerSignUp(
+        consumersApiService.signUp(
             email = email,
             phoneNumber = phone,
             country = country,
@@ -68,6 +68,7 @@ internal class LinkApiRepository @Inject constructor(
             locale = locale,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
+            requestSurface = REQUEST_SURFACE,
         )
     }
 

@@ -85,7 +85,7 @@ internal sealed interface UiDefinitionFactory {
     interface Simple : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
 
-        fun createFormHeaderInformation(): FormHeaderInformation {
+        fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
             return createSupportedPaymentMethod().asFormHeaderInformation()
         }
 
@@ -127,9 +127,10 @@ internal sealed interface UiDefinitionFactory {
         definition: PaymentMethodDefinition,
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
+        customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
-            createFormHeaderInformation()
+            createFormHeaderInformation(customerHasSavedPaymentMethods = customerHasSavedPaymentMethods)
         }
 
         is RequiresSharedDataSpec -> {

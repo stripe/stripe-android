@@ -32,7 +32,6 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.DeferredIntentParams
@@ -225,12 +224,6 @@ internal class StripeApiRepositoryTest {
     fun testConfirmPaymentIntentUrl() {
         assertThat(StripeApiRepository.getConfirmPaymentIntentUrl("pi123"))
             .isEqualTo("https://api.stripe.com/v1/payment_intents/pi123/confirm")
-    }
-
-    @Test
-    fun testConsumerSignUpUrl() {
-        assertThat(StripeApiRepository.consumerSignUpUrl)
-            .isEqualTo("https://api.stripe.com/v1/consumers/accounts/sign_up")
     }
 
     @Test
@@ -1744,46 +1737,6 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRefresh)
-        }
-
-    @Test
-    fun `consumerSignUp() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val email = "email@example.com"
-            val phoneNumber = "phone number"
-            val country = "US"
-            val name = "name"
-            val locale = Locale.US
-            val consentAction = ConsumerSignUpConsentAction.Implied
-            create().consumerSignUp(
-                email,
-                phoneNumber,
-                country,
-                name,
-                locale,
-                consentAction,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertThat(this["email_address"]).isEqualTo(email)
-                assertThat(this["phone_number"]).isEqualTo(phoneNumber)
-                assertThat(this["country"]).isEqualTo(country)
-                assertThat(this["legal_name"]).isEqualTo(name)
-                assertThat(this["locale"]).isEqualTo(locale.toLanguageTag())
-                assertThat(this["consent_action"]).isEqualTo("implied_consent_withspm_mobile_v0")
-            }
         }
 
     @Test

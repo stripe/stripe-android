@@ -53,6 +53,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -508,6 +509,49 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout()
 
         verify(paymentLauncher).confirm(eq(expectedParams))
+    }
+
+    @Test
+    fun `checkout() with null payment selection, should report event and show failure`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val viewModel = createViewModel(
+            errorReporter = errorReporter,
+            initialPaymentSelection = null,
+        )
+
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.checkout()
+
+            assertThat(errorReporter.getLoggedErrors()).contains(
+                "unexpected_error.paymentsheet.no_payment_selection"
+            )
+
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        }
+    }
+
+    @Test
+    fun `checkout() with invalid payment selection, should report event and show failure`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val viewModel = createViewModel(
+            errorReporter = errorReporter,
+            initialPaymentSelection = null,
+        )
+
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.updateSelection(PaymentSelection.Link)
+            viewModel.checkout()
+
+            assertThat(errorReporter.getLoggedErrors()).contains(
+                "unexpected_error.paymentsheet.invalid_payment_selection"
+            )
+
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        }
     }
 
     @Test
@@ -2775,6 +2819,7 @@ internal class PaymentSheetViewModelTest {
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
         ),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -2806,6 +2851,7 @@ internal class PaymentSheetViewModelTest {
                     logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
+                errorReporter = errorReporter,
             ).apply {
                 if (shouldRegister) {
                     val activityResultCaller = mock<ActivityResultCaller> {

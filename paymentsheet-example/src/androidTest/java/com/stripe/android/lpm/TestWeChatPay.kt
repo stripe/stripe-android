@@ -10,10 +10,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@Ignore("Backend issues")
 internal class TestWeChatPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "wechat_pay",

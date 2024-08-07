@@ -9,9 +9,10 @@ require_relative 'gnupg_utils'
 @release_url = nil
 
 def create_github_release
-    # Must be run on the release branch, because it depends on changes made in
+    # Must be run on the deploy branch, because it depends on changes made in
     # create_version_bump_pr (updating CHANGELOG.md)
-    switch_to_release_branch()
+    execute_or_fail("git checkout #{@deploy_branch}")
+    execute_or_fail("git pull")
 
     build_example_release_apk
     tag_release

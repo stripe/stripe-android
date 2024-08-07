@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -515,7 +516,10 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
-        val headerInformation = metadata.formHeaderInformationForCode(code = "card")!!
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = "card",
+            customerHasSavedPaymentMethods = true
+        )!!
         assertThat(headerInformation.displayName).isEqualTo(R.string.stripe_paymentsheet_add_new_card.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isFalse()
     }
@@ -527,7 +531,10 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card", "bancontact")
             ),
         )
-        val headerInformation = metadata.formHeaderInformationForCode(code = "bancontact")!!
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = "bancontact",
+            customerHasSavedPaymentMethods = true,
+        )!!
         assertThat(headerInformation.displayName)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_bancontact.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
@@ -540,6 +547,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(externalPaymentMethodSpecs = listOf(paypalSpec))
         val headerInformation = metadata.formHeaderInformationForCode(
             code = paypalSpec.type,
+            customerHasSavedPaymentMethods = true,
         )!!
         assertThat(headerInformation.displayName).isEqualTo(paypalSpec.label.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
@@ -772,6 +780,7 @@ internal class PaymentMethodMetadataTest {
                 sharedDataSpecs = listOf(SharedDataSpec("card")),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 hasCustomerConfiguration = true,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 isGooglePayReady = false,
             )
         )
@@ -829,21 +838,95 @@ internal class PaymentMethodMetadataTest {
                 externalPaymentMethodSpecs = listOf(),
                 hasCustomerConfiguration = true,
                 isGooglePayReady = true,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 financialConnectionsAvailable = false,
             )
         )
     }
 
+    @Test
+    fun `consent behavior should be Always for Payment Sheet is customer session save is enabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                isPaymentMethodSaveEnabled = true,
+                isPaymentMethodRemoveEnabled = true,
+            )
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Enabled)
+    }
+
+    @Test
+    fun `consent behavior should be Disabled for Payment Sheet is customer session save is disabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                isPaymentMethodSaveEnabled = false,
+                isPaymentMethodRemoveEnabled = true,
+            ),
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Disabled)
+    }
+
+    @Test
+    fun `consent behavior should be Legacy for Payment Sheet if payment sheet component is disabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+    }
+
+    @Test
+    fun `consent behavior should be Legacy for Payment Sheet if no customer session provided`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            paymentSheetComponent = null,
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+    }
+
+    private fun createPaymentMethodMetadataForPaymentSheet(
+        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet?,
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                paymentSheetComponent = paymentSheetComponent
+            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            sharedDataSpecs = listOf(),
+            externalPaymentMethodSpecs = listOf(),
+            isGooglePayReady = false,
+        )
+    }
+
     private fun createElementsSession(
-        intent: StripeIntent,
-        isEligibleForCardBrandChoice: Boolean,
+        intent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        isEligibleForCardBrandChoice: Boolean = true,
+        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet? = null
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
             isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
             merchantCountry = null,
             isGooglePayEnabled = false,
-            customer = null,
+            customer = paymentSheetComponent?.let { component ->
+                ElementsSession.Customer(
+                    paymentMethods = listOf(),
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_123",
+                        customerId = "cus_123",
+                        liveMode = false,
+                        apiKey = "123",
+                        apiKeyExpiry = 999999999,
+                        components = ElementsSession.Customer.Components(
+                            paymentSheet = component,
+                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            },
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
