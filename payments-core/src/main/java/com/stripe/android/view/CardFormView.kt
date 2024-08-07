@@ -430,6 +430,17 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // Merchant could set onBehalfOf before view is attached to window.
+        // Check and set if needed.
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            if (onBehalfOf != null && viewModel.onBehalfOf != onBehalfOf) {
+                viewModel.setOnBehalfOf(onBehalfOf)
+            }
+        }
+    }
+
     /**
      * A list of preferred networks that should be used to process payments made with a co-branded
      * card if your user hasn't selected a network themselves.

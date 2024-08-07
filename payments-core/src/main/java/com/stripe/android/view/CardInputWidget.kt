@@ -411,6 +411,8 @@ class CardInputWidget @JvmOverloads constructor(
         super.onAttachedToWindow()
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            // Merchant could set onBehalfOf before view is attached to window.
+            // Check and set if needed.
             if (onBehalfOf != null && viewModel.onBehalfOf != onBehalfOf) {
                 viewModel.setOnBehalfOf(onBehalfOf)
             }
