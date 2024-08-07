@@ -74,7 +74,7 @@ interface ConsumersApiService {
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
-    ): ConsumerPaymentDetails
+    ): Result<ConsumerPaymentDetails>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -242,8 +242,8 @@ class ConsumersApiServiceImpl(
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
-    ): ConsumerPaymentDetails {
-        return executeRequestWithModelJsonParser(
+    ): Result<ConsumerPaymentDetails> {
+        return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(

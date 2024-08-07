@@ -273,7 +273,7 @@ class LinkApiRepositoryTest {
                 requestSurface = any(),
                 requestOptions = any(),
             )
-        ).thenReturn(paymentDetails)
+        ).thenReturn(Result.success(paymentDetails))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
@@ -320,7 +320,7 @@ class LinkApiRepositoryTest {
                 requestSurface = any(),
                 requestOptions = any(),
             )
-        ).thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,

@@ -246,7 +246,7 @@ class ConsumersApiServiceImplTest {
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
-        )
+        ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
         assertThat(cardDetails.last4).isEqualTo("4242")
@@ -304,7 +304,7 @@ class ConsumersApiServiceImplTest {
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
-        )
+        ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
         assertThat(cardDetails.last4).isEqualTo("4242")

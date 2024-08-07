@@ -33,7 +33,7 @@ data class ConsumerPaymentDetails(
     data class Passthrough(
         override val id: String,
         override val last4: String,
-    ) : PaymentDetails(id, "card")
+    ) : PaymentDetails(id, type = "card")
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

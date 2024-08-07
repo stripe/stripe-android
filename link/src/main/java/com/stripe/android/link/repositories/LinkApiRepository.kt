@@ -80,19 +80,16 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
-        // TODO: Result<T>
-        runCatching {
-            consumersApiService.createPaymentDetails(
-                consumerSessionClientSecret = consumerSessionClientSecret,
-                paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
-                    cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
-                    email = userEmail,
-                    active = active,
-                ),
-                requestSurface = REQUEST_SURFACE,
-                requestOptions = buildRequestOptions(consumerPublishableKey),
-            )
-        }.mapCatching {
+        consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
+                email = userEmail,
+                active = active,
+            ),
+            requestSurface = REQUEST_SURFACE,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
+        ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
             val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
 
