@@ -115,6 +115,48 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
+    fun `init - Redirects to nextPaneOnNewAccount if no bank accounts`() = runTest {
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = emptyList(),
+                display = display(emptyList()),
+                nextPaneOnAddAccount = Pane.LINK_LOGIN, // Random pane to test it
+            )
+        )
+
+        buildViewModel(LinkAccountPickerState())
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.LINK_LOGIN.destination,
+            pane = Pane.LINK_ACCOUNT_PICKER,
+        )
+    }
+
+    @Test
+    fun `init - Redirects to institution picker if no bank accounts and no nextPaneOnAddAccount`() = runTest {
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = emptyList(),
+                display = display(emptyList()),
+                nextPaneOnAddAccount = null,
+            )
+        )
+
+        buildViewModel(LinkAccountPickerState())
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.INSTITUTION_PICKER.destination,
+            pane = Pane.LINK_ACCOUNT_PICKER,
+        )
+    }
+
+    @Test
     fun `onNewBankAccountClick - navigates to AddNewAccount#NextPane`() = runTest {
         val response = twoAccounts().copy(
             nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
