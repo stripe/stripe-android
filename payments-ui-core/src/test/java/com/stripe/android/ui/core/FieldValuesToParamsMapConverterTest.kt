@@ -407,4 +407,67 @@ class FieldValuesToParamsMapConverterTest {
 
         assertThat(paymentMethodParams).isNull()
     }
+
+    @Test
+    fun `allowRedisplay is set to UNSPECIFIED in param map`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                fieldValuePairs = fieldValuePairs,
+                code = PaymentMethod.Type.Ideal.code,
+                requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+            )
+
+        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
+            .isEqualTo(
+                """
+                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=unspecified}
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `allowRedisplay is set to LIMITED in param map`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                fieldValuePairs = fieldValuePairs,
+                code = PaymentMethod.Type.Ideal.code,
+                requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
+                PaymentMethod.AllowRedisplay.LIMITED,
+            )
+
+        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
+            .isEqualTo(
+                """
+                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=limited}
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun `allowRedisplay is set to ALWAYS in param map`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                fieldValuePairs = fieldValuePairs,
+                code = PaymentMethod.Type.Ideal.code,
+                requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
+                PaymentMethod.AllowRedisplay.ALWAYS,
+            )
+
+        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
+            .isEqualTo(
+                """
+                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=always}
+                """.trimIndent()
+            )
+    }
+
+    private companion object {
+        val fieldValuePairs = mapOf(
+            IdentifierSpec.Generic("ideal[bank]") to FormFieldEntry(
+                "abn_amro",
+                true
+            )
+        )
+    }
 }

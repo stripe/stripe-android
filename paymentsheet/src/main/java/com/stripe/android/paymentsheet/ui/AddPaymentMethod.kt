@@ -68,10 +68,17 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethodCode: PaymentMethodCode,
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentMethodCreateParams {
+    val saveForFutureUse = when (userRequestedReuse) {
+        PaymentSelection.CustomerRequestedSave.RequestReuse -> true
+        PaymentSelection.CustomerRequestedSave.RequestNoReuse -> false
+        PaymentSelection.CustomerRequestedSave.NoRequest -> null
+    }
+
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs,
         code = paymentMethodCode,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethodCode),
+        allowRedisplay = paymentMethodMetadata.allowRedisplay(saveForFutureUse),
     )
 }
 

@@ -9,11 +9,13 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -165,6 +167,65 @@ internal class AddPaymentMethodTest {
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()
         }
+    }
+
+    @Test
+    fun `when customer reuse is not requested, should have allow_redisplay in params`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+
+        val formValues = FormFieldValues(
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = "card",
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(params.toParamMap()).containsEntry("allow_redisplay", "unspecified")
+    }
+
+    @Test
+    fun `when customer reuse is requested with reuse, should have allow_redisplay in params`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+
+        val formValues = FormFieldValues(
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        )
+
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = "card",
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(params.toParamMap()).containsEntry("allow_redisplay", "always")
+    }
+
+    @Test
+    fun `when customer reuse is requested with no reuse, should have allow_redisplay in params`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+
+        val formValues = FormFieldValues(
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = "card",
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(params.toParamMap()).containsEntry("allow_redisplay", "limited")
     }
 
     private fun runScenario(

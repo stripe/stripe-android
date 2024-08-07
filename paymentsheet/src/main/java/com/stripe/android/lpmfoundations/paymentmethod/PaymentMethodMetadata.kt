@@ -197,6 +197,34 @@ internal data class PaymentMethodMetadata(
         }
     }
 
+    fun allowRedisplay(saveForFutureUse: Boolean?): PaymentMethod.AllowRedisplay {
+        return when (paymentMethodSaveConsentBehavior) {
+            PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            PaymentMethodSaveConsentBehavior.Disabled -> {
+                if (hasIntentToSetup()) {
+                    PaymentMethod.AllowRedisplay.LIMITED
+                } else {
+                    PaymentMethod.AllowRedisplay.UNSPECIFIED
+                }
+            }
+            PaymentMethodSaveConsentBehavior.Enabled -> {
+                if (hasIntentToSetup()) {
+                    if (saveForFutureUse == true) {
+                        PaymentMethod.AllowRedisplay.ALWAYS
+                    } else {
+                        PaymentMethod.AllowRedisplay.LIMITED
+                    }
+                } else {
+                    if (saveForFutureUse == true) {
+                        PaymentMethod.AllowRedisplay.ALWAYS
+                    } else {
+                        PaymentMethod.AllowRedisplay.UNSPECIFIED
+                    }
+                }
+            }
+        }
+    }
+
     internal companion object {
         internal fun create(
             elementsSession: ElementsSession,
