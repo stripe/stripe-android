@@ -87,7 +87,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier = modifier.padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
 
