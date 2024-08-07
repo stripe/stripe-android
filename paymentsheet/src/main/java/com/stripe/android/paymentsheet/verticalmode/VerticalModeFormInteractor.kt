@@ -132,7 +132,10 @@ internal class DefaultVerticalModeFormInteractor(
                     hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
                     selectedPaymentMethodCode = selectedPaymentMethodCode
                 ),
-                headerInformation = paymentMethodMetadata.formHeaderInformationForCode(selectedPaymentMethodCode),
+                headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
+                    selectedPaymentMethodCode,
+                    customerHasSavedPaymentMethods = viewModel.customerStateHolder.paymentMethods.value.isNotEmpty(),
+                ),
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 canGoBackDelegate = { viewModel.navigationHandler.canGoBack },
                 processing = viewModel.processing,

@@ -123,7 +123,9 @@ internal class VerticalModeFormUITest {
 
     private fun createCardState(): VerticalModeFormInteractor.State {
         val headerInformation =
-            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation()
+            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
+                customerHasSavedPaymentMethods = true,
+            )
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
             isProcessing = false,
@@ -152,7 +154,7 @@ internal class VerticalModeFormUITest {
                     "cashapp"
                 )
             )
-        ).formHeaderInformationForCode("cashapp")
+        ).formHeaderInformationForCode("cashapp", customerHasSavedPaymentMethods = true)
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.CashAppPay.code,
             isProcessing = false,
@@ -182,7 +184,10 @@ internal class VerticalModeFormUITest {
                 )
             )
         )
-        val headerInformation = paymentMethodMetadata.formHeaderInformationForCode("klarna")
+        val headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
+            "klarna",
+            customerHasSavedPaymentMethods = true,
+        )
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Klarna.code,
             isProcessing = false,

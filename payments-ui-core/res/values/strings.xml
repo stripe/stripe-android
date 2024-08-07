@@ -65,6 +65,8 @@
   <string name="stripe_pay_button_amount">Pay %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
+  <!-- Title shown above a view allowing the customer to save their first card. -->
+  <string name="stripe_paymentsheet_add_card">Add card</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
   <string name="stripe_paymentsheet_add_new_card">Add new card</string>
   <!-- Card details entry form header title -->
