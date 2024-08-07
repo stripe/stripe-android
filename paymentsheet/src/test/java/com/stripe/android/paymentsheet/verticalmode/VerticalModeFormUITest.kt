@@ -43,7 +43,7 @@ internal class VerticalModeFormUITest {
     private val formPage = FormPage(composeRule)
 
     @Test
-    fun testWithCardProperties() = runScenario(createCardState()) {
+    fun testWithCardProperties() = runScenario(createCardState(customerHasSavedPaymentMethods = true)) {
         viewActionRecorder.consume(VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged(null))
         assertThat(viewActionRecorder.viewActions).isEmpty()
         formPage.cardNumber.performTextInput("4242")
@@ -67,10 +67,19 @@ internal class VerticalModeFormUITest {
     }
 
     @Test
-    fun testCardShowsHeader() = runScenario(createCardState()) {
+    fun testCardShowsHeader() = runScenario(createCardState(customerHasSavedPaymentMethods = true)) {
         formPage.headerIcon.assertDoesNotExist()
         formPage.title.assertExists()
         formPage.title.assert(hasText("Add new card"))
+    }
+
+    @Test
+    fun testCardShowsAddCardHeader_whenCustomerHasNoSavedPMs() = runScenario(
+        createCardState(customerHasSavedPaymentMethods = false)
+    ) {
+        formPage.headerIcon.assertDoesNotExist()
+        formPage.title.assertExists()
+        formPage.title.assert(hasText("Add card"))
     }
 
     @Test
@@ -121,10 +130,10 @@ internal class VerticalModeFormUITest {
         }
     }
 
-    private fun createCardState(): VerticalModeFormInteractor.State {
+    private fun createCardState(customerHasSavedPaymentMethods: Boolean): VerticalModeFormInteractor.State {
         val headerInformation =
             (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
-                customerHasSavedPaymentMethods = true,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
             )
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
