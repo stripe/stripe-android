@@ -3,12 +3,12 @@ package com.stripe.android.model
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class ConsumerPaymentDetailsCreateParams2Test {
+class ConsumerPaymentDetailsCreateParamsTest {
 
     @Test
     fun createCardParams_generatesCorrectParameters() {
         assertThat(
-            ConsumerPaymentDetailsCreateParams2.Card(
+            ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = mapOf(
                     "ignored" to "none",
                     "card" to mapOf(

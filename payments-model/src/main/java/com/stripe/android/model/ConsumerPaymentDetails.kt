@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ConsumerPaymentDetails2(
+data class ConsumerPaymentDetails(
     val paymentDetails: List<PaymentDetails>
 ) : StripeModel {
 

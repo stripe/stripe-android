@@ -7,9 +7,9 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkScope
-import com.stripe.android.model.ConsumerPaymentDetails2
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2.Card.Companion.extraConfirmationParams
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -84,7 +84,7 @@ internal class LinkApiRepository @Inject constructor(
         runCatching {
             consumersApiService.createPaymentDetails(
                 consumerSessionClientSecret = consumerSessionClientSecret,
-                paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams2.Card(
+                paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                     cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                     email = userEmail,
                     active = active,
@@ -129,7 +129,7 @@ internal class LinkApiRepository @Inject constructor(
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { passthroughModePaymentMethodId ->
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails2.Passthrough(
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = passthroughModePaymentMethodId,
                     last4 = last4,
                 ),

@@ -6,12 +6,12 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface ConsumerPaymentDetailsCreateParams2 : StripeParamsModel, Parcelable {
+sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcelable {
 
     /**
      * Represents a new Card payment method that will be created using the
      * [cardPaymentMethodCreateParamsMap] values, converting from the `PaymentMethodCreateParams`
-     * format to [ConsumerPaymentDetailsCreateParams2] format.
+     * format to [ConsumerPaymentDetailsCreateParams] format.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -19,7 +19,7 @@ sealed interface ConsumerPaymentDetailsCreateParams2 : StripeParamsModel, Parcel
         private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
         private val email: String,
         private val active: Boolean,
-    ) : ConsumerPaymentDetailsCreateParams2 {
+    ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
             val params = mutableMapOf<String, Any>(

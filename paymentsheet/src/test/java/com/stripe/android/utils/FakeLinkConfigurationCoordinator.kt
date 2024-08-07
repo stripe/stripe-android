@@ -6,7 +6,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.ConsumerPaymentDetails2
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -18,7 +18,7 @@ import org.mockito.kotlin.mock
 class FakeLinkConfigurationCoordinator(
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
-            paymentDetails = ConsumerPaymentDetails2.Card(
+            paymentDetails = ConsumerPaymentDetails.Card(
                 id = "pm_123",
                 last4 = "4242",
             ),

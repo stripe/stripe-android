@@ -12,7 +12,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.ConsumerPaymentDetails2
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -384,7 +384,7 @@ class LinkAccountManagerTest {
                 startSession = true,
             )
 
-            val paymentDetails = mock<ConsumerPaymentDetails2.PaymentDetails>().apply {
+            val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
                 whenever(id).thenReturn("csmrpd*AYq4D_sXdAAAAOQ0")
             }
             whenever(
@@ -461,7 +461,7 @@ class LinkAccountManagerTest {
         ).thenReturn(
             Result.success(
                 LinkPaymentDetails.Saved(
-                    paymentDetails = ConsumerPaymentDetails2.Passthrough(
+                    paymentDetails = ConsumerPaymentDetails.Passthrough(
                         id = PAYMENT_METHOD_ID,
                         last4 = "1234",
                     ),

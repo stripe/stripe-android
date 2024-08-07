@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
-import com.stripe.android.model.ConsumerPaymentDetails2
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -202,7 +202,7 @@ class LinkApiRepositoryTest {
 
         verify(consumersApiService).createPaymentDetails(
             eq(secret),
-            argThat<ConsumerPaymentDetailsCreateParams2> {
+            argThat<ConsumerPaymentDetailsCreateParams> {
                 toParamMap() == mapOf(
                     "type" to "card",
                     "billing_email_address" to "email@stripe.com",
@@ -240,7 +240,7 @@ class LinkApiRepositoryTest {
 
             verify(consumersApiService).createPaymentDetails(
                 consumerSessionClientSecret = eq(secret),
-                paymentDetailsCreateParams = argThat<ConsumerPaymentDetailsCreateParams2> {
+                paymentDetailsCreateParams = argThat<ConsumerPaymentDetailsCreateParams> {
                     toParamMap() == mapOf(
                         "type" to "card",
                         "billing_email_address" to "email@stripe.com",
@@ -368,7 +368,7 @@ class LinkApiRepositoryTest {
             requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
-            .isEqualTo(ConsumerPaymentDetails2.Passthrough(id = "pm_123", last4 = "4242"))
+            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(

@@ -9,8 +9,8 @@ import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
-import com.stripe.android.model.ConsumerPaymentDetails2
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -71,10 +71,10 @@ interface ConsumersApiService {
 
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams2,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
-    ): ConsumerPaymentDetails2
+    ): ConsumerPaymentDetails
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -239,10 +239,10 @@ class ConsumersApiServiceImpl(
 
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams2,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
-    ): ConsumerPaymentDetails2 {
+    ): ConsumerPaymentDetails {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

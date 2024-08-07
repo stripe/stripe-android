@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import org.junit.Test
 
 class SupportedPaymentMethodTest {
@@ -25,7 +25,7 @@ class SupportedPaymentMethodTest {
         )
 
         assertThat(
-            ConsumerPaymentDetailsCreateParams2.Card(
+            ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = "email@test.com",
                 active = false,
