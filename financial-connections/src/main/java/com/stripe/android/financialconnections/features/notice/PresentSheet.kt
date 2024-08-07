@@ -30,8 +30,6 @@ internal class RealPresentSheet @Inject constructor(
                 val route = Destination.Notice(referrer = referrer)
                 navigationManager.tryNavigateTo(route)
             }
-
         }
     }
 }
-

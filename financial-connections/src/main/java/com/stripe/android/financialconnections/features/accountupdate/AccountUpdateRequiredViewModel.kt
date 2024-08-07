@@ -132,6 +132,4 @@ internal data class AccountUpdateRequiredState(
     constructor(arguments: Bundle?) : this(
         referrer = Destination.referrer(arguments)!!,
     )
-
-
 }

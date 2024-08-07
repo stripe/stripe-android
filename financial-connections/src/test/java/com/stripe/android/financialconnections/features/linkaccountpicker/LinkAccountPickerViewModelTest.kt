@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -58,7 +57,7 @@ class LinkAccountPickerViewModelTest {
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
-    private val presentUpdateRequiredSheet = mock<PresentAccountUpdateRequiredSheet>()
+    private val presentUpdateRequiredSheet = mock<PresentSheet>()
     private val presentSheet = mock<PresentSheet>()
 
     private fun buildViewModel(
@@ -77,8 +76,7 @@ class LinkAccountPickerViewModelTest {
             handleClickableUrl = mock(),
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
             presentSheet = presentSheet,
-            acceptConsent = mock(),
-            presentUpdateRequiredSheet = presentUpdateRequiredSheet,
+            acceptConsent = mock()
         )
     }
 
