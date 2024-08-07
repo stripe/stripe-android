@@ -798,6 +798,7 @@ class IntentConfirmationHandlerTest {
     fun `On init with 'SavedStateHandle', should receive result through 'awaitIntentResult'`() = runTest {
         val savedStateHandle = SavedStateHandle().apply {
             set("AwaitingPaymentResult", true)
+            set("IntentConfirmationArguments", DEFAULT_ARGUMENTS)
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
