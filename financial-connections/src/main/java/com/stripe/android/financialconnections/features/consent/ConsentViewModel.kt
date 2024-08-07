@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
@@ -131,6 +132,12 @@ internal class ConsentViewModel @AssistedInject constructor(
                         )
                     )
                 },
+                // Surfaces where user has signed in to Link and then launches the auth flow.
+                ConsentClickableText.LINK_ACCOUNT_PICKER.value to {
+                    navigationManager.tryNavigateTo(
+                        route = Destination.LinkAccountPicker(referrer = Pane.CONSENT)
+                    )
+                }
             )
         )
     }
