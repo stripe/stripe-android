@@ -269,18 +269,10 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          title: Assemble Instrumentation tests
-          timeout: 600
-          inputs:
-            - content: ./gradlew :paymentsheet:assembleAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet:connectedAndroidTest
+            - content: ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
