@@ -197,24 +197,27 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val payload = requireNotNull(state.payload())
             val accounts = payload.selectedAccounts.map { it.account }
-            val accountsWithDrawerOnSelection = payload.selectedAccounts.filter { it.display.drawerOnSelection != null }
+            val selectedAccountDrawers = payload.selectedAccounts
+                .mapNotNull { it.account.computeDrawerPayload(payload) }
             updateCachedAccounts(accounts)
 
-            if (accountsWithDrawerOnSelection.size > 1) {
-                // MULTIPLE ACCOUNTS WITH DRAWER ON SELECTION: log error.
-                eventTracker.logError(
-                    extraMessage = "Multiple accounts with drawers on selection",
-                    error = UnclassifiedError("MultipleAccountsSelectedError"),
-                    logger = logger,
-                    pane = PANE
-                )
-            } else if (accountsWithDrawerOnSelection.size == 1) {
-                // AN ACCOUNT WITH DRAWER ON SELECTION -> accept consent and present it.
+            // In some cases we need to mark consent acquisition on submission and then need
+            // to present the necessary drawer.
+            if (selectedAccountDrawers.isNotEmpty()) {
+                // Currently this should only occur for single account flows to not present a drawer right away but
+                // to collect consent and then open the drawer. This is not expected to happen for multi-account flows.
+                if (selectedAccountDrawers.size > 1) {
+                    eventTracker.logError(
+                        extraMessage = "Multiple accounts with drawers on selection",
+                        error = UnclassifiedError("MultipleAccountsSelectedError"),
+                        logger = logger,
+                        pane = PANE
+                    )
+                }
                 acceptConsent()
-                val accountWithDrawerOnSelection = accountsWithDrawerOnSelection.first()
-                presentDrawerIfRequired(accountWithDrawerOnSelection.account, payload)
+                selectedAccountDrawers.first().present()
             } else {
-                // NO ACCOUNTS WITH DRAWER ON SELECTION
+                // No account selected with drawers on selection.
                 // We assume that at this point, all selected accounts have the same next pane.
                 // Otherwise, the user would have been presented with an update-required bottom
                 // sheet before.
@@ -318,7 +321,11 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         // Don't present the drawer if we need to acquire consent still, since the user has to explicitly consent
         // clicking the pane CTA.
         if (payload.acquireConsentOnPrimaryCtaClick.not()) {
-            if (presentDrawerIfRequired(partnerAccount, payload)) return
+            val drawerPayload = partnerAccount.computeDrawerPayload(payload)
+            if (drawerPayload != null) {
+                drawerPayload.present()
+                return
+            }
         }
 
         val selectedAccountIds = when {
@@ -334,38 +341,57 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         }
     }
 
-    private fun presentDrawerIfRequired(
-        partnerAccount: PartnerAccount,
+    sealed interface DrawerPayload {
+        data class Generic(val content: FinancialConnectionsGenericInfoScreen) : DrawerPayload
+        data class UpdateRequired(val content: AccountUpdateRequiredState.Payload) : DrawerPayload
+    }
+
+    private fun PartnerAccount.computeDrawerPayload(
         payload: LinkAccountPickerState.Payload
-    ): Boolean {
-        val drawerOnSelection =
-            payload.accounts.firstOrNull { it.account.id == partnerAccount.id }?.display?.drawerOnSelection
-        val updateRequired: AccountUpdateRequiredState.Payload? = createUpdateRequiredContent(
-            partnerAccount = partnerAccount,
+    ): DrawerPayload? {
+        val drawerOnSelection = payload.accounts.firstOrNull { it.account.id == id }
+            ?.display?.drawerOnSelection
+            ?.let(DrawerPayload::Generic)
+        val updateRequired = drawerOnSelection?.content
             // Use selected account icon (not coming on the SDU response as selection is not known by backend)
-            genericContent = drawerOnSelection?.withIcon(partnerAccount.institution?.icon?.default),
-            partnerToCoreAuths = payload.partnerToCoreAuths,
-        )
-        return when {
-            // [updateRequired] has to be checked before [drawerOnSelection].
-            // The update required modal basically uses [drawerOnSelection] to render content,
-            // and has specific logic handling for CTAs).
-            updateRequired != null -> {
-                logUpdateRequired(updateRequired)
-                presentUpdateRequiredSheet(
-                    updateRequired,
-                    referrer = PANE,
+            ?.withIcon(institution?.icon?.default)
+            ?.let { genericContent ->
+            when (nextPaneOnSelection) {
+                BANK_AUTH_REPAIR -> AccountUpdateRequiredState.Payload(
+                    generic = genericContent,
+                    type = Repair(
+                        authorization = authorization?.let { payload.partnerToCoreAuths?.getValue(it) },
+                    ),
                 )
-                true
-            }
-            drawerOnSelection != null -> {
-                presentSheet(
-                    content = Generic(drawerOnSelection),
-                    referrer = PANE,
+                PARTNER_AUTH -> AccountUpdateRequiredState.Payload(
+                    generic = genericContent,
+                    type = PartnerAuth(
+                        institution = institution,
+                    ),
                 )
-                true
+                else -> null
             }
-            else -> false
+        }?.let { DrawerPayload.UpdateRequired(it) }
+
+        // [updateRequired] has to be checked before [drawerOnSelection].
+        // The update required modal basically uses [drawerOnSelection] to render content,
+        // and has specific logic handling for CTAs).
+        return updateRequired ?: drawerOnSelection
+    }
+
+    private fun DrawerPayload.present() = when (this) {
+        is DrawerPayload.UpdateRequired -> {
+            logUpdateRequired(content)
+            presentUpdateRequiredSheet(
+                content,
+                referrer = PANE,
+            )
+        }
+        is DrawerPayload.Generic -> {
+            presentSheet(
+                content = Generic(content),
+                referrer = PANE,
+            )
         }
     }
 
@@ -438,7 +464,7 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
-                    // if no account was selected, use the consent
+                // if no account was selected, use the consent
                     ?: payload.defaultDataAccessNotice
             }
         }
@@ -476,40 +502,10 @@ internal data class LinkedAccount(
     val account: PartnerAccount,
     val display: NetworkedAccount
 ) {
-
     // Bank accounts can have multiple types, determined by their prefixes.
     // (ex. linked account "bctmacct", manual account "csmrbankacct").
     val type: String?
         get() = account.id.split("_").firstOrNull()
-}
-
-private fun createUpdateRequiredContent(
-    partnerAccount: PartnerAccount,
-    partnerToCoreAuths: Map<String, String>?,
-    genericContent: FinancialConnectionsGenericInfoScreen?,
-): AccountUpdateRequiredState.Payload? {
-    if (genericContent == null) return null
-    return when (partnerAccount.nextPaneOnSelection) {
-        BANK_AUTH_REPAIR -> {
-            AccountUpdateRequiredState.Payload(
-                generic = genericContent,
-                type = Repair(
-                    authorization = partnerAccount.authorization?.let { partnerToCoreAuths?.getValue(it) },
-                ),
-            )
-        }
-        PARTNER_AUTH -> {
-            AccountUpdateRequiredState.Payload(
-                generic = genericContent,
-                type = PartnerAuth(
-                    institution = partnerAccount.institution,
-                ),
-            )
-        }
-        else -> {
-            null
-        }
-    }
 }
 
 private fun FinancialConnectionsGenericInfoScreen.withIcon(iconUrl: String?) = copy(
