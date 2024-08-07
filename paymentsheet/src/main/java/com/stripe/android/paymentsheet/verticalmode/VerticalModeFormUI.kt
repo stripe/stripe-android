@@ -40,7 +40,7 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
 
-    Column(modifier = Modifier.padding(bottom = 32.dp)) {
+    Column(modifier = Modifier.padding(bottom = 20.dp)) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
         if (headerInformation != null) {
