@@ -1,5 +1,7 @@
 package com.stripe.android.utils
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -24,8 +26,8 @@ internal open class FakeCustomerRepository(
         Result.failure(NotImplementedError())
     }
 ) : CustomerRepository {
-    private val _detachRequests = mutableListOf<DetachRequest>()
-    val detachRequests: List<DetachRequest> = _detachRequests
+    private val _detachRequests = Turbine<DetachRequest>()
+    val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
     var error: Throwable? = null
 
@@ -41,12 +43,14 @@ internal open class FakeCustomerRepository(
 
     override suspend fun detachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
-        paymentMethodId: String
+        paymentMethodId: String,
+        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
-                customerInfo = customerInfo
+                customerInfo = customerInfo,
+                canRemoveDuplicates = canRemoveDuplicates,
             )
         )
 
@@ -67,5 +71,6 @@ internal open class FakeCustomerRepository(
     data class DetachRequest(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,
+        val canRemoveDuplicates: Boolean,
     )
 }
