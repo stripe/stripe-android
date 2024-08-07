@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -40,6 +42,7 @@ internal class DefaultCustomerSheetLoader(
     private val lpmRepository: LpmRepository,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
     private val errorReporter: ErrorReporter,
+    private val workContext: CoroutineContext
 ) : CustomerSheetLoader {
 
     @Inject constructor(
@@ -49,6 +52,7 @@ internal class DefaultCustomerSheetLoader(
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
         errorReporter: ErrorReporter,
+        @IOContext workContext: CoroutineContext
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
@@ -57,35 +61,36 @@ internal class DefaultCustomerSheetLoader(
         lpmRepository = lpmRepository,
         customerAdapterProvider = CustomerSheetHacks.adapter,
         errorReporter = errorReporter,
+        workContext = workContext,
     )
 
-    override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
-        return runCatching {
-            val customerAdapter = retrieveCustomerAdapter().getOrThrow()
+    override suspend fun load(
+        configuration: CustomerSheet.Configuration
+    ): Result<CustomerSheetState.Full> = workContext.runCatching {
+        val customerAdapter = retrieveCustomerAdapter().getOrThrow()
 
-            val elementsSession = retrieveElementsSession(
-                customerAdapter = customerAdapter,
-            ).getOrThrow()
+        val elementsSession = retrieveElementsSession(
+            customerAdapter = customerAdapter,
+        ).getOrThrow()
 
-            val metadata = createPaymentMethodMetadata(
-                configuration = configuration,
+        val metadata = createPaymentMethodMetadata(
+            configuration = configuration,
+            elementsSession = elementsSession,
+        )
+
+        loadPaymentMethods(
+            customerAdapter = customerAdapter,
+            configuration = configuration,
+            elementsSessionWithMetadata = ElementsSessionWithMetadata(
                 elementsSession = elementsSession,
+                metadata = metadata,
+            ),
+        ).onFailure {
+            errorReporter.report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
+                stripeException = StripeException.create(it)
             )
-
-            loadPaymentMethods(
-                customerAdapter = customerAdapter,
-                configuration = configuration,
-                elementsSessionWithMetadata = ElementsSessionWithMetadata(
-                    elementsSession = elementsSession,
-                    metadata = metadata,
-                ),
-            ).onFailure {
-                errorReporter.report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
-                    stripeException = StripeException.create(it)
-                )
-            }.getOrThrow()
-        }
+        }.getOrThrow()
     }
 
     private suspend fun retrieveCustomerAdapter(): Result<CustomerAdapter> {
