@@ -20,7 +20,9 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsTest {
     fun `title returns select payment method when isCompleteFlow false`() = runTest {
         PaymentSheetScreen.SelectSavedPaymentMethods(mock())
             .title(isCompleteFlow = false, isWalletEnabled = true).test {
-                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_select_your_payment_method.resolvableString)
+                assertThat(awaitItem()).isEqualTo(
+                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+                )
             }
     }
 
@@ -28,7 +30,9 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsTest {
     fun `title returns select payment method when isWalletEnabled is false`() = runTest {
         PaymentSheetScreen.SelectSavedPaymentMethods(mock())
             .title(isCompleteFlow = true, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_select_your_payment_method.resolvableString)
+                assertThat(awaitItem()).isEqualTo(
+                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+                )
             }
     }
 }
