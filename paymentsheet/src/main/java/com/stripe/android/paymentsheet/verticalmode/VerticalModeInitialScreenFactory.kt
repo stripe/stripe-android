@@ -21,6 +21,7 @@ internal object VerticalModeInitialScreenFactory {
                     selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
                     viewModel = viewModel,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
                 ),
                 showsWalletHeader = true,
             )

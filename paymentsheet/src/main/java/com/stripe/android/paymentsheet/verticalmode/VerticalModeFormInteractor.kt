@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -111,6 +112,7 @@ internal class DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode: String,
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            customerStateHolder: CustomerStateHolder,
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(viewModel = viewModel, paymentMethodMetadata = paymentMethodMetadata)
@@ -134,7 +136,7 @@ internal class DefaultVerticalModeFormInteractor(
                 ),
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,
-                    customerHasSavedPaymentMethods = viewModel.customerStateHolder.paymentMethods.value.isNotEmpty(),
+                    customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty(),
                 ),
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 canGoBackDelegate = { viewModel.navigationHandler.canGoBack },
