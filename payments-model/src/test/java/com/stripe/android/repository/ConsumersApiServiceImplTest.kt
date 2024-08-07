@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -32,6 +33,44 @@ class ConsumersApiServiceImplTest {
         apiVersion = ApiVersion(betas = emptySet()).code,
         appInfo = null
     )
+
+    @Test
+    fun `signUp() sends all parameters`() = runTest {
+        val email = "email@example.com"
+        val requestSurface = "android_payment_element"
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            bodyPart("email_address", "email%40example.com"),
+            bodyPart("phone_number", "%2B15555555568"),
+            bodyPart("country", "US"),
+            bodyPart("locale", "en-US"),
+            bodyPart("consent_action", "clicked_checkbox_nospm_mobile_v0"),
+            bodyPart("request_surface", requestSurface),
+        ) { response ->
+            response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
+        }
+
+        val signup = consumersApiService.signUp(
+            email = email,
+            phoneNumber = "+15555555568",
+            country = "US",
+            name = null,
+            locale = Locale.US,
+            consentAction = ConsumerSignUpConsentAction.Checkbox,
+            requestSurface = requestSurface,
+            requestOptions = DEFAULT_OPTIONS,
+        ).getOrThrow()
+
+        assertThat(signup.consumerSession.verificationSessions).isEmpty()
+        assertThat(signup.consumerSession.emailAddress).isEqualTo(email)
+        assertThat(signup.consumerSession.redactedPhoneNumber).isEqualTo("+1********68")
+        assertThat(signup.consumerSession.clientSecret).isEqualTo("secret")
+        assertThat(signup.publishableKey).isEqualTo("asdfg123")
+    }
 
     @Test
     fun `lookupConsumerSession() sends all parameters`() = runTest {

@@ -12,8 +12,6 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -38,7 +36,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.networking.StripeRepository
-import java.util.Locale
 
 abstract class AbsFakeStripeRepository : StripeRepository {
 
@@ -293,18 +290,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         hcaptchaEKey: String?,
         requestOptions: ApiRequest.Options
     ): Result<RadarSessionWithHCaptcha> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun consumerSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        consentAction: ConsumerSignUpConsentAction,
-        requestOptions: ApiRequest.Options
-    ): Result<ConsumerSessionSignup> {
         TODO("Not yet implemented")
     }
 

@@ -18,6 +18,7 @@ object ConsumerFixtures {
         """
             {
               "auth_session_client_secret": null,
+              "publishable_key": "asdfg123",
               "consumer_session": {
                 "client_secret": "secret",
                 "email_address": "email@example.com",

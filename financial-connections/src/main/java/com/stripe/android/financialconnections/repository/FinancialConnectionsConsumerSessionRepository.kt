@@ -6,6 +6,8 @@ import com.stripe.android.financialconnections.repository.api.ProvideApiRequestO
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
@@ -16,6 +18,13 @@ import java.util.Locale
 internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): CachedConsumerSession?
+
+    suspend fun signUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        locale: Locale?,
+    ): ConsumerSessionSignup
 
     suspend fun lookupConsumerSession(
         email: String,
@@ -80,8 +89,28 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
         postConsumerSession(email, clientSecret).also { lookup ->
-            updateCachedConsumerSession("lookupConsumerSession", lookup)
+            updateCachedConsumerSessionFromLookup(lookup)
         }
+    }
+
+    override suspend fun signUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        locale: Locale?,
+    ): ConsumerSessionSignup = mutex.withLock {
+        consumersApiService.signUp(
+            email = email,
+            phoneNumber = phoneNumber,
+            country = country,
+            name = null,
+            locale = locale,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            requestSurface = CONSUMER_SURFACE,
+            consentAction = EnteredPhoneNumberClickedSaveToLink,
+        ).onSuccess { signup ->
+            updateCachedConsumerSessionFromSignup(signup)
+        }.getOrThrow()
     }
 
     override suspend fun startConsumerVerification(
@@ -148,12 +177,18 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSessionRepository.updateConsumerSession(consumerSession)
     }
 
-    private fun updateCachedConsumerSession(
-        source: String,
+    private fun updateCachedConsumerSessionFromLookup(
         lookup: ConsumerSessionLookup,
     ) {
-        logger.debug("SYNC_CACHE: updating local consumer session from $source")
+        logger.debug("SYNC_CACHE: updating local consumer session from lookupConsumerSession")
         consumerSessionRepository.storeNewConsumerSession(lookup.consumerSession, lookup.publishableKey)
+    }
+
+    private fun updateCachedConsumerSessionFromSignup(
+        signup: ConsumerSessionSignup,
+    ) {
+        logger.debug("SYNC_CACHE: updating local consumer session from signUp")
+        consumerSessionRepository.storeNewConsumerSession(signup.consumerSession, signup.publishableKey)
     }
 
     private companion object {

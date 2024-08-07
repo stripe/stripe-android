@@ -53,8 +53,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -82,7 +80,6 @@ import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
-import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
@@ -1069,43 +1066,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    /**
-     * Creates a new Link account for the credentials provided.
-     */
-    override suspend fun consumerSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        consentAction: ConsumerSignUpConsentAction,
-        requestOptions: ApiRequest.Options
-    ): Result<ConsumerSessionSignup> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = consumerSignUpUrl,
-                options = requestOptions,
-                params = mapOf(
-                    "request_surface" to "android_payment_element",
-                    "country_inferring_method" to "PHONE_NUMBER",
-                    "email_address" to email.lowercase(),
-                    "phone_number" to phoneNumber,
-                    "country" to country,
-                    "consent_action" to consentAction.value
-                ).plus(
-                    locale?.let {
-                        mapOf("locale" to it.toLanguageTag())
-                    } ?: emptyMap()
-                ).plus(
-                    name?.let {
-                        mapOf("legal_name" to it)
-                    } ?: emptyMap()
-                )
-            ),
-            jsonParser = ConsumerSessionSignupJsonParser,
-        )
-    }
-
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
@@ -1829,13 +1789,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val paymentMethodsUrl: String
             @JvmSynthetic
             get() = getApiUrl("payment_methods")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
-         */
-        internal val consumerSignUpUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/accounts/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/log_out`
