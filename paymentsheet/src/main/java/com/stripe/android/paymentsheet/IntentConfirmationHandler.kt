@@ -17,9 +17,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -61,6 +58,11 @@ internal class IntentConfirmationHandler(
     private val errorReporter: ErrorReporter,
     private val logger: UserFacingLogger?,
 ) {
+    private val intentConfirmationDefinition = IntentConfirmationDefinition(
+        intentConfirmationInterceptor,
+        paymentLauncherFactory
+    )
+
     private var paymentLauncher: PaymentLauncher? = null
     private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
@@ -121,11 +123,9 @@ internal class IntentConfirmationHandler(
      * @param lifecycleOwner a class tied to an Android [Lifecycle]
      */
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        paymentLauncher = paymentLauncherFactory(
-            activityResultCaller.registerForActivityResult(
-                PaymentLauncherContract(),
-                ::onPaymentResult
-            )
+        paymentLauncher = intentConfirmationDefinition.createLauncher(
+            activityResultCaller,
+            ::onPaymentResult
         )
 
         externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
@@ -262,75 +262,36 @@ internal class IntentConfirmationHandler(
         paymentMethod: PaymentConfirmationOption.PaymentMethod,
         intent: StripeIntent,
     ) {
-        val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = paymentMethod)
+        when (val action = intentConfirmationDefinition.action(paymentMethod, intent)) {
+            is PaymentConfirmationDefinition.ConfirmationAction.Launch -> withPaymentLauncher { launcher ->
+                deferredIntentConfirmationType = action.deferredIntentConfirmationType
 
-        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+                storeIsAwaitingForPaymentResult()
 
-        when (nextStep) {
-            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                handleNextAction(
-                    clientSecret = nextStep.clientSecret,
-                    stripeIntent = intent,
+                intentConfirmationDefinition.launch(
+                    launcher = launcher,
+                    arguments = action.launcherArguments,
+                    confirmationOption = paymentMethod,
+                    intent = intent,
                 )
             }
-            is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                confirmStripeIntent(nextStep.confirmParams)
-            }
-            is IntentConfirmationInterceptor.NextStep.Fail -> {
+            is PaymentConfirmationDefinition.ConfirmationAction.Fail -> {
                 onIntentResult(
                     PaymentConfirmationResult.Failed(
-                        cause = nextStep.cause,
-                        message = nextStep.message,
+                        cause = action.cause,
+                        message = action.message,
                         type = PaymentConfirmationErrorType.Internal,
                     )
                 )
             }
-            is IntentConfirmationInterceptor.NextStep.Complete -> {
+            is PaymentConfirmationDefinition.ConfirmationAction.Complete -> {
                 onIntentResult(
                     PaymentConfirmationResult.Succeeded(
                         intent = intent,
-                        deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType,
+                        confirmationOption = paymentMethod,
+                        deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     )
                 )
-            }
-        }
-    }
-
-    private fun handleNextAction(
-        clientSecret: String,
-        stripeIntent: StripeIntent,
-    ) = withPaymentLauncher { launcher ->
-        /*
-         * In case of process death, we should store that we waiting for a payment result to return from a
-         * payment confirmation activity
-         */
-        storeIsAwaitingForPaymentResult()
-
-        when (stripeIntent) {
-            is PaymentIntent -> {
-                launcher.handleNextActionForPaymentIntent(clientSecret)
-            }
-            is SetupIntent -> {
-                launcher.handleNextActionForSetupIntent(clientSecret)
-            }
-        }
-    }
-
-    private fun confirmStripeIntent(
-        confirmStripeIntentParams: ConfirmStripeIntentParams
-    ) = withPaymentLauncher { launcher ->
-        /*
-         * In case of process death, we should store that we waiting for a payment result to return from a
-         * payment confirmation activity
-         */
-        storeIsAwaitingForPaymentResult()
-
-        when (confirmStripeIntentParams) {
-            is ConfirmPaymentIntentParams -> {
-                launcher.confirm(confirmStripeIntentParams)
-            }
-            is ConfirmSetupIntentParams -> {
-                launcher.confirm(confirmStripeIntentParams)
             }
         }
     }
@@ -492,18 +453,25 @@ internal class IntentConfirmationHandler(
     }
 
     private fun onPaymentResult(result: InternalPaymentResult) {
-        val intentResult = when (result) {
-            is InternalPaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
-                intent = result.intent,
-                deferredIntentConfirmationType = deferredIntentConfirmationType
+        val intentResult = runCatching {
+            val arguments = currentArguments ?: throw IllegalStateException(
+                "Arguments should have been initialized before handling payment result!"
             )
-            is InternalPaymentResult.Failed -> PaymentConfirmationResult.Failed(
-                cause = result.throwable,
-                message = result.throwable.stripeErrorMessage(),
-                type = PaymentConfirmationErrorType.Payment,
+
+            val intentConfirmationOption = arguments.confirmationOption as? PaymentConfirmationOption.PaymentMethod
+                ?: throw IllegalStateException("Cannot confirm intent with non payment method confirmation option")
+
+            intentConfirmationDefinition.toPaymentConfirmationResult(
+                confirmationOption = intentConfirmationOption,
+                intent = arguments.intent,
+                result = result,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
-            is InternalPaymentResult.Canceled -> PaymentConfirmationResult.Canceled(
-                action = PaymentCancellationAction.InformCancellation
+        }.getOrElse { cause ->
+            PaymentConfirmationResult.Failed(
+                cause = cause,
+                message = cause.stripeErrorMessage(),
+                type = PaymentConfirmationErrorType.ExternalPaymentMethod,
             )
         }
 
@@ -552,7 +520,8 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is PaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
                     intent = arguments.intent,
-                    deferredIntentConfirmationType = null
+                    confirmationOption = arguments.confirmationOption,
+                    deferredIntentConfirmationType = null,
                 )
                 is PaymentResult.Failed -> PaymentConfirmationResult.Failed(
                     cause = result.throwable,
