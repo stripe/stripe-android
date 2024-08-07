@@ -55,30 +55,29 @@ class IntentConfirmationDefinitionTest {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
             )
 
+            val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_123")
+            val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            val shippingDetails = AddressDetails(name = "John Doe")
+
             definition.action(
                 confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                        clientSecret = "pi_123"
-                    ),
-                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    initializationMode = initializationMode,
+                    createParams = createParams,
                     optionsParams = null,
-                    shippingDetails = AddressDetails(name = "John Doe"),
+                    shippingDetails = shippingDetails,
                     shouldSave = true,
                 ),
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             )
 
-            assertThat(intentConfirmationInterceptor.calls.awaitItem()).isEqualTo(
-                FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                        clientSecret = "pi_123"
-                    ),
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    paymentMethodOptionsParams = null,
-                    shippingValues = AddressDetails(name = "John Doe").toConfirmPaymentIntentShipping(),
-                    customerRequestedSave = true,
-                )
-            )
+            val result = intentConfirmationInterceptor
+                .await<FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod>()
+
+            assertThat(result.initializationMode).isEqualTo(initializationMode)
+            assertThat(result.paymentMethodCreateParams).isEqualTo(createParams)
+            assertThat(result.paymentMethodOptionsParams).isNull()
+            assertThat(result.shippingValues).isEqualTo(shippingDetails.toConfirmPaymentIntentShipping())
+            assertThat(result.customerRequestedSave).isTrue()
         }
 
     @Test
@@ -92,22 +91,21 @@ class IntentConfirmationDefinitionTest {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
             )
 
+            val confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION
+
             definition.action(
-                confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+                confirmationOption = confirmationOption,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             )
 
-            assertThat(intentConfirmationInterceptor.calls.awaitItem()).isEqualTo(
-                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                        clientSecret = "pi_123"
-                    ),
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                        cvc = "505",
-                    ),
-                    shippingValues = AddressDetails(name = "John Doe").toConfirmPaymentIntentShipping(),
-                )
+            val result = intentConfirmationInterceptor
+                .await<FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod>()
+
+            assertThat(result.initializationMode).isEqualTo(confirmationOption.initializationMode)
+            assertThat(result.paymentMethod).isEqualTo(confirmationOption.paymentMethod)
+            assertThat(result.paymentMethodOptionsParams).isEqualTo(confirmationOption.optionsParams)
+            assertThat(result.shippingValues).isEqualTo(
+                confirmationOption.shippingDetails?.toConfirmPaymentIntentShipping()
             )
         }
 
@@ -126,13 +124,11 @@ class IntentConfirmationDefinitionTest {
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
 
-        assertThat(action).isEqualTo(
-            PaymentConfirmationDefinition.ConfirmationAction.Complete<IntentConfirmationDefinition.Args>(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-            )
-        )
+        val completeAction = action.asComplete()
+
+        assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        assertThat(completeAction.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
+        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
     @Test
@@ -156,13 +152,11 @@ class IntentConfirmationDefinitionTest {
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
 
-        assertThat(action).isEqualTo(
-            PaymentConfirmationDefinition.ConfirmationAction.Fail<IntentConfirmationDefinition.Args>(
-                cause = cause,
-                message = message.resolvableString,
-                errorType = PaymentConfirmationErrorType.Internal,
-            )
-        )
+        val failAction = action.asFail()
+
+        assertThat(failAction.cause).isEqualTo(cause)
+        assertThat(failAction.message).isEqualTo(message.resolvableString)
+        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
     }
 
     @Test
@@ -180,14 +174,14 @@ class IntentConfirmationDefinitionTest {
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
 
-        assertThat(action).isEqualTo(
-            PaymentConfirmationDefinition.ConfirmationAction.Launch<IntentConfirmationDefinition.Args>(
-                launcherArguments = IntentConfirmationDefinition.Args.NextAction(
-                    clientSecret = "pi_123"
-                ),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+        val launchAction = action.asLaunch()
+
+        assertThat(launchAction.launcherArguments).isEqualTo(
+            IntentConfirmationDefinition.Args.NextAction(
+                clientSecret = "pi_123"
             )
         )
+        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
     @Test
@@ -210,14 +204,14 @@ class IntentConfirmationDefinitionTest {
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
         )
 
-        assertThat(action).isEqualTo(
-            PaymentConfirmationDefinition.ConfirmationAction.Launch<IntentConfirmationDefinition.Args>(
-                launcherArguments = IntentConfirmationDefinition.Args.Confirm(
-                    confirmNextParams = confirmParams,
-                ),
-                deferredIntentConfirmationType = null,
+        val launchAction = action.asLaunch()
+
+        assertThat(launchAction.launcherArguments).isEqualTo(
+            IntentConfirmationDefinition.Args.Confirm(
+                confirmNextParams = confirmParams,
             )
         )
+        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -325,12 +319,10 @@ class IntentConfirmationDefinitionTest {
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
 
-        assertThat(result).isEqualTo(
-            PaymentConfirmationResult.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            ),
-        )
+        val succeededResult = result.asSucceeded()
+
+        assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
+        assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
@@ -350,13 +342,11 @@ class IntentConfirmationDefinitionTest {
             result = InternalPaymentResult.Failed(exception),
         )
 
-        assertThat(result).isEqualTo(
-            PaymentConfirmationResult.Failed(
-                cause = exception,
-                message = R.string.stripe_something_went_wrong.resolvableString,
-                type = PaymentConfirmationErrorType.Payment,
-            ),
-        )
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+        assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Payment)
     }
 
     @Test
@@ -374,11 +364,9 @@ class IntentConfirmationDefinitionTest {
             result = InternalPaymentResult.Canceled,
         )
 
-        assertThat(result).isEqualTo(
-            PaymentConfirmationResult.Canceled(
-                action = PaymentCancellationAction.InformCancellation,
-            ),
-        )
+        val canceledResult = result.asCanceled()
+
+        assertThat(canceledResult.action).isEqualTo(PaymentCancellationAction.InformCancellation)
     }
 
     private fun createIntentConfirmationDefinition(
@@ -389,6 +377,38 @@ class IntentConfirmationDefinitionTest {
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = { paymentLauncher }
         )
+    }
+
+    private suspend inline fun <reified T : FakeIntentConfirmationInterceptor.InterceptCall>
+        FakeIntentConfirmationInterceptor.await(): T {
+        return calls.awaitItem() as T
+    }
+
+    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asComplete():
+        PaymentConfirmationDefinition.ConfirmationAction.Complete<T> {
+        return this as PaymentConfirmationDefinition.ConfirmationAction.Complete<T>
+    }
+
+    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asFail():
+        PaymentConfirmationDefinition.ConfirmationAction.Fail<T> {
+        return this as PaymentConfirmationDefinition.ConfirmationAction.Fail<T>
+    }
+
+    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asLaunch():
+        PaymentConfirmationDefinition.ConfirmationAction.Launch<T> {
+        return this as PaymentConfirmationDefinition.ConfirmationAction.Launch<T>
+    }
+
+    private fun PaymentConfirmationResult.asSucceeded(): PaymentConfirmationResult.Succeeded {
+        return this as PaymentConfirmationResult.Succeeded
+    }
+
+    private fun PaymentConfirmationResult.asFailed(): PaymentConfirmationResult.Failed {
+        return this as PaymentConfirmationResult.Failed
+    }
+
+    private fun PaymentConfirmationResult.asCanceled(): PaymentConfirmationResult.Canceled {
+        return this as PaymentConfirmationResult.Canceled
     }
 
     private companion object {
