@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -132,6 +133,10 @@ class LinkAccountPickerViewModelTest {
         navigationManager.assertNavigatedTo(
             destination = Pane.LINK_LOGIN.destination,
             pane = Pane.LINK_ACCOUNT_PICKER,
+            popUpTo = PopUpToBehavior.Route(
+                route = Pane.CONSENT.destination.fullRoute,
+                inclusive = true,
+            ),
         )
     }
 
@@ -153,6 +158,10 @@ class LinkAccountPickerViewModelTest {
         navigationManager.assertNavigatedTo(
             destination = Pane.INSTITUTION_PICKER.destination,
             pane = Pane.LINK_ACCOUNT_PICKER,
+            popUpTo = PopUpToBehavior.Route(
+                route = Pane.CONSENT.destination.fullRoute,
+                inclusive = true,
+            ),
         )
     }
 

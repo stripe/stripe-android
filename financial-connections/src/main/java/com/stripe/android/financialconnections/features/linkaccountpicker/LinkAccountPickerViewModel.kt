@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
@@ -138,8 +139,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             LinkAccountPickerState::payload,
             onSuccess = { payload ->
                 if (payload.accounts.isEmpty()) {
-                    val nextPane = payload.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
-                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
+                    skipToNextPane(payload)
                 }
             },
             onFail = { error ->
@@ -162,6 +162,19 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     pane = PANE
                 )
             },
+        )
+    }
+
+    private fun skipToNextPane(payload: LinkAccountPickerState.Payload) {
+        val nextPane = payload.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
+
+        navigationManager.tryNavigateTo(
+            route = nextPane.destination(referrer = PANE),
+            popUpTo = PopUpToBehavior.Route(
+                // Prevent back navigation, since we're only showing an empty list
+                route = Pane.CONSENT.destination.fullRoute,
+                inclusive = true,
+            ),
         )
     }
 
