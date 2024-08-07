@@ -43,7 +43,8 @@ internal fun PaymentMethodRowButton(
         isClickable = isClickable,
         onClick = onClick,
         contentPaddingValues = PaddingValues(horizontal = 12.dp, vertical = contentPaddingValues),
-        modifier = modifier.fillMaxWidth().heightIn(48.dp),
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),

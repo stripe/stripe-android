@@ -54,7 +54,7 @@
   <!-- Klarna mandate text -->
   <string name="stripe_klarna_mandate">By continuing to Klarna, you allow %1$s to charge your Klarna account for future payments in accordance with their terms and Klarna\'s terms. You can change this at any time in your Klarna app or by reaching out to %2$s.</string>
   <!-- Klarna pay later copy -->
-  <string name="stripe_klarna_pay_later">Pay later with Klarna.</string>
+  <string name="stripe_klarna_pay_later">Pay later with Klarna</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Phone</string>
   <!-- Label for name on card field -->
@@ -65,6 +65,8 @@
   <string name="stripe_pay_button_amount">Pay %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">Add card</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
   <string name="stripe_paymentsheet_add_new_card">Add new card</string>
   <!-- Card details entry form header title -->

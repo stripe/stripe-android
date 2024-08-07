@@ -249,8 +249,7 @@ internal class IntentConfirmationHandler(
             onIntentResult(
                 PaymentConfirmationResult.Failed(
                     cause = IllegalStateException(
-                        "Attempted to confirm invalid " +
-                            "${confirmationOption?.let { it::class.java } ?: "null"} confirmation type"
+                        "Attempted to confirm invalid ${confirmationOption::class.qualifiedName} confirmation type"
                     ),
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = PaymentConfirmationErrorType.Internal,
@@ -692,7 +691,7 @@ internal class IntentConfirmationHandler(
     @Parcelize
     internal data class Args(
         val intent: StripeIntent,
-        val confirmationOption: PaymentConfirmationOption?
+        val confirmationOption: PaymentConfirmationOption
     ) : Parcelable
 
     /**

@@ -13,6 +13,7 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
@@ -103,18 +104,29 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun detachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
-        paymentMethodId: String
-    ): Result<PaymentMethod> =
-        stripeRepository.detachPaymentMethod(
-            productUsageTokens = productUsageTokens,
-            paymentMethodId = paymentMethodId,
-            requestOptions = ApiRequest.Options(
-                apiKey = customerInfo.ephemeralKeySecret,
-                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+        paymentMethodId: String,
+        canRemoveDuplicates: Boolean
+    ): Result<PaymentMethod> {
+        val result = if (canRemoveDuplicates) {
+            detachPaymentMethodAndDuplicates(
+                customerInfo,
+                paymentMethodId
             )
-        ).onFailure {
+        } else {
+            stripeRepository.detachPaymentMethod(
+                productUsageTokens = productUsageTokens,
+                paymentMethodId = paymentMethodId,
+                requestOptions = ApiRequest.Options(
+                    apiKey = customerInfo.ephemeralKeySecret,
+                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                )
+            )
+        }
+
+        return result.onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
         }
+    }
 
     override suspend fun attachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
@@ -181,5 +193,94 @@ internal class CustomerApiRepository @Inject constructor(
 
             "${card?.last4}-${card?.expiryMonth}-${card?.expiryYear}-${card?.brand?.code}"
         }
+    }
+
+    /**
+     * Removes the provided saved payment method alongside any duplicate stored payment methods. This logic removes
+     * removes all the duplicates first before attempting to remove the requested payment method. We will only return
+     * the result of the requested payment method since it is the main payment method that we are trying to remove.
+     *
+     * This function should eventually be replaced by an endpoint that does this logic in the backend.
+     *
+     * @param customerInfo authentication information that can perform detaching operations.
+     * @param paymentMethodId the id of the payment method to remove and to compare with for stored duplicates
+     *
+     * @return a result containing the requested payment method to remove
+     */
+    private suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
+        customerInfo: CustomerRepository.CustomerInfo,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
+        val paymentMethods = getPaymentMethods(
+            customerInfo = customerInfo,
+            // We only support removing duplicate cards.
+            types = listOf(PaymentMethod.Type.Card),
+            silentlyFail = false,
+        ).getOrElse {
+            return Result.failure(it)
+        }
+
+        val requestedPaymentMethodToRemove = paymentMethods.find { paymentMethod ->
+            paymentMethod.id == paymentMethodId
+        } ?: run {
+            /*
+             * If we don't find the requested payment method in the retrieved list, attempt remove it anyways. It
+             * could be that the payment method is not a card but a saved US Bank Account or SEPA Debit PM.
+             */
+            return@with detachPaymentMethod(
+                customerInfo = customerInfo,
+                paymentMethodId = paymentMethodId,
+                canRemoveDuplicates = false,
+            )
+        }
+
+        /*
+         * Find all duplicate payment methods except for the original payment method we are attempting to remove. The
+         * original payment method will be removed last.
+         */
+        val paymentMethodsToRemove = paymentMethods.filter { paymentMethod ->
+            paymentMethod.type == PaymentMethod.Type.Card &&
+                paymentMethod.card?.fingerprint == requestedPaymentMethodToRemove.card?.fingerprint &&
+                paymentMethod.id != paymentMethodId
+        }
+
+        val failureResults = mutableListOf<DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure>()
+
+        /*
+         * Removes all the payment methods asynchronously, improving the overall performance of this function.
+         */
+        val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
+            async {
+                val paymentMethodIdToRemove = paymentMethod.id
+
+                paymentMethodIdToRemove?.let { id ->
+                    detachPaymentMethod(
+                        customerInfo = customerInfo,
+                        paymentMethodId = id,
+                        canRemoveDuplicates = false,
+                    ).onFailure { exception ->
+                        failureResults.add(
+                            DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
+                                paymentMethodId = id,
+                                exception = exception,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        paymentMethodAsyncRemovals.awaitAll()
+
+        if (failureResults.isNotEmpty()) {
+            return Result.failure(DuplicatePaymentMethodDetachFailureException(failureResults))
+        }
+
+        // Remove the original payment method
+        return detachPaymentMethod(
+            customerInfo = customerInfo,
+            paymentMethodId = paymentMethodId,
+            canRemoveDuplicates = false,
+        )
     }
 }

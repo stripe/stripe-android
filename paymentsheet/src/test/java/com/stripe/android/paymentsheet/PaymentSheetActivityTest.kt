@@ -1122,6 +1122,7 @@ internal class PaymentSheetActivityTest {
                     logger = FakeUserFacingLogger(),
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
+                errorReporter = FakeErrorReporter(),
             )
         }
     }

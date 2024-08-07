@@ -124,6 +124,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        customerStateHolder = customerStateHolder,
                     )
                     PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                 },

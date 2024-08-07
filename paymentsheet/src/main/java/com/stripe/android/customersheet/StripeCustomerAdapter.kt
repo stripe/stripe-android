@@ -107,7 +107,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
-                paymentMethodId = paymentMethodId
+                paymentMethodId = paymentMethodId,
+                canRemoveDuplicates = false,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

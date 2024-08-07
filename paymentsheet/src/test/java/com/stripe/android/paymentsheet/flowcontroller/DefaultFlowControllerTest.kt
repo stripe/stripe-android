@@ -37,6 +37,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -720,6 +721,52 @@ internal class DefaultFlowControllerTest {
             paymentSelection.paymentMethodCreateParams,
             PaymentMethodOptionsParams.USBankAccount()
         )
+    }
+
+    @Test
+    fun `confirmPaymentSelection() with null payment selection, should report event and return failure`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val flowController = createFlowController(
+            paymentSelection = null,
+            errorReporter = errorReporter,
+        )
+
+        flowController.configureExpectingSuccess()
+
+        flowController.confirmPaymentSelection(
+            paymentSelection = null,
+            state = PAYMENT_SHEET_STATE_FULL,
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).contains(
+            "unexpected_error.flow_controller.no_payment_selection"
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
+    }
+
+    @Test
+    fun `confirm() with invalid payment selection, should report event and return failure`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val flowController = createFlowController(
+            paymentSelection = null,
+            errorReporter = errorReporter,
+        )
+
+        flowController.configureExpectingSuccess()
+
+        flowController.confirmPaymentSelection(
+            paymentSelection = PaymentSelection.Link,
+            state = PAYMENT_SHEET_STATE_FULL,
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).contains(
+            "unexpected_error.flow_controller.invalid_payment_selection"
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
     }
 
     @Test
@@ -2147,7 +2194,8 @@ internal class DefaultFlowControllerTest {
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
-        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
+        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -2158,7 +2206,8 @@ internal class DefaultFlowControllerTest {
             ),
             viewModel,
             bacsMandateConfirmationLauncherFactory,
-            cvcRecollectionLauncherFactory
+            cvcRecollectionLauncherFactory,
+            errorReporter
         )
     }
 
@@ -2166,7 +2215,8 @@ internal class DefaultFlowControllerTest {
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
-        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
+        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
@@ -2200,7 +2250,7 @@ internal class DefaultFlowControllerTest {
             paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-        errorReporter = FakeErrorReporter(),
+        errorReporter = errorReporter,
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
@@ -2256,6 +2306,17 @@ internal class DefaultFlowControllerTest {
         )
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
+
+        private val PAYMENT_SHEET_STATE_FULL = PaymentSheetState.Full(
+            PaymentSheetFixtures.CONFIG_CUSTOMER,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = PAYMENT_METHODS
+            ),
+            linkState = null,
+            paymentSelection = null,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        )
 
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")

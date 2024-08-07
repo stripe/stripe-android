@@ -41,6 +41,7 @@ internal data class PaymentMethodMetadata(
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val hasCustomerConfiguration: Boolean,
     val isGooglePayReady: Boolean,
+    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -154,9 +155,12 @@ internal data class PaymentMethodMetadata(
 
     fun formHeaderInformationForCode(
         code: String,
+        customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation()
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
+            )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
@@ -164,6 +168,7 @@ internal data class PaymentMethodMetadata(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
             )
         }
     }
@@ -217,6 +222,7 @@ internal data class PaymentMethodMetadata(
                 hasCustomerConfiguration = configuration.customer != null,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 isGooglePayReady = isGooglePayReady,
             )
         }
@@ -246,6 +252,7 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 externalPaymentMethodSpecs = emptyList(),
             )
         }

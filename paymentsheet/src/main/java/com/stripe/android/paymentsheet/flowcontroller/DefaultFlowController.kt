@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.UserFacingLogger
@@ -390,18 +392,43 @@ internal class DefaultFlowController @Inject internal constructor(
         state: PaymentSheetState.Full,
     ) {
         viewModelScope.launch {
-            val stripeIntent = requireNotNull(state.stripeIntent)
             val initializationMode = requireNotNull(initializationMode)
 
-            intentConfirmationHandler.start(
-                arguments = IntentConfirmationHandler.Args(
-                    confirmationOption = paymentSelection?.toPaymentConfirmationOption(
-                        initializationMode = initializationMode,
-                        configuration = state.config,
-                    ),
-                    intent = stripeIntent,
-                )
+            val confirmationOption = paymentSelection?.toPaymentConfirmationOption(
+                initializationMode = initializationMode,
+                configuration = state.config,
             )
+
+            confirmationOption?.let { option ->
+                val stripeIntent = requireNotNull(state.stripeIntent)
+
+                intentConfirmationHandler.start(
+                    arguments = IntentConfirmationHandler.Args(
+                        confirmationOption = option,
+                        intent = stripeIntent,
+                    )
+                )
+            } ?: run {
+                val message = paymentSelection?.let {
+                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
+                } ?: "Cannot confirm without a payment selection!"
+
+                val exception = IllegalStateException(message)
+
+                val event = paymentSelection?.let {
+                    ErrorReporter.UnexpectedErrorEvent.FLOW_CONTROLLER_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+                } ?: ErrorReporter.UnexpectedErrorEvent.FLOW_CONTROLLER_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+                errorReporter.report(event, StripeException.create(exception))
+
+                onIntentResult(
+                    PaymentConfirmationResult.Failed(
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
+                        type = PaymentConfirmationErrorType.Internal,
+                    )
+                )
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,7 @@ internal fun NewPaymentMethodTab(
             end = PaymentMethodUISpacing.cardPadding,
             top = PaymentMethodUISpacing.cardPadding,
         ),
+        verticalArrangement = Arrangement.Top,
         modifier = modifier
             .height(60.dp)
             .widthIn(min = minViewWidth),

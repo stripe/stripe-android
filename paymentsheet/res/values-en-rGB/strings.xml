@@ -92,7 +92,7 @@
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Saved</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+  <string name="stripe_paymentsheet_select_your_payment_method">Select your payment method</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Generic failure message -->

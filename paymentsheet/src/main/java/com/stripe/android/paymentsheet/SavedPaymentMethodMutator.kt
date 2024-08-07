@@ -139,7 +139,8 @@ internal class SavedPaymentMethodMutator(
                 id = currentCustomer.id,
                 ephemeralKeySecret = currentCustomer.ephemeralKeySecret
             ),
-            paymentMethodId
+            paymentMethodId,
+            currentCustomer.permissions.canRemoveDuplicates,
         )
     }
 

@@ -121,7 +121,7 @@ internal sealed interface PaymentSheetScreen {
                 if (isCompleteFlow && isWalletEnabled) {
                     null
                 } else {
-                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
+                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
                 }
             )
         }
@@ -370,7 +370,7 @@ internal sealed interface PaymentSheetScreen {
                 val title = if (state.isEditing) {
                     R.string.stripe_paymentsheet_manage_payment_methods
                 } else {
-                    R.string.stripe_paymentsheet_select_payment_method
+                    R.string.stripe_paymentsheet_select_your_payment_method
                 }
 
                 title.resolvableString

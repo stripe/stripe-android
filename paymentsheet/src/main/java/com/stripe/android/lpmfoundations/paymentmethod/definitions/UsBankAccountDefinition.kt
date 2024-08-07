@@ -39,7 +39,7 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         darkThemeIconUrl = null,
     )
 
-    override fun createFormHeaderInformation(): FormHeaderInformation {
+    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
         return createSupportedPaymentMethod().asFormHeaderInformation().copy(
             displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
