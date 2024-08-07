@@ -172,7 +172,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.consumerSignUp(
             "email",
