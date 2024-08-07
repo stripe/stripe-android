@@ -155,9 +155,12 @@ internal data class PaymentMethodMetadata(
 
     fun formHeaderInformationForCode(
         code: String,
+        customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation()
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
+            )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
@@ -165,6 +168,7 @@ internal data class PaymentMethodMetadata(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
             )
         }
     }
