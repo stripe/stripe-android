@@ -1,21 +1,21 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.ConsumerFixtures
-import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails2
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class ConsumerPaymentDetailsJsonParserTest {
+class ConsumerPaymentDetails2JsonParserTest {
 
     @Test
     fun `parse single card payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON),
-            ConsumerPaymentDetails(
+            ConsumerPaymentDetails2(
                 listOf(
-                    ConsumerPaymentDetails.Card(
+                    ConsumerPaymentDetails2.Card(
                         id = "QAAAKJ6",
                         last4 = "4444",
                     )
@@ -27,11 +27,11 @@ class ConsumerPaymentDetailsJsonParserTest {
     @Test
     fun `parse single bank account payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(ConsumerFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON),
-            ConsumerPaymentDetails(
+            ConsumerPaymentDetails2(
                 listOf(
-                    ConsumerPaymentDetails.BankAccount(
+                    ConsumerPaymentDetails2.BankAccount(
                         id = "wAAACGA",
                         last4 = "6789"
                     )
@@ -43,18 +43,18 @@ class ConsumerPaymentDetailsJsonParserTest {
     @Test
     fun `parse multiple payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser().parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
-            ConsumerPaymentDetails(
+            ConsumerPaymentDetailsJsonParser.parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
+            ConsumerPaymentDetails2(
                 listOf(
-                    ConsumerPaymentDetails.Card(
+                    ConsumerPaymentDetails2.Card(
                         id = "QAAAKJ6",
                         last4 = "4444",
                     ),
-                    ConsumerPaymentDetails.Card(
+                    ConsumerPaymentDetails2.Card(
                         id = "QAAAKIL",
                         last4 = "4242",
                     ),
-                    ConsumerPaymentDetails.BankAccount(
+                    ConsumerPaymentDetails2.BankAccount(
                         id = "wAAACGA",
                         last4 = "6789"
                     )
@@ -134,15 +134,15 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
 
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(json),
-            ConsumerPaymentDetails(
+            ConsumerPaymentDetails2(
                 listOf(
-                    ConsumerPaymentDetails.Card(
+                    ConsumerPaymentDetails2.Card(
                         id = "QAAAKJ6",
                         last4 = "4444",
                     ),
-                    ConsumerPaymentDetails.Card(
+                    ConsumerPaymentDetails2.Card(
                         id = "QAAAKIL",
                         last4 = "4242",
                     )

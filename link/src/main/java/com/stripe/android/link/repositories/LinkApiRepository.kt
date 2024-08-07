@@ -7,9 +7,9 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkScope
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
+import com.stripe.android.model.ConsumerPaymentDetails2
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -80,17 +80,21 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
-        stripeRepository.createPaymentDetails(
-            consumerSessionClientSecret = consumerSessionClientSecret,
-            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
-                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
-                email = userEmail,
-            ),
-            active = active,
-            requestOptions = buildRequestOptions(consumerPublishableKey),
-        ).mapCatching {
+        // TODO: Result<T>
+        runCatching {
+            consumersApiService.createPaymentDetails(
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams2.Card(
+                    cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
+                    email = userEmail,
+                    active = active,
+                ),
+                requestSurface = REQUEST_SURFACE,
+                requestOptions = buildRequestOptions(consumerPublishableKey),
+            )
+        }.mapCatching {
             val paymentDetails = it.paymentDetails.first()
-            val extraParams = extraConfirmationParams(paymentMethodCreateParams)
+            val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
 
             val createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
@@ -117,20 +121,22 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
-            extraParams = mapOf("payment_method_options" to extraConfirmationParams(paymentMethodCreateParams)),
+            extraParams = mapOf(
+                "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+            ),
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { passthroughModePaymentMethodId ->
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                paymentDetails = ConsumerPaymentDetails2.Passthrough(
                     id = passthroughModePaymentMethodId,
                     last4 = last4,
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams)
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
                 ),
             )
         }

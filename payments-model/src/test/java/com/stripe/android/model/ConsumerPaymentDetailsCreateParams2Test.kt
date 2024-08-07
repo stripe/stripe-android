@@ -3,13 +3,13 @@ package com.stripe.android.model
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class ConsumerPaymentDetailsCreateParamsTest {
+class ConsumerPaymentDetailsCreateParams2Test {
 
     @Test
     fun createCardParams_generatesCorrectParameters() {
         assertThat(
-            ConsumerPaymentDetailsCreateParams.Card(
-                mapOf(
+            ConsumerPaymentDetailsCreateParams2.Card(
+                cardPaymentMethodCreateParamsMap = mapOf(
                     "ignored" to "none",
                     "card" to mapOf(
                         "number" to "123",
@@ -26,7 +26,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                         )
                     )
                 ),
-                "email@stripe.com"
+                email = "email@stripe.com",
+                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -40,7 +41,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                 "billing_address" to mapOf(
                     "country_code" to "US",
                     "postal_code" to "12345"
-                )
+                ),
+                "active" to false,
             )
         )
     }

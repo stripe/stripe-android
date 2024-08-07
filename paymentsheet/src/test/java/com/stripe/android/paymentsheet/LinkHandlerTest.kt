@@ -20,7 +20,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails2
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -349,7 +349,7 @@ class LinkHandlerTest {
         linkConfiguration = defaultLinkConfiguration().copy(passthroughModeEnabled = true),
         attachNewCardToAccountResult = Result.success(
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                paymentDetails = ConsumerPaymentDetails2.Passthrough(
                     id = "pm_123",
                     last4 = "4242"
                 ),
@@ -599,7 +599,7 @@ private fun runLinkInlineTest(
     ),
     attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
-            paymentDetails = ConsumerPaymentDetails.Card(
+            paymentDetails = ConsumerPaymentDetails2.Card(
                 id = "pm_123",
                 last4 = "4242",
             ),

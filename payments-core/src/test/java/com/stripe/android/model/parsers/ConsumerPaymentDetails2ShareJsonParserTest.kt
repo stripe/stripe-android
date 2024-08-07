@@ -5,7 +5,7 @@ import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsShare
 import org.junit.Test
 
-internal class ConsumerPaymentDetailsShareJsonParserTest {
+internal class ConsumerPaymentDetails2ShareJsonParserTest {
     @Test
     fun `parse result`() {
         assertThat(

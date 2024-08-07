@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams2
 import org.junit.Test
 
 class SupportedPaymentMethodTest {
@@ -25,8 +25,11 @@ class SupportedPaymentMethodTest {
         )
 
         assertThat(
-            ConsumerPaymentDetailsCreateParams.Card(paymentMethodCreateParams, "email@test.com")
-                .toParamMap()
+            ConsumerPaymentDetailsCreateParams2.Card(
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
+                email = "email@test.com",
+                active = false,
+            ).toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "card",
@@ -39,7 +42,8 @@ class SupportedPaymentMethodTest {
                 "billing_address" to mapOf(
                     "country_code" to "US",
                     "postal_code" to "12345"
-                )
+                ),
+                "active" to false,
             )
         )
     }
