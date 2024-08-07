@@ -57,7 +57,7 @@ private const val LINK_DIVIDER_ID = "LinkDivider"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_PAY_WITH_FONT_SIZE = 21
-private const val LINK_EMAIL_FONT_SIZE = 18
+private const val LINK_EMAIL_FONT_SIZE = 16
 
 private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
 
