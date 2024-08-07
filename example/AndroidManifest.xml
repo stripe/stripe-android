@@ -42,7 +42,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.TestCBCActivity" />
         <activity android:name=".activity.CreateCardTokenActivity" />
         <activity android:name=".activity.CreateCardSourceActivity" />
         <activity android:name=".activity.CustomerSessionActivity" />

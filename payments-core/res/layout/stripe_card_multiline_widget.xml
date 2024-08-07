@@ -28,7 +28,7 @@
 
         </com.stripe.android.view.CardNumberTextInputLayout>
 
-        <com.stripe.android.view.CardBrandViewRebuild
+        <com.stripe.android.view.CardBrandView
             android:id="@+id/card_brand_view"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/stripe_card_brand_view_height"

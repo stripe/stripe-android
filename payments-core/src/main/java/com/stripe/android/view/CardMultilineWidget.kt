@@ -58,7 +58,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val cardNumberEditText = viewBinding.etCardNumber
 
-    internal val cardBrandView: CardBrandViewRebuild = viewBinding.cardBrandView
+    internal val cardBrandView: CardBrandView = viewBinding.cardBrandView
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val expiryDateEditText = viewBinding.etExpiry
