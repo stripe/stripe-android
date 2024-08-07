@@ -114,7 +114,7 @@ class CardAccountRangeService(
     }
 
     private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        val shouldQuery =  accountRange == null ||
+        val shouldQuery = accountRange == null ||
             cardNumber.bin == null ||
             accountRange?.binRange?.matches(cardNumber) == false ||
             cardNumber.bin != lastBin

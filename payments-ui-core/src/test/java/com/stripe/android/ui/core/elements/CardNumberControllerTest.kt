@@ -337,8 +337,9 @@ internal class CardNumberControllerTest {
                 )
             )
             cardNumberController.onValueChange("400000250000100")
-            skipItems(3)
+            skipItems(4)
             cardNumberController.onValueChange("4000002500001001")
+            skipItems(1)
             idleLooper()
             assertThat(awaitItem() as TextFieldIcon.Dropdown)
                 .isEqualTo(
