@@ -24,14 +24,14 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.exception.UnclassifiedError
-import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState
-import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.PartnerAuth
-import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.Repair
-import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.PartnerAuth
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.Repair
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -74,7 +74,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val acceptConsent: AcceptConsent,
     private val presentSheet: PresentSheet,
-    private val presentUpdateRequiredSheet: PresentAccountUpdateRequiredSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -341,62 +340,45 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         }
     }
 
-    sealed interface DrawerPayload {
-        data class Generic(val content: FinancialConnectionsGenericInfoScreen) : DrawerPayload
-        data class UpdateRequired(val content: AccountUpdateRequiredState.Payload) : DrawerPayload
-    }
-
     private fun PartnerAccount.computeDrawerPayload(
         payload: LinkAccountPickerState.Payload
-    ): DrawerPayload? {
+    ): NoticeSheetState.NoticeSheetContent? {
         val drawerOnSelection = payload.accounts.firstOrNull { it.account.id == id }
             ?.display?.drawerOnSelection
-            ?.let(DrawerPayload::Generic)
-        val updateRequired = drawerOnSelection?.content
+        val updateRequired = drawerOnSelection
             // Use selected account icon (not coming on the SDU response as selection is not known by backend)
             ?.withIcon(institution?.icon?.default)
             ?.let { genericContent ->
-            when (nextPaneOnSelection) {
-                BANK_AUTH_REPAIR -> AccountUpdateRequiredState.Payload(
-                    generic = genericContent,
-                    type = Repair(
-                        authorization = authorization?.let { payload.partnerToCoreAuths?.getValue(it) },
-                    ),
-                )
-                PARTNER_AUTH -> AccountUpdateRequiredState.Payload(
-                    generic = genericContent,
-                    type = PartnerAuth(
-                        institution = institution,
-                    ),
-                )
-                else -> null
+                when (nextPaneOnSelection) {
+                    BANK_AUTH_REPAIR -> UpdateRequired(
+                        generic = genericContent,
+                        type = Repair(
+                            authorization = authorization?.let { payload.partnerToCoreAuths?.getValue(it) },
+                        ),
+                    )
+                    PARTNER_AUTH -> UpdateRequired(
+                        generic = genericContent,
+                        type = PartnerAuth(
+                            institution = institution,
+                        ),
+                    )
+                    else -> null
+                }
             }
-        }?.let { DrawerPayload.UpdateRequired(it) }
 
         // [updateRequired] has to be checked before [drawerOnSelection].
         // The update required modal basically uses [drawerOnSelection] to render content,
         // and has specific logic handling for CTAs).
-        return updateRequired ?: drawerOnSelection
+        return updateRequired ?: drawerOnSelection?.let(::Generic)
     }
 
-    private fun DrawerPayload.present() = when (this) {
-        is DrawerPayload.UpdateRequired -> {
-            logUpdateRequired(content)
-            presentUpdateRequiredSheet(
-                content,
-                referrer = PANE,
-            )
-        }
-        is DrawerPayload.Generic -> {
-            presentSheet(
-                content = Generic(content),
-                referrer = PANE,
-            )
-        }
+    private fun NoticeSheetState.NoticeSheetContent.present() {
+        if (this is UpdateRequired) logUpdateRequired(type)
+        presentSheet(this, referrer = PANE)
     }
 
-    private fun logUpdateRequired(state: AccountUpdateRequiredState.Payload) {
-        val eventName = when (state.type) {
+    private fun logUpdateRequired(type: UpdateRequired.Type) {
+        val eventName = when (type) {
             is PartnerAuth -> "click.supportability_account"
             is Repair -> "click.repair_accounts"
         }

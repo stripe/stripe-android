@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections.features.accountupdate
 
-import FinancialConnectionsGenericInfoScreen
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -14,6 +12,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.UnclassifiedError
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -27,7 +26,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     @Assisted initialState: AccountUpdateRequiredState,
@@ -59,10 +57,10 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val referrer = state.referrer
             when (val type = requireNotNull(state.payload()?.type)) {
-                is AccountUpdateRequiredState.Type.Repair -> {
+                is UpdateRequired.Type.Repair -> {
                     handleUnsupportedRepairAction(referrer)
                 }
-                is AccountUpdateRequiredState.Type.PartnerAuth -> {
+                is UpdateRequired.Type.PartnerAuth -> {
                     openPartnerAuth(type.institution, referrer)
                 }
             }
@@ -128,25 +126,12 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
 
 internal data class AccountUpdateRequiredState(
     val referrer: Pane,
-    val payload: Async<Payload> = Uninitialized,
+    val payload: Async<UpdateRequired> = Uninitialized,
 ) {
 
     constructor(arguments: Bundle?) : this(
         referrer = Destination.referrer(arguments)!!,
     )
 
-    @Parcelize
-    data class Payload(
-        val generic: FinancialConnectionsGenericInfoScreen,
-        val type: Type,
-    ) : Parcelable
 
-    sealed interface Type : Parcelable {
-
-        @Parcelize
-        data class Repair(val authorization: String?) : Type
-
-        @Parcelize
-        data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type
-    }
 }

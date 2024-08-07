@@ -77,6 +77,16 @@ private fun NoticeSheetContent(
                 onPrimaryButtonClick = onConfirmModalClick,
                 onSecondaryButtonClick = {} // TODO handle secondary button clicks.
             )
+            /**
+             * We're not expecting update required content on the generic notice sheet yet, as it's managed by
+             * [com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredModalKt].
+             */
+            is NoticeSheetContent.UpdateRequired -> GenericBottomSheetContent(
+                screen = content.generic,
+                onClickableTextClick = onClickableTextClick,
+                onPrimaryButtonClick = onConfirmModalClick,
+                onSecondaryButtonClick = {}
+            )
         }
         onViewEffectLaunched()
     }
