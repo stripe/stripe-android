@@ -154,7 +154,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         if (paymentMethodMetadata.value == null) {
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
-        customerStateHolder.customer = args.state.customer
+        customerStateHolder.setCustomerState(args.state.customer)
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)

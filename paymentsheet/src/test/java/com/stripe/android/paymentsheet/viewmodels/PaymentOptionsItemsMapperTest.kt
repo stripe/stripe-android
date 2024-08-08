@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -17,14 +18,14 @@ class PaymentOptionsItemsMapperTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>>(emptyList())
+    private val customerStateFlow = MutableStateFlow<CustomerState?>(null)
     private val isGooglePayReadyFlow = MutableStateFlow(false)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
 
     @Test
     fun `Only emits value if required flows have emitted values`() = runTest {
         val mapper = PaymentOptionsItemsMapper(
-            paymentMethods = paymentMethodsFlow,
+            customerState = customerStateFlow,
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
@@ -35,7 +36,9 @@ class PaymentOptionsItemsMapperTest {
         mapper().test {
             assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
 
-            paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
+            customerStateFlow.value = createCustomerState(
+                paymentMethods = PaymentMethodFixtures.createCards(2)
+            )
             isGooglePayReadyFlow.value = true
             isLinkEnabledFlow.value = true
 
@@ -52,7 +55,7 @@ class PaymentOptionsItemsMapperTest {
     @Test
     fun `Doesn't include Google Pay and Link in payment flow`() = runTest {
         val mapper = PaymentOptionsItemsMapper(
-            paymentMethods = paymentMethodsFlow,
+            customerState = customerStateFlow,
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
@@ -63,8 +66,9 @@ class PaymentOptionsItemsMapperTest {
         mapper().test {
             assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
 
-            val cards = PaymentMethodFixtures.createCards(2)
-            paymentMethodsFlow.value = cards
+            customerStateFlow.value = createCustomerState(
+                paymentMethods = PaymentMethodFixtures.createCards(2)
+            )
             isGooglePayReadyFlow.value = true
             isLinkEnabledFlow.value = true
 
@@ -73,5 +77,19 @@ class PaymentOptionsItemsMapperTest {
                 PaymentOptionsItem.Link,
             )
         }
+    }
+
+    private fun createCustomerState(
+        paymentMethods: List<PaymentMethod> = emptyList(),
+    ): CustomerState {
+        return CustomerState(
+            id = "pi_123",
+            ephemeralKeySecret = "ek_123",
+            paymentMethods = paymentMethods,
+            permissions = CustomerState.Permissions(
+                canRemovePaymentMethods = true,
+                canRemoveDuplicates = false,
+            )
+        )
     }
 }

@@ -14,7 +14,9 @@ import kotlin.test.Test
 internal class CustomerStateHolderTest {
     @Test
     fun `customer is initialized as null`() = runScenario {
-        assertThat(customerStateHolder.customer).isNull()
+        customerStateHolder.customer.test {
+            assertThat(awaitItem()).isNull()
+        }
     }
 
     @Test
@@ -34,7 +36,9 @@ internal class CustomerStateHolderTest {
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
         runScenario(savedStateHandle = savedStateHandle) {
-            assertThat(customerStateHolder.customer).isEqualTo(customerState)
+            customerStateHolder.customer.test {
+                assertThat(awaitItem()).isEqualTo(customerState)
+            }
         }
     }
 
@@ -43,10 +47,12 @@ internal class CustomerStateHolderTest {
         customerStateHolder.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
             )
 
             assertThat(awaitItem()).hasSize(1)

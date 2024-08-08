@@ -30,10 +30,12 @@ class SavedPaymentMethodMutatorTest {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
             )
             assertThat(awaitItem()).isTrue()
         }
@@ -46,30 +48,28 @@ class SavedPaymentMethodMutatorTest {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    )
                 )
             )
             assertThat(awaitItem()).isTrue()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+                    )
                 )
             )
             assertThat(awaitItem()).isFalse()
-
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf()
-            )
         }
     }
 
@@ -81,23 +81,27 @@ class SavedPaymentMethodMutatorTest {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
+                    )
                 )
             )
             assertThat(awaitItem()).isTrue()
 
-            customerStateHolder.customer = null
+            customerStateHolder.setCustomerState(null)
             assertThat(awaitItem()).isFalse()
 
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    )
                 )
             )
             assertThat(awaitItem()).isTrue()
@@ -116,11 +120,13 @@ class SavedPaymentMethodMutatorTest {
         )
 
         runScenario(customerRepository = customerRepository) {
-            customerStateHolder.customer = CustomerState.createForLegacyEphemeralKey(
-                customerId = "cus_123",
-                accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
-                paymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
                 )
             )
 
@@ -154,7 +160,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `Sets editing to false when removing the last payment method while editing`() = runScenario {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
-        customerStateHolder.customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = customerPaymentMethods)
+        customerStateHolder.setCustomerState(EMPTY_CUSTOMER_STATE.copy(paymentMethods = customerPaymentMethods))
 
         savedPaymentMethodMutator.editing.test {
             assertThat(awaitItem()).isFalse()
@@ -170,7 +176,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `Removing selected payment method clears selection`() = runScenario {
         val cards = PaymentMethodFixtures.createCards(3)
-        customerStateHolder.customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards)
+        customerStateHolder.setCustomerState(EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards))
 
         val selection = PaymentSelection.Saved(cards[1])
         selectionSource.value = selection
@@ -196,13 +202,15 @@ class SavedPaymentMethodMutatorTest {
         val repository = FakeCustomerRepository()
 
         runScenario(repository) {
-            customerStateHolder.customer = CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                paymentMethods = listOf(),
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = true,
-                    canRemoveDuplicates = shouldRemoveDuplicates,
+            customerStateHolder.setCustomerState(
+                CustomerState(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_1",
+                    paymentMethods = listOf(),
+                    permissions = CustomerState.Permissions(
+                        canRemovePaymentMethods = true,
+                        canRemoveDuplicates = shouldRemoveDuplicates,
+                    )
                 )
             )
 
