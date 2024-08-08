@@ -1,9 +1,6 @@
 package com.stripe.android.view
 
-import android.content.Context
-import android.util.AttributeSet
 import android.view.View
-import android.widget.LinearLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -18,40 +15,30 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
-open class LifecycleOwnerLayout(
-    context: Context,
-    attributeSet: AttributeSet?,
-    defStyleAttr: Int
-) : LinearLayout(context, attributeSet, defStyleAttr), LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
+internal class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        (parent as? View)?.findViewTreeLifecycleOwner() ?: run {
+    fun initLifecycle(owner: View) {
+        owner.findViewTreeLifecycleOwner() ?: run {
             savedStateRegistryController.performRestore(null)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
             enableSavedStateHandles()
-            attachToParent((parent as? View))
+            attachToParent(owner)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         }
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        (parent as? View)?.findViewTreeLifecycleOwner() ?: run {
+    fun destroyLifecycle(owner: View) {
+        owner.findViewTreeLifecycleOwner() ?: run {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
             store.clear()
         }
     }
 
-    private fun attachToParent(parent: View?) {
-        if (parent == null) {
-            return
-        }
-
-        parent.setViewTreeLifecycleOwner(this)
-        parent.setViewTreeViewModelStoreOwner(this)
-        parent.setViewTreeSavedStateRegistryOwner(this)
+    private fun attachToParent(owner: View) {
+        owner.setViewTreeLifecycleOwner(this)
+        owner.setViewTreeViewModelStoreOwner(this)
+        owner.setViewTreeSavedStateRegistryOwner(this)
     }
 
     // LifecycleOwner methods

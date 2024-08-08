@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -49,7 +50,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-) : LifecycleOwnerLayout(context, attrs, defStyleAttr), CardWidget {
+) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -81,6 +82,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
+
+    private val lifecycleDelegate = LifecycleOwnerDelegate()
 
     private val textInputLayouts = listOf(
         cardNumberTextInputLayout,
@@ -473,6 +476,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
 
+        lifecycleDelegate.initLifecycle(this)
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             // Merchant could set onBehalfOf before view is attached to window.
             // Check and set if needed.
@@ -483,6 +487,11 @@ class CardMultilineWidget @JvmOverloads constructor(
                 cardBrandView.isCbcEligible = isCbcEligible
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        lifecycleDelegate.destroyLifecycle(this)
     }
 
     /**

@@ -16,6 +16,7 @@ import android.view.animation.AnimationSet
 import android.view.animation.Transformation
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -59,7 +60,7 @@ class CardInputWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LifecycleOwnerLayout(context, attrs, defStyleAttr), CardWidget {
+) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),
@@ -87,6 +88,8 @@ class CardInputWidget @JvmOverloads constructor(
 
     @JvmSynthetic
     internal val postalCodeEditText = viewBinding.postalCodeEditText
+
+    private val lifecycleDelegate = LifecycleOwnerDelegate()
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
@@ -409,6 +412,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        lifecycleDelegate.initLifecycle(this)
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             // Merchant could set onBehalfOf before view is attached to window.
@@ -420,6 +424,11 @@ class CardInputWidget @JvmOverloads constructor(
                 cardBrandView.isCbcEligible = isCbcEligible
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        lifecycleDelegate.destroyLifecycle(this)
     }
 
     override fun onFinishInflate() {

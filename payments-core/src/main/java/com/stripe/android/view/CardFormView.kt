@@ -11,6 +11,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
@@ -48,7 +49,7 @@ class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LifecycleOwnerLayout(context, attrs, defStyleAttr) {
+) : LinearLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
     private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
 
@@ -73,6 +74,8 @@ class CardFormView @JvmOverloads constructor(
     private val errorsMap = mutableMapOf<Fields, String?>()
 
     private var cardValidCallback: CardValidCallback? = null
+
+    private val lifecycleOwnerDelegate = LifecycleOwnerDelegate()
 
     private val allEditTextFields: Collection<StripeEditText>
         get() {
@@ -432,6 +435,7 @@ class CardFormView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        lifecycleOwnerDelegate.initLifecycle(this)
         // Merchant could set onBehalfOf before view is attached to window.
         // Check and set if needed.
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
@@ -439,6 +443,11 @@ class CardFormView @JvmOverloads constructor(
                 viewModel.setOnBehalfOf(onBehalfOf)
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        lifecycleOwnerDelegate.destroyLifecycle(this)
     }
 
     /**
