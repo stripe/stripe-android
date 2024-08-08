@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
-[FIXED][9011](https://github.com/stripe/stripe-android/pull/9011) Rebuild CardBrandView using native views instead of compose to prevent crashes when used with React Native and base android `Activity`.
+* [FIXED][9011](https://github.com/stripe/stripe-android/pull/9011) Fixed an issue where rendering Card Element in React Native and the base `Activity` would cause a crash.
 
 ## 20.48.3 - 2024-08-05
 
