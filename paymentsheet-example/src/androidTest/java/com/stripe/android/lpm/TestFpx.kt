@@ -20,6 +20,7 @@ internal class TestFpx : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.MY
         settings[CurrencySettingsDefinition] = Currency.MYR
+        settings[AutomaticPaymentMethodsSettingsDefinition] = true
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
             PaymentMethod.Type.Fpx

@@ -20,6 +20,7 @@ internal class TestTwint : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.GB
         settings[CurrencySettingsDefinition] = Currency.CHF
+        settings[AutomaticPaymentMethodsSettingsDefinition] = true
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
             PaymentMethod.Type.Twint

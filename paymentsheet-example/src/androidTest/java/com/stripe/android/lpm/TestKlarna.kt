@@ -23,10 +23,7 @@ internal class TestKlarna : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
-            PaymentMethod.Type.Card,
-            PaymentMethod.Type.Klarna
-        ).joinToString(",")
+        settings[AutomaticPaymentMethodsSettingsDefinition] = true
     }
 
     @Test
