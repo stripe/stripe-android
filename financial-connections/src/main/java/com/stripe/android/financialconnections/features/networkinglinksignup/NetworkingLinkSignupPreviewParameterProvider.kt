@@ -106,6 +106,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         validPhone = null,
         lookupAccount = Uninitialized,
         saveAccountToLink = Uninitialized,
+        isInstantDebits = true,
     )
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
