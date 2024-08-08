@@ -82,17 +82,8 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
 
     private suspend fun buildInitData(): InitData {
         val manifest = getOrFetchSync().manifest
-        val isInstantDebits = isLinkWithStripe()
-
-        val email = if (isInstantDebits) {
-            // This pane can appear in two different places in the flow,
-            // and it might not have the consumer session created when launched from the
-            // Link warmup sheet. Therefore, we need to fall back to the customer email.
-            val consumerSession = getCachedConsumerSession()
-            consumerSession?.emailAddress ?: manifest.accountholderCustomerEmailAddress
-        } else {
-            manifest.accountholderCustomerEmailAddress
-        }
+        val consumerSession = getCachedConsumerSession()
+        val email = consumerSession?.emailAddress
 
         return InitData(
             businessName = manifest.businessName,
