@@ -9,10 +9,11 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealHandleError
-import com.stripe.android.financialconnections.domain.RealSignUpToLink
-import com.stripe.android.financialconnections.domain.SignUpToLink
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerFactory
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -62,11 +63,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsAttachConsumerToLinkAccountSession(
         impl: RealAttachConsumerToLinkAccountSession,
     ): AttachConsumerToLinkAccountSession
-
-    @Binds
-    fun bindsSignUpToLink(
-        impl: RealSignUpToLink,
-    ): SignUpToLink
 
     companion object {
         @Provides
@@ -164,5 +160,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             apiRequestFactory = apiRequestFactory,
             requestExecutor = requestExecutor
         )
+
+        @Provides
+        internal fun provideLinkSignupHandler(
+            isLinkWithStripe: IsLinkWithStripe,
+            linkSignupHandlerFactory: LinkSignupHandlerFactory,
+        ): LinkSignupHandler {
+            return linkSignupHandlerFactory.create(isLinkWithStripe())
+        }
     }
 }
