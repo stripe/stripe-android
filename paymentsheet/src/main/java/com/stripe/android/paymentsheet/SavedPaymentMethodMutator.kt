@@ -49,7 +49,7 @@ internal class SavedPaymentMethodMutator(
 ) {
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
-            paymentMethods = customerStateHolder.paymentMethods,
+            customerState = customerStateHolder.customer,
             isGooglePayReady = isGooglePayReady,
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = isNotPaymentFlow,
@@ -118,7 +118,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer ?: return Result.failure(
+        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
             IllegalStateException(
                 "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -145,12 +145,14 @@ internal class SavedPaymentMethodMutator(
     }
 
     private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
-        val currentCustomer = customerStateHolder.customer ?: return
+        val currentCustomer = customerStateHolder.customer.value ?: return
 
-        customerStateHolder.customer = currentCustomer.copy(
-            paymentMethods = currentCustomer.paymentMethods.filter {
-                it.id != paymentMethodId
-            }
+        customerStateHolder.setCustomerState(
+            currentCustomer.copy(
+                paymentMethods = currentCustomer.paymentMethods.filter {
+                    it.id != paymentMethodId
+                }
+            )
         )
 
         if (customerStateHolder.mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
@@ -231,7 +233,7 @@ internal class SavedPaymentMethodMutator(
         brand: CardBrand
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer ?: return Result.failure(
+        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
             IllegalStateException(
                 "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -251,17 +253,19 @@ internal class SavedPaymentMethodMutator(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
-            customerStateHolder.customer = currentCustomer.copy(
-                paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
-                    val savedId = savedMethod.id
-                    val updatedId = updatedMethod.id
+            customerStateHolder.setCustomerState(
+                currentCustomer.copy(
+                    paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
+                        val savedId = savedMethod.id
+                        val updatedId = updatedMethod.id
 
-                    if (updatedId != null && savedId != null && updatedId == savedId) {
-                        updatedMethod
-                    } else {
-                        savedMethod
+                        if (updatedId != null && savedId != null && updatedId == savedId) {
+                            updatedMethod
+                        } else {
+                            savedMethod
+                        }
                     }
-                }
+                )
             )
 
             navigationHandler.pop()

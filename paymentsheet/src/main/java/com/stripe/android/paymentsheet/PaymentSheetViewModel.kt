@@ -320,7 +320,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customerStateHolder.customer = state.customer
+        customerStateHolder.setCustomerState(state.customer)
 
         updateSelection(state.paymentSelection)
 

@@ -12,18 +12,14 @@ internal class CustomerStateHolder(
     private val savedStateHandle: SavedStateHandle,
     private val selection: StateFlow<PaymentSelection?>,
 ) {
-    var customer: CustomerState?
-        get() = savedStateHandle[SAVED_CUSTOMER]
-        set(value) {
-            savedStateHandle[SAVED_CUSTOMER] = value
-        }
+    val customer: StateFlow<CustomerState?> = savedStateHandle
+        .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
 
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
-        .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
+    val paymentMethods: StateFlow<List<PaymentMethod>> = customer
         .mapAsStateFlow { state ->
             state?.paymentMethods ?: emptyList()
         }
@@ -32,6 +28,10 @@ internal class CustomerStateHolder(
         SAVED_PM_SELECTION,
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
+
+    fun setCustomerState(customerState: CustomerState?) {
+        savedStateHandle[SAVED_CUSTOMER] = customerState
+    }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
         savedStateHandle[SAVED_PM_SELECTION] = paymentMethod
