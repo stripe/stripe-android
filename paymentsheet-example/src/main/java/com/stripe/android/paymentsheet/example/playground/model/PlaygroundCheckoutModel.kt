@@ -63,6 +63,14 @@ class CheckoutRequest private constructor(
         private var supportedPaymentMethods: List<String>? = null
         private var paymentMethodConfigurationId: String? = null
         private var requireCvcRecollection: Boolean? = null
+        private var paymentMethodSaveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRedisplayFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
+            AllowRedisplayFilter.Unspecified,
+            AllowRedisplayFilter.Limited,
+            AllowRedisplayFilter.Always,
+        )
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -108,6 +116,22 @@ class CheckoutRequest private constructor(
             this.paymentMethodConfigurationId = paymentMethodConfigurationId
         }
 
+        fun paymentMethodSaveFeature(state: FeatureState) {
+            this.paymentMethodSaveFeature = state
+        }
+
+        fun paymentMethodRemoveFeature(state: FeatureState) {
+            this.paymentMethodRemoveFeature = state
+        }
+
+        fun paymentMethodRedisplayFeature(state: FeatureState) {
+            this.paymentMethodRedisplayFeature = state
+        }
+
+        fun paymentMethodRedisplayFilters(filters: List<AllowRedisplayFilter>) {
+            this.paymentMethodRedisplayFilters = filters
+        }
+
         fun requireCvcRecollection(requireCvcRecollection: Boolean?) = apply {
             this.requireCvcRecollection = requireCvcRecollection
         }
@@ -126,14 +150,10 @@ class CheckoutRequest private constructor(
                 supportedPaymentMethods = supportedPaymentMethods,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
                 requireCvcRecollection = requireCvcRecollection,
-                paymentMethodSaveFeature = FeatureState.Enabled,
-                paymentMethodRemoveFeature = FeatureState.Enabled,
-                paymentMethodRedisplayFeature = FeatureState.Enabled,
-                paymentMethodRedisplayFilters = listOf(
-                    AllowRedisplayFilter.Unspecified,
-                    AllowRedisplayFilter.Limited,
-                    AllowRedisplayFilter.Always,
-                )
+                paymentMethodSaveFeature = paymentMethodSaveFeature,
+                paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
+                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
             )
         }
     }
