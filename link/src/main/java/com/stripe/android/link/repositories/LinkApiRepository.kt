@@ -80,17 +80,18 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
-        stripeRepository.createPaymentDetails(
+        consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
+                active = active,
             ),
-            active = active,
+            requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
-            val extraParams = extraConfirmationParams(paymentMethodCreateParams)
+            val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
 
             val createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
@@ -117,7 +118,9 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
-            extraParams = mapOf("payment_method_options" to extraConfirmationParams(paymentMethodCreateParams)),
+            extraParams = mapOf(
+                "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+            ),
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -130,7 +133,7 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams)
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
                 ),
             )
         }

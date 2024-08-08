@@ -9,8 +9,6 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -290,15 +288,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         hcaptchaEKey: String?,
         requestOptions: ApiRequest.Options
     ): Result<RadarSessionWithHCaptcha> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options,
-        active: Boolean,
-    ): Result<ConsumerPaymentDetails> {
         TODO("Not yet implemented")
     }
 

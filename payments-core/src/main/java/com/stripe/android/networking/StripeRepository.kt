@@ -10,8 +10,6 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -267,14 +265,6 @@ interface StripeRepository {
     ): Result<RadarSessionWithHCaptcha>
 
     // Link endpoints
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options,
-        active: Boolean,
-    ): Result<ConsumerPaymentDetails>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun sharePaymentDetails(

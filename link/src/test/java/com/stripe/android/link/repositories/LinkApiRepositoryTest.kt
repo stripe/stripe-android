@@ -200,7 +200,7 @@ class LinkApiRepositoryTest {
             active = false,
         )
 
-        verify(stripeRepository).createPaymentDetails(
+        verify(consumersApiService).createPaymentDetails(
             eq(secret),
             argThat<ConsumerPaymentDetailsCreateParams> {
                 toParamMap() == mapOf(
@@ -214,11 +214,12 @@ class LinkApiRepositoryTest {
                     "billing_address" to mapOf(
                         "country_code" to "US",
                         "postal_code" to "12345"
-                    )
+                    ),
+                    "active" to false,
                 )
             },
-            eq(ApiRequest.Options(consumerKey)),
-            eq(false),
+            requestSurface = eq("android_payment_element"),
+            requestOptions = eq(ApiRequest.Options(consumerKey)),
         )
     }
 
@@ -237,9 +238,9 @@ class LinkApiRepositoryTest {
                 active = false,
             )
 
-            verify(stripeRepository).createPaymentDetails(
-                eq(secret),
-                argThat<ConsumerPaymentDetailsCreateParams> {
+            verify(consumersApiService).createPaymentDetails(
+                consumerSessionClientSecret = eq(secret),
+                paymentDetailsCreateParams = argThat<ConsumerPaymentDetailsCreateParams> {
                     toParamMap() == mapOf(
                         "type" to "card",
                         "billing_email_address" to "email@stripe.com",
@@ -251,11 +252,12 @@ class LinkApiRepositoryTest {
                         "billing_address" to mapOf(
                             "country_code" to "US",
                             "postal_code" to "12345"
-                        )
+                        ),
+                        "active" to false,
                     )
                 },
-                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
-                eq(false),
+                requestSurface = eq("android_payment_element"),
+                requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
             )
         }
 
@@ -265,11 +267,11 @@ class LinkApiRepositoryTest {
         val email = "email@stripe.com"
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
         whenever(
-            stripeRepository.createPaymentDetails(
+            consumersApiService.createPaymentDetails(
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
+                requestSurface = any(),
                 requestOptions = any(),
-                active = any(),
             )
         ).thenReturn(Result.success(paymentDetails))
 
@@ -312,11 +314,11 @@ class LinkApiRepositoryTest {
     @Test
     fun `createPaymentDetails for card catches exception and returns failure`() = runTest {
         whenever(
-            stripeRepository.createPaymentDetails(
+            consumersApiService.createPaymentDetails(
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
+                requestSurface = any(),
                 requestOptions = any(),
-                active = any(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 

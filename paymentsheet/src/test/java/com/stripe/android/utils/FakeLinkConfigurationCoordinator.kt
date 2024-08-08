@@ -29,7 +29,7 @@ class FakeLinkConfigurationCoordinator(
     private val accountStatus: AccountStatus = AccountStatus.SignedOut,
 ) : LinkConfigurationCoordinator {
 
-    override val component: LinkComponent?
+    override val component: LinkComponent
         get() = mock()
 
     override val emailFlow: StateFlow<String?>

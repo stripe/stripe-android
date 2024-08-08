@@ -11,7 +11,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     @Test
     fun `parse single card payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(
                 listOf(
@@ -27,7 +27,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     @Test
     fun `parse single bank account payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(ConsumerFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(
                 listOf(
@@ -43,7 +43,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     @Test
     fun `parse multiple payment details`() {
         assertEquals(
-            ConsumerPaymentDetailsJsonParser().parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
+            ConsumerPaymentDetailsJsonParser.parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
@@ -134,7 +134,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
 
         assertEquals(
-            ConsumerPaymentDetailsJsonParser()
+            ConsumerPaymentDetailsJsonParser
                 .parse(json),
             ConsumerPaymentDetails(
                 listOf(

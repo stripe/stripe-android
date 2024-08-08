@@ -40,5 +40,5 @@ internal object PaymentDetailsFixtures {
         """.trimIndent()
     )
     val CONSUMER_SINGLE_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
+        ConsumerPaymentDetailsJsonParser.parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
 }

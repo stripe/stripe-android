@@ -25,8 +25,11 @@ class SupportedPaymentMethodTest {
         )
 
         assertThat(
-            ConsumerPaymentDetailsCreateParams.Card(paymentMethodCreateParams, "email@test.com")
-                .toParamMap()
+            ConsumerPaymentDetailsCreateParams.Card(
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
+                email = "email@test.com",
+                active = false,
+            ).toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "card",
@@ -39,7 +42,8 @@ class SupportedPaymentMethodTest {
                 "billing_address" to mapOf(
                     "country_code" to "US",
                     "postal_code" to "12345"
-                )
+                ),
+                "active" to false,
             )
         )
     }

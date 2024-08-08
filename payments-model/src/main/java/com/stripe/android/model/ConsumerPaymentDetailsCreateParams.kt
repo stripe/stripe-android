@@ -1,38 +1,35 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
-/**
- * Model for Link Payment Method creation parameters, used for 'consumers/payment_details' endpoint.
- */
-sealed class ConsumerPaymentDetailsCreateParams(
-    internal val type: PaymentMethod.Type
-) : StripeParamsModel, Parcelable {
-
-    override fun toParamMap(): Map<String, Any> =
-        mapOf("type" to type.code)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcelable {
 
     /**
      * Represents a new Card payment method that will be created using the
-     * [cardPaymentMethodCreateParamsMap] values, converting from the [PaymentMethodCreateParams]
+     * [cardPaymentMethodCreateParamsMap] values, converting from the `PaymentMethodCreateParams`
      * format to [ConsumerPaymentDetailsCreateParams] format.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class Card(
+    data class Card(
         private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
-        private val email: String
-    ) : ConsumerPaymentDetailsCreateParams(PaymentMethod.Type.Card) {
-        override fun toParamMap() = super.toParamMap()
-            .plus(convertParamsMap())
+        private val email: String,
+        private val active: Boolean,
+    ) : ConsumerPaymentDetailsCreateParams {
 
-        private fun convertParamsMap(): Map<String, Any> {
-            val params: MutableMap<String, Any> = mutableMapOf()
-            params[LINK_PARAM_BILLING_EMAIL_ADDRESS] = email
+        override fun toParamMap(): Map<String, Any> {
+            val params = mutableMapOf<String, Any>(
+                "type" to "card",
+                "active" to active,
+                LINK_PARAM_BILLING_EMAIL_ADDRESS to email,
+            )
 
-            ConsumerPaymentDetails.Card.getAddressFromMap(cardPaymentMethodCreateParamsMap)?.let {
-                params.plusAssign(it)
+            getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(cardPaymentMethodCreateParamsMap)?.let {
+                params += it
             }
 
             // only card number, exp_month and exp_year are included
@@ -52,6 +49,7 @@ sealed class ConsumerPaymentDetailsCreateParams(
             return params
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             private const val BASE_PARAM_CARD = "card"
             private const val BASE_PARAM_CARD_NUMBER = "number"
@@ -68,10 +66,31 @@ sealed class ConsumerPaymentDetailsCreateParams(
              * A map containing additional parameters that must be sent during payment confirmation.
              * CVC is not passed during creation, and must be included when confirming the payment.
              */
-            fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams) =
-                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)?.let { card ->
+            fun extraConfirmationParams(paymentMethodCreateParams: Map<String, Any>) =
+                (paymentMethodCreateParams["card"] as? Map<*, *>)?.let { card ->
                     mapOf("card" to mapOf("cvc" to card["cvc"]))
                 }
         }
+    }
+}
+
+/**
+ * Reads the address from the `PaymentMethodCreateParams` mapping format to the format
+ * used by `ConsumerPaymentDetails`.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(
+    cardPaymentMethodCreateParams: Map<String, Any>
+): Pair<String, Any>? {
+    val billingDetails = cardPaymentMethodCreateParams["billing_details"] as? Map<*, *>
+    val address = billingDetails?.get("address") as? Map<*, *>
+    return address?.let {
+        // card["billing_details"]["address"] becomes card["billing_address"]
+        "billing_address" to mapOf(
+            // card["billing_details"]["address"]["country"]
+            // becomes card["billing_address"]["country_code"]
+            "country_code" to it["country"],
+            "postal_code" to it["postal_code"]
+        )
     }
 }

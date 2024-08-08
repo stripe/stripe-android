@@ -9,6 +9,8 @@ import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -16,6 +18,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
@@ -65,6 +68,13 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): AttachConsumerToLinkAccountSession
+
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerPaymentDetails>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -227,6 +237,31 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerPaymentDetails> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = createPaymentDetails,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ).plus(
+                    paymentDetailsCreateParams.toParamMap()
+                )
+            ),
+            responseJsonParser = ConsumerPaymentDetailsJsonParser,
+        )
+    }
+
     internal companion object {
 
         /**
@@ -258,6 +293,11 @@ class ConsumersApiServiceImpl(
          */
         internal val attachLinkConsumerToLinkAccountSession: String =
             getApiUrl("consumers/attach_link_consumer_to_link_account_session")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details`
+         */
+        private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

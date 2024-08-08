@@ -93,8 +93,6 @@ internal object PaymentDetailsFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_SINGLE_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -132,7 +130,7 @@ internal object PaymentDetailsFixtures {
         """.trimIndent()
     )
     val CONSUMER_SINGLE_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
+        ConsumerPaymentDetailsJsonParser.parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -163,6 +161,4 @@ internal object PaymentDetailsFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON)
 }
