@@ -13,6 +13,15 @@ import org.junit.Before
 import org.junit.Test
 
 class CvcRecollectionViewModelTest {
+    private val interactor = FakeCvcRecollectionInteractor(
+        initialState = CvcRecollectionViewState(
+            cardBrand = CardBrand.Visa,
+            lastFour = "4242",
+            cvc = null,
+            displayMode = Args.DisplayMode.Activity(false)
+        )
+    )
+
     @Before
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -24,14 +33,7 @@ class CvcRecollectionViewModelTest {
     }
 
     private fun createViewModel(): CvcRecollectionViewModel {
-        return CvcRecollectionViewModel(
-            CvcRecollectionViewModel.Args(
-                lastFour = "4242",
-                cardBrand = CardBrand.Visa,
-                cvc = null,
-                isLiveMode = false
-            )
-        )
+        return CvcRecollectionViewModel(interactor)
     }
 
     @Test
@@ -43,7 +45,7 @@ class CvcRecollectionViewModelTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 cvc = null,
-                isLiveMode = false
+                displayMode = Args.DisplayMode.Activity(false)
             )
         )
     }

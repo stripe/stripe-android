@@ -4,33 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
+internal class CvcRecollectionViewModel(
+    private val interactor: CvcRecollectionInteractor
+) : ViewModel(), CvcRecollectionInteractor by interactor {
     private val _result = MutableSharedFlow<CvcRecollectionResult>()
+
+    // This is used in DisplayMode.Activity to send confirmation or cancellation events
     val result: SharedFlow<CvcRecollectionResult> = _result.asSharedFlow()
 
-    private val _viewState = MutableStateFlow(
-        CvcRecollectionViewState(
-            cardBrand = args.cardBrand,
-            lastFour = args.lastFour,
-            cvc = null,
-            isLiveMode = args.isLiveMode
-        )
-    )
-    val viewState: StateFlow<CvcRecollectionViewState> = _viewState.asStateFlow()
-
-    fun handleViewAction(action: CvcRecollectionViewAction) {
+    override fun handleViewAction(action: CvcRecollectionViewAction) {
         when (action) {
             is CvcRecollectionViewAction.OnConfirmPressed -> onConfirmPress(action.cvc)
             is CvcRecollectionViewAction.OnBackPressed -> onBackPress()
+            else -> interactor.handleViewAction(action)
         }
     }
 
@@ -46,24 +37,32 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         }
     }
 
-    data class Args(
-        val lastFour: String,
-        val cardBrand: CardBrand,
-        val cvc: String? = null,
-        val isLiveMode: Boolean
-    )
-
-    class Factory(private val args: CvcRecollectionContract.Args) : ViewModelProvider.Factory {
+    class Factory(
+        private val args: CvcRecollectionContract.Args,
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return CvcRecollectionViewModel(
-                Args(
-                    lastFour = args.lastFour,
-                    cardBrand = args.cardBrand,
-                    cvc = null,
-                    isLiveMode = args.isLiveMode
+                interactor = DefaultCvcRecollectionInteractor(
+                    args = Args(
+                        lastFour = args.lastFour,
+                        cardBrand = args.cardBrand,
+                        cvc = null,
+                        displayMode = args.displayMode.toDisplayMode()
+                    )
                 )
             ) as T
+        }
+    }
+}
+
+internal fun CvcRecollectionContract.Args.DisplayMode.toDisplayMode(): Args.DisplayMode {
+    return when (this) {
+        is CvcRecollectionContract.Args.DisplayMode.Activity -> {
+            Args.DisplayMode.Activity(isLiveMode)
+        }
+        is CvcRecollectionContract.Args.DisplayMode.PaymentScreen -> {
+            Args.DisplayMode.PaymentScreen(isLiveMode)
         }
     }
 }

@@ -22,7 +22,19 @@ class CvcRecollectionScreenScreenshotTest {
             CvcRecollectionScreen(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
-                isTestMode = false,
+                displayMode = Args.DisplayMode.Activity(isLiveMode = true),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
+    fun testEmptyPaymentScreenDisplayMode() {
+        paparazziRule.snapshot {
+            CvcRecollectionScreen(
+                cardBrand = CardBrand.Visa,
+                lastFour = "4242",
+                displayMode = Args.DisplayMode.PaymentScreen(isLiveMode = true),
                 viewActionHandler = {}
             )
         }
@@ -34,7 +46,7 @@ class CvcRecollectionScreenScreenshotTest {
             CvcRecollectionScreen(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
-                isTestMode = false,
+                displayMode = Args.DisplayMode.Activity(isLiveMode = true),
                 viewActionHandler = {}
             )
         }
@@ -46,7 +58,19 @@ class CvcRecollectionScreenScreenshotTest {
             CvcRecollectionScreen(
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
-                isTestMode = true,
+                displayMode = Args.DisplayMode.Activity(isLiveMode = false),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
+    fun testFilledTestModePaymentScreenDisplayMode() {
+        paparazziRule.snapshot {
+            CvcRecollectionScreen(
+                cardBrand = CardBrand.Visa,
+                lastFour = "4242",
+                displayMode = Args.DisplayMode.PaymentScreen(isLiveMode = false),
                 viewActionHandler = {}
             )
         }
