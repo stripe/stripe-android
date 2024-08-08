@@ -15,7 +15,6 @@
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
-    <ID>LargeClass:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
     <ID>LargeClass:IntentConfirmationHandlerTest.kt$IntentConfirmationHandlerTest</ID>
@@ -73,6 +72,7 @@
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
+    <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>

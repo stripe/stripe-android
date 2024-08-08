@@ -271,22 +271,24 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     override fun toParamMap(): Map<String, Any> {
-        return overrideParamMap
+        val params = overrideParamMap
             ?: mapOf(
                 PARAM_TYPE to code
             ).plus(
                 billingDetails?.let {
                     mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
                 }.orEmpty()
-            ).plus(
-                allowRedisplay?.let {
-                    mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
-                }.orEmpty()
             ).plus(typeParams).plus(
                 metadata?.let {
                     mapOf(PARAM_METADATA to it)
                 }.orEmpty()
             )
+
+        return params.plus(
+            allowRedisplay?.let {
+                mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
+            }.orEmpty()
+        )
     }
 
     private val typeParams: Map<String, Any>
@@ -1322,12 +1324,14 @@ data class PaymentMethodCreateParams internal constructor(
             billingDetails: PaymentMethod.BillingDetails?,
             requiresMandate: Boolean,
             overrideParamMap: Map<String, @RawValue Any>?,
-            productUsage: Set<String>
+            productUsage: Set<String>,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
                 billingDetails = billingDetails,
                 requiresMandate = requiresMandate,
+                allowRedisplay = allowRedisplay,
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage
             )
