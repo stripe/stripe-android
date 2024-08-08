@@ -72,12 +72,14 @@ internal fun CvcRecollectionScreen(
             }
             CvcRecollectionTitle()
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
-            CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
-                viewActionHandler.invoke(
-                    CvcRecollectionViewAction.OnConfirmPressed(
-                        element.controller.fieldValue.value
+            if (displayMode is Args.DisplayMode.Activity) {
+                CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
+                    viewActionHandler.invoke(
+                        CvcRecollectionViewAction.OnConfirmPressed(
+                            element.controller.fieldValue.value
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -178,10 +180,10 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 
 @Composable
 private fun CvcRecollectionHeader(
-    displayMode: CvcRecollectionViewModel.Args.DisplayMode,
+    displayMode: Args.DisplayMode,
     onClosePressed: () -> Unit
 ) {
-    if (displayMode is CvcRecollectionViewModel.Args.DisplayMode.Activity) {
+    if (displayMode is Args.DisplayMode.Activity) {
         Row(
             modifier = Modifier
                 .padding(0.dp, 16.dp, 0.dp, 0.dp)

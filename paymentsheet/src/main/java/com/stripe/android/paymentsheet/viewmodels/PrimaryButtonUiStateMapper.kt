@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combine
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,15 +36,15 @@ internal class PrimaryButtonUiStateMapper(
             amountFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-            cvcCompleteFlow
+            cvcCompleteFlow,
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
             customPrimaryButton ?: PrimaryButton.UIState(
-                label = buyButtonLabel(amount),
+                label = buyButtonLabel(amount, screen.buyButtonState.buyButtonOverride?.label),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null &&
                     cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                lockVisible = true,
-            ).takeIf { screen.showsBuyButton }
+                lockVisible = screen.buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+            ).takeIf { screen.buyButtonState.visible }
         }
     }
 
@@ -65,13 +66,13 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    private fun buyButtonLabel(amount: Amount?): ResolvableString {
+    private fun buyButtonLabel(amount: Amount?, baseText: ResolvableString?): ResolvableString {
         return config.primaryButtonLabel?.let {
             it.resolvableString
         } ?: run {
             if (isProcessingPayment) {
                 val fallback = R.string.stripe_paymentsheet_pay_button_label.resolvableString
-                amount?.buildPayButtonLabel() ?: fallback
+                baseText ?: amount?.buildPayButtonLabel() ?: fallback
             } else {
                 StripeUiCoreR.string.stripe_setup_button_label.resolvableString
             }

@@ -23,7 +23,10 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
     }
 
     private val viewModel by viewModels<CvcRecollectionViewModel> {
-        CvcRecollectionViewModel.Factory(args)
+        CvcRecollectionViewModel.Factory(
+            args = args,
+            onCompletionChanged = {}
+        )
     }
 
     @OptIn(ExperimentalMaterialApi::class)

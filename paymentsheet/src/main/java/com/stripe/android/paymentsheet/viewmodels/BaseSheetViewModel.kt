@@ -84,7 +84,7 @@ internal abstract class BaseSheetViewModel(
     private val _cvcControllerFlow = MutableStateFlow(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
     internal val cvcControllerFlow: StateFlow<CvcController> = _cvcControllerFlow
 
-    private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
+    protected val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
