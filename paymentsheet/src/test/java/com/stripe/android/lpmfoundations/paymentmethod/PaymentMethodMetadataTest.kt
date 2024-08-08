@@ -16,6 +16,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -940,24 +941,34 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
-        assertThat(metadataForPaymentIntent.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForPaymentIntent.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForPaymentIntent.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -966,12 +977,17 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
     }
 
     @Test
@@ -982,8 +998,11 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = true))
-                .isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
             val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -992,8 +1011,11 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = true))
-                .isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
         }
 
     @Test
@@ -1004,10 +1026,17 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = null))
-                .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-            assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = false))
-                .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
             val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -1016,10 +1045,17 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = null))
-                .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-            assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = false))
-                .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
         }
 
     @Test
@@ -1030,8 +1066,11 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadata.allowRedisplay(saveForFutureUse = true))
-                .isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
         }
 
     @Test
@@ -1042,10 +1081,17 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
 
-            assertThat(metadata.allowRedisplay(saveForFutureUse = null))
-                .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-            assertThat(metadata.allowRedisplay(saveForFutureUse = false))
-                .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
         }
 
     @Test
@@ -1055,12 +1101,23 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled
         )
 
-        assertThat(metadata.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadata.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
-        assertThat(metadata.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
     }
 
     @Test
@@ -1070,12 +1127,23 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled
         )
 
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-        assertThat(metadataForSetupIntent.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
         val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -1084,11 +1152,22 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled
         )
 
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = true))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = false))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
-        assertThat(metadataForPaymentIntentWithSfu.allowRedisplay(saveForFutureUse = null))
-            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
     }
 }

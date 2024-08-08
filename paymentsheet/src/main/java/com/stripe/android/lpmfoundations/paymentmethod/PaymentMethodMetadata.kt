@@ -15,6 +15,7 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -197,29 +198,43 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun allowRedisplay(saveForFutureUse: Boolean?): PaymentMethod.AllowRedisplay {
+    fun allowRedisplay(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
+        return if (hasIntentToSetup()) {
+            allowRedisplayForSetupIntent(customerRequestedSave)
+        } else {
+            allowRedisplayForPaymentIntent(customerRequestedSave)
+        }
+    }
+
+    private fun allowRedisplayForSetupIntent(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
         return when (paymentMethodSaveConsentBehavior) {
             PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            PaymentMethodSaveConsentBehavior.Disabled -> {
-                if (hasIntentToSetup()) {
-                    PaymentMethod.AllowRedisplay.LIMITED
+            PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.LIMITED
+            PaymentMethodSaveConsentBehavior.Enabled -> {
+                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
+                    PaymentMethod.AllowRedisplay.ALWAYS
                 } else {
-                    PaymentMethod.AllowRedisplay.UNSPECIFIED
+                    PaymentMethod.AllowRedisplay.LIMITED
                 }
             }
+        }
+    }
+
+    private fun allowRedisplayForPaymentIntent(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
+        return when (paymentMethodSaveConsentBehavior) {
+            PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
             PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (hasIntentToSetup()) {
-                    if (saveForFutureUse == true) {
-                        PaymentMethod.AllowRedisplay.ALWAYS
-                    } else {
-                        PaymentMethod.AllowRedisplay.LIMITED
-                    }
+                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
+                    PaymentMethod.AllowRedisplay.ALWAYS
                 } else {
-                    if (saveForFutureUse == true) {
-                        PaymentMethod.AllowRedisplay.ALWAYS
-                    } else {
-                        PaymentMethod.AllowRedisplay.UNSPECIFIED
-                    }
+                    PaymentMethod.AllowRedisplay.UNSPECIFIED
                 }
             }
         }
