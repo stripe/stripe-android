@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.navigation.Destination
@@ -134,6 +135,21 @@ internal data class NoticeSheetState(
         data class DataAccess(
             val dataAccess: DataAccessNotice,
         ) : NoticeSheetContent
+
+        @Parcelize
+        data class UpdateRequired(
+            val generic: FinancialConnectionsGenericInfoScreen,
+            val type: Type,
+        ) : NoticeSheetContent {
+            sealed interface Type : Parcelable {
+
+                @Parcelize
+                data class Repair(val authorization: String?) : Type
+
+                @Parcelize
+                data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type
+            }
+        }
     }
 
     internal sealed interface ViewEffect {

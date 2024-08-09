@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
 import com.stripe.android.financialconnections.repository.AccountUpdateRequiredContentRepository.State
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -15,12 +15,12 @@ internal class AccountUpdateRequiredContentRepository @Inject constructor(
     savedStateHandle = savedStateHandle,
 ) {
 
-    fun set(payload: AccountUpdateRequiredState.Payload) {
+    fun set(payload: UpdateRequired) {
         set(State(payload))
     }
 
     @Parcelize
     data class State(
-        val payload: AccountUpdateRequiredState.Payload,
+        val payload: UpdateRequired,
     ) : Parcelable
 }

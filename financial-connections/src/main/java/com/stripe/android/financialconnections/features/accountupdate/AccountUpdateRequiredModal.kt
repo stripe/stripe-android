@@ -11,8 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavBackStackEntry
-import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.PartnerAuth
 import com.stripe.android.financialconnections.features.common.GenericBottomSheetContent
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.PartnerAuth
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -37,7 +38,7 @@ internal fun AccountUpdateRequiredModal(
 
 @Composable
 private fun AccountUpdateRequiredModalContent(
-    payload: AccountUpdateRequiredState.Payload?,
+    payload: UpdateRequired?,
     onContinue: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -59,7 +60,7 @@ private fun AccountUpdateRequiredModalContent(
 internal fun AccountUpdateRequiredModalPreview() {
     FinancialConnectionsPreview {
         AccountUpdateRequiredModalContent(
-            payload = AccountUpdateRequiredState.Payload(
+            payload = UpdateRequired(
                 generic = FinancialConnectionsGenericInfoScreen(
                     id = "sampleScreen1",
                     header = Header(
