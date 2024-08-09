@@ -89,13 +89,4 @@ class CvcRecollectionScreenScreenshotTest {
             )
         }
     }
-
-    @Test
-    fun testFilledTestModePaymentScreenDisplayMode() {
-        paparazziRule.snapshot {
-            CvcRecollectionPaymentSheetScreen(
-                interactor = interactor()
-            )
-        }
-    }
 }
