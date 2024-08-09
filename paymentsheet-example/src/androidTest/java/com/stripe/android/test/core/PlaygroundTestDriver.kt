@@ -35,6 +35,10 @@ import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlayground
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -410,6 +414,43 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmWithGooglePay(
+        country: Country
+    ) {
+        setup(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CountrySettingsDefinition] = country
+            }
+        )
+
+        launchComplete()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.googlePayButton.waitForEnabled()
+        selectors.googlePayButton.click()
+
+        composeTestRule.waitForIdle()
+
+        selectors.googlePaySheet.waitFor()
+        selectors.googlePayContinueButton.click()
+
+        composeTestRule.waitForIdle()
+
+        // Skips the full screen payment animation in `PaymentSheet`
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.mainClock.advanceTimeByFrame()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
     }
 
     private fun pressMultiStepSelect() {
@@ -1227,6 +1268,7 @@ internal class PlaygroundTestDriver(
 
     internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        application = null
         playgroundState = null
         currentActivity = null
     }
