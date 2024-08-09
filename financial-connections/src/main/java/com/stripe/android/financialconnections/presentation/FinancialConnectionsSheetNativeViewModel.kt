@@ -69,7 +69,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     /**
      * Exposes parent dagger component (activity viewModel scoped so that it survives config changes)
