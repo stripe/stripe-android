@@ -26,19 +26,8 @@ internal class CvcRecollectionContract :
         val lastFour: String,
         val cardBrand: CardBrand,
         val appearance: PaymentSheet.Appearance,
-        val displayMode: DisplayMode
+        val isTestMode: Boolean
     ) : Parcelable {
-
-        sealed interface DisplayMode : Parcelable {
-            val isLiveMode: Boolean
-
-            @Parcelize
-            data class Activity(override val isLiveMode: Boolean) : DisplayMode
-
-            @Parcelize
-            data class PaymentScreen(override val isLiveMode: Boolean) : DisplayMode
-        }
-
         companion object {
             fun fromIntent(intent: Intent): Args? {
                 return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

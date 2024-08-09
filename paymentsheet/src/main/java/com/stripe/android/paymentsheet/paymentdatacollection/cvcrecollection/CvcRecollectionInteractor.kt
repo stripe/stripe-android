@@ -5,14 +5,14 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal interface CvcRecollectionInteractor {
     val viewState: StateFlow<CvcRecollectionViewState>
-    val cvcCompletionState: StateFlow<CvcCompletionState>
+    val cvcCompletionState: StateFlow<CvcState>
 
     fun handleViewAction(action: CvcRecollectionViewAction)
 }
 
 internal class DefaultCvcRecollectionInteractor(args: Args) : CvcRecollectionInteractor {
-    private val _cvcCompletionState = MutableStateFlow<CvcCompletionState>(CvcCompletionState.Incomplete)
-    override val cvcCompletionState: StateFlow<CvcCompletionState>
+    private val _cvcCompletionState = MutableStateFlow(CvcState())
+    override val cvcCompletionState: StateFlow<CvcState>
         get() = _cvcCompletionState
 
     private val _viewState = MutableStateFlow(
@@ -20,7 +20,7 @@ internal class DefaultCvcRecollectionInteractor(args: Args) : CvcRecollectionInt
             cardBrand = args.cardBrand,
             lastFour = args.lastFour,
             cvc = null,
-            displayMode = args.displayMode
+            isTestMode = args.isTestMode
         )
     )
     override val viewState: StateFlow<CvcRecollectionViewState>
@@ -28,7 +28,7 @@ internal class DefaultCvcRecollectionInteractor(args: Args) : CvcRecollectionInt
 
     override fun handleViewAction(action: CvcRecollectionViewAction) {
         when (action) {
-            is CvcRecollectionViewAction.CvcCompletionChanged -> {
+            is CvcRecollectionViewAction.CvcStateChanged -> {
                 _cvcCompletionState.value = action.completion
             }
             CvcRecollectionViewAction.OnBackPressed -> Unit

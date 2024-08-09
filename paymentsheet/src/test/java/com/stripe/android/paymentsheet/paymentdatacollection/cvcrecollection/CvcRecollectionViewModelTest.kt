@@ -18,7 +18,7 @@ class CvcRecollectionViewModelTest {
             cardBrand = CardBrand.Visa,
             lastFour = "4242",
             cvc = null,
-            displayMode = Args.DisplayMode.Activity(false)
+            isTestMode = true
         )
     )
 
@@ -45,7 +45,7 @@ class CvcRecollectionViewModelTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 cvc = null,
-                displayMode = Args.DisplayMode.Activity(false)
+                isTestMode = true
             )
         )
     }

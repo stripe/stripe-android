@@ -48,21 +48,10 @@ internal class CvcRecollectionViewModel(
                         lastFour = args.lastFour,
                         cardBrand = args.cardBrand,
                         cvc = null,
-                        displayMode = args.displayMode.toDisplayMode()
+                        isTestMode = args.isTestMode
                     )
                 )
             ) as T
-        }
-    }
-}
-
-internal fun CvcRecollectionContract.Args.DisplayMode.toDisplayMode(): Args.DisplayMode {
-    return when (this) {
-        is CvcRecollectionContract.Args.DisplayMode.Activity -> {
-            Args.DisplayMode.Activity(isLiveMode)
-        }
-        is CvcRecollectionContract.Args.DisplayMode.PaymentScreen -> {
-            Args.DisplayMode.PaymentScreen(isLiveMode)
         }
     }
 }

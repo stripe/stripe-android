@@ -10,8 +10,8 @@ internal class FakeCvcRecollectionInteractor(
     override val viewState: StateFlow<CvcRecollectionViewState>
         get() = _viewState
 
-    private val _cvcCompletion = MutableStateFlow<CvcCompletionState>(CvcCompletionState.Incomplete)
-    override val cvcCompletionState: StateFlow<CvcCompletionState>
+    private val _cvcCompletion = MutableStateFlow(CvcState())
+    override val cvcCompletionState: StateFlow<CvcState>
         get() = _cvcCompletion
 
     override fun handleViewAction(action: CvcRecollectionViewAction) = Unit

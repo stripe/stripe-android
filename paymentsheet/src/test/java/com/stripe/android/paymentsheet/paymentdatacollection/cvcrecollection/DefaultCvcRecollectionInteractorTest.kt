@@ -30,7 +30,7 @@ class DefaultCvcRecollectionInteractorTest {
                 lastFour = "4242",
                 cardBrand = CardBrand.Visa,
                 cvc = null,
-                displayMode = Args.DisplayMode.Activity(isLiveMode = false)
+                isTestMode = true
             ),
         )
     }
@@ -44,7 +44,7 @@ class DefaultCvcRecollectionInteractorTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 cvc = null,
-                displayMode = Args.DisplayMode.Activity(false)
+                isTestMode = true
             )
         )
     }
@@ -54,23 +54,13 @@ class DefaultCvcRecollectionInteractorTest {
         val interactor = createInteractor()
 
         interactor.cvcCompletionState.test {
-            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
+            assertThat(awaitItem()).isEqualTo(CvcState())
 
             interactor.handleViewAction(
-                action = CvcRecollectionViewAction.CvcCompletionChanged(CvcCompletionState.Incomplete)
+                action = CvcRecollectionViewAction.CvcStateChanged(CvcState("555", isComplete = true))
             )
 
-            interactor.handleViewAction(
-                action = CvcRecollectionViewAction.CvcCompletionChanged(CvcCompletionState.Completed("515"))
-            )
-
-            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Completed("515"))
-
-            interactor.handleViewAction(
-                action = CvcRecollectionViewAction.CvcCompletionChanged(CvcCompletionState.Incomplete)
-            )
-
-            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
+            assertThat(awaitItem()).isEqualTo(CvcState("555", isComplete = true))
         }
     }
 }
