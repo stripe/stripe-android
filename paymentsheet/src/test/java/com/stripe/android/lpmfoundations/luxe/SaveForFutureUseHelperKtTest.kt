@@ -107,7 +107,9 @@ class SaveForFutureUseHelperKtTest {
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = null,
+                ),
             ),
         )
 

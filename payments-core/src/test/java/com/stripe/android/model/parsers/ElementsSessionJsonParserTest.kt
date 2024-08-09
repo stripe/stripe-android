@@ -6,6 +6,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
+import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -495,7 +496,7 @@ class ElementsSessionJsonParserTest {
             apiKey = "test",
         )
 
-        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_CUSTOMER_SESSION
+        val intent = createPaymentIntentWithCustomerSession()
         val elementsSession = parser.parse(intent)
 
         assertThat(elementsSession?.customer).isEqualTo(
@@ -510,6 +511,7 @@ class ElementsSessionJsonParserTest {
                         paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             isPaymentMethodRemoveEnabled = true,
+                            allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
                         ),
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled
                     )
@@ -544,6 +546,38 @@ class ElementsSessionJsonParserTest {
                     )
                 )
             )
+        )
+    }
+
+    @Test
+    fun `ElementsSession has 'unspecified' allow redisplay override`() {
+        allowRedisplayTest(
+            rawAllowRedisplayValue = "unspecified",
+            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+    }
+
+    @Test
+    fun `ElementsSession has 'limited' allow redisplay override`() {
+        allowRedisplayTest(
+            rawAllowRedisplayValue = "limited",
+            allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+    }
+
+    @Test
+    fun `ElementsSession has 'always' allow redisplay override`() {
+        allowRedisplayTest(
+            rawAllowRedisplayValue = "always",
+            allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+        )
+    }
+
+    @Test
+    fun `ElementsSession has null allow redisplay override`() {
+        allowRedisplayTest(
+            rawAllowRedisplayValue = null,
+            allowRedisplay = null,
         )
     }
 
@@ -629,5 +663,28 @@ class ElementsSessionJsonParserTest {
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
         assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+    }
+
+    private fun allowRedisplayTest(
+        rawAllowRedisplayValue: String?,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+    ) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(allowRedisplay = rawAllowRedisplayValue)
+        val elementsSession = parser.parse(intent)
+
+        val paymentSheetComponent = elementsSession?.customer?.session?.components?.paymentSheet
+
+        val enabledComponent = paymentSheetComponent as? ElementsSession.Customer.Components.PaymentSheet.Enabled
+
+        assertThat(enabledComponent?.allowRedisplayOverride).isEqualTo(allowRedisplay)
     }
 }

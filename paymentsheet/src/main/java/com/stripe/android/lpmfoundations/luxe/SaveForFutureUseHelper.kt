@@ -11,9 +11,9 @@ internal fun isSaveForFutureUseValueChangeable(
     metadata: PaymentMethodMetadata,
 ): Boolean {
     return when (metadata.paymentMethodSaveConsentBehavior) {
-        PaymentMethodSaveConsentBehavior.Disabled -> false
-        PaymentMethodSaveConsentBehavior.Enabled -> metadata.hasCustomerConfiguration
-        PaymentMethodSaveConsentBehavior.Legacy -> {
+        is PaymentMethodSaveConsentBehavior.Disabled -> false
+        is PaymentMethodSaveConsentBehavior.Enabled -> metadata.hasCustomerConfiguration
+        is PaymentMethodSaveConsentBehavior.Legacy -> {
             when (metadata.stripeIntent) {
                 is PaymentIntent -> {
                     val isSetupFutureUsageSet = metadata.stripeIntent.isSetupFutureUsageSet(code)

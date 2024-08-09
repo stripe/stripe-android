@@ -28,6 +28,7 @@
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
+    <ID>LargeClass:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
@@ -41,6 +42,8 @@
     <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
+    <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited" ): JSONObject</ID>
+    <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>
     <ID>LongMethod:PaymentAuthWebViewActivity.kt$PaymentAuthWebViewActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>

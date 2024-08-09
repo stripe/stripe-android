@@ -1174,6 +1174,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         ElementsSession.Customer.Components.PaymentSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             isPaymentMethodSaveEnabled = false,
+                            allowRedisplayOverride = null,
                         )
                     ),
                     defaultPaymentMethod = null,
@@ -1213,6 +1214,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         ElementsSession.Customer.Components.PaymentSheet.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            allowRedisplayOverride = null,
                         )
                     ),
                     defaultPaymentMethod = null,
@@ -1252,6 +1254,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         ElementsSession.Customer.Components.PaymentSheet.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            allowRedisplayOverride = null,
                         )
                     ),
                     defaultPaymentMethod = null,
