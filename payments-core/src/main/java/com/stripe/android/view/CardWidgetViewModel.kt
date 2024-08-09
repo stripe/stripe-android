@@ -1,13 +1,12 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +16,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,19 +30,21 @@ internal class CardWidgetViewModel(
     private val paymentConfigProvider: Provider<PaymentConfiguration>,
     private val stripeRepository: StripeRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val handle: SavedStateHandle
 ) : ViewModel() {
 
     private val _isCbcEligible = MutableStateFlow(false)
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
-    var onBehalfOf: String? = handle[ON_BEHALF_OF]
-        set(value) {
-            field = value
-            handle[ON_BEHALF_OF] = value
-            getEligibility()
-        }
+
+    private var _onBehalfOf: String? = null
+    val onBehalfOf: String?
+        get() = _onBehalfOf
 
     init {
+        getEligibility()
+    }
+
+    fun setOnBehalfOf(onBehalfOf: String? = null) {
+        _onBehalfOf = onBehalfOf
         getEligibility()
     }
 
@@ -71,11 +71,9 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(val context: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = extras.requireApplication()
-
             val stripeRepository = StripeApiRepository(
                 context = context,
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
@@ -85,13 +83,8 @@ internal class CardWidgetViewModel(
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
                 stripeRepository = stripeRepository,
-                handle = extras.createSavedStateHandle()
             ) as T
         }
-    }
-
-    companion object {
-        internal const val ON_BEHALF_OF = "on_behalf_of"
     }
 }
 
@@ -113,8 +106,7 @@ internal fun View.doWithCardWidgetViewModel(
         return
     }
 
-    val factory = CardWidgetViewModel.Factory()
-
+    val factory = CardWidgetViewModel.Factory(context.applicationContext)
     val viewModel = ViewModelProvider(
         owner = storeOwner,
         factory = factory,

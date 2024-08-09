@@ -1,68 +1,42 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.FrameLayout
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import android.widget.ImageView
+import android.widget.ListPopupWindow
+import android.widget.TextView
 import com.stripe.android.R
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.SingleChoiceDropdown
-import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.utils.AppCompatOrMdcTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
-import kotlin.properties.Delegates
-import com.stripe.android.uicore.R as StripeUiCoreR
-
-internal const val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private val viewBinding: StripeCardBrandViewBinding = StripeCardBrandViewBinding.inflate(
-        LayoutInflater.from(context),
-        this
-    )
+    private val viewBinding: StripeCardBrandViewBinding =
+        StripeCardBrandViewBinding.inflate(LayoutInflater.from(context), this)
     private val iconView = viewBinding.icon
-    private val progressView = viewBinding.progress
+    private val chevron = viewBinding.chevron
+    private val listPopup = ListPopupWindow(context)
 
     @Parcelize
     internal data class State(
         val isCbcEligible: Boolean = false,
-        val reserveSpaceForCbcDropdown: Boolean = true,
         val isLoading: Boolean = false,
         val brand: CardBrand = Unknown,
         val userSelectedBrand: CardBrand? = null,
@@ -73,7 +47,7 @@ internal class CardBrandView @JvmOverloads constructor(
         val tintColor: Int = 0,
     ) : Parcelable
 
-    private val stateFlow = MutableStateFlow(State())
+    private var stateFlow = MutableStateFlow(State())
 
     private var state: State
         get() = stateFlow.value
@@ -85,50 +59,44 @@ internal class CardBrandView @JvmOverloads constructor(
         get() = state.isCbcEligible
         set(value) {
             stateFlow.update { it.copy(isCbcEligible = value) }
+            updateBrandSpinner()
         }
-
-    var isLoading: Boolean by Delegates.observable(
-        false
-    ) { _, wasLoading, isLoading ->
-        stateFlow.update { it.copy(isLoading = isLoading) }
-
-        if (wasLoading != isLoading) {
-            if (isLoading) {
-                progressView.show()
-            } else {
-                progressView.hide()
-            }
-        }
-    }
 
     var brand: CardBrand
         get() = state.brand
         set(value) {
             stateFlow.update { it.copy(brand = value) }
+            determineCardBrandToDisplay()
+            updateBrandSpinner()
         }
 
     var possibleBrands: List<CardBrand>
         get() = state.possibleBrands
         set(value) {
             stateFlow.update { it.copy(possibleBrands = value) }
+            determineCardBrandToDisplay()
+            updateBrandSpinner()
         }
 
     var merchantPreferredNetworks: List<CardBrand>
         get() = state.merchantPreferredNetworks
         set(value) {
             stateFlow.update { it.copy(merchantPreferredNetworks = value) }
+            determineCardBrandToDisplay()
         }
 
     var shouldShowCvc: Boolean
         get() = state.shouldShowCvc
         set(value) {
             stateFlow.update { it.copy(shouldShowCvc = value) }
+            setCardBrandIconAndTint()
         }
 
     var shouldShowErrorIcon: Boolean
         get() = state.shouldShowErrorIcon
         set(value) {
             stateFlow.update { it.copy(shouldShowErrorIcon = value) }
+            setCardBrandIconAndTint()
         }
 
     internal var tintColorInt: Int
@@ -137,42 +105,12 @@ internal class CardBrandView @JvmOverloads constructor(
             stateFlow.update { it.copy(tintColor = value) }
         }
 
-    internal var reserveSpaceForCbcDropdown: Boolean
-        get() = state.reserveSpaceForCbcDropdown
-        set(value) {
-            stateFlow.update { it.copy(reserveSpaceForCbcDropdown = value) }
-        }
-
     init {
         isClickable = false
         isFocusable = false
 
-        iconView.setContent {
-            AppCompatOrMdcTheme {
-                val state by stateFlow.collectAsState()
-
-                LaunchedEffect(state) {
-                    determineCardBrandToDisplay(
-                        userSelectedBrand = state.userSelectedBrand,
-                        autoDeterminedBrand = state.brand,
-                        possibleBrands = state.possibleBrands,
-                        merchantPreferredBrands = state.merchantPreferredNetworks,
-                    )
-                }
-
-                CardBrand(
-                    isLoading = state.isLoading,
-                    currentBrand = state.brand,
-                    possibleBrands = state.possibleBrands,
-                    shouldShowCvc = state.shouldShowCvc,
-                    shouldShowErrorIcon = state.shouldShowErrorIcon,
-                    tintColorInt = state.tintColor,
-                    isCbcEligible = state.isCbcEligible,
-                    reserveSpaceForCbcDropdown = state.reserveSpaceForCbcDropdown,
-                    onBrandSelected = this::handleBrandSelected,
-                )
-            }
-        }
+        determineCardBrandToDisplay()
+        updateBrandSpinner()
     }
 
     fun createNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
@@ -184,20 +122,85 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun handleBrandSelected(brand: CardBrand?) {
-        stateFlow.update { it.copy(userSelectedBrand = brand) }
+        brand?.let {
+            stateFlow.update { it.copy(userSelectedBrand = brand) }
+            determineCardBrandToDisplay()
+        }
     }
 
-    private fun determineCardBrandToDisplay(
-        userSelectedBrand: CardBrand?,
-        autoDeterminedBrand: CardBrand,
-        possibleBrands: List<CardBrand>,
-        merchantPreferredBrands: List<CardBrand>,
-    ) {
-        brand = if (possibleBrands.size > 1) {
-            selectCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
-        } else {
-            autoDeterminedBrand
+    private fun setCardBrandIconAndTint() {
+        iconView.setBackgroundResource(
+            when {
+                shouldShowErrorIcon -> state.brand.errorIcon
+                shouldShowCvc -> state.brand.cvcIcon
+                else -> state.brand.icon
+            }
+        )
+
+        val tint = when {
+            shouldShowErrorIcon -> null
+            shouldShowCvc -> tintColorInt
+            else -> tintColorInt.takeIf { state.brand == Unknown }
         }
+
+        iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
+    }
+
+    private fun determineCardBrandToDisplay() {
+        val newBrand = if (state.possibleBrands.size > 1) {
+            selectCardBrandToDisplay(state.userSelectedBrand, state.possibleBrands, state.merchantPreferredNetworks)
+        } else {
+            state.brand
+        }
+        if (brand != newBrand) brand = newBrand
+        setCardBrandIconAndTint()
+    }
+
+    private fun updateBrandSpinner() {
+        val showDropdown = isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+        if (showDropdown) {
+            initListPopup()
+            this.setOnClickListener {
+                if (listPopup.isShowing) {
+                    listPopup.dismiss()
+                } else {
+                    listPopup.show()
+                }
+            }
+            chevron.visibility = View.VISIBLE
+        } else {
+            this.setOnClickListener(null)
+            chevron.visibility = View.GONE
+        }
+    }
+
+    private fun initListPopup() {
+        val adapter = BrandAdapter(context, possibleBrands, brand)
+        listPopup.setAdapter(adapter)
+        listPopup.isModal = true
+        listPopup.width = measureContentWidth(adapter)
+        listPopup.setOnItemClickListener { _, _, position, _ ->
+            possibleBrands.getOrNull(position - 1)?.let {
+                handleBrandSelected(it)
+            }
+            listPopup.dismiss()
+        }
+        listPopup.anchorView = iconView
+    }
+
+    private fun measureContentWidth(adapter: BrandAdapter): Int {
+        val widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+        val heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+        val count = adapter.count
+        var maxWidth = 0
+
+        for (i in 0..<count) {
+            val itemView = adapter.getView(i, null, this)
+            itemView.measure(widthMeasureSpec, heightMeasureSpec)
+            maxWidth = maxWidth.coerceAtLeast(itemView.measuredWidth)
+        }
+
+        return maxWidth
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -208,6 +211,8 @@ internal class CardBrandView @JvmOverloads constructor(
     override fun onRestoreInstanceState(state: Parcelable?) {
         val savedState = state as? SavedState
         this.state = savedState?.state ?: State()
+        determineCardBrandToDisplay()
+        updateBrandSpinner()
         super.onRestoreInstanceState(savedState?.superState ?: state)
     }
 
@@ -218,124 +223,63 @@ internal class CardBrandView @JvmOverloads constructor(
     ) : BaseSavedState(superSavedState), Parcelable
 }
 
-@Composable
-private fun CardBrand(
-    isLoading: Boolean,
-    currentBrand: CardBrand,
-    possibleBrands: List<CardBrand>,
-    shouldShowCvc: Boolean,
-    shouldShowErrorIcon: Boolean,
-    tintColorInt: Int,
-    isCbcEligible: Boolean,
-    reserveSpaceForCbcDropdown: Boolean,
-    modifier: Modifier = Modifier,
-    onBrandSelected: (CardBrand?) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
+internal class BrandAdapter(
+    context: Context,
+    private val brands: List<CardBrand?>,
+    private val selectedBrand: CardBrand?
+) : ArrayAdapter<CardBrand?>(context, 0, brands) {
 
-    val icon = remember(isLoading, currentBrand, shouldShowCvc, shouldShowErrorIcon) {
-        when {
-            isLoading -> currentBrand.icon
-            shouldShowErrorIcon -> currentBrand.errorIcon
-            shouldShowCvc -> currentBrand.cvcIcon
-            else -> currentBrand.icon
+    private val inflater = LayoutInflater.from(context)
+    private val colorUtils = StripeColorUtils(context)
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = if (position == 0) {
+            inflater.inflate(R.layout.stripe_select_card_brand_view, parent, false)
+        } else {
+            inflater.inflate(R.layout.stripe_card_brand_choice_list_view, parent, false)
         }
+
+        if (position > 0) updateView(view, position)
+        return view
     }
 
-    val tint = remember(isLoading, currentBrand, shouldShowCvc, shouldShowErrorIcon) {
-        when {
-            isLoading -> Color(tintColorInt).takeIf { currentBrand == Unknown }
-            shouldShowErrorIcon -> null
-            shouldShowCvc -> Color(tintColorInt)
-            else -> Color(tintColorInt).takeIf { currentBrand == Unknown }
-        }
+    override fun getItem(position: Int): CardBrand? {
+        return if (position == 0) null else super.getItem(position - 1)
     }
 
-    val showDropdown = remember(possibleBrands, shouldShowCvc, shouldShowErrorIcon) {
-        isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+    override fun getCount(): Int {
+        return if (brands.isEmpty()) 0 else brands.size + 1
     }
 
-    Box(modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .clickable(enabled = showDropdown) { expanded = true }
-                .testTag(CardBrandDropdownTestTag),
-        ) {
-            val dropdownIconAlpha by animateFloatAsState(
-                targetValue = if (showDropdown) ContentAlpha.medium else 0f,
-                label = "CbcDropdownIconAlpha",
-            )
+    override fun areAllItemsEnabled(): Boolean {
+        return false
+    }
 
-            Image(
-                painter = painterResource(icon),
-                colorFilter = tint?.let { ColorFilter.tint(it) },
-                contentDescription = null,
-                modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
-            )
+    override fun isEnabled(position: Int): Boolean {
+        return position != 0
+    }
 
-            Spacer(modifier = Modifier.requiredWidth(1.dp))
-
-            AnimatedVisibility(visible = showDropdown || reserveSpaceForCbcDropdown) {
-                Spacer(modifier = Modifier.requiredWidth(1.dp))
-
-                Image(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .requiredSize(8.dp)
-                        .graphicsLayer { alpha = dropdownIconAlpha },
-                )
+    private fun updateView(view: View, position: Int) {
+        brands.getOrNull(position - 1)?.let { brand ->
+            val isSelected = brand == selectedBrand
+            view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_check).apply {
+                if (isSelected) {
+                    visibility = View.VISIBLE
+                    setColorFilter(colorUtils.colorPrimary)
+                } else {
+                    visibility = View.GONE
+                }
+            }
+            view.findViewById<TextView>(R.id.brand_text)?.apply {
+                text = brand.displayName
+                if (isSelected) {
+                    setTextColor(colorUtils.colorPrimary)
+                    typeface = Typeface.DEFAULT_BOLD
+                } else {
+                    typeface = Typeface.DEFAULT
+                }
             }
         }
-
-        if (showDropdown) {
-            CardBrandChoiceDropdown(
-                expanded = expanded,
-                currentBrand = currentBrand,
-                brands = possibleBrands,
-                onBrandSelected = { brand ->
-                    onBrandSelected(brand)
-                    expanded = false
-                },
-                onDismiss = { expanded = false },
-            )
-        }
     }
-}
-
-@Composable
-private fun CardBrandChoiceDropdown(
-    expanded: Boolean,
-    currentBrand: CardBrand,
-    brands: List<CardBrand>,
-    onBrandSelected: (CardBrand?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val choices = brands.map { it.toChoice() }
-
-    SingleChoiceDropdown(
-        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
-        expanded = expanded,
-        currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
-        choices = choices,
-        headerTextColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
-        optionTextColor = MaterialTheme.colors.onSurface,
-        onChoiceSelected = { choice ->
-            val choiceIndex = choices.indexOf(choice)
-            val brand = brands.getOrNull(choiceIndex)
-
-            if (brand != null) {
-                onBrandSelected(brand)
-            }
-        },
-        onDismiss = onDismiss,
-    )
-}
-
-private fun CardBrand.toChoice(): CardBrandChoice {
-    return CardBrandChoice(
-        label = displayName.resolvableString,
-        icon = icon
-    )
 }
