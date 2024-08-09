@@ -1551,10 +1551,8 @@ class PaymentSheet internal constructor(
             accessType = CustomerAccessType.LegacyCustomerEphemeralKey(ephemeralKeySecret)
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             @ExperimentalCustomerSessionApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createWithCustomerSession(
                 id: String,
                 clientSecret: String

@@ -812,6 +812,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerAccessTy
 public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -824,6 +825,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfigur
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration$Companion {
+	public final fun createWithCustomerSession (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration$Creator : android/os/Parcelable$Creator {
