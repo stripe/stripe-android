@@ -40,6 +40,8 @@ class CheckoutRequest private constructor(
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
+    @SerialName("customer_session_payment_method_save_allow_redisplay_override")
+    val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -71,6 +73,7 @@ class CheckoutRequest private constructor(
             AllowRedisplayFilter.Limited,
             AllowRedisplayFilter.Always,
         )
+        private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -132,6 +135,10 @@ class CheckoutRequest private constructor(
             this.paymentMethodRedisplayFilters = filters
         }
 
+        fun paymentMethodOverrideRedisplay(override: AllowRedisplayFilter?) {
+            this.paymentMethodOverrideRedisplay = override
+        }
+
         fun requireCvcRecollection(requireCvcRecollection: Boolean?) = apply {
             this.requireCvcRecollection = requireCvcRecollection
         }
@@ -154,6 +161,7 @@ class CheckoutRequest private constructor(
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
+                paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
             )
         }
     }
