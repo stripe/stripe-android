@@ -212,9 +212,11 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
     ): PaymentMethod.AllowRedisplay {
         return when (paymentMethodSaveConsentBehavior) {
-            PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.LIMITED
-            PaymentMethodSaveConsentBehavior.Enabled -> {
+            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Disabled -> {
+                paymentMethodSaveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
+            }
+            is PaymentMethodSaveConsentBehavior.Enabled -> {
                 if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
                     PaymentMethod.AllowRedisplay.ALWAYS
                 } else {
@@ -228,9 +230,9 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
     ): PaymentMethod.AllowRedisplay {
         return when (paymentMethodSaveConsentBehavior) {
-            PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            PaymentMethodSaveConsentBehavior.Enabled -> {
+            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Enabled -> {
                 if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
                     PaymentMethod.AllowRedisplay.ALWAYS
                 } else {

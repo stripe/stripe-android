@@ -81,6 +81,7 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
+                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
                 ) : PaymentSheet
             }
 

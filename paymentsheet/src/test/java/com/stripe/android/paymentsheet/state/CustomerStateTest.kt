@@ -44,6 +44,7 @@ class CustomerStateTest {
             paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
+                allowRedisplayOverride = null,
             ),
         )
 
@@ -73,6 +74,7 @@ class CustomerStateTest {
             paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = false,
+                allowRedisplayOverride = null,
             ),
         )
 

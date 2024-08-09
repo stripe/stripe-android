@@ -8,7 +8,9 @@ internal fun ElementsSession.toPaymentSheetSaveConsentBehavior(): PaymentMethodS
             if (paymentSheetComponent.isPaymentMethodSaveEnabled) {
                 PaymentMethodSaveConsentBehavior.Enabled
             } else {
-                PaymentMethodSaveConsentBehavior.Disabled
+                PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = paymentSheetComponent.allowRedisplayOverride
+                )
             }
         }
         // Unless the merchant explicitly defines the consent behavior, always use the legacy behavior

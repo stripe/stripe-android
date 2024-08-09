@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONArray
 import org.json.JSONObject
@@ -220,10 +221,17 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val allowRedisplayOverrideValue = paymentSheetFeatures
+                .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
+
+            val allowRedisplayOverride = PaymentMethod.AllowRedisplay.entries.firstOrNull { allowRedisplay ->
+                allowRedisplay.value == allowRedisplayOverrideValue
+            }
 
             ElementsSession.Customer.Components.PaymentSheet.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                allowRedisplayOverride = allowRedisplayOverride,
             )
         } else {
             ElementsSession.Customer.Components.PaymentSheet.Disabled
@@ -302,6 +310,8 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_FEATURES = "features"
         private const val FIELD_PAYMENT_METHOD_SAVE = "payment_method_save"
         private const val FIELD_PAYMENT_METHOD_REMOVE = "payment_method_remove"
+        private const val FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE =
+            "payment_method_save_allow_redisplay_override"
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
 
