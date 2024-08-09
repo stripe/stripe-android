@@ -42,7 +42,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
@@ -271,13 +270,15 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         consumerSessionClientSecret: String,
         accountIds: Set<String>,
     ) {
-        selectNetworkedAccounts(
+        val response = selectNetworkedAccounts(
             consumerSessionClientSecret = consumerSessionClientSecret,
             selectedAccountIds = accountIds,
             consentAcquired = acquireConsentOnPrimaryCtaClick,
         )
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
-        navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
+        navigationManager.tryNavigateTo(
+            (response.nextPane ?: SUCCESS).destination(referrer = PANE)
+        )
     }
 
     private suspend fun handleNonSuccessNextPane(payload: LinkAccountPickerState.Payload, nextPane: Pane?) {
@@ -465,7 +466,7 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
-                    // if no account was selected, use the consent
+                // if no account was selected, use the consent
                     ?: payload.defaultDataAccessNotice
             }
         }
