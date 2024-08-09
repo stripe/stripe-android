@@ -466,7 +466,7 @@ internal data class LinkAccountPickerState(
                 // 1) one account
                 // 2) or, multiple accounts of the same account type
                 payload.selectedAccounts.firstOrNull()?.display?.dataAccessNotice
-                // if no account was selected, use the consent
+                    // if no account was selected, use the consent
                     ?: payload.defaultDataAccessNotice
             }
         }

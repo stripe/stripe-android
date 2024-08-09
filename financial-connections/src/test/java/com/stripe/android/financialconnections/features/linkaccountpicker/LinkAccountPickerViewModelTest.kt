@@ -23,10 +23,10 @@ import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
@@ -217,7 +217,13 @@ class LinkAccountPickerViewModelTest {
                 selectedAccountIds = any(),
                 consentAcquired = any()
             )
-        ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
+        ).thenReturn(
+            ShareNetworkedAccountsResponse(
+                nextPane = null,
+                display = null,
+                data = listOf(institution())
+            )
+        )
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
@@ -258,7 +264,13 @@ class LinkAccountPickerViewModelTest {
                     selectedAccountIds = any(),
                     consentAcquired = any()
                 )
-            ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
+            ).thenReturn(
+                ShareNetworkedAccountsResponse(
+                    nextPane = null,
+                    display = null,
+                    data = listOf(institution())
+                )
+            )
 
             val viewModel = buildViewModel(LinkAccountPickerState())
 

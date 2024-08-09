@@ -133,7 +133,7 @@ internal class SaveAccountToLinkTest {
             )
         }
 
-        assertThat(successRepository.get()?.customSuccessMessage).isEqualTo(
+        assertThat(successRepository.get()?.message).isEqualTo(
             TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_desc_link_error,
                 count = 2,
@@ -171,7 +171,7 @@ internal class SaveAccountToLinkTest {
                 shouldPollAccountNumbers = true,
             )
 
-            assertThat(successRepository.get()?.customSuccessMessage).isEqualTo(
+            assertThat(successRepository.get()?.message).isEqualTo(
                 TextResource.PluralId(
                     value = R.plurals.stripe_success_pane_desc_link_success,
                     count = 1,
