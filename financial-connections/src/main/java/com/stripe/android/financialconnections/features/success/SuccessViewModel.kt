@@ -22,7 +22,6 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -44,11 +43,10 @@ internal class SuccessViewModel @AssistedInject constructor(
         suspend {
             val manifest = getOrFetchSync().manifest
             val accounts = getCachedAccounts()
-            val successContent = successContentRepository.get()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,
-                customSuccessMessage = successContent?.customSuccessMessage,
+                customSuccessContent = successContentRepository.get(),
                 // We just want to use the business name in the CTA if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
@@ -116,7 +114,7 @@ internal data class SuccessState(
 
     data class Payload(
         val businessName: String?,
-        val customSuccessMessage: TextResource?,
+        val customSuccessContent: SuccessContentRepository.State?,
         val accountsCount: Int,
         val skipSuccessPane: Boolean
     )

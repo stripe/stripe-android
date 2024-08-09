@@ -150,7 +150,7 @@ internal class ManualEntryViewModel @AssistedInject constructor(
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
                     successContentRepository.set(
-                        customSuccessMessage = TextResource.StringId(
+                        message = TextResource.StringId(
                             R.string.stripe_success_pane_desc_microdeposits,
                             listOf(account.takeLast(4))
                         )

@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -125,7 +124,8 @@ private fun SuccessContentInternal(
             .padding(24.dp),
     ) {
         SpinnerToSuccessAnimation(
-            customSuccessMessage = payload?.customSuccessMessage,
+            customMessage = payload?.customSuccessContent?.message,
+            customHeading = payload?.customSuccessContent?.heading,
             accountsCount = payload?.accountsCount ?: 0,
             showSpinner = showSpinner || payload == null,
             initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
@@ -152,7 +152,8 @@ private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
     initialSuccessBodyHeight: Dp?,
     accountsCount: Int,
-    customSuccessMessage: TextResource?,
+    customMessage: TextResource?,
+    customHeading: TextResource?,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -214,7 +215,8 @@ private fun SpinnerToSuccessAnimation(
             enter = SUCCESS_SLIDE_IN_ANIMATION,
         ) {
             SuccessBody(
-                customSuccessMessage = customSuccessMessage,
+                customMessage = customMessage,
+                customHeading = customHeading,
                 accountsCount = accountsCount,
                 modifier = Modifier.onGloballyPositioned {
                     successBodyHeight = with(density) { it.size.height.toDp() }
@@ -292,7 +294,8 @@ private fun SpinnerToCheckmark(
 
 @Composable
 private fun SuccessBody(
-    customSuccessMessage: TextResource?,
+    customMessage: TextResource?,
+    customHeading: TextResource?,
     accountsCount: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -301,14 +304,16 @@ private fun SuccessBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
-        Text(
-            text = stringResource(R.string.stripe_success_pane_title),
-            style = typography.headingXLarge,
-            textAlign = TextAlign.Center
+        AnnotatedText(
+            text = customHeading ?: TextResource.StringId(R.string.stripe_success_pane_title),
+            defaultStyle = typography.headingXLarge.copy(
+                textAlign = TextAlign.Center
+            ),
+            onClickableTextClick = {}
         )
 
         AnnotatedText(
-            text = customSuccessMessage ?: TextResource.PluralId(
+            text = customMessage ?: TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_desc,
                 count = accountsCount,
             ),
@@ -369,7 +374,7 @@ private fun calculateBodyHeightForPreview(config: Configuration, state: SuccessS
     // We need to manually calculate this for our screenshot tests, as we've been unable to
     // delay the capture until the offset animation finishes.
     val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
-    return if (state.payload()?.customSuccessMessage != null && isPhone) {
+    return if (state.payload()?.customSuccessContent != null && isPhone) {
         120.dp
     } else {
         72.dp
