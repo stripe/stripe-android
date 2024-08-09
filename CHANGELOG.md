@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.48.4 - 2024-08-09
+
 ### Payments
 * [FIXED][9011](https://github.com/stripe/stripe-android/pull/9011) Fixed an issue where rendering Card Element in React Native and the base `Activity` would cause a crash.
 
