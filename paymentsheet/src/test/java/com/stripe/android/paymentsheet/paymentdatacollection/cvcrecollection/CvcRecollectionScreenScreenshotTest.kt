@@ -4,7 +4,12 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.test.TestScope
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,6 +21,27 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
+    private fun interactor(cvc: String? = null, isTestMode: Boolean = true): CvcRecollectionInteractor {
+        return DefaultCvcRecollectionInteractor(
+            args = Args(
+                lastFour = "4242",
+                cardBrand = CardBrand.Visa,
+                cvc = cvc,
+                isTestMode = isTestMode
+            ),
+            scope = TestScope()
+        )
+    }
+
+    private fun element(): CvcElement {
+        return CvcElement(
+            IdentifierSpec(),
+            CvcController(
+                cardBrandFlow = stateFlowOf(CardBrand.Visa)
+            )
+        )
+    }
+
     @Test
     fun testEmpty() {
         paparazziRule.snapshot {
@@ -23,6 +49,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = false,
+                element = element(),
                 viewActionHandler = {}
             )
         }
@@ -32,9 +59,7 @@ class CvcRecollectionScreenScreenshotTest {
     fun testEmptyPaymentScreenDisplayMode() {
         paparazziRule.snapshot {
             CvcRecollectionPaymentSheetScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242",
-                viewActionHandler = {}
+                interactor = interactor()
             )
         }
     }
@@ -46,6 +71,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = false,
+                element = element(),
                 viewActionHandler = {}
             )
         }
@@ -58,6 +84,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = true,
+                element = element(),
                 viewActionHandler = {}
             )
         }
@@ -67,9 +94,7 @@ class CvcRecollectionScreenScreenshotTest {
     fun testFilledTestModePaymentScreenDisplayMode() {
         paparazziRule.snapshot {
             CvcRecollectionPaymentSheetScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242",
-                viewActionHandler = {}
+                interactor = interactor()
             )
         }
     }

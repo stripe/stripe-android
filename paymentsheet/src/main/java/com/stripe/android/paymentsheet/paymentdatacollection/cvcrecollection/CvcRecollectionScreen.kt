@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -50,19 +51,15 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.combine
 
 @Composable
 internal fun CvcRecollectionScreen(
     cardBrand: CardBrand,
     lastFour: String,
     isTestMode: Boolean,
+    element: CvcElement,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
-    val element = rememberElement(cardBrand) { cvcState ->
-        viewActionHandler(CvcRecollectionViewAction.CvcStateChanged(cvcState))
-    }
-
     StripeTheme {
         Column(
             Modifier
@@ -87,13 +84,9 @@ internal fun CvcRecollectionScreen(
 
 @Composable
 internal fun CvcRecollectionPaymentSheetScreen(
-    cardBrand: CardBrand,
-    lastFour: String,
-    viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
+    interactor: CvcRecollectionInteractor,
 ) {
-    val element = rememberElement(cardBrand) { cvcState ->
-        viewActionHandler(CvcRecollectionViewAction.CvcStateChanged(cvcState))
-    }
+    val state by interactor.viewState.collectAsState()
 
     StripeTheme {
         Column(
@@ -102,35 +95,9 @@ internal fun CvcRecollectionPaymentSheetScreen(
                 .padding(horizontal = 20.dp)
         ) {
             CvcRecollectionTitle()
-            CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
+            CvcRecollectionField(element = state.element, cardBrand = state.cardBrand, lastFour = state.lastFour)
         }
     }
-}
-
-@Composable
-private fun rememberElement(
-    cardBrand: CardBrand,
-    onCompletionChanged: (CvcState) -> Unit
-): CvcElement {
-    val element = remember {
-        CvcElement(
-            IdentifierSpec(),
-            CvcController(cardBrandFlow = stateFlowOf(cardBrand))
-        )
-    }
-
-    LaunchedEffect(element) {
-        combine(
-            element.controller.fieldValue,
-            element.controller.isComplete
-        ) { cvc, isComplete ->
-            CvcState(cvc, isComplete)
-        }.collect {
-            onCompletionChanged(it)
-        }
-    }
-
-    return element
 }
 
 @Suppress("MagicNumber", "LongMethod")
@@ -267,6 +234,12 @@ private fun CvcRecollectionFieldPreview() {
             cardBrand = CardBrand.Visa,
             lastFour = "4242",
             isTestMode = false,
+            element = CvcElement(
+                IdentifierSpec(),
+                CvcController(
+                    cardBrandFlow = stateFlowOf(CardBrand.Visa)
+                )
+            ),
             viewActionHandler = { }
         )
     }
