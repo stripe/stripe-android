@@ -85,6 +85,16 @@ internal object PaymentMethodFixtures {
         customerId = "cus_AQsHpvKfKwJDrF",
         code = "paypal"
     )
+
+    val LINK_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Link,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        code = "link"
+    )
 //
 //    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
 //        id = "pm_1GJ4cUABjb",

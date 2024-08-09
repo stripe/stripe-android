@@ -1476,6 +1476,47 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
+    fun `When using 'CustomerSession', payment methods should be filtered by supported saved payment methods`() =
+        runTest {
+            val paymentMethods = PaymentMethodFixtures.createCards(2) +
+                listOf(
+                    PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                    PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+                    PaymentMethodFixtures.AU_BECS_DEBIT,
+                )
+
+            val loader = createPaymentSheetLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "link", "au_becs_debit", "sepa_debit")
+                ),
+                customer = createElementsSessionCustomer(
+                    paymentMethods = paymentMethods,
+                ),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "id",
+                        clientSecret = "cuss_1",
+                    ),
+                    allowsDelayedPaymentMethods = true,
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            val expectedPaymentMethods = paymentMethods.filter { paymentMethod ->
+                paymentMethod != PaymentMethodFixtures.LINK_PAYMENT_METHOD &&
+                    paymentMethod != PaymentMethodFixtures.AU_BECS_DEBIT
+            }
+
+            assertThat(result.customer?.paymentMethods)
+                .containsExactlyElementsIn(expectedPaymentMethods)
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
         runTest {
             val customerRepository = spy(
@@ -1696,6 +1737,26 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
+    private fun createElementsSessionCustomer(
+        paymentMethods: List<PaymentMethod>,
+    ): ElementsSession.Customer {
+        return ElementsSession.Customer(
+            paymentMethods = paymentMethods,
+            session = ElementsSession.Customer.Session(
+                id = "cuss_1",
+                customerId = "cus_1",
+                liveMode = false,
+                apiKey = "ek_123",
+                apiKeyExpiry = 555555555,
+                components = ElementsSession.Customer.Components(
+                    paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                ),
+            ),
+            defaultPaymentMethod = null,
+        )
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -1744,6 +1805,7 @@ internal class DefaultPaymentSheetLoaderTest {
     private fun mockConfiguration(
         customer: PaymentSheet.CustomerConfiguration? = null,
         isGooglePayEnabled: Boolean = true,
+        allowsDelayedPaymentMethods: Boolean = false,
         shippingDetails: AddressDetails? = null,
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
     ): PaymentSheet.Configuration {
@@ -1752,6 +1814,7 @@ internal class DefaultPaymentSheetLoaderTest {
             customer = customer,
             shippingDetails = shippingDetails,
             defaultBillingDetails = defaultBillingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
