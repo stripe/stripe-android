@@ -27,8 +27,6 @@ internal class PaymentOptionsItemsMapper(
             createPaymentOptionsItems(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
-                // TODO(samer-stripe): Set this based on customer_session permissions
-                canRemovePaymentMethods = true,
                 isGooglePayReady = isGooglePayReady,
             ) ?: emptyList()
         }
@@ -38,7 +36,6 @@ internal class PaymentOptionsItemsMapper(
     private fun createPaymentOptionsItems(
         paymentMethods: List<PaymentMethod>,
         isLinkEnabled: Boolean?,
-        canRemovePaymentMethods: Boolean?,
         isGooglePayReady: Boolean,
     ): List<PaymentOptionsItem>? {
         if (isLinkEnabled == null) return null
@@ -49,7 +46,6 @@ internal class PaymentOptionsItemsMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible(),
-            canRemovePaymentMethods = canRemovePaymentMethods ?: false
         )
     }
 }

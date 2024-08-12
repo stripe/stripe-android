@@ -113,55 +113,6 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
-    @Test
-    fun testItemsNotRemovableWhileEditing() {
-        val paymentOptionsItems = listOf(
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("4242"),
-                    isRemovable = false,
-                )
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("4000").run {
-                        copy(
-                            card = card?.copy(
-                                networks = PaymentMethod.Card.Networks(
-                                    available = setOf("visa", "cartes_bancaires")
-                                )
-                            )
-                        )
-                    },
-                    isRemovable = false,
-                    isCbcEligible = true,
-                )
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("1234"),
-                    isRemovable = false,
-                )
-            ),
-        )
-
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItems,
-                selectedPaymentOptionsItem = paymentOptionsItems[1],
-                isEditing = true,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                onItemRemoved = {},
-            )
-        }
-    }
-
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
         return original.copy(
