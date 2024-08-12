@@ -65,6 +65,8 @@
   <string name="stripe_pay_button_amount">%s 결제</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">은행</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">카드 추가</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
   <string name="stripe_paymentsheet_add_new_card">새 카드 추가</string>
   <!-- Card details entry form header title -->

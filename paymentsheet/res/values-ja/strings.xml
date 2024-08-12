@@ -91,6 +91,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">保存済み</string>
+  <!-- Title shown above a view containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">決済手段を選択する</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">支払い方法を選択してください</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->

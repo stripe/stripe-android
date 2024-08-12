@@ -91,6 +91,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来在 %s 付款</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">已保存</string>
+  <!-- Title shown above a view containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">选择支付方式</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">选择您的支付方式</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->

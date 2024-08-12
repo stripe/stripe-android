@@ -65,6 +65,8 @@
   <string name="stripe_pay_button_amount">Magbayad ng %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bangko</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">Magdagdag ng kard</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
   <string name="stripe_paymentsheet_add_new_card">Magdagdag ng bagong kard</string>
   <!-- Card details entry form header title -->
