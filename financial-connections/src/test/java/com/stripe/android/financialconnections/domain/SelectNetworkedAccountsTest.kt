@@ -39,7 +39,6 @@ class SelectNetworkedAccountsTest {
         val consentAcquired = true
         val successPane = SuccessPane("Success Caption", "Success SubCaption")
         val response = ShareNetworkedAccountsResponse(
-            data = emptyList(),
             nextPane = null,
             display = Display(TextUpdate(successPane = successPane))
         )

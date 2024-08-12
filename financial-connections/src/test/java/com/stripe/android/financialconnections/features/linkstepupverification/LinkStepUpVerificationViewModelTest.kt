@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
@@ -161,7 +160,6 @@ class LinkStepUpVerificationViewModelTest {
             )
         ).thenReturn(
             ShareNetworkedAccountsResponse(
-                data = listOf(institution()),
                 nextPane = null,
                 display = null
             )

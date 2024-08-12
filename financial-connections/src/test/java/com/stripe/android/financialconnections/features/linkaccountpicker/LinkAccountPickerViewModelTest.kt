@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 import FinancialConnectionsGenericInfoScreen
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
@@ -221,7 +220,6 @@ class LinkAccountPickerViewModelTest {
             ShareNetworkedAccountsResponse(
                 nextPane = null,
                 display = null,
-                data = listOf(institution())
             )
         )
 
@@ -268,7 +266,6 @@ class LinkAccountPickerViewModelTest {
                 ShareNetworkedAccountsResponse(
                     nextPane = null,
                     display = null,
-                    data = listOf(institution())
                 )
             )
 
