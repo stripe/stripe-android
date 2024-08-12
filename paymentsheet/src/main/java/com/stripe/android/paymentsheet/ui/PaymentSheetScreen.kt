@@ -43,7 +43,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.core.strings.ResolvableString
@@ -240,7 +239,7 @@ private fun PaymentSheetContent(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = Modifier.animateContentSize()) {
+    Column(modifier = Modifier.animateContentSize().padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -289,7 +288,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel, topPadding = currentScreen.bottomContentPadding)
+    PrimaryButton(viewModel)
 
     Box(modifier = Modifier.animateContentSize()) {
         if (mandateText?.showAbovePrimaryButton == false) {
@@ -355,7 +354,7 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel, topPadding: Dp) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState = viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
@@ -390,7 +389,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, topPadding: Dp) {
             )
             binding
         },
-        modifier = modifier.padding(top = topPadding),
+        modifier = modifier,
     )
 
     LaunchedEffect(viewModel, button) {
