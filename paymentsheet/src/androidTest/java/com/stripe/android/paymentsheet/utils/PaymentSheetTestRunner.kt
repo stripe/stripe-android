@@ -44,7 +44,7 @@ internal class PaymentSheetTestRunnerContext(
 
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
-    integrationType: IntegrationType,
+    integrationType: IntegrationType = IntegrationType.Compose,
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
