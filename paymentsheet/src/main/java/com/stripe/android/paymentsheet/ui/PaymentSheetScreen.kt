@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.core.strings.ResolvableString
@@ -54,7 +55,6 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -289,7 +289,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+    PrimaryButton(viewModel, topPadding = currentScreen.bottomContentPadding)
 
     Box(modifier = Modifier.animateContentSize()) {
         if (mandateText?.showAbovePrimaryButton == false) {
@@ -355,7 +355,7 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel, topPadding: Dp) {
     val uiState = viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
@@ -390,7 +390,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             )
             binding
         },
-        modifier = modifier,
+        modifier = modifier.padding(top = topPadding),
     )
 
     LaunchedEffect(viewModel, button) {
