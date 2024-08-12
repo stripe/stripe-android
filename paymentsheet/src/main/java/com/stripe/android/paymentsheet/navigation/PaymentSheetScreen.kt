@@ -350,7 +350,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = 0.dp
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -398,7 +398,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = 0.dp
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
