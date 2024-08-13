@@ -42,7 +42,7 @@ internal fun SavedPaymentMethodRowButton(
                 iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
                 colorFilter = null,
                 alignment = Alignment.Center,
-                modifier = Modifier.padding(4.dp).height(16.dp).width(24.dp)
+                modifier = Modifier.padding(4.dp).height(20.dp).width(24.dp)
             )
         },
         title = paymentMethodTitle.resolve(),
