@@ -274,7 +274,7 @@ private fun PaymentSheetContent(
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 8.dp),
             )
         }
 
