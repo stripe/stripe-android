@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -132,6 +133,65 @@ class SavedPaymentMethodMutatorTest {
                 )
 
                 assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when has remove permissions & allowsRemovalOfLastSavedPaymentMethod is true`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = true,
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when has remove permissions & allowsRemovalOfLastSavedPaymentMethod is false`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = true,
+                    )
+                )
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when does not remove permissions & allowsRemovalOfLastSavedPaymentMethod is true`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = false,
+                    )
+                )
+
+                ensureAllEventsConsumed()
             }
         }
 
@@ -308,6 +368,42 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
+    fun `modifyPaymentMethod should create modify screen correctly when can remove`() = runScenario {
+        val cards = PaymentMethodFixtures.createCards(3)
+
+        customerStateHolder.setCustomerState(
+            createCustomerState(
+                paymentMethods = cards,
+                isRemoveEnabled = true,
+            )
+        )
+
+        savedPaymentMethodMutator.modifyPaymentMethod(cards[0])
+
+        val call = editPaymentMethodInteractorFactory.calls.awaitItem()
+
+        assertThat(call.canRemove).isTrue()
+    }
+
+    @Test
+    fun `modifyPaymentMethod should create modify screen correctly when cannot remove`() = runScenario {
+        val cards = PaymentMethodFixtures.createCards(3)
+
+        customerStateHolder.setCustomerState(
+            createCustomerState(
+                paymentMethods = cards,
+                isRemoveEnabled = false,
+            )
+        )
+
+        savedPaymentMethodMutator.modifyPaymentMethod(cards[0])
+
+        val call = editPaymentMethodInteractorFactory.calls.awaitItem()
+
+        assertThat(call.canRemove).isFalse()
+    }
+
+    @Test
     fun `Removing selected payment method clears selection`() = runScenario {
         val cards = PaymentMethodFixtures.createCards(3)
         customerStateHolder.setCustomerState(EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards))
@@ -330,6 +426,21 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `On detach with remove duplicate permissions, should attempt to remove duplicates in repository`() {
         removeDuplicatesTest(shouldRemoveDuplicates = true)
+    }
+
+    private fun createCustomerState(
+        paymentMethods: List<PaymentMethod>,
+        isRemoveEnabled: Boolean,
+    ): CustomerState {
+        return CustomerState(
+            id = "cus_1",
+            ephemeralKeySecret = "ek_1",
+            paymentMethods = paymentMethods,
+            permissions = CustomerState.Permissions(
+                canRemovePaymentMethods = isRemoveEnabled,
+                canRemoveDuplicates = true,
+            )
+        )
     }
 
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
@@ -379,9 +490,10 @@ class SavedPaymentMethodMutatorTest {
                 selection = selection,
             )
             val navigationHandler = mock<NavigationHandler>()
+            val editPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractor.Factory()
             whenever(navigationHandler.currentScreen).thenReturn(stateFlowOf(PaymentSheetScreen.Loading))
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
-                editInteractorFactory = mock(),
+                editInteractorFactory = editPaymentMethodInteractorFactory,
                 eventReporter = mock(),
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
@@ -403,6 +515,7 @@ class SavedPaymentMethodMutatorTest {
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
                 customerStateHolder = customerStateHolder,
                 selectionSource = selection,
+                editPaymentMethodInteractorFactory = editPaymentMethodInteractorFactory,
             ).apply {
                 block()
             }
@@ -413,5 +526,6 @@ class SavedPaymentMethodMutatorTest {
         val savedPaymentMethodMutator: SavedPaymentMethodMutator,
         val customerStateHolder: CustomerStateHolder,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
+        val editPaymentMethodInteractorFactory: FakeEditPaymentMethodInteractor.Factory,
     )
 }

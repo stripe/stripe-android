@@ -50,10 +50,12 @@ internal class SavedPaymentMethodMutator(
 ) {
     val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.run {
+            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+
             when (paymentMethods.size) {
                 0 -> false
-                1 -> allowsRemovalOfLastSavedPaymentMethod
-                else -> true
+                1 -> allowsRemovalOfLastSavedPaymentMethod && hasRemovePermissions
+                else -> hasRemovePermissions
             }
         } ?: false
     }
@@ -179,12 +181,6 @@ internal class SavedPaymentMethodMutator(
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        val canRemove = if (allowsRemovalOfLastSavedPaymentMethod) {
-            true
-        } else {
-            paymentOptionsItems.value.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
-        }
-
         navigationHandler.transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
@@ -212,7 +208,7 @@ internal class SavedPaymentMethodMutator(
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
                     },
-                    canRemove = canRemove,
+                    canRemove = canRemove.value,
                     isLiveMode = isLiveModeProvider(),
                 ),
                 isLiveMode = isLiveModeProvider(),
