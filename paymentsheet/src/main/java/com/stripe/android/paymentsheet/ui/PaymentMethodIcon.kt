@@ -40,6 +40,14 @@ internal fun PaymentMethodIcon(
         }
     }
     val iconModifier = Modifier.fillMaxSize()
+    val iconFromResource = @Composable {
+        PaymentMethodIconFromResource(
+            iconRes = iconRes,
+            colorFilter = colorFilter,
+            modifier = iconModifier,
+            alignment = contentAlignment,
+        )
+    }
 
     Box(
         modifier = modifier,
@@ -51,24 +59,14 @@ internal fun PaymentMethodIcon(
                 imageLoader = imageLoader,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
-                errorContent = {
-                    PaymentMethodIconFromResource(
-                        iconRes = iconRes,
-                        colorFilter = colorFilter,
-                        modifier = iconModifier,
-                        alignment = contentAlignment,
-                    )
-                },
+                loadingContent = { iconFromResource() },
+                errorContent = { iconFromResource() },
+                disableAnimations = true,
                 alignment = contentAlignment,
                 modifier = iconModifier,
             )
         } else {
-            PaymentMethodIconFromResource(
-                iconRes = iconRes,
-                colorFilter = colorFilter,
-                modifier = iconModifier,
-                alignment = contentAlignment,
-            )
+            iconFromResource()
         }
     }
 }
