@@ -3,13 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.elements.CvcConfig
-import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -18,7 +12,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
 
 class CvcRecollectionViewModelTest {
 
