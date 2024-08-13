@@ -147,7 +147,7 @@ internal data class NoticeSheetState(
                 data class Repair(val authorization: String?) : Type
 
                 @Parcelize
-                data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type
+                data class Supportability(val institution: FinancialConnectionsInstitution?) : Type
             }
         }
     }

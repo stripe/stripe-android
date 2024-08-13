@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.features.common.GenericBottomSheetContent
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.PartnerAuth
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.Supportability
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -88,7 +88,7 @@ internal fun AccountUpdateRequiredModalPreview() {
                         verticalAlignment = VerticalAlignment.Default
                     )
                 ),
-                type = PartnerAuth(
+                type = Supportability(
                     institution = null,
                 ),
             ),

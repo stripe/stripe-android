@@ -13,9 +13,11 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.UnclassifiedError
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
@@ -57,10 +59,10 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val referrer = state.referrer
             when (val type = requireNotNull(state.payload()?.type)) {
-                is UpdateRequired.Type.Repair -> {
+                is Type.Repair -> {
                     handleUnsupportedRepairAction(referrer)
                 }
-                is UpdateRequired.Type.PartnerAuth -> {
+                is Type.Supportability -> {
                     openPartnerAuth(type.institution, referrer)
                 }
             }
@@ -75,7 +77,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             pane = PANE,
         )
         // Fall back to the institution picker for now
-        navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer))
+        navigationManager.tryNavigateTo(InstitutionPicker(referrer))
     }
 
     private fun openPartnerAuth(
@@ -89,7 +91,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             navigationManager.tryNavigateTo(Destination.PartnerAuth(referrer))
         } else {
             // Fall back to the institution picker
-            navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer))
+            navigationManager.tryNavigateTo(InstitutionPicker(referrer))
         }
     }
 
