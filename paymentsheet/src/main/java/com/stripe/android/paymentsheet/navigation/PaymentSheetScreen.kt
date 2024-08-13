@@ -304,7 +304,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor)
+            PaymentMethodVerticalLayoutUI(interactor, modifier)
         }
     }
 

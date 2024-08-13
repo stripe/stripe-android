@@ -33,7 +33,7 @@ internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
 internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
 
 @Composable
-internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayoutInteractor) {
+internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayoutInteractor, modifier: Modifier) {
     val context = LocalContext.current
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
@@ -68,7 +68,7 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
             )
         },
         imageLoader = imageLoader,
-        modifier = Modifier.padding(horizontal = 20.dp)
+        modifier = modifier.padding(horizontal = 20.dp)
     )
 }
 
