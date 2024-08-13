@@ -28,7 +28,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = false,
-                        canDelete = true,
+                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -45,7 +45,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = savedPaymentMethods[1],
                         isEditing = false,
-                        canDelete = true,
+                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -62,7 +62,7 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = true,
-                        canDelete = true,
+                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -81,7 +81,7 @@ internal class ManageScreenUIScreenshotTest {
                         ),
                         currentSelection = null,
                         isEditing = true,
-                        canDelete = false,
+                        canRemove = false,
                         canEdit = true,
                     )
                 ),

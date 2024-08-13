@@ -127,7 +127,7 @@ class DefaultManageScreenInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(canDelete).isFalse()
+                    assertThat(canRemove).isFalse()
                 }
             }
         }
