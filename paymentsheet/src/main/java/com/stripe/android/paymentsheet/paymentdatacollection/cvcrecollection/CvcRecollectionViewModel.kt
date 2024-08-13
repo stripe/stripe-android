@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
+    val controller = CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
 
     private val _viewState = MutableStateFlow(
         CvcRecollectionViewState(
@@ -23,10 +22,7 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
             lastFour = args.lastFour,
             cvc = null,
             isTestMode = args.isTestMode,
-            element = CvcElement(
-                IdentifierSpec(),
-                CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
-            )
+            controller = controller
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState>
