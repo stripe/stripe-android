@@ -82,6 +82,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     SavedPaymentMethodTabLayoutUI(
         paymentOptionsItems = state.paymentOptionsItems,
         selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        canRemoveSavedPaymentMethods = state.canRemove,
         isEditing = state.isEditing,
         isProcessing = state.isProcessing,
         onAddCardPressed = {
@@ -126,6 +127,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
+    canRemoveSavedPaymentMethods: Boolean,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -147,14 +149,14 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 items = paymentOptionsItems,
                 key = { it.key },
             ) { item ->
-                val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
                     item = item,
                     width = width,
+                    canRemoveSavedPaymentMethods = canRemoveSavedPaymentMethods,
+                    isProcessing = isProcessing,
                     isEditing = isEditing,
-                    isEnabled = isEnabled,
                     isSelected = isSelected,
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
@@ -209,6 +211,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                 ),
             ),
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            canRemoveSavedPaymentMethods = true,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -232,7 +235,8 @@ internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
 private fun SavedPaymentMethodTab(
     item: PaymentOptionsItem,
     width: Dp,
-    isEnabled: Boolean,
+    canRemoveSavedPaymentMethods: Boolean,
+    isProcessing: Boolean,
     isEditing: Boolean,
     isSelected: Boolean,
     onAddCardPressed: () -> Unit,
@@ -241,11 +245,13 @@ private fun SavedPaymentMethodTab(
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val enabled = !isProcessing && !isEditing
+
     when (item) {
         is PaymentOptionsItem.AddCard -> {
             AddCardTab(
                 width = width,
-                isEnabled = isEnabled,
+                isEnabled = enabled,
                 onAddCardPressed = onAddCardPressed,
                 modifier = modifier,
             )
@@ -253,7 +259,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.GooglePay -> {
             GooglePayTab(
                 width = width,
-                isEnabled = isEnabled,
+                isEnabled = enabled,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 modifier = modifier,
@@ -262,7 +268,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.Link -> {
             LinkTab(
                 width = width,
-                isEnabled = isEnabled,
+                isEnabled = enabled,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 modifier = modifier,
@@ -272,7 +278,7 @@ private fun SavedPaymentMethodTab(
             SavedPaymentMethodTab(
                 paymentMethod = item,
                 width = width,
-                isEnabled = isEnabled,
+                isEnabled = !isProcessing && (!isEditing || canRemoveSavedPaymentMethods || item.isModifiable),
                 isEditing = isEditing,
                 isModifiable = item.isModifiable,
                 isSelected = isSelected,
@@ -381,8 +387,8 @@ private fun SavedPaymentMethodTab(
         SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
-                isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEnabled && isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEnabled && isEditing -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,

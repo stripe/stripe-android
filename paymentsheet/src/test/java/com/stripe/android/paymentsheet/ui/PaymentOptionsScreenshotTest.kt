@@ -23,6 +23,7 @@ class PaymentOptionsScreenshotTest {
                     PaymentOptionsItem.AddCard,
                     PaymentOptionsItem.Link,
                 ),
+                canRemoveSavedPaymentMethods = true,
                 selectedPaymentOptionsItem = PaymentOptionsItem.Link,
                 isEditing = false,
                 isProcessing = false,
@@ -63,6 +64,7 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = paymentOptionsItems[1],
+                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -102,6 +104,7 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = paymentOptionsItems[1],
+                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -113,10 +116,59 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
-    private fun createCard(last4: String): PaymentMethod {
+    @Test
+    fun testEditingAndRemoveDisabledWithModifiableItems() {
+        val paymentOptionsItems = listOf(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4242"),
+                )
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4000"),
+                )
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("1234", addNetworks = true),
+                    isCbcEligible = true,
+                )
+            ),
+        )
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItems,
+                selectedPaymentOptionsItem = null,
+                canRemoveSavedPaymentMethods = false,
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
+            )
+        }
+    }
+
+    private fun createCard(last4: String, addNetworks: Boolean = false): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
         return original.copy(
-            card = original.card?.copy(last4 = last4),
+            card = original.card?.copy(
+                last4 = last4,
+                networks = if (addNetworks) {
+                    PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires"),
+                    )
+                } else {
+                    null
+                }
+            ),
         )
     }
 }

@@ -29,6 +29,7 @@ class PaymentOptionsTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                 selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = { didCallOnAddCardPressed = true },
@@ -58,6 +59,7 @@ class PaymentOptionsTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                 selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -86,6 +88,7 @@ class PaymentOptionsTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                 selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                canRemoveSavedPaymentMethods = true,
                 isEditing = true,
                 isProcessing = false,
                 onAddCardPressed = {},

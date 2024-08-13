@@ -6,21 +6,17 @@ import com.stripe.android.model.PaymentMethod
 internal sealed class PaymentOptionsItem {
 
     abstract val viewType: ViewType
-    abstract val isEnabledDuringEditing: Boolean
 
     object AddCard : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.AddCard
-        override val isEnabledDuringEditing: Boolean = false
     }
 
     object GooglePay : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.GooglePay
-        override val isEnabledDuringEditing: Boolean = false
     }
 
     object Link : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.Link
-        override val isEnabledDuringEditing: Boolean = false
     }
 
     /**
@@ -34,8 +30,6 @@ internal sealed class PaymentOptionsItem {
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         val isModifiable: Boolean by lazy { displayableSavedPaymentMethod.isModifiable() }
-
-        override val isEnabledDuringEditing: Boolean = true
 
         fun getModifyDescription(resources: Resources) = resources.getString(
             R.string.stripe_paymentsheet_modify_pm,
