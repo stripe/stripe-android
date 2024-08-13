@@ -86,7 +86,7 @@ internal fun CvcRecollectionScreen(
 internal fun CvcRecollectionPaymentSheetScreen(
     interactor: CvcRecollectionInteractor,
 ) {
-    val state by interactor.viewState.collectAsState()
+    val state = interactor.viewState
 
     StripeTheme {
         Column(

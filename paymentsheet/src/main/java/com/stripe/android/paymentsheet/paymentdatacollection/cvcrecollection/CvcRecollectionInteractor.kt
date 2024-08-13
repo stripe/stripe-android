@@ -3,50 +3,45 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
 internal interface CvcRecollectionInteractor {
-    val viewState: StateFlow<CvcRecollectionViewState>
-    val cvcCompletionState: StateFlow<CvcState>
+    val viewState: CvcRecollectionViewState
+    val cvcCompletionState: StateFlow<CvcCompletionState>
 }
 
 internal class DefaultCvcRecollectionInteractor(
     args: Args,
     private val scope: CoroutineScope
 ) : CvcRecollectionInteractor {
-    private val _viewState = MutableStateFlow(
-        CvcRecollectionViewState(
-            cardBrand = args.cardBrand,
-            lastFour = args.lastFour,
-            cvc = null,
-            isTestMode = args.isTestMode,
-            element = CvcElement(
-                IdentifierSpec(),
-                CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
-            )
-        )
+    private val controller = CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
+    private val element = CvcElement(
+        IdentifierSpec(),
+        controller
     )
-    override val viewState: StateFlow<CvcRecollectionViewState>
-        get() = _viewState
+    override val viewState = CvcRecollectionViewState(
+        cardBrand = args.cardBrand,
+        lastFour = args.lastFour,
+        cvc = null,
+        isTestMode = args.isTestMode,
+        element = element
+    )
 
-    override val cvcCompletionState: StateFlow<CvcState>
-        get() = _viewState.flatMapLatest {
-            combine(
-                it.element.controller.fieldValue,
-                it.element.controller.isComplete
-            ) { cvc, isComplete ->
-                CvcState(cvc, isComplete)
+    override val cvcCompletionState: StateFlow<CvcCompletionState>
+        get() = controller.isComplete.mapAsStateFlow { isComplete ->
+            if (isComplete) {
+                CvcCompletionState.Completed(controller.fieldValue.value)
+            } else {
+                CvcCompletionState.Incomplete
             }
         }.stateIn(
             scope = scope,
-            initialValue = CvcState(),
+            initialValue = CvcCompletionState.Incomplete,
             started = SharingStarted.Eagerly
         )
 }

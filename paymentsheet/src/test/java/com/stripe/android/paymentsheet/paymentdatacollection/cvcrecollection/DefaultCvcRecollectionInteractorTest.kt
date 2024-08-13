@@ -28,11 +28,11 @@ class DefaultCvcRecollectionInteractorTest {
     fun `view model state initialized properly on init`() {
         val interactor = createInteractor()
 
-        assertThat(interactor.viewState.value.cardBrand).isEqualTo(CardBrand.Visa)
-        assertThat(interactor.viewState.value.lastFour).isEqualTo("4242")
-        assertThat(interactor.viewState.value.cvc).isEqualTo(null)
-        assertThat(interactor.viewState.value.isTestMode).isEqualTo(true)
-        assertThat(interactor.viewState.value.element.controller.fieldState.value)
+        assertThat(interactor.viewState.cardBrand).isEqualTo(CardBrand.Visa)
+        assertThat(interactor.viewState.lastFour).isEqualTo("4242")
+        assertThat(interactor.viewState.cvc).isEqualTo(null)
+        assertThat(interactor.viewState.isTestMode).isEqualTo(true)
+        assertThat(interactor.viewState.element.controller.fieldState.value)
             .isEqualTo(TextFieldStateConstants.Error.Blank)
     }
 
@@ -41,23 +41,15 @@ class DefaultCvcRecollectionInteractorTest {
         val interactor = createInteractor()
 
         interactor.cvcCompletionState.test {
-            assertThat(awaitItem()).isEqualTo(CvcState())
+            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
 
-            interactor.viewState.value.element.controller.onRawValueChange("55")
-
+            interactor.viewState.element.controller.onRawValueChange("555")
             scope.advanceUntilIdle()
+            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Completed("555"))
 
-            assertThat(awaitItem()).isEqualTo(CvcState("55", isComplete = false))
-
-            interactor.viewState.value.element.controller.onRawValueChange("555")
-
+            interactor.viewState.element.controller.onRawValueChange("55")
             scope.advanceUntilIdle()
-
-            assertThat(awaitItem()).isEqualTo(CvcState("555", isComplete = false))
-
-            scope.advanceUntilIdle()
-
-            assertThat(awaitItem()).isEqualTo(CvcState("555", isComplete = true))
+            assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
         }
     }
 }
