@@ -32,7 +32,7 @@ class DefaultCvcRecollectionInteractorTest {
         assertThat(interactor.viewState.lastFour).isEqualTo("4242")
         assertThat(interactor.viewState.cvc).isEqualTo(null)
         assertThat(interactor.viewState.isTestMode).isEqualTo(true)
-        assertThat(interactor.viewState.element.controller.fieldState.value)
+        assertThat(interactor.viewState.controller.fieldState.value)
             .isEqualTo(TextFieldStateConstants.Error.Blank)
     }
 
@@ -43,11 +43,11 @@ class DefaultCvcRecollectionInteractorTest {
         interactor.cvcCompletionState.test {
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
 
-            interactor.viewState.element.controller.onRawValueChange("555")
+            interactor.viewState.controller.onRawValueChange("555")
             scope.advanceUntilIdle()
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Completed("555"))
 
-            interactor.viewState.element.controller.onRawValueChange("55")
+            interactor.viewState.controller.onRawValueChange("55")
             scope.advanceUntilIdle()
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
         }

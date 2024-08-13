@@ -44,7 +44,7 @@ class CvcRecollectionViewModelTest {
         assertThat(viewModel.viewState.value.lastFour).isEqualTo("4242")
         assertThat(viewModel.viewState.value.cvc).isEqualTo(null)
         assertThat(viewModel.viewState.value.isTestMode).isEqualTo(false)
-        assertThat(viewModel.viewState.value.element.controller.fieldState.value)
+        assertThat(viewModel.viewState.value.controller.fieldState.value)
             .isEqualTo(TextFieldStateConstants.Error.Blank)
     }
 

@@ -5,8 +5,6 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.test.TestScope
@@ -33,12 +31,9 @@ class CvcRecollectionScreenScreenshotTest {
         )
     }
 
-    private fun element(): CvcElement {
-        return CvcElement(
-            IdentifierSpec(),
-            CvcController(
-                cardBrandFlow = stateFlowOf(CardBrand.Visa)
-            )
+    private fun controller(): CvcController {
+        return CvcController(
+            cardBrandFlow = stateFlowOf(CardBrand.Visa)
         )
     }
 
@@ -49,7 +44,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = false,
-                element = element(),
+                controller = controller(),
                 viewActionHandler = {}
             )
         }
@@ -71,7 +66,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = false,
-                element = element(),
+                controller = controller(),
                 viewActionHandler = {}
             )
         }
@@ -84,7 +79,7 @@ class CvcRecollectionScreenScreenshotTest {
                 cardBrand = CardBrand.Visa,
                 lastFour = "4242",
                 isTestMode = true,
-                element = element(),
+                controller = controller(),
                 viewActionHandler = {}
             )
         }
