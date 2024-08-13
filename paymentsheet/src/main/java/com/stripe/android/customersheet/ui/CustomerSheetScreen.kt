@@ -121,13 +121,13 @@ internal fun SelectPaymentMethod(
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
+            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
             isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
         )
 
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = paymentOptionsState.items,
             selectedPaymentOptionsItem = paymentOptionsState.selectedItem,
-            canRemoveSavedPaymentMethods = viewState.canRemovePaymentMethods,
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },

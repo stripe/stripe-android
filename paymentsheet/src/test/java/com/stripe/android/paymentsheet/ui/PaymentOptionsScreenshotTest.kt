@@ -23,7 +23,6 @@ class PaymentOptionsScreenshotTest {
                     PaymentOptionsItem.AddCard,
                     PaymentOptionsItem.Link,
                 ),
-                canRemoveSavedPaymentMethods = true,
                 selectedPaymentOptionsItem = PaymentOptionsItem.Link,
                 isEditing = false,
                 isProcessing = false,
@@ -44,19 +43,22 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
         )
 
@@ -64,7 +66,6 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = paymentOptionsItems[1],
-                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -84,19 +85,22 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
         )
 
@@ -104,7 +108,6 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = paymentOptionsItems[1],
-                canRemoveSavedPaymentMethods = true,
                 isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
@@ -123,20 +126,23 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                )
+                ),
+                canRemovePaymentMethods = false,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                )
+                ),
+                canRemovePaymentMethods = false,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234", addNetworks = true),
                     isCbcEligible = true,
-                )
+                ),
+                canRemovePaymentMethods = false,
             ),
         )
 
@@ -144,7 +150,6 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = null,
-                canRemoveSavedPaymentMethods = false,
                 isEditing = true,
                 isProcessing = false,
                 onAddCardPressed = {},

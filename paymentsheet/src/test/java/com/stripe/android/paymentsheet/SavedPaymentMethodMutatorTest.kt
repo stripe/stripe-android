@@ -39,7 +39,8 @@ class SavedPaymentMethodMutatorTest {
                 )
             )
 
-            ensureAllEventsConsumed()
+            // Should still be false so expect no more events
+            expectNoEvents()
         }
     }
 
@@ -85,7 +86,8 @@ class SavedPaymentMethodMutatorTest {
                     )
                 )
 
-                ensureAllEventsConsumed()
+                // Should still be false so expect no more events
+                expectNoEvents()
             }
         }
 
@@ -108,8 +110,6 @@ class SavedPaymentMethodMutatorTest {
                 )
 
                 assertThat(awaitItem()).isTrue()
-
-                ensureAllEventsConsumed()
             }
         }
 
@@ -132,8 +132,6 @@ class SavedPaymentMethodMutatorTest {
                 )
 
                 assertThat(awaitItem()).isTrue()
-
-                ensureAllEventsConsumed()
             }
         }
 
@@ -154,7 +152,8 @@ class SavedPaymentMethodMutatorTest {
                 )
             )
 
-            ensureAllEventsConsumed()
+            // Should still be false so expect no more events
+            expectNoEvents()
         }
     }
 

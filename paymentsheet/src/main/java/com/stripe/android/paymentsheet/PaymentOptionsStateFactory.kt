@@ -17,6 +17,7 @@ internal object PaymentOptionsStateFactory {
         showGooglePay: Boolean,
         showLink: Boolean,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
+        canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): List<PaymentOptionsItem> {
         return listOfNotNull(
@@ -29,7 +30,8 @@ internal object PaymentOptionsStateFactory {
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
                     isCbcEligible = isCbcEligible
-                )
+                ),
+                canRemovePaymentMethods = canRemovePaymentMethods,
             )
         }
     }
@@ -49,6 +51,7 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
+        canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean
     ): PaymentOptionsState {
         val items = createPaymentOptionsList(
@@ -57,6 +60,7 @@ internal object PaymentOptionsStateFactory {
             showLink = showLink,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
+            canRemovePaymentMethods = canRemovePaymentMethods,
         )
 
         val selectedItem = getSelectedItem(items, currentSelection)

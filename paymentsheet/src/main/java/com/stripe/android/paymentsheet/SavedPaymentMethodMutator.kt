@@ -48,19 +48,6 @@ internal class SavedPaymentMethodMutator(
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
-    private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
-        PaymentOptionsItemsMapper(
-            customerState = customerStateHolder.customer,
-            isGooglePayReady = isGooglePayReady,
-            isLinkEnabled = isLinkEnabled,
-            isNotPaymentFlow = isNotPaymentFlow,
-            nameProvider = providePaymentMethodName,
-            isCbcEligible = isCbcEligible,
-        )
-    }
-
-    val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = paymentOptionsItemsMapper()
-
     val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.run {
             when (paymentMethods.size) {
@@ -70,6 +57,20 @@ internal class SavedPaymentMethodMutator(
             }
         } ?: false
     }
+
+    private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
+        PaymentOptionsItemsMapper(
+            customerState = customerStateHolder.customer,
+            isGooglePayReady = isGooglePayReady,
+            isLinkEnabled = isLinkEnabled,
+            isNotPaymentFlow = isNotPaymentFlow,
+            nameProvider = providePaymentMethodName,
+            isCbcEligible = isCbcEligible,
+            canRemovePaymentMethods = canRemove,
+        )
+    }
+
+    val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = paymentOptionsItemsMapper()
 
     val canEdit: StateFlow<Boolean> = combineAsStateFlow(
         canRemove,
