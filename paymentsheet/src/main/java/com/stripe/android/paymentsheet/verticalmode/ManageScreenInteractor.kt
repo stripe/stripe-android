@@ -33,7 +33,7 @@ internal interface ManageScreenInteractor {
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
-        val canDelete: Boolean,
+        val canRemove: Boolean,
         val canEdit: Boolean,
     )
 
@@ -90,7 +90,7 @@ internal class DefaultManageScreenInteractor(
             paymentMethods = displayablePaymentMethods,
             currentSelection = currentSelection,
             isEditing = editing,
-            canDelete = canRemove,
+            canRemove = canRemove,
             canEdit = canEdit,
         )
     }
@@ -100,7 +100,7 @@ internal class DefaultManageScreenInteractor(
             state.collect { state ->
                 if (!state.canEdit) {
                     safeNavigateBack()
-                } else if (!state.isEditing && !state.canDelete && state.paymentMethods.size == 1) {
+                } else if (!state.isEditing && !state.canRemove && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
                     safeNavigateBack()
                 }
