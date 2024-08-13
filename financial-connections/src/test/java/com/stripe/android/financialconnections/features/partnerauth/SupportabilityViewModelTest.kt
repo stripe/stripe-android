@@ -42,7 +42,7 @@ import kotlin.test.assertEquals
 
 @Suppress("MaxLineLength")
 @ExperimentalCoroutinesApi
-internal class PartnerAuthViewModelTest {
+internal class SupportabilityViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
