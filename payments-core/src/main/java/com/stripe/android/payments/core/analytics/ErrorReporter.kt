@@ -184,9 +184,6 @@ interface ErrorReporter {
         PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT(
             partialEventName = "paymentsheet.invalid_payment_selection"
         ),
-        FLOW_CONTROLLER_NO_PAYMENT_SELECTION_ON_CHECKOUT(
-            partialEventName = "flow_controller.no_payment_selection"
-        ),
         FLOW_CONTROLLER_INVALID_PAYMENT_SELECTION_ON_CHECKOUT(
             partialEventName = "flow_controller.invalid_payment_selection"
         ),
