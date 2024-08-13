@@ -7,8 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -65,7 +66,7 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = modifier.height(20.dp).width(24.dp),
+                modifier = modifier.height(iconHeight).width(iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },

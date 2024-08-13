@@ -17,6 +17,8 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -42,7 +44,7 @@ internal fun SavedPaymentMethodRowButton(
                 iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
                 colorFilter = null,
                 alignment = Alignment.Center,
-                modifier = Modifier.padding(4.dp).height(20.dp).width(24.dp)
+                modifier = Modifier.padding(4.dp).height(iconHeight).width(iconWidth)
             )
         },
         title = paymentMethodTitle.resolve(),
