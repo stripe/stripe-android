@@ -121,6 +121,7 @@ internal fun SelectPaymentMethod(
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
+            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
             isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
         )
 

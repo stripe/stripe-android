@@ -35,6 +35,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
         val isEditing: Boolean,
         val isProcessing: Boolean,
         val canEdit: Boolean,
+        val canRemove: Boolean,
     )
 
     sealed class ViewAction {
@@ -50,6 +51,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>,
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
+    private val canRemove: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
     private val isProcessing: StateFlow<Boolean>,
     private val currentSelection: StateFlow<PaymentSelection?>,
@@ -81,6 +83,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             isEditing = editing.value,
             isProcessing = isProcessing.value,
             canEdit = canEdit.value,
+            canRemove = canRemove.value,
         )
     }
 
@@ -110,6 +113,16 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 _state.update { previousState ->
                     previousState.copy(
                         canEdit = it
+                    )
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            canRemove.collect {
+                _state.update { previousState ->
+                    previousState.copy(
+                        canRemove = it
                     )
                 }
             }
@@ -205,6 +218,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
+                canRemove = savedPaymentMethodMutator.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,

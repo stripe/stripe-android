@@ -193,7 +193,8 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                                 last4 = "4242",
                             )
                         )
-                    )
+                    ),
+                    canRemovePaymentMethods = true,
                 ),
                 PaymentOptionsItem.SavedPaymentMethod(
                     DisplayableSavedPaymentMethod(
@@ -205,7 +206,8 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                             code = PaymentMethod.Type.SepaDebit.code,
                             type = PaymentMethod.Type.SepaDebit,
                         )
-                    )
+                    ),
+                    canRemovePaymentMethods = true,
                 ),
             ),
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
@@ -381,8 +383,8 @@ private fun SavedPaymentMethodTab(
         SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
-                isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEnabled && isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEnabled && isEditing -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,

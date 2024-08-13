@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,139 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 
 class SavedPaymentMethodMutatorTest {
+    @Test
+    fun `canRemove is correct when no payment methods for customer`() = runScenario(
+        allowsRemovalOfLastSavedPaymentMethod = true,
+    ) {
+        savedPaymentMethodMutator.canRemove.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf()
+                )
+            )
+
+            // Should still be false so expect no more events
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `canRemove is correct when one payment method & allowsRemovalOfLastSavedPaymentMethod is true`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    CustomerState.createForLegacyEphemeralKey(
+                        customerId = "cus_123",
+                        accessType = PaymentSheet
+                            .CustomerAccessType
+                            .LegacyCustomerEphemeralKey("ek_123"),
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when one payment method & allowsRemovalOfLastSavedPaymentMethod is false`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    CustomerState.createForLegacyEphemeralKey(
+                        customerId = "cus_123",
+                        accessType = PaymentSheet
+                            .CustomerAccessType
+                            .LegacyCustomerEphemeralKey("ek_123"),
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                // Should still be false so expect no more events
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when multiple payment methods & allowsRemovalOfLastSavedPaymentMethod is true`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    CustomerState.createForLegacyEphemeralKey(
+                        customerId = "cus_123",
+                        accessType = PaymentSheet
+                            .CustomerAccessType
+                            .LegacyCustomerEphemeralKey("ek_123"),
+                        paymentMethods = PaymentMethodFactory.cards(2),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when multiple payment methods & allowsRemovalOfLastSavedPaymentMethod is false`() =
+        runScenario(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        ) {
+            savedPaymentMethodMutator.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    CustomerState.createForLegacyEphemeralKey(
+                        customerId = "cus_123",
+                        accessType = PaymentSheet
+                            .CustomerAccessType
+                            .LegacyCustomerEphemeralKey("ek_123"),
+                        paymentMethods = PaymentMethodFactory.cards(2),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
+    fun `canEdit is correct when no payment methods`() = runScenario(
+        allowsRemovalOfLastSavedPaymentMethod = true,
+    ) {
+        savedPaymentMethodMutator.canEdit.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    accessType = PaymentSheet
+                        .CustomerAccessType
+                        .LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf()
+                )
+            )
+
+            // Should still be false so expect no more events
+            expectNoEvents()
+        }
+    }
+
     @Test
     fun `canEdit is correct when allowsRemovalOfLastSavedPaymentMethod is true`() = runScenario(
         allowsRemovalOfLastSavedPaymentMethod = true,
