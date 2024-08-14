@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.core.strings.ResolvableString
@@ -250,12 +251,13 @@ private fun PaymentSheetContent(
         }
 
         walletsState?.let { state ->
-            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
+            val bottomSpacing = currentScreen.walletsDividerSpacing - currentScreen.topContentPadding
             Wallet(
                 state = state,
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
+                dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
             )
         }
@@ -308,6 +310,7 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
+    dividerSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
@@ -346,7 +349,7 @@ internal fun Wallet(
             else -> Unit
         }
 
-        Spacer(modifier = Modifier.requiredHeight(WalletDividerSpacing))
+        Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)
