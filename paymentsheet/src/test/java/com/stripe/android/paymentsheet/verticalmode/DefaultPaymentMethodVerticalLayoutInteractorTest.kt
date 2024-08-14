@@ -776,36 +776,16 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun verticalModeScreenSelection_isNeverUpdatedToNull() {
-        val expectedPaymentSelection = PaymentSelection.Link
-        runScenario(initialSelection = expectedPaymentSelection, updateSelection = {}) {
-            selectionSource.value = null
-
-            dispatcher.scheduler.advanceUntilIdle()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(selection).isEqualTo(expectedPaymentSelection)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link
+    fun verticalModeSelectionIsCleared_whenReturningFromForm() {
         runScenario(
-            initialSelection = initialPaymentSelection,
+            initialSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             updateSelection = {},
-            formElementsForCode = { formFieldsWhichRequireUserInteraction }
         ) {
-            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-
-            dispatcher.scheduler.advanceUntilIdle()
+            isCurrentScreenSource.value = true
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(initialPaymentSelection)
+                    assertThat(selection).isEqualTo(null)
                 }
             }
         }
