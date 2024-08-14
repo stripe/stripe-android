@@ -80,7 +80,7 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun cannotRemoveOrEdit_shouldNavigateBack() {
+    fun cannotRemoveOrEdit_multiplePaymentsMethods_shouldNotNavigateBack() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
@@ -98,7 +98,7 @@ class DefaultManageScreenInteractorTest {
             canRemoveSource.value = false
             canEditSource.value = false
 
-            assertThat(backPressed).isTrue()
+            assertThat(backPressed).isFalse()
         }
     }
 
@@ -134,7 +134,7 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun cannotRemoveButCanEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
+    fun cannotRemoveOrEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
@@ -160,6 +160,7 @@ class DefaultManageScreenInteractorTest {
 
             paymentMethodsSource.value = listOf(paymentMethods[2])
             canRemoveSource.value = false
+            canEditSource.value = false
 
             assertThat(backPressed).isFalse()
 

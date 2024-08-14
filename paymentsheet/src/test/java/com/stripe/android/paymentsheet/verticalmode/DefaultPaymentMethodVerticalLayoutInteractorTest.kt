@@ -123,6 +123,24 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `state has manage_all action when multiple PMs are available, cannot edit and cannot remove`() {
+        runScenario(
+            initialPaymentMethods = PaymentMethodFixtures.createCards(3),
+        ) {
+            canRemove.value = false
+            canEdit.value = false
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun `state has manage_one saved PM action when one saved PM, can edit, and can remove`() {
         runScenario(
             initialPaymentMethods = PaymentMethodFactory.cards(1),

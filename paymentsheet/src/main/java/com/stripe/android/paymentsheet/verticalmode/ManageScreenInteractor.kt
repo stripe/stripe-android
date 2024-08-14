@@ -98,9 +98,7 @@ internal class DefaultManageScreenInteractor(
     init {
         coroutineScope.launch {
             state.collect { state ->
-                if (!state.canEdit) {
-                    safeNavigateBack()
-                } else if (!state.isEditing && !state.canRemove && state.paymentMethods.size == 1) {
+                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
                     safeNavigateBack()
                 }

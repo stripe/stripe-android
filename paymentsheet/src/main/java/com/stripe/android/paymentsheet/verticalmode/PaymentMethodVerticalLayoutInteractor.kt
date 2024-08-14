@@ -309,10 +309,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
         }
 
-        if (!canEdit && !canRemove) {
-            return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
-        }
-
         return when (paymentMethods.size) {
             0 -> PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
             1 -> {

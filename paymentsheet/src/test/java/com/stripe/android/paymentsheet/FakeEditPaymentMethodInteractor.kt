@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -41,7 +43,11 @@ internal class FakeEditPaymentMethodInteractor(
         // No-op
     }
 
-    object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
+    class Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
+        private val _calls = Turbine<Call>()
+
+        val calls: ReceiveTurbine<Call> = _calls
+
         override fun create(
             initialPaymentMethod: PaymentMethod,
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
@@ -51,7 +57,14 @@ internal class FakeEditPaymentMethodInteractor(
             canRemove: Boolean,
             isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
-            return FakeEditPaymentMethodInteractor(initialPaymentMethod)
+            _calls.add(Call(initialPaymentMethod, canRemove))
+
+            return FakeEditPaymentMethodInteractor(initialPaymentMethod, canRemove)
         }
+
+        data class Call(
+            val initialPaymentMethod: PaymentMethod,
+            val canRemove: Boolean,
+        )
     }
 }
