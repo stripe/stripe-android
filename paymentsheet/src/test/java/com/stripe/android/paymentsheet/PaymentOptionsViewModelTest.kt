@@ -213,6 +213,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel(
             linkState = LinkState(
                 configuration = mock(),
+                signupMode = null,
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
@@ -681,6 +682,7 @@ internal class PaymentOptionsViewModelTest {
         val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
             linkState = LinkState(
                 configuration = mock(),
+                signupMode = null,
                 loginState = LinkState.LoginState.NeedsVerification,
             ),
             isGooglePayReady = false,
@@ -746,6 +748,7 @@ internal class PaymentOptionsViewModelTest {
         return createViewModel(
             linkState = LinkState(
                 configuration = LinkTestUtils.createLinkConfiguration(),
+                signupMode = null,
                 loginState = LinkState.LoginState.LoggedOut
             ),
             linkConfigurationCoordinator = linkConfigurationCoordinator,

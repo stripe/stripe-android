@@ -337,7 +337,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
-            linkSignUpDisabled = linkSignUpDisabled,
         )
 
         val loginState = when (accountStatusProvider(linkConfig)) {
@@ -348,9 +347,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             AccountStatus.Error -> LinkState.LoginState.LoggedOut
         }
 
+        val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+            code = PaymentMethod.Type.Card.code,
+            intent = elementsSession.stripeIntent,
+            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+            hasCustomerConfiguration = config.customer != null,
+        )
+        val hasUsedLink = linkStore.hasUsedLink()
+
+        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
+            null
+        } else if (isSaveForFutureUseValueChangeable) {
+            LinkSignupMode.AlongsideSaveForFutureUse
+        } else {
+            LinkSignupMode.InsteadOfSaveForFutureUse
+        }
+
         return LinkState(
             configuration = linkConfig,
             loginState = loginState,
+            signupMode = linkSignupMode,
         )
     }
 
@@ -360,7 +376,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
-        linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config.shippingDetails
@@ -388,22 +403,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
-            code = PaymentMethod.Type.Card.code,
-            intent = elementsSession.stripeIntent,
-            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-            hasCustomerConfiguration = config.customer != null,
-        )
-        val hasUsedLink = linkStore.hasUsedLink()
-
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
-            null
-        } else if (isSaveForFutureUseValueChangeable) {
-            LinkSignupMode.AlongsideSaveForFutureUse
-        } else {
-            LinkSignupMode.InsteadOfSaveForFutureUse
-        }
-
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = config.defaultBillingDetails?.name,
             email = customerEmail,
@@ -413,7 +412,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         return LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
-            signupMode = linkSignupMode,
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,
             customerInfo = customerInfo,

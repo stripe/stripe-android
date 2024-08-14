@@ -2189,6 +2189,7 @@ internal class DefaultFlowControllerTest {
         linkState: LinkState? = LinkState(
             configuration = mock(),
             loginState = LinkState.LoginState.LoggedIn,
+            signupMode = null,
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),

@@ -5,7 +5,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.StripeIntentFixtures
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.flow.flowOf
@@ -33,7 +32,6 @@ class LinkConfigurationCoordinatorTest {
             billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
         ),
         shippingValues = null,
-        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         passthroughModeEnabled = false,
         flags = emptyMap(),
     )

@@ -52,7 +52,7 @@ class LinkHandlerTest {
     @Test
     fun `Prepares state correctly for logged out user`() = runLinkTest {
         accountStatusFlow.emit(AccountStatus.SignedOut)
-        handler.setupLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
+        handler.setupLink(createLinkState(LinkState.LoginState.LoggedOut))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
@@ -61,7 +61,7 @@ class LinkHandlerTest {
     @Test
     fun `Completed result sets processing state to Completed`() = runLinkTest {
         handler.setupLink(
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
+            createLinkState(LinkState.LoginState.LoggedIn),
         )
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -76,7 +76,7 @@ class LinkHandlerTest {
     @Test
     fun `Back pressed result sets processing state to Cancelled`() = runLinkTest {
         handler.setupLink(
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
+            createLinkState(LinkState.LoginState.LoggedIn),
         )
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -87,7 +87,7 @@ class LinkHandlerTest {
     @Test
     fun `Cancelled result sets processing state to Cancelled`() = runLinkTest {
         handler.setupLink(
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
+            createLinkState(LinkState.LoginState.LoggedIn),
         )
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -100,7 +100,7 @@ class LinkHandlerTest {
     @Test
     fun `exception causes processing state to be CompletedWithPaymentResult`() = runLinkTest {
         handler.setupLink(
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
+            createLinkState(LinkState.LoginState.LoggedIn),
         )
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -119,9 +119,8 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn("example@example.com")
 
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedIn,
-                configuration = configuration,
             )
         )
 
@@ -153,9 +152,8 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn("example@example.com")
 
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.NeedsVerification,
-                configuration = configuration,
             )
         )
 
@@ -186,9 +184,8 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn("example@example.com")
 
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -218,9 +215,8 @@ class LinkHandlerTest {
 
         accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -255,9 +251,8 @@ class LinkHandlerTest {
 
         accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -361,9 +356,8 @@ class LinkHandlerTest {
 
         accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -412,9 +406,8 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -450,9 +443,8 @@ class LinkHandlerTest {
         )
 
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -480,9 +472,8 @@ class LinkHandlerTest {
     @Test
     fun `payWithLinkInline fails for signedOut user without userInput`() = runLinkInlineTest {
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -512,9 +503,8 @@ class LinkHandlerTest {
         ),
     ) {
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -530,9 +520,8 @@ class LinkHandlerTest {
     @Test
     fun `Hides Link inline signup if user already has an account`() = runLinkInlineTest {
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.NeedsVerification,
-                configuration = configuration,
             )
         )
 
@@ -548,9 +537,8 @@ class LinkHandlerTest {
     @Test
     fun `Shows Link inline signup if user has no account`() = runLinkInlineTest {
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
-                configuration = configuration,
             )
         )
 
@@ -565,9 +553,8 @@ class LinkHandlerTest {
 
     private suspend fun LinkInlineTestData.setupBasicLink() {
         handler.setupLink(
-            state = LinkState(
+            state = createLinkState(
                 loginState = LinkState.LoginState.LoggedIn,
-                configuration = configuration,
             )
         )
 
@@ -687,6 +674,16 @@ private fun runLinkTest(
     }
 }
 
+private fun LinkTestData.createLinkState(
+    loginState: LinkState.LoginState,
+): LinkState {
+    return LinkState(
+        loginState = loginState,
+        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+        configuration = configuration,
+    )
+}
+
 private fun defaultLinkConfiguration(
     linkFundingSources: List<String> = emptyList(),
 ): LinkConfiguration {
@@ -694,7 +691,6 @@ private fun defaultLinkConfiguration(
         stripeIntent = PaymentIntentFactory.create(
             linkFundingSources = linkFundingSources,
         ),
-        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         merchantName = "Merchant, Inc",
         merchantCountryCode = "US",
         customerInfo = LinkConfiguration.CustomerInfo(
