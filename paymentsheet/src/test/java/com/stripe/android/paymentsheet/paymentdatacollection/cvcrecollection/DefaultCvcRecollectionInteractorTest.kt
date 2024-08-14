@@ -21,7 +21,7 @@ class DefaultCvcRecollectionInteractorTest {
     }
 
     @Test
-    fun `view model state initialized properly on init`() {
+    fun `view state initialized properly on init`() {
         val interactor = createInteractor()
 
         assertThat(interactor.viewState.cardBrand).isEqualTo(CardBrand.Visa)
