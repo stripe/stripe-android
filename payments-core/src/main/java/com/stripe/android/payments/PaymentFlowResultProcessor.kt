@@ -22,7 +22,7 @@ import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -224,7 +224,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
         }
 
-        withTimeout(retryDelaySupplier.maxDuration(maxRetries = maxRetries)) {
+        withTimeoutOrNull(retryDelaySupplier.maxDuration(maxRetries = maxRetries)) {
             while (shouldRetry(stripeIntentResult) && remainingRetries > 0) {
                 val delayDuration = retryDelaySupplier.getDelay(
                     maxRetries,

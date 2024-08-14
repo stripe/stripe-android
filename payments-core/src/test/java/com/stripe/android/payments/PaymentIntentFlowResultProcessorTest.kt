@@ -14,19 +14,24 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.minutes
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentIntentFlowResultProcessorTest {
@@ -192,6 +197,54 @@ internal class PaymentIntentFlowResultProcessorTest {
                 eq(requestOptions)
             )
         }
+
+    @Test
+    fun `timeout uses last known response`() {
+        runTest(testDispatcher) {
+            mockStripeRepository.stub {
+                onBlocking { retrievePaymentIntent(any(), any(), any()) } doReturn
+                    Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+
+                onBlocking { refreshPaymentIntent(any(), any()) } doReturn
+                    Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
+            }
+
+            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+            val paymentIntentResult = async(Dispatchers.IO) {
+                processor.processResult(
+                    PaymentFlowResult.Unvalidated(
+                        clientSecret = clientSecret,
+                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+                    )
+                ).getOrThrow()
+            }
+
+            testDispatcher.scheduler.advanceTimeBy(5.minutes)
+
+            assertThat(paymentIntentResult.await())
+                .isEqualTo(
+                    PaymentIntentResult(
+                        intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE,
+                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                        failureMessage = "We are unable to authenticate your payment method." +
+                            " Please choose a different payment method and try again."
+                    )
+                )
+
+            verify(mockStripeRepository).retrievePaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            )
+
+            verify(mockStripeRepository).refreshPaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions)
+            )
+        }
+    }
 
     @Test
     fun `3ds2 canceled with processing intent should succeed`() =
