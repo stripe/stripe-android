@@ -261,8 +261,12 @@ class PaymentSheetCustomerSessionTest {
         if (!isSaveEnabled) {
             replacements.add(
                 ResponseReplacement(
-                    original = "\"payment_method_save\": \"enabled\"",
-                    new = "\"payment_method_save\": \"disabled\"",
+                    original = """
+                        "payment_method_save": "enabled"
+                    """.trimIndent(),
+                    new = """
+                        "payment_method_save": "disabled"
+                    """.trimIndent(),
                 )
             )
         }
@@ -270,8 +274,12 @@ class PaymentSheetCustomerSessionTest {
         allowRedisplayOverride?.let {
             replacements.add(
                 ResponseReplacement(
-                    original = "\"payment_method_save_allow_redisplay_override\": null",
-                    new = "\"payment_method_save_allow_redisplay_override\": \"$it\"",
+                    original = """
+                        "payment_method_save_allow_redisplay_override": null
+                    """.trimIndent(),
+                    new = """
+                        "payment_method_save_allow_redisplay_override": "$it"
+                    """.trimIndent(),
                 )
             )
         }
