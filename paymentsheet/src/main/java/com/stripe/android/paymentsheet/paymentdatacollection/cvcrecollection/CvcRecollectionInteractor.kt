@@ -3,10 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 
 internal interface CvcRecollectionInteractor {
     val viewState: CvcRecollectionViewState
@@ -15,8 +12,8 @@ internal interface CvcRecollectionInteractor {
 
 internal class DefaultCvcRecollectionInteractor(
     args: Args,
-    scope: CoroutineScope
 ) : CvcRecollectionInteractor {
+
     private val controller = CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
     override val viewState = CvcRecollectionViewState(
         cardBrand = args.cardBrand,
@@ -32,9 +29,5 @@ internal class DefaultCvcRecollectionInteractor(
         } else {
             CvcCompletionState.Incomplete
         }
-    }.stateIn(
-        scope = scope,
-        initialValue = CvcCompletionState.Incomplete,
-        started = SharingStarted.Eagerly
-    )
+    }
 }

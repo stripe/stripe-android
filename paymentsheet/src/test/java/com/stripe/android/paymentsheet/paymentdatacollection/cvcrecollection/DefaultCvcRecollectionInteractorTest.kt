@@ -4,14 +4,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.TextFieldStateConstants
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class DefaultCvcRecollectionInteractorTest {
 
-    private val scope = TestScope()
     private fun createInteractor(): DefaultCvcRecollectionInteractor {
         return DefaultCvcRecollectionInteractor(
             args = Args(
@@ -20,7 +17,6 @@ class DefaultCvcRecollectionInteractorTest {
                 cvc = null,
                 isTestMode = true
             ),
-            scope = scope
         )
     }
 
@@ -44,11 +40,11 @@ class DefaultCvcRecollectionInteractorTest {
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
 
             interactor.viewState.controller.onRawValueChange("555")
-            scope.advanceUntilIdle()
+//            delay(100)
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Completed("555"))
 
             interactor.viewState.controller.onRawValueChange("55")
-            scope.advanceUntilIdle()
+//            delay(100)
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
         }
     }

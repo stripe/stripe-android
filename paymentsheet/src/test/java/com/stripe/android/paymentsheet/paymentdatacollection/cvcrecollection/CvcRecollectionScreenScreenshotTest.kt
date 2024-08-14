@@ -7,7 +7,6 @@ import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import kotlinx.coroutines.test.TestScope
 import org.junit.Rule
 import org.junit.Test
 
@@ -27,7 +26,6 @@ class CvcRecollectionScreenScreenshotTest {
                 cvc = cvc,
                 isTestMode = isTestMode
             ),
-            scope = TestScope()
         )
     }
 
