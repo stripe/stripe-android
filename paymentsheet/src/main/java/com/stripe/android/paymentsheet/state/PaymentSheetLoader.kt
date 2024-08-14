@@ -95,6 +95,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             defaultPaymentMethodId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
 
+        val customerInfo = createCustomerInfo(
+            config = paymentSheetConfiguration,
+            elementsSession = elementsSession,
+        )
+
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession)
 
         val metadata = createPaymentMethodMetadata(
@@ -113,8 +118,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val customer = async {
             createCustomerState(
-                config = paymentSheetConfiguration,
-                elementsSession = elementsSession,
+                customerInfo = customerInfo,
                 metadata = metadata,
                 savedSelection = savedSelection,
             )
@@ -128,7 +132,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             createLinkState(
                 config = paymentSheetConfiguration,
                 elementsSession = elementsSession,
-                customer = customer,
+                customer = customerInfo,
             )
         }
 
@@ -207,18 +211,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
     }
 
-    private suspend fun createCustomerState(
+    private fun createCustomerInfo(
         config: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
-        metadata: PaymentMethodMetadata,
-        savedSelection: Deferred<SavedSelection>,
-    ): CustomerState? {
-        val customerConfig = config.customer
+    ): CustomerInfo? {
+        val customer = config.customer
 
-        val customerState = when (val accessType = customerConfig?.accessType) {
+        return when (val accessType = customer?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                elementsSession.customer?.let { customer ->
-                    CustomerState.createForCustomerSession(customer, metadata.supportedSavedPaymentMethodTypes())
+                elementsSession.customer?.let { elementsSessionCustomer ->
+                    CustomerInfo.CustomerSession(elementsSessionCustomer)
                 } ?: run {
                     val exception = IllegalStateException(
                         "Excepted 'customer' attribute as part of 'elements_session' response!"
@@ -237,12 +239,34 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 }
             }
             is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                CustomerState.createForLegacyEphemeralKey(
-                    customerId = customerConfig.id,
+                CustomerInfo.Legacy(
+                    customerConfig = customer,
                     accessType = accessType,
+                )
+            }
+            else -> null
+        }
+    }
+
+    private suspend fun createCustomerState(
+        customerInfo: CustomerInfo?,
+        metadata: PaymentMethodMetadata,
+        savedSelection: Deferred<SavedSelection>,
+    ): CustomerState? {
+        val customerState = when (customerInfo) {
+            is CustomerInfo.CustomerSession -> {
+                CustomerState.createForCustomerSession(
+                    customer = customerInfo.elementsSessionCustomer,
+                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
+                )
+            }
+            is CustomerInfo.Legacy -> {
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = customerInfo.id,
+                    accessType = customerInfo.accessType,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
-                        customerConfig = customerConfig,
+                        customerConfig = customerInfo.customerConfig,
                     )
                 )
             }
@@ -280,12 +304,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun createLinkState(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
-        customer: Deferred<CustomerState?>,
+        customer: CustomerInfo?,
     ): LinkState? {
         return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
             loadLinkState(
                 config = config,
-                customer = customer.await(),
+                customer = customer,
                 elementsSession = elementsSession,
                 merchantCountry = elementsSession.merchantCountry,
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
@@ -299,7 +323,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun loadLinkState(
         config: PaymentSheet.Configuration,
-        customer: CustomerState?,
+        customer: CustomerInfo?,
         elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
@@ -332,7 +356,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
-        customer: CustomerState?,
+        customer: CustomerInfo?,
         elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
@@ -561,6 +585,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                         "available-external-payment-methods"
                 )
             }
+        }
+    }
+
+    private sealed interface CustomerInfo {
+        val id: String
+        val ephemeralKeySecret: String
+
+        data class CustomerSession(
+            val elementsSessionCustomer: ElementsSession.Customer,
+        ) : CustomerInfo {
+            override val id: String = elementsSessionCustomer.session.customerId
+            override val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey
+        }
+
+        data class Legacy(
+            val customerConfig: PaymentSheet.CustomerConfiguration,
+            val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
+        ) : CustomerInfo {
+            override val id: String = customerConfig.id
+            override val ephemeralKeySecret: String = accessType.ephemeralKeySecret
         }
     }
 }
