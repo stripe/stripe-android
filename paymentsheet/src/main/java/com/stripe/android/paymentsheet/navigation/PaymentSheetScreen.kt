@@ -34,6 +34,8 @@ import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
 internal val verticalModeBottomContentPadding = 20.dp
+internal val horizontalModeWalletsDividerSpacing = 16.dp
+internal val verticalModeWalletsDividerSpacing = 24.dp
 
 internal sealed interface PaymentSheetScreen {
 
@@ -41,6 +43,7 @@ internal sealed interface PaymentSheetScreen {
     val showsContinueButton: Boolean
     val topContentPadding: Dp
     val bottomContentPadding: Dp
+    val walletsDividerSpacing: Dp
 
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
@@ -57,6 +60,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(null)
@@ -90,6 +94,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = SavedPaymentMethodsTopContentPadding
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -143,6 +148,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -190,6 +196,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -240,6 +247,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -275,6 +283,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -317,6 +326,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -351,6 +361,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -399,6 +410,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
