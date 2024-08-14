@@ -1,8 +1,15 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_ACCOUNT_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
@@ -11,35 +18,8 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import javax.inject.Inject
-import javax.inject.Provider
-
-internal class LinkSignupHandlerFactory @Inject constructor(
-    private val performLinkSignupForNetworking: Provider<PerformLinkSignupForNetworking>,
-    private val performLinkSignupForInstantDebits: Provider<PerformLinkSignupForInstantDebits>,
-    private val navigationManager: NavigationManager,
-    private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val logger: Logger,
-) {
-
-    fun create(isInstantDebits: Boolean): LinkSignupHandler {
-        return if (isInstantDebits) {
-            LinkSignupHandlerForInstantDebits(
-                performLinkSignup = performLinkSignupForInstantDebits.get(),
-                navigationManager = navigationManager,
-                eventTracker = eventTracker,
-                logger = logger,
-            )
-        } else {
-            LinkSignupHandlerForNetworking(
-                performLinkSignup = performLinkSignupForNetworking.get(),
-                navigationManager = navigationManager,
-                eventTracker = eventTracker,
-                logger = logger,
-            )
-        }
-    }
-}
 
 internal interface LinkSignupHandler {
 
@@ -56,7 +36,9 @@ internal interface LinkSignupHandler {
 }
 
 internal class LinkSignupHandlerForInstantDebits @Inject constructor(
-    private val performLinkSignup: PerformLinkSignup,
+    private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
+    private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
@@ -65,7 +47,20 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     override suspend fun performSignup(
         state: NetworkingLinkSignupState,
     ): Pane {
-        performLinkSignup(state)
+        val phoneController = state.payload()!!.phoneController
+
+        val signup = consumerRepository.signUp(
+            email = state.validEmail!!,
+            phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
+            country = phoneController.getCountryCode(),
+        )
+
+        attachConsumerToLinkAccountSession(
+            consumerSessionClientSecret = signup.consumerSession.clientSecret,
+        )
+
+        getOrFetchSync(refetchCondition = Always)
+
         return LINK_ACCOUNT_PICKER
     }
 
@@ -91,7 +86,9 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
 }
 
 internal class LinkSignupHandlerForNetworking @Inject constructor(
-    private val performLinkSignup: PerformLinkSignup,
+    private val getOrFetchSync: GetOrFetchSync,
+    private val getCachedAccounts: GetCachedAccounts,
+    private val saveAccountToLink: SaveAccountToLink,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
@@ -100,7 +97,19 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
     override suspend fun performSignup(
         state: NetworkingLinkSignupState,
     ): Pane {
-        performLinkSignup(state)
+        eventTracker.track(Click(eventName = "click.save_to_link", pane = NETWORKING_LINK_SIGNUP_PANE))
+        val selectedAccounts = getCachedAccounts()
+        val manifest = getOrFetchSync().manifest
+        val phoneController = state.payload()!!.phoneController
+        require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
+        saveAccountToLink.new(
+            country = phoneController.getCountryCode(),
+            email = state.validEmail!!,
+            phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
+            selectedAccounts = selectedAccounts,
+            shouldPollAccountNumbers = manifest.isDataFlow,
+        )
+
         return Pane.SUCCESS
     }
 

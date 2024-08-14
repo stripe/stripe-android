@@ -4,15 +4,18 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccounts
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.LinkLoginPane
@@ -24,6 +27,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,6 +35,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -185,7 +191,8 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
             signupHandler = mockLinkSignupHandlerForInstantDebits(
-                performLinkSignup = { error("Not expected to call sign-up") },
+                // We don't expect a signup to be performed
+                failOnSignup = true,
             ),
         )
 
@@ -222,7 +229,8 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
             signupHandler = mockLinkSignupHandlerForNetworking(
-                performLinkSignup = { error("Not expected to call sign-up") },
+                // We don't expect a signup to be performed
+                failOnSignup = true,
             )
         )
 
@@ -382,9 +390,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
-            signupHandler = mockLinkSignupHandlerForNetworking(
-                performLinkSignup = { throw APIConnectionException() },
-            ),
+            signupHandler = mockLinkSignupHandlerForNetworking(failOnSignup = true),
         )
 
         navigationManager.navigationFlow.test {
@@ -418,9 +424,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
-            signupHandler = mockLinkSignupHandlerForInstantDebits(
-                performLinkSignup = { throw APIConnectionException() },
-            )
+            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
         )
 
         navigationManager.navigationFlow.test {
@@ -436,10 +440,41 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     private fun mockLinkSignupHandlerForNetworking(
-        performLinkSignup: PerformLinkSignup = PerformLinkSignup { Pane.SUCCESS },
+        failOnSignup: Boolean = false,
     ): LinkSignupHandler {
+        val manifest = sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "test@test.com"
+        )
+
+        val getOrFetchSync = mock<GetOrFetchSync> {
+            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane(),
+                )
+            )
+        }
+
+        val getCachedAccounts = mock<GetCachedAccounts> {
+            onBlocking { invoke() } doReturn cachedPartnerAccounts()
+        }
+
+        val saveAccountToLink = mock<SaveAccountToLink> {
+            if (failOnSignup) {
+                onBlocking { new(any(), any(), any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+            } else {
+                onBlocking { new(any(), any(), any(), any(), any()) } doReturn manifest
+            }
+        }
+
         return LinkSignupHandlerForNetworking(
-            performLinkSignup = performLinkSignup,
+            getOrFetchSync = getOrFetchSync,
+            getCachedAccounts = getCachedAccounts,
+            saveAccountToLink = saveAccountToLink,
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             logger = Logger.noop(),
@@ -447,10 +482,39 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     private fun mockLinkSignupHandlerForInstantDebits(
-        performLinkSignup: PerformLinkSignup = PerformLinkSignup { Pane.SUCCESS },
+        failOnSignup: Boolean = false,
     ): LinkSignupHandler {
+        val manifest = sessionManifest().copy(
+            businessName = "Business",
+            accountholderCustomerEmailAddress = "test@test.com"
+        )
+
+        val getOrFetchSync = mock<GetOrFetchSync> {
+            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    linkLoginPane = linkLoginPane(),
+                )
+            )
+        }
+
+        val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
+            if (failOnSignup) {
+                onBlocking { signUp(any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+            } else {
+                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
+            }
+        }
+
         return LinkSignupHandlerForInstantDebits(
-            performLinkSignup = performLinkSignup,
+            getOrFetchSync = getOrFetchSync,
+            consumerRepository = consumerRepository,
+            attachConsumerToLinkAccountSession = {
+                // Mock a successful attach
+            },
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             logger = Logger.noop(),

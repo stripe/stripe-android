@@ -13,7 +13,8 @@ import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
-import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerFactory
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForNetworking
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -36,6 +37,7 @@ import dagger.Module
 import dagger.Provides
 import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -164,9 +166,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         internal fun provideLinkSignupHandler(
             isLinkWithStripe: IsLinkWithStripe,
-            linkSignupHandlerFactory: LinkSignupHandlerFactory,
+            linkSignupHandlerForInstantDebits: Provider<LinkSignupHandlerForInstantDebits>,
+            linkSignupHandlerForNetworking: Provider<LinkSignupHandlerForNetworking>,
         ): LinkSignupHandler {
-            return linkSignupHandlerFactory.create(isLinkWithStripe())
+            return if (isLinkWithStripe()) {
+                linkSignupHandlerForInstantDebits.get()
+            } else {
+                linkSignupHandlerForNetworking.get()
+            }
         }
     }
 }
