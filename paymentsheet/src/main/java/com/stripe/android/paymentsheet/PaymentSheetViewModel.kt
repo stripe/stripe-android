@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -41,6 +42,7 @@ import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CVCRecollectionCompletion
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -402,40 +404,41 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             cvcRecollectionHandler.launch(
                 paymentSelection = selection.value
             ) { cvcRecollectionData ->
-                navigationHandler.transitionTo(
-                    target = PaymentSheetScreen.CvcRecollection(
-                        interactor = DefaultCvcRecollectionInteractor(
-                            args = Args(
-                                lastFour = cvcRecollectionData.lastFour ?: "",
-                                cardBrand = cvcRecollectionData.brand,
-                                displayMode = Args.DisplayMode.PaymentScreen(
-                                    paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false
-                                ),
-                            ),
-                            onCompletionChanged = { result ->
-                                (selection.value as? PaymentSelection.Saved)?.let {
-                                    val paymentMethodOptionsParams = when (result) {
-                                        is CVCRecollectionCompletion.Completed -> {
-                                            PaymentMethodOptionsParams.Card(
-                                                cvc = result.cvc,
-                                            )
-                                        }
-                                        CVCRecollectionCompletion.Incomplete -> {
-                                            PaymentMethodOptionsParams.Card(
-                                                cvc = "",
-                                            )
-                                        }
-                                    }
-                                    updateSelection(
-                                        selection = PaymentSelection.Saved(
-                                            paymentMethod = it.paymentMethod,
-                                            walletType = it.walletType,
-                                            paymentMethodOptionsParams = paymentMethodOptionsParams
-                                        )
+                val interactor = DefaultCvcRecollectionInteractor(
+                    args = Args(
+                        lastFour = cvcRecollectionData.lastFour ?: "",
+                        cardBrand = cvcRecollectionData.brand,
+                        isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode ?: false,
+                    )
+                )
+                viewModelScope.launch {
+                    interactor.cvcCompletionState.collectLatest { completionState ->
+                        (selection.value as? PaymentSelection.Saved)?.let {
+                            val paymentMethodOptionsParams = when (completionState) {
+                                is CvcCompletionState.Completed -> {
+                                    PaymentMethodOptionsParams.Card(
+                                        cvc = completionState.cvc,
+                                    )
+                                }
+                                CvcCompletionState.Incomplete -> {
+                                    PaymentMethodOptionsParams.Card(
+                                        cvc = "",
                                     )
                                 }
                             }
-                        )
+                            updateSelection(
+                                selection = PaymentSelection.Saved(
+                                    paymentMethod = it.paymentMethod,
+                                    walletType = it.walletType,
+                                    paymentMethodOptionsParams = paymentMethodOptionsParams
+                                )
+                            )
+                        }
+                    }
+                }
+                navigationHandler.transitionTo(
+                    target = PaymentSheetScreen.CvcRecollection(
+                        interactor = interactor
                     )
                 )
             }

@@ -10,6 +10,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CVCRecollectionCompletion
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionScreen
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -461,14 +463,20 @@ internal sealed interface PaymentSheetScreen {
             )
         )
         override val showsContinueButton = false
+        override val topContentPadding: Dp
+            get() = 0.dp
+        override val bottomContentPadding: Dp
+            get() = 0.dp
+        override val walletsDividerSpacing: Dp
+            get() = 0.dp
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return interactor.cvcCompletion.mapAsStateFlow { complete ->
+            return interactor.cvcCompletionState.mapAsStateFlow { complete ->
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = false,
                     isLiveMode = false,
                     editable = PaymentSheetTopBarState.Editable.Maybe(
-                        isEditing = complete is CVCRecollectionCompletion.Incomplete,
+                        isEditing = complete is CvcCompletionState.Incomplete,
                         canEdit = false,
                         onEditIconPressed = {}
                     ),
@@ -482,13 +490,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            val state = interactor.viewState.collectAsState()
-            CvcRecollectionScreen(
-                cardBrand = state.value.cardBrand,
-                lastFour = state.value.lastFour,
-                displayMode = state.value.displayMode,
-                viewActionHandler = interactor::handleViewAction
-            )
+            CvcRecollectionPaymentSheetScreen(interactor)
         }
 
         override fun close() = Unit

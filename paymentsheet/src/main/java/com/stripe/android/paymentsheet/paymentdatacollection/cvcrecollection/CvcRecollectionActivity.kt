@@ -25,7 +25,6 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
     private val viewModel by viewModels<CvcRecollectionViewModel> {
         CvcRecollectionViewModel.Factory(
             args = args,
-            onCompletionChanged = {}
         )
     }
 
@@ -61,7 +60,6 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                         lastFour = state.value.lastFour,
                         isTestMode = state.value.isTestMode,
                         controller = state.value.controller,
-                        displayMode = state.value.displayMode,
                         viewActionHandler = viewModel::handleViewAction
                     )
                 }
