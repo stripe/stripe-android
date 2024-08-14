@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.RealGetOrFetchSync
 import com.stripe.android.financialconnections.domain.RealIsLinkWithStripe
 import com.stripe.android.financialconnections.features.common.enableWorkManager
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
@@ -81,6 +82,9 @@ internal interface FinancialConnectionsSheetSharedModule {
 
     @Binds
     fun bindsIsLinkWithStripe(impl: RealIsLinkWithStripe): IsLinkWithStripe
+
+    @Binds
+    fun bindsGetOrFetchSync(impl: RealGetOrFetchSync): GetOrFetchSync
 
     companion object {
 

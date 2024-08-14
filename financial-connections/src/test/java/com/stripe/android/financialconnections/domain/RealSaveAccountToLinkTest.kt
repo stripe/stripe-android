@@ -26,7 +26,7 @@ import java.util.Locale
 import kotlin.test.assertFails
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class SaveAccountToLinkTest {
+internal class RealSaveAccountToLinkTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -185,7 +185,7 @@ internal class SaveAccountToLinkTest {
         successRepository: SuccessContentRepository = SuccessContentRepository(SavedStateHandle()),
         attachedPaymentAccountRepository: AttachedPaymentAccountRepository = mock(),
     ): SaveAccountToLink {
-        return SaveAccountToLink(
+        return RealSaveAccountToLink(
             locale = Locale.getDefault(),
             configuration = FinancialConnectionsSheet.Configuration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,

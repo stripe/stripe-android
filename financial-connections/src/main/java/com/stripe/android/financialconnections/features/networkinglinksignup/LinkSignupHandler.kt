@@ -10,44 +10,50 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.SignUpToLink
+import com.stripe.android.financialconnections.exception.UnclassifiedError
 import com.stripe.android.financialconnections.features.common.isDataFlow
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.navigation.destination
 import javax.inject.Inject
 
 internal interface LinkSignupHandler {
 
     suspend fun performSignup(
         state: NetworkingLinkSignupState,
-    ): Pane
+    )
 
     fun handleSignupFailure(
         error: Throwable,
     )
 
     fun navigateToVerification()
+
+    fun skipSignup()
 }
 
 internal class LinkSignupHandlerForInstantDebits @Inject constructor(
-    private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
+    private val signUpToLink: SignUpToLink,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val handleError: HandleError,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val logger: Logger,
 ) : LinkSignupHandler {
 
     override suspend fun performSignup(
         state: NetworkingLinkSignupState,
-    ): Pane {
+    ) {
         val phoneController = state.payload()!!.phoneController
 
-        val signup = consumerRepository.signUp(
+        val signup = signUpToLink(
             email = state.validEmail!!,
             phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
             country = phoneController.getCountryCode(),
@@ -58,7 +64,8 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         )
 
         val manifest = getOrFetchSync(refetchCondition = Always).manifest
-        return manifest.nextPane
+        val destination = manifest.nextPane.destination(referrer = LINK_LOGIN)
+        navigationManager.tryNavigateTo(destination)
     }
 
     override fun navigateToVerification() {
@@ -71,6 +78,15 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
             error = error,
             pane = LINK_LOGIN,
             displayErrorScreen = true,
+        )
+    }
+
+    override fun skipSignup() {
+        eventTracker.logError(
+            extraMessage = "User skipped signup",
+            logger = logger,
+            pane = LINK_LOGIN,
+            error = UnclassifiedError("InvalidActionError"),
         )
     }
 }
@@ -86,7 +102,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
 
     override suspend fun performSignup(
         state: NetworkingLinkSignupState,
-    ): Pane {
+    ) {
         eventTracker.track(Click(eventName = "click.save_to_link", pane = NETWORKING_LINK_SIGNUP_PANE))
         val selectedAccounts = getCachedAccounts()
         val manifest = getOrFetchSync().manifest
@@ -100,7 +116,8 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
             shouldPollAccountNumbers = manifest.isDataFlow,
         )
 
-        return Pane.SUCCESS
+        val destination = SUCCESS.destination(referrer = NETWORKING_LINK_SIGNUP_PANE)
+        navigationManager.tryNavigateTo(destination)
     }
 
     override fun navigateToVerification() {
@@ -115,6 +132,10 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
             pane = NETWORKING_LINK_SIGNUP_PANE,
         )
 
+        navigationManager.tryNavigateTo(Success(referrer = NETWORKING_LINK_SIGNUP_PANE))
+    }
+
+    override fun skipSignup() {
         navigationManager.tryNavigateTo(Success(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 }

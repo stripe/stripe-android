@@ -263,7 +263,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     handleNonSuccessNextPane(payload, nextPane)
                 }
             }
-            Unit
         }.execute { copy(selectNetworkedAccountAsync = it) }
     }
 
