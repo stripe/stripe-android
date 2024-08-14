@@ -7,6 +7,6 @@ internal data class CvcRecollectionViewState(
     val cardBrand: CardBrand,
     val lastFour: String,
     val cvc: String?,
-    val controller: CvcController,
-    val displayMode: Args.DisplayMode
+    val isTestMode: Boolean,
+    val controller: CvcController
 )

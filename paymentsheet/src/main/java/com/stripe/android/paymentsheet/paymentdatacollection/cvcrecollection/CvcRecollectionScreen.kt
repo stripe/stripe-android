@@ -57,7 +57,6 @@ internal fun CvcRecollectionScreen(
     lastFour: String,
     isTestMode: Boolean,
     controller: CvcController,
-    displayMode: CvcRecollectionViewModel.Args.DisplayMode,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     val element = rememberElement(controller)
@@ -67,19 +66,17 @@ internal fun CvcRecollectionScreen(
                 .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
-            CvcRecollectionHeader(displayMode) {
+            CvcRecollectionTopBar(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionTitle()
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
-            if (displayMode is Args.DisplayMode.Activity) {
-                CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
-                    viewActionHandler.invoke(
-                        CvcRecollectionViewAction.OnConfirmPressed(
-                            element.controller.fieldValue.value
-                        )
+            CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
+                viewActionHandler.invoke(
+                    CvcRecollectionViewAction.OnConfirmPressed(
+                        element.controller.fieldValue.value
                     )
-                }
+                )
             }
         }
     }
@@ -179,26 +176,24 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionHeader(
-    displayMode: Args.DisplayMode,
+private fun CvcRecollectionTopBar(
+    isTestMode: Boolean,
     onClosePressed: () -> Unit
 ) {
-    if (displayMode is Args.DisplayMode.Activity) {
-        Row(
-            modifier = Modifier
-                .padding(0.dp, 16.dp, 0.dp, 0.dp)
-                .height(32.dp)
+    Row(
+        modifier = Modifier
+            .padding(0.dp, 16.dp, 0.dp, 0.dp)
+            .height(32.dp)
+    ) {
+        if (isTestMode) {
+            TestModeBadge()
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = { onClosePressed.invoke() },
+            Modifier.offset(16.dp, -8.dp)
         ) {
-            if (displayMode.isLiveMode.not()) {
-                TestModeBadge()
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = { onClosePressed.invoke() },
-                Modifier.offset(16.dp, -8.dp)
-            ) {
-                Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
-            }
+            Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
         }
     }
 }
@@ -253,7 +248,6 @@ private fun CvcRecollectionFieldPreview() {
             controller = CvcController(
                 cardBrandFlow = stateFlowOf(CardBrand.Visa)
             ),
-            displayMode = CvcRecollectionViewModel.Args.DisplayMode.Activity(true),
             viewActionHandler = { }
         )
     }

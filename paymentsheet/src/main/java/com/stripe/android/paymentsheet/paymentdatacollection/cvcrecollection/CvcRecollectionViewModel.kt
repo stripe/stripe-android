@@ -7,7 +7,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
@@ -19,8 +21,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
             cardBrand = args.cardBrand,
             lastFour = args.lastFour,
             cvc = null,
-            controller = controller,
-            displayMode = args.displayMode
+            isTestMode = args.isTestMode,
+            controller = controller
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState>
@@ -33,7 +35,6 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         when (action) {
             is CvcRecollectionViewAction.OnConfirmPressed -> onConfirmPress(action.cvc)
             is CvcRecollectionViewAction.OnBackPressed -> onBackPress()
-            else -> interactor.handleViewAction(action)
         }
     }
 
@@ -51,7 +52,6 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
 
     class Factory(
         private val args: CvcRecollectionContract.Args,
-        private val onCompletionChanged: (CVCRecollectionCompletion) -> Unit,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -60,20 +60,9 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
                     cvc = null,
-                    displayMode = args.displayMode.toDisplayMode()
+                    isTestMode = args.isTestMode
                 )
             ) as T
-        }
-    }
-}
-
-internal fun CvcRecollectionContract.Args.DisplayMode.toDisplayMode(): Args.DisplayMode {
-    return when (this) {
-        is CvcRecollectionContract.Args.DisplayMode.Activity -> {
-            Args.DisplayMode.Activity(isLiveMode)
-        }
-        is CvcRecollectionContract.Args.DisplayMode.PaymentScreen -> {
-            Args.DisplayMode.PaymentScreen(isLiveMode)
         }
     }
 }
