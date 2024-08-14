@@ -56,7 +56,8 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                     CvcRecollectionScreen(
                         cardBrand = state.value.cardBrand,
                         lastFour = state.value.lastFour,
-                        isTestMode = !state.value.isLiveMode,
+                        isTestMode = state.value.isTestMode,
+                        controller = state.value.controller,
                         viewActionHandler = viewModel::handleViewAction
                     )
                 }
