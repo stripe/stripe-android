@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionSignup
 
 internal object ApiKeyFixtures {
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -145,6 +146,18 @@ internal object ApiKeyFixtures {
                 type = ConsumerSession.VerificationSession.SessionType.Sms,
                 state = ConsumerSession.VerificationSession.SessionState.Verified,
             )
+        ),
+    )
+
+    fun consumerSessionSignup() = ConsumerSessionSignup(
+        publishableKey = "pk_123",
+        consumerSession = consumerSession().copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.SignUp,
+                    state = ConsumerSession.VerificationSession.SessionState.Started,
+                )
+            ),
         ),
     )
 }
