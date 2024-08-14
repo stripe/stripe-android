@@ -40,11 +40,9 @@ class DefaultCvcRecollectionInteractorTest {
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
 
             interactor.viewState.controller.onRawValueChange("555")
-//            delay(100)
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Completed("555"))
 
             interactor.viewState.controller.onRawValueChange("55")
-//            delay(100)
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)
         }
     }
