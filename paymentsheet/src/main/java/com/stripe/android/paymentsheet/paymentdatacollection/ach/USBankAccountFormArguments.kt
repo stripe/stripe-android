@@ -63,7 +63,9 @@ internal class USBankAccountFormArguments(
         ): USBankAccountFormArguments {
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
-                metadata = paymentMethodMetadata,
+                intent = paymentMethodMetadata.stripeIntent,
+                paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
+                hasCustomerConfiguration = paymentMethodMetadata.hasCustomerConfiguration,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val initializationMode = (viewModel as? PaymentSheetViewModel)

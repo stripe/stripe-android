@@ -99,7 +99,9 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             if (
                 isSaveForFutureUseValueChangeable(
                     code = PaymentMethod.Type.Card.code,
-                    metadata = metadata,
+                    intent = metadata.stripeIntent,
+                    paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+                    hasCustomerConfiguration = metadata.hasCustomerConfiguration,
                 )
             ) {
                 add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))

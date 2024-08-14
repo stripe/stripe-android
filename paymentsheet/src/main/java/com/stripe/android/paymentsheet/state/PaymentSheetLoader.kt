@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -99,7 +100,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val metadata = createPaymentMethodMetadata(
             paymentSheetConfiguration = paymentSheetConfiguration,
             elementsSession = elementsSession,
-            isGooglePayReady = isGooglePayReady
+            isGooglePayReady = isGooglePayReady,
         )
 
         val savedSelection = async {
@@ -128,7 +129,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 config = paymentSheetConfiguration,
                 elementsSession = elementsSession,
                 customer = customer,
-                metadata = metadata,
             )
         }
 
@@ -280,14 +280,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun createLinkState(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
-        metadata: PaymentMethodMetadata,
         customer: Deferred<CustomerState?>,
     ): LinkState? {
         return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
             loadLinkState(
                 config = config,
                 customer = customer.await(),
-                metadata = metadata,
+                elementsSession = elementsSession,
                 merchantCountry = elementsSession.merchantCountry,
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                 linkSignUpDisabled = elementsSession.disableLinkSignup,
@@ -301,7 +300,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun loadLinkState(
         config: PaymentSheet.Configuration,
         customer: CustomerState?,
-        metadata: PaymentMethodMetadata,
+        elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
@@ -310,7 +309,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val linkConfig = createLinkConfiguration(
             config = config,
             customer = customer,
-            metadata = metadata,
+            elementsSession = elementsSession,
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
@@ -334,7 +333,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
         customer: CustomerState?,
-        metadata: PaymentMethodMetadata,
+        elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
@@ -367,7 +366,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = metadata,
+            intent = elementsSession.stripeIntent,
+            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+            hasCustomerConfiguration = config.customer != null,
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
@@ -387,7 +388,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
 
         return LinkConfiguration(
-            stripeIntent = metadata.stripeIntent,
+            stripeIntent = elementsSession.stripeIntent,
             signupMode = linkSignupMode,
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,

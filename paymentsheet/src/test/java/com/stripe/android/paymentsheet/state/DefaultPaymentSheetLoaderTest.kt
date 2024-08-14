@@ -1021,6 +1021,40 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Returns correct Link signup mode when payment sheet save is disabled`() = runTest {
+        val loader = createPaymentSheetLoader(
+            customer = createElementsSessionCustomer(
+                isPaymentMethodSaveEnabled = false,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
+    fun `Returns correct Link signup mode when payment sheet save is enabled`() = runTest {
+        val loader = createPaymentSheetLoader(
+            customer = createElementsSessionCustomer(
+                isPaymentMethodSaveEnabled = true,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+    }
+
+    @Test
     fun `Disables Link if BDCC collects anything`() = runTest {
         val loader = createPaymentSheetLoader()
 
@@ -1741,7 +1775,15 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     private fun createElementsSessionCustomer(
-        paymentMethods: List<PaymentMethod>,
+        paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
+        isPaymentMethodSaveEnabled: Boolean? = null,
+        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet = isPaymentMethodSaveEnabled?.let {
+            ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                isPaymentMethodSaveEnabled = it,
+                isPaymentMethodRemoveEnabled = true,
+                allowRedisplayOverride = null,
+            )
+        } ?: ElementsSession.Customer.Components.PaymentSheet.Disabled
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
@@ -1752,7 +1794,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 apiKey = "ek_123",
                 apiKeyExpiry = 555555555,
                 components = ElementsSession.Customer.Components(
-                    paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                    paymentSheet = paymentSheetComponent,
                     customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                 ),
             ),
@@ -1828,5 +1870,15 @@ internal class DefaultPaymentSheetLoaderTest {
     private companion object {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
+        private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
+            merchantDisplayName = "Some Name",
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_123",
+                ephemeralKeySecret = "some_secret",
+            ),
+        )
+        private val DEFAULT_INITIALIZATION_MODE = PaymentSheet.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
     }
 }
