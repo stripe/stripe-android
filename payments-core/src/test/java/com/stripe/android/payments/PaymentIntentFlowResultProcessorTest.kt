@@ -44,7 +44,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_REDIRECT)
             )
@@ -77,7 +77,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
             whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
@@ -100,7 +100,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `no refresh when user cancels the payment`() = runTest {
+    fun `no refresh when user cancels the payment`() = runTest(testDispatcher) {
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
             Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         )
@@ -120,7 +120,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `refresh succeeds when user confirms the payment`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
@@ -195,7 +195,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled with processing intent should succeed`() =
-        runTest {
+        runTest(testDispatcher) {
             val initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.Processing
             )
@@ -210,7 +210,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled with requires capture intent should succeed`() =
-        runTest {
+        runTest(testDispatcher) {
             val initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.Processing
             )
@@ -225,7 +225,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled with succeeded intent should succeed`() =
-        runTest {
+        runTest(testDispatcher) {
             runCanceledFlow(
                 initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                     status = StripeIntent.Status.Succeeded

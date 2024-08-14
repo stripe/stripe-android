@@ -16,6 +16,10 @@ class LinearRetryDelaySupplier(
     @Inject
     constructor() : this(DEFAULT_DELAY.toDuration(DurationUnit.SECONDS))
 
+    override fun maxDuration(maxRetries: Int): Duration {
+        return delay.times(maxRetries)
+    }
+
     /**
      * Gets a linear delay time regardless of provided parameters
      *

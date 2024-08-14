@@ -56,4 +56,21 @@ class ExponentialBackoffRetryDelaySupplierTest {
             )
         ).isEqualTo((8L).toDuration(DurationUnit.SECONDS))
     }
+
+    @Test
+    fun `maxDuration() should return expected value`() {
+        val supplier = ExponentialBackoffRetryDelaySupplier()
+
+        assertThat(
+            supplier.maxDuration(
+                maxRetries = 3,
+            )
+        ).isEqualTo((12L).toDuration(DurationUnit.SECONDS))
+
+        assertThat(
+            supplier.maxDuration(
+                maxRetries = 5,
+            )
+        ).isEqualTo((60L).toDuration(DurationUnit.SECONDS))
+    }
 }
