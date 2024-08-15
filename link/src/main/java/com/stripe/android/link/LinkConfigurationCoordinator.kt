@@ -22,6 +22,8 @@ interface LinkConfigurationCoordinator {
     val component: LinkComponent?
     val emailFlow: StateFlow<String?>
 
+    fun setConfiguration(configuration: LinkConfiguration)
+
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
 
     suspend fun signInWithUserInput(
@@ -96,6 +98,10 @@ class RealLinkConfigurationCoordinator @Inject internal constructor(
         return getLinkPaymentLauncherComponent(configuration)
             .linkAccountManager
             .logOut()
+    }
+
+    override fun setConfiguration(configuration: LinkConfiguration) {
+        getLinkPaymentLauncherComponent(configuration)
     }
 
     /**

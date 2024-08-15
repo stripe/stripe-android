@@ -702,6 +702,102 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Disables Link inline signup if no valid funding source`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                linkFundingSources = listOf("us_bank_account")
+            ),
+            linkAccountState = AccountStatus.SignedOut,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isNull()
+    }
+
+    @Test
+    fun `Disables Link inline signup if user already has an unverified account`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.NeedsVerification,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isNull()
+    }
+
+    @Test
+    fun `Disables Link inline signup if user already has an verified account`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.Verified,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isNull()
+    }
+
+    @Test
+    fun `Disables Link inline signup if there is an account error`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.Error,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isNull()
+    }
+
+    @Test
+    fun `Enables Link inline signup if valid card funding source`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                linkFundingSources = listOf("card"),
+            ),
+            linkAccountState = AccountStatus.SignedOut,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
+    fun `Enables Link inline signup if user has no account`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.SignedOut,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
     fun `Uses shipping address phone number if checkbox is selected`() = runTest {
         val loader = createPaymentSheetLoader()
 
@@ -982,7 +1078,7 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Returns correct Link signup mode if not saving for future use`() = runTest {
         val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.Error,
+            linkAccountState = AccountStatus.SignedOut,
         )
 
         val result = loader.load(
@@ -999,7 +1095,7 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Returns correct Link signup mode if saving for future use`() = runTest {
         val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.NeedsVerification,
+            linkAccountState = AccountStatus.SignedOut,
         )
 
         val result = loader.load(
@@ -1022,6 +1118,7 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Returns correct Link signup mode when payment sheet save is disabled`() = runTest {
         val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
                 isPaymentMethodSaveEnabled = false,
             )
@@ -1039,6 +1136,7 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Returns correct Link signup mode when payment sheet save is enabled`() = runTest {
         val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
                 isPaymentMethodSaveEnabled = true,
             )

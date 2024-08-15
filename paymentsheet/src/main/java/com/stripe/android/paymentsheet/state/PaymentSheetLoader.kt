@@ -339,7 +339,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             flags = flags,
         )
 
-        val loginState = when (accountStatusProvider(linkConfig)) {
+        val accountStatus = accountStatusProvider(linkConfig)
+
+        val loginState = when (accountStatus) {
             AccountStatus.Verified -> LinkState.LoginState.LoggedIn
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> LinkState.LoginState.NeedsVerification
@@ -366,7 +368,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return LinkState(
             configuration = linkConfig,
             loginState = loginState,
-            signupMode = linkSignupMode,
+            signupMode = linkSignupMode.takeIf {
+                val validFundingSource = linkConfig.stripeIntent.linkFundingSources
+                    .contains(PaymentMethod.Type.Card.code)
+
+                val notLoggedIn = accountStatus == AccountStatus.SignedOut
+
+                validFundingSource && notLoggedIn
+            },
         )
     }
 

@@ -35,6 +35,10 @@ class FakeLinkConfigurationCoordinator(
     override val emailFlow: StateFlow<String?>
         get() = stateFlowOf(null)
 
+    override fun setConfiguration(configuration: LinkConfiguration) {
+        // No-op
+    }
+
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
         return flowOf(accountStatus)
     }

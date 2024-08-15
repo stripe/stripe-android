@@ -21,9 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal interface AddPaymentMethodInteractor {
@@ -87,16 +85,11 @@ internal class DefaultAddPaymentMethodInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(viewModel = viewModel, paymentMethodMetadata = paymentMethodMetadata)
             val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
-            val linkSignupMode = viewModel.linkHandler.linkSignupMode.stateIn(
-                scope = coroutineScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = null,
-            )
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
                 selection = viewModel.selection,
-                linkSignupMode = linkSignupMode,
+                linkSignupMode = viewModel.linkHandler.linkSignupMode,
                 processing = viewModel.processing,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,

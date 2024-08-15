@@ -52,9 +52,30 @@ class LinkHandlerTest {
     @Test
     fun `Prepares state correctly for logged out user`() = runLinkTest {
         accountStatusFlow.emit(AccountStatus.SignedOut)
-        handler.setupLink(createLinkState(LinkState.LoginState.LoggedOut))
+        handler.setupLink(
+            createLinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
+            )
+        )
         assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
+        verify(linkConfigurationCoordinator).setConfiguration(configuration)
+        assertThat(handler.linkSignupMode.value).isEqualTo(LinkSignupMode.InsteadOfSaveForFutureUse)
+        assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
+    }
+
+    @Test
+    fun `Prepares state correctly with SFU signup mode`() = runLinkTest {
+        accountStatusFlow.emit(AccountStatus.SignedOut)
+        handler.setupLink(
+            createLinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+        assertThat(handler.isLinkEnabled.first()).isTrue()
+        verify(linkConfigurationCoordinator).setConfiguration(configuration)
+        assertThat(handler.linkSignupMode.value).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 
@@ -137,12 +158,7 @@ class LinkHandlerTest {
             verify(linkStore, never()).markLinkAsUsed()
         }
 
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.Verified)
-        }
-
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
 
     @Test
@@ -169,12 +185,7 @@ class LinkHandlerTest {
             verify(linkStore).markLinkAsUsed()
         }
 
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.Verified)
-        }
-
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
 
     @Test
@@ -203,7 +214,6 @@ class LinkHandlerTest {
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
 
     @Test
@@ -213,7 +223,6 @@ class LinkHandlerTest {
     ) {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
-        accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
             state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
@@ -229,17 +238,14 @@ class LinkHandlerTest {
             }
             accountStatusFlow.emit(AccountStatus.SignedOut)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkAnalyticsHelper).onLinkPopupSkipped()
             verify(linkLauncher, never()).present(eq(configuration))
             verify(linkStore, never()).markLinkAsUsed()
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.ensureAllEventsConsumed()
     }
 
     @Test
@@ -249,7 +255,6 @@ class LinkHandlerTest {
     ) {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
-        accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
             state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
@@ -265,11 +270,9 @@ class LinkHandlerTest {
             }
             accountStatusFlow.emit(AccountStatus.SignedOut)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
 
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isInstanceOf<LinkHandler.ProcessingState.PaymentDetailsCollected>()
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkLauncher, never()).present(eq(configuration))
             verify(linkStore).markLinkAsUsed()
         }
@@ -303,7 +306,6 @@ class LinkHandlerTest {
             cancelAndConsumeRemainingEvents()
         }
 
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
         processingStateTurbine.cancelAndIgnoreRemainingEvents()
     }
 
@@ -333,7 +335,6 @@ class LinkHandlerTest {
             cancelAndConsumeRemainingEvents()
         }
 
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
         processingStateTurbine.cancelAndIgnoreRemainingEvents()
     }
 
@@ -354,7 +355,6 @@ class LinkHandlerTest {
     ) {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
-        accountStatusTurbine.ensureAllEventsConsumed()
         handler.setupLink(
             state = createLinkState(
                 loginState = LinkState.LoginState.LoggedOut,
@@ -370,7 +370,6 @@ class LinkHandlerTest {
             }
             accountStatusFlow.emit(AccountStatus.SignedOut)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
 
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isEqualTo(
@@ -394,7 +393,6 @@ class LinkHandlerTest {
                     ),
                 )
             )
-            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkLauncher, never()).present(eq(configuration))
         }
 
@@ -424,12 +422,7 @@ class LinkHandlerTest {
             verify(linkLauncher, never()).present(eq(configuration))
         }
 
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.SignedOut)
-        }
-
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
 
     @Test
@@ -461,12 +454,7 @@ class LinkHandlerTest {
             verify(linkLauncher, never()).present(eq(configuration))
         }
 
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.SignedOut)
-        }
-
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
 
     @Test
@@ -488,67 +476,7 @@ class LinkHandlerTest {
             verify(linkLauncher, never()).present(eq(configuration))
         }
 
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.SignedOut)
-        }
-
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-    }
-
-    @Test
-    fun `Hides Link inline signup if no valid funding source`() = runLinkInlineTest(
-        linkConfiguration = defaultLinkConfiguration(
-            linkFundingSources = listOf("us_bank_account"),
-        ),
-    ) {
-        handler.setupLink(
-            state = createLinkState(
-                loginState = LinkState.LoginState.LoggedOut,
-            )
-        )
-
-        accountStatusFlow.emit(AccountStatus.SignedOut)
-
-        handler.linkSignupMode.test {
-            assertThat(awaitItem()).isNull()
-        }
-
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
-    }
-
-    @Test
-    fun `Hides Link inline signup if user already has an account`() = runLinkInlineTest {
-        handler.setupLink(
-            state = createLinkState(
-                loginState = LinkState.LoginState.NeedsVerification,
-            )
-        )
-
-        accountStatusFlow.emit(AccountStatus.NeedsVerification)
-
-        handler.linkSignupMode.test {
-            assertThat(awaitItem()).isNull()
-        }
-
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
-    }
-
-    @Test
-    fun `Shows Link inline signup if user has no account`() = runLinkInlineTest {
-        handler.setupLink(
-            state = createLinkState(
-                loginState = LinkState.LoginState.LoggedOut,
-            )
-        )
-
-        accountStatusFlow.emit(AccountStatus.SignedOut)
-
-        handler.linkSignupMode.test {
-            assertThat(awaitItem()).isNotNull()
-        }
-
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
     }
 
     private suspend fun LinkInlineTestData.setupBasicLink() {
@@ -645,7 +573,6 @@ private fun runLinkTest(
     val testScope = this
     turbineScope {
         val processingStateTurbine = handler.processingState.testIn(backgroundScope)
-        val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
 
         whenever(linkConfigurationCoordinator.getAccountStatusFlow(eq(linkConfiguration))).thenReturn(accountStatusFlow)
         whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(
@@ -663,23 +590,22 @@ private fun runLinkTest(
                 configuration = linkConfiguration,
                 accountStatusFlow = accountStatusFlow,
                 processingStateTurbine = processingStateTurbine,
-                accountStatusTurbine = accountStatusTurbine,
                 linkAnalyticsHelper = linkAnalyticsHelper,
             )
         ) {
             testBlock()
             processingStateTurbine.ensureAllEventsConsumed()
-            accountStatusTurbine.ensureAllEventsConsumed()
         }
     }
 }
 
 private fun LinkTestData.createLinkState(
     loginState: LinkState.LoginState,
+    signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
 ): LinkState {
     return LinkState(
         loginState = loginState,
-        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+        signupMode = signupMode,
         configuration = configuration,
     )
 }
@@ -730,7 +656,6 @@ private class LinkTestDataImpl(
     override val configuration: LinkConfiguration,
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
     override val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>,
-    override val accountStatusTurbine: ReceiveTurbine<AccountStatus>,
     override val linkAnalyticsHelper: LinkAnalyticsHelper,
 ) : LinkTestData
 
@@ -744,7 +669,6 @@ private interface LinkTestData {
     val configuration: LinkConfiguration
     val accountStatusFlow: MutableSharedFlow<AccountStatus>
     val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>
-    val accountStatusTurbine: ReceiveTurbine<AccountStatus>
     val linkAnalyticsHelper: LinkAnalyticsHelper
 }
 
