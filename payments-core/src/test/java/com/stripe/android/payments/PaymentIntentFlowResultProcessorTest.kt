@@ -209,7 +209,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                             Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
                         } else {
                             delay(10.minutes)
-                            throw AssertionError("No expected")
+                            throw AssertionError("Not expected")
                         }
                     },
                 )

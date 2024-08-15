@@ -41,7 +41,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
     @Test
     fun `processResult() when shouldCancelSource=true should return canceled SetupIntent`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
                 Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
             )
@@ -68,7 +68,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled with processing intent should succeed`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
                 Result.success(SetupIntentFixtures.SI_3DS2_PROCESSING),
                 Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED),
@@ -105,7 +105,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled with succeeded intent should succeed`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
                 Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED)
             )
