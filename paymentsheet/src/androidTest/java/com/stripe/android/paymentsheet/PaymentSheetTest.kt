@@ -141,7 +141,6 @@ internal class PaymentSheetTest {
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        successTimeoutSeconds = 10L,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(

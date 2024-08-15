@@ -46,7 +46,6 @@ internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
     createIntentCallback: CreateIntentCallback? = null,
-    successTimeoutSeconds: Long = 5L,
     resultCallback: PaymentSheetResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
@@ -64,7 +63,6 @@ internal fun runPaymentSheetTest(
     runPaymentSheetTestInternal(
         networkRule = networkRule,
         countDownLatch = countDownLatch,
-        countDownLatchTimeoutSeconds = successTimeoutSeconds,
         makePaymentSheet = factory::make,
         block = block,
     )
@@ -73,7 +71,6 @@ internal fun runPaymentSheetTest(
 private fun runPaymentSheetTestInternal(
     networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
-    countDownLatchTimeoutSeconds: Long,
     makePaymentSheet: (ComponentActivity) -> PaymentSheet,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
@@ -94,7 +91,7 @@ private fun runPaymentSheetTestInternal(
         val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
     }
