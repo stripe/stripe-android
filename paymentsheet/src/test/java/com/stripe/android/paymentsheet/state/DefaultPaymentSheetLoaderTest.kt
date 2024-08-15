@@ -642,18 +642,18 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(
-            mapOf(
-                "link_authenticated_change_event_enabled" to false,
-                "link_bank_incentives_enabled" to false,
-                "link_bank_onboarding_enabled" to false,
-                "link_email_verification_login_enabled" to false,
-                "link_financial_incentives_experiment_enabled" to false,
-                "link_local_storage_login_enabled" to true,
-                "link_only_for_payment_method_types_enabled" to false,
-                "link_passthrough_mode_enabled" to true,
-            )
+        val expectedFlags = mapOf(
+            "link_authenticated_change_event_enabled" to false,
+            "link_bank_incentives_enabled" to false,
+            "link_bank_onboarding_enabled" to false,
+            "link_email_verification_login_enabled" to false,
+            "link_financial_incentives_experiment_enabled" to false,
+            "link_local_storage_login_enabled" to true,
+            "link_only_for_payment_method_types_enabled" to false,
+            "link_passthrough_mode_enabled" to true,
         )
+
+        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
     }
 
     @Test
@@ -678,6 +678,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -699,6 +700,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -717,6 +719,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -732,6 +735,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -747,6 +751,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -762,6 +767,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -780,6 +786,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -795,6 +803,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1090,6 +1100,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1113,6 +1125,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1131,6 +1145,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1149,6 +1165,8 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
+            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1169,6 +1187,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
     @Test

@@ -29,18 +29,11 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         formElements = state.formElements,
-        linkSignupMode = state.linkInlineSignupMode,
-        linkConfigurationCoordinator = state.linkConfigurationCoordinator,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
                     selectedLpm.code
                 )
-            )
-        },
-        onLinkSignupStateChanged = {
-            interactor.handleViewAction(
-                AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(it)
             )
         },
         formArguments = state.arguments,

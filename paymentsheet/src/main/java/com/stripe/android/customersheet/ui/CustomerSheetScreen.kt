@@ -219,12 +219,9 @@ internal fun AddPaymentMethod(
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
                 selectedItemCode = viewState.paymentMethodCode,
                 formElements = viewState.formElements,
-                linkSignupMode = null,
-                linkConfigurationCoordinator = null,
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
-                onLinkSignupStateChanged = { _ -> },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
                 onFormFieldValuesChanged = {

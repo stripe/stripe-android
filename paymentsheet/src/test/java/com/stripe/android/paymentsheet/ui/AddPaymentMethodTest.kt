@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
@@ -25,7 +24,6 @@ import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -251,11 +249,8 @@ internal class AddPaymentMethodTest {
                 )
             ),
             paymentSelection = null,
-            linkSignupMode = LinkSignupMode.AlongsideSaveForFutureUse,
-            linkInlineSignupMode = null,
             processing = false,
             usBankAccountFormArguments = mock(),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
         val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()

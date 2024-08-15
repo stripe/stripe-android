@@ -66,17 +66,20 @@ class LinkConfigurationCoordinatorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
+        val component = linkConfigurationCoordinator.getComponent(config)
+
         linkConfigurationCoordinator.getAccountStatusFlow(config)
-        val component = linkConfigurationCoordinator.component
         linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkConfigurationCoordinator.component).isEqualTo(component)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config)).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkConfigurationCoordinator.component
-        linkConfigurationCoordinator.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkConfigurationCoordinator.component).isNotEqualTo(component)
+        val component = linkConfigurationCoordinator.getComponent(config)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config.copy(merchantName = "anotherName")))
+            .isNotEqualTo(component)
     }
 
     companion object {

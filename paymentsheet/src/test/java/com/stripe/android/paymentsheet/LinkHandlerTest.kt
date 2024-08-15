@@ -59,8 +59,6 @@ class LinkHandlerTest {
             )
         )
         assertThat(handler.isLinkEnabled.first()).isTrue()
-        verify(linkConfigurationCoordinator).setConfiguration(configuration)
-        assertThat(handler.linkSignupMode.value).isEqualTo(LinkSignupMode.InsteadOfSaveForFutureUse)
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 
@@ -74,8 +72,6 @@ class LinkHandlerTest {
             )
         )
         assertThat(handler.isLinkEnabled.first()).isTrue()
-        verify(linkConfigurationCoordinator).setConfiguration(configuration)
-        assertThat(handler.linkSignupMode.value).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 

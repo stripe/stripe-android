@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -18,6 +20,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal sealed interface UiDefinitionFactory {
     class Arguments(
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
         val shippingValues: Map<IdentifierSpec, String?>?,
         val amount: Amount?,
@@ -26,6 +29,7 @@ internal sealed interface UiDefinitionFactory {
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
+        val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
     ) {
         interface Factory {
             fun create(
@@ -35,6 +39,8 @@ internal sealed interface UiDefinitionFactory {
 
             class Default(
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+                private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+                private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
             ) : Factory {
@@ -44,6 +50,7 @@ internal sealed interface UiDefinitionFactory {
                 ): Arguments {
                     return Arguments(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                        linkConfigurationCoordinator = linkConfigurationCoordinator,
                         amount = metadata.amount(),
                         merchantName = metadata.merchantName,
                         cbcEligibility = metadata.cbcEligibility,
@@ -56,6 +63,7 @@ internal sealed interface UiDefinitionFactory {
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
+                        onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                     )
                 }
             }
