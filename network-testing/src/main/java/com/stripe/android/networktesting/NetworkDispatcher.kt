@@ -1,6 +1,5 @@
 package com.stripe.android.networktesting
 
-import android.os.SystemClock
 import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -74,7 +73,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         var timeWaited = 0.milliseconds
         val sleepDuration = 100.milliseconds
         while (enqueuedResponses.size != 0 && timeWaited < validationTimeout) {
-            SystemClock.sleep(sleepDuration.inWholeMilliseconds)
+            Thread.sleep(sleepDuration.inWholeMilliseconds)
             timeWaited = timeWaited.plus(sleepDuration)
         }
         return enqueuedResponses.size != 0
