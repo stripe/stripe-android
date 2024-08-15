@@ -15,7 +15,6 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
@@ -30,11 +29,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -77,21 +72,8 @@ internal class LinkHandler @Inject constructor(
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
     private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
-    val accountStatus: Flow<AccountStatus> = _linkConfiguration
-        .filterNotNull()
-        .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
-
     private val _linkSignupMode = MutableStateFlow<LinkSignupMode?>(null)
-    val linkSignupMode: Flow<LinkSignupMode?> = combine(
-        linkConfiguration,
-        _linkSignupMode,
-        accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
-    ) { linkConfig, linkSignupMode, linkAccountStatus ->
-        val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
-        val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
-        val ableToShowLink = validFundingSource && notLoggedIn
-        linkSignupMode.takeIf { ableToShowLink }
-    }
+    val linkSignupMode: StateFlow<LinkSignupMode?> = _linkSignupMode.asStateFlow()
 
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
@@ -113,6 +95,7 @@ internal class LinkHandler @Inject constructor(
 
         if (state == null) return
 
+        linkConfigurationCoordinator.setConfiguration(state.configuration)
         _linkConfiguration.value = state.configuration
         _linkSignupMode.value = state.signupMode
     }

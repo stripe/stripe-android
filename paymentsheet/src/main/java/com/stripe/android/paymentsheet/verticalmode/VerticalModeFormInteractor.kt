@@ -20,9 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 
 internal interface VerticalModeFormInteractor {
     val isLiveMode: Boolean
@@ -120,11 +118,7 @@ internal class DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
                 onLinkInlineStateUpdated = LinkInlineHandler.create(viewModel, coroutineScope)::onStateUpdated,
-                linkSignupMode = viewModel.linkHandler.linkSignupMode.stateIn(
-                    scope = coroutineScope,
-                    started = SharingStarted.WhileSubscribed(5_000),
-                    initialValue = null,
-                ),
+                linkSignupMode = viewModel.linkHandler.linkSignupMode,
                 formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
                 formElements = formHelper.formElementsForCode(selectedPaymentMethodCode),
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,

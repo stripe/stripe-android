@@ -171,13 +171,6 @@ internal class LinkTest {
                 response.testBodyFromFile("consumer-session-lookup-success.json")
             }
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
@@ -464,13 +457,6 @@ internal class LinkTest {
                 path("/v1/payment_methods"),
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
-            }
-
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
             }
 
             networkRule.enqueue(
@@ -941,7 +927,7 @@ internal class LinkTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        repeat(3) {
+        repeat(2) {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/sessions/lookup"),
