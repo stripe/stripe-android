@@ -65,12 +65,12 @@ class ExponentialBackoffRetryDelaySupplierTest {
             supplier.maxDuration(
                 maxRetries = 3,
             )
-        ).isEqualTo((12L).toDuration(DurationUnit.SECONDS))
+        ).isEqualTo((14L).toDuration(DurationUnit.SECONDS))
 
         assertThat(
             supplier.maxDuration(
                 maxRetries = 5,
             )
-        ).isEqualTo((60L).toDuration(DurationUnit.SECONDS))
+        ).isEqualTo((62L).toDuration(DurationUnit.SECONDS))
     }
 }

@@ -208,7 +208,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         requestOptions: ApiRequest.Options
     ): Result<T> {
         val maxRetries = originalIntent.paymentMethod?.type?.afterRedirectAction?.retryCount ?: MAX_RETRIES
-        var remainingRetries = maxRetries - 1
+        var remainingRetries = maxRetries
 
         var stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
             refreshStripeIntent(
@@ -225,7 +225,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         withTimeoutOrNull(retryDelaySupplier.maxDuration(maxRetries = maxRetries)) {
-            while (shouldRetry(stripeIntentResult) && remainingRetries > 0) {
+            while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
                 val delayDuration = retryDelaySupplier.getDelay(
                     maxRetries,
                     remainingRetries
