@@ -1,7 +1,6 @@
 package com.stripe.android.networktesting
 
 import android.os.SystemClock
-import android.util.Log
 import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -101,7 +100,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         }
 
         val exception = RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
-        Log.d("NetworkDispatcher", "Request not found.", exception)
+        println(exception)
 
         extraRequests.add(request)
 
