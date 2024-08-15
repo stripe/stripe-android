@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -19,15 +21,23 @@ internal class FormHelper(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
     companion object {
-        fun create(viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata): FormHelper {
+        fun create(
+            viewModel: BaseSheetViewModel,
+            linkInlineHandler: LinkInlineHandler,
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): FormHelper {
             return FormHelper(
                 context = viewModel.getApplication(),
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
                 },
+                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
+                onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 }
@@ -44,6 +54,8 @@ internal class FormHelper(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),

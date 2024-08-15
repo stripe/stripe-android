@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -105,6 +106,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             ) {
                 add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            }
+
+            if (metadata.linkInlineConfiguration != null && arguments.linkConfigurationCoordinator != null) {
+                add(
+                    LinkFormElement(
+                        configuration = metadata.linkInlineConfiguration,
+                        linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                    )
+                )
             }
         }
     }

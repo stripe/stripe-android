@@ -18,10 +18,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkElement
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -41,10 +37,7 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<SupportedPaymentMethod>,
     selectedItemCode: PaymentMethodCode,
     formElements: List<FormElement>,
-    linkSignupMode: LinkSignupMode?,
-    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
@@ -88,14 +81,6 @@ internal fun PaymentElement(
             horizontalPadding = horizontalPadding,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             onInteractionEvent = onInteractionEvent,
-        )
-
-        LinkElement(
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkSignupMode = linkSignupMode,
-            enabled = enabled,
-            horizontalPadding = horizontalPadding,
-            onLinkSignupStateChanged = onLinkSignupStateChanged,
         )
     }
 }

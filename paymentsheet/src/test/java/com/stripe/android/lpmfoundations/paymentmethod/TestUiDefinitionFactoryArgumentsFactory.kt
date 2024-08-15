@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -17,6 +18,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
@@ -27,6 +29,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodExtraParams = paymentMethodExtraParams,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
     }
 

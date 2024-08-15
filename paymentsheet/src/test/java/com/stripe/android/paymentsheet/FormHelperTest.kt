@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -166,6 +167,8 @@ internal class FormHelperTest {
             context = ApplicationProvider.getApplicationContext(),
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            onLinkInlineSignupStateChanged = {},
             selectionUpdater = selectionUpdater,
         )
     }

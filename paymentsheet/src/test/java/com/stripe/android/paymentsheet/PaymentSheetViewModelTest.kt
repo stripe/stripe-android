@@ -1490,6 +1490,7 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = FormHelper.create(
             viewModel = viewModel,
+            linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope),
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,

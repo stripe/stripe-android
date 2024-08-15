@@ -18,11 +18,9 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface LinkConfigurationCoordinator {
-
-    val component: LinkComponent?
     val emailFlow: StateFlow<String?>
 
-    fun setConfiguration(configuration: LinkConfiguration)
+    fun getComponent(configuration: LinkConfiguration): LinkComponent
 
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
 
@@ -53,11 +51,12 @@ class RealLinkConfigurationCoordinator @Inject internal constructor(
         .mapAsStateFlow { it?.email }
 
     /**
-     * The dependency injector Component for all injectable classes in Link while in an embedded
+     * Fetch the dependency injector Component for all injectable classes in Link while in an embedded
      * environment.
      */
-    override val component: LinkComponent?
-        get() = componentFlow.value
+    override fun getComponent(configuration: LinkConfiguration): LinkComponent {
+        return getLinkPaymentLauncherComponent(configuration)
+    }
 
     /**
      * Fetch the customer's account status, initializing the dependencies if they haven't been
@@ -100,16 +99,12 @@ class RealLinkConfigurationCoordinator @Inject internal constructor(
             .logOut()
     }
 
-    override fun setConfiguration(configuration: LinkConfiguration) {
-        getLinkPaymentLauncherComponent(configuration)
-    }
-
     /**
      * Create or get the existing [LinkComponent], responsible for injecting all
      * injectable classes in Link while in an embedded environment.
      */
     private fun getLinkPaymentLauncherComponent(configuration: LinkConfiguration) =
-        component?.takeIf { it.configuration == configuration }
+        componentFlow.value?.takeIf { it.configuration == configuration }
             ?: linkComponentBuilder
                 .configuration(configuration)
                 .build()

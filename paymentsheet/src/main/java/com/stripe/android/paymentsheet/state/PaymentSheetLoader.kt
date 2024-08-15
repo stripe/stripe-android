@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -102,30 +103,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession)
 
-        val metadata = createPaymentMethodMetadata(
-            paymentSheetConfiguration = paymentSheetConfiguration,
-            elementsSession = elementsSession,
-            isGooglePayReady = isGooglePayReady,
-        )
-
         val savedSelection = async {
             retrieveSavedSelection(
                 config = paymentSheetConfiguration,
                 isGooglePayReady = isGooglePayReady,
                 elementsSession = elementsSession
             )
-        }
-
-        val customer = async {
-            createCustomerState(
-                customerInfo = customerInfo,
-                metadata = metadata,
-                savedSelection = savedSelection,
-            )
-        }
-
-        val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, customer)
         }
 
         val linkState = async {
@@ -136,22 +119,45 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
         }
 
+        val metadata = async {
+            createPaymentMethodMetadata(
+                paymentSheetConfiguration = paymentSheetConfiguration,
+                elementsSession = elementsSession,
+                isGooglePayReady = isGooglePayReady,
+                linkState = linkState.await(),
+            )
+        }
+
+        val customer = async {
+            createCustomerState(
+                customerInfo = customerInfo,
+                metadata = metadata.await(),
+                savedSelection = savedSelection,
+            )
+        }
+
+        val initialPaymentSelection = async {
+            retrieveInitialPaymentSelection(savedSelection, customer)
+        }
+
         val stripeIntent = elementsSession.stripeIntent
+        val paymentMethodMetadata = metadata.await()
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        if (!supportsIntent(metadata)) {
+        if (!supportsIntent(paymentMethodMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
 
+        val fetchedLinkState = linkState.await()
         val state = PaymentSheetState.Full(
             config = paymentSheetConfiguration,
             customer = customer.await(),
-            linkState = linkState.await(),
+            linkState = fetchedLinkState,
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
-            paymentMethodMetadata = metadata,
+            paymentMethodMetadata = paymentMethodMetadata,
         )
 
         reportSuccessfulLoad(
@@ -182,6 +188,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun createPaymentMethodMetadata(
         paymentSheetConfiguration: PaymentSheet.Configuration,
         elementsSession: ElementsSession,
+        linkState: LinkState?,
         isGooglePayReady: Boolean,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
@@ -208,6 +215,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            linkInlineConfiguration = createLinkInlineConfiguration(linkState),
         )
     }
 
@@ -515,6 +523,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             isGooglePayAvailable = isGooglePayReady,
             isLinkAvailable = isLinkAvailable,
         )
+    }
+
+    private fun createLinkInlineConfiguration(state: LinkState?): LinkInlineConfiguration? {
+        return state?.run {
+            signupMode?.let { linkSignupMode ->
+                LinkInlineConfiguration(
+                    linkConfiguration = configuration,
+                    signupMode = linkSignupMode,
+                )
+            }
+        }
     }
 
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {

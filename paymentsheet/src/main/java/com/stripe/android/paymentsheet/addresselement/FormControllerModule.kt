@@ -43,6 +43,8 @@ internal object FormControllerModule {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,
+            linkConfigurationCoordinator = null,
+            onLinkInlineSignupStateChanged = {}
         )
     )
 }

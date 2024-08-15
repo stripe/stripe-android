@@ -19,6 +19,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
+import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
@@ -99,6 +100,7 @@ fun FormUI(
                     )
                     is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
                     is OTPElement -> OTPElementUI(enabled, element)
+                    is RenderableFormElement -> element.ComposeUI(enabled)
                     is EmptyFormElement -> {}
                 }
             }
