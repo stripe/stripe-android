@@ -168,7 +168,7 @@ internal class FormHelperTest {
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            onLinkInlineSignupStateChanged = {},
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             selectionUpdater = selectionUpdater,
         )
     }

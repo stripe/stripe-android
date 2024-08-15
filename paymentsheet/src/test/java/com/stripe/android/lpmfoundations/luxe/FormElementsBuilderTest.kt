@@ -109,7 +109,7 @@ class FormElementsBuilderTest {
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,
             linkConfigurationCoordinator = null,
-            onLinkInlineSignupStateChanged = {},
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
         )
     }
 }

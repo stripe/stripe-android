@@ -388,7 +388,7 @@ private object TransformSpecToElementsFactory {
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 requiresMandate = requiresMandate,
                 linkConfigurationCoordinator = null,
-                onLinkInlineSignupStateChanged = {},
+                onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             )
         )
     }

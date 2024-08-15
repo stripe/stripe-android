@@ -150,11 +150,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
 
-        val fetchedLinkState = linkState.await()
         val state = PaymentSheetState.Full(
             config = paymentSheetConfiguration,
             customer = customer.await(),
-            linkState = fetchedLinkState,
+            linkState = linkState.await(),
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = paymentMethodMetadata,

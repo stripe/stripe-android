@@ -72,38 +72,53 @@ fun FormUI(
     ) {
         elements.forEachIndexed { _, element ->
             if (!hiddenIdentifiers.contains(element.identifier)) {
-                when (element) {
-                    is SectionElement -> SectionElementUI(
-                        enabled,
-                        element,
-                        hiddenIdentifiers,
-                        lastTextFieldIdentifier
-                    )
-                    is CheckboxFieldElement -> CheckboxFieldUI(
-                        controller = element.controller,
-                        enabled = enabled
-                    )
-                    is StaticTextElement -> StaticTextElementUI(element)
-                    is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-                    is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
-                        enabled,
-                        element
-                    )
-                    is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
-                    is AffirmHeaderElement -> AffirmElementUI()
-                    is MandateTextElement -> MandateTextUI(element)
-                    is CardDetailsSectionElement -> CardDetailsSectionElementUI(
-                        enabled,
-                        element.controller,
-                        hiddenIdentifiers,
-                        lastTextFieldIdentifier
-                    )
-                    is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
-                    is OTPElement -> OTPElementUI(enabled, element)
-                    is RenderableFormElement -> element.ComposeUI(enabled)
-                    is EmptyFormElement -> {}
-                }
+                FormUIElement(
+                    element = element,
+                    enabled = enabled,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun FormUIElement(
+    element: FormElement,
+    enabled: Boolean,
+    hiddenIdentifiers: Set<IdentifierSpec>,
+    lastTextFieldIdentifier: IdentifierSpec?,
+) {
+    when (element) {
+        is SectionElement -> SectionElementUI(
+            enabled,
+            element,
+            hiddenIdentifiers,
+            lastTextFieldIdentifier
+        )
+        is CheckboxFieldElement -> CheckboxFieldUI(
+            controller = element.controller,
+            enabled = enabled
+        )
+        is StaticTextElement -> StaticTextElementUI(element)
+        is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
+        is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
+            enabled,
+            element
+        )
+        is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
+        is AffirmHeaderElement -> AffirmElementUI()
+        is MandateTextElement -> MandateTextUI(element)
+        is CardDetailsSectionElement -> CardDetailsSectionElementUI(
+            enabled,
+            element.controller,
+            hiddenIdentifiers,
+            lastTextFieldIdentifier
+        )
+        is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
+        is OTPElement -> OTPElementUI(enabled, element)
+        is RenderableFormElement -> element.ComposeUI(enabled)
+        is EmptyFormElement -> {}
     }
 }

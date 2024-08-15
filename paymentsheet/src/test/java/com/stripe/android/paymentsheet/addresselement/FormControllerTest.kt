@@ -45,7 +45,7 @@ class FormControllerTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,
             linkConfigurationCoordinator = null,
-            onLinkInlineSignupStateChanged = {},
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
         )
     )
 

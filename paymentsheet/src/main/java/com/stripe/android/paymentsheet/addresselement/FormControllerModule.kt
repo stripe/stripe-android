@@ -43,8 +43,16 @@ internal object FormControllerModule {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,
+            /*
+             * `FormController` is only used by `AddressElement` now so it does not require a
+             * `LinkConfigurationCoordinator` instance or a callback for reacting to `InlineSignUpViewState` changes.
+             */
             linkConfigurationCoordinator = null,
-            onLinkInlineSignupStateChanged = {}
+            onLinkInlineSignupStateChanged = {
+                throw IllegalStateException(
+                    "`InlineSignUpViewState` updates should not be received by `FormController`!"
+                )
+            },
         )
     )
 }
