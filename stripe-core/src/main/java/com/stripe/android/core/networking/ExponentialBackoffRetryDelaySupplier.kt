@@ -20,7 +20,7 @@ class ExponentialBackoffRetryDelaySupplier(
 
     override fun maxDuration(maxRetries: Int): Duration {
         var resultDuration = 0.seconds
-        for (i in maxRetries  downTo 1) {
+        for (i in maxRetries downTo 1) {
             resultDuration = resultDuration.plus(getDelay(maxRetries = maxRetries, remainingRetries = i))
         }
         return resultDuration
