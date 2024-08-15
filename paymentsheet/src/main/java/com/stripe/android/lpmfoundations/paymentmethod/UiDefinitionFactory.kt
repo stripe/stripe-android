@@ -39,10 +39,10 @@ internal sealed interface UiDefinitionFactory {
 
             class Default(
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+                private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+                private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-                private val linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
-                private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit = {}
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,

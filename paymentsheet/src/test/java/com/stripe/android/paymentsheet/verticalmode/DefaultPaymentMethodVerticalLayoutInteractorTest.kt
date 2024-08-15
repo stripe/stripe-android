@@ -669,6 +669,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     cardAccountRangeRepositoryFactory = mock(),
                     paymentMethodCreateParams = null,
                     paymentMethodExtraParams = null,
+                    linkConfigurationCoordinator = null,
+                    onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
                 )
                 paymentMethodMetadata.formElementsForCode(it, uiDefinitionFactoryArgumentsFactory)!!
             },

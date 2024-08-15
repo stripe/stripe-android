@@ -30,6 +30,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodExtraParams = paymentMethodExtraParams,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
         )
     }
 
