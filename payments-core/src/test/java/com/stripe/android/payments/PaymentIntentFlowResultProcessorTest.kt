@@ -13,9 +13,11 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -23,14 +25,14 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.minutes
 
 @RunWith(RobolectricTestRunner::class)
@@ -38,14 +40,6 @@ internal class PaymentIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockStripeRepository: StripeRepository = mock()
-
-    private val processor = PaymentIntentFlowResultProcessor(
-        ApplicationProvider.getApplicationContext(),
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-        mockStripeRepository,
-        Logger.noop(),
-        testDispatcher
-    )
 
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
@@ -63,7 +57,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(PaymentIntentFixtures.CANCELLED)
             )
 
-            val paymentIntentResult = processor.processResult(
+            val paymentIntentResult = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "client_secret",
                     flowOutcome = StripeIntentResult.Outcome.CANCELED,
@@ -88,7 +82,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE))
 
-            processor.processResult(
+            createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "client_secret",
                     sourceId = "source_id",
@@ -136,7 +130,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            val paymentIntentResult = processor.processResult(
+            val paymentIntentResult = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
@@ -176,7 +170,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            processor.processResult(
+            createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
@@ -201,19 +195,26 @@ internal class PaymentIntentFlowResultProcessorTest {
     @Test
     fun `timeout uses last known response`() {
         runTest(testDispatcher) {
-            mockStripeRepository.stub {
-                onBlocking { retrievePaymentIntent(any(), any(), any()) } doReturn
-                    Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
-
-                onBlocking { refreshPaymentIntent(any(), any()) } doReturn
-                    Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
-            }
-
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
+            val refreshCountDownLatch = CountDownLatch(1)
             val paymentIntentResult = async(Dispatchers.IO) {
-                processor.processResult(
+                val stripeRepository = FakeStripeRepository(
+                    retrievePaymentIntent = {
+                        Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                    },
+                    refreshPaymentIntent = {
+                        if (refreshCountDownLatch.count == 1L) {
+                            refreshCountDownLatch.countDown()
+                            Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                        } else {
+                            delay(10.minutes)
+                            throw AssertionError("No expected")
+                        }
+                    },
+                )
+
+                createProcessor(stripeRepository).processResult(
                     PaymentFlowResult.Unvalidated(
                         clientSecret = clientSecret,
                         flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
@@ -221,6 +222,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 ).getOrThrow()
             }
 
+            assertThat(refreshCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
             testDispatcher.scheduler.advanceTimeBy(5.minutes)
 
             assertThat(paymentIntentResult.await())
@@ -232,17 +234,6 @@ internal class PaymentIntentFlowResultProcessorTest {
                             " Please choose a different payment method and try again."
                     )
                 )
-
-            verify(mockStripeRepository).retrievePaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
-            )
-
-            verify(mockStripeRepository).refreshPaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions)
-            )
         }
     }
 
@@ -301,7 +292,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            val result = processor.processResult(
+            val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
@@ -347,7 +338,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         val clientSecret = requireNotNull(processingIntent.clientSecret)
         val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        val result = processor.processResult(
+        val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
                 clientSecret = clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED
@@ -387,7 +378,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
-            val result = processor.processResult(
+            val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
@@ -426,7 +417,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
-            val result = processor.processResult(
+            val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
@@ -463,7 +454,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
-            val result = processor.processResult(
+            val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
@@ -498,7 +489,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
-            val result = processor.processResult(
+            val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
@@ -530,7 +521,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         val clientSecret = requireNotNull(initialIntent.clientSecret)
         val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        val result = processor.processResult(
+        val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
                 clientSecret = clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED
@@ -551,5 +542,35 @@ internal class PaymentIntentFlowResultProcessorTest {
                     null
                 )
             )
+    }
+
+    private fun createProcessor(
+        stripeRepository: StripeRepository = mockStripeRepository,
+    ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
+        ApplicationProvider.getApplicationContext(),
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        stripeRepository,
+        Logger.noop(),
+        testDispatcher
+    )
+
+    private class FakeStripeRepository(
+        private val retrievePaymentIntent: suspend () -> Result<PaymentIntent>,
+        private val refreshPaymentIntent: suspend () -> Result<PaymentIntent>,
+    ) : AbsFakeStripeRepository() {
+        override suspend fun retrievePaymentIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): Result<PaymentIntent> {
+            return retrievePaymentIntent()
+        }
+
+        override suspend fun refreshPaymentIntent(
+            clientSecret: String,
+            options: ApiRequest.Options
+        ): Result<PaymentIntent> {
+            return refreshPaymentIntent()
+        }
     }
 }
