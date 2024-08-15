@@ -5,6 +5,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -16,6 +17,14 @@ class ExponentialBackoffRetryDelaySupplier(
 
     @Inject
     constructor() : this(DEFAULT_INCREMENT_SECONDS.toDuration(DurationUnit.SECONDS))
+
+    override fun maxDuration(maxRetries: Int): Duration {
+        var resultDuration = 0.seconds
+        for (i in maxRetries downTo 1) {
+            resultDuration = resultDuration.plus(getDelay(maxRetries = maxRetries, remainingRetries = i))
+        }
+        return resultDuration
+    }
 
     /**
      * Calculate an exponential backoff delay before retrying the next completion request
