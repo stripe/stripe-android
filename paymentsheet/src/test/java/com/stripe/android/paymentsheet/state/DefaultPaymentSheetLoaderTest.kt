@@ -557,7 +557,6 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val expectedLinkConfig = LinkConfiguration(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            signupMode = InsteadOfSaveForFutureUse,
             merchantName = "Merchant",
             merchantCountryCode = null,
             customerInfo = LinkConfiguration.CustomerInfo(
@@ -678,7 +677,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isNull()
+        assertThat(result.linkState?.signupMode).isNull()
     }
 
     @Test
@@ -699,7 +698,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isNull()
+        assertThat(result.linkState?.signupMode).isNull()
     }
 
     @Test
@@ -994,7 +993,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1017,7 +1016,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1034,7 +1033,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1051,7 +1050,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test

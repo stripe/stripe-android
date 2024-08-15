@@ -1098,6 +1098,7 @@ internal class PaymentSheetActivityTest {
                     linkState = LinkState(
                         configuration = mock(),
                         loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,

@@ -60,13 +60,13 @@ class InlineSignupViewModelTest {
                         billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
                     ),
                     shippingValues = null,
-                    signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                     passthroughModeEnabled = false,
                     flags = emptyMap(),
                 ),
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
-                logger = Logger.noop()
+                logger = Logger.noop(),
             )
 
             whenever(linkAccountManager.lookupConsumer(any(), any()))
@@ -429,13 +429,13 @@ class InlineSignupViewModelTest {
                 billingCountryCode = null,
             ),
             shippingValues = null,
-            signupMode = signupMode,
             passthroughModeEnabled = false,
             flags = emptyMap(),
         ),
+        signupMode = signupMode,
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
-        logger = Logger.noop()
+        logger = Logger.noop(),
     )
 
     private fun mockConsumerSessionWithVerificationSession(

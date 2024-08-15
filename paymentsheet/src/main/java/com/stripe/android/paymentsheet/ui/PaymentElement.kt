@@ -20,8 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkInlineSignup
-import com.stripe.android.link.ui.inline.LinkOptionalInlineSignup
+import com.stripe.android.link.ui.inline.LinkElement
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
@@ -150,40 +149,6 @@ internal fun FormElement(
                 formElements = formElements,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
-        }
-    }
-}
-
-@Composable
-internal fun LinkElement(
-    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    linkSignupMode: LinkSignupMode?,
-    enabled: Boolean,
-    horizontalPadding: Dp,
-    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
-) {
-    if (linkConfigurationCoordinator != null && linkSignupMode != null) {
-        when (linkSignupMode) {
-            LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                LinkInlineSignup(
-                    linkConfigurationCoordinator = linkConfigurationCoordinator,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth(),
-                )
-            }
-            LinkSignupMode.AlongsideSaveForFutureUse -> {
-                LinkOptionalInlineSignup(
-                    linkConfigurationCoordinator = linkConfigurationCoordinator,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth(),
-                )
-            }
         }
     }
 }

@@ -19,10 +19,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.ui.inline.LinkElement
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
-import com.stripe.android.paymentsheet.ui.LinkElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve

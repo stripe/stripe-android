@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -11,7 +10,6 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class LinkConfiguration(
     val stripeIntent: StripeIntent,
-    val signupMode: LinkSignupMode?,
     val merchantName: String,
     val merchantCountryCode: String?,
     val customerInfo: CustomerInfo,
@@ -19,10 +17,6 @@ data class LinkConfiguration(
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
 ) : Parcelable {
-
-    val showOptionalLabel: Boolean
-        get() = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class CustomerInfo(

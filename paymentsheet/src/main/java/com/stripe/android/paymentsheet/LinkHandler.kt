@@ -81,14 +81,16 @@ internal class LinkHandler @Inject constructor(
         .filterNotNull()
         .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
 
+    private val _linkSignupMode = MutableStateFlow<LinkSignupMode?>(null)
     val linkSignupMode: Flow<LinkSignupMode?> = combine(
         linkConfiguration,
+        _linkSignupMode,
         accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
-    ) { linkConfig, linkAccountStatus ->
+    ) { linkConfig, linkSignupMode, linkAccountStatus ->
         val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
         val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
         val ableToShowLink = validFundingSource && notLoggedIn
-        linkConfig?.signupMode.takeIf { ableToShowLink }
+        linkSignupMode.takeIf { ableToShowLink }
     }
 
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
@@ -112,6 +114,7 @@ internal class LinkHandler @Inject constructor(
         if (state == null) return
 
         _linkConfiguration.value = state.configuration
+        _linkSignupMode.value = state.signupMode
     }
 
     suspend fun payWithLinkInline(
