@@ -182,7 +182,7 @@ internal class LinkTest {
             )
 
             page.fillOutCardDetails()
-            page.clickOnSaveForFutureUsage("Merchant, Inc.")
+            page.clickOnSaveForFutureUsage()
 
             closeSoftKeyboard()
 
@@ -477,7 +477,7 @@ internal class LinkTest {
             )
 
             page.fillOutCardDetails()
-            page.clickOnSaveForFutureUsage("Merchant, Inc.")
+            page.clickOnSaveForFutureUsage()
 
             closeSoftKeyboard()
 

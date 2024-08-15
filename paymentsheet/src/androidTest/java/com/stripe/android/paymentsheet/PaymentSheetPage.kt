@@ -65,12 +65,12 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
-    fun clickOnSaveForFutureUsage(merchantName: String) {
+    fun clickOnSaveForFutureUsage() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        waitForText("Save for future $merchantName payments", true)
-        clickViewWithText("Save for future $merchantName payments")
+        waitForTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+        clickViewWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
     }
 
     fun clickOnLinkCheckbox() {
@@ -151,6 +151,20 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasText(text))
             .performScrollTo()
             .performClick()
+    }
+
+    fun clickViewWithTag(testTag: String) {
+        composeTestRule.onNode(hasTestTag(testTag))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun waitForTag(testTag: String) {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     fun waitForText(text: String, substring: Boolean = false) {
