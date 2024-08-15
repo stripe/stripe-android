@@ -41,7 +41,13 @@ data class ChallengeRequestData constructor(
                 json.put(FIELD_CHALLENGE_CANCEL, cancelReason.code)
             }
 
-            if (challengeDataEntry != null) {
+            // [Req 40] ...if the cardholder has submitted the response without entering any data in the UI,
+            // the Challenge Data Entry field shall not be present in the CReq message.
+            // [Req 71] If the Cardholder does not enter any data in the UI, the Challenge No Entry field
+            // shall be sent in the CReq message with the value ”Y.”
+            if (challengeDataEntry.isNullOrEmpty()) {
+                json.put(FIELD_CHALLENGE_NO_ENTRY, "Y")
+            } else {
                 json.put(FIELD_CHALLENGE_DATA_ENTRY, challengeDataEntry)
             }
 
@@ -90,6 +96,7 @@ data class ChallengeRequestData constructor(
         internal const val FIELD_3DS_SERVER_TRANS_ID: String = "threeDSServerTransID"
         internal const val FIELD_CHALLENGE_CANCEL: String = "challengeCancel"
         internal const val FIELD_CHALLENGE_DATA_ENTRY: String = "challengeDataEntry"
+        internal const val FIELD_CHALLENGE_NO_ENTRY: String = "challengeNoEntry"
         internal const val FIELD_CHALLENGE_HTML_DATA_ENTRY: String = "challengeHTMLDataEntry"
         internal const val FIELD_MESSAGE_EXTENSION: String = "messageExtensions"
         internal const val FIELD_MESSAGE_TYPE: String = "messageType"
