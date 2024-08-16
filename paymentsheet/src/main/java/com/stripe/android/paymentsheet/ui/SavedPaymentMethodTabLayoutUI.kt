@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -106,7 +107,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
             )
         },
-        modifier = modifier,
+        modifier = modifier.testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
     )
 
     if (
@@ -378,6 +379,10 @@ private fun SavedPaymentMethodTab(
             testTag = SAVED_PAYMENT_OPTION_TEST_TAG
             selected = isSelected
             text = AnnotatedString(labelText)
+
+            if (!isEnabled) {
+                disabled()
+            }
         }
     ) {
         SavedPaymentMethodTab(
@@ -474,6 +479,8 @@ internal fun CvcRecollectionField(
         }
     }
 }
+
+internal const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
 
 @VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
