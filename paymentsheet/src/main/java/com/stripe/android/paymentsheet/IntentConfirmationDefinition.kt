@@ -22,6 +22,12 @@ internal class IntentConfirmationDefinition(
     IntentConfirmationDefinition.Args,
     InternalPaymentResult
     > {
+    override val key: String = "IntentConfirmation"
+
+    override fun option(confirmationOption: PaymentConfirmationOption): PaymentConfirmationOption.PaymentMethod? {
+        return confirmationOption as? PaymentConfirmationOption.PaymentMethod
+    }
+
     override suspend fun action(
         confirmationOption: PaymentConfirmationOption.PaymentMethod,
         intent: StripeIntent

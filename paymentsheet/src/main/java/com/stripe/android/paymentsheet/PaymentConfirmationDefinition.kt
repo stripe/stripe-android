@@ -11,6 +11,12 @@ internal interface PaymentConfirmationDefinition<
     TLauncherArgs,
     TLauncherResult : Parcelable
     > {
+    val key: String
+
+    fun option(
+        confirmationOption: PaymentConfirmationOption,
+    ): TConfirmationOption?
+
     suspend fun action(
         confirmationOption: TConfirmationOption,
         intent: StripeIntent,
