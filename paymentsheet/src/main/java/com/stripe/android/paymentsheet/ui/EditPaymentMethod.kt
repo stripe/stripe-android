@@ -190,6 +190,7 @@ private fun RemoveButton(
     ) {
         Box(
             modifier = Modifier
+                .testTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
                 .fillMaxWidth()
                 .padding(
                     start = 8.dp,
@@ -328,3 +329,5 @@ private fun EditPaymentMethodPreview() {
         )
     }
 }
+
+internal const val PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON = "PaymentSheetEditScreenRemoveButton"
