@@ -9,9 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.stripeColors
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,11 +24,13 @@ fun MandateTextUI(
 ) {
     Text(
         text = stringResource(element.stringResId, *element.args.toTypedArray()),
-        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Left),
-        color = MaterialTheme.stripeColors.subtitle,
-        fontSize = 11.sp,
+        style = MaterialTheme.typography.caption.copy(
+            textAlign = TextAlign.Start,
+            fontWeight = FontWeight.Normal,
+        ),
+        color = MaterialTheme.stripeColors.placeholderText,
         modifier = Modifier
-            .padding(vertical = 8.dp)
+            .padding(top = 2.dp)
             .semantics(mergeDescendants = true) {} // makes it a separate accessibile item
             .testTag(MANDATE_TEST_TAG)
     )

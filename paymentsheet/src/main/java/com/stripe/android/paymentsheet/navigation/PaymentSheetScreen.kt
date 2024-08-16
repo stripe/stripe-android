@@ -34,6 +34,7 @@ import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
 internal val verticalModeBottomContentPadding = 20.dp
+internal val horizontalBottomContentPadding = 12.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
 
@@ -147,7 +148,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = horizontalBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
@@ -195,7 +196,7 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = horizontalBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
