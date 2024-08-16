@@ -376,8 +376,7 @@
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 (*)
 +--- org.bouncycastle:bcprov-jdk15to18:1.69
-+--- com.nimbusds:nimbus-jose-jwt:9.21
-|    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
++--- com.nimbusds:nimbus-jose-jwt:9.40
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22
      +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
      \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.22
