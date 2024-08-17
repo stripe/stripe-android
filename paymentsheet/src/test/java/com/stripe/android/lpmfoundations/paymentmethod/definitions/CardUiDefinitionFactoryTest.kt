@@ -1,8 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -99,6 +101,34 @@ class CardUiDefinitionFactoryTest {
                         isCheckboxSelected = true
                     ),
                 )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithMandate() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithMandateAndSaveForLater() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    hasCustomerConfiguration = true,
+                ),
             )
         }
     }
