@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 
-internal interface CVCRecollectionHandler {
+internal interface CvcRecollectionHandler {
     fun launch(paymentSelection: PaymentSelection?, launch: (CvcRecollectionData) -> Unit)
 
     fun requiresCVCRecollection(

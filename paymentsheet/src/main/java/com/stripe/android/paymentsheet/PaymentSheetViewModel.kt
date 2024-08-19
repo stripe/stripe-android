@@ -32,7 +32,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.cvcrecollection.CVCRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -86,7 +86,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
-    private val cvcRecollectionHandler: CVCRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -398,7 +398,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical
             }
         )
-        if (requiresCVCRecollection && navigationHandler.currentScreen.value !is PaymentSheetScreen.CvcRecollection) {
+        if (requiresCVCRecollection) {
             cvcRecollectionHandler.launch(
                 paymentSelection = selection.value
             ) { cvcRecollectionData ->

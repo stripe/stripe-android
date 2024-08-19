@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 
-internal class CVCRecollectionHandlerImpl : CVCRecollectionHandler {
+internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
     override fun launch(paymentSelection: PaymentSelection?, launch: (CvcRecollectionData) -> Unit) {
         val card = (paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.card

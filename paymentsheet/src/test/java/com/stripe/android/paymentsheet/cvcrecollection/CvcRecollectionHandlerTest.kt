@@ -12,8 +12,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import org.junit.Test
 
 @OptIn(ExperimentalCvcRecollectionApi::class)
-class CVCRecollectionHandlerTest {
-    private val handler = CVCRecollectionHandlerImpl()
+class CvcRecollectionHandlerTest {
+    private val handler = CvcRecollectionHandlerImpl()
 
     @Test
     fun testLaunch() {
