@@ -54,12 +54,10 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
     }
 
     private fun onCvcChanged(cvc: String) {
-        viewModelScope.launch {
-            _viewState.update { oldState ->
-                oldState.copy(
-                    cvcState = oldState.cvcState.updateCvc(cvc)
-                )
-            }
+        _viewState.update { oldState ->
+            oldState.copy(
+                cvcState = oldState.cvcState.updateCvc(cvc)
+            )
         }
     }
 
