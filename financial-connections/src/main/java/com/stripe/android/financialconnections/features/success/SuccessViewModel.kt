@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -22,6 +23,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -43,10 +45,16 @@ internal class SuccessViewModel @AssistedInject constructor(
         suspend {
             val manifest = getOrFetchSync().manifest
             val accounts = getCachedAccounts()
+            val successContent = successContentRepository.get()
+            val title = successContent?.heading ?: TextResource.StringId(R.string.stripe_success_pane_title)
+            val content = successContent?.message ?: TextResource.PluralId(
+                value = R.plurals.stripe_success_pane_desc,
+                count = accounts.size,
+            )
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
-                accountsCount = accounts.size,
-                customSuccessContent = successContentRepository.get(),
+                title = title,
+                content = content,
                 // We just want to use the business name in the CTA if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
@@ -114,8 +122,8 @@ internal data class SuccessState(
 
     data class Payload(
         val businessName: String?,
-        val customSuccessContent: SuccessContentRepository.State?,
-        val accountsCount: Int,
+        val title: TextResource,
+        val content: TextResource,
         val skipSuccessPane: Boolean
     )
 }

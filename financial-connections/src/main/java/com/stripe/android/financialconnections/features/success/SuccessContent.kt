@@ -124,9 +124,8 @@ private fun SuccessContentInternal(
             .padding(24.dp),
     ) {
         SpinnerToSuccessAnimation(
-            customMessage = payload?.customSuccessContent?.message,
-            customHeading = payload?.customSuccessContent?.heading,
-            accountsCount = payload?.accountsCount ?: 0,
+            content = payload?.content ?: TextResource.Text(""),
+            title = payload?.title ?: TextResource.Text(""),
             showSpinner = showSpinner || payload == null,
             initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
         )
@@ -151,9 +150,8 @@ private fun SuccessContentInternal(
 private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
     initialSuccessBodyHeight: Dp?,
-    accountsCount: Int,
-    customMessage: TextResource?,
-    customHeading: TextResource?,
+    content: TextResource,
+    title: TextResource,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -215,9 +213,8 @@ private fun SpinnerToSuccessAnimation(
             enter = SUCCESS_SLIDE_IN_ANIMATION,
         ) {
             SuccessBody(
-                customMessage = customMessage,
-                customHeading = customHeading,
-                accountsCount = accountsCount,
+                content = content,
+                title = title,
                 modifier = Modifier.onGloballyPositioned {
                     successBodyHeight = with(density) { it.size.height.toDp() }
                 },
@@ -294,9 +291,8 @@ private fun SpinnerToCheckmark(
 
 @Composable
 private fun SuccessBody(
-    customMessage: TextResource?,
-    customHeading: TextResource?,
-    accountsCount: Int,
+    content: TextResource,
+    title: TextResource,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -305,7 +301,7 @@ private fun SuccessBody(
         modifier = modifier,
     ) {
         AnnotatedText(
-            text = customHeading ?: TextResource.StringId(R.string.stripe_success_pane_title),
+            text = title,
             defaultStyle = typography.headingXLarge.copy(
                 textAlign = TextAlign.Center
             ),
@@ -313,10 +309,7 @@ private fun SuccessBody(
         )
 
         AnnotatedText(
-            text = customMessage ?: TextResource.PluralId(
-                value = R.plurals.stripe_success_pane_desc,
-                count = accountsCount,
-            ),
+            text = content,
             defaultStyle = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center
             ),
@@ -374,7 +367,7 @@ private fun calculateBodyHeightForPreview(config: Configuration, state: SuccessS
     // We need to manually calculate this for our screenshot tests, as we've been unable to
     // delay the capture until the offset animation finishes.
     val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
-    return if (state.payload()?.customSuccessContent != null && isPhone) {
+    return if (state.payload()?.content != null && isPhone) {
         120.dp
     } else {
         72.dp
