@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Poleg tega boste po e-pošti dva dni vnaprej prejeli predhodno obvestilo o morebitnem znesku, za katerega bo bremenjen vaš račun v skladu s temi navodili. Plačila bodo na bančnem izpisku prikazana kot \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vaša plačila so zaščitena z %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">S posredovanjem podatkov o svoji kartici dovoljujete, da %s bremeni vašo kartico za prihodnja plačila v skladu z njihovimi pogoji.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izberite način plačila</string>
   <string name="stripe_paymentsheet_close">Zapri</string>

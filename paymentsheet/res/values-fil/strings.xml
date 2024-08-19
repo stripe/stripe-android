@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Bilang karagdagan, makakatanggap ka ng dalawang araw na paunang abiso sa pamamagitan ng email para sa anumang halaga na ide-debit sa ilalim ng tagubiling ito. Ipapakita ang mga pagbabayad bilang \'%s\' sa iyong bank statement.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Ang iyong mga pagbabayad ay protektado ng %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Sa pagbibigay ng impormasyon ng iyong kard, pinahihintulutan mo ang %s na singilin ang iyong kard para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pumili ng pamamaraan ng pagbabayad</string>
   <string name="stripe_paymentsheet_close">Isara</string>

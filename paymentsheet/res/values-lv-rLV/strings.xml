@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Turklāt jūs e-pastā divas dienas iepriekš saņemsiet brīdinājumu par jebkādām debeta darbībām saistībā ar šo pieprasījumu. Bankas konta pārskatos šie maksājumi tiks rādīti ar atzīmi „%s”.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsu maksājumus aizsargā %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Norādot savas kartes informāciju, jūs atļaujat uzņēmumam %s saskaņā ar viņu noteikumiem iekasēt no jūsu kartes turpmākus maksājumus.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izvēlēties maksājuma veidu</string>
   <string name="stripe_paymentsheet_close">Aizvērt</string>

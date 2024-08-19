@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Be to, el. paštu prieš dvi dienas gausite pranešimą apie bet kokią pagal šį nurodymą nurašomą sumą. Mokėjimai jūsų banko išraše bus rodomi kaip „%s“.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsų mokėjimai apsaugoti %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Pateikdami kortelės duomenis sutinkate, kad „%s“ nuskaičiuotų nuo jūsų kortelės būsimus mokėjimus pagal jų sąlygas.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pasirinkite mokėjimo būdą</string>
   <string name="stripe_paymentsheet_close">Užverti</string>
