@@ -778,36 +778,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun verticalModeScreenSelection_isNeverUpdatedToNull() {
-        val expectedPaymentSelection = PaymentSelection.Link
-        runScenario(initialSelection = expectedPaymentSelection, updateSelection = {}) {
-            selectionSource.value = null
-
-            dispatcher.scheduler.advanceUntilIdle()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(selection).isEqualTo(expectedPaymentSelection)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link
+    fun verticalModeSelectionIsCleared_whenReturningFromForm() {
+        var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         runScenario(
-            initialSelection = initialPaymentSelection,
-            updateSelection = {},
-            formElementsForCode = { formFieldsWhichRequireUserInteraction }
+            initialSelection = verticalModeSelection,
+            updateSelection = { verticalModeSelection = it },
         ) {
-            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-
+            isCurrentScreenSource.value = true
             dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(initialPaymentSelection)
+                    assertThat(verticalModeSelection).isEqualTo(null)
                 }
             }
         }
@@ -919,28 +901,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(newSelection)
                 }
             }
-        }
-    }
-
-    @Test
-    fun whenVerticalModeScreen_becomesCurrentScreen_updateSelectionCalled() {
-        var updatedSelection: PaymentSelection? = null
-        fun onUpdateSelection(paymentSelection: PaymentSelection?) {
-            updatedSelection = paymentSelection
-        }
-        val verticalModeSelection = PaymentSelection.GooglePay
-
-        runScenario(
-            initialIsCurrentScreen = false,
-            initialSelection = verticalModeSelection,
-            updateSelection = ::onUpdateSelection,
-            formElementsForCode = { emptyList() },
-        ) {
-            isCurrentScreenSource.value = true
-
-            dispatcher.scheduler.advanceUntilIdle()
-
-            assertThat(updatedSelection).isEqualTo(verticalModeSelection)
         }
     }
 

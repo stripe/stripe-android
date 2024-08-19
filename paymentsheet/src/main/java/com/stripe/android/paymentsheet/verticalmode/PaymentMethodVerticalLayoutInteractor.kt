@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
-import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -25,7 +24,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -156,9 +154,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
-    private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
-    private val verticalModeScreenSelection = _verticalModeScreenSelection
-
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
     private val displayedSavedPaymentMethod = combineAsStateFlow(
@@ -188,15 +183,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         processing,
-        verticalModeScreenSelection,
+        selection,
         displayedSavedPaymentMethod,
         walletsState,
         availableSavedPaymentMethodAction,
-    ) { isProcessing, mostRecentSelection, displayedSavedPaymentMethod, walletsState, action ->
+    ) { isProcessing, selection, displayedSavedPaymentMethod, walletsState, action ->
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = getDisplayablePaymentMethods(walletsState),
             isProcessing = isProcessing,
-            selection = mostRecentSelection,
+            selection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
         )
@@ -208,35 +203,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     init {
         coroutineScope.launch {
-            selection.collect {
-                if (it == null) {
+            isCurrentScreen.collect { isCurrentScreen ->
+                if (!isCurrentScreen) {
                     return@collect
                 }
 
-                val paymentMethodCode = (it as? PaymentSelection.New).code()
-                    ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
-                val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
-                if (!requiresFormScreen) {
-                    _verticalModeScreenSelection.value = it
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            mostRecentlySelectedSavedPaymentMethod.collect { mostRecentlySelectedSavedPaymentMethod ->
-                if (
-                    mostRecentlySelectedSavedPaymentMethod == null &&
-                    verticalModeScreenSelection.value is PaymentSelection.Saved
-                ) {
-                    _verticalModeScreenSelection.value = null
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            isCurrentScreen.collect { isCurrentScreen ->
-                if (isCurrentScreen) {
-                    updateSelection(verticalModeScreenSelection.value)
+                val currentSelection = selection.value ?: return@collect
+                if (currentSelection !is PaymentSelection.Saved) {
+                    updateSelection(null)
                 }
             }
         }
