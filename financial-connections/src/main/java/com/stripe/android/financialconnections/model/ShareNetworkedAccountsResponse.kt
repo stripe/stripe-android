@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class ShareNetworkedAccountsResponse(
-    @SerialName("next_pane") val nextPane: FinancialConnectionsSessionManifest.Pane?,
-    @SerialName("display_text") val display: Display?,
+    @SerialName("next_pane") val nextPane: FinancialConnectionsSessionManifest.Pane? = null,
+    @SerialName("display_text") val display: Display? = null
 )
