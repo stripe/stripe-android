@@ -25,8 +25,11 @@ class IntegrityStandardRequestManager(
     private val standardIntegrityManager by lazy { IntegrityManagerFactory.createStandard(appContext) }
     private lateinit var integrityTokenProvider: StandardIntegrityTokenProvider
 
-    // Prepare integrity token.
-    // Can be called once in a while to keep internal state fresh.
+    /**
+     * Prepare the integrity token.
+     *
+     * Needs to be called before calling [requestToken].
+     */
     suspend fun prepare() = suspendCancellableCoroutine<Result<Unit>> { continuation ->
         runCatching {
             standardIntegrityManager.prepareIntegrityToken(
@@ -47,9 +50,11 @@ class IntegrityStandardRequestManager(
             Log.e("Integrity", "Failed to prepare integrity token", it)
             continuation.resume(Result.failure(it))
         }
-
     }
 
+    /**
+     * Request an Integrity token for using the given [requestIdentifier] string to generate a hashed identifier.
+     */
     suspend fun requestToken(
         requestIdentifier: String,
     ): Result<String> {
@@ -59,6 +64,10 @@ class IntegrityStandardRequestManager(
         return request(requestHash)
     }
 
+    /**
+     * Request an Integrity token using the given [StripeRequest] details to generate a hashed identifier.
+     *
+     */
     suspend fun requestToken(
         request: StripeRequest,
     ): Result<String> {
