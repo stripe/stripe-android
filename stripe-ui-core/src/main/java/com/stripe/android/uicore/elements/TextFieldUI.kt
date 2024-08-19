@@ -360,7 +360,7 @@ fun TextFieldColors(
 )
 
 @Composable
-internal fun TrailingIcon(
+fun TrailingIcon(
     trailingIcon: TextFieldIcon.Trailing,
     loading: Boolean,
     modifier: Modifier = Modifier

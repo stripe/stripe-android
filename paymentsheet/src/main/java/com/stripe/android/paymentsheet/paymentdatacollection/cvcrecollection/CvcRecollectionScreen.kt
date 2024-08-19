@@ -16,50 +16,51 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
-import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.Placeholder
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.stateFlowOf
 
 @Composable
 internal fun CvcRecollectionScreen(
-    cardBrand: CardBrand,
     lastFour: String,
     isTestMode: Boolean,
-    controller: CvcController,
+    cvcState: CvcState,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
-    val element = rememberElement(controller)
     StripeTheme {
         Column(
             Modifier
@@ -70,13 +71,15 @@ internal fun CvcRecollectionScreen(
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionTitle()
-            CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
-            CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
-                viewActionHandler.invoke(
-                    CvcRecollectionViewAction.OnConfirmPressed(
-                        element.controller.fieldValue.value
-                    )
-                )
+            CvcRecollectionField(
+                lastFour = lastFour,
+                cvcState = cvcState,
+                onValueChanged = {
+                    viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
+                }
+            )
+            CvcRecollectionButton(cvcState.isValid) {
+                viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
             }
         }
     }
@@ -86,8 +89,7 @@ internal fun CvcRecollectionScreen(
 internal fun CvcRecollectionPaymentSheetScreen(
     interactor: CvcRecollectionInteractor,
 ) {
-    val state = interactor.viewState
-    val element = rememberElement(state.controller)
+    val state by interactor.viewState.collectAsState()
 
     StripeTheme {
         Column(
@@ -96,7 +98,11 @@ internal fun CvcRecollectionPaymentSheetScreen(
                 .padding(horizontal = 20.dp)
         ) {
             CvcRecollectionTitle()
-            CvcRecollectionField(element = element, cardBrand = state.cardBrand, lastFour = state.lastFour)
+            CvcRecollectionField(
+                lastFour = state.lastFour,
+                cvcState = state.cvcState,
+                onValueChanged = interactor::onCvcChanged
+            )
         }
     }
 }
@@ -104,7 +110,11 @@ internal fun CvcRecollectionPaymentSheetScreen(
 @Suppress("MagicNumber", "LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, lastFour: String) {
+internal fun CvcRecollectionField(
+    lastFour: String,
+    cvcState: CvcState,
+    onValueChanged: (String) -> Unit
+) {
     val backgroundColor = if (isSystemInDarkTheme()) {
         Color.White.copy(alpha = 0.075f)
     } else {
@@ -116,7 +126,7 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
     }
 
     if (!LocalInspectionMode.current) {
-        LaunchedEffect(element) {
+        LaunchedEffect(Unit) {
             focusRequester.requestFocus()
         }
     }
@@ -141,7 +151,7 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = cardBrand.icon),
+                        painter = painterResource(id = cvcState.cardBrand.icon),
                         contentDescription = "",
                     )
                     Text(
@@ -159,17 +169,34 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                     .fillMaxHeight(),
                 color = MaterialTheme.stripeColors.componentBorder
             )
-            element.controller.ComposeUI(
-                enabled = true,
-                field = element,
+            TextField(
                 modifier = Modifier
+                    .autofill(
+                        types = listOf(AutofillType.CreditCardSecurityCode),
+                        onFill = {
+                            onValueChanged(it)
+                        }
+                    )
                     .fillMaxWidth()
                     .weight(.5f, true)
                     .focusRequester(focusRequester),
-                hiddenIdentifiers = setOf(),
-                lastTextFieldIdentifier = null,
-                nextFocusDirection = FocusDirection.Exit,
-                previousFocusDirection = FocusDirection.Previous
+                value = cvcState.cvc,
+                onValueChange = onValueChanged,
+                shape = MaterialTheme.shapes.large,
+                colors = TextFieldColors(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.NumberPassword
+                ),
+                singleLine = true,
+                label = {
+                    Placeholder(text = stringResource(id = cvcState.label))
+                },
+                trailingIcon = {
+                    TrailingIcon(
+                        trailingIcon = cvcState.cvcIcon,
+                        loading = false
+                    )
+                }
             )
         }
     }
@@ -208,7 +235,7 @@ private fun CvcRecollectionTitle() {
 
 @Composable
 private fun CvcRecollectionButton(
-    isComplete: State<Boolean>,
+    isComplete: Boolean,
     onConfirmPressed: () -> Unit
 ) {
     Box(
@@ -220,20 +247,10 @@ private fun CvcRecollectionButton(
         PrimaryButton(
             label = stringResource(R.string.stripe_paymentsheet_confirm),
             locked = false,
-            enabled = isComplete.value
+            enabled = isComplete
         ) {
             onConfirmPressed.invoke()
         }
-    }
-}
-
-@Composable
-private fun rememberElement(controller: CvcController): CvcElement {
-    return remember {
-        CvcElement(
-            IdentifierSpec(),
-            controller
-        )
     }
 }
 
@@ -242,11 +259,11 @@ private fun rememberElement(controller: CvcController): CvcElement {
 private fun CvcRecollectionFieldPreview() {
     StripeTheme {
         CvcRecollectionScreen(
-            cardBrand = CardBrand.Visa,
             lastFour = "4242",
             isTestMode = false,
-            controller = CvcController(
-                cardBrandFlow = stateFlowOf(CardBrand.Visa)
+            cvcState = CvcState(
+                cvc = "",
+                cardBrand = CardBrand.Visa
             ),
             viewActionHandler = { }
         )

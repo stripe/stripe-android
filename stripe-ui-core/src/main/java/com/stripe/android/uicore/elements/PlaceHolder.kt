@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.stripeColors
 
 @Composable
-internal fun Placeholder(
+fun Placeholder(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
