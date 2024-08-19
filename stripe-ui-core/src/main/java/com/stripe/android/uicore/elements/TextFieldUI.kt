@@ -359,6 +359,7 @@ fun TextFieldColors(
     cursorColor = MaterialTheme.stripeColors.textCursor
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun TrailingIcon(
     trailingIcon: TextFieldIcon.Trailing,

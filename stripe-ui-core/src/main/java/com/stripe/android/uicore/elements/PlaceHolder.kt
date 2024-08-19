@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -7,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.stripeColors
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun Placeholder(
     text: String,
