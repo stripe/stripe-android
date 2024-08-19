@@ -33,6 +33,8 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionReposit
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.domain.BuildRequestIdentifier
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -83,6 +85,18 @@ internal interface FinancialConnectionsSheetSharedModule {
     fun bindsIsLinkWithStripe(impl: RealIsLinkWithStripe): IsLinkWithStripe
 
     companion object {
+
+        @Singleton
+        @Provides
+        fun providesIntegrityStandardRequestManager(
+            context: Application
+        ): IntegrityStandardRequestManager {
+            return IntegrityStandardRequestManager(
+                cloudProjectNumber = 123456789L,
+                buildRequestIdentifier = BuildRequestIdentifier(),
+                appContext = context
+            )
+        }
 
         @Provides
         @Singleton

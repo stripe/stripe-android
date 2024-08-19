@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.attestation.IntegrityStandardRequestManager
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
@@ -171,18 +172,20 @@ internal interface FinancialConnectionsManifestRepository {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
+            standardRequestManager: IntegrityStandardRequestManager,
             provideApiRequestOptions: ProvideApiRequestOptions,
             logger: Logger,
             locale: Locale,
             initialSync: SynchronizeSessionResponse?
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
-                requestExecutor,
-                apiRequestFactory,
-                provideApiRequestOptions,
-                locale,
-                logger,
-                initialSync
+                requestExecutor = requestExecutor,
+                apiRequestFactory = apiRequestFactory,
+                provideApiRequestOptions = provideApiRequestOptions,
+                standardRequestManager = standardRequestManager,
+                locale = locale,
+                logger = logger,
+                initialSync = initialSync
             )
     }
 }
@@ -191,6 +194,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
     val provideApiRequestOptions: ProvideApiRequestOptions,
+    val standardRequestManager: IntegrityStandardRequestManager,
     val locale: Locale,
     val logger: Logger,
     initialSync: SynchronizeSessionResponse?
@@ -247,6 +251,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
+
+        val token: Result<String> = standardRequestManager.requestToken(financialConnectionsRequest)
+
         return requestExecutor.execute(
             financialConnectionsRequest,
             FinancialConnectionsSessionManifest.serializer()
