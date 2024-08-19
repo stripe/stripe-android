@@ -7,7 +7,7 @@ import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
 
 @Immutable
-data class CvcState(
+internal data class CvcState(
     val cvc: String,
     val cardBrand: CardBrand
 ) {
