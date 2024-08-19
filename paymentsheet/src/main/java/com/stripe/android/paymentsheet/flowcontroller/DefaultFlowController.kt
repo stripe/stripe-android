@@ -415,11 +415,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
                 val exception = IllegalStateException(message)
 
-                val event = paymentSelection?.let {
-                    ErrorReporter.UnexpectedErrorEvent.FLOW_CONTROLLER_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
-                } ?: ErrorReporter.UnexpectedErrorEvent.FLOW_CONTROLLER_NO_PAYMENT_SELECTION_ON_CHECKOUT
-
-                errorReporter.report(event, StripeException.create(exception))
+                paymentSelection?.let {
+                    val event = ErrorReporter.UnexpectedErrorEvent.FLOW_CONTROLLER_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+                    errorReporter.report(event, StripeException.create(exception))
+                }
 
                 onIntentResult(
                     PaymentConfirmationResult.Failed(

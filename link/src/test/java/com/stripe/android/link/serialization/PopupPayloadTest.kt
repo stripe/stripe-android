@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -199,7 +198,6 @@ internal class PopupPayloadTest {
             flags = emptyMap(),
             passthroughModeEnabled = true,
             shippingValues = emptyMap(),
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             stripeIntent = intent
         )
     }

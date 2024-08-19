@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.repository
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState.Verified
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType.SignUp
 import getRedactedPhoneNumber
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -61,8 +63,6 @@ internal class RealConsumerSessionRepository @Inject constructor(
         phoneNumber = getRedactedPhoneNumber(),
         clientSecret = clientSecret,
         publishableKey = publishableKey,
-        isVerified = verificationSessions.any {
-            it.state == ConsumerSession.VerificationSession.SessionState.Verified
-        },
+        isVerified = verificationSessions.any { it.state == Verified || it.type == SignUp },
     )
 }

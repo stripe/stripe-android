@@ -30,13 +30,15 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.PartnerAuth
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.Repair
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type.Supportability
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.BANK_AUTH_REPAIR
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
 import com.stripe.android.financialconnections.model.Image
@@ -378,8 +380,14 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                     )
                     PARTNER_AUTH -> UpdateRequired(
                         generic = genericContent,
-                        type = PartnerAuth(
+                        type = Supportability(
                             institution = institution,
+                        ),
+                    )
+                    INSTITUTION_PICKER -> UpdateRequired(
+                        generic = genericContent,
+                        type = Supportability(
+                            institution = null,
                         ),
                     )
                     else -> null
@@ -397,9 +405,9 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         presentSheet(this, referrer = PANE)
     }
 
-    private fun logUpdateRequired(type: UpdateRequired.Type) {
+    private fun logUpdateRequired(type: Type) {
         val eventName = when (type) {
-            is PartnerAuth -> "click.supportability_account"
+            is Supportability -> "click.supportability_account"
             is Repair -> "click.repair_accounts"
         }
 

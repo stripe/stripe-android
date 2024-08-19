@@ -77,131 +77,76 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `'isRemovable' is true when 'canRemovePaymentMethods' is 'true'`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(8)
-
-        val state = PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = false,
-            showLink = false,
-            currentSelection = PaymentSelection.Link,
-            nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
+    fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled`() {
+        val state = createPaymentOptionsState(
+            paymentMethods = PaymentMethodFixtures.createCards(3),
             canRemovePaymentMethods = true,
         )
 
-        val allAreRemovable = state.items
-            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-            .all { item ->
-                item.isRemovable
-            }
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(allAreRemovable).isTrue()
+        assertThat(options[1].isEnabledDuringEditing).isTrue()
+        assertThat(options[2].isEnabledDuringEditing).isTrue()
+        assertThat(options[2].isEnabledDuringEditing).isTrue()
     }
 
     @Test
-    fun `'isRemovable' is false when 'canRemovePaymentMethods' is 'false'`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(8)
-
-        val state = PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = false,
-            showLink = false,
-            currentSelection = PaymentSelection.Link,
-            nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
+    fun `canRemovePaymentMethods is false for all saved payment methods`() {
+        val state = createPaymentOptionsState(
+            paymentMethods = PaymentMethodFixtures.createCards(3),
             canRemovePaymentMethods = false,
         )
 
-        val noneAreRemovable = state.items
-            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-            .none { item ->
-                item.isRemovable
-            }
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(noneAreRemovable).isTrue()
+        assertThat(options[0].isEnabledDuringEditing).isFalse()
+        assertThat(options[1].isEnabledDuringEditing).isFalse()
+        assertThat(options[2].isEnabledDuringEditing).isFalse()
     }
 
     @Test
-    fun `When 'canRemovePaymentMethods' is true, 'isEnabledDuringEditing' is true only for CBC-enabled cards`() {
-        val enabledPaymentMethodId = "pm_787"
-        val paymentMethods = PaymentMethodFixtures.createCards(4).toMutableList()
-
-        paymentMethods[2] = paymentMethods[2].copy(
-            id = enabledPaymentMethodId,
-            card = paymentMethods[2].card?.copy(
-                networks = PaymentMethod.Card.Networks(
-                    available = setOf("visa", "cartes_bancaires")
+    fun `canRemovePaymentMethods is false for all saved payment methods unless can modify`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3).run {
+            val mutablePaymentMethods = toMutableList()
+            val updatedPaymentMethod = mutablePaymentMethods[2].run {
+                copy(
+                    card = card?.copy(
+                        networks = PaymentMethod.Card.Networks(
+                            available = setOf("visa", "cartes_bancaires")
+                        )
+                    )
                 )
-            )
+            }
+
+            mutablePaymentMethods[2] = updatedPaymentMethod
+
+            mutablePaymentMethods
+        }
+
+        val state = createPaymentOptionsState(
+            paymentMethods = paymentMethods,
+            canRemovePaymentMethods = false,
         )
 
-        val state = PaymentOptionsStateFactory.create(
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+
+        assertThat(options[0].isEnabledDuringEditing).isFalse()
+        assertThat(options[1].isEnabledDuringEditing).isFalse()
+        assertThat(options[2].isEnabledDuringEditing).isTrue()
+    }
+
+    private fun createPaymentOptionsState(
+        paymentMethods: List<PaymentMethod>,
+        canRemovePaymentMethods: Boolean,
+    ): PaymentOptionsState {
+        return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = false,
+            canRemovePaymentMethods = canRemovePaymentMethods,
         )
-
-        val onlyCbcPaymentMethodIsEnabled = state.items
-            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-            .all { item ->
-                if (item.paymentMethod.id == enabledPaymentMethodId) {
-                    item.isEnabledDuringEditing
-                } else {
-                    !item.isEnabledDuringEditing
-                }
-            }
-
-        assertThat(onlyCbcPaymentMethodIsEnabled).isTrue()
-    }
-
-    @Test
-    fun `'isEnabledDuringEditing' is true when 'canRemovePaymentMethods' is true && 'isCbcEligible' is false`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(8)
-
-        val state = PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = false,
-            showLink = false,
-            currentSelection = PaymentSelection.Link,
-            nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
-            canRemovePaymentMethods = true,
-        )
-
-        val noneAreRemovable = state.items
-            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-            .all { item ->
-                item.isEnabledDuringEditing
-            }
-
-        assertThat(noneAreRemovable).isTrue()
-    }
-
-    @Test
-    fun `'isEnabledDuringEditing' is false when 'canRemovePaymentMethods' is false && 'isCbcEligible' is false`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(8)
-
-        val state = PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = false,
-            showLink = false,
-            currentSelection = PaymentSelection.Link,
-            nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
-            canRemovePaymentMethods = false,
-        )
-
-        val noneAreRemovable = state.items
-            .filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-            .none { item ->
-                item.isEnabledDuringEditing
-            }
-
-        assertThat(noneAreRemovable).isTrue()
     }
 }

@@ -35,7 +35,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = false,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -56,7 +56,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -78,7 +78,7 @@ class ManageScreenUITest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = false,
-                canDelete = true,
+                canRemove = true,
                 canEdit = true,
             )
         ) {
@@ -101,7 +101,7 @@ class ManageScreenUITest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = true,
-                canDelete = true,
+                canRemove = true,
                 canEdit = true,
             )
         ) {
@@ -121,7 +121,7 @@ class ManageScreenUITest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = true,
-                canDelete = true,
+                canRemove = true,
                 canEdit = true,
             )
         ) {
@@ -140,7 +140,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -158,7 +158,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -177,7 +177,7 @@ class ManageScreenUITest {
             paymentMethods = listOf(cbcEligibleSavedPaymentMethod),
             currentSelection = null,
             isEditing = true,
-            canDelete = false,
+            canRemove = false,
             canEdit = true,
         )
     ) {
@@ -191,7 +191,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -213,7 +213,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -232,7 +232,7 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canDelete = true,
+            canRemove = true,
             canEdit = true,
         )
     ) {

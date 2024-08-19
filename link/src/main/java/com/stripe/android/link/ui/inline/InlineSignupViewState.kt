@@ -48,8 +48,11 @@ constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
-        fun create(config: LinkConfiguration): InlineSignupViewState {
-            val isAlternativeFlow = config.signupMode == LinkSignupMode.AlongsideSaveForFutureUse
+        fun create(
+            signupMode: LinkSignupMode,
+            config: LinkConfiguration
+        ): InlineSignupViewState {
+            val isAlternativeFlow = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
             val customer = config.customerInfo
 
             val fields = buildList {
@@ -72,7 +75,7 @@ constructor(
                 }
             }
 
-            val prefillEligibleFields = when (config.signupMode) {
+            val prefillEligibleFields = when (signupMode) {
                 LinkSignupMode.InsteadOfSaveForFutureUse -> {
                     fields.toSet()
                 }
@@ -81,15 +84,12 @@ constructor(
                     // user consent. We don't prefill the first field in this case.
                     fields.toSet() - fields.first()
                 }
-                null -> {
-                    emptySet()
-                }
             }
 
             return InlineSignupViewState(
                 userInput = null,
                 merchantName = config.merchantName,
-                signupMode = config.signupMode!!,
+                signupMode = signupMode,
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
             )

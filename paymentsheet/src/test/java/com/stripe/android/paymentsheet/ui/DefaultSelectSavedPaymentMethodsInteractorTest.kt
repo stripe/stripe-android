@@ -441,8 +441,8 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             showLink = false,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             nameProvider = { it!!.resolvableString },
-            canRemovePaymentMethods = true,
             isCbcEligible = true,
+            canRemovePaymentMethods = true,
         ).items
     }
 
@@ -477,6 +477,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = MutableStateFlow(emptyList()),
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         canEdit: StateFlow<Boolean> = MutableStateFlow(true),
+        canRemove: StateFlow<Boolean> = MutableStateFlow(true),
         toggleEdit: () -> Unit = { notImplemented() },
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
@@ -491,6 +492,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = paymentOptionsItems,
             editing = editing,
             canEdit = canEdit,
+            canRemove = canRemove,
             toggleEdit = toggleEdit,
             isProcessing = isProcessing,
             currentSelection = currentSelection,

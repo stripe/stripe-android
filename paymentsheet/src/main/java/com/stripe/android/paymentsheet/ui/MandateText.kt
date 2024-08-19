@@ -25,8 +25,9 @@ internal fun Mandate(
             html = text,
             color = MaterialTheme.stripeColors.subtitle,
             style = body.copy(
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Left,
                 lineHeight = lineHeight,
+                fontSize = 11.sp,
             ),
             modifier = modifier,
         )

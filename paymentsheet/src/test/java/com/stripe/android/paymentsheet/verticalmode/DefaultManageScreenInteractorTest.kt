@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,7 +38,7 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun `updating canEdit updates state`() {
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
-        runScenario(initialPaymentMethods, currentSelection = null) {
+        runScenario(initialPaymentMethods, currentSelection = null, handleBackPressed = {}) {
             interactor.state.test {
                 assertThat(awaitItem().canEdit).isTrue()
 
@@ -79,29 +80,7 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun removeLastPaymentMethod_shouldNavigateBack() {
-        var backPressed = false
-        fun handleBackPressed() {
-            backPressed = true
-        }
-
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(1)
-        runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
-            isEditing = true,
-            handleBackPressed = ::handleBackPressed,
-        ) {
-            assertThat(backPressed).isFalse()
-
-            paymentMethodsSource.value = emptyList()
-
-            assertThat(backPressed).isTrue()
-        }
-    }
-
-    @Test
-    fun removeSecondToLastPaymentMethod_cantRemoveLastPm_shouldNavigateBack() {
+    fun cannotRemoveOrEdit_multiplePaymentsMethods_shouldNotNavigateBack() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
@@ -112,50 +91,50 @@ class DefaultManageScreenInteractorTest {
             initialPaymentMethods = initialPaymentMethods,
             currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
             isEditing = true,
-            allowsRemovalOfLastSavedPaymentMethod = false,
             handleBackPressed = ::handleBackPressed,
         ) {
             assertThat(backPressed).isFalse()
 
-            paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
+            canRemoveSource.value = false
+            canEditSource.value = false
 
-            assertThat(backPressed).isTrue()
+            assertThat(backPressed).isFalse()
         }
     }
 
     @Test
-    fun removeSecondToLastPaymentMethod_cantRemoveLastPm_cbcEligible_hidesDeleteButton() {
+    fun cannotRemoveButCanEdit_hidesDeleteButton() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
         }
 
-        val nonCbcCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val cbcCard = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-        val initialPaymentMethods = listOf(nonCbcCard, cbcCard)
+        val paymentMethods = PaymentMethodFactory.cards(1)
+
         runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
+            initialPaymentMethods = paymentMethods,
+            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             isEditing = true,
-            allowsRemovalOfLastSavedPaymentMethod = false,
             handleBackPressed = ::handleBackPressed,
         ) {
             assertThat(backPressed).isFalse()
 
-            paymentMethodsSource.value = listOf(cbcCard)
+            paymentMethodsSource.value = paymentMethods
+            canEditSource.value = true
+            canRemoveSource.value = false
 
             assertThat(backPressed).isFalse()
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(canDelete).isFalse()
+                    assertThat(canRemove).isFalse()
                 }
             }
         }
     }
 
     @Test
-    fun removeSecondToLastPaymentMethod_cantRemoveLastPm_cbcEligible_navsBackWhenEditingFinishes() {
+    fun cannotRemoveOrEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
@@ -166,114 +145,56 @@ class DefaultManageScreenInteractorTest {
             selectedPaymentMethod = savedPaymentMethod
         }
 
-        val nonCbcCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val cbcCard = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-        val initialPaymentMethods = listOf(nonCbcCard, cbcCard)
+        val paymentMethods = PaymentMethodFactory.cards(3)
+
         runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
+            initialPaymentMethods = paymentMethods,
+            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             onSelectPaymentMethod = ::onSelectPaymentMethod,
             isEditing = true,
-            allowsRemovalOfLastSavedPaymentMethod = false,
             handleBackPressed = ::handleBackPressed,
         ) {
             assertThat(backPressed).isFalse()
 
-            paymentMethodsSource.value = listOf(cbcCard)
+            val lastPaymentMethod = paymentMethods[2]
+
+            paymentMethodsSource.value = listOf(paymentMethods[2])
+            canRemoveSource.value = false
+            canEditSource.value = false
 
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
             assertThat(backPressed).isTrue()
-            assertThat(selectedPaymentMethod?.paymentMethod).isEqualTo(cbcCard)
+            assertThat(selectedPaymentMethod?.paymentMethod).isEqualTo(lastPaymentMethod)
         }
     }
 
     @Test
-    fun removeSecondToLastPaymentMethod_canRemoveLastPm_cbcEligible_doesNotNavBackWhenEditingFinishes() {
+    fun canRemove_doesNotNavBackWhenEditingFinishes() {
         var backPressed = false
         fun handleBackPressed() {
             backPressed = true
         }
 
-        val nonCbcCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val cbcCard = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-        val initialPaymentMethods = listOf(nonCbcCard, cbcCard)
+        val paymentMethods = PaymentMethodFactory.cards(2)
         runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
+            initialPaymentMethods = paymentMethods,
+            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             onSelectPaymentMethod = {},
             isEditing = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
             handleBackPressed = ::handleBackPressed,
         ) {
             assertThat(backPressed).isFalse()
 
-            paymentMethodsSource.value = listOf(nonCbcCard)
+            paymentMethodsSource.value = listOf(paymentMethods[1])
 
             assertThat(backPressed).isFalse()
 
             editingSource.value = false
 
             assertThat(backPressed).isFalse()
-        }
-    }
-
-    @Test
-    fun removeThirdToLastPaymentMethod_doesNotNavBackWhenEditingFinishes() {
-        var backPressed = false
-        fun handleBackPressed() {
-            backPressed = true
-        }
-
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(3)
-        runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
-            isEditing = true,
-            onSelectPaymentMethod = {},
-            allowsRemovalOfLastSavedPaymentMethod = false,
-            handleBackPressed = ::handleBackPressed,
-        ) {
-            assertThat(backPressed).isFalse()
-
-            paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
-
-            assertThat(backPressed).isFalse()
-
-            editingSource.value = false
-
-            assertThat(backPressed).isFalse()
-        }
-    }
-
-    @Test
-    fun removeSecondToLastPaymentMethod_canRemoveLastPm_doesntNavigateBackOrHideButtons() {
-        var backPressed = false
-        fun handleBackPressed() {
-            backPressed = true
-        }
-
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
-        runScenario(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = PaymentSelection.Saved(initialPaymentMethods[0]),
-            isEditing = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
-            handleBackPressed = ::handleBackPressed,
-        ) {
-            assertThat(backPressed).isFalse()
-
-            paymentMethodsSource.value = initialPaymentMethods.minus(initialPaymentMethods[0])
-
-            assertThat(backPressed).isFalse()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(canDelete).isTrue()
-                }
-            }
         }
     }
 
@@ -298,7 +219,6 @@ class DefaultManageScreenInteractorTest {
         currentSelection: PaymentSelection?,
         isEditing: Boolean = false,
         toggleEdit: () -> Unit = { notImplemented() },
-        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         handleBackPressed: () -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
@@ -307,6 +227,7 @@ class DefaultManageScreenInteractorTest {
         val selection = MutableStateFlow(currentSelection)
         val editing = MutableStateFlow(isEditing)
         val canEdit = MutableStateFlow(true)
+        val canRemove = MutableStateFlow(true)
         val dispatcher = UnconfinedTestDispatcher()
 
         val interactor = DefaultManageScreenInteractor(
@@ -318,8 +239,8 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
+            canRemove = canRemove,
             toggleEdit = toggleEdit,
-            allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,
             onDeletePaymentMethod = { notImplemented() },
@@ -334,6 +255,7 @@ class DefaultManageScreenInteractorTest {
             paymentMethodsSource = paymentMethods,
             editingSource = editing,
             canEditSource = canEdit,
+            canRemoveSource = canRemove,
         ).apply {
             runTest {
                 testBlock()
@@ -346,5 +268,6 @@ class DefaultManageScreenInteractorTest {
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,
+        val canRemoveSource: MutableStateFlow<Boolean,>
     )
 }

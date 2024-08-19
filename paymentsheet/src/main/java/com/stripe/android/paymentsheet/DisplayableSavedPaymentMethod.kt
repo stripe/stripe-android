@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 internal data class DisplayableSavedPaymentMethod(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
-    val isRemovable: Boolean = true,
     val isCbcEligible: Boolean = false,
 ) {
     fun isModifiable(): Boolean {

@@ -353,6 +353,16 @@ internal class CustomerSheetViewModel(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                        /*
+                         * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
+                         */
+                        linkConfigurationCoordinator = null,
+                        onLinkInlineSignupStateChanged = {
+                            throw IllegalStateException(
+                                "`CustomerSheet` does not implement `Link` and should not " +
+                                    "receive `InlineSignUpViewState` updates"
+                            )
+                        }
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -720,6 +730,16 @@ internal class CustomerSheetViewModel(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                /*
+                 * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
+                 */
+                linkConfigurationCoordinator = null,
+                onLinkInlineSignupStateChanged = {
+                    throw IllegalStateException(
+                        "`CustomerSheet` does not implement `Link` and should not " +
+                            "receive `InlineSignUpViewState` updates"
+                    )
+                }
             )
         ) ?: emptyList()
 

@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.core.strings.ResolvableString
@@ -54,7 +55,6 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -240,7 +240,7 @@ private fun PaymentSheetContent(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = Modifier.animateContentSize()) {
+    Column(modifier = Modifier.animateContentSize().padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -251,12 +251,13 @@ private fun PaymentSheetContent(
         }
 
         walletsState?.let { state ->
-            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
+            val bottomSpacing = currentScreen.walletsDividerSpacing - currentScreen.topContentPadding
             Wallet(
                 state = state,
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
+                dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
             )
         }
@@ -275,7 +276,7 @@ private fun PaymentSheetContent(
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 8.dp),
             )
         }
 
@@ -309,6 +310,7 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
+    dividerSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
@@ -347,7 +349,7 @@ internal fun Wallet(
             else -> Unit
         }
 
-        Spacer(modifier = Modifier.requiredHeight(WalletDividerSpacing))
+        Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)

@@ -33,27 +33,17 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
-internal val PaymentSheetScreen.topContentPadding: Dp
-    get() = when (this) {
-        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-            SavedPaymentMethodsTopContentPadding
-        }
-        is PaymentSheetScreen.Loading,
-        is PaymentSheetScreen.VerticalMode,
-        is PaymentSheetScreen.VerticalModeForm,
-        is PaymentSheetScreen.AddFirstPaymentMethod,
-        is PaymentSheetScreen.AddAnotherPaymentMethod,
-        is PaymentSheetScreen.ManageSavedPaymentMethods,
-        is PaymentSheetScreen.ManageOneSavedPaymentMethod,
-        is PaymentSheetScreen.EditPaymentMethod -> {
-            0.dp
-        }
-    }
+internal val verticalModeBottomContentPadding = 20.dp
+internal val horizontalModeWalletsDividerSpacing = 16.dp
+internal val verticalModeWalletsDividerSpacing = 24.dp
 
 internal sealed interface PaymentSheetScreen {
 
     val showsBuyButton: Boolean
     val showsContinueButton: Boolean
+    val topContentPadding: Dp
+    val bottomContentPadding: Dp
+    val walletsDividerSpacing: Dp
 
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
@@ -68,6 +58,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(null)
@@ -99,6 +92,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = SavedPaymentMethodsTopContentPadding
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -150,6 +146,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -195,6 +194,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -243,6 +245,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -276,6 +281,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -305,7 +313,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor)
+            PaymentMethodVerticalLayoutUI(interactor, modifier)
         }
     }
 
@@ -316,6 +324,9 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -348,6 +359,9 @@ internal sealed interface PaymentSheetScreen {
     class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen, Closeable {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -394,6 +408,9 @@ internal sealed interface PaymentSheetScreen {
         PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = 0.dp
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(

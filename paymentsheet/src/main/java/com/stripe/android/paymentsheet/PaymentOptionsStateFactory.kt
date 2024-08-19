@@ -29,9 +29,9 @@ internal object PaymentOptionsStateFactory {
                 DisplayableSavedPaymentMethod(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
-                    isRemovable = canRemovePaymentMethods,
                     isCbcEligible = isCbcEligible
-                )
+                ),
+                canRemovePaymentMethods = canRemovePaymentMethods,
             )
         }
     }
@@ -59,8 +59,8 @@ internal object PaymentOptionsStateFactory {
             showGooglePay = showGooglePay,
             showLink = showLink,
             nameProvider = nameProvider,
-            canRemovePaymentMethods = canRemovePaymentMethods,
             isCbcEligible = isCbcEligible,
+            canRemovePaymentMethods = canRemovePaymentMethods,
         )
 
         val selectedItem = getSelectedItem(items, currentSelection)

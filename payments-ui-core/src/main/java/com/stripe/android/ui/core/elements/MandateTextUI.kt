@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
@@ -23,8 +24,11 @@ fun MandateTextUI(
 ) {
     Text(
         text = stringResource(element.stringResId, *element.args.toTypedArray()),
-        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-        color = MaterialTheme.stripeColors.subtitle,
+        style = MaterialTheme.typography.caption.copy(
+            textAlign = TextAlign.Start,
+            fontWeight = FontWeight.Normal,
+        ),
+        color = MaterialTheme.stripeColors.placeholderText,
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {} // makes it a separate accessibile item

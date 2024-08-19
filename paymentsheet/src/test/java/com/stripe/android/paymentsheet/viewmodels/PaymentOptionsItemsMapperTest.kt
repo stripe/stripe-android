@@ -21,6 +21,7 @@ class PaymentOptionsItemsMapperTest {
     private val customerStateFlow = MutableStateFlow<CustomerState?>(null)
     private val isGooglePayReadyFlow = MutableStateFlow(false)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
+    private val canRemovePaymentMethodsFlow = MutableStateFlow(true)
 
     @Test
     fun `Only emits value if required flows have emitted values`() = runTest {
@@ -30,6 +31,7 @@ class PaymentOptionsItemsMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
+            canRemovePaymentMethods = canRemovePaymentMethodsFlow,
             isCbcEligible = { false }
         )
 
@@ -60,6 +62,7 @@ class PaymentOptionsItemsMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
+            canRemovePaymentMethods = canRemovePaymentMethodsFlow,
             isCbcEligible = { false }
         )
 

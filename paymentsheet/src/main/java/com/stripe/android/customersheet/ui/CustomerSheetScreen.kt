@@ -121,8 +121,8 @@ internal fun SelectPaymentMethod(
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
-            isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             canRemovePaymentMethods = viewState.canRemovePaymentMethods,
+            isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
         )
 
         SavedPaymentMethodTabLayoutUI(
@@ -219,12 +219,9 @@ internal fun AddPaymentMethod(
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
                 selectedItemCode = viewState.paymentMethodCode,
                 formElements = viewState.formElements,
-                linkSignupMode = null,
-                linkConfigurationCoordinator = null,
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
-                onLinkSignupStateChanged = { _ -> },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
                 onFormFieldValuesChanged = {

@@ -4,6 +4,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 
 internal interface FinancialConnectionsInstitutionsRepository {
 
@@ -20,11 +21,11 @@ internal interface FinancialConnectionsInstitutionsRepository {
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             apiRequestFactory: ApiRequest.Factory
         ): FinancialConnectionsInstitutionsRepository = FinancialConnectionsInstitutionsRepositoryImpl(
             requestExecutor,
-            apiOptions,
+            provideApiRequestOptions,
             apiRequestFactory
         )
     }
@@ -32,7 +33,7 @@ internal interface FinancialConnectionsInstitutionsRepository {
 
 private class FinancialConnectionsInstitutionsRepositoryImpl(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
-    private val apiOptions: ApiRequest.Options,
+    private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsInstitutionsRepository {
 
@@ -41,7 +42,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = featuredInstitutionsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
             )
@@ -60,7 +61,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = institutionsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,

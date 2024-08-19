@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -149,8 +148,6 @@ internal class VerticalModeFormUITest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             formElements = CardDefinition.formElements(),
-            linkSignupMode = null,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             headerInformation = headerInformation,
         )
     }
@@ -178,8 +175,6 @@ internal class VerticalModeFormUITest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             formElements = emptyList(),
-            linkSignupMode = null,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             headerInformation = headerInformation,
         )
     }
@@ -211,8 +206,6 @@ internal class VerticalModeFormUITest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
-            linkSignupMode = null,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             headerInformation = headerInformation,
         )
     }

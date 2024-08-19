@@ -523,6 +523,7 @@ class FlowControllerConfigurationHandlerTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
             ),
         )
     }
