@@ -101,7 +101,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 processing = viewModel.processing,
                 selection = viewModel.selection,
                 formElementsForCode = formHelper::formElementsForCode,
-                transitionTo = viewModel.navigationHandler::transitionTo,
+                transitionTo = viewModel.navigationHandler::transitionToWithDelay,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 manageScreenFactory = {
                     val interactor = DefaultManageScreenInteractor.create(
