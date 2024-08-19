@@ -152,7 +152,7 @@ internal class DefaultManageScreenInteractor(
                 },
                 onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
-                navigateBack = viewModel::handleBackPressed,
+                navigateBack = viewModel.navigationHandler::popWithDelay,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }

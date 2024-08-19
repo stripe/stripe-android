@@ -58,7 +58,7 @@ internal abstract class BaseSheetViewModel(
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
-    val navigationHandler: NavigationHandler = NavigationHandler { poppedScreen ->
+    val navigationHandler: NavigationHandler = NavigationHandler(viewModelScope) { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
