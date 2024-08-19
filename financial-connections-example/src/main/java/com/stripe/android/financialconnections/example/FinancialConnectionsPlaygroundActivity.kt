@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.SettingsUi
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
@@ -119,6 +120,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     }
 
                     is FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent -> {
+                        val email = state.settings.get<EmailSetting>().selectedOption
+
                         collectBankAccountLauncher.presentWithPaymentIntent(
                             publishableKey = it.publishableKey,
                             stripeAccountId = null,
@@ -127,12 +130,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                                 Experience.FinancialConnections -> {
                                     CollectBankAccountConfiguration.USBankAccount(
                                         name = "Sample name",
-                                        email = "sampleEmail@test.com"
+                                        email = email,
                                     )
                                 }
                                 Experience.InstantDebits -> {
                                     CollectBankAccountConfiguration.InstantDebits(
-                                        email = "sampleEmail@test.com",
+                                        email = email,
                                     )
                                 }
                             }
