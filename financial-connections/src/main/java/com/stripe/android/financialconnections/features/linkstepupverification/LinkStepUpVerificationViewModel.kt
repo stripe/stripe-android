@@ -6,10 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.ConsumerNotFoundError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.LookupConsumerSession
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.MarkLinkVerifiedError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.StartVerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -17,25 +14,22 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
+import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -51,7 +45,8 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
-    private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
+    private val consumerSessionProvider: ConsumerSessionProvider,
+    private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
     private val getCachedAccounts: GetCachedAccounts,
@@ -61,8 +56,8 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
 ) : FinancialConnectionsViewModel<LinkStepUpVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
-        logErrors()
-        viewModelScope.launch { lookupAndStartVerification() }
+        observeErrors()
+        startVerification()
     }
 
     override fun updateTopAppBar(state: LinkStepUpVerificationState): TopAppBarStateUpdate {
@@ -73,35 +68,17 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
         )
     }
 
-    private suspend fun lookupAndStartVerification() = runCatching {
-        getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) }
-    }
-        .onFailure { setState { copy(payload = Fail(it)) } }
-        .onSuccess { manifest ->
-            setState { copy(payload = Loading()) }
-            lookupConsumerAndStartVerification(
-                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+    private fun startVerification() {
+        suspend {
+            val cachedConsumerSession = requireNotNull(consumerSessionProvider.provideConsumerSession())
+            val manifest = getOrFetchSync().manifest
+            val consumerSession = startVerification.email(
+                consumerSessionClientSecret = cachedConsumerSession.clientSecret,
                 businessName = manifest.businessName,
-                verificationType = VerificationType.EMAIL,
-                onConsumerNotFound = {
-                    eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
-                    navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-                },
-                onLookupError = { error ->
-                    eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
-                    setState { copy(payload = Fail(error)) }
-                },
-                onStartVerification = { /* no-op */ },
-                onVerificationStarted = { consumerSession ->
-                    val payload = buildPayload(consumerSession)
-                    setState { copy(payload = Success(payload)) }
-                },
-                onStartVerificationError = { error ->
-                    eventTracker.track(VerificationStepUpError(PANE, StartVerificationError))
-                    setState { copy(payload = Fail(error)) }
-                }
             )
-        }
+            buildPayload(consumerSession)
+        }.execute { copy(payload = it) }
+    }
 
     private fun buildPayload(consumerSession: ConsumerSession) = Payload(
         email = consumerSession.emailAddress,
@@ -113,7 +90,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
         )
     )
 
-    private fun logErrors() {
+    private fun observeErrors() {
         onAsync(
             LinkStepUpVerificationState::payload,
             onSuccess = {
@@ -179,37 +156,22 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
 
     fun onClickableTextClick(text: String) {
         when (text) {
-            CLICKABLE_TEXT_RESEND_CODE -> viewModelScope.launch { onResendOtp() }
+            CLICKABLE_TEXT_RESEND_CODE -> onResendOtp()
             else -> logger.error("Unknown clicked text $text")
         }
     }
 
-    private suspend fun onResendOtp() = runCatching {
-        getOrFetchSync().manifest.also { requireNotNull(it.accountholderCustomerEmailAddress) }
-    }
-        .onFailure { setState { copy(resendOtp = Fail(it)) } }
-        .onSuccess { manifest ->
-            setState { copy(resendOtp = Loading()) }
-            lookupConsumerAndStartVerification(
-                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+    private fun onResendOtp() {
+        suspend {
+            val cachedConsumerSession = requireNotNull(consumerSessionProvider.provideConsumerSession())
+            val manifest = getOrFetchSync().manifest
+            startVerification.email(
+                consumerSessionClientSecret = cachedConsumerSession.clientSecret,
                 businessName = manifest.businessName,
-                verificationType = VerificationType.EMAIL,
-                onConsumerNotFound = {
-                    eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
-                    navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-                },
-                onLookupError = { error ->
-                    eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
-                    setState { copy(resendOtp = Fail(error)) }
-                },
-                onStartVerification = { /* no-op */ },
-                onVerificationStarted = { setState { copy(resendOtp = Success(Unit)) } },
-                onStartVerificationError = { error ->
-                    eventTracker.track(VerificationStepUpError(PANE, StartVerificationError))
-                    setState { copy(resendOtp = Fail(error)) }
-                }
             )
-        }
+            Unit
+        }.execute { copy(resendOtp = it) }
+    }
 
     @AssistedFactory
     interface Factory {

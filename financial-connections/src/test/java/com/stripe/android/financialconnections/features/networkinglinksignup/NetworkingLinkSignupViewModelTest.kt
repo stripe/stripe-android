@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.LinkLoginPane
@@ -50,6 +51,7 @@ class NetworkingLinkSignupViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val navigationManager = NavigationManagerImpl()
     private val lookupAccount = mock<LookupAccount>()
+    private val startVerification = mock<StartVerification>()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
@@ -66,6 +68,7 @@ class NetworkingLinkSignupViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
         linkSignupHandler = signupHandler,
+        startVerification = startVerification,
     )
 
     @Test

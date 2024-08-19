@@ -1,10 +1,13 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
-import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionLookup
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -17,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -32,6 +36,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     private val handleError = TestHandleError()
     private val disableNetworking = mock<DisableNetworking>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val lookupAccount = mock<LookupAccount>()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
@@ -43,6 +48,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         disableNetworking = disableNetworking,
         eventTracker = eventTracker,
         initialState = state,
+        lookupAccount = lookupAccount,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
@@ -63,9 +69,21 @@ class NetworkingLinkLoginWarmupViewModelTest {
 
     @Test
     fun `onContinueClick - navigates to verification pane`() = runTest {
+        val syncResponse = syncResponse(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "email@email.com",
+            ),
+        )
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
 
+        whenever(
+            lookupAccount.invoke(email = anyOrNull())
+        ).thenReturn(consumerSessionLookup())
+
         viewModel.onContinueClick()
+
         navigationManager.assertNavigatedTo(
             destination = Destination.NetworkingLinkVerification,
             pane = Pane.NETWORKING_LINK_LOGIN_WARMUP
@@ -78,7 +96,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState(referrer))
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+            sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
         viewModel.onSecondaryButtonClicked()
@@ -103,7 +121,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         )
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+            sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
         viewModel.onSecondaryButtonClicked()
@@ -116,7 +134,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val expectedNextPane = Pane.INSTITUTION_PICKER
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = expectedNextPane)
+            sessionManifest().copy(nextPane = expectedNextPane)
         )
 
         viewModel.onSecondaryButtonClicked()

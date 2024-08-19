@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.domain
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
+import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification.Result
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -34,22 +34,16 @@ class LookupConsumerAndStartVerificationTest {
             consumerSession = null
         )
         whenever(lookupAccount.invoke(email)).thenReturn(lookup)
-        var onConsumerNotFoundCalled = false
 
         // Act
-        lookupConsumerAndStartVerification(
+        val verificationResult = lookupConsumerAndStartVerification(
             email = email,
             businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
-            onConsumerNotFound = { onConsumerNotFoundCalled = true },
-            onLookupError = { fail("onLookupError should not be called") },
-            onStartVerification = { fail("onStartVerification should not be called") },
-            onVerificationStarted = { fail("onVerificationStarted should not be called") },
-            onStartVerificationError = { fail("onStartVerificationError should not be called") }
         )
 
         // Assert
-        assertEquals(true, onConsumerNotFoundCalled)
+        assertThat(verificationResult).isInstanceOf(Result.ConsumerNotFound::class.java)
         verifyNoInteractions(startVerification)
     }
 
@@ -76,24 +70,16 @@ class LookupConsumerAndStartVerificationTest {
                 consumerSession
             )
 
-            var onStartVerificationCalled = false
-            var onVerificationStartedCalled = false
-
             // Act
-            lookupConsumerAndStartVerification(
+            val verificationResult = lookupConsumerAndStartVerification(
                 email = email,
                 businessName = "Test Business",
                 verificationType = expectedVerificationType,
-                onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
-                onLookupError = { fail("onLookupError should not be called") },
-                onStartVerification = { onStartVerificationCalled = true },
-                onVerificationStarted = { onVerificationStartedCalled = true },
-                onStartVerificationError = { fail("onStartVerificationError should not be called") }
             )
 
+            assertThat(verificationResult).isInstanceOf(Result.Success::class.java)
+
             // Assert
-            assertEquals(true, onStartVerificationCalled)
-            assertEquals(true, onVerificationStartedCalled)
             verify(startVerification).email(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = "Test Business"
@@ -106,22 +92,16 @@ class LookupConsumerAndStartVerificationTest {
         val email = "test@test.com"
         val expectedException = RuntimeException("Mock lookupAccount exception")
         whenever(lookupAccount(email)).thenThrow(expectedException)
-        var onLookupErrorCalled = false
 
         // Act
-        lookupConsumerAndStartVerification(
+        val verificationResult = lookupConsumerAndStartVerification(
             email = email,
             businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
-            onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
-            onLookupError = { onLookupErrorCalled = true },
-            onStartVerification = { fail("onStartVerification should not be called") },
-            onVerificationStarted = { fail("onVerificationStarted should not be called") },
-            onStartVerificationError = { fail("onStartVerificationError should not be called") }
         )
 
         // Assert
-        assertEquals(true, onLookupErrorCalled)
+        assertThat(verificationResult).isInstanceOf(Result.LookupError::class.java)
         verifyNoInteractions(startVerification)
     }
 
@@ -144,22 +124,16 @@ class LookupConsumerAndStartVerificationTest {
                 businessName = "Test Business"
             )
         ).thenThrow(expectedException)
-        var onStartVerificationErrorCalled = false
 
         // Act
-        lookupConsumerAndStartVerification(
+        val verificationResult = lookupConsumerAndStartVerification(
             email = email,
             businessName = "Test Business",
             verificationType = expectedVerificationType,
-            onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
-            onLookupError = { fail("onLookupError should not be called") },
-            onStartVerification = { },
-            onVerificationStarted = { fail("onVerificationStarted should not be called") },
-            onStartVerificationError = { onStartVerificationErrorCalled = true }
         )
 
         // Assert
-        assertEquals(true, onStartVerificationErrorCalled)
+        assertThat(verificationResult).isInstanceOf(Result.VerificationError::class.java)
         verify(startVerification).email(
             consumerSessionClientSecret = consumerSession.clientSecret,
             businessName = "Test Business"

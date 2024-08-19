@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 
 internal object ApiKeyFixtures {
@@ -136,6 +137,29 @@ internal object ApiKeyFixtures {
         verificationSessions = emptyList(),
     )
 
+    fun consumerSessionLookup() = ConsumerSessionLookup(
+        exists = true,
+        consumerSession = ConsumerSession(
+            clientSecret = "clientSecret",
+            emailAddress = "test@test.com",
+            redactedPhoneNumber = "+1********12",
+            redactedFormattedPhoneNumber = "(***) *** **12",
+            verificationSessions = emptyList(),
+        ),
+        publishableKey = "pk_123",
+    )
+
+    fun consumerSessionSignup() = ConsumerSessionSignup(
+        consumerSession = ConsumerSession(
+            clientSecret = "clientSecret",
+            emailAddress = "test@test.com",
+            redactedPhoneNumber = "+1********12",
+            redactedFormattedPhoneNumber = "(***) *** **12",
+            verificationSessions = emptyList(),
+        ),
+        publishableKey = "pk_123",
+    )
+
     fun verifiedConsumerSession() = ConsumerSession(
         clientSecret = "clientSecret",
         emailAddress = "test@test.com",
@@ -146,18 +170,6 @@ internal object ApiKeyFixtures {
                 type = ConsumerSession.VerificationSession.SessionType.Sms,
                 state = ConsumerSession.VerificationSession.SessionState.Verified,
             )
-        ),
-    )
-
-    fun consumerSessionSignup() = ConsumerSessionSignup(
-        publishableKey = "pk_123",
-        consumerSession = consumerSession().copy(
-            verificationSessions = listOf(
-                ConsumerSession.VerificationSession(
-                    type = ConsumerSession.VerificationSession.SessionType.SignUp,
-                    state = ConsumerSession.VerificationSession.SessionState.Started,
-                )
-            ),
         ),
     )
 }

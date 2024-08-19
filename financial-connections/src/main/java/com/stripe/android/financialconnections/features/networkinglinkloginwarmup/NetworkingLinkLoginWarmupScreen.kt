@@ -83,6 +83,7 @@ private fun NetworkingLinkLoginWarmupContent(
         },
         footer = {
             Footer(
+                loadingPrimary = state.continueAsync is Loading,
                 loading = state.disableNetworkingAsync is Loading || state.payload() == null,
                 secondaryButtonLabel = state.secondaryButtonLabel,
                 onContinueClick = onContinueClick,
@@ -115,6 +116,7 @@ private fun HeaderSection() {
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
+    loadingPrimary: Boolean,
     loading: Boolean,
     secondaryButtonLabel: Int,
     onContinueClick: () -> Unit,
@@ -122,7 +124,7 @@ private fun Footer(
 ) {
     Column {
         FinancialConnectionsButton(
-            loading = false,
+            loading = loadingPrimary,
             enabled = loading.not(),
             type = Type.Primary,
             onClick = onContinueClick,

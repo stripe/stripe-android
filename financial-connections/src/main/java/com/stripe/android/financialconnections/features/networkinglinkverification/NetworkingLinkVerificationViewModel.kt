@@ -6,10 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConsumerNotFoundError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.LookupConsumerSession
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.MarkLinkVerifiedError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -20,26 +17,21 @@ import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
-import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Fail
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -58,7 +50,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private val markLinkVerified: MarkLinkVerified,
     private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
-    private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
+    private val startVerification: StartVerification,
     private val logger: Logger,
     private val isLinkWithStripe: IsLinkWithStripe,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
@@ -67,67 +59,18 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
 
     init {
         observeAsyncs()
-        viewModelScope.launch {
-            setState { copy(payload = Loading()) }
-
-            runCatching {
-                buildInitData()
-            }.onSuccess {
-                startVerification(it)
-            }.onFailure {
-                setState { copy(payload = Fail(it)) }
-            }
-        }
+        startVerification()
     }
 
-    private suspend fun buildInitData(): InitData {
-        val manifest = getOrFetchSync().manifest
-        val isInstantDebits = isLinkWithStripe()
-
-        val email = if (isInstantDebits) {
-            // This pane can appear in two different places in the flow,
-            // and it might not have the consumer session created when launched from the
-            // Link warmup sheet. Therefore, we need to fall back to the customer email.
-            val consumerSession = getCachedConsumerSession()
-            consumerSession?.emailAddress ?: manifest.accountholderCustomerEmailAddress
-        } else {
-            manifest.accountholderCustomerEmailAddress
+    private fun startVerification() {
+        suspend {
+            val manifest = getOrFetchSync().manifest
+            val cachedConsumerSession = requireNotNull(getCachedConsumerSession())
+            val consumerSession = startVerification.sms(cachedConsumerSession.clientSecret)
+            buildPayload(consumerSession, manifest.initialInstitution)
+        }.execute { payload ->
+            copy(payload = payload)
         }
-
-        return InitData(
-            businessName = manifest.businessName,
-            emailAddress = requireNotNull(email),
-            initialInstitution = manifest.initialInstitution,
-        )
-    }
-
-    private suspend fun startVerification(
-        initData: InitData,
-    ) {
-        lookupConsumerAndStartVerification(
-            email = initData.emailAddress,
-            businessName = initData.businessName,
-            verificationType = VerificationType.SMS,
-            onConsumerNotFound = {
-                analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
-                navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
-            },
-            onLookupError = { error ->
-                analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
-                setState { copy(payload = Fail(error)) }
-            },
-            onStartVerification = { /* no-op */ },
-            onVerificationStarted = { consumerSession ->
-                val payload = buildPayload(consumerSession, initData.initialInstitution)
-                setState { copy(payload = Success(payload)) }
-            },
-            onStartVerificationError = { error ->
-                analyticsTracker.track(
-                    VerificationError(PANE, StartVerificationSessionError)
-                )
-                setState { copy(payload = Fail(error)) }
-            }
-        )
     }
 
     override fun updateTopAppBar(state: NetworkingLinkVerificationState): TopAppBarStateUpdate {
@@ -211,12 +154,6 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     interface Factory {
         fun create(initialState: NetworkingLinkVerificationState): NetworkingLinkVerificationViewModel
     }
-
-    private data class InitData(
-        val businessName: String?,
-        val emailAddress: String,
-        val initialInstitution: FinancialConnectionsInstitution?,
-    )
 
     companion object {
 
