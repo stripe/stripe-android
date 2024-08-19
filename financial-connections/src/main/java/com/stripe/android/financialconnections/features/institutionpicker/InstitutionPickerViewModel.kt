@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -29,6 +30,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
@@ -98,9 +100,13 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
     }
 
     override fun updateTopAppBar(state: InstitutionPickerState): TopAppBarStateUpdate {
+        // We don't allow users to return to the signup pane, as this might result
+        // in them accidentally creating multiple accounts.
+        val canNavigateBack = state.referrer != Pane.LINK_LOGIN
+
         return TopAppBarStateUpdate(
             pane = PANE,
-            allowBackNavigation = true,
+            allowBackNavigation = canNavigateBack,
             allowElevation = false,
             error = state.payload.error,
         )
@@ -257,10 +263,14 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
     }
 
     companion object {
-        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+        fun factory(
+            parentComponent: FinancialConnectionsSheetNativeComponent,
+            arguments: Bundle?,
+        ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent.institutionPickerViewModelFactory.create(InstitutionPickerState())
+                    val state = InstitutionPickerState(arguments)
+                    parentComponent.institutionPickerViewModelFactory.create(state)
                 }
             }
 
@@ -275,8 +285,13 @@ internal data class InstitutionPickerState(
     val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
-    val createSessionForInstitution: Async<Unit> = Uninitialized
+    val createSessionForInstitution: Async<Unit> = Uninitialized,
+    val referrer: Pane? = null,
 ) {
+
+    constructor(args: Bundle?) : this(
+        referrer = Destination.referrer(args),
+    )
 
     data class Payload(
         val featuredInstitutions: InstitutionResponse,

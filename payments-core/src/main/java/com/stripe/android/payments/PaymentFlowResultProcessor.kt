@@ -22,6 +22,7 @@ import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -206,7 +207,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): Result<T> {
-        var remainingRetries = originalIntent.paymentMethod?.type?.afterRedirectAction?.retryCount ?: MAX_RETRIES
+        val maxRetries = originalIntent.paymentMethod?.type?.afterRedirectAction?.retryCount ?: MAX_RETRIES
+        var remainingRetries = maxRetries
 
         var stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
             refreshStripeIntent(
@@ -222,26 +224,28 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
         }
 
-        while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
-            val delayDuration = retryDelaySupplier.getDelay(
-                MAX_RETRIES,
-                remainingRetries
-            )
-            delay(delayDuration)
-            stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-                refreshStripeIntent(
-                    clientSecret = clientSecret,
-                    requestOptions = requestOptions,
-                    expandFields = EXPAND_PAYMENT_METHOD
+        withTimeoutOrNull(retryDelaySupplier.maxDuration(maxRetries = maxRetries)) {
+            while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
+                val delayDuration = retryDelaySupplier.getDelay(
+                    maxRetries,
+                    remainingRetries
                 )
-            } else {
-                retrieveStripeIntent(
-                    clientSecret = clientSecret,
-                    requestOptions = requestOptions,
-                    expandFields = EXPAND_PAYMENT_METHOD
-                )
+                delay(delayDuration)
+                stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
+                    refreshStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                } else {
+                    retrieveStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                }
+                remainingRetries--
             }
-            remainingRetries--
         }
 
         return stripeIntentResult

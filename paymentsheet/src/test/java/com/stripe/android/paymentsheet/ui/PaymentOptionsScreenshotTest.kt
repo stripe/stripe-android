@@ -43,19 +43,22 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
         )
 
@@ -82,19 +85,22 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                )
+                ),
+                canRemovePaymentMethods = true,
             ),
         )
 
@@ -113,10 +119,61 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
-    private fun createCard(last4: String): PaymentMethod {
+    @Test
+    fun testEditingAndRemoveDisabledWithModifiableItems() {
+        val paymentOptionsItems = listOf(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4242"),
+                ),
+                canRemovePaymentMethods = false,
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4000"),
+                ),
+                canRemovePaymentMethods = false,
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("1234", addNetworks = true),
+                    isCbcEligible = true,
+                ),
+                canRemovePaymentMethods = false,
+            ),
+        )
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItems,
+                selectedPaymentOptionsItem = null,
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
+            )
+        }
+    }
+
+    private fun createCard(last4: String, addNetworks: Boolean = false): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
         return original.copy(
-            card = original.card?.copy(last4 = last4),
+            card = original.card?.copy(
+                last4 = last4,
+                networks = if (addNetworks) {
+                    PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires"),
+                    )
+                } else {
+                    null
+                }
+            ),
         )
     }
 }

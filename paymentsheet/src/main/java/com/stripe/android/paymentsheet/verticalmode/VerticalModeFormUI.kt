@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
-import com.stripe.android.paymentsheet.ui.LinkElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
@@ -64,16 +63,6 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
                     interactor.handleViewAction(VerticalModeFormInteractor.ViewAction.FieldInteraction)
                     hasSentInteractionEvent = true
                 }
-            },
-        )
-
-        LinkElement(
-            linkConfigurationCoordinator = state.linkConfigurationCoordinator,
-            linkSignupMode = state.linkSignupMode,
-            enabled = enabled,
-            horizontalPadding = horizontalPadding,
-            onLinkSignupStateChanged = {
-                interactor.handleViewAction(VerticalModeFormInteractor.ViewAction.LinkSignupStateChanged(it))
             },
         )
     }

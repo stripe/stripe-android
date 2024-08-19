@@ -1,6 +1,5 @@
 package com.stripe.android.networktesting
 
-import android.annotation.SuppressLint
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.tls.HandshakeCertificates
@@ -40,7 +39,7 @@ internal class TestMockWebServer(validationTimeout: Duration?) {
         return serverCertificates.sslSocketFactory()
     }
 
-    @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
+    @Suppress("CustomX509TrustManager", "TrustAllX509TrustManager")
     fun clientSocketFactory(
         trustAll: Boolean = false,
     ): SSLSocketFactory {

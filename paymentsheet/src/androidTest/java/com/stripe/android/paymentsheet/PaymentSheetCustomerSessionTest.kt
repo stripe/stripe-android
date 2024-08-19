@@ -5,8 +5,8 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -59,7 +59,6 @@ class PaymentSheetCustomerSessionTest {
     @Test
     fun allowRedisplayIsLimitedWhenNotSavingWithSetupIntent() = runPaymentSheetTest(
         networkRule = networkRule,
-        integrationType = IntegrationType.Compose,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         enqueueElementsSessionWithSetupIntentAndCustomerSession()
@@ -90,12 +89,98 @@ class PaymentSheetCustomerSessionTest {
         page.clickPrimaryButton()
     }
 
-    private fun enqueueElementsSessionWithPaymentIntentAndCustomerSession() {
-        enqueueElementsSession("elements-sessions-requires_pm_with_ps_pi_cs.json")
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenSaveIsDisabledWithPaymentIntent() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        enqueueElementsSessionWithPaymentIntentAndCustomerSession(
+            isSaveEnabled = false,
+        )
+
+        testContext.presentWithPaymentIntent()
+
+        page.fillOutCardDetails()
+
+        enqueuePaymentIntentConfirmWithExpectedAllowRedisplay(allowRedisplay = "unspecified")
+
+        page.clickPrimaryButton()
     }
 
-    private fun enqueueElementsSessionWithSetupIntentAndCustomerSession() {
-        enqueueElementsSession("elements-sessions-requires_pm_with_ps_si_cs.json")
+    @Test
+    fun allowRedisplayIsLimitedWhenSaveIsDisabledWithSetupIntent() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        enqueueElementsSessionWithSetupIntentAndCustomerSession(
+            isSaveEnabled = false,
+        )
+
+        testContext.presentWithSetupIntent()
+
+        page.fillOutCardDetails()
+
+        enqueueSetupIntentConfirmWithExpectedAllowRedisplay(allowRedisplay = "limited")
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenOverrideIsUnspecifiedWithSetupIntent() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        enqueueElementsSessionWithSetupIntentAndCustomerSession(
+            isSaveEnabled = false,
+            allowRedisplayOverride = "unspecified",
+        )
+
+        testContext.presentWithSetupIntent()
+
+        page.fillOutCardDetails()
+
+        enqueueSetupIntentConfirmWithExpectedAllowRedisplay(allowRedisplay = "unspecified")
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun allowRedisplayIsAlwaysWhenOverrideIsAlwaysWithSetupIntent() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        enqueueElementsSessionWithSetupIntentAndCustomerSession(
+            isSaveEnabled = false,
+            allowRedisplayOverride = "always",
+        )
+
+        testContext.presentWithSetupIntent()
+
+        page.fillOutCardDetails()
+
+        enqueueSetupIntentConfirmWithExpectedAllowRedisplay(allowRedisplay = "always")
+
+        page.clickPrimaryButton()
+    }
+
+    private fun enqueueElementsSessionWithPaymentIntentAndCustomerSession(
+        isSaveEnabled: Boolean = true,
+        allowRedisplayOverride: String? = null,
+    ) {
+        enqueueElementsSession(
+            responseFilePath = "elements-sessions-requires_pm_with_ps_pi_cs.json",
+            replacements = createReplacements(isSaveEnabled, allowRedisplayOverride),
+        )
+    }
+
+    private fun enqueueElementsSessionWithSetupIntentAndCustomerSession(
+        isSaveEnabled: Boolean = true,
+        allowRedisplayOverride: String? = null,
+    ) {
+        enqueueElementsSession(
+            responseFilePath = "elements-sessions-requires_pm_with_ps_si_cs.json",
+            replacements = createReplacements(isSaveEnabled, allowRedisplayOverride),
+        )
     }
 
     private fun enqueuePaymentIntentConfirmWithExpectedAllowRedisplay(allowRedisplay: String) {
@@ -118,18 +203,21 @@ class PaymentSheetCustomerSessionTest {
         }
     }
 
-    private fun enqueueElementsSession(responseFilePath: String) {
+    private fun enqueueElementsSession(
+        responseFilePath: String,
+        replacements: List<ResponseReplacement> = listOf()
+    ) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.testBodyFromFile(responseFilePath)
+            response.testBodyFromFile(responseFilePath, replacements)
         }
     }
 
     private fun clickOnSaveForFutureUsage() {
-        page.clickOnSaveForFutureUsage("Merchant, Inc.")
+        page.clickOnSaveForFutureUsage()
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -162,5 +250,40 @@ class PaymentSheetCustomerSessionTest {
                 ),
             )
         }
+    }
+
+    private fun createReplacements(
+        isSaveEnabled: Boolean,
+        allowRedisplayOverride: String?
+    ): List<ResponseReplacement> {
+        val replacements = mutableListOf<ResponseReplacement>()
+
+        if (!isSaveEnabled) {
+            replacements.add(
+                ResponseReplacement(
+                    original = """
+                        "payment_method_save": "enabled"
+                    """.trimIndent(),
+                    new = """
+                        "payment_method_save": "disabled"
+                    """.trimIndent(),
+                )
+            )
+        }
+
+        allowRedisplayOverride?.let {
+            replacements.add(
+                ResponseReplacement(
+                    original = """
+                        "payment_method_save_allow_redisplay_override": null
+                    """.trimIndent(),
+                    new = """
+                        "payment_method_save_allow_redisplay_override": "$it"
+                    """.trimIndent(),
+                )
+            )
+        }
+
+        return replacements
     }
 }

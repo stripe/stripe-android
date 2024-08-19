@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -47,6 +48,18 @@ internal class SavedPaymentMethodMutator(
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
+    val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
+        customerState?.run {
+            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+
+            when (paymentMethods.size) {
+                0 -> false
+                1 -> allowsRemovalOfLastSavedPaymentMethod && hasRemovePermissions
+                else -> hasRemovePermissions
+            }
+        } ?: false
+    }
+
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
             customerState = customerStateHolder.customer,
@@ -55,22 +68,18 @@ internal class SavedPaymentMethodMutator(
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = providePaymentMethodName,
             isCbcEligible = isCbcEligible,
+            canRemovePaymentMethods = canRemove,
         )
     }
 
     val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = paymentOptionsItemsMapper()
 
-    val canEdit: StateFlow<Boolean> = paymentOptionsItems.mapAsStateFlow { items ->
-        val paymentMethods = items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-        if (allowsRemovalOfLastSavedPaymentMethod) {
-            paymentMethods.isNotEmpty()
-        } else {
-            if (paymentMethods.size == 1) {
-                // We will allow them to change card brand, but not delete.
-                paymentMethods.first().isModifiable
-            } else {
-                paymentMethods.size > 1
-            }
+    val canEdit: StateFlow<Boolean> = combineAsStateFlow(
+        canRemove,
+        paymentOptionsItems
+    ) { canRemove, items ->
+        canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
+            item.isModifiable
         }
     }
 
@@ -172,12 +181,6 @@ internal class SavedPaymentMethodMutator(
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        val canRemove = if (allowsRemovalOfLastSavedPaymentMethod) {
-            true
-        } else {
-            paymentOptionsItems.value.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
-        }
-
         navigationHandler.transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
@@ -205,7 +208,7 @@ internal class SavedPaymentMethodMutator(
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
                     },
-                    canRemove = canRemove,
+                    canRemove = canRemove.value,
                     isLiveMode = isLiveModeProvider(),
                 ),
                 isLiveMode = isLiveModeProvider(),

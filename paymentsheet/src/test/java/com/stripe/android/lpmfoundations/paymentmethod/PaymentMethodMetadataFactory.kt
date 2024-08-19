@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -26,6 +27,7 @@ internal object PaymentMethodMetadataFactory {
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+        linkInlineConfiguration: LinkInlineConfiguration? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -43,6 +45,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            linkInlineConfiguration = linkInlineConfiguration,
         )
     }
 

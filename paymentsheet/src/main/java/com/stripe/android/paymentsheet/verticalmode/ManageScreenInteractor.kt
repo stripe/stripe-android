@@ -33,7 +33,7 @@ internal interface ManageScreenInteractor {
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
-        val canDelete: Boolean,
+        val canRemove: Boolean,
         val canEdit: Boolean,
     )
 
@@ -50,9 +50,9 @@ internal class DefaultManageScreenInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
+    canRemove: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -77,10 +77,9 @@ internal class DefaultManageScreenInteractor(
         displayableSavedPaymentMethods,
         selection,
         editing,
+        canRemove,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
-        val canDelete = displayablePaymentMethods.size > 1 || allowsRemovalOfLastSavedPaymentMethod
-
+    ) { displayablePaymentMethods, paymentSelection, editing, canRemove, canEdit ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -91,27 +90,16 @@ internal class DefaultManageScreenInteractor(
             paymentMethods = displayablePaymentMethods,
             currentSelection = currentSelection,
             isEditing = editing,
-            canDelete = canDelete,
+            canRemove = canRemove,
             canEdit = canEdit,
         )
     }
 
     init {
         coroutineScope.launch {
-            displayableSavedPaymentMethods.collect {
-                if (noPaymentMethodsAvailableToManage(it)) {
-                    safeNavigateBack()
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            editing.collect { editing ->
-                val savedPaymentMethods = displayableSavedPaymentMethods.value
-                val oneModifiablePmRemaining =
-                    savedPaymentMethods.size == 1 && savedPaymentMethods.first().isModifiable()
-                if (!editing && oneModifiablePmRemaining && !allowsRemovalOfLastSavedPaymentMethod) {
-                    handlePaymentMethodSelected(savedPaymentMethods.first())
+            state.collect { state ->
+                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
+                    handlePaymentMethodSelected(state.paymentMethods.first())
                     safeNavigateBack()
                 }
             }
@@ -137,15 +125,6 @@ internal class DefaultManageScreenInteractor(
         safeNavigateBack()
     }
 
-    private fun noPaymentMethodsAvailableToManage(
-        displayableSavedPaymentMethods: List<DisplayableSavedPaymentMethod>
-    ): Boolean {
-        val onlyOneNotModifiablePm = displayableSavedPaymentMethods.size == 1 &&
-            !allowsRemovalOfLastSavedPaymentMethod &&
-            !displayableSavedPaymentMethods.first().isModifiable()
-        return displayableSavedPaymentMethods.isEmpty() || onlyOneNotModifiablePm
-    }
-
     private fun safeNavigateBack() {
         if (!hasNavigatedBack.getAndSet(true)) {
             navigateBack()
@@ -165,8 +144,8 @@ internal class DefaultManageScreenInteractor(
                 selection = viewModel.selection,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
+                canRemove = savedPaymentMethodMutator.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod))

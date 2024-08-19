@@ -42,7 +42,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                         isSelected = isSelected,
                         isEditing = state.isEditing,
                         isModifiable = it.isModifiable(),
-                        canDelete = state.canDelete,
+                        canRemove = state.canRemove,
                         paymentMethod = it,
                         deletePaymentMethod = { paymentMethod ->
                             interactor.handleViewAction(
@@ -69,7 +69,7 @@ private fun TrailingContent(
     isSelected: Boolean,
     isEditing: Boolean,
     isModifiable: Boolean,
-    canDelete: Boolean,
+    canRemove: Boolean,
     paymentMethod: DisplayableSavedPaymentMethod,
     deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -77,11 +77,11 @@ private fun TrailingContent(
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             EditIcon(paymentMethod, editPaymentMethod)
-            if (canDelete) {
+            if (canRemove) {
                 DeleteIcon(paymentMethod, deletePaymentMethod)
             }
         }
-    } else if (isEditing && canDelete) {
+    } else if (isEditing && canRemove) {
         DeleteIcon(paymentMethod, deletePaymentMethod)
     } else if (isSelected) {
         SelectedBadge()

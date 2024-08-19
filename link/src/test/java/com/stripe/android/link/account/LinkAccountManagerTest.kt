@@ -8,7 +8,6 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardParams
@@ -490,7 +489,6 @@ class LinkAccountManagerTest {
             merchantName = "Merchant",
             merchantCountryCode = "US",
             shippingValues = null,
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = emptyMap(),
         ),

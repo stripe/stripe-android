@@ -56,24 +56,20 @@ internal fun CvcRecollectionScreen(
     cardBrand: CardBrand,
     lastFour: String,
     isTestMode: Boolean,
+    controller: CvcController,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
-    val element = remember {
-        CvcElement(
-            IdentifierSpec(),
-            CvcController(cardBrandFlow = stateFlowOf(cardBrand))
-        )
-    }
-
+    val element = rememberElement(controller)
     StripeTheme {
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
-            CvcRecollectionHeader(isTestMode) {
+            CvcRecollectionTopBar(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
+            CvcRecollectionTitle()
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
             CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
                 viewActionHandler.invoke(
@@ -82,6 +78,25 @@ internal fun CvcRecollectionScreen(
                     )
                 )
             }
+        }
+    }
+}
+
+@Composable
+internal fun CvcRecollectionPaymentSheetScreen(
+    interactor: CvcRecollectionInteractor,
+) {
+    val state = interactor.viewState
+    val element = rememberElement(state.controller)
+
+    StripeTheme {
+        Column(
+            Modifier
+                .background(MaterialTheme.stripeColors.materialColors.surface)
+                .padding(horizontal = 20.dp)
+        ) {
+            CvcRecollectionTitle()
+            CvcRecollectionField(element = element, cardBrand = state.cardBrand, lastFour = state.lastFour)
         }
     }
 }
@@ -161,13 +176,16 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionHeader(testMode: Boolean, onClosePressed: () -> Unit) {
+private fun CvcRecollectionTopBar(
+    isTestMode: Boolean,
+    onClosePressed: () -> Unit
+) {
     Row(
         modifier = Modifier
             .padding(0.dp, 16.dp, 0.dp, 0.dp)
             .height(32.dp)
     ) {
-        if (testMode) {
+        if (isTestMode) {
             TestModeBadge()
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -178,7 +196,10 @@ private fun CvcRecollectionHeader(testMode: Boolean, onClosePressed: () -> Unit)
             Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
         }
     }
+}
 
+@Composable
+private fun CvcRecollectionTitle() {
     H4Text(
         text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
         modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
@@ -186,7 +207,10 @@ private fun CvcRecollectionHeader(testMode: Boolean, onClosePressed: () -> Unit)
 }
 
 @Composable
-private fun CvcRecollectionButton(isComplete: State<Boolean>, onConfirmPressed: () -> Unit) {
+private fun CvcRecollectionButton(
+    isComplete: State<Boolean>,
+    onConfirmPressed: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
@@ -204,13 +228,26 @@ private fun CvcRecollectionButton(isComplete: State<Boolean>, onConfirmPressed: 
 }
 
 @Composable
+private fun rememberElement(controller: CvcController): CvcElement {
+    return remember {
+        CvcElement(
+            IdentifierSpec(),
+            controller
+        )
+    }
+}
+
+@Composable
 @Preview
 private fun CvcRecollectionFieldPreview() {
     StripeTheme {
         CvcRecollectionScreen(
             cardBrand = CardBrand.Visa,
             lastFour = "4242",
-            isTestMode = true,
+            isTestMode = false,
+            controller = CvcController(
+                cardBrandFlow = stateFlowOf(CardBrand.Visa)
+            ),
             viewActionHandler = { }
         )
     }

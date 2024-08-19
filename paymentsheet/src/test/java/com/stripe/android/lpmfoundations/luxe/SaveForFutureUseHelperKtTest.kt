@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -14,11 +13,9 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns false for SI if behavior is Legacy`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                hasCustomerConfiguration = true,
-            ),
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            hasCustomerConfiguration = true,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
@@ -28,13 +25,11 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns false for PI with SFU and no customer if behavior is Legacy`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    setupFutureUsage = StripeIntent.Usage.OnSession,
-                ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                hasCustomerConfiguration = false,
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            hasCustomerConfiguration = false,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
@@ -44,13 +39,11 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns false for PI with SFU and has customer if behavior is Legacy`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    setupFutureUsage = StripeIntent.Usage.OnSession,
-                ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                hasCustomerConfiguration = true,
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            hasCustomerConfiguration = true,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
@@ -60,13 +53,11 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns true for PI without SFU and has customer if behavior is Legacy`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    setupFutureUsage = null,
-                ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                hasCustomerConfiguration = true,
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = null,
             ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            hasCustomerConfiguration = true,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isTrue()
@@ -76,11 +67,9 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns true if consent behavior is Enabled and has customer`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                hasCustomerConfiguration = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-            ),
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            hasCustomerConfiguration = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isTrue()
@@ -90,11 +79,9 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns false if consent behavior is Enabled and no customer`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                hasCustomerConfiguration = false,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-            ),
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            hasCustomerConfiguration = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
@@ -104,12 +91,10 @@ class SaveForFutureUseHelperKtTest {
     fun `isSaveForFutureUseValueChangeable returns false if consent behavior is Disabled`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                hasCustomerConfiguration = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = null,
-                ),
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            hasCustomerConfiguration = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
             ),
         )
 

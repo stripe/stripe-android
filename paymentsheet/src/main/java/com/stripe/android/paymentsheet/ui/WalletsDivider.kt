@@ -18,8 +18,6 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
-internal val WalletDividerSpacing = 16.dp
-
 @Composable
 internal fun WalletsDivider(text: String) {
     Row(

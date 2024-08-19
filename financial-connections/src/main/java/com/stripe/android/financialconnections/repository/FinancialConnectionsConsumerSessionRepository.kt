@@ -23,7 +23,6 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         email: String,
         phoneNumber: String,
         country: String,
-        locale: Locale?,
     ): ConsumerSessionSignup
 
     suspend fun lookupConsumerSession(
@@ -97,7 +96,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         email: String,
         phoneNumber: String,
         country: String,
-        locale: Locale?,
     ): ConsumerSessionSignup = mutex.withLock {
         consumersApiService.signUp(
             email = email,

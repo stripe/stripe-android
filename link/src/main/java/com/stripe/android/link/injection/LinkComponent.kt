@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 import javax.inject.Scope
@@ -27,7 +26,7 @@ internal annotation class LinkScope
 abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
     internal abstract val configuration: LinkConfiguration
-    internal abstract val inlineSignupViewModel: InlineSignupViewModel
+    internal abstract val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
 
     @Subcomponent.Builder
     internal interface Builder {

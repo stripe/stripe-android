@@ -678,6 +678,7 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
             ),
         )
 
@@ -781,11 +782,13 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `On inline link payment, should process with primary button`() = runTest {
         val linkConfiguration = LinkTestUtils.createLinkConfiguration()
+        val signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
 
         val viewModel = createViewModel(
             linkState = LinkState(
                 configuration = linkConfiguration,
-                loginState = LinkState.LoginState.LoggedOut
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = signupMode,
             )
         )
 
@@ -809,6 +812,7 @@ internal class PaymentSheetViewModelTest {
             val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
             linkInlineHandler.onStateUpdated(
                 InlineSignupViewState.create(
+                    signupMode = signupMode,
                     config = linkConfiguration
                 ).copy(
                     userInput = UserInput.SignUp(
@@ -900,7 +904,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code
                 )
             },
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
             flags = mapOf(),
             merchantName = "Test merchant inc.",
@@ -912,7 +915,8 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             linkState = LinkState(
                 configuration = linkConfiguration,
-                loginState = LinkState.LoginState.LoggedOut
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             )
         )
 
@@ -1486,6 +1490,7 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = FormHelper.create(
             viewModel = viewModel,
+            linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope),
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
@@ -1526,6 +1531,7 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
             ),
             customer = null,
             customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
@@ -1547,6 +1553,7 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
             ),
             customer = null,
             customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
@@ -1667,6 +1674,7 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
             ),
         )
 
@@ -1683,6 +1691,7 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
             )
         )
 
@@ -2336,11 +2345,12 @@ internal class PaymentSheetViewModelTest {
 
             val interceptor = spy(FakeIntentConfirmationInterceptor())
 
+            val signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
             val viewModel = spy(
                 createViewModel(
                     customer = EMPTY_CUSTOMER_STATE,
                     intentConfirmationInterceptor = interceptor,
-                    linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut)
+                    linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut, signupMode)
                 )
             )
 
@@ -2366,7 +2376,10 @@ internal class PaymentSheetViewModelTest {
 
                 val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
                 linkInlineHandler.onStateUpdated(
-                    InlineSignupViewState.create(config = LINK_CONFIG).copy(
+                    InlineSignupViewState.create(
+                        signupMode = signupMode,
+                        config = LINK_CONFIG,
+                    ).copy(
                         isExpanded = true,
                         userInput = UserInput.SignUp(
                             name = "John Doe",
@@ -2892,7 +2905,8 @@ internal class PaymentSheetViewModelTest {
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             linkState = LinkState(
                 configuration = LinkTestUtils.createLinkConfiguration(),
-                loginState = LinkState.LoginState.LoggedOut
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
             )
         )
     }
@@ -3031,7 +3045,6 @@ internal class PaymentSheetViewModelTest {
 
         private val LINK_CONFIG = LinkConfiguration(
             stripeIntent = PAYMENT_INTENT,
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "US",
             customerInfo = LinkConfiguration.CustomerInfo(

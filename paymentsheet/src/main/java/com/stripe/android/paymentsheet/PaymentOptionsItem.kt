@@ -28,6 +28,7 @@ internal sealed class PaymentOptionsItem {
      */
     data class SavedPaymentMethod(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        private val canRemovePaymentMethods: Boolean,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
 
@@ -35,7 +36,9 @@ internal sealed class PaymentOptionsItem {
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         val isModifiable: Boolean by lazy { displayableSavedPaymentMethod.isModifiable() }
 
-        override val isEnabledDuringEditing: Boolean = true
+        override val isEnabledDuringEditing: Boolean by lazy {
+            isModifiable || canRemovePaymentMethods
+        }
 
         fun getModifyDescription(resources: Resources) = resources.getString(
             R.string.stripe_paymentsheet_modify_pm,

@@ -1098,6 +1098,7 @@ internal class PaymentSheetActivityTest {
                     linkState = LinkState(
                         configuration = mock(),
                         loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
@@ -1121,7 +1122,7 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),
-                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory,
+                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
             )
         }

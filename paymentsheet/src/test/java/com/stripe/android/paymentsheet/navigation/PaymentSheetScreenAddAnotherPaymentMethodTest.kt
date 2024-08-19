@@ -75,11 +75,8 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
             arguments = mock(),
             formElements = emptyList(),
             paymentSelection = null,
-            linkSignupMode = null,
-            linkInlineSignupMode = null,
             processing = false,
             usBankAccountFormArguments = mock(),
-            linkConfigurationCoordinator = mock(),
         )
     }
 }

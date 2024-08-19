@@ -4,8 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -737,9 +740,9 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
 
-        val shippingDetails = AddressDetails(
-            address = PaymentSheet.Address(line1 = "123 Pear Street")
-        )
+        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
+
+        val linkInlineConfiguration = createLinkInlineConfiguration()
 
         val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
@@ -763,6 +766,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
             isGooglePayReady = false,
+            linkInlineConfiguration = linkInlineConfiguration,
         )
 
         assertThat(metadata).isEqualTo(
@@ -783,6 +787,7 @@ internal class PaymentMethodMetadataTest {
                 hasCustomerConfiguration = true,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 isGooglePayReady = false,
+                linkInlineConfiguration = linkInlineConfiguration,
             )
         )
     }
@@ -841,6 +846,7 @@ internal class PaymentMethodMetadataTest {
                 isGooglePayReady = true,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 financialConnectionsAvailable = false,
+                linkInlineConfiguration = null,
             )
         )
     }
@@ -905,6 +911,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
+            linkInlineConfiguration = null,
         )
     }
 
@@ -1239,4 +1246,24 @@ internal class PaymentMethodMetadataTest {
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
         }
+
+    private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
+        return LinkInlineConfiguration(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            linkConfiguration = LinkConfiguration(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                customerInfo = LinkConfiguration.CustomerInfo(
+                    email = "john@email.com",
+                    name = "John Doe",
+                    billingCountryCode = "CA",
+                    phone = "1234567890"
+                ),
+                merchantName = "Merchant Inc.",
+                merchantCountryCode = "CA",
+                shippingValues = mapOf(),
+                flags = mapOf(),
+                passthroughModeEnabled = false,
+            ),
+        )
+    }
 }

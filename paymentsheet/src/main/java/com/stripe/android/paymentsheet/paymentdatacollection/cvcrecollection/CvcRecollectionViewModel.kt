@@ -4,28 +4,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
-    private val _result = MutableSharedFlow<CvcRecollectionResult>()
-    val result: SharedFlow<CvcRecollectionResult> = _result.asSharedFlow()
+    val controller = CvcController(cardBrandFlow = stateFlowOf(args.cardBrand))
 
     private val _viewState = MutableStateFlow(
         CvcRecollectionViewState(
             cardBrand = args.cardBrand,
             lastFour = args.lastFour,
             cvc = null,
-            isLiveMode = args.isLiveMode
+            isTestMode = args.isTestMode,
+            controller = controller
         )
     )
-    val viewState: StateFlow<CvcRecollectionViewState> = _viewState.asStateFlow()
+    val viewState: StateFlow<CvcRecollectionViewState>
+        get() = _viewState
+
+    private val _result = MutableSharedFlow<CvcRecollectionResult>()
+    val result: SharedFlow<CvcRecollectionResult> = _result.asSharedFlow()
 
     fun handleViewAction(action: CvcRecollectionViewAction) {
         when (action) {
@@ -46,22 +50,17 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         }
     }
 
-    data class Args(
-        val lastFour: String,
-        val cardBrand: CardBrand,
-        val cvc: String? = null,
-        val isLiveMode: Boolean
-    )
-
-    class Factory(private val args: CvcRecollectionContract.Args) : ViewModelProvider.Factory {
+    class Factory(
+        private val args: CvcRecollectionContract.Args,
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return CvcRecollectionViewModel(
-                Args(
+                args = Args(
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
                     cvc = null,
-                    isLiveMode = args.isLiveMode
+                    isTestMode = args.isTestMode
                 )
             ) as T
         }

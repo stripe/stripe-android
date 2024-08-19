@@ -724,7 +724,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with null payment selection, should report event and return failure`() = runTest {
+    fun `confirmPaymentSelection() with null payment selection, should return failure`() = runTest {
         val errorReporter = FakeErrorReporter()
 
         val flowController = createFlowController(
@@ -739,9 +739,7 @@ internal class DefaultFlowControllerTest {
             state = PAYMENT_SHEET_STATE_FULL,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).contains(
-            "unexpected_error.flow_controller.no_payment_selection"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
 
         verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
     }
@@ -2191,6 +2189,7 @@ internal class DefaultFlowControllerTest {
         linkState: LinkState? = LinkState(
             configuration = mock(),
             loginState = LinkState.LoginState.LoggedIn,
+            signupMode = null,
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),

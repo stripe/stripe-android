@@ -5,7 +5,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.StripeIntentFixtures
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.flow.flowOf
@@ -33,7 +32,6 @@ class LinkConfigurationCoordinatorTest {
             billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
         ),
         shippingValues = null,
-        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         passthroughModeEnabled = false,
         flags = emptyMap(),
     )
@@ -68,17 +66,20 @@ class LinkConfigurationCoordinatorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
+        val component = linkConfigurationCoordinator.getComponent(config)
+
         linkConfigurationCoordinator.getAccountStatusFlow(config)
-        val component = linkConfigurationCoordinator.component
         linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkConfigurationCoordinator.component).isEqualTo(component)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config)).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkConfigurationCoordinator.component
-        linkConfigurationCoordinator.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkConfigurationCoordinator.component).isNotEqualTo(component)
+        val component = linkConfigurationCoordinator.getComponent(config)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config.copy(merchantName = "anotherName")))
+            .isNotEqualTo(component)
     }
 
     companion object {

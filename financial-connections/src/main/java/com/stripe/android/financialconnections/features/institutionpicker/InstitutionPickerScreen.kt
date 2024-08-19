@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
@@ -84,8 +85,13 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun InstitutionPickerScreen() {
-    val viewModel: InstitutionPickerViewModel = paneViewModel { InstitutionPickerViewModel.factory(it) }
+internal fun InstitutionPickerScreen(
+    backStackEntry: NavBackStackEntry,
+) {
+    val viewModel: InstitutionPickerViewModel = paneViewModel {
+        InstitutionPickerViewModel.factory(parentComponent = it, backStackEntry.arguments)
+    }
+
     val state: InstitutionPickerState by viewModel.stateFlow.collectAsState()
     val listState = rememberLazyListState()
 

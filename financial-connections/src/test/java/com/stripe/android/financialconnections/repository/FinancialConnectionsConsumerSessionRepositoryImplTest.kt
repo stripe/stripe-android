@@ -4,11 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
@@ -28,7 +32,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val consumersApiService: ConsumersApiService = mock()
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService =
         mock()
-    private val apiOptions: ApiRequest.Options = mock()
+    private val apiOptions: ApiRequest.Options = ApiRequest.Options(
+        apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+    )
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
     private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
@@ -42,6 +48,60 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             locale = locale,
             logger = logger
         )
+
+    @Test
+    fun testSignUp() = runTest {
+        val consumerSession = consumerSession().copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = SessionType.SignUp,
+                    state = SessionState.Started,
+                )
+            )
+        )
+
+        val consumerSessionSignup = ConsumerSessionSignup(
+            consumerSession = consumerSession,
+            publishableKey = "pk_123",
+        )
+
+        whenever(
+            consumersApiService.signUp(
+                email = anyOrNull(),
+                phoneNumber = anyOrNull(),
+                country = anyOrNull(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                consentAction = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+            )
+        ).thenReturn(Result.success(consumerSessionSignup))
+
+        val repository = buildRepository()
+
+        // ensures there's no cached consumer session
+        assertThat(repository.getCachedConsumerSession()).isNull()
+
+        val result = repository.signUp(
+            email = "email@email.com",
+            phoneNumber = "+15555555555",
+            country = "US",
+        )
+
+        assertThat(result).isEqualTo(consumerSessionSignup)
+
+        // ensures there's a cached consumer session after the signup call.
+        assertThat(repository.getCachedConsumerSession()).isEqualTo(
+            CachedConsumerSession(
+                clientSecret = "clientSecret",
+                emailAddress = "test@test.com",
+                phoneNumber = "(•••) ••• ••12",
+                publishableKey = "pk_123",
+                isVerified = true,
+            )
+        )
+    }
 
     @Test
     fun testLookupConsumerSession() = runTest {
