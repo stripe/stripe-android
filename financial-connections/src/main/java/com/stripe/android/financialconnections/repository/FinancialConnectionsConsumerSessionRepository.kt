@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
@@ -56,6 +57,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
+            isLinkWithStripe: IsLinkWithStripe,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
@@ -64,6 +66,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
                 consumerSessionRepository = consumerSessionRepository,
                 locale = locale,
                 logger = logger,
+                isLinkWithStripe = isLinkWithStripe,
             )
     }
 }
@@ -75,9 +78,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val locale: Locale?,
     private val logger: Logger,
+    isLinkWithStripe: IsLinkWithStripe,
 ) : FinancialConnectionsConsumerSessionRepository {
 
     private val mutex = Mutex()
+
+    private val requestSurface: String = if (isLinkWithStripe()) {
+        "android_instant_debits"
+    } else {
+        "android_connections"
+    }
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
         consumerSessionRepository.provideConsumerSession()
@@ -104,7 +114,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             name = null,
             locale = locale,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            requestSurface = CONSUMER_SURFACE,
+            requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,
         ).onSuccess { signup ->
             updateCachedConsumerSessionFromSignup(signup)
@@ -121,7 +131,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale ?: Locale.getDefault(),
             connectionsMerchantName = connectionsMerchantName,
-            requestSurface = CONSUMER_SURFACE,
+            requestSurface = requestSurface,
             type = type,
             customEmailType = customEmailType,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
@@ -139,7 +149,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
             type = type,
-            requestSurface = CONSUMER_SURFACE,
+            requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
@@ -153,7 +163,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         return consumersApiService.attachLinkConsumerToLinkAccountSession(
             consumerSessionClientSecret = consumerSessionClientSecret,
             clientSecret = clientSecret,
-            requestSurface = CONSUMER_SURFACE,
+            requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         )
     }
@@ -164,7 +174,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSessionLookup = financialConnectionsConsumersApiService.postConsumerSession(
         email = email,
         clientSecret = clientSecret,
-        requestSurface = CONSUMER_SURFACE,
+        requestSurface = requestSurface,
     )
 
     private fun updateCachedConsumerSession(
@@ -187,9 +197,5 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from signUp")
         consumerSessionRepository.storeNewConsumerSession(signup.consumerSession, signup.publishableKey)
-    }
-
-    private companion object {
-        private const val CONSUMER_SURFACE: String = "android_connections"
     }
 }

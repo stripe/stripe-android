@@ -115,6 +115,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
             logger: Logger,
+            isLinkWithStripe: IsLinkWithStripe,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -122,6 +123,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumerSessionRepository = consumerSessionRepository,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
+            isLinkWithStripe = isLinkWithStripe,
         )
 
         @Singleton
