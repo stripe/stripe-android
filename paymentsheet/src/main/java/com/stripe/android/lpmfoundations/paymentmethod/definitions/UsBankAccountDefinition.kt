@@ -8,9 +8,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.ui.core.R as UiCoreR
 
 internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.USBankAccount
@@ -33,21 +32,16 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
-        displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account,
-        iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_bank,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
         iconRequiresTinting = true,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
     )
 
     override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
-        val displayName = if (customerHasSavedPaymentMethods) {
-            R.string.stripe_paymentsheet_add_new_us_bank_account
-        } else {
-            UiCoreR.string.stripe_paymentsheet_add_us_bank_account
-        }
         return createSupportedPaymentMethod().asFormHeaderInformation().copy(
-            displayName = displayName.resolvableString,
+            displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
         )
     }

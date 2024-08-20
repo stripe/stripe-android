@@ -400,37 +400,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `state has correct displayablePaymentMethods based on saved payment methods for us_bank`() {
-        runScenario(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("us_bank_account"),
-                    clientSecret = null,
-                ),
-                allowsDelayedPaymentMethods = true,
-            ),
-            initialPaymentMethods = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT),
-            formElementsForCode = {
-                listOf()
-            },
-        ) {
-            interactor.state.test {
-                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
-                    .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_us_bank_account.resolvableString)
-                ensureAllEventsConsumed()
-
-                // The text shouldn't say new us bank account when another saved payment method type exists.
-                paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                // Updating paymentMethodsSource causes 2 total emissions, we only care about the last one.
-                skipItems(1)
-
-                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
-                    .isEqualTo(R.string.stripe_paymentsheet_payment_method_us_bank_account.resolvableString)
-            }
-        }
-    }
-
-    @Test
     fun `calling state_displayablePaymentMethods_onClick calls ViewAction_PaymentMethodSelected`() {
         var onFormFieldValuesChangedCalled = false
         runScenario(

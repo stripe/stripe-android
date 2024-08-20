@@ -93,8 +93,6 @@ internal data class SupportedPaymentMethod(
 
         val displayName = if (isTypeAndHasCustomerSavedPaymentMethodsOfType(PaymentMethod.Type.Card)) {
             R.string.stripe_paymentsheet_new_card.resolvableString
-        } else if (isTypeAndHasCustomerSavedPaymentMethodsOfType(PaymentMethod.Type.USBankAccount)) {
-            R.string.stripe_paymentsheet_new_us_bank_account.resolvableString
         } else {
             displayName
         }
