@@ -5,6 +5,8 @@ import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -48,6 +50,11 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         consumerSessionClientSecret: String,
         clientSecret: String,
     ): AttachConsumerToLinkAccountSession
+
+    suspend fun createPaymentDetails(
+        bankAccountId: String,
+        consumerSessionClientSecret: String,
+    ): ConsumerPaymentDetails
 
     companion object {
         operator fun invoke(
@@ -166,6 +173,20 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         )
+    }
+
+    override suspend fun createPaymentDetails(
+        bankAccountId: String,
+        consumerSessionClientSecret: String
+    ): ConsumerPaymentDetails {
+        return consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
+                bankAccountId = bankAccountId,
+            ),
+            requestSurface = requestSurface,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+        ).getOrThrow()
     }
 
     private suspend fun postConsumerSession(
