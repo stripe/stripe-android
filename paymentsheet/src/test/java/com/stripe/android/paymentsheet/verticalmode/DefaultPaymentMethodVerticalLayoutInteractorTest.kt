@@ -141,7 +141,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `state has manage_one saved PM action when one saved PM, can edit, and can remove`() {
+    fun `state has edit_card_brand saved PM action when one saved PM, can edit, and can remove`() {
         runScenario(
             initialPaymentMethods = PaymentMethodFactory.cards(1),
         ) {
@@ -151,7 +151,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(availableSavedPaymentMethodAction).isEqualTo(
-                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
                     )
                 }
             }
