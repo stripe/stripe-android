@@ -72,7 +72,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val manageScreenFactory: () -> PaymentSheetScreen,
     private val manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen,
     private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
-    paymentMethods: StateFlow<List<PaymentMethod>?>,
+    paymentMethods: StateFlow<List<PaymentMethod>>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
@@ -182,14 +182,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+        paymentMethods,
         processing,
         selection,
         displayedSavedPaymentMethod,
         walletsState,
         availableSavedPaymentMethodAction,
-    ) { isProcessing, selection, displayedSavedPaymentMethod, walletsState, action ->
+    ) { paymentMethods, isProcessing, selection, displayedSavedPaymentMethod, walletsState, action ->
         PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = getDisplayablePaymentMethods(walletsState),
+            displayablePaymentMethods = getDisplayablePaymentMethods(paymentMethods, walletsState),
             isProcessing = isProcessing,
             selection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
@@ -216,9 +217,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    private fun getDisplayablePaymentMethods(walletsState: WalletsState?): List<DisplayablePaymentMethod> {
+    private fun getDisplayablePaymentMethods(
+        paymentMethods: List<PaymentMethod>,
+        walletsState: WalletsState?,
+    ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
-            supportedPaymentMethod.asDisplayablePaymentMethod {
+            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
