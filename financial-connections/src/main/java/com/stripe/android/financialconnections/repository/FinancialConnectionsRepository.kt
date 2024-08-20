@@ -113,7 +113,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): MixedOAuthParams {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionOAuthResultsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret

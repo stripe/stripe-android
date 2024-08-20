@@ -111,7 +111,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -177,7 +177,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): LinkAccountSessionPaymentAccount {
         val request = apiRequestFactory.createPost(
             url = attachPaymentAccountUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 PARAMS_CLIENT_SECRET to clientSecret
@@ -197,7 +197,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
