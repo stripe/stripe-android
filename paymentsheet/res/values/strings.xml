@@ -117,4 +117,8 @@
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">View more</string>
+  <!-- Title for adding a new card as a payment method -->
+  <string name="stripe_paymentsheet_new_card">New card</string>
+  <!-- Title for adding a new US bank account as a payment method -->
+  <string name="stripe_paymentsheet_new_us_bank_account">New US bank account</string>
 </resources>

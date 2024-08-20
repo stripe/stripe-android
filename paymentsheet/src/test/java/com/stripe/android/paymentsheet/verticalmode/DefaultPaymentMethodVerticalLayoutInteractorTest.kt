@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass")
 class DefaultPaymentMethodVerticalLayoutInteractorTest {
@@ -365,6 +366,66 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(displayedSavedPaymentMethod).isNotNull()
                     assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(newDisplayedSavedPm)
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `state has correct displayablePaymentMethods based on saved payment methods for cards`() {
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp")
+                )
+            ),
+            initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+            formElementsForCode = {
+                listOf()
+            },
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
+                    .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_card.resolvableString)
+                ensureAllEventsConsumed()
+
+                // The text shouldn't say new card when another saved payment method type exists.
+                paymentMethodsSource.value = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT)
+                // Updating paymentMethodsSource causes 2 total emissions, we only care about the last one.
+                skipItems(1)
+
+                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
+                    .isEqualTo(R.string.stripe_paymentsheet_payment_method_card.resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun `state has correct displayablePaymentMethods based on saved payment methods for us_bank`() {
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("us_bank_account"),
+                    clientSecret = null,
+                ),
+                allowsDelayedPaymentMethods = true,
+            ),
+            initialPaymentMethods = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT),
+            formElementsForCode = {
+                listOf()
+            },
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
+                    .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_us_bank_account.resolvableString)
+                ensureAllEventsConsumed()
+
+                // The text shouldn't say new us bank account when another saved payment method type exists.
+                paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                // Updating paymentMethodsSource causes 2 total emissions, we only care about the last one.
+                skipItems(1)
+
+                assertThat(awaitItem().displayablePaymentMethods.first().displayName)
+                    .isEqualTo(R.string.stripe_paymentsheet_payment_method_us_bank_account.resolvableString)
             }
         }
     }
@@ -927,7 +988,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         manageScreenFactory: () -> PaymentSheetScreen = { notImplemented() },
         manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen = { notImplemented() },
         formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
-        initialPaymentMethods: List<PaymentMethod>? = null,
+        initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
@@ -938,7 +999,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)
-        val paymentMethods: MutableStateFlow<List<PaymentMethod>?> = MutableStateFlow(initialPaymentMethods)
+        val paymentMethods: MutableStateFlow<List<PaymentMethod>> = MutableStateFlow(initialPaymentMethods)
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow<WalletsState?>(null)
@@ -996,7 +1057,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val isCurrentScreenSource: MutableStateFlow<Boolean>,
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
-        val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
+        val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val walletsState: MutableStateFlow<WalletsState?>,
         val canRemove: MutableStateFlow<Boolean>,
         val canEdit: MutableStateFlow<Boolean>,
