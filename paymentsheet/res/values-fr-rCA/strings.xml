@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">En outre, vous recevrez par courriel un préavis de deux jours pour tout prélèvement effectué en vertu de cet ordre. Les paiements apparaîtront sur votre relevé bancaire sous le libellé « %s ».</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vos paiements sont protégés par la %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">En fournissant vos informations de carte, vous autorisez %s à débiter votre carte pour les paiements à venir, conformément à ses conditions.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choisir un moyen de paiement</string>
   <string name="stripe_paymentsheet_close">Fermer</string>

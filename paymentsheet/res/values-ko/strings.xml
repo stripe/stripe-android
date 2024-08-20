@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">또한, 본 지침에 따라 인출해야 할 금액에 대해 2일 전 사전 통지를 이메일로 받으실 수 있습니다. 결제는 은행 계좌에 \'%s\'(으)로 표시됩니다.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">결제는 %s에 의해 보호됩니다.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">결제 방식 선택</string>
   <string name="stripe_paymentsheet_close">닫기</string>

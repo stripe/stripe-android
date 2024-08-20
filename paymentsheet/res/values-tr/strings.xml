@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Ayrıca, bu talimat kapsamında borçlandırılacak herhangi bir tutar için iki gün önceden e-posta yoluyla bildirim alacaksınız. Ödemeler banka ekstrenizde \'%s\' olarak gösterilir.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Ödemeleriniz %s ile güvence altındadır.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Kart bilgilerinizi sağlayarak %s işletmesinin gelecekteki ödemeler için kartınızı kendi şartlarına uygun olarak ücretlendirmesine izin vermiş olursunuz.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Yeni bir ödeme yöntemi seçin</string>
   <string name="stripe_paymentsheet_close">Kapat</string>

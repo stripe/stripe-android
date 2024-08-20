@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Ezenkívül a jelen utasítás értelmében a beszedni kívánt összegről két nappal korábban értesítést fog kapni e-mailben. A kifizetések mint „%s” jelennek meg a bankszámlakivonatán.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Kifizetéseit védi a(z) %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">A kártyaadatok megadásával engedélyezi, hogy a(z) %s megterhelje kártyáját a jövőbeli kifizetésekkel a feltételeiknek megfelelően.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Fizetési mód választása</string>
   <string name="stripe_paymentsheet_close">Bezárás</string>

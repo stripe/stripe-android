@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Além disso, você será notificado por e-mail com dois dias de antecedência sobre qualquer valor a ser debitado de acordo com esta instrução. Os pagamentos serão exibidos como \'\'%s\'\' no seu extrato bancário.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Seus pagamentos estão protegidos por %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Ao fornecer os dados do seu cartão, você permite que %s cobre de seu cartão por pagamentos futuros de acordo com os termos da empresa.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Escolha uma forma de pagamento</string>
   <string name="stripe_paymentsheet_close">Fechar</string>

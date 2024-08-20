@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Кроме этого, вас предупредят по электронной почте за два дня до списания любой суммы по этой инструкции. Эти платежи будут указаны в выписке операций по вашему счету как \'\'%s\'\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Ваши платежи защищает %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Указывая реквизиты карты, вы разрешаете компании %s списывать средства с карты в рамках будущих платежей в соответствии с условиями компании.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Выберите метод оплаты</string>
   <string name="stripe_paymentsheet_close">Закрыть</string>

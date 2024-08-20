@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Dessutom kommer du att två dagar i förväg via e-post få besked om alla belopp som ska debiteras enligt detta medgivande. Betalningar kommer att visas som \'%s\' på ditt bankkontoutdrag.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Dina betalningar skyddas av %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Genom att tillhandahålla kortinformationen ger du %s tillåtelse att debitera ditt kort för framtida betalningar enligt deras villkor.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Välj en betalmetod</string>
   <string name="stripe_paymentsheet_close">Stäng</string>

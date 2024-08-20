@@ -36,6 +36,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Dále vám bude zaslán e-mail s avízem o jakékoli částce k odečtení v rámci tohoto pokynu, a to dva dny předem. Platby se na bankovním výpisu budou zobrazovat jako \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vaše platby jsou chráněny %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Poskytnutím údajů o vaší kartě povolujete společnosti %s, aby si v souladu se svými podmínkami strhla z vaší karty poplatky za budoucí platby.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Zvolte platební metodu</string>
   <string name="stripe_paymentsheet_close">Zavřít</string>
