@@ -124,8 +124,8 @@ private fun SuccessContentInternal(
             .padding(24.dp),
     ) {
         SpinnerToSuccessAnimation(
-            content = payload?.content ?: TextResource.Text(""),
-            title = payload?.title ?: TextResource.Text(""),
+            content = payload?.content,
+            title = payload?.title,
             showSpinner = showSpinner || payload == null,
             initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
         )
@@ -150,8 +150,8 @@ private fun SuccessContentInternal(
 private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
     initialSuccessBodyHeight: Dp?,
-    content: TextResource,
-    title: TextResource,
+    content: TextResource?,
+    title: TextResource?,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -291,8 +291,8 @@ private fun SpinnerToCheckmark(
 
 @Composable
 private fun SuccessBody(
-    content: TextResource,
-    title: TextResource,
+    content: TextResource?,
+    title: TextResource?,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -300,26 +300,30 @@ private fun SuccessBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
-        AnnotatedText(
-            text = title,
-            defaultStyle = typography.headingXLarge.copy(
-                textAlign = TextAlign.Center
-            ),
-            onClickableTextClick = {}
-        )
+        title?.let {
+            AnnotatedText(
+                text = it,
+                defaultStyle = typography.headingXLarge.copy(
+                    textAlign = TextAlign.Center
+                ),
+                onClickableTextClick = {}
+            )
+        }
 
-        AnnotatedText(
-            text = content,
-            defaultStyle = typography.bodyMedium.copy(
-                textAlign = TextAlign.Center
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
-                    textAlign = TextAlign.Center,
-                ).toSpanStyle()
-            ),
-            onClickableTextClick = {}
-        )
+        content?.let {
+            AnnotatedText(
+                text = content,
+                defaultStyle = typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
+                        textAlign = TextAlign.Center,
+                    ).toSpanStyle()
+                ),
+                onClickableTextClick = {}
+            )
+        }
     }
 }
 
@@ -351,7 +355,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
 ) {
     FinancialConnectionsPreview {
         val configuration = LocalConfiguration.current
-        val successBodyHeight = calculateBodyHeightForPreview(configuration, state)
+        val successBodyHeight = calculateBodyHeightForPreview(configuration)
 
         SuccessContentInternal(
             overrideAnimationForPreview = true,
@@ -363,7 +367,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
     }
 }
 
-private fun calculateBodyHeightForPreview(config: Configuration, state: SuccessState): Dp {
+private fun calculateBodyHeightForPreview(config: Configuration): Dp {
     // We need to manually calculate this for our screenshot tests, as we've been unable to
     // delay the capture until the offset animation finishes.
     val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
