@@ -6,6 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
@@ -39,15 +40,17 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val locale: Locale = Locale.getDefault()
     private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
 
-    private fun buildRepository() =
-        FinancialConnectionsConsumerSessionRepository(
-            consumersApiService = consumersApiService,
-            provideApiRequestOptions = { apiOptions },
-            financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
-            consumerSessionRepository = consumerSessionRepository,
-            locale = locale,
-            logger = logger
-        )
+    private fun buildRepository(
+        isInstantDebits: Boolean = false
+    ) = FinancialConnectionsConsumerSessionRepository(
+        consumersApiService = consumersApiService,
+        provideApiRequestOptions = { apiOptions },
+        financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+        consumerSessionRepository = consumerSessionRepository,
+        locale = locale,
+        logger = logger,
+        isLinkWithStripe = { isInstantDebits },
+    )
 
     @Test
     fun testSignUp() = runTest {
@@ -249,6 +252,76 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 publishableKey = null,
                 isVerified = true,
             )
+        )
+    }
+
+    @Test
+    fun `Uses correct request surface in Financial Connections flow`() = runTest {
+        val repository = buildRepository(isInstantDebits = false)
+
+        whenever(
+            consumersApiService.signUp(
+                email = anyOrNull(),
+                phoneNumber = anyOrNull(),
+                country = anyOrNull(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                consentAction = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+            )
+        ).thenReturn(Result.success(consumerSessionSignup()))
+
+        repository.signUp(
+            email = "someone@something.ca",
+            phoneNumber = "+15555555555",
+            country = "US",
+        )
+
+        verify(consumersApiService).signUp(
+            email = anyOrNull(),
+            phoneNumber = anyOrNull(),
+            country = anyOrNull(),
+            name = anyOrNull(),
+            locale = anyOrNull(),
+            requestSurface = eq("android_connections"),
+            consentAction = anyOrNull(),
+            requestOptions = anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `Uses correct request surface in Instant Debits flow`() = runTest {
+        val repository = buildRepository(isInstantDebits = true)
+
+        whenever(
+            consumersApiService.signUp(
+                email = anyOrNull(),
+                phoneNumber = anyOrNull(),
+                country = anyOrNull(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                consentAction = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+            )
+        ).thenReturn(Result.success(consumerSessionSignup()))
+
+        repository.signUp(
+            email = "someone@something.ca",
+            phoneNumber = "+15555555555",
+            country = "US",
+        )
+
+        verify(consumersApiService).signUp(
+            email = anyOrNull(),
+            phoneNumber = anyOrNull(),
+            country = anyOrNull(),
+            name = anyOrNull(),
+            locale = anyOrNull(),
+            requestSurface = eq("android_instant_debits"),
+            consentAction = anyOrNull(),
+            requestOptions = anyOrNull(),
         )
     }
 }
