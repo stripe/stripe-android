@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,6 +52,7 @@ class NetworkingLinkSignupViewModelTest {
     private val navigationManager = NavigationManagerImpl()
     private val lookupAccount = mock<LookupAccount>()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val handleError = TestHandleError()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState,
@@ -515,9 +517,8 @@ class NetworkingLinkSignupViewModelTest {
             attachConsumerToLinkAccountSession = {
                 // Mock a successful attach
             },
-            eventTracker = eventTracker,
             navigationManager = navigationManager,
-            logger = Logger.noop(),
+            handleError = handleError,
         )
     }
 

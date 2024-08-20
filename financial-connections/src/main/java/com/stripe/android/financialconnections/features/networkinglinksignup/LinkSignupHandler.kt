@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccoun
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -28,9 +29,8 @@ internal interface LinkSignupHandler {
     ): Pane
 
     fun handleSignupFailure(
-        state: NetworkingLinkSignupState,
         error: Throwable,
-    ): NetworkingLinkSignupState
+    )
 
     fun navigateToVerification()
 }
@@ -40,8 +40,7 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
-    private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val logger: Logger,
+    private val handleError: HandleError,
 ) : LinkSignupHandler {
 
     override suspend fun performSignup(
@@ -68,20 +67,13 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingLinkVerification(referrer = LINK_LOGIN))
     }
 
-    override fun handleSignupFailure(
-        state: NetworkingLinkSignupState,
-        error: Throwable,
-    ): NetworkingLinkSignupState {
-        eventTracker.logError(
+    override fun handleSignupFailure(error: Throwable) {
+        handleError(
             extraMessage = "Error creating a Link account",
             error = error,
-            logger = logger,
             pane = LINK_LOGIN,
+            displayErrorScreen = true,
         )
-
-        // TODO(tillh-stripe) Display error inline
-
-        return state
     }
 }
 
@@ -117,10 +109,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 
-    override fun handleSignupFailure(
-        state: NetworkingLinkSignupState,
-        error: Throwable,
-    ): NetworkingLinkSignupState {
+    override fun handleSignupFailure(error: Throwable) {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
             error = error,
@@ -129,6 +118,5 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         )
 
         navigationManager.tryNavigateTo(Success(referrer = NETWORKING_LINK_SIGNUP_PANE))
-        return state
     }
 }
