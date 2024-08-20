@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 
 internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialConnectionsAccountsRepository {
@@ -55,7 +55,7 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
         consumerSessionClientSecret: String,
         selectedAccountIds: Set<String>,
         consentAcquired: Boolean?
-    ): InstitutionResponse {
+    ): ShareNetworkedAccountsResponse {
         TODO("Not yet implemented")
     }
 

@@ -130,5 +130,5 @@ internal data class FinancialConnectionsAuthorizationSession(
 @Serializable
 internal data class Display(
     @SerialName("text")
-    val text: TextUpdate?
+    val text: TextUpdate? = null
 ) : Parcelable
