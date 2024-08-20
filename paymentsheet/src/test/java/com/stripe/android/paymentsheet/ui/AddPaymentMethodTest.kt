@@ -61,7 +61,7 @@ internal class AddPaymentMethodTest {
             ),
             userRequestedReuse = customerRequestedSave,
         )
-        val cardPaymentMethod = metadata.supportedPaymentMethodForCode("card")!!
+        val cardPaymentMethod = metadata.supportedPaymentMethodForCode("card",)!!
         val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
             cardPaymentMethod,
             metadata
@@ -84,7 +84,7 @@ internal class AddPaymentMethodTest {
             ),
             userRequestedReuse = customerRequestedSave,
         )
-        val externalPaymentMethod = metadata.supportedPaymentMethodForCode(paypalSpec.type)!!
+        val externalPaymentMethod = metadata.supportedPaymentMethodForCode(paypalSpec.type,)!!
         val externalPaymentSelection = formFieldValues.transformToPaymentSelection(
             externalPaymentMethod,
             metadata
@@ -109,7 +109,7 @@ internal class AddPaymentMethodTest {
             ),
             userRequestedReuse = customerRequestedSave,
         )
-        val klarnaPaymentMethod = metadata.supportedPaymentMethodForCode("klarna")!!
+        val klarnaPaymentMethod = metadata.supportedPaymentMethodForCode("klarna",)!!
         val klarnaPaymentSelection = formFieldValues.transformToPaymentSelection(
             klarnaPaymentMethod,
             metadata

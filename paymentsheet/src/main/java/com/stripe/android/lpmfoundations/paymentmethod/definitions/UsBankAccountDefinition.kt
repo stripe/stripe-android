@@ -31,7 +31,8 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 
 private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean
     ): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
@@ -45,7 +46,7 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         metadata: PaymentMethodMetadata,
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation {
-        return createSupportedPaymentMethod(metadata).asFormHeaderInformation().copy(
+        return createSupportedPaymentMethod(metadata, customerHasSavedPaymentMethods).asFormHeaderInformation().copy(
             displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
         )

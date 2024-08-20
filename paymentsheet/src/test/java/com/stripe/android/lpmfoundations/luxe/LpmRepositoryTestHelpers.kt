@@ -24,7 +24,7 @@ internal object LpmRepositoryTestHelpers {
 
     private fun cardFromPaymentMethodMetadata(): SupportedPaymentMethod? = runCatching {
         PaymentMethodMetadataFactory.create().supportedPaymentMethodForCode(
-            code = "card",
+            code = "card",,
         )
     }.getOrNull()
 }

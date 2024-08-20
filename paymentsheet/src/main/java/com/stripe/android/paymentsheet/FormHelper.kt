@@ -80,6 +80,6 @@ internal class FormHelper(
     }
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
-        return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
+        return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code, false)) // TODO:
     }
 }

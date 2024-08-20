@@ -115,7 +115,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = listOf(
-                    PaymentMethodMetadataFactory.create().supportedPaymentMethodForCode("card")!!
+                    PaymentMethodMetadataFactory.create().supportedPaymentMethodForCode("card",)!!
                         .asDisplayablePaymentMethod { onClickCalled = true },
                 ),
                 isProcessing = false,

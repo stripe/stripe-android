@@ -38,7 +38,7 @@ internal class AfterpayClearpayDefinitionTest {
             )
         )
         val supportedPaymentMethod = paymentMethodMetadata.supportedPaymentMethodForCode(
-            code = "afterpay_clearpay",
+            code = "afterpay_clearpay",,
         )!!
         assertThat(supportedPaymentMethod.displayName.resolve(context))
             .isEqualTo(res.getString(resourceId))

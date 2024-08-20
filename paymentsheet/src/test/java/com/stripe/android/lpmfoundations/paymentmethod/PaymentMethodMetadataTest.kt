@@ -145,7 +145,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
+        assertThat(metadata.supportedPaymentMethodForCode("klarna",)?.code).isEqualTo("klarna")
     }
 
     @Test
@@ -156,7 +156,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna",)).isNull()
     }
 
     @Test
@@ -167,7 +167,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna",)).isNull()
     }
 
     @Test
@@ -685,7 +685,7 @@ internal class PaymentMethodMetadataTest {
             iconRequiresTinting = false,
         )
 
-        val actualSupportedPaymentMethod = metadata.supportedPaymentMethodForCode("external_paypal")
+        val actualSupportedPaymentMethod = metadata.supportedPaymentMethodForCode("external_paypal",)
 
         assertThat(actualSupportedPaymentMethod).isEqualTo(expectedSupportedPaymentMethod)
     }

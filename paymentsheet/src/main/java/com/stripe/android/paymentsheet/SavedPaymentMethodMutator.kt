@@ -297,7 +297,7 @@ internal class SavedPaymentMethodMutator(
                 selection = viewModel.selection,
                 providePaymentMethodName = { code ->
                     code?.let {
-                        viewModel.paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
+                        viewModel.paymentMethodMetadata.value?.supportedPaymentMethodForCode(code, viewModel.customerStateHolder.paymentMethods.value.isNotEmpty())
                     }?.displayName.orEmpty()
                 },
                 customerStateHolder = viewModel.customerStateHolder,

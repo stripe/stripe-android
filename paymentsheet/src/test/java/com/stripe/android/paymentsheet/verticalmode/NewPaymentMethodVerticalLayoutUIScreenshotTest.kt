@@ -75,7 +75,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod(metadata).asDisplayablePaymentMethod { }
+            ).createSupportedPaymentMethod(metadata,).asDisplayablePaymentMethod { }
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodVerticalLayoutUI(

@@ -94,7 +94,7 @@ class PaymentMethodsUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod(metadata)
+            ).createSupportedPaymentMethod(metadata,)
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodTabLayoutUI(

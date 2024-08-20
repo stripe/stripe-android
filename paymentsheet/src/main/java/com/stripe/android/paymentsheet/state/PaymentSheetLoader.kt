@@ -578,7 +578,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
-                orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                orderedLpms = state.paymentMethodMetadata.supportedPaymentMethodTypes(),
             )
         }
     }

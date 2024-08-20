@@ -41,7 +41,7 @@ internal object CardDefinition : PaymentMethodDefinition {
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata, customerHasSavedPaymentMethods: Boolean) = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
@@ -57,7 +57,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         } else {
             R.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod(metadata).asFormHeaderInformation().copy(
+        return createSupportedPaymentMethod(metadata, customerHasSavedPaymentMethods).asFormHeaderInformation().copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )

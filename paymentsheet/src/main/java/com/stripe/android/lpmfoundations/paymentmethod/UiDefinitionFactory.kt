@@ -91,13 +91,13 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Simple : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod
+        fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata, customerHasSavedPaymentMethods: Boolean): SupportedPaymentMethod
 
         fun createFormHeaderInformation(
             metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,
         ): FormHeaderInformation {
-            return createSupportedPaymentMethod(metadata).asFormHeaderInformation()
+            return createSupportedPaymentMethod(metadata, customerHasSavedPaymentMethods).asFormHeaderInformation()
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
@@ -119,9 +119,10 @@ internal sealed interface UiDefinitionFactory {
     fun supportedPaymentMethod(
         definition: PaymentMethodDefinition,
         metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
-            createSupportedPaymentMethod(metadata)
+            createSupportedPaymentMethod(metadata, customerHasSavedPaymentMethods)
         }
 
         is RequiresSharedDataSpec -> {

@@ -35,7 +35,7 @@ internal object BoletoDefinition : PaymentMethodDefinition {
 }
 
 private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata, customerHasSavedPaymentMethods: Boolean) = SupportedPaymentMethod(
         paymentMethodDefinition = BoletoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_boleto,

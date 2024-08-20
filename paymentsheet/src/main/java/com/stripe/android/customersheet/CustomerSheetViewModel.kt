@@ -215,7 +215,7 @@ internal class CustomerSheetViewModel(
 
     fun providePaymentMethodName(code: PaymentMethodCode?): ResolvableString {
         return code?.let {
-            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
+            paymentMethodMetadata?.supportedPaymentMethodForCode(code, false) // TODO:
         }?.displayName.orEmpty()
     }
 
@@ -723,7 +723,7 @@ internal class CustomerSheetViewModel(
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
+            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode, false)) // TODO:
 
         val stripeIntent = paymentMethodMetadata?.stripeIntent
         val formElements = paymentMethodMetadata?.formElementsForCode(

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -66,6 +67,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
+    private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val formElementsForCode: (code: String) -> List<FormElement>,
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
@@ -100,6 +102,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
+                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(viewModel.customerStateHolder.paymentMethods.value.isNotEmpty()),
                 formElementsForCode = formHelper::formElementsForCode,
                 transitionTo = viewModel.navigationHandler::transitionToWithDelay,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
@@ -153,8 +156,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
-
-    private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,

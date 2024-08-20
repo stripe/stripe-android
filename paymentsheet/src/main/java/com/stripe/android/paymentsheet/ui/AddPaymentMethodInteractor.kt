@@ -82,7 +82,7 @@ internal class DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 selection = viewModel.selection,
                 processing = viewModel.processing,
-                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
+                supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(viewModel.customerStateHolder.paymentMethods.value.isNotEmpty()),
                 createFormArguments = formHelper::createFormArguments,
                 formElementsForCode = formHelper::formElementsForCode,
                 clearErrorMessages = viewModel::clearErrorMessages,

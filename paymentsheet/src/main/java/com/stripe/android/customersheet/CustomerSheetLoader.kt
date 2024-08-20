@@ -199,7 +199,7 @@ internal class DefaultCustomerSheetLoader(
                 val elementsSession = elementsSessionWithMetadata.elementsSession
                 val metadata = elementsSessionWithMetadata.metadata
 
-                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods(paymentMethods.isNotEmpty())
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
 

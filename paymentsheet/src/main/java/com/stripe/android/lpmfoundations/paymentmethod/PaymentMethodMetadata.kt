@@ -85,17 +85,25 @@ internal data class PaymentMethodMetadata(
 
     fun supportedPaymentMethodForCode(
         code: String,
+        customerHasSavedPaymentMethods: Boolean,
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod(this)
+            getUiDefinitionFactoryForExternalPaymentMethod(code)
+                ?.createSupportedPaymentMethod(this, customerHasSavedPaymentMethods)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, this)
+            definition.uiDefinitionFactory().supportedPaymentMethod(
+                definition = definition,
+                metadata = this,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+            )
         }
     }
 
-    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        return supportedPaymentMethodTypes().mapNotNull { supportedPaymentMethodForCode(it) }
+    fun sortedSupportedPaymentMethods(customerHasSavedPaymentMethods: Boolean): List<SupportedPaymentMethod> {
+        return supportedPaymentMethodTypes().mapNotNull { code ->
+            supportedPaymentMethodForCode(code, customerHasSavedPaymentMethods)
+        }
     }
 
     private fun orderedPaymentMethodTypes(): List<String> {
