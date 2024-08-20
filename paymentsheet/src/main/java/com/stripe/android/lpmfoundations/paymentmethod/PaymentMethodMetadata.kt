@@ -86,10 +86,10 @@ internal data class PaymentMethodMetadata(
         code: String,
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod(this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+            definition.uiDefinitionFactory().supportedPaymentMethod(definition, this)
         }
     }
 
@@ -162,6 +162,7 @@ internal data class PaymentMethodMetadata(
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
             )
         } else {

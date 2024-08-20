@@ -91,10 +91,13 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Simple : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(): SupportedPaymentMethod
+        fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod
 
-        fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
-            return createSupportedPaymentMethod().asFormHeaderInformation()
+        fun createFormHeaderInformation(
+            metadata: PaymentMethodMetadata,
+            customerHasSavedPaymentMethods: Boolean,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod(metadata).asFormHeaderInformation()
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
@@ -115,14 +118,14 @@ internal sealed interface UiDefinitionFactory {
 
     fun supportedPaymentMethod(
         definition: PaymentMethodDefinition,
-        sharedDataSpecs: List<SharedDataSpec>,
+        metadata: PaymentMethodMetadata,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
-            createSupportedPaymentMethod()
+            createSupportedPaymentMethod(metadata)
         }
 
         is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
+            val sharedDataSpec = metadata.sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
                 createSupportedPaymentMethod(sharedDataSpec)
             } else {
@@ -138,7 +141,10 @@ internal sealed interface UiDefinitionFactory {
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
-            createFormHeaderInformation(customerHasSavedPaymentMethods = customerHasSavedPaymentMethods)
+            createFormHeaderInformation(
+                metadata = metadata,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+            )
         }
 
         is RequiresSharedDataSpec -> {

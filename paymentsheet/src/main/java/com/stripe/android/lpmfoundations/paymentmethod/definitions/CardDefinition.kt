@@ -41,20 +41,23 @@ internal object CardDefinition : PaymentMethodDefinition {
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
         iconRequiresTinting = true,
     )
 
-    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+    override fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
+    ): FormHeaderInformation {
         val displayName = if (customerHasSavedPaymentMethods) {
             R.string.stripe_paymentsheet_add_new_card
         } else {
             R.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+        return createSupportedPaymentMethod(metadata).asFormHeaderInformation().copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )

@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
@@ -65,10 +67,15 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
 
     @Test
     fun testExternalPaymentMethod_iconUrlFailsToLoadForVerticalMode() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf("card", "external_paypal")
+            )
+        )
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod().asDisplayablePaymentMethod { }
+            ).createSupportedPaymentMethod(metadata).asDisplayablePaymentMethod { }
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodVerticalLayoutUI(

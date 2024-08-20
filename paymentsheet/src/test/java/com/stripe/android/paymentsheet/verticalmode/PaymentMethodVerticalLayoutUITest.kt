@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
@@ -116,7 +115,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
+                    PaymentMethodMetadataFactory.create().supportedPaymentMethodForCode("card")!!
                         .asDisplayablePaymentMethod { onClickCalled = true },
                 ),
                 isProcessing = false,

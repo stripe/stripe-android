@@ -30,7 +30,9 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 }
 
 private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata
+    ): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
@@ -39,8 +41,11 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         darkThemeIconUrl = null,
     )
 
-    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
-        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+    override fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
+    ): FormHeaderInformation {
+        return createSupportedPaymentMethod(metadata).asFormHeaderInformation().copy(
             displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
         )

@@ -11,7 +11,7 @@ import com.stripe.android.uicore.elements.FormElement
 internal class ExternalPaymentMethodUiDefinitionFactory(
     private val externalPaymentMethodSpec: ExternalPaymentMethodSpec
 ) : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,
             displayName = externalPaymentMethodSpec.label.resolvableString,

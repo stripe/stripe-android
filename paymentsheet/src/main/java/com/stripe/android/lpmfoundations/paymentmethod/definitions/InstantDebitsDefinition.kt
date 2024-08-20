@@ -29,7 +29,7 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
 
 private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,

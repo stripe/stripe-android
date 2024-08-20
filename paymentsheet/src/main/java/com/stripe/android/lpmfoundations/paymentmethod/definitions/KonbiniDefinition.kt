@@ -36,7 +36,7 @@ internal object KonbiniDefinition : PaymentMethodDefinition {
 }
 
 private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = KonbiniDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_konbini,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_konbini,

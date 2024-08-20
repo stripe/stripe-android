@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
@@ -84,10 +86,15 @@ class PaymentMethodsUIScreenshotTest {
 
     @Test
     fun testExternalPaymentMethod_iconUrlFailsToLoad() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                paymentMethodTypes = listOf("card", "paypal")
+            )
+        )
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod()
+            ).createSupportedPaymentMethod(metadata)
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodTabLayoutUI(
