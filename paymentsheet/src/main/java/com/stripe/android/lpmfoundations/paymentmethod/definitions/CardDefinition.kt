@@ -12,8 +12,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
@@ -25,6 +25,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.ui.core.R as UiCoreR
 
 internal object CardDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Card
@@ -41,21 +42,31 @@ internal object CardDefinition : PaymentMethodDefinition {
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata, customerHasSavedPaymentMethods: Boolean) = SupportedPaymentMethod(
-        paymentMethodDefinition = CardDefinition,
-        displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-        iconRequiresTinting = true,
-    )
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
+    ): SupportedPaymentMethod {
+        val displayNameResource = if (metadata.isVerticalMode && customerHasSavedPaymentMethods) {
+            R.string.stripe_paymentsheet_new_card
+        } else {
+            UiCoreR.string.stripe_paymentsheet_payment_method_card
+        }
+        return SupportedPaymentMethod(
+            paymentMethodDefinition = CardDefinition,
+            displayNameResource = displayNameResource,
+            iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
+            iconRequiresTinting = true,
+        )
+    }
 
     override fun createFormHeaderInformation(
         metadata: PaymentMethodMetadata,
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation {
         val displayName = if (customerHasSavedPaymentMethods) {
-            R.string.stripe_paymentsheet_add_new_card
+            UiCoreR.string.stripe_paymentsheet_add_new_card
         } else {
-            R.string.stripe_paymentsheet_add_card
+            UiCoreR.string.stripe_paymentsheet_add_card
         }
         return createSupportedPaymentMethod(metadata, customerHasSavedPaymentMethods).asFormHeaderInformation().copy(
             displayName = displayName.resolvableString,
@@ -168,7 +179,7 @@ private fun cardBillingElement(
             addressElement,
             sameAsShippingElement
         ),
-        R.string.stripe_billing_details
+        UiCoreR.string.stripe_billing_details
     )
 }
 
@@ -192,7 +203,7 @@ private fun contactInformationElement(
     if (elements.isEmpty()) return null
 
     return SectionElement.wrap(
-        label = R.string.stripe_contact_information,
+        label = UiCoreR.string.stripe_contact_information,
         sectionFieldElements = elements,
     )
 }
