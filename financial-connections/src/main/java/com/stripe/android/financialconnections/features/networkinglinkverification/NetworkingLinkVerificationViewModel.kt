@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
@@ -63,6 +64,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private val isLinkWithStripe: IsLinkWithStripe,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
     private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val handleError: HandleError,
 ) : FinancialConnectionsViewModel<NetworkingLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -178,8 +180,10 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
             verificationCode = otp
         )
 
+        val isInstantDebits = isLinkWithStripe()
+
         runCatching {
-            if (isLinkWithStripe()) {
+            if (isInstantDebits) {
                 attachConsumerToLinkAccountSession(payload.consumerSessionClientSecret)
                 getOrFetchSync(refetchCondition = Always).manifest
             } else {
@@ -192,17 +196,26 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
                 navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
             },
             onFailure = {
-                analyticsTracker.logError(
-                    extraMessage = "Error confirming verification or marking link as verified",
-                    error = it,
-                    logger = logger,
-                    pane = PANE
-                )
-                val nextPaneOnFailure = payload.initialInstitution
-                    ?.let { Pane.PARTNER_AUTH }
-                    ?: Pane.INSTITUTION_PICKER
-                analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
-                navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
+                if (isInstantDebits) {
+                    handleError(
+                        extraMessage = "Error attaching consumer to LAS or synchronizing afterwards",
+                        error = it,
+                        pane = PANE,
+                        displayErrorScreen = true,
+                    )
+                } else {
+                    analyticsTracker.logError(
+                        extraMessage = "Error confirming verification or marking link as verified",
+                        error = it,
+                        logger = logger,
+                        pane = PANE
+                    )
+                    val nextPaneOnFailure = payload.initialInstitution
+                        ?.let { Pane.PARTNER_AUTH }
+                        ?: Pane.INSTITUTION_PICKER
+                    analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
+                    navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
+                }
             }
         )
     }.execute { copy(confirmVerification = it) }
