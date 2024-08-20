@@ -121,4 +121,6 @@
   <string name="stripe_paymentsheet_new_card">New card</string>
   <!-- Title for adding a new US bank account as a payment method -->
   <string name="stripe_paymentsheet_new_us_bank_account">New US bank account</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_new_us_bank_account">Add new US bank account</string>
 </resources>
