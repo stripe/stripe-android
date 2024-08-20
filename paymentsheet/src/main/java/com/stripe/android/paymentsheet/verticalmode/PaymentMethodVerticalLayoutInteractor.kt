@@ -152,6 +152,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             )
         }
     }
+
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -307,10 +308,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         canEdit: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (canRemove) {
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
-        } else if (canEdit) {
+        return if (canEdit) {
+            // Edit screen handles both canRemove variants.
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
+        } else if (canRemove) {
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
         }
