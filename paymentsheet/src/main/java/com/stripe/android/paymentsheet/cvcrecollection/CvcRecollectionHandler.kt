@@ -8,6 +8,11 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 internal interface CvcRecollectionHandler {
     fun launch(paymentSelection: PaymentSelection?, launch: (CvcRecollectionData) -> Unit)
 
+    fun cvcRecollectionEnabled(
+        stripeIntent: StripeIntent?,
+        initializationMode: PaymentSheet.InitializationMode?,
+    ): Boolean
+
     fun requiresCVCRecollection(
         stripeIntent: StripeIntent?,
         paymentSelection: PaymentSelection?,

@@ -9,6 +9,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
@@ -433,5 +436,39 @@ internal sealed interface PaymentSheetScreen {
         override fun Content(modifier: Modifier) {
             ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
+    }
+
+    class CvcRecollection(private val interactor: CvcRecollectionInteractor): PaymentSheetScreen, Closeable {
+        override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
+
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+            return interactor.cvcCompletionState.mapAsStateFlow { complete ->
+                PaymentSheetTopBarStateFactory.create(
+                    hasBackStack = false,
+                    isLiveMode = interactor.viewState.value.isTestMode.not(),
+                    editable = PaymentSheetTopBarState.Editable.Maybe(
+                        isEditing = complete is CvcCompletionState.Incomplete,
+                        canEdit = false,
+                        onEditIconPressed = {}
+                    ),
+                )
+            }
+        }
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean) = stateFlowOf(null)
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean) = stateFlowOf(false)
+
+        @Composable
+        override fun Content(modifier: Modifier) {
+            CvcRecollectionPaymentSheetScreen(interactor)
+        }
+
+        override fun close() = Unit
+
     }
 }

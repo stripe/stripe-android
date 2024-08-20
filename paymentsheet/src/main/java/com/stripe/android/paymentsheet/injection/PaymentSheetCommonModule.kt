@@ -51,6 +51,8 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 
 @Module(
     subcomponents = [
@@ -152,6 +154,12 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
             return DefaultCvcRecollectionLauncherFactory
+        }
+
+        @Provides
+        @Singleton
+        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
+            return CvcRecollectionHandlerImpl()
         }
 
         @Provides

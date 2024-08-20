@@ -54,6 +54,8 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -142,6 +144,8 @@ internal class PaymentSheetActivityTest {
     }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+
+    private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
     private val contract = PaymentSheetContractV2()
 
@@ -1124,6 +1128,7 @@ internal class PaymentSheetActivityTest {
                 ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
+                cvcRecollectionHandler = cvcRecollectionHandler
             )
         }
     }

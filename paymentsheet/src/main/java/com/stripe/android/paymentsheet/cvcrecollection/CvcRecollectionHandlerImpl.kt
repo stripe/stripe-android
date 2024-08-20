@@ -16,6 +16,14 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
             ?: throw IllegalStateException("unable to create CvcRecollectionData")
     }
 
+    override fun cvcRecollectionEnabled(
+        stripeIntent: StripeIntent?,
+        initializationMode: PaymentSheet.InitializationMode?
+    ): Boolean {
+        return deferredIntentRequiresCVCRecollection(initializationMode) ||
+            paymentIntentRequiresCVCRecollection(stripeIntent)
+    }
+
     override fun requiresCVCRecollection(
         stripeIntent: StripeIntent?,
         paymentSelection: PaymentSelection?,
@@ -23,15 +31,7 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         extraRequirements: () -> Boolean
     ): Boolean {
         return paymentSelectionIsSavedCard(paymentSelection) &&
-            intentRequiresCVCRecollection(stripeIntent, initializationMode) && extraRequirements()
-    }
-
-    private fun intentRequiresCVCRecollection(
-        stripeIntent: StripeIntent?,
-        initializationMode: PaymentSheet.InitializationMode?
-    ): Boolean {
-        return deferredIntentRequiresCVCRecollection(initializationMode) ||
-            paymentIntentRequiresCVCRecollection(stripeIntent)
+            cvcRecollectionEnabled(stripeIntent, initializationMode) && extraRequirements()
     }
 
     private fun deferredIntentRequiresCVCRecollection(initializationMode: PaymentSheet.InitializationMode?): Boolean {
