@@ -29,7 +29,7 @@ internal class SuccessPreviewParameterProvider :
         payload = Success(
             SuccessState.Payload(
                 skipSuccessPane = false,
-                title = TextResource.Text("Success!"),
+                title = TextResource.Text("Success"),
                 content = TextResource.Text(
                     "You can expect micro-deposits to account " +
                         "••••1234 in 1-2 days and an email with further instructions."

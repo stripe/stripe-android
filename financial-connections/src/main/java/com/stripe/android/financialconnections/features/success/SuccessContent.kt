@@ -367,7 +367,7 @@ private fun calculateBodyHeightForPreview(config: Configuration, state: SuccessS
     // We need to manually calculate this for our screenshot tests, as we've been unable to
     // delay the capture until the offset animation finishes.
     val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
-    return if (state.payload()?.content != null && isPhone) {
+    return if (isPhone) {
         120.dp
     } else {
         72.dp
