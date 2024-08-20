@@ -45,6 +45,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val isVerticalMode: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -274,6 +275,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
                 isGooglePayReady = isGooglePayReady,
+                isVerticalMode = configuration.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical,
             )
         }
 
@@ -305,6 +307,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 externalPaymentMethodSpecs = emptyList(),
+                isVerticalMode = false,
             )
         }
     }

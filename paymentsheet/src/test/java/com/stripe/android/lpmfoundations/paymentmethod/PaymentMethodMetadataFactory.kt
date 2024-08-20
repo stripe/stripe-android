@@ -28,6 +28,7 @@ internal object PaymentMethodMetadataFactory {
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkInlineConfiguration: LinkInlineConfiguration? = null,
+        isVerticalMode: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -46,6 +47,7 @@ internal object PaymentMethodMetadataFactory {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = linkInlineConfiguration,
+            isVerticalMode = isVerticalMode,
         )
     }
 
