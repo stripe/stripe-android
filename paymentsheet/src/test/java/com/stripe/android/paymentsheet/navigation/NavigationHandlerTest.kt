@@ -227,6 +227,70 @@ internal class NavigationHandlerTest {
     }
 
     @Test
+    fun `popWithDelay transitions to target screen`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler(testScope) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val screenOne = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenOne)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+            val screenTwo = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenTwo)
+            assertThat(awaitItem()).isEqualTo(screenTwo)
+            navigationHandler.popWithDelay()
+            testScope.testScheduler.advanceTimeBy(250.milliseconds)
+            ensureAllEventsConsumed()
+            testScope.testScheduler.advanceTimeBy(1.milliseconds)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+        }
+    }
+
+    @Test
+    fun `popWithDelay allows future transitions`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler(testScope) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val screenOne = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenOne)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+            val screenTwo = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenTwo)
+            assertThat(awaitItem()).isEqualTo(screenTwo)
+            navigationHandler.popWithDelay()
+            testScope.testScheduler.advanceTimeBy(251.milliseconds)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+            val screenThree = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenThree)
+            assertThat(awaitItem()).isEqualTo(screenThree)
+            assertThat(navigationHandler.canGoBack).isTrue()
+        }
+    }
+
+    @Test
+    fun `popWithDelay prevents other navigation actions during delay`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler(testScope) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val screenOne = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenOne)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+            val screenTwo = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenTwo)
+            assertThat(awaitItem()).isEqualTo(screenTwo)
+            navigationHandler.popWithDelay()
+            val screenThree = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenThree)
+            navigationHandler.pop()
+            navigationHandler.resetTo(listOf(screenThree))
+            testScope.testScheduler.advanceTimeBy(251.milliseconds)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+        }
+    }
+
+    @Test
     fun `closeScreens calls close on all closable screens in the backstack`() = runTest {
         val navigationHandler = NavigationHandler(this) {}
         navigationHandler.currentScreen.test {

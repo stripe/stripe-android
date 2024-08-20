@@ -62,7 +62,7 @@ internal class NavigationHandler(
     }
 
     fun popWithDelay() {
-        navigateWithDelay { pop() }
+        navigateWithDelay { popInternal() }
     }
 
     private fun popInternal() {
