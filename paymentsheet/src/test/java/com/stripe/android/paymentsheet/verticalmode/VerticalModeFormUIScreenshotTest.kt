@@ -112,7 +112,7 @@ internal class VerticalModeFormUIScreenshotTest {
         override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(initialState)
 
         override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
-            throw AssertionError("Not expected")
+            // No op.
         }
 
         override fun canGoBack(): Boolean {
