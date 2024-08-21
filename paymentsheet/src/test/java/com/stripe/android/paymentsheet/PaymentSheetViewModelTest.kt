@@ -2692,12 +2692,12 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.requiresCvcRecollection { true }).isTrue()
-        assertThat(viewModel.requiresCvcRecollection { false }).isFalse()
+        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { true })).isTrue()
+        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { false })).isFalse()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.requiresCvcRecollection { true }).isFalse()
-        assertThat(viewModel.requiresCvcRecollection { false }).isFalse()
+        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { true })).isFalse()
+        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { false })).isFalse()
     }
 
     @Test
