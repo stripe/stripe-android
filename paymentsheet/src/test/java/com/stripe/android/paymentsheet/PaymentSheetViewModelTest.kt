@@ -2613,6 +2613,33 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `getCvcRecollectionState returns correct state for complete flow`() = runTest {
+        var stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(true)
+        )
+        var viewModel = createViewModel(
+            stripeIntent = stripeIntent
+        )
+
+        cvcRecollectionHandler.cvcRecollectionEnabled = true
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.Required>()
+
+        stripeIntent = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = getPaymentMethodOptionJsonStringWithCvcRecollectionValue(false)
+        )
+        viewModel = createViewModel(
+            stripeIntent = stripeIntent
+        )
+
+        cvcRecollectionHandler.cvcRecollectionEnabled = false
+
+        assertThat(viewModel.getCvcRecollectionState())
+            .isInstanceOf<SelectSavedPaymentMethods.CvcRecollectionState.NotRequired>()
+    }
+
+    @Test
     fun `On confirm with existing payment method, calls interceptor with expected parameters`() = runTest {
         val initializationMode = InitializationMode.PaymentIntent(clientSecret = "pi_123")
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
