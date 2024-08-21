@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.48.5 - 2024-08-21
+
+### PaymentSheet
+* [FIXED][9111](https://github.com/stripe/stripe-android/pull/9111) Fixed an issue where Google Pay was displaying an error.
+
 ## 20.48.4 - 2024-08-09
 
 ### Payments
