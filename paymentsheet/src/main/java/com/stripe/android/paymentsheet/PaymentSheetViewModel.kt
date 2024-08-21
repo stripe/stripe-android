@@ -388,7 +388,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout() {
-        if (requiresCVCRecollection { isVerticalMode() && isOnCvcRecollectionScreen().not() }) {
+        if (requiresCvcRecollection { isVerticalMode() && isOnCvcRecollectionScreen().not() }) {
             launchCvcRecollection()
             return
         }
@@ -426,7 +426,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun requiresCVCRecollection(extraRequirements: () -> Boolean = { true }): Boolean {
+    fun requiresCvcRecollection(extraRequirements: () -> Boolean): Boolean {
         return cvcRecollectionHandler.requiresCVCRecollection(
             stripeIntent = paymentMethodMetadata.value?.stripeIntent,
             paymentSelection = selection.value,
@@ -510,7 +510,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         if (paymentSelection !is PaymentSelection.Saved) return paymentSelection
-        return if (requiresCVCRecollection { isVerticalMode().not() }) {
+        return if (requiresCvcRecollection { isVerticalMode().not() }) {
             val paymentMethodOptionsParams =
                 (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
                     ?: PaymentMethodOptionsParams.Card()

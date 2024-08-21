@@ -27,6 +27,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -51,8 +53,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 
 @Module(
     subcomponents = [
@@ -100,6 +100,7 @@ internal abstract class PaymentSheetCommonModule {
     @Binds
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
+    @Suppress("TooManyFunctions")
     companion object {
         /**
          * Provides a non-singleton PaymentConfiguration.

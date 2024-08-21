@@ -438,7 +438,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    class CvcRecollection(private val interactor: CvcRecollectionInteractor): PaymentSheetScreen, Closeable {
+    class CvcRecollection(private val interactor: CvcRecollectionInteractor) : PaymentSheetScreen, Closeable {
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
@@ -469,6 +469,5 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun close() = Unit
-
     }
 }
