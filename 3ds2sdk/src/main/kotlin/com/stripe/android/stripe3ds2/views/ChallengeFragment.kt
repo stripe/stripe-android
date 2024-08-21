@@ -25,10 +25,12 @@ import com.stripe.android.stripe3ds2.transactions.ChallengeRequestData
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.ErrorData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeFragment(
     private val uiCustomization: StripeUiCustomization,
+    private val analyticsDelegate: AnalyticsDelegate?,
     private val transactionTimer: TransactionTimer,
     private val errorRequestExecutor: ErrorRequestExecutor,
     private val errorReporter: ErrorReporter,
@@ -128,7 +130,9 @@ internal class ChallengeFragment(
             )
             return
         }
+
         cresData = nullableCres
+        analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
 
         _viewBinding = StripeChallengeFragmentBinding.bind(view)
 
@@ -153,6 +157,22 @@ internal class ChallengeFragment(
             challengeZoneWebView
         )
         configureInformationZoneView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (cresData.uiType == UiType.OutOfBand) {
+            analyticsDelegate?.oobFlowDidResume(cresData.serverTransId)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if (cresData.uiType == UiType.OutOfBand) {
+            analyticsDelegate?.oobFlowDidPause(cresData.serverTransId)
+        }
     }
 
     override fun onDestroyView() {
@@ -272,6 +292,15 @@ internal class ChallengeFragment(
 
         challengeZoneView.setSubmitButtonClickListener {
             viewModel.onSubmitClicked(challengeAction)
+
+            when (cresData.uiType) {
+                UiType.Text ->
+                    analyticsDelegate?.otpSubmitButtonTappedWithTransactionID(cresData.serverTransId)
+                UiType.OutOfBand ->
+                    analyticsDelegate?.oobContinueButtonTappedWithTransactionID((cresData.serverTransId))
+                UiType.SingleSelect, UiType.MultiSelect, UiType.Html -> { }
+                null -> { }
+            }
         }
         challengeZoneView.setResendButtonClickListener {
             viewModel.submit(ChallengeAction.Resend)
@@ -343,6 +372,8 @@ internal class ChallengeFragment(
         } else {
             viewModel.onNextScreen(cresData)
         }
+
+        analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
     }
 
     private fun onError(data: ErrorData) {

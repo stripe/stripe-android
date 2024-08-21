@@ -15,6 +15,7 @@ import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.stripe3ds2.observability.DefaultErrorReporter
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
 import com.stripe.android.stripe3ds2.observability.Stripe3ds2ErrorReporterConfig
+import com.stripe.android.stripe3ds2.service.AnalyticsSingleton
 import com.stripe.android.stripe3ds2.transaction.ChallengeAction
 import com.stripe.android.stripe3ds2.transaction.ChallengeActionHandler
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -93,11 +94,13 @@ class ChallengeActivity : AppCompatActivity() {
     }
 
     private var progressDialog: Dialog? = null
-    private var currentUITypeCode = ""
+    private var currentChallengeResponseData: ChallengeResponseData? = null
+    private val analyticsDelegate = AnalyticsSingleton.getInstance().analyticsDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportFragmentManager.fragmentFactory = ChallengeFragmentFactory(
             uiCustomization = viewArgs.uiCustomization,
+            analyticsDelegate = analyticsDelegate,
             transactionTimer = transactionTimer,
             errorRequestExecutor = errorRequestExecutor,
             errorReporter = errorReporter,
@@ -158,7 +161,7 @@ class ChallengeActivity : AppCompatActivity() {
             if (cres != null) {
                 startFragment(cres)
 
-                currentUITypeCode = cres.uiType?.code.orEmpty()
+                currentChallengeResponseData = cres
             }
         }
 
@@ -170,13 +173,15 @@ class ChallengeActivity : AppCompatActivity() {
             if (isTimeout == true) {
                 viewModel.onFinish(
                     ChallengeResult.Timeout(
-                        currentUITypeCode,
+                        currentChallengeResponseData?.uiType?.code.orEmpty(),
                         viewArgs.cresData.uiType,
                         viewArgs.intentData
                     )
                 )
             }
         }
+
+        currentChallengeResponseData = viewArgs.cresData
     }
 
     private fun startFragment(
@@ -215,7 +220,7 @@ class ChallengeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.shouldRefreshUi = true
-        viewModel.shouldAutoSubmitOOB = UiType.fromCode(currentUITypeCode) == UiType.OutOfBand
+        viewModel.shouldAutoSubmitOOB = UiType.fromCode(currentChallengeResponseData?.uiType?.code.orEmpty()) == UiType.OutOfBand
         dismissKeyboard()
     }
 
@@ -238,6 +243,10 @@ class ChallengeActivity : AppCompatActivity() {
         cancelButton?.setOnClickListener {
             cancelButton.isClickable = false
             viewModel.submit(ChallengeAction.Cancel)
+
+            currentChallengeResponseData?.let {
+                analyticsDelegate?.cancelButtonTappedWithTransactionId(it.serverTransId)
+            }
         }
     }
 

@@ -9,10 +9,12 @@ import com.stripe.android.stripe3ds2.transaction.ErrorRequestExecutor
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeFragmentFactory(
     private val uiCustomization: StripeUiCustomization,
+    private val analyticsDelegate: AnalyticsDelegate?,
     private val transactionTimer: TransactionTimer,
     private val errorRequestExecutor: ErrorRequestExecutor,
     private val errorReporter: ErrorReporter,
@@ -26,6 +28,7 @@ internal class ChallengeFragmentFactory(
             ChallengeFragment::class.java.name -> {
                 ChallengeFragment(
                     uiCustomization,
+                    analyticsDelegate,
                     transactionTimer,
                     errorRequestExecutor,
                     errorReporter,
