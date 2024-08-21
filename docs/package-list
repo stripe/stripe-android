@@ -1,17 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 
-module:3ds2sdk
-com.stripe.android.stripe3ds2.exceptions
-com.stripe.android.stripe3ds2.init
-com.stripe.android.stripe3ds2.init.ui
-com.stripe.android.stripe3ds2.observability
-com.stripe.android.stripe3ds2.security
-com.stripe.android.stripe3ds2.service
-com.stripe.android.stripe3ds2.transaction
-com.stripe.android.stripe3ds2.transactions
-com.stripe.android.stripe3ds2.utils
-com.stripe.android.stripe3ds2.views
 module:camera-core
 com.stripe.android.camera
 com.stripe.android.camera.framework
