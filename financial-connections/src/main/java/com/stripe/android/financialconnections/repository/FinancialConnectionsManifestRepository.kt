@@ -252,7 +252,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             )
         )
 
-        val token: Result<String> = standardRequestManager.requestToken(financialConnectionsRequest)
+//        val token: Result<String> = standardRequestManager.requestToken(financialConnectionsRequest)
 
         return requestExecutor.execute(
             financialConnectionsRequest,

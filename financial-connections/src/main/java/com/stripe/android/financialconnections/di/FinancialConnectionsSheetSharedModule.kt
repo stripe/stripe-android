@@ -92,7 +92,6 @@ internal interface FinancialConnectionsSheetSharedModule {
             context: Application
         ): IntegrityStandardRequestManager {
             return IntegrityStandardRequestManager(
-                cloudProjectNumber = 123456789L,
                 buildRequestIdentifier = BuildRequestIdentifier(),
                 appContext = context
             )
