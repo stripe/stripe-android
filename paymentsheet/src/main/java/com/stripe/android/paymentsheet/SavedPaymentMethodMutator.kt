@@ -256,6 +256,7 @@ internal class SavedPaymentMethodMutator(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
+            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
             customerStateHolder.setCustomerState(
                 currentCustomer.copy(
                     paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
