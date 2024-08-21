@@ -2705,20 +2705,7 @@ internal class PaymentSheetViewModelTest {
 
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
-        val savedStateHandle = SavedStateHandle(
-            initialState = mapOf(
-                "AwaitingPaymentResult" to true,
-                "IntentConfirmationArguments" to IntentConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                        initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
-                        paymentMethod = CARD_PAYMENT_METHOD,
-                        optionsParams = null,
-                        shippingDetails = null,
-                    )
-                )
-            )
-        )
+        val savedStateHandle = SavedStateHandle(initialState = mapOf("AwaitingPaymentResult" to true))
         val paymentSheetLoader = RelayingPaymentSheetLoader()
 
         val viewModel = createViewModel(
