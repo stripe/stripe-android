@@ -13,9 +13,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.ui.RowButton
 import com.stripe.android.uicore.stripeColors
 
@@ -69,8 +69,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean,) 
     Column {
         Text(
             text = title,
-            style = MaterialTheme.typography.caption,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
             color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -80,7 +79,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean,) 
             val subtitleTextColor = MaterialTheme.stripeColors.subtitle
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }
