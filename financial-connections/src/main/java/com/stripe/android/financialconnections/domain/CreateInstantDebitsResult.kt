@@ -10,7 +10,7 @@ import javax.inject.Inject
 internal fun interface CreateInstantDebitsResult {
     suspend operator fun invoke(
         bankAccountId: String,
-    ): InstantDebitsResult?
+    ): InstantDebitsResult
 }
 
 internal class RealCreateInstantDebitsResult @Inject constructor(
