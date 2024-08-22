@@ -46,7 +46,7 @@ data class ChallengeRequestData constructor(
             // [Req 71] If the Cardholder does not enter any data in the UI, the Challenge No Entry field
             // shall be sent in the CReq message with the value ”Y.”
             if (challengeDataEntry.isNullOrEmpty()) {
-                json.put(FIELD_CHALLENGE_NO_ENTRY, "Y")
+                json.put(FIELD_CHALLENGE_NO_ENTRY, YES_VALUE)
             } else {
                 json.put(FIELD_CHALLENGE_DATA_ENTRY, challengeDataEntry)
             }
@@ -106,5 +106,6 @@ data class ChallengeRequestData constructor(
         internal const val FIELD_SDK_TRANS_ID: String = "sdkTransID"
 
         internal const val MESSAGE_TYPE: String = "CReq"
+        internal const val YES_VALUE: String = "Y"
     }
 }
