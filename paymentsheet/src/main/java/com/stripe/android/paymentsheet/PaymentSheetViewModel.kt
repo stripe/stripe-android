@@ -721,13 +721,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun isCvcRecollectionEnabled(): Boolean {
-        return cvcRecollectionHandler.cvcRecollectionEnabled(
-            stripeIntent = paymentMethodMetadata.value?.stripeIntent,
-            initializationMode = args.initializationMode
-        )
-    }
-
     private fun mapViewStateToCheckoutIdentifier(
         viewState: PaymentSheetViewState?,
         checkoutIdentifier: CheckoutIdentifier

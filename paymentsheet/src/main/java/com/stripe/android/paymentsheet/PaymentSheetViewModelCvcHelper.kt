@@ -15,6 +15,13 @@ internal fun PaymentSheetViewModel.shouldAttachCvc(): Boolean {
     }
 }
 
+internal fun PaymentSheetViewModel.isCvcRecollectionEnabled(): Boolean {
+    return cvcRecollectionHandler.cvcRecollectionEnabled(
+        stripeIntent = paymentMethodMetadata.value?.stripeIntent,
+        initializationMode = args.initializationMode
+    )
+}
+
 private fun PaymentSheetViewModel.requiresCvcRecollection(extraRequirements: () -> Boolean): Boolean {
     return cvcRecollectionHandler.requiresCVCRecollection(
         stripeIntent = paymentMethodMetadata.value?.stripeIntent,
