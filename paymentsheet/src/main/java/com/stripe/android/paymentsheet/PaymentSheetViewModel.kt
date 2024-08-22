@@ -86,7 +86,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    internal val cvcRecollectionHandler: CvcRecollectionHandler
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -388,7 +388,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout() {
-        if (requiresCvcRecollection { isVerticalMode() && isOnCvcRecollectionScreen().not() }) {
+        if (shouldLaunchCvcRecollectionScreen()) {
             launchCvcRecollection()
             return
         }
@@ -424,23 +424,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (viewState.value is PaymentSheetViewState.Reset) {
             viewState.value = PaymentSheetViewState.Reset(message = null)
         }
-    }
-
-    fun requiresCvcRecollection(extraRequirements: () -> Boolean): Boolean {
-        return cvcRecollectionHandler.requiresCVCRecollection(
-            stripeIntent = paymentMethodMetadata.value?.stripeIntent,
-            paymentSelection = selection.value,
-            initializationMode = args.initializationMode,
-            extraRequirements = extraRequirements
-        )
-    }
-
-    private fun isVerticalMode(): Boolean {
-        return config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical
-    }
-
-    private fun isOnCvcRecollectionScreen(): Boolean {
-        return navigationHandler.currentScreen.value is PaymentSheetScreen.CvcRecollection
     }
 
     private fun launchCvcRecollection() {
@@ -510,7 +493,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         if (paymentSelection !is PaymentSelection.Saved) return paymentSelection
-        return if (requiresCvcRecollection { isVerticalMode().not() }) {
+        return if (shouldAttachCvc()) {
             val paymentMethodOptionsParams =
                 (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
                     ?: PaymentMethodOptionsParams.Card()

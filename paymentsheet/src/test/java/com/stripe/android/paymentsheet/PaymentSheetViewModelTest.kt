@@ -2689,15 +2689,35 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `requiresCvcRecollection should return correct value`() {
-        val viewModel = createViewModel()
+        var viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
+                )
+            )
+        )
 
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { true })).isTrue()
-        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { false })).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isTrue()
+        assertThat(viewModel.shouldAttachCvc()).isFalse()
+
+        viewModel.checkout()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc()).isFalse()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { true })).isFalse()
-        assertThat(viewModel.requiresCvcRecollection(extraRequirements = { false })).isFalse()
+        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+
+        viewModel = createViewModel()
+
+        cvcRecollectionHandler.requiresCVCRecollection = true
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc()).isTrue()
+
+        cvcRecollectionHandler.requiresCVCRecollection = false
+        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
     }
 
     @Test
