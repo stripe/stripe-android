@@ -199,6 +199,29 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
+    fun `removing the last payment methods navigates back`() {
+        var backPressed = false
+        fun handleBackPressed() {
+            backPressed = true
+        }
+
+        val paymentMethods = PaymentMethodFactory.cards(2)
+        runScenario(
+            initialPaymentMethods = paymentMethods,
+            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
+            onSelectPaymentMethod = {},
+            isEditing = true,
+            handleBackPressed = ::handleBackPressed,
+        ) {
+            assertThat(backPressed).isFalse()
+
+            paymentMethodsSource.value = listOf()
+
+            assertThat(backPressed).isTrue()
+        }
+    }
+
+    @Test
     fun `handleViewAction ToggleEdit calls toggleEdit`() {
         var hasCalledToggleEdit = false
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
@@ -215,7 +238,7 @@ class DefaultManageScreenInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
-        initialPaymentMethods: List<PaymentMethod>?,
+        initialPaymentMethods: List<PaymentMethod>,
         currentSelection: PaymentSelection?,
         isEditing: Boolean = false,
         toggleEdit: () -> Unit = { notImplemented() },
@@ -265,7 +288,7 @@ class DefaultManageScreenInteractorTest {
 
     private data class TestParams(
         val interactor: ManageScreenInteractor,
-        val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>?>,
+        val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,
         val canRemoveSource: MutableStateFlow<Boolean,>

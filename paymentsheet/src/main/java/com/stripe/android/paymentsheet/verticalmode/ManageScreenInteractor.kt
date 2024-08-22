@@ -46,7 +46,7 @@ internal interface ManageScreenInteractor {
 }
 
 internal class DefaultManageScreenInteractor(
-    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
@@ -68,9 +68,9 @@ internal class DefaultManageScreenInteractor(
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
         paymentMethods.mapAsStateFlow { paymentMethods ->
-            paymentMethods?.map {
+            paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
-            } ?: emptyList()
+            }
         }
 
     override val state = combineAsStateFlow(
@@ -100,6 +100,14 @@ internal class DefaultManageScreenInteractor(
             state.collect { state ->
                 if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
+                    safeNavigateBack()
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            paymentMethods.collect { paymentMethods ->
+                if (paymentMethods.isEmpty()) {
                     safeNavigateBack()
                 }
             }
