@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -51,6 +52,11 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         sessionId: String
     ): MixedOAuthParams
+
+    suspend fun createPaymentMethod(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+    ): PaymentMethod
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
@@ -125,24 +131,55 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun createPaymentMethod(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String
+    ): PaymentMethod {
+        val credentials = mapOf(
+            "consumer_session_client_secret" to consumerSessionClientSecret,
+        )
+
+        val params = mapOf(
+            "type" to "link",
+            "link" to mapOf(
+                "credentials" to credentials,
+                "payment_details_id" to paymentDetailsId,
+            ),
+        )
+
+        val request = apiRequestFactory.createPost(
+            url = paymentMethodsUrl,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            params = params,
+        )
+
+        return requestExecutor.execute(
+            request,
+            PaymentMethod.serializer()
+        )
+    }
+
     internal companion object {
 
-        internal const val listAccountsUrl: String =
+        private const val listAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
 
-        internal const val sessionReceiptUrl: String =
+        private const val sessionReceiptUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
 
         internal const val authorizationSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
 
-        internal const val completeUrl: String =
+        private const val completeUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
-        internal const val authorizationSessionOAuthResultsUrl: String =
+        private const val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
         internal const val authorizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
+
+        private const val paymentMethodsUrl: String =
+            "${ApiRequest.API_HOST}/v1/payment_methods"
     }
 }

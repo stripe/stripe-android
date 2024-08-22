@@ -1147,7 +1147,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getCategory ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category;
 	public final fun getCreated ()I
 	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getId ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
 	public final fun getInstitutionName ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
 	public final fun getLivemode ()Z
@@ -1742,6 +1742,7 @@ public final class com/stripe/android/financialconnections/model/PartnerNotice$C
 public abstract class com/stripe/android/financialconnections/model/PaymentAccount : android/os/Parcelable {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/financialconnections/model/PaymentAccount$Companion;
+	public abstract fun getId ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/financialconnections/model/PaymentAccount$Companion {
