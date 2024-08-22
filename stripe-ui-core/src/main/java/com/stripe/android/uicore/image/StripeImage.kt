@@ -83,13 +83,13 @@ fun StripeImage(
         AnimatedContent(
             targetState = state.value,
             label = "loading_image_animation",
-            contentKey = {
+            contentKey = { targetState ->
                 if (disableAnimations) {
                     // Animations only occur when the content key changes, by setting the content key to a constant
                     // value here, we can effectively disable animations.
                     true
                 } else {
-                    state.value
+                    targetState
                 }
             }
         ) {

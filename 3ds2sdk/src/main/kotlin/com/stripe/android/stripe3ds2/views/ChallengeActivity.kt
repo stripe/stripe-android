@@ -23,6 +23,7 @@ import com.stripe.android.stripe3ds2.transaction.ErrorRequestExecutor
 import com.stripe.android.stripe3ds2.transaction.StripeErrorRequestExecutor
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
+import com.stripe.android.stripe3ds2.transactions.UiType
 import kotlinx.coroutines.Dispatchers
 
 class ChallengeActivity : AppCompatActivity() {
@@ -92,6 +93,7 @@ class ChallengeActivity : AppCompatActivity() {
     }
 
     private var progressDialog: Dialog? = null
+    private var currentUITypeCode = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportFragmentManager.fragmentFactory = ChallengeFragmentFactory(
@@ -150,14 +152,13 @@ class ChallengeActivity : AppCompatActivity() {
 
         configureHeaderZone()
 
-        var uiTypeCode = ""
         viewModel.nextScreen.observe(this) { cres ->
             dismissDialog()
 
             if (cres != null) {
                 startFragment(cres)
 
-                uiTypeCode = cres.uiType?.code.orEmpty()
+                currentUITypeCode = cres.uiType?.code.orEmpty()
             }
         }
 
@@ -169,7 +170,7 @@ class ChallengeActivity : AppCompatActivity() {
             if (isTimeout == true) {
                 viewModel.onFinish(
                     ChallengeResult.Timeout(
-                        uiTypeCode,
+                        currentUITypeCode,
                         viewArgs.cresData.uiType,
                         viewArgs.intentData
                     )
@@ -214,13 +215,16 @@ class ChallengeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.shouldRefreshUi = true
+        viewModel.shouldAutoSubmitOOB = UiType.fromCode(currentUITypeCode) == UiType.OutOfBand
         dismissKeyboard()
     }
 
     override fun onResume() {
         super.onResume()
 
-        if (viewModel.shouldRefreshUi) {
+        if (viewModel.shouldAutoSubmitOOB) {
+            viewModel.submit(ChallengeAction.Oob)
+        } else if (viewModel.shouldRefreshUi) {
             viewModel.onRefreshUi()
         }
     }

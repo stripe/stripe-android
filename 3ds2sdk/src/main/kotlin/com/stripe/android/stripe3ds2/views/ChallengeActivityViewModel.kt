@@ -47,6 +47,7 @@ internal class ChallengeActivityViewModel(
     val nextScreen: LiveData<ChallengeResponseData> = _nextScreen
 
     var shouldRefreshUi: Boolean = false
+    var shouldAutoSubmitOOB: Boolean = false
 
     internal val transactionTimerJob: Job
 
