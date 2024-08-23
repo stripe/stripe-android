@@ -82,7 +82,9 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun cannotRemoveOrEdit_multiplePaymentsMethods_shouldNotNavigateBack() {
         var backPressed = false
-        fun handleBackPressed() {
+        fun handleBackPressed(withDelay: Boolean) {
+            assertThat(withDelay).isTrue()
+            assertThat(backPressed).isFalse()
             backPressed = true
         }
 
@@ -105,7 +107,9 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun cannotRemoveButCanEdit_hidesDeleteButton() {
         var backPressed = false
-        fun handleBackPressed() {
+        fun handleBackPressed(withDelay: Boolean) {
+            assertThat(withDelay).isTrue()
+            assertThat(backPressed).isFalse()
             backPressed = true
         }
 
@@ -136,7 +140,9 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun cannotRemoveOrEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
         var backPressed = false
-        fun handleBackPressed() {
+        fun handleBackPressed(withDelay: Boolean) {
+            assertThat(withDelay).isTrue()
+            assertThat(backPressed).isFalse()
             backPressed = true
         }
 
@@ -174,7 +180,9 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun canRemove_doesNotNavBackWhenEditingFinishes() {
         var backPressed = false
-        fun handleBackPressed() {
+        fun handleBackPressed(withDelay: Boolean) {
+            assertThat(withDelay).isTrue()
+            assertThat(backPressed).isFalse()
             backPressed = true
         }
 
@@ -199,9 +207,11 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `removing the last payment methods navigates back`() {
+    fun `removing the last payment methods navigates back without delay`() {
         var backPressed = false
-        fun handleBackPressed() {
+        fun handleBackPressed(withDelay: Boolean) {
+            assertThat(withDelay).isFalse()
+            assertThat(backPressed).isFalse()
             backPressed = true
         }
 
@@ -243,7 +253,7 @@ class DefaultManageScreenInteractorTest {
         isEditing: Boolean = false,
         toggleEdit: () -> Unit = { notImplemented() },
         onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
-        handleBackPressed: () -> Unit = { notImplemented() },
+        handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)

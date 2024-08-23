@@ -57,7 +57,7 @@ internal class DefaultManageScreenInteractor(
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val navigateBack: () -> Unit,
+    private val navigateBack: (withDelay: Boolean) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
@@ -100,7 +100,6 @@ internal class DefaultManageScreenInteractor(
             state.collect { state ->
                 if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
-                    safeNavigateBack()
                 }
             }
         }
@@ -108,7 +107,7 @@ internal class DefaultManageScreenInteractor(
         coroutineScope.launch {
             paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty()) {
-                    safeNavigateBack()
+                    safeNavigateBack(false)
                 }
             }
         }
@@ -130,12 +129,12 @@ internal class DefaultManageScreenInteractor(
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
         onSelectPaymentMethod(paymentMethod)
-        safeNavigateBack()
+        safeNavigateBack(true)
     }
 
-    private fun safeNavigateBack() {
+    private fun safeNavigateBack(withDelay: Boolean) {
         if (!hasNavigatedBack.getAndSet(true)) {
-            navigateBack()
+            navigateBack(withDelay)
         }
     }
 
@@ -160,7 +159,13 @@ internal class DefaultManageScreenInteractor(
                 },
                 onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
-                navigateBack = viewModel.navigationHandler::popWithDelay,
+                navigateBack = { withDelay ->
+                    if (withDelay) {
+                        viewModel.navigationHandler.popWithDelay()
+                    } else {
+                        viewModel.navigationHandler.pop()
+                    }
+                },
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
