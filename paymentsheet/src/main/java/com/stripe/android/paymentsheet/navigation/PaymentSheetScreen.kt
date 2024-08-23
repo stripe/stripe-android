@@ -40,9 +40,19 @@ internal val verticalModeBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
 
+internal data class BuyButtonState(
+    val visible: Boolean,
+    val buyButtonOverride: BuyButtonOverride? = null
+) {
+    data class BuyButtonOverride(
+        val label: ResolvableString,
+        val lockEnabled: Boolean
+    )
+}
+
 internal sealed interface PaymentSheetScreen {
 
-    val showsBuyButton: Boolean
+    val buyButtonState: StateFlow<BuyButtonState>
     val showsContinueButton: Boolean
     val topContentPadding: Dp
     val bottomContentPadding: Dp
@@ -59,7 +69,9 @@ internal sealed interface PaymentSheetScreen {
 
     object Loading : PaymentSheetScreen {
 
-        override val showsBuyButton: Boolean = false
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = false)
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -93,7 +105,9 @@ internal sealed interface PaymentSheetScreen {
             class Required(val cvcControllerFlow: StateFlow<CvcController>) : CvcRecollectionState
         }
 
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = SavedPaymentMethodsTopContentPadding
         override val bottomContentPadding: Dp = 0.dp
@@ -147,7 +161,9 @@ internal sealed interface PaymentSheetScreen {
         private val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen, Closeable {
 
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -195,7 +211,9 @@ internal sealed interface PaymentSheetScreen {
         private val interactor: AddPaymentMethodInteractor,
     ) : PaymentSheetScreen, Closeable {
 
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -246,7 +264,9 @@ internal sealed interface PaymentSheetScreen {
         private val isLiveMode: Boolean,
     ) : PaymentSheetScreen, Closeable {
 
-        override val showsBuyButton: Boolean = false
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = false)
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -282,7 +302,9 @@ internal sealed interface PaymentSheetScreen {
 
     class VerticalMode(private val interactor: PaymentMethodVerticalLayoutInteractor) : PaymentSheetScreen {
 
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
@@ -325,7 +347,9 @@ internal sealed interface PaymentSheetScreen {
         private val showsWalletHeader: Boolean = false,
     ) : PaymentSheetScreen, Closeable {
 
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
@@ -360,7 +384,9 @@ internal sealed interface PaymentSheetScreen {
     }
 
     class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen, Closeable {
-        override val showsBuyButton: Boolean = false
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = false)
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -409,7 +435,9 @@ internal sealed interface PaymentSheetScreen {
 
     class ManageOneSavedPaymentMethod(private val interactor: ManageOneSavedPaymentMethodInteractor) :
         PaymentSheetScreen {
-        override val showsBuyButton: Boolean = false
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = false)
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
@@ -439,7 +467,15 @@ internal sealed interface PaymentSheetScreen {
     }
 
     class CvcRecollection(private val interactor: CvcRecollectionInteractor) : PaymentSheetScreen {
-        override val showsBuyButton: Boolean = true
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(
+                visible = true,
+                buyButtonOverride = BuyButtonState.BuyButtonOverride(
+                    label = resolvableString(R.string.stripe_paymentsheet_confirm),
+                    lockEnabled = false
+                )
+            )
+        )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding

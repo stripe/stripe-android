@@ -9,8 +9,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -383,6 +385,29 @@ class PrimaryButtonUiStateMapperTest {
                     formatArgs = arrayOf("\$12.34")
                 )
             )
+        }
+    }
+
+    @Test
+    fun `screen buy button override should be used complete flow when available`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor)
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            val item = awaitItem()
+            assertThat(item?.label).isEqualTo(resolvableString(R.string.stripe_paymentsheet_confirm))
+            assertThat(item?.lockVisible).isFalse()
         }
     }
 
