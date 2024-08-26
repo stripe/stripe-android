@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.48.6 - 2024-08-26
+* Stability and efficiency improvements.
+
 ## 20.48.5 - 2024-08-21
 
 ### PaymentSheet
