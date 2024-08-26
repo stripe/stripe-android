@@ -185,7 +185,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddAnotherPaymentMethod>()
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()

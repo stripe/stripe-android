@@ -152,7 +152,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any> = emptyMap()
     }
 
-    class ShowNewPaymentOptionForm(
+    class ShowNewPaymentOptions(
         mode: EventReporter.Mode,
         currency: String?,
         override val isDeferred: Boolean,
