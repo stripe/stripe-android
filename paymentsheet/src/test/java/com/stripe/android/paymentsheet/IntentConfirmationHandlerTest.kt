@@ -1673,6 +1673,64 @@ class IntentConfirmationHandlerTest {
         )
     }
 
+    @Test
+    fun `On Bacs succeeded, should return successful result`() = runBacsTest(
+        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Confirmed,
+        skipPaymentResultCheck = false,
+        internalPaymentResult = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            )
+        )
+    }
+
+    @Test
+    fun `On Bacs modify details, should return expected cancel result`() = runBacsTest(
+        bacsMandateConfirmationResult = BacsMandateConfirmationResult.ModifyDetails,
+        skipPaymentResultCheck = true,
+        internalPaymentResult = null,
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Canceled(
+                action = PaymentCancellationAction.ModifyPaymentDetails,
+            )
+        )
+    }
+
+    @Test
+    fun `On Bacs cancel, should return expected cancel result`() = runBacsTest(
+        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Cancelled,
+        skipPaymentResultCheck = true,
+        internalPaymentResult = null,
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Canceled(
+                action = PaymentCancellationAction.None,
+            )
+        )
+    }
+
+    @Test
+    fun `On Bacs cancelled while confirming intent, should return expected failed result`() = runBacsTest(
+        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Confirmed,
+        skipPaymentResultCheck = false,
+        internalPaymentResult = InternalPaymentResult.Failed(
+            throwable = IllegalStateException("An error occurred"),
+        ),
+    ) { result ->
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause)
+            .isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.message)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failedResult.type)
+            .isEqualTo(PaymentConfirmationErrorType.Payment)
+    }
+
     private fun runGooglePayTest(
         googlePayResult: GooglePayPaymentMethodLauncher.Result,
         internalPaymentResult: InternalPaymentResult?,
@@ -1722,6 +1780,72 @@ class IntentConfirmationHandlerTest {
             )
 
             googlePayCallbackHandler.onResult(googlePayResult)
+
+            if (skipPaymentResultCheck) {
+                test(awaitItem().asCompleted().result)
+
+                return@test
+            }
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+
+            internalPaymentResult?.let { result ->
+                paymentResultCallbackHandler.onResult(result)
+            } ?: throw IllegalStateException("Cannot continue test without a payment result!")
+
+            test(awaitItem().asCompleted().result)
+        }
+    }
+
+    private fun runBacsTest(
+        bacsMandateConfirmationResult: BacsMandateConfirmationResult,
+        internalPaymentResult: InternalPaymentResult?,
+        skipPaymentResultCheck: Boolean,
+        test: suspend (result: PaymentConfirmationResult) -> Unit
+    ) = runTest {
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueConfirmStep(
+                confirmParams = ConfirmPaymentIntentParams.create(
+                    clientSecret = "pi_123_secret_123"
+                )
+            )
+        }
+
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
+        ).apply {
+            registerWithCallbacks(
+                paymentResultCallbackHandler = paymentResultCallbackHandler,
+                bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
+            )
+        }
+
+        intentConfirmationHandler.state.test {
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
+
+            intentConfirmationHandler.start(
+                arguments = DEFAULT_ARGUMENTS.copy(
+                    confirmationOption = BACS_OPTION
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = BACS_OPTION,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = BACS_OPTION,
+                    inPreconfirmFlow = true,
+                )
+            )
+
+            bacsMandateConfirmationCallbackHandler.onResult(bacsMandateConfirmationResult)
 
             if (skipPaymentResultCheck) {
                 test(awaitItem().asCompleted().result)
@@ -1876,6 +2000,23 @@ class IntentConfirmationHandlerTest {
         val EXTERNAL_PAYMENT_METHOD = PaymentConfirmationOption.ExternalPaymentMethod(
             type = "paypal",
             billingDetails = null
+        )
+
+        val BACS_OPTION = PaymentConfirmationOption.BacsPaymentMethod(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            shippingDetails = null,
+            appearance = APPEARANCE,
+            createParams = PaymentMethodCreateParams.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = "00012345",
+                    sortCode = "808080",
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "John Doe",
+                    email = "johndoe@email.com"
+                ),
+            ),
+            optionsParams = null,
         )
 
         val GOOGLE_PAY_OPTION = PaymentConfirmationOption.GooglePay(
