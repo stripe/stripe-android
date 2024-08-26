@@ -52,6 +52,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(AndroidJUnit4::class)
 class IntentConfirmationHandlerTest {
@@ -1514,100 +1515,7 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
-    fun `On Google Pay cancel, should return expected result`() = runTest {
-        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
-        val intentConfirmationHandler = createIntentConfirmationHandler().apply {
-            registerWithCallbacks(
-                googlePayCallbackHandler = googlePayCallbackHandler,
-            )
-        }
-
-        intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
-
-            intentConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = GOOGLE_PAY_OPTION
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                IntentConfirmationHandler.State.Preconfirming(
-                    confirmationOption = GOOGLE_PAY_OPTION,
-                    inPreconfirmFlow = false,
-                )
-            )
-            assertThat(awaitItem()).isEqualTo(
-                IntentConfirmationHandler.State.Preconfirming(
-                    confirmationOption = GOOGLE_PAY_OPTION,
-                    inPreconfirmFlow = true,
-                )
-            )
-
-            googlePayCallbackHandler.onResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-
-            val expectedResult = PaymentConfirmationResult.Canceled(
-                action = PaymentCancellationAction.InformCancellation,
-            )
-
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Complete(expectedResult))
-            assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
-        }
-    }
-
-    @Test
-    fun `On Google Pay failed, should return expected result`() = runTest {
-        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
-        val intentConfirmationHandler = createIntentConfirmationHandler().apply {
-            registerWithCallbacks(
-                googlePayCallbackHandler = googlePayCallbackHandler,
-            )
-        }
-
-        intentConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
-
-            intentConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = GOOGLE_PAY_OPTION
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                IntentConfirmationHandler.State.Preconfirming(
-                    confirmationOption = GOOGLE_PAY_OPTION,
-                    inPreconfirmFlow = false,
-                )
-            )
-            assertThat(awaitItem()).isEqualTo(
-                IntentConfirmationHandler.State.Preconfirming(
-                    confirmationOption = GOOGLE_PAY_OPTION,
-                    inPreconfirmFlow = true,
-                )
-            )
-
-            val exception = IllegalStateException("Failed!")
-
-            googlePayCallbackHandler.onResult(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    error = exception,
-                    errorCode = 127,
-                )
-            )
-
-            val expectedResult = PaymentConfirmationResult.Failed(
-                cause = exception,
-                message = com.stripe.android.R.string.stripe_internal_error.resolvableString,
-                type = PaymentConfirmationErrorType.GooglePay(127),
-            )
-
-            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Complete(expectedResult))
-            assertThat(intentConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
-        }
-    }
-
-    @Test
-    fun `On Google Pay succeeded, should proceed to intent confirmation`() = runTest {
+    fun `On Google Pay launcher succeeded, should proceed to intent confirmation`() = runTest {
         val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
         val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -1660,6 +1568,174 @@ class IntentConfirmationHandlerTest {
                     shippingValues = null,
                 )
             )
+        }
+    }
+
+    @Test
+    fun `On Google Pay succeeded, should return successful result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        ),
+        skipPaymentResultCheck = false,
+        internalPaymentResult = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            )
+        )
+    }
+
+    @Test
+    fun `On Google Pay network failure, should return expected failed result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Failed(
+            error = IllegalStateException("An error occurred"),
+            errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
+        ),
+        skipPaymentResultCheck = true,
+        internalPaymentResult = null,
+    ) { result ->
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause)
+            .isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.message)
+            .isEqualTo(PaymentsCoreR.string.stripe_failure_connection_error.resolvableString)
+        assertThat(failedResult.type)
+            .isEqualTo(PaymentConfirmationErrorType.GooglePay(GooglePayPaymentMethodLauncher.NETWORK_ERROR))
+    }
+
+    @Test
+    fun `On Google Pay internal failure, should return expected failed result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Failed(
+            error = IllegalStateException("An error occurred"),
+            errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
+        ),
+        skipPaymentResultCheck = true,
+        internalPaymentResult = null,
+    ) { result ->
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause)
+            .isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.message)
+            .isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
+        assertThat(failedResult.type)
+            .isEqualTo(PaymentConfirmationErrorType.GooglePay(GooglePayPaymentMethodLauncher.INTERNAL_ERROR))
+    }
+
+    @Test
+    fun `On Google Pay cancel, should return expected cancel result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Canceled,
+        skipPaymentResultCheck = true,
+        internalPaymentResult = null,
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Canceled(
+                action = PaymentCancellationAction.InformCancellation
+            )
+        )
+    }
+
+    @Test
+    fun `On Google Pay failure while confirming intent, should return expected failed result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        ),
+        skipPaymentResultCheck = false,
+        internalPaymentResult = InternalPaymentResult.Failed(
+            throwable = IllegalStateException("An error occurred"),
+        ),
+    ) { result ->
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause)
+            .isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.message)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failedResult.type)
+            .isEqualTo(PaymentConfirmationErrorType.Payment)
+    }
+
+    @Test
+    fun `On Google Pay canceled while confirming intent, should return expected cancel result`() = runGooglePayTest(
+        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        ),
+        skipPaymentResultCheck = false,
+        internalPaymentResult = InternalPaymentResult.Canceled,
+    ) { result ->
+        assertThat(result).isEqualTo(
+            PaymentConfirmationResult.Canceled(
+                action = PaymentCancellationAction.InformCancellation
+            )
+        )
+    }
+
+    private fun runGooglePayTest(
+        googlePayResult: GooglePayPaymentMethodLauncher.Result,
+        internalPaymentResult: InternalPaymentResult?,
+        skipPaymentResultCheck: Boolean,
+        test: suspend (result: PaymentConfirmationResult) -> Unit
+    ) = runTest {
+        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueConfirmStep(
+                confirmParams = ConfirmPaymentIntentParams.create(
+                    clientSecret = "pi_123_secret_123"
+                )
+            )
+        }
+
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
+        ).apply {
+            registerWithCallbacks(
+                paymentResultCallbackHandler = paymentResultCallbackHandler,
+                googlePayCallbackHandler = googlePayCallbackHandler,
+            )
+        }
+
+        intentConfirmationHandler.state.test {
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Idle)
+
+            intentConfirmationHandler.start(
+                arguments = DEFAULT_ARGUMENTS.copy(
+                    confirmationOption = GOOGLE_PAY_OPTION
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = false,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(
+                IntentConfirmationHandler.State.Preconfirming(
+                    confirmationOption = GOOGLE_PAY_OPTION,
+                    inPreconfirmFlow = true,
+                )
+            )
+
+            googlePayCallbackHandler.onResult(googlePayResult)
+
+            if (skipPaymentResultCheck) {
+                test(awaitItem().asCompleted().result)
+
+                return@test
+            }
+
+            assertThat(awaitItem()).isEqualTo(IntentConfirmationHandler.State.Confirming)
+
+            internalPaymentResult?.let { result ->
+                paymentResultCallbackHandler.onResult(result)
+            } ?: throw IllegalStateException("Cannot continue test without a payment result!")
+
+            test(awaitItem().asCompleted().result)
         }
     }
 
@@ -1757,6 +1833,10 @@ class IntentConfirmationHandlerTest {
 
     private fun PaymentConfirmationResult?.asFailed(): PaymentConfirmationResult.Failed {
         return this as PaymentConfirmationResult.Failed
+    }
+
+    private fun IntentConfirmationHandler.State.asCompleted(): IntentConfirmationHandler.State.Complete {
+        return this as IntentConfirmationHandler.State.Complete
     }
 
     private fun createBacsPaymentConfirmationOption(
