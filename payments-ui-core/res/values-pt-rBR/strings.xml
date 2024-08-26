@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Pague em <num_installments/> vezes sem juros de <installment_price/> com <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d pagamentos sem juros de%2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Ao confirmar seu pagamento com o Amazon Pay, você permite que %s cobre sua conta do Amazon Pay por pagamentos futuros em conformidade com os termos da empresa.</string>
   <!-- Text for back button -->

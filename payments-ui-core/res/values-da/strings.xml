@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betal i <num_installments/> rentefri afdrag på <installment_price/> hver med <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d rentefri betalinger på %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Ved at bekræfte din betaling med Amazon Pay tillader du %s at debitere din Amazon Pay-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
   <!-- Text for back button -->

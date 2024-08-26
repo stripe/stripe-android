@@ -2,10 +2,14 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Aggiungi nuova modalità di pagamento</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Paga a rate con Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Rimuovi conto bancario che termina con %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Per completare l\'acquisto, conferma il pagamento nell\'app della tua banca entro %s.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Paga a rate con Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">I dati di pagamento non verranno salvati.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -55,6 +59,8 @@
   <string name="stripe_paymentsheet_microdeposit">Stripe verserà 0,01 USD sul tuo account in 1-2 giorni lavorativi. Poi riceverai un\'email con le istruzioni per completare il pagamento a favore di %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Modifica %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Nuova carta</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Nuova modalità di pagamento</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->

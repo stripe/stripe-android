@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Πληρώστε σε <num_installments/> άτοκες δόσεις των <installment_price/> με <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d άτοκες δόσεις των %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Αν επιβεβαιώσετε την πληρωμή σας με το Amazon Pay, επιτρέπετε στην %s να χρεώνει τον λογαριασμό σας στο Amazon Pay για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
   <!-- Text for back button -->

@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">ผ่อน %1$d งวดแบบปลอดดอกเบี้ย งวดละ %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">การยืนยันการการชำระเงินด้วย Amazon Pay หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี Amazon Pay ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Text for back button -->
