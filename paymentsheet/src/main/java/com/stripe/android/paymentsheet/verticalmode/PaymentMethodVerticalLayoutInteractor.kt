@@ -76,7 +76,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
-    private val canEdit: StateFlow<Boolean>,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
@@ -133,7 +132,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethods = customerStateHolder.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
-                canEdit = viewModel.savedPaymentMethodMutator.canEdit,
                 canRemove = viewModel.savedPaymentMethodMutator.canRemove,
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
@@ -171,13 +169,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val availableSavedPaymentMethodAction = combineAsStateFlow(
         paymentMethods,
         displayedSavedPaymentMethod,
-        canEdit,
         canRemove,
-    ) { paymentMethods, displayedSavedPaymentMethod, canEdit, canRemove ->
+    ) { paymentMethods, displayedSavedPaymentMethod, canRemove ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
-            canEdit = canEdit,
             canRemove = canRemove
         )
     }
@@ -284,7 +280,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getAvailableSavedPaymentMethodAction(
         paymentMethods: List<PaymentMethod>?,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
-        canEdit: Boolean,
         canRemove: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
@@ -296,7 +291,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             1 -> {
                 getSavedPaymentMethodActionForOnePaymentMethod(
                     canRemove = canRemove,
-                    canEdit = canEdit,
+                    savedPaymentMethod = savedPaymentMethod,
                 )
             }
             else ->
@@ -306,9 +301,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private fun getSavedPaymentMethodActionForOnePaymentMethod(
         canRemove: Boolean,
-        canEdit: Boolean,
+        savedPaymentMethod: DisplayableSavedPaymentMethod?,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (canEdit) {
+        return if (savedPaymentMethod?.isModifiable() == true) {
             // Edit screen handles both canRemove variants.
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
         } else if (canRemove) {

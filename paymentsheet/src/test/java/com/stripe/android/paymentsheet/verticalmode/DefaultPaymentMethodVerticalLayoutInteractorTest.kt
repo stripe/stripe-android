@@ -111,7 +111,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialPaymentMethods = PaymentMethodFixtures.createCards(3),
         ) {
             canRemove.value = true
-            canEdit.value = true
 
             interactor.state.test {
                 awaitItem().run {
@@ -129,7 +128,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialPaymentMethods = PaymentMethodFixtures.createCards(3),
         ) {
             canRemove.value = false
-            canEdit.value = false
 
             interactor.state.test {
                 awaitItem().run {
@@ -144,10 +142,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun `state has edit_card_brand saved PM action when one saved PM, can edit, and can remove`() {
         runScenario(
-            initialPaymentMethods = PaymentMethodFactory.cards(1),
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD),
         ) {
             canRemove.value = true
-            canEdit.value = true
 
             interactor.state.test {
                 awaitItem().run {
@@ -162,10 +159,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun `state has edit card brand saved payment method action when one saved PM, can edit, and cannot remove`() {
         runScenario(
-            initialPaymentMethods = PaymentMethodFactory.cards(1),
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD),
         ) {
             canRemove.value = false
-            canEdit.value = true
 
             interactor.state.test {
                 awaitItem().run {
@@ -178,12 +174,28 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `state has manage one saved payment method action when one saved PM, cannot edit, and can remove`() {
+        runScenario(
+            initialPaymentMethods = PaymentMethodFactory.cards(1), // Creates a non-modifiable card
+        ) {
+            canRemove.value = true
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(availableSavedPaymentMethodAction).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun `state has no saved payment method action when one saved PM, cannot edit, and cannot remove`() {
         runScenario(
-            initialPaymentMethods = PaymentMethodFactory.cards(1),
+            initialPaymentMethods = PaymentMethodFactory.cards(1), // Creates a non-modifiable card
         ) {
             canRemove.value = false
-            canEdit.value = false
 
             interactor.state.test {
                 awaitItem().run {
@@ -196,12 +208,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `state has no saved payment method action when multiple saved PMs, cannot edit, and cannot remove`() {
+    fun `state has no saved payment method action when multiple saved PMs and cannot remove`() {
         runScenario(
             initialPaymentMethods = PaymentMethodFactory.cards(1),
         ) {
             canRemove.value = false
-            canEdit.value = false
 
             interactor.state.test {
                 awaitItem().run {
@@ -972,7 +983,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow<WalletsState?>(null)
-        val canEdit = MutableStateFlow(true)
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val dispatcher = StandardTestDispatcher()
@@ -998,7 +1008,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             updateSelection = updateSelection,
             isCurrentScreen = isCurrentScreen,
             dispatcher = dispatcher,
-            canEdit = canEdit,
             canRemove = canRemove,
             isLiveMode = true,
         )
@@ -1012,7 +1021,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsState = walletsState,
             interactor = interactor,
             canRemove = canRemove,
-            canEdit = canEdit,
             dispatcher = dispatcher,
         ).apply {
             runTest {
@@ -1029,7 +1037,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val walletsState: MutableStateFlow<WalletsState?>,
         val canRemove: MutableStateFlow<Boolean>,
-        val canEdit: MutableStateFlow<Boolean>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
         val dispatcher: TestDispatcher,
     )
