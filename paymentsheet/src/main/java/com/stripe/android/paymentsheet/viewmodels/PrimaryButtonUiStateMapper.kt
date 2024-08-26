@@ -6,17 +6,16 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.BuyButtonState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combine
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
@@ -31,31 +30,25 @@ internal class PrimaryButtonUiStateMapper(
     private val onClick: () -> Unit,
 ) {
 
-    private fun screenAndButtonFlow(): StateFlow<Pair<PaymentSheetScreen, BuyButtonState>> {
-        return currentScreenFlow.flatMapLatestAsStateFlow { screen ->
-            screen.buyButtonState.mapAsStateFlow { buyButtonState ->
-                screen to buyButtonState
-            }
-        }
-    }
-
     fun forCompleteFlow(): Flow<PrimaryButton.UIState?> {
         return combine(
-            screenAndButtonFlow(),
+            currentScreenFlow,
             buttonsEnabledFlow,
             amountFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
             cvcCompleteFlow
-        ) { (screen, buyButtonState), buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
-            customPrimaryButton ?: PrimaryButton.UIState(
-                label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(amount),
-                onClick = onClick,
-                enabled = buttonsEnabled && selection != null &&
-                    cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
-            ).takeIf { buyButtonState.visible }
-        }
+        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
+            screen.buyButtonState.map { buyButtonState ->
+                customPrimaryButton ?: PrimaryButton.UIState(
+                    label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(amount),
+                    onClick = onClick,
+                    enabled = buttonsEnabled && selection != null &&
+                        cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
+                    lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+                ).takeIf { buyButtonState.visible }
+            }
+        }.flatMapConcat { it }
     }
 
     fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
