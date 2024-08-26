@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -48,7 +49,7 @@ internal class PrimaryButtonUiStateMapper(
                     lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
                 ).takeIf { buyButtonState.visible }
             }
-        }.flatMapConcat { it }
+        }.flatMapLatest { it }
     }
 
     fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
