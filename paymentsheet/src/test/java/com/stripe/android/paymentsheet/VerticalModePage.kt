@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 
 internal class VerticalModePage(
     private val composeTestRule: ComposeTestRule
@@ -25,7 +26,7 @@ internal class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 2_000) {
+        composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()
@@ -57,7 +58,10 @@ internal class VerticalModePage(
         composeTestRule.onNode(
             hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
                 .and(hasAnyDescendant(isSelected()))
-        ).performScrollTo()
-            .performClick()
+        ).assertExists()
+    }
+
+    fun clickViewMore() {
+        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
     }
 }

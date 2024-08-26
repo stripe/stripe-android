@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Build
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -18,11 +19,13 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(
     ExperimentalPaymentMethodLayoutApi::class,
 )
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class VerticalModePaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
@@ -31,6 +34,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val formPage = FormPage(composeTestRule)
+    private val managePage = ManagePage(composeTestRule)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -116,6 +120,27 @@ internal class VerticalModePaymentSheetActivityTest {
     ) {
         verticalModePage.assertIsNotVisible()
         verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @Test
+    fun `Updates selected saved payment method`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(lpms = listOf("card"))
+            setupV1PaymentMethodsResponse(isEmpty = false)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.selectPaymentMethod("pm_67890")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_67890")
     }
 
     private fun runTest(

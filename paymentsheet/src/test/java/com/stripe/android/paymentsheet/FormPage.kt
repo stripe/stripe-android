@@ -42,7 +42,7 @@ internal class FormPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 2_000) {
+        composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
                 .fetchSemanticsNodes()
