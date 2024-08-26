@@ -29,8 +29,10 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
+internal const val TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT = "TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT"
 internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
 internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
+internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -71,7 +73,9 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
-        modifier = modifier.padding(horizontal = 20.dp)
+        modifier = modifier
+            .padding(horizontal = 20.dp)
+            .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
 }
 
@@ -95,7 +99,12 @@ internal fun PaymentMethodVerticalLayoutUI(
         val textColor = MaterialTheme.stripeColors.onComponent
 
         if (displayedSavedPaymentMethod != null) {
-            Text(stringResource(id = R.string.stripe_paymentsheet_saved), style = textStyle, color = textColor)
+            Text(
+                text = stringResource(id = R.string.stripe_paymentsheet_saved),
+                style = textStyle,
+                color = textColor,
+                modifier = Modifier.testTag(TEST_TAG_SAVED_TEXT),
+            )
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
