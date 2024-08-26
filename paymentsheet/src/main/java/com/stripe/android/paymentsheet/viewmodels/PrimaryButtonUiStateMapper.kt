@@ -14,7 +14,6 @@ import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import com.stripe.android.ui.core.R as StripeUiCoreR
