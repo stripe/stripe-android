@@ -108,7 +108,7 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `When the payment intent only has on LPM it launches directly into the form`() = runTest(
+    fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("cashapp"))
