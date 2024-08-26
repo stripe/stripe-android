@@ -28,7 +28,7 @@ open class AnalyticsRequestFactory(
      * Ensure this common parameters are not already included in [standardParams].
      *
      */
-    fun createRequest(
+    open fun createRequest(
         event: AnalyticsEvent,
         additionalParams: Map<String, Any?>
     ): AnalyticsRequest {

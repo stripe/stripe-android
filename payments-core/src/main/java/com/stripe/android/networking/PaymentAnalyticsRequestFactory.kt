@@ -7,6 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
@@ -216,6 +217,22 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 threeDS2UiType = threeDS2UiType,
                 errorMessage = errorMessage,
             )
+        )
+    }
+
+    override fun createRequest(
+        event: AnalyticsEvent,
+        additionalParams: Map<String, Any?>
+    ): AnalyticsRequest {
+        val params = if (defaultProductUsageTokens.isNotEmpty()) {
+            mapOf(FIELD_PRODUCT_USAGE to defaultProductUsageTokens.toList()).plus(additionalParams)
+        } else {
+            additionalParams
+        }
+
+        return super.createRequest(
+            event,
+            params,
         )
     }
 
