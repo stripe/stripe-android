@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Ħallas f\'dan-numru ta\' pagamenti: <num_installments/> ta\' <installment_price/> mingħajr imgħax grazzi għal <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d pagamenti ta\' %2$s bla imgħax</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Meta tikkonferma l-pagament tiegħek b\'AmazonPay, tkun qed tagħti permess lil %s biex jiċċarġjaw il-kont ta\' AmazonPay tiegħek għal pagamenti furuti skont it-termini tagħhom.</string>
   <!-- Text for back button -->

@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Platite u <num_installments/> beskamatnih obroka po <installment_price/> koristeći <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d plaćanja u iznosu od %2$s bez kamata</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Potvrdom svog plaćanja putem Amazon Paya, dopuštate poduzeću %s da tereti vaš AmazonPay račun za buduća plaćanja u skladu s njegovim uvjetima.</string>
   <!-- Text for back button -->

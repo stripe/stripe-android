@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Maksu <num_installments/> korottomassa <installment_price/> osassa maksutavalla <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d korotonta %2$s maksua</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Kun vahvistat maksusi Amazon Paylla, %s valtuutetaan veloittamaan tulevia maksuja Amazon Pay -tililtäsi omien ehtojensa mukaisesti.</string>
   <!-- Text for back button -->

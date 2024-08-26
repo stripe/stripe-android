@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> で毎回 <installment_price/> ずつ、無利息の <num_installments/> 回の分割払いで支払う]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%2$s の無利息の %1$d 回払い</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">AmazonPay による支払いを確定すると、%s が規約に従って今後の支払いをお客様の AmazonPay アカウントに請求することを許可することになります。</string>
   <!-- Text for back button -->
