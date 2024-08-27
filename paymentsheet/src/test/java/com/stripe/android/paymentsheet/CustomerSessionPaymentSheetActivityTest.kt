@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray
-import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -54,8 +53,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When multiple PMs with remove permissions and can remove last PM, should all be enabled when editing`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242"),
-                createCard(last4 = "5544", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "4242"),
+                PaymentMethodFactory.card(last4 = "5544", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -70,7 +69,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When single PM with remove permissions and can remove last PM, should be enabled when editing`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242"),
+                PaymentMethodFactory.card(last4 = "4242"),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -84,7 +83,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When single PM with remove permissions but cannot remove last PM, edit button should not be displayed`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242"),
+                PaymentMethodFactory.card(last4 = "4242"),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = false,
@@ -96,8 +95,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When multiple PMs but no remove permissions, edit button should not be displayed`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242"),
-                createCard(last4 = "5544"),
+                PaymentMethodFactory.card(last4 = "4242"),
+                PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -109,8 +108,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When multiple PMs with CBC card but no remove permissions, should allow editing CBC card and disable rest`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242", addCbcNetworks = true),
-                createCard(last4 = "5544"),
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -129,8 +128,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When multiple PMs with CBC card and has remove permissions, should be able to remove and edit CBC card`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242", addCbcNetworks = true),
-                createCard(last4 = "5544"),
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -153,7 +152,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When single CBC card, has remove permissions, and can remove last PM, should be able to remove and edit`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -174,7 +173,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When single CBC card but no remove permissions, can edit but not remove CBC card`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
@@ -195,7 +194,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
     fun `When single CBC card has remove permissions but cannot remove last, can edit but not remove CBC card`() =
         runTest(
             cards = listOf(
-                createCard(last4 = "4242", addCbcNetworks = true),
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = false,
@@ -296,22 +295,6 @@ internal class CustomerSessionPaymentSheetActivityTest {
         return hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG).and(hasText(last4, substring = true))
     }
 
-    private fun createCard(last4: String, addCbcNetworks: Boolean = false): PaymentMethod {
-        return PaymentMethodFactory.card(random = true).run {
-            copy(
-                card = card?.copy(
-                    last4 = last4,
-                    networks = PaymentMethod.Card.Networks(
-                        available = setOf("cartes_bancaires", "visa"),
-                        preferred = "cartes_bancaries",
-                    ).takeIf {
-                        addCbcNetworks
-                    }
-                )
-            )
-        }
-    }
-
     private companion object {
         @Suppress("LongMethod")
         fun createElementsSessionResponse(
@@ -321,7 +304,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             val cardsArray = JSONArray()
 
             cards.forEach { card ->
-                cardsArray.put(convertCardToJson(card))
+                cardsArray.put(PaymentMethodFactory.convertCardToJson(card))
             }
 
             val cardsStringified = cardsArray.toString(2)
@@ -435,39 +418,6 @@ internal class CustomerSessionPaymentSheetActivityTest {
                   "unactivated_payment_method_types": []
                 }
             """.trimIndent()
-        }
-
-        private fun convertCardToJson(paymentMethod: PaymentMethod): JSONObject {
-            val paymentMethodJson = JSONObject()
-
-            paymentMethodJson.put("id", paymentMethod.id)
-            paymentMethodJson.put("type", paymentMethod.type?.code)
-            paymentMethodJson.put("created", paymentMethod.created)
-            paymentMethodJson.put("customer", paymentMethod.customerId)
-            paymentMethodJson.put("livemode", paymentMethod.liveMode)
-
-            val card = paymentMethod.card
-            val cardJson = JSONObject()
-
-            cardJson.put("brand", card?.brand?.code)
-            cardJson.put("last4", card?.last4)
-
-            val networks = paymentMethod.card?.networks
-            val networksJson = JSONObject()
-            val availableJson = JSONArray()
-
-            networks?.available?.forEach {
-                availableJson.put(it)
-            }
-
-            networksJson.put("available", availableJson)
-            networksJson.put("preferred", networks?.preferred)
-
-            cardJson.put("networks", networksJson)
-
-            paymentMethodJson.put("card", cardJson)
-
-            return paymentMethodJson
         }
     }
 }

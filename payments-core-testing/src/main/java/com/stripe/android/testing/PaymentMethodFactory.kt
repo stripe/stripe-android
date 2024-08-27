@@ -1,9 +1,27 @@
 package com.stripe.android.testing
 
 import com.stripe.android.model.PaymentMethod
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.random.Random
 
 object PaymentMethodFactory {
+
+    fun card(last4: String, addCbcNetworks: Boolean = false): PaymentMethod {
+        return card(random = true).run {
+            copy(
+                card = card?.copy(
+                    last4 = last4,
+                    networks = PaymentMethod.Card.Networks(
+                        available = setOf("cartes_bancaires", "visa"),
+                        preferred = "cartes_bancaries",
+                    ).takeIf {
+                        addCbcNetworks
+                    }
+                )
+            )
+        }
+    }
 
     fun cards(size: Int): List<PaymentMethod> {
         return buildList {
@@ -19,7 +37,10 @@ object PaymentMethodFactory {
         } else {
             "pm_1234"
         }
+        return card(id)
+    }
 
+    fun card(id: String): PaymentMethod {
         return PaymentMethod(
             id = id,
             created = 123456789L,
@@ -70,5 +91,38 @@ object PaymentMethodFactory {
             type = PaymentMethod.Type.SepaDebit,
             code = PaymentMethod.Type.SepaDebit.code,
         )
+    }
+
+    fun convertCardToJson(paymentMethod: PaymentMethod): JSONObject {
+        val paymentMethodJson = JSONObject()
+
+        paymentMethodJson.put("id", paymentMethod.id)
+        paymentMethodJson.put("type", paymentMethod.type?.code)
+        paymentMethodJson.put("created", paymentMethod.created)
+        paymentMethodJson.put("customer", paymentMethod.customerId)
+        paymentMethodJson.put("livemode", paymentMethod.liveMode)
+
+        val card = paymentMethod.card
+        val cardJson = JSONObject()
+
+        cardJson.put("brand", card?.brand?.code)
+        cardJson.put("last4", card?.last4)
+
+        val networks = paymentMethod.card?.networks
+        val networksJson = JSONObject()
+        val availableJson = JSONArray()
+
+        networks?.available?.forEach {
+            availableJson.put(it)
+        }
+
+        networksJson.put("available", availableJson)
+        networksJson.put("preferred", networks?.preferred)
+
+        cardJson.put("networks", networksJson)
+
+        paymentMethodJson.put("card", cardJson)
+
+        return paymentMethodJson
     }
 }

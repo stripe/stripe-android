@@ -7,6 +7,7 @@ import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -14,6 +15,8 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.PaymentMethodFactory
+import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -75,7 +78,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(isEmpty = false)
+            setupV1PaymentMethodsResponse(count = 2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -102,7 +105,7 @@ internal class VerticalModePaymentSheetActivityTest {
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(isEmpty = true)
+            setupV1PaymentMethodsResponse(count = 0)
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -127,7 +130,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(isEmpty = false)
+            setupV1PaymentMethodsResponse(count = 2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -141,6 +144,81 @@ internal class VerticalModePaymentSheetActivityTest {
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_67890")
+    }
+
+    @Test
+    fun `Removing card selects next available card`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(count = 2)
+            setupPaymentMethodDetachResponse("pm_12345")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.clickEdit()
+        managePage.clickRemove("pm_12345")
+        managePage.clickDone()
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.clickSavedPaymentMethod("pm_67890")
+        verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @Test
+    fun `Removing last card navigates back`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(count = 2)
+            setupPaymentMethodDetachResponse("pm_12345")
+            setupPaymentMethodDetachResponse("pm_67890")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.clickEdit()
+        managePage.clickRemove("pm_12345")
+        managePage.clickRemove("pm_67890")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+    }
+
+    @Test
+    fun `Removing only card navigates back`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(count = 1)
+            setupPaymentMethodDetachResponse("pm_12345")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickEdit()
+        managePage.waitUntilRemoveVisible("pm_12345")
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.clickRemove("pm_12345")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
     }
 
     private fun runTest(
@@ -196,17 +274,50 @@ internal class VerticalModePaymentSheetActivityTest {
         }
     }
 
-    private fun setupV1PaymentMethodsResponse(isEmpty: Boolean) {
+    private fun setupV1PaymentMethodsResponse(count: Int) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
         ) { response ->
-            if (isEmpty) {
-                response.testBodyFromFile("payment-methods-get-success-empty.json")
-            } else {
-                response.testBodyFromFile("payment-methods-get-success.json")
+            val cardsArray = JSONArray()
+
+            val idMap = mapOf(
+                0 to "pm_12345",
+                1 to "pm_67890"
+            )
+
+            for (i in 0 until count) {
+                val id = idMap[i]
+                if (id != null) {
+                    cardsArray.put(PaymentMethodFactory.convertCardToJson(PaymentMethodFactory.card(id = id)))
+                } else {
+                    cardsArray.put(PaymentMethodFactory.convertCardToJson(PaymentMethodFactory.card(random = true)))
+                }
             }
+
+            val cardsStringified = cardsArray.toString(2)
+
+            val body = """
+            {
+              "object": "list",
+              "data": $cardsStringified,
+              "has_more": false,
+              "url": "/v1/payment_methods"
+            }
+            """.trimIndent()
+            response.setBody(body)
+        }
+    }
+
+    private fun setupPaymentMethodDetachResponse(paymentMethodId: String) {
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods/$paymentMethodId/detach"),
+        ) { response ->
+            // We ignore the result.
+            response.setResponseCode(500)
         }
     }
 }
