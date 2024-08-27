@@ -277,7 +277,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorMessage()
+            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorInfo()
 
         private fun buildDeferredIntentConfirmationType(): Map<String, String> {
             return deferredIntentConfirmationType?.let {
@@ -285,10 +285,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }.orEmpty()
         }
 
-        private fun errorMessage(): Map<String, String> {
+        private fun errorInfo(): Map<String, String> {
             return when (result) {
                 is Result.Success -> emptyMap()
-                is Result.Failure -> mapOf(FIELD_ERROR_MESSAGE to result.error.analyticsValue)
+                is Result.Failure -> mapOf(
+                    FIELD_ERROR_MESSAGE to result.error.analyticsValue,
+                    FIELD_ERROR_CODE to result.error.errorCode,
+                ).filterNotNullValues()
             }
         }
 
@@ -476,6 +479,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_ERROR_MESSAGE = "error_message"
+        const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
