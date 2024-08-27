@@ -335,6 +335,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {
+                reportPaymentMethodTypeSelected("saved")
                 onSelectSavedPaymentMethod(viewAction.savedPaymentMethod)
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
