@@ -1,5 +1,6 @@
 package com.stripe.android.testing
 
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9,18 +10,24 @@ object PaymentMethodFactory {
 
     fun card(last4: String, addCbcNetworks: Boolean = false): PaymentMethod {
         return card(random = true).run {
-            copy(
-                card = card?.copy(
-                    last4 = last4,
-                    networks = PaymentMethod.Card.Networks(
-                        available = setOf("cartes_bancaires", "visa"),
-                        preferred = "cartes_bancaries",
-                    ).takeIf {
-                        addCbcNetworks
-                    }
-                )
-            )
+            update(last4, addCbcNetworks)
         }
+    }
+
+    fun PaymentMethod.update(last4: String?, addCbcNetworks: Boolean): PaymentMethod {
+        return copy(
+            card = card?.copy(
+                last4 = last4,
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf("cartes_bancaires", "visa"),
+                    preferred = "cartes_bancaries",
+                ).takeIf {
+                    addCbcNetworks
+                },
+                displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
+                brand = CardBrand.Visa,
+            )
+        )
     }
 
     fun cards(size: Int): List<PaymentMethod> {
@@ -105,6 +112,7 @@ object PaymentMethodFactory {
         val card = paymentMethod.card
         val cardJson = JSONObject()
 
+        cardJson.put("display_brand", card?.displayBrand)
         cardJson.put("brand", card?.brand?.code)
         cardJson.put("last4", card?.last4)
 

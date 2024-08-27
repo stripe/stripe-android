@@ -8,7 +8,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -16,6 +18,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +41,7 @@ internal class VerticalModePaymentSheetActivityTest {
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val formPage = FormPage(composeTestRule)
     private val managePage = ManagePage(composeTestRule)
+    private val editPage = EditPage(composeTestRule)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -221,6 +225,38 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertPrimaryButton(isNotEnabled())
     }
 
+    @Test
+    fun `Updating a card brand updates the icon in the list`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(isCbcEligible = true)
+            setupV1PaymentMethodsResponse(count = 2, addCbcNetworks = true)
+            setupPaymentMethodUpdateResponse(paymentMethodId = "pm_12345", cardBrand = "visa")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
+        managePage.clickEdit()
+        managePage.clickEdit("pm_12345")
+
+        editPage.assertIsVisible()
+        editPage.setCardBrand("Visa")
+        editPage.update()
+        managePage.waitUntilVisible()
+        managePage.clickDone()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")
+        verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
     private fun runTest(
         customer: PaymentSheet.CustomerConfiguration? = null,
         networkSetup: () -> Unit,
@@ -253,7 +289,8 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     private fun setupElementsSessionsResponse(
-        lpms: List<String> = listOf("card", "cashapp")
+        lpms: List<String> = listOf("card", "cashapp"),
+        isCbcEligible: Boolean = false,
     ) {
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -270,11 +307,15 @@ internal class VerticalModePaymentSheetActivityTest {
                     postfix = "\"",
                 )
             )
+            replacements += ResponseReplacement(
+                original = "CBC_ELIGIBLE_HERE",
+                new = "$isCbcEligible",
+            )
             response.testBodyFromFile("elements-sessions-requires_payment_method.json", replacements)
         }
     }
 
-    private fun setupV1PaymentMethodsResponse(count: Int) {
+    private fun setupV1PaymentMethodsResponse(count: Int, addCbcNetworks: Boolean = false) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -282,18 +323,15 @@ internal class VerticalModePaymentSheetActivityTest {
         ) { response ->
             val cardsArray = JSONArray()
 
-            val idMap = mapOf(
-                0 to "pm_12345",
-                1 to "pm_67890"
-            )
-
             for (i in 0 until count) {
-                val id = idMap[i]
-                if (id != null) {
-                    cardsArray.put(PaymentMethodFactory.convertCardToJson(PaymentMethodFactory.card(id = id)))
-                } else {
-                    cardsArray.put(PaymentMethodFactory.convertCardToJson(PaymentMethodFactory.card(random = true)))
-                }
+                val paymentMethodDetails = paymentMethodDetailsMap[i]!!
+                val card = PaymentMethodFactory.card(
+                    id = paymentMethodDetails.id
+                ).update(
+                    last4 = paymentMethodDetails.last4,
+                    addCbcNetworks = addCbcNetworks,
+                )
+                cardsArray.put(PaymentMethodFactory.convertCardToJson(card))
             }
 
             val cardsStringified = cardsArray.toString(2)
@@ -320,4 +358,38 @@ internal class VerticalModePaymentSheetActivityTest {
             response.setResponseCode(500)
         }
     }
+
+    private fun setupPaymentMethodUpdateResponse(paymentMethodId: String, cardBrand: String) {
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods/$paymentMethodId"),
+            bodyPart(urlEncode("card[networks][preferred]"), cardBrand)
+        ) { response ->
+            val paymentMethodDetails = paymentMethodDetailsMap.values.first { it.id == paymentMethodId }
+            val originalCard = PaymentMethodFactory.card(
+                id = paymentMethodDetails.id
+            ).update(
+                last4 = paymentMethodDetails.last4,
+                addCbcNetworks = true,
+            )
+
+            val card = originalCard.copy(
+                card = originalCard.card!!.copy(
+                    displayBrand = cardBrand
+                )
+            )
+            response.setBody(PaymentMethodFactory.convertCardToJson(card).toString(2))
+        }
+    }
+
+    private data class PaymentMethodDetails(
+        val id: String,
+        val last4: String,
+    )
+
+    private val paymentMethodDetailsMap = mapOf(
+        0 to PaymentMethodDetails("pm_12345", "4242"),
+        1 to PaymentMethodDetails("pm_67890", "5544"),
+    )
 }

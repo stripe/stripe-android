@@ -55,9 +55,10 @@ internal class VerticalModePage(
         composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertDoesNotExist()
     }
 
-    fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String) {
+    fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
+        val metadata = if (cardBrand != null) "_$cardBrand" else ""
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethodId}$metadata")
                 .and(hasAnyDescendant(isSelected()))
         ).assertExists()
     }

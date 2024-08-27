@@ -35,6 +35,9 @@ internal fun SavedPaymentMethodRowButton(
         displayableSavedPaymentMethod.paymentMethod.getLabel()
             ?: displayableSavedPaymentMethod.displayName
 
+    val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
+    val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
+    val testTagMetadata = if (displayBrand != null) "_$displayBrand" else ""
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
@@ -51,7 +54,7 @@ internal fun SavedPaymentMethodRowButton(
         subtitle = null,
         onClick = onClick,
         modifier = modifier.testTag(
-            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethod.paymentMethod.id}"
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethodId}$testTagMetadata"
         ),
         trailingContent = trailingContent,
     )
