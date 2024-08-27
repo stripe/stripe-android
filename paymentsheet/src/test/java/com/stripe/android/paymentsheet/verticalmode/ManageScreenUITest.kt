@@ -44,10 +44,8 @@ class ManageScreenUITest {
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
-            val cardBrand = savedPaymentMethod.paymentMethod.card?.displayBrand
-            val metadata = if (cardBrand != null) "_$cardBrand" else ""
             composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}$metadata"
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}"
             ).assertExists()
         }
     }
@@ -67,10 +65,8 @@ class ManageScreenUITest {
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
-            val cardBrand = savedPaymentMethod.paymentMethod.card?.displayBrand
-            val metadata = if (cardBrand != null) "_$cardBrand" else ""
             composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}$metadata"
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}"
             ).assertExists()
         }
     }

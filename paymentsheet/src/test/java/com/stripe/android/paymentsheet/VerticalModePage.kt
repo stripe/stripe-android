@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
@@ -56,10 +57,23 @@ internal class VerticalModePage(
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
-        val metadata = if (cardBrand != null) "_$cardBrand" else ""
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethodId}$metadata")
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
                 .and(hasAnyDescendant(isSelected()))
+        ).assertExists()
+
+        if (cardBrand != null) {
+            composeTestRule.onNode(
+                hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+                    .and(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES).and(hasTestMetadata(cardBrand)))),
+                useUnmergedTree = true,
+            ).assertExists()
+        }
+    }
+
+    fun assertHasDisplayedSavedPaymentMethod(paymentMethodId: String) {
+        composeTestRule.onNode(
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
         ).assertExists()
     }
 

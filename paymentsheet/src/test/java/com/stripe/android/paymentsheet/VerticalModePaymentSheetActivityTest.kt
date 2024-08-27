@@ -51,6 +51,7 @@ internal class VerticalModePaymentSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+//        .around(ShampooRule(1000))
 
     @Test
     fun `Allows paying with card`() = runTest(
@@ -258,6 +259,32 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")
         verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @Test
+    fun `Displayed saved payment method is correct`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.selectPaymentMethod("pm_67890")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_67890")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickOnNewLpm("cashapp")
+        // We don't want it to switch back to the first saved payment method (pm_12345).
+        verticalModePage.assertHasDisplayedSavedPaymentMethod("pm_67890")
     }
 
     private fun runTest(

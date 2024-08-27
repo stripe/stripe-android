@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.strings.resolve
@@ -36,25 +37,28 @@ internal fun SavedPaymentMethodRowButton(
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
-    val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-    val testTagMetadata = if (displayBrand != null) "_$displayBrand" else ""
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
         isClickable = isClickable,
         iconContent = {
+            val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
             PaymentMethodIconFromResource(
                 iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
                 colorFilter = null,
                 alignment = Alignment.Center,
-                modifier = Modifier.padding(4.dp).height(iconHeight).width(iconWidth)
+                modifier = Modifier
+                    .padding(4.dp)
+                    .height(iconHeight)
+                    .width(iconWidth)
+                    .testMetadata(displayBrand)
             )
         },
         title = paymentMethodTitle.resolve(),
         subtitle = null,
         onClick = onClick,
         modifier = modifier.testTag(
-            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethodId}$testTagMetadata"
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"
         ),
         trailingContent = trailingContent,
     )
