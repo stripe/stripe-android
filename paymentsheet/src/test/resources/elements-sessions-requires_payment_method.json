@@ -50,5 +50,8 @@
     },
     "type": "payment_intent"
   },
-  "unactivated_payment_method_types": []
+  "unactivated_payment_method_types": [],
+  "card_brand_choice": {
+    "eligible": CBC_ELIGIBLE_HERE
+  }
 }
