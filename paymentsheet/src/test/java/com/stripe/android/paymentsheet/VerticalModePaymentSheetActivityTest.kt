@@ -51,7 +51,6 @@ internal class VerticalModePaymentSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-//        .around(ShampooRule(1000))
 
     @Test
     fun `Allows paying with card`() = runTest(
