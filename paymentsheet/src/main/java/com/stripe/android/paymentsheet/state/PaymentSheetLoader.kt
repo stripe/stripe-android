@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.LinkMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
@@ -573,13 +574,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
-                linkEnabled = elementsSession.isLinkEnabled,
+                linkMode = getLinkMode(elementsSession),
                 googlePaySupported = isGooglePaySupported,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
             )
+        }
+    }
+
+    private fun getLinkMode(elementsSession: ElementsSession): LinkMode? {
+        return when (elementsSession.isLinkEnabled) {
+            true -> {
+                if (elementsSession.linkPassthroughModeEnabled) {
+                    LinkMode.Passthrough
+                } else {
+                    LinkMode.PaymentMethodMode
+                }
+            }
+            false -> null
         }
     }
 

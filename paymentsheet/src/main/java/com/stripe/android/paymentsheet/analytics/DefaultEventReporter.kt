@@ -53,14 +53,14 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
+        linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
     ) {
         this.currency = currency
-        this.linkEnabled = linkEnabled
+        this.linkEnabled = linkMode != null
         this.googlePaySupported = googlePaySupported
 
         durationProvider.start(DurationProvider.Key.Checkout)
@@ -72,7 +72,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
+                linkMode = linkMode,
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,

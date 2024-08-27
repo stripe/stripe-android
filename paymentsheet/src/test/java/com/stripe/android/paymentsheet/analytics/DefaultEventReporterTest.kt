@@ -128,7 +128,7 @@ class DefaultEventReporterTest {
     @Test
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
+            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
         completeEventReporter.onShowNewPaymentOptionForm()
@@ -573,6 +573,40 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `Send correct link_mode for payment method mode on load succeeded event`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkMode = LinkMode.PaymentMethodMode
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_enabled"] == true &&
+                    req.params["link_mode"] == "payment_method_mode"
+            }
+        )
+    }
+
+    @Test
+    fun `Send correct link_mode for passthrough mode on load succeeded event`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkMode = LinkMode.Passthrough
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_enabled"] == true &&
+                    req.params["link_mode"] == "passthrough"
+            }
+        )
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
@@ -680,7 +714,7 @@ class DefaultEventReporterTest {
 
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
-        linkEnabled: Boolean = true,
+        linkMode: LinkMode? = LinkMode.PaymentMethodMode,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -692,7 +726,7 @@ class DefaultEventReporterTest {
         onLoadSucceeded(
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,
-            linkEnabled = linkEnabled,
+            linkMode = linkMode,
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
