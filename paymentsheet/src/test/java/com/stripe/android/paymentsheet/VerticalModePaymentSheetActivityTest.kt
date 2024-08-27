@@ -43,6 +43,9 @@ internal class VerticalModePaymentSheetActivityTest {
     private val managePage = ManagePage(composeTestRule)
     private val editPage = EditPage(composeTestRule)
 
+    private val card1 = PaymentMethodDetails("pm_12345", "4242")
+    private val card2 = PaymentMethodDetails("pm_67890", "5544")
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(composeTestRule)
@@ -82,7 +85,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(count = 2)
+            setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -109,7 +112,7 @@ internal class VerticalModePaymentSheetActivityTest {
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(count = 0)
+            setupV1PaymentMethodsResponse()
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -134,7 +137,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(count = 2)
+            setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -155,7 +158,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(count = 2)
+            setupV1PaymentMethodsResponse(card1, card2)
             setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -181,7 +184,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(count = 2)
+            setupV1PaymentMethodsResponse(card1, card2)
             setupPaymentMethodDetachResponse("pm_12345")
             setupPaymentMethodDetachResponse("pm_67890")
         },
@@ -207,7 +210,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(count = 1)
+            setupV1PaymentMethodsResponse(card1)
             setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -230,8 +233,8 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
-            setupV1PaymentMethodsResponse(count = 2, addCbcNetworks = true)
-            setupPaymentMethodUpdateResponse(paymentMethodId = "pm_12345", cardBrand = "visa")
+            setupV1PaymentMethodsResponse(card1, card2, addCbcNetworks = true)
+            setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -315,7 +318,10 @@ internal class VerticalModePaymentSheetActivityTest {
         }
     }
 
-    private fun setupV1PaymentMethodsResponse(count: Int, addCbcNetworks: Boolean = false) {
+    private fun setupV1PaymentMethodsResponse(
+        vararg paymentMethodDetails: PaymentMethodDetails,
+        addCbcNetworks: Boolean = false,
+    ) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -323,12 +329,11 @@ internal class VerticalModePaymentSheetActivityTest {
         ) { response ->
             val cardsArray = JSONArray()
 
-            for (i in 0 until count) {
-                val paymentMethodDetails = paymentMethodDetailsMap[i]!!
+            for (paymentMethodDetail in paymentMethodDetails) {
                 val card = PaymentMethodFactory.card(
-                    id = paymentMethodDetails.id
+                    id = paymentMethodDetail.id
                 ).update(
-                    last4 = paymentMethodDetails.last4,
+                    last4 = paymentMethodDetail.last4,
                     addCbcNetworks = addCbcNetworks,
                 )
                 cardsArray.put(PaymentMethodFactory.convertCardToJson(card))
@@ -359,14 +364,13 @@ internal class VerticalModePaymentSheetActivityTest {
         }
     }
 
-    private fun setupPaymentMethodUpdateResponse(paymentMethodId: String, cardBrand: String) {
+    private fun setupPaymentMethodUpdateResponse(paymentMethodDetails: PaymentMethodDetails, cardBrand: String) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_methods/$paymentMethodId"),
+            path("/v1/payment_methods/${paymentMethodDetails.id}"),
             bodyPart(urlEncode("card[networks][preferred]"), cardBrand)
         ) { response ->
-            val paymentMethodDetails = paymentMethodDetailsMap.values.first { it.id == paymentMethodId }
             val originalCard = PaymentMethodFactory.card(
                 id = paymentMethodDetails.id
             ).update(
@@ -386,10 +390,5 @@ internal class VerticalModePaymentSheetActivityTest {
     private data class PaymentMethodDetails(
         val id: String,
         val last4: String,
-    )
-
-    private val paymentMethodDetailsMap = mapOf(
-        0 to PaymentMethodDetails("pm_12345", "4242"),
-        1 to PaymentMethodDetails("pm_67890", "5544"),
     )
 }
