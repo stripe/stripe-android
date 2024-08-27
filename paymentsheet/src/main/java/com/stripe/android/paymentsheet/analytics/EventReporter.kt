@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -28,7 +29,7 @@ internal interface EventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
+        linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,

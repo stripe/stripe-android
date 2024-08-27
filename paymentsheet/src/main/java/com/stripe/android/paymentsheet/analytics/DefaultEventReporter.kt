@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
@@ -53,14 +54,14 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
+        linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
     ) {
         this.currency = currency
-        this.linkEnabled = linkEnabled
+        this.linkEnabled = linkMode != null
         this.googlePaySupported = googlePaySupported
 
         durationProvider.start(DurationProvider.Key.Checkout)
@@ -72,7 +73,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
+                linkMode = linkMode,
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,

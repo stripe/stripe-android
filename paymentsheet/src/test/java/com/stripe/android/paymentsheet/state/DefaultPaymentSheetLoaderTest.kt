@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -928,7 +929,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -980,7 +981,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -1819,6 +1820,80 @@ internal class DefaultPaymentSheetLoaderTest {
             assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
         }
 
+    @Test
+    fun `Emits correct loaded event when Link is unavailable`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = null,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card"),
+        )
+    }
+
+    @Test
+    fun `Emits correct event when Link is in payment method mode`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            ),
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+        )
+    }
+
+    @Test
+    fun `Emits correct event when Link is in passthrough mode`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            ),
+            linkSettings = createLinkSettings(passthroughModeEnabled = true),
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.Passthrough,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+        )
+    }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
@@ -1866,11 +1941,20 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+        )
+    }
+
+    private fun createLinkSettings(passthroughModeEnabled: Boolean): ElementsSession.LinkSettings {
+        return ElementsSession.LinkSettings(
+            linkFundingSources = listOf("card", "bank"),
+            linkFlags = mapOf(),
+            linkPassthroughModeEnabled = passthroughModeEnabled,
+            disableLinkSignup = false,
         )
     }
 
