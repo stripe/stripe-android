@@ -57,9 +57,9 @@ internal interface EventReporter {
     fun onShowExistingPaymentOptions()
 
     /**
-     * PaymentSheet is now being displayed and its first screen shows the payment method form.
+     * PaymentSheet is now being displayed and its first screen shows new payment methods.
      */
-    fun onShowNewPaymentOptionForm()
+    fun onShowNewPaymentOptions()
 
     /**
      * The customer has selected one of the available payment methods in the payment method form.

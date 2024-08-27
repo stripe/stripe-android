@@ -126,12 +126,12 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
+    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
         }
 
-        completeEventReporter.onShowNewPaymentOptionForm()
+        completeEventReporter.onShowNewPaymentOptions()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->

@@ -83,6 +83,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
+    private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
+    private val reportFormShown: (PaymentMethodCode) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -146,6 +148,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onMandateTextUpdated = {
                     viewModel.mandateHandler.updateMandateText(mandateText = it, showAbove = true)
                 },
+                reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
+                reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
@@ -316,7 +320,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override fun handleViewAction(viewAction: ViewAction) {
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
+                reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
+
                 if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
+                    reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)

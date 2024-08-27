@@ -1521,7 +1521,7 @@ internal class PaymentSheetViewModelTest {
         turbineScope {
             val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             receiver.cancelAndIgnoreRemainingEvents()
         }
@@ -1543,7 +1543,7 @@ internal class PaymentSheetViewModelTest {
         turbineScope {
             val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             receiver.cancelAndIgnoreRemainingEvents()
         }
@@ -1565,7 +1565,7 @@ internal class PaymentSheetViewModelTest {
         turbineScope {
             val receiver = viewModel.navigationHandler.currentScreen.testIn(this)
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             receiver.cancelAndIgnoreRemainingEvents()
         }

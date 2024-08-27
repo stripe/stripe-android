@@ -128,9 +128,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowNewPaymentOptionForm() {
+    override fun onShowNewPaymentOptions() {
         fireEvent(
-            PaymentSheetEvent.ShowNewPaymentOptionForm(
+            PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
