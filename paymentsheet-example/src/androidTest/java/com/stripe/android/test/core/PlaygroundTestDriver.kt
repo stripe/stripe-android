@@ -1035,7 +1035,11 @@ internal class PlaygroundTestDriver(
 
                     is AuthorizeAction.Authorize3ds2 -> {
                         closeButton.wait(5000)
-                        UiAutomatorText("COMPLETE", device = device).click()
+
+                        val completeButton = UiAutomatorText("COMPLETE", device = device)
+
+                        completeButton.wait(5000)
+                        completeButton.click()
                     }
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
