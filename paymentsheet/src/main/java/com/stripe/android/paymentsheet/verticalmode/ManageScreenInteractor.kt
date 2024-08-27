@@ -155,7 +155,9 @@ internal class DefaultManageScreenInteractor(
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
-                    viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod))
+                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                    viewModel.handlePaymentMethodSelected(savedPmSelection)
+                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                 },
                 onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
