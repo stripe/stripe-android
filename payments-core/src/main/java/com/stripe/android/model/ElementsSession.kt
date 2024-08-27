@@ -37,6 +37,17 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
+    val linkMode: LinkMode?
+        get() = if (isLinkEnabled) {
+            if (linkPassthroughModeEnabled) {
+                LinkMode.Passthrough
+            } else {
+                LinkMode.PaymentMethod
+            }
+        } else {
+            null
+        }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(

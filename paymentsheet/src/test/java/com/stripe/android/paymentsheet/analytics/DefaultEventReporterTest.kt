@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -577,7 +578,7 @@ class DefaultEventReporterTest {
         val eventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         eventReporter.simulateSuccessfulSetup(
-            linkMode = LinkMode.PaymentMethodMode
+            linkMode = LinkMode.PaymentMethod
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -714,7 +715,7 @@ class DefaultEventReporterTest {
 
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
-        linkMode: LinkMode? = LinkMode.PaymentMethodMode,
+        linkMode: LinkMode? = LinkMode.PaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(

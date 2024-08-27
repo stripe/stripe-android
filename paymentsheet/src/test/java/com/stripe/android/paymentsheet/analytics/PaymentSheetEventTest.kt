@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -352,7 +353,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain payment method mode for Link if provided`() {
         val event = createLoadSucceededEvent(
-            linkMode = LinkMode.PaymentMethodMode,
+            linkMode = LinkMode.PaymentMethod,
         )
 
         assertThat(event.params).containsEntry("link_enabled", true)

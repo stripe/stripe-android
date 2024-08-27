@@ -5,6 +5,7 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -52,15 +53,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_ORDERED_LPMS to orderedLpms.joinToString(",")
         ).plus(
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.defaultAnalyticsValue)
+                mapOf(FIELD_LINK_MODE to mode.value)
             }.orEmpty()
         )
-
-        private val LinkMode.defaultAnalyticsValue: String
-            get() = when (this) {
-                LinkMode.Passthrough -> "passthrough"
-                LinkMode.PaymentMethodMode -> "payment_method_mode"
-            }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
             get() = when (this) {
@@ -501,11 +496,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }
-}
-
-internal enum class LinkMode {
-    Passthrough,
-    PaymentMethodMode,
 }
 
 private val Duration.asSeconds: Float

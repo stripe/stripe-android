@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -29,7 +30,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.LinkMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -929,7 +929,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
-            linkMode = LinkMode.PaymentMethodMode,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -981,7 +981,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkMode = LinkMode.PaymentMethodMode,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -1861,7 +1861,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkMode = LinkMode.PaymentMethodMode,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -1941,7 +1941,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
-            linkMode = LinkMode.PaymentMethodMode,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
