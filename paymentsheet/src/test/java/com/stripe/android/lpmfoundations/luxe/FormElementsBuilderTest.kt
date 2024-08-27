@@ -101,7 +101,6 @@ class FormElementsBuilderTest {
         return UiDefinitionFactory.Arguments(
             initialValues = emptyMap(),
             shippingValues = emptyMap(),
-            amount = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
