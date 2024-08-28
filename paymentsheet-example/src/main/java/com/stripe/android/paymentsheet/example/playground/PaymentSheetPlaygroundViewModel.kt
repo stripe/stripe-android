@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.CvcRecollectionEnabledCallbackValue
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -293,7 +294,13 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
-        if (paymentResult !is PaymentSheetResult.Canceled) {
+        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
+            ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
+        if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
+            if (paymentResult is PaymentSheetResult.Completed) {
+                state.value = null
+            }
+        } else if (paymentResult !is PaymentSheetResult.Canceled) {
             state.value = null
         }
 
