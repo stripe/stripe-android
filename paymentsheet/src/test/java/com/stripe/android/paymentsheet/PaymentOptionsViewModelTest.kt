@@ -760,7 +760,7 @@ internal class PaymentOptionsViewModelTest {
         linkState: LinkState? = args.state.linkState,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
-    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, linkInteractor, savedStateHandle ->
+    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             eventReporter = eventReporter,
@@ -768,7 +768,6 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
-            linkConfigurationCoordinator = linkInteractor,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             editInteractorFactory = editInteractorFactory,
         )

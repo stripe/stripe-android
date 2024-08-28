@@ -35,7 +35,7 @@ internal class FormHelper(
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
                 },
-                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
+                linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)

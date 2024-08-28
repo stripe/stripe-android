@@ -1087,7 +1087,7 @@ internal class PaymentSheetActivityTest {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
                 on { emailFlow } doReturn stateFlowOf("email@email.com")
             },
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+        ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
@@ -1110,7 +1110,6 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
