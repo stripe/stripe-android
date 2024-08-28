@@ -152,19 +152,20 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                                 )
                             )
                             PaymentElement -> {
+                                val customerConfig = PaymentSheet.CustomerConfiguration(
+                                    id = it.customerId!!,
+                                    ephemeralKeySecret = it.ephemeralKey!!
+                                )
                                 PaymentConfiguration.init(
                                     context = this@FinancialConnectionsPlaygroundActivity,
                                     publishableKey = it.publishableKey
                                 )
                                 paymentSheet.presentWithPaymentIntent(
-                                    it.paymentIntentSecret,
+                                    paymentIntentClientSecret = it.paymentIntentSecret,
                                     configuration = PaymentSheet.Configuration(
                                         allowsDelayedPaymentMethods = true,
                                         merchantDisplayName = "Example, Inc.",
-                                        customer = PaymentSheet.CustomerConfiguration(
-                                            id = "123",
-                                            ephemeralKeySecret = it.paymentIntentSecret
-                                        )
+                                        customer = customerConfig
                                     )
                                 )
                             }

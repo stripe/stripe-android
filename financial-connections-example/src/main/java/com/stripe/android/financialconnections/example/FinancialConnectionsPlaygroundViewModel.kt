@@ -120,6 +120,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
                             ephemeralKey = it.ephemeralKey,
+                            customerId = it.customerId,
                             experience = settings.get<ExperienceSetting>().selectedOption,
                         )
                     )
@@ -467,6 +468,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
     data class OpenForPaymentIntent(
         val paymentIntentSecret: String,
         val ephemeralKey: String?,
+        val customerId: String?,
         val publishableKey: String,
         val experience: Experience,
     ) : FinancialConnectionsPlaygroundViewEffect()
