@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
@@ -32,6 +33,10 @@ internal fun SavedPaymentMethodRowButton(
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
+    val contentDescription = displayableSavedPaymentMethod
+        .getDescription()
+        .resolve()
+        .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
         displayableSavedPaymentMethod.paymentMethod.getLabel()
             ?: displayableSavedPaymentMethod.displayName
@@ -57,9 +62,11 @@ internal fun SavedPaymentMethodRowButton(
         title = paymentMethodTitle.resolve(),
         subtitle = null,
         onClick = onClick,
-        modifier = modifier.testTag(
-            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"
-        ),
+        modifier = modifier
+            .testTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"
+            ),
+        contentDescription = contentDescription,
         trailingContent = trailingContent,
     )
 }

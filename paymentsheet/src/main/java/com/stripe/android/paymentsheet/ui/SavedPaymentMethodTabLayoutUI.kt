@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -370,7 +369,6 @@ private fun SavedPaymentMethodTab(
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
 
@@ -399,11 +397,23 @@ private fun SavedPaymentMethodTab(
             labelIcon = labelIcon,
             labelText = labelText,
             paymentMethod = paymentMethod.displayableSavedPaymentMethod,
-            description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
+            description = paymentMethod
+                .displayableSavedPaymentMethod
+                .getDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onModifyAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getModifyDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
+            onRemoveAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getRemoveDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
                 onItemSelected(paymentMethod.toPaymentSelection())
             },
