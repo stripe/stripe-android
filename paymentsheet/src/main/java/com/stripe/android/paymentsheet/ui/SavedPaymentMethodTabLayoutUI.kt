@@ -401,9 +401,13 @@ private fun SavedPaymentMethodTab(
             paymentMethod = paymentMethod.displayableSavedPaymentMethod,
             description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onModifyAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getModifyDescription(context.resources),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
+            onRemoveAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getRemoveDescription(context.resources),
             onItemSelectedListener = {
                 onItemSelected(paymentMethod.toPaymentSelection())
             },

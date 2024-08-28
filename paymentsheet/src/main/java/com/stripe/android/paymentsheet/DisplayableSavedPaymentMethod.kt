@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.Resources
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 
 internal data class DisplayableSavedPaymentMethod(
     val displayName: ResolvableString,
@@ -21,16 +22,26 @@ internal data class DisplayableSavedPaymentMethod(
         PaymentMethod.Type.Card -> resources.getString(
             com.stripe.android.R.string.stripe_card_ending_in,
             paymentMethod.card?.brand,
-            paymentMethod.card?.last4
+            paymentMethod.card?.last4?.readNumbersAsIndividualDigits()
         )
         PaymentMethod.Type.SepaDebit -> resources.getString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.sepaDebit?.last4
+            paymentMethod.sepaDebit?.last4?.readNumbersAsIndividualDigits()
         )
         PaymentMethod.Type.USBankAccount -> resources.getString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.usBankAccount?.last4
+            paymentMethod.usBankAccount?.last4?.readNumbersAsIndividualDigits()
         )
         else -> ""
     }
+
+    fun getModifyDescription(resources: Resources) = resources.getString(
+        R.string.stripe_paymentsheet_modify_pm,
+        getDescription(resources)
+    )
+
+    fun getRemoveDescription(resources: Resources) = resources.getString(
+        R.string.stripe_paymentsheet_remove_pm,
+        getDescription(resources)
+    )
 }
