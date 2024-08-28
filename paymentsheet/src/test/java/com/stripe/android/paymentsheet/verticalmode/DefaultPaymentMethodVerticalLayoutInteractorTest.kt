@@ -826,11 +826,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
         var selectedSavedPaymentMethod: PaymentMethod? = null
+        var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         runScenario(
-            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it }
+            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it },
+            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
             assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(reportedSelectedPaymentMethodType).isEqualTo("saved")
         }
     }
 
