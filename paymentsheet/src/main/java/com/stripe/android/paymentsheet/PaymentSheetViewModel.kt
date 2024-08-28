@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -12,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -72,7 +72,6 @@ import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
-    application: Application,
     internal val args: PaymentSheetContractV2.Args,
     eventReporter: EventReporter,
     private val paymentSheetLoader: PaymentSheetLoader,
@@ -84,11 +83,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler
 ) : BaseSheetViewModel(
-    application = application,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
@@ -96,6 +95,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
+    cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     editInteractorFactory = editInteractorFactory,
     isCompleteFlow = true,
 ) {

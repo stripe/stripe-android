@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -99,6 +101,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
+
+    @Binds
+    abstract fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
 
     @Suppress("TooManyFunctions")
     companion object {

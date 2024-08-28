@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultCallback
@@ -82,6 +81,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
@@ -1088,10 +1088,7 @@ internal class PaymentSheetActivityTest {
                 on { emailFlow } doReturn stateFlowOf("email@email.com")
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
-            val application = ApplicationProvider.getApplicationContext<Application>()
-
             PaymentSheetViewModel(
-                application = application,
                 args = args,
                 eventReporter = eventReporter,
                 paymentSheetLoader = FakePaymentSheetLoader(
@@ -1125,6 +1122,7 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler

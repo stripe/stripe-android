@@ -108,6 +108,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RelayingPaymentSheetLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -2911,7 +2912,6 @@ internal class PaymentSheetViewModelTest {
             savedStateHandle = savedStateHandle,
         ) { linkHandler, linkInteractor, thisSavedStateHandle ->
             PaymentSheetViewModel(
-                application = application,
                 args = args,
                 eventReporter = eventReporter,
                 paymentSheetLoader = paymentSheetLoader,
@@ -2933,6 +2933,7 @@ internal class PaymentSheetViewModelTest {
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
                 errorReporter = errorReporter,
                 cvcRecollectionHandler = cvcRecollectionHandler
