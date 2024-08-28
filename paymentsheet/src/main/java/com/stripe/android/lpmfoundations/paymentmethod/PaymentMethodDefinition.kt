@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import android.util.Log
 import com.stripe.android.model.PaymentMethod
 
 internal interface PaymentMethodDefinition {
@@ -28,8 +27,7 @@ internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata
     if (type.code !in metadata.stripeIntent.paymentMethodTypes) {
         return false
     }
-    return  requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->
-        Log.e("LOREN", "requirement: $requirement, met: ${requirement.isMetBy(metadata)}")
+    return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->
         requirement.isMetBy(metadata)
     }
 }
