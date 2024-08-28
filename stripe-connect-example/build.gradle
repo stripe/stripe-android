@@ -28,7 +28,6 @@ dependencies {
 
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
-    debugImplementation libs.leakCanary
 
     androidTestImplementation libs.playServicesWallet
     androidTestImplementation testLibs.androidx.archCore

@@ -5,22 +5,31 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
-internal class StripeConnectWebViewClient: WebViewClient() {
+internal class StripeConnectWebViewClient(
+    private val appearance: Appearance? = null,
+): WebViewClient() {
 
-    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        super.onPageStarted(view, url, favicon)
+    private var view: WebView? = null
 
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+
+        this.view = view
+        if (appearance != null) {
+            updateAppearance(newAppearance = appearance)
+        }
+    }
+
+    fun updateAppearance(newAppearance: Appearance) {
         view?.evaluateJavascript(
             """
-            window.webkit = {
-                messageHandlers: {
-//                    fetchClientSecret: { postMessage: (payload) => { return Android.fetchClientSecret() } },
-//                    fetchInitParams: { postMessage: (payload) => { return {} } }
-                }
-            };
-            """.trimIndent(),
-            null
-        )
+                setTimeout(() => {
+                    StripeConnect.update({
+                        appearance: { variables: ${newAppearance.asJsonString()} }
+                    });
+                }, 100);
+            """.trimIndent()
+        ) { /* Empty callback */ }
     }
 
     @Suppress("unused")

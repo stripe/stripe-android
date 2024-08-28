@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">StripeConnectExample</string>
+    <string name="title">Title</string>
 </resources>
