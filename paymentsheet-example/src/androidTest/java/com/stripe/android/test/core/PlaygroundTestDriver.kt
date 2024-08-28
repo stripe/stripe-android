@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
@@ -28,19 +29,23 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
-import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
@@ -452,22 +457,28 @@ internal class PlaygroundTestDriver(
      */
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
-        values: FieldPopulator.Values = FieldPopulator.Values(),
+        values: FieldPopulator.Values? = FieldPopulator.Values(),
         afterAuthorization: (Selectors) -> Unit = {},
         populateCustomLpmFields: FieldPopulator.() -> Unit = {},
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
 
-        clickPaymentSelection()
+        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition]) {
+            selectLpmInVerticalMode(testParameters.paymentMethodCode)
+        } else {
+            clickPaymentSelection()
+        }
 
-        FieldPopulator(
-            selectors,
-            testParameters,
-            populateCustomLpmFields,
-            verifyCustomLpmFields = {},
-            values = values,
-        ).populateFields()
+        if (values != null) {
+            FieldPopulator(
+                selectors,
+                testParameters,
+                populateCustomLpmFields,
+                verifyCustomLpmFields = {},
+                values = values,
+            ).populateFields()
+        }
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
@@ -874,6 +885,22 @@ internal class PlaygroundTestDriver(
     private fun clickPaymentSelection() {
         selectors.formElement.waitFor()
         selectors.paymentSelection.click()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+    }
+
+    private fun selectLpmInVerticalMode(paymentMethodCode: PaymentMethodCode) {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
+            .performScrollTo()
+            .performClick()
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
