@@ -115,7 +115,7 @@ internal fun SavedPaymentMethodTab(
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
-                            this.contentDescription = description.readNumbersAsIndividualDigits()
+                           contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
             }
