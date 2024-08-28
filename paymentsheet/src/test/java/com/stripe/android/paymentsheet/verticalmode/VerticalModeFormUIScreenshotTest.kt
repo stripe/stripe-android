@@ -15,6 +15,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalModeForm
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
+import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -48,6 +52,26 @@ internal class VerticalModeFormUIScreenshotTest {
     }
 
     @Test
+    fun fullCardForm() {
+        paparazziRule.snapshot {
+            val viewModel = FakeBaseSheetViewModel()
+            val metadata = PaymentMethodMetadataFactory.create()
+            viewModel.setPaymentMethodMetadata(metadata)
+            viewModel.navigationHandler.transitionTo(
+                VerticalModeForm(
+                    createInteractor(
+                        paymentMethodCode = "card",
+                        metadata = metadata,
+                    )
+                )
+            )
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
     fun cashappShowsBillingFields() {
         paparazziRule.snapshot {
             val metadata = PaymentMethodMetadataFactory.create(
@@ -62,12 +86,11 @@ internal class VerticalModeFormUIScreenshotTest {
         }
     }
 
-    @Composable
-    private fun CreateTestScenario(
+    private fun createInteractor(
         paymentMethodCode: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
         isProcessing: Boolean = false,
-    ) {
+    ): VerticalModeFormInteractor {
         val formArguments = FormArgumentsFactory.create(
             paymentMethodCode = paymentMethodCode,
             metadata = metadata,
@@ -78,27 +101,47 @@ internal class VerticalModeFormUIScreenshotTest {
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
         )
 
+        return ScreenshotVerticalModeFormInteractor(
+            initialState = VerticalModeFormInteractor.State(
+                selectedPaymentMethodCode = paymentMethodCode,
+                isProcessing = isProcessing,
+                usBankAccountFormArguments = mock(),
+                formArguments = formArguments,
+                formElements = metadata.formElementsForCode(
+                    code = paymentMethodCode,
+                    uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
+                )!!,
+                headerInformation = metadata.formHeaderInformationForCode(
+                    code = paymentMethodCode,
+                    customerHasSavedPaymentMethods = false,
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun ViewModelStoreOwnerContext(content: @Composable () -> Unit) {
         CompositionLocalProvider(
             LocalViewModelStoreOwner provides object : ViewModelStoreOwner {
                 override val viewModelStore: ViewModelStore = ViewModelStore()
             }
         ) {
+            content()
+        }
+    }
+
+    @Composable
+    private fun CreateTestScenario(
+        paymentMethodCode: PaymentMethodCode,
+        metadata: PaymentMethodMetadata,
+        isProcessing: Boolean = false,
+    ) {
+        ViewModelStoreOwnerContext {
             VerticalModeFormUI(
-                interactor = ScreenshotVerticalModeFormInteractor(
-                    initialState = VerticalModeFormInteractor.State(
-                        selectedPaymentMethodCode = paymentMethodCode,
-                        isProcessing = isProcessing,
-                        usBankAccountFormArguments = mock(),
-                        formArguments = formArguments,
-                        formElements = metadata.formElementsForCode(
-                            code = paymentMethodCode,
-                            uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
-                        )!!,
-                        headerInformation = metadata.formHeaderInformationForCode(
-                            code = paymentMethodCode,
-                            customerHasSavedPaymentMethods = false,
-                        ),
-                    ),
+                interactor = createInteractor(
+                    paymentMethodCode = paymentMethodCode,
+                    metadata = metadata,
+                    isProcessing = isProcessing,
                 ),
             )
         }

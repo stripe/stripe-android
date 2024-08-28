@@ -95,6 +95,16 @@ internal fun PaymentSheetScreen(
 }
 
 @Composable
+internal fun PaymentSheetScreen(
+    viewModel: BaseSheetViewModel,
+    type: PaymentSheetFlowType,
+) {
+    PaymentSheetScreen(viewModel) {
+        PaymentSheetScreenContent(viewModel, type = type)
+    }
+}
+
+@Composable
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     contentVisible: Boolean = true,
