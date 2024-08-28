@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.res.Resources
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 
 internal data class DisplayableSavedPaymentMethod(
     val displayName: ResolvableString,
