@@ -19,7 +19,10 @@ data class FlowSetting(
     override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body
 
     override fun shouldDisplay(merchant: Merchant, flow: Flow, experience: Experience): Boolean {
-        return experience != Experience.InstantDebits
+        return setOf(
+            Experience.InstantDebits,
+            Experience.PaymentElement
+        ).contains(experience).not()
     }
 
     override fun convertToString(value: Flow): String {
