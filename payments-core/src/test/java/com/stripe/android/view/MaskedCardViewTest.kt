@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
@@ -64,5 +65,11 @@ class MaskedCardViewTest {
     @Test
     fun whenTypeNotCard_doesNotCrash() {
         maskedCardView.setPaymentMethod(PaymentMethodFixtures.FPX_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun whenDisplayBrandIsDifferentThanBrand_shouldUseDisplayBrand() {
+        maskedCardView.setPaymentMethod(PaymentMethodFixtures.CARD_WITH_DISPLAY_BRAND)
+        assertThat(maskedCardView.cardBrand).isEqualTo(CardBrand.CartesBancaires)
     }
 }
