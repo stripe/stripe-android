@@ -71,7 +71,7 @@ class ManageScreenUITest {
             composeRule.onNodeWithTag(
                 "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedCard.id}"
             ).onChildren().assertAny(
-                hasContentDescriptionExactly("Visa ending in 4 2 4 2")
+                hasContentDescriptionExactly("Visa ending in 4 2 4 2 ")
             )
         }
     }

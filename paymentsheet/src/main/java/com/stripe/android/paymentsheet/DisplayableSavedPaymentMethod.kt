@@ -22,15 +22,15 @@ internal data class DisplayableSavedPaymentMethod(
         PaymentMethod.Type.Card -> resources.getString(
             com.stripe.android.R.string.stripe_card_ending_in,
             paymentMethod.card?.brand,
-            paymentMethod.card?.last4?.readNumbersAsIndividualDigits()
+            paymentMethod.card?.last4
         )
         PaymentMethod.Type.SepaDebit -> resources.getString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.sepaDebit?.last4?.readNumbersAsIndividualDigits()
+            paymentMethod.sepaDebit?.last4
         )
         PaymentMethod.Type.USBankAccount -> resources.getString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.usBankAccount?.last4?.readNumbersAsIndividualDigits()
+            paymentMethod.usBankAccount?.last4
         )
         else -> ""
     }

@@ -399,15 +399,20 @@ private fun SavedPaymentMethodTab(
             labelIcon = labelIcon,
             labelText = labelText,
             paymentMethod = paymentMethod.displayableSavedPaymentMethod,
-            description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
+            description = paymentMethod
+                .displayableSavedPaymentMethod
+                .getDescription(context.resources)
+                .readNumbersAsIndividualDigits(),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
             onModifyAccessibilityDescription = paymentMethod
                 .displayableSavedPaymentMethod
-                .getModifyDescription(context.resources),
+                .getModifyDescription(context.resources)
+                .readNumbersAsIndividualDigits(),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
             onRemoveAccessibilityDescription = paymentMethod
                 .displayableSavedPaymentMethod
-                .getRemoveDescription(context.resources),
+                .getRemoveDescription(context.resources)
+                .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
                 onItemSelected(paymentMethod.toPaymentSelection())
             },

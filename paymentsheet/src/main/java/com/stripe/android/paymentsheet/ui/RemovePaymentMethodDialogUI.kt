@@ -23,7 +23,7 @@ internal fun RemovePaymentMethodDialogUI(
         paymentMethod.displayName.resolve(),
     )
     val messageText = when (paymentMethod.paymentMethod.type) {
-        PaymentMethod.Type.Card -> paymentMethod.getRemoveDescription(resources)
+        PaymentMethod.Type.Card -> paymentMethod.getDescription(resources)
         PaymentMethod.Type.USBankAccount -> resources.getString(
             R.string.stripe_remove_bank_account_ending_in,
             paymentMethod.paymentMethod.usBankAccount?.last4

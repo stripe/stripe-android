@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.RemovePaymentMethodDialogUI
+import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 
 @Composable
 internal fun DeleteIcon(
@@ -40,7 +41,9 @@ internal fun DeleteIcon(
         onClick = {
             openRemoveDialog.value = true
         },
-        contentDescription = paymentMethod.getRemoveDescription(LocalContext.current.resources)
+        contentDescription = paymentMethod
+            .getRemoveDescription(LocalContext.current.resources)
+            .readNumbersAsIndividualDigits()
     )
 
     if (openRemoveDialog.value) {
@@ -65,7 +68,9 @@ internal fun EditIcon(
         icon = Icons.Filled.Edit,
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
         onClick = { editPaymentMethod(paymentMethod) },
-        contentDescription = paymentMethod.getModifyDescription(LocalContext.current.resources),
+        contentDescription = paymentMethod
+            .getModifyDescription(LocalContext.current.resources)
+            .readNumbersAsIndividualDigits(),
     )
 }
 
