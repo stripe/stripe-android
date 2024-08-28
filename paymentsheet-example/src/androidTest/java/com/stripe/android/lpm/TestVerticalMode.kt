@@ -16,7 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestVerticalMode : BasePlaygroundTest()  {
+internal class TestVerticalMode : BasePlaygroundTest() {
     private val cardTestParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
