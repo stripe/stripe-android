@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.RemovePaymentMethodDialogUI
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
+import com.stripe.android.uicore.strings.resolve
 
 @Composable
 internal fun DeleteIcon(
@@ -42,7 +42,8 @@ internal fun DeleteIcon(
             openRemoveDialog.value = true
         },
         contentDescription = paymentMethod
-            .getRemoveDescription(LocalContext.current.resources)
+            .getRemoveDescription()
+            .resolve()
             .readNumbersAsIndividualDigits()
     )
 
@@ -69,7 +70,8 @@ internal fun EditIcon(
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
         onClick = { editPaymentMethod(paymentMethod) },
         contentDescription = paymentMethod
-            .getModifyDescription(LocalContext.current.resources)
+            .getModifyDescription()
+            .resolve()
             .readNumbersAsIndividualDigits(),
     )
 }
@@ -94,9 +96,11 @@ private fun TrailingIcon(
             imageVector = icon,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(12.dp).semantics {
-                this.contentDescription = contentDescription
-            },
+            modifier = Modifier
+                .size(12.dp)
+                .semantics {
+                    this.contentDescription = contentDescription
+                },
         )
     }
 }
