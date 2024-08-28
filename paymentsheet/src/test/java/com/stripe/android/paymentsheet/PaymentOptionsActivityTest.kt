@@ -448,7 +448,7 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+        ) { linkHandler, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = eventReporter,
@@ -456,7 +456,6 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationCoordinator = linkInteractor,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = mock()
             )
