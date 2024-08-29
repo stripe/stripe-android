@@ -10,22 +10,26 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalModeForm
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.mock
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 internal class VerticalModeFormUIScreenshotTest {
 
@@ -34,6 +38,16 @@ internal class VerticalModeFormUIScreenshotTest {
         boxModifier = Modifier
             .padding(16.dp)
     )
+
+    @BeforeTest
+    fun before() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun after() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun cardFormIsDisplayed() {
@@ -53,18 +67,92 @@ internal class VerticalModeFormUIScreenshotTest {
 
     @Test
     fun fullCardForm() {
-        paparazziRule.snapshot {
-            val viewModel = FakeBaseSheetViewModel()
-            val metadata = PaymentMethodMetadataFactory.create()
-            viewModel.setPaymentMethodMetadata(metadata)
-            viewModel.navigationHandler.transitionTo(
-                VerticalModeForm(
-                    createInteractor(
-                        paymentMethodCode = "card",
-                        metadata = metadata,
-                    )
-                )
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata,
             )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithLink() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata,
+                canGoBack = false,
+            ),
+            showsWalletHeader = true,
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.walletsStateSource.value = WalletsState(
+            link = WalletsState.Link(
+                email = null,
+            ),
+            googlePay = null,
+            buttonsEnabled = true,
+            dividerTextResource = R.string.stripe_paymentsheet_or_pay_with_card,
+            onGooglePayPressed = { throw AssertionError("Not expected.") },
+            onLinkPressed = { throw AssertionError("Not expected.") },
+        )
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithSaveForLater() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+        )
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata,
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCashAppForm() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+        )
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "cashapp",
+                metadata = metadata,
+                canGoBack = false,
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.primaryButtonUiStateSource.update { original ->
+            original?.copy(enabled = true)
+        }
+
+        paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
                 PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
             }
@@ -86,39 +174,6 @@ internal class VerticalModeFormUIScreenshotTest {
         }
     }
 
-    private fun createInteractor(
-        paymentMethodCode: PaymentMethodCode,
-        metadata: PaymentMethodMetadata,
-        isProcessing: Boolean = false,
-    ): VerticalModeFormInteractor {
-        val formArguments = FormArgumentsFactory.create(
-            paymentMethodCode = paymentMethodCode,
-            metadata = metadata,
-        )
-        val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            linkConfigurationCoordinator = null,
-            onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
-        )
-
-        return ScreenshotVerticalModeFormInteractor(
-            initialState = VerticalModeFormInteractor.State(
-                selectedPaymentMethodCode = paymentMethodCode,
-                isProcessing = isProcessing,
-                usBankAccountFormArguments = mock(),
-                formArguments = formArguments,
-                formElements = metadata.formElementsForCode(
-                    code = paymentMethodCode,
-                    uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
-                )!!,
-                headerInformation = metadata.formHeaderInformationForCode(
-                    code = paymentMethodCode,
-                    customerHasSavedPaymentMethods = false,
-                ),
-            ),
-        )
-    }
-
     @Composable
     private fun ViewModelStoreOwnerContext(content: @Composable () -> Unit) {
         CompositionLocalProvider(
@@ -138,32 +193,12 @@ internal class VerticalModeFormUIScreenshotTest {
     ) {
         ViewModelStoreOwnerContext {
             VerticalModeFormUI(
-                interactor = createInteractor(
+                interactor = FakeVerticalModeFormInteractor.create(
                     paymentMethodCode = paymentMethodCode,
                     metadata = metadata,
                     isProcessing = isProcessing,
                 ),
             )
-        }
-    }
-
-    private class ScreenshotVerticalModeFormInteractor(
-        initialState: VerticalModeFormInteractor.State,
-        override val isLiveMode: Boolean = true,
-        private val canGoBack: Boolean = true,
-    ) : VerticalModeFormInteractor {
-        override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(initialState)
-
-        override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
-            // No op.
-        }
-
-        override fun canGoBack(): Boolean {
-            return canGoBack
-        }
-
-        override fun close() {
-            throw AssertionError("Not expected")
         }
     }
 }

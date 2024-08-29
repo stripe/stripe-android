@@ -130,7 +130,7 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
+    protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
     }
 
