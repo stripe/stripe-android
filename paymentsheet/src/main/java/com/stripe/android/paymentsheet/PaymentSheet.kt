@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -1511,11 +1512,19 @@ class PaymentSheet internal constructor(
     }
 
     internal sealed interface CustomerAccessType : Parcelable {
-        @Parcelize
-        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType
+        val analyticsValue: String
 
         @Parcelize
-        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType
+        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType {
+            @IgnoredOnParcel
+            override val analyticsValue: String = "legacy"
+        }
+
+        @Parcelize
+        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType {
+            @IgnoredOnParcel
+            override val analyticsValue: String = "customer_session"
+        }
     }
 
     @Parcelize

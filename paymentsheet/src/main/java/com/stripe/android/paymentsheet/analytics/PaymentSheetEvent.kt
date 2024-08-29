@@ -127,6 +127,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
+                    FIELD_CUSTOMER_ACCESS_PROVIDER to (configuration.customer?.accessType?.analyticsValue),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
                     FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
@@ -463,6 +464,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
 
         const val FIELD_CUSTOMER = "customer"
+        const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
         const val FIELD_GOOGLE_PAY = "googlepay"
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_PRIMARY_BUTTON_COLOR = "primary_button_color"
