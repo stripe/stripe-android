@@ -44,7 +44,7 @@ internal fun SettingsUi(
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.animateContentSize(),
     ) {
         for (setting in playgroundSettings.displayableSettings) {

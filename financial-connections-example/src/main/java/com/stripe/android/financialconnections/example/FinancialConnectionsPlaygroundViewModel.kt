@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.example.settings.ExperienceSettin
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
+import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -137,8 +138,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = _state.value.stripeAccountId
                             )
                         )
                     )
@@ -454,4 +456,6 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
+    val stripeAccountId: String? = settings.get<StripeAccountIdSetting>().selectedOption
+        .takeIf { it.isNotEmpty() }
 }

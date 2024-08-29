@@ -165,6 +165,7 @@ internal data class PlaygroundSettings(
             NativeSetting(),
             PermissionsSetting(),
             EmailSetting(),
+            StripeAccountIdSetting(),
         )
     }
 }
