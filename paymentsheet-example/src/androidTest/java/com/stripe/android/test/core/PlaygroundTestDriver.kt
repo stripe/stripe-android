@@ -891,7 +891,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun selectLpmInVerticalMode(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()
