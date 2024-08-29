@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -64,6 +65,25 @@ internal class VerticalModeFormUIScreenshotTest {
             )
         )
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithError() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata,
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.onError("An error occurred.".resolvableString)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
