@@ -527,30 +527,10 @@ class DefaultIntentConfirmationInterceptorTest {
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
             val interceptor = DefaultIntentConfirmationInterceptor(
-                stripeRepository = object : AbsFakeStripeRepository() {
-                    override suspend fun createPaymentMethod(
-                        paymentMethodCreateParams: PaymentMethodCreateParams,
-                        options: ApiRequest.Options
-                    ): Result<PaymentMethod> {
-                        return Result.success(
-                            PaymentMethodFactory.card(random = true).copy(
-                                id = "pm_1234"
-                            )
-                        )
-                    }
-
-                    override suspend fun retrieveStripeIntent(
-                        clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
-                    ): Result<StripeIntent> {
-                        return Result.success(
-                            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
-                                paymentMethodId = "pm_5678"
-                            )
-                        )
-                    }
-                },
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678"
+                ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
                 isFlowController = false,
@@ -649,6 +629,36 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
             isFlowController = false,
         )
+    }
+
+    private fun stripeRepositoryReturning(
+        onCreatePaymentMethodId: String,
+        onRetrievePaymentMethodId: String,
+    ): StripeRepository {
+        return object : AbsFakeStripeRepository() {
+            override suspend fun createPaymentMethod(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                options: ApiRequest.Options
+            ): Result<PaymentMethod> {
+                return Result.success(
+                    PaymentMethodFactory.card(random = true).copy(
+                        id = onCreatePaymentMethodId
+                    )
+                )
+            }
+
+            override suspend fun retrieveStripeIntent(
+                clientSecret: String,
+                options: ApiRequest.Options,
+                expandFields: List<String>
+            ): Result<StripeIntent> {
+                return Result.success(
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
+                        paymentMethodId = onRetrievePaymentMethodId
+                    )
+                )
+            }
+        }
     }
 
     private fun IntentConfirmationInterceptor.NextStep.asFail(): IntentConfirmationInterceptor.NextStep.Fail {

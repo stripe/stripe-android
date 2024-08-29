@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -8,7 +10,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 @Suppress("EmptyFunctionBlock")
-internal class NoOpEventReporter : EventReporter {
+internal class FakeEventReporter : EventReporter {
+    private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
+    val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
+
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
     }
 
@@ -64,7 +69,16 @@ internal class NoOpEventReporter : EventReporter {
     ) {
     }
 
-    override fun onPaymentFailure(paymentSelection: PaymentSelection?, error: PaymentSheetConfirmationError) {
+    override fun onPaymentFailure(
+        paymentSelection: PaymentSelection?,
+        error: PaymentSheetConfirmationError
+    ) {
+        _paymentFailureCalls.add(
+            PaymentFailureCall(
+                paymentSelection = paymentSelection,
+                error = error,
+            )
+        )
     }
 
     override fun onLpmSpecFailure(errorMessage: String?) {
@@ -96,4 +110,9 @@ internal class NoOpEventReporter : EventReporter {
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
     }
+
+    data class PaymentFailureCall(
+        val paymentSelection: PaymentSelection?,
+        val error: PaymentSheetConfirmationError
+    )
 }
