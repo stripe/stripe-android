@@ -422,7 +422,7 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `Changing the screen resets editing to false`() {
+    fun `Exiting the manage saved PMs screen resets editing to false`() {
         runScenario {
             currentScreen.value = PaymentSheetScreen.ManageSavedPaymentMethods(
                 interactor = FakeManageScreenInteractor()

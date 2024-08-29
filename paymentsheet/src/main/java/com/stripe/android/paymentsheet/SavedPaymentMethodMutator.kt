@@ -113,9 +113,24 @@ internal class SavedPaymentMethodMutator(
         }
 
         coroutineScope.launch {
-            currentScreen.collect {
-                // Anytime the screen changes, editing should be reset to false.
-                _editing.value = false
+            currentScreen.collect { currentScreen ->
+                when (currentScreen) {
+                    is PaymentSheetScreen.VerticalMode -> {
+                        // When returning to the vertical mode screen, reset editing to false.
+                        _editing.value = false
+                    }
+                    is PaymentSheetScreen.ManageSavedPaymentMethods,
+                    is PaymentSheetScreen.AddAnotherPaymentMethod,
+                    is PaymentSheetScreen.AddFirstPaymentMethod,
+                    is PaymentSheetScreen.CvcRecollection,
+                    is PaymentSheetScreen.EditPaymentMethod,
+                    PaymentSheetScreen.Loading,
+                    is PaymentSheetScreen.ManageOneSavedPaymentMethod,
+                    is PaymentSheetScreen.SelectSavedPaymentMethods,
+                    is PaymentSheetScreen.VerticalModeForm -> {
+                        // Do nothing.
+                    }
+                }
             }
         }
     }
