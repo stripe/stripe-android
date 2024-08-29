@@ -43,6 +43,7 @@ internal class SavedPaymentMethodMutator(
     private val clearSelection: () -> Unit,
     private val isLiveModeProvider: () -> Boolean,
     private val customerStateHolder: CustomerStateHolder,
+    private val currentScreen: StateFlow<PaymentSheetScreen>,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -108,6 +109,13 @@ internal class SavedPaymentMethodMutator(
                 if (paymentMethods.isEmpty() && editing.value) {
                     _editing.value = false
                 }
+            }
+        }
+
+        coroutineScope.launch {
+            currentScreen.collect {
+                // Anytime the screen changes, editing should be reset to false.
+                _editing.value = false
             }
         }
     }
@@ -316,7 +324,8 @@ internal class SavedPaymentMethodMutator(
                 isGooglePayReady = viewModel.paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
-                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode }
+                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode },
+                currentScreen = viewModel.navigationHandler.currentScreen,
             )
         }
     }
