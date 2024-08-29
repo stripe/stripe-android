@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -311,6 +312,48 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = isA<PaymentSelection.New>(),
                 error = eq(PaymentSheetConfirmationError.Stripe(error)),
             )
+    }
+
+    @Test
+    fun `On fail due to invalid deferred intent usage, should report with expected integration error`() = runTest {
+        fakeIntentConfirmationInterceptor.apply {
+            enqueueFailureStep(
+                cause = InvalidDeferredIntentUsageException(),
+                message = "An error occurred!",
+            )
+        }
+
+        val flowController = createFlowController().apply {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                    ),
+                ),
+                callback = { _, _ -> }
+            )
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            )
+        )
+
+        flowController.confirm()
+
+        val errorCaptor = argumentCaptor<PaymentSheetConfirmationError.Stripe>()
+
+        verify(eventReporter).onPaymentFailure(
+            paymentSelection = eq(PaymentMethodFixtures.CARD_PAYMENT_SELECTION),
+            error = errorCaptor.capture(),
+        )
+
+        val error = errorCaptor.firstValue
+
+        assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
+        assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
     }
 
     @Test

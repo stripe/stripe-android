@@ -47,6 +47,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -1069,6 +1070,35 @@ internal class PaymentSheetViewModelTest {
             val stripeIntent = awaitItem()?.stripeIntent
             assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
+    }
+
+    @Test
+    fun `On fail due to invalid deferred intent usage, should report with expected integration error`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueFailureStep(
+                cause = InvalidDeferredIntentUsageException(),
+                message = "An error occurred!",
+            )
+        }
+
+        val viewModel = createViewModel(
+            intentConfirmationInterceptor = interceptor,
+        )
+
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        viewModel.checkout()
+
+        val errorCaptor = argumentCaptor<PaymentSheetConfirmationError.Stripe>()
+
+        verify(eventReporter).onPaymentFailure(
+            paymentSelection = eq(CARD_PAYMENT_SELECTION),
+            error = errorCaptor.capture(),
+        )
+
+        val error = errorCaptor.firstValue
+
+        assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
+        assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
     }
 
     @Test
