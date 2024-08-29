@@ -29,9 +29,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
@@ -78,7 +76,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@OptIn(ExperimentalCvcRecollectionApi::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
@@ -192,7 +189,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     PaymentSheet.FlowController.linkHandler = null
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
                 }
             }
         )
@@ -379,11 +375,9 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
-        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
-            (
-                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledForDeferredIntent() &&
-                    initializationMode is PaymentSheet.InitializationMode.DeferredIntent
-                )
+        return  (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
+        (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            ?.intentConfiguration?.requireCvcRecollection == true
     }
 
     @VisibleForTesting

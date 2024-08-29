@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
 
 @Stable
 internal sealed interface PlaygroundState {
@@ -42,6 +43,8 @@ internal sealed interface PlaygroundState {
 
         val stripeIntentId: String
             get() = clientSecret.substringBefore("_secret_")
+
+        val requireCvcRecollectionForDeferred = snapshot[RequireCvcRecollectionDefinition]
 
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
