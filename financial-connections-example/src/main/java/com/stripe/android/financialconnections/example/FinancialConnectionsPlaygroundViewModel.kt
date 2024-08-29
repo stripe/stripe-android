@@ -167,8 +167,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = ""
                             )
                         )
                     )
@@ -445,7 +446,7 @@ enum class Experience(
 ) {
     FinancialConnections("Financial Connections"),
     InstantDebits("Instant Debits"),
-    PaymentElement("Payment Element");
+    PaymentElement("Payment Element")
 }
 
 enum class NativeOverride(val apiValue: String) {

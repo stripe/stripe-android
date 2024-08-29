@@ -45,9 +45,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
 import com.stripe.android.financialconnections.example.Experience.PaymentElement
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
 import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.SettingsUi
@@ -110,67 +114,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             viewModel::onFinancialConnectionsSheetForTokenResult
         )
 
-        val collectBankAccountLauncher: CollectBankAccountLauncher? = remember(state.experience) {
-            when (state.experience) {
-                FinancialConnections -> collectBankAccountForAchLauncher
-                InstantDebits -> collectBankAccountForInstantDebitsLauncher
-                PaymentElement -> null
-            }
-        }
-
         LaunchedEffect(viewEffect) {
-            viewEffect?.let {
-                when (it) {
-                    is FinancialConnectionsPlaygroundViewEffect.OpenForData -> {
-                        financialConnectionsSheetForData.present(it.configuration)
-                    }
-
-                    is FinancialConnectionsPlaygroundViewEffect.OpenForToken -> {
-                        financialConnectionsSheetForToken.present(it.configuration)
-                    }
-
-                    is FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent -> {
-                        val email = state.settings.get<EmailSetting>().selectedOption
-
-                        when (it.experience) {
-                            FinancialConnections -> collectBankAccountLauncher!!.presentWithPaymentIntent(
-                                publishableKey = it.publishableKey,
-                                stripeAccountId = null,
-                                clientSecret = it.paymentIntentSecret,
-                                configuration = CollectBankAccountConfiguration.USBankAccount(
-                                    name = "Sample name",
-                                    email = email,
-                                )
-                            )
-                            InstantDebits -> collectBankAccountLauncher!!.presentWithPaymentIntent(
-                                publishableKey = it.publishableKey,
-                                stripeAccountId = null,
-                                clientSecret = it.paymentIntentSecret,
-                                configuration = CollectBankAccountConfiguration.USBankAccount(
-                                    name = "Sample name",
-                                    email = email,
-                                )
-                            )
-                            PaymentElement -> {
-                                val customerConfig = PaymentSheet.CustomerConfiguration(
-                                    id = it.customerId!!,
-                                    ephemeralKeySecret = it.ephemeralKey!!
-                                )
-                                PaymentConfiguration.init(
-                                    context = this@FinancialConnectionsPlaygroundActivity,
-                                    publishableKey = it.publishableKey
-                                )
-                                paymentSheet.presentWithPaymentIntent(
-                                    paymentIntentClientSecret = it.paymentIntentSecret,
-                                    configuration = PaymentSheet.Configuration(
-                                        allowsDelayedPaymentMethods = true,
-                                        merchantDisplayName = "Example, Inc.",
-                                        customer = customerConfig
-                                    )
-                                )
-                            }
-                        }
-                    }
+            viewEffect?.let { effect ->
+                when (effect) {
+                    is OpenForData -> effect.launch(financialConnectionsSheetForData)
+                    is OpenForToken -> effect.launch(financialConnectionsSheetForToken)
+                    is OpenForPaymentIntent -> effect.launch(state, paymentSheet)
                 }
             }
         }
@@ -180,6 +129,62 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             onSettingsChanged = viewModel::onSettingsChanged,
             onButtonClick = viewModel::startFinancialConnectionsSession
         )
+    }
+
+    private fun OpenForData.launch(
+        financialConnectionsSheet: FinancialConnectionsSheet
+    ) {
+        financialConnectionsSheet.present(configuration)
+    }
+
+    private fun OpenForToken.launch(
+        financialConnectionsSheet: FinancialConnectionsSheet
+    ) {
+        financialConnectionsSheet.present(configuration)
+    }
+
+    private fun OpenForPaymentIntent.launch(
+        state: FinancialConnectionsPlaygroundState,
+        paymentSheet: PaymentSheet
+    ) {
+        val email = state.settings.get<EmailSetting>().selectedOption
+        when (experience) {
+            FinancialConnections -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+                clientSecret = paymentIntentSecret,
+                configuration = CollectBankAccountConfiguration.USBankAccount(
+                    name = "Sample name",
+                    email = email,
+                )
+            )
+            InstantDebits -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+                clientSecret = paymentIntentSecret,
+                configuration = CollectBankAccountConfiguration.USBankAccount(
+                    name = "Sample name",
+                    email = email,
+                )
+            )
+            PaymentElement -> {
+                PaymentConfiguration.init(
+                    context = this@FinancialConnectionsPlaygroundActivity,
+                    publishableKey = publishableKey
+                )
+                paymentSheet.presentWithPaymentIntent(
+                    paymentIntentClientSecret = paymentIntentSecret,
+                    configuration = PaymentSheet.Configuration(
+                        allowsDelayedPaymentMethods = true,
+                        merchantDisplayName = "Example, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = requireNotNull(customerId),
+                            ephemeralKeySecret = requireNotNull(ephemeralKey)
+                        )
+                    )
+                )
+            }
+        }
     }
 
     @Composable
