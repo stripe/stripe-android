@@ -21,15 +21,11 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 
 internal class VerticalModeFormUIScreenshotTest {
 
@@ -39,15 +35,8 @@ internal class VerticalModeFormUIScreenshotTest {
             .padding(16.dp)
     )
 
-    @BeforeTest
-    fun before() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
-
-    @AfterTest
-    fun after() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
     fun cardFormIsDisplayed() {
