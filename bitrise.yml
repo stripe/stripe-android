@@ -39,6 +39,7 @@ stages:
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
       - run-paymentsheet-screenshot-tests: { }
+      - run-google-pay-tests: { }
       - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
@@ -105,6 +106,24 @@ workflows:
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
+  run-google-pay-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - android-build-for-ui-testing:
+          inputs:
+            - module: paymentsheet-example
+            - variant: debug
+      - virtual-device-testing-for-android:
+          inputs:
+          - test_type: instrumentation
+          - auto_google_login: true
+          - use_verbose_log: true
+          - download_test_results: true
+          - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+          - test_devices: 'Pixel3,30,en,portrait'
   run-connections-e2e-payments-tests:
     envs:
       - MAESTRO_TAGS: testmode-payments
