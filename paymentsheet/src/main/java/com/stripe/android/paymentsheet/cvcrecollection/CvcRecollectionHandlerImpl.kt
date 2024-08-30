@@ -34,7 +34,7 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
     }
 
     private fun deferredIntentRequiresCVCRecollection(initializationMode: PaymentSheet.InitializationMode?): Boolean {
-        return  (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+        return (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
             ?.intentConfiguration?.requireCvcRecollection == true
     }
 

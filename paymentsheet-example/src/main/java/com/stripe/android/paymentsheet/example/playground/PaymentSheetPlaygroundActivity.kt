@@ -63,7 +63,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_T
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
