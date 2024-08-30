@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+*[ADDED][9158](https://github.com/stripe/stripe-android/pull/9158) Add `requireCvcRecollection` param to `IntentConfiguration`
+
 ## 20.48.6 - 2024-08-26
 * Stability and efficiency improvements.
 
