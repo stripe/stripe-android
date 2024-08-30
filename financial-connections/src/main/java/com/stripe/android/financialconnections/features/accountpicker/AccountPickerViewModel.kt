@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -30,6 +31,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
+import com.stripe.android.financialconnections.features.error.clearAccountsAndNavigateToManualEntry
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -37,7 +39,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -60,6 +61,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val updateCachedAccounts: UpdateCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -329,11 +331,19 @@ internal class AccountPickerViewModel @AssistedInject constructor(
         }
     }
 
-    fun selectAnotherBank() =
+    fun selectAnotherBank() {
         navigationManager.tryNavigateTo(Reset(referrer = PANE))
+    }
 
-    fun onEnterDetailsManually() =
-        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
+    fun onEnterDetailsManually() {
+        viewModelScope.launch {
+            clearAccountsAndNavigateToManualEntry(
+                updateCachedAccounts = updateCachedAccounts,
+                navigationManager = navigationManager,
+                referrer = PANE
+            )
+        }
+    }
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }
