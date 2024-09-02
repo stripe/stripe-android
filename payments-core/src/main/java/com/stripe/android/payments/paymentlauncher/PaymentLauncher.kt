@@ -11,7 +11,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.utils.rememberActivityOrNull
+import com.stripe.android.uicore.compose.rememberActivityOrNull
 
 /**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].

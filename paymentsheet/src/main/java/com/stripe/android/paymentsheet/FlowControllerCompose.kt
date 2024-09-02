@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
-import com.stripe.android.utils.rememberActivity
+import com.stripe.android.uicore.compose.rememberActivity
 
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.

@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.browser.customtabs.CustomTabsManager
+import com.stripe.android.core.browser.customtabs.CustomTabsManagerImpl
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -53,6 +55,12 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Singleton
+    @Binds
+    fun bindsCustomTabsManager(
+        impl: CustomTabsManagerImpl,
+    ): CustomTabsManager
 
     @Binds
     fun bindsHandleError(
