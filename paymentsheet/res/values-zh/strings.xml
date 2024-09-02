@@ -4,8 +4,6 @@
   <string name="stripe_add_new_payment_method">添加新支付方式</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">用 Afterpay 先买后付</string>
-  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">移除尾号为 %s 的银行账户</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s内在您的银行应用中确认付款，完成购物。</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -105,6 +103,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">选择您的支付方式</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">移除尾号为 %s 的银行账户</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">出错了</string>
   <!-- Button text on a screen asking the user to approve a payment -->
