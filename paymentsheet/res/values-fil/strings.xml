@@ -4,8 +4,6 @@
   <string name="stripe_add_new_payment_method">Magdagadag ng bagong pamamaraan ng pagbabayad</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Bumili ngayon o magbayad sa ibang pagkakataon gamit ang Afterpay</string>
-  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Alisin ang account na nagtatapos sa %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Kumpirmahin ang pagbabayad sa app ng iyong bangko sa loob ng %s para kumpletuhin ang pagbili.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -105,6 +103,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Piliin ang iyong paraan ng pagbabayad</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Alisin ang account na nagtatapos sa %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">May nangyaring mali</string>
   <!-- Button text on a screen asking the user to approve a payment -->
