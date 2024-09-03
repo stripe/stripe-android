@@ -314,6 +314,12 @@ internal class Selectors(
         )
     )
 
+    fun getCvcRecollectionScreenConfirm() = composeTestRule.onNodeWithTextAfterWaiting(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            PaymentSheetR.string.stripe_paymentsheet_confirm
+        )
+    )
+
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
         this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             this.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
