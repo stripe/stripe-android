@@ -9,11 +9,18 @@ import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSaveSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
@@ -261,6 +268,58 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
+                settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
+            },
+            numExpectedPaymentMethodIcons = 3,
+            customOperations = {
+                testDriver.pressSelection()
+                testDriver.scrollToBottom()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetAlongsideSfuLinkSignUp() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(
+                resetCustomer = true,
+            ).copyPlaygroundSettings { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSessionSaveSettingsDefinition] = true
+
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
+                settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
+            },
+            numExpectedPaymentMethodIcons = 3,
+            customOperations = {
+                testDriver.pressSelection()
+                testDriver.scrollToBottom()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetInsteadOfSfuLinkSignUp() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(
+                resetCustomer = true,
+            ).copyPlaygroundSettings { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSessionSaveSettingsDefinition] = false
+
                 settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
                 settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
             },

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Mua ngay hoặc thanh toán sau bằng <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Trả bằng <num_installments/> khoản thanh toán không lãi suất là <installment_price/> bằng <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d khoản thanh toán không lãi suất %2$s</string>

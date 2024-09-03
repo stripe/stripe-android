@@ -32,11 +32,13 @@ import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
@@ -837,10 +839,14 @@ internal class PlaygroundTestDriver(
                         .size == 1
                 }
 
-                composeTestRule.waitUntil {
-                    composeTestRule.onAllNodesWithText("Country or region")
-                        .fetchSemanticsNodes()
-                        .size == 1
+                val collectionMode = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition]
+
+                if (collectionMode != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
+                    composeTestRule.waitUntil {
+                        composeTestRule.onAllNodesWithText("Country or region")
+                            .fetchSemanticsNodes()
+                            .size == 1
+                    }
                 }
             }
             is CustomerType.Existing, is CustomerType.RETURNING -> {
@@ -1233,6 +1239,10 @@ internal class PlaygroundTestDriver(
 
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
+            if (testParameters.resetCustomer) {
+                PaymentSheet.resetCustomer(activity.applicationContext)
+            }
+
             monitorCurrentActivity(activity.application)
 
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)

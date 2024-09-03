@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[<img/>(으)로 지금 구매하거나 나중에 결제하십시오]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d%2$s회 무이자 결제</string>
