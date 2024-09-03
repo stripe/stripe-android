@@ -79,6 +79,31 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     }
 
     @Test
+    fun displaysVerticalModeListWithErrorAndMandate() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+        )
+        val initialScreen = VerticalMode(
+            FakePaymentMethodVerticalLayoutInteractor.create(
+                paymentMethodMetadata = metadata,
+                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.onError("Example error".resolvableString)
+        viewModel.mandateHandler.updateMandateText("Example Mandate".resolvableString, showAbove = true)
+        viewModel.primaryButtonUiStateSource.update { original ->
+            original?.copy(enabled = true)
+        }
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
     fun displaysVerticalModeListWithLink() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
