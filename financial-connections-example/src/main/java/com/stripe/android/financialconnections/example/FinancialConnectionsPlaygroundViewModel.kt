@@ -323,27 +323,25 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     fun onPaymentSheetResult(result: PaymentSheetResult) {
-        viewModelScope.launch {
-            when (result) {
-                is PaymentSheetResult.Canceled -> {
-                    _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
-                }
-                is PaymentSheetResult.Completed -> {
-                    _state.update {
-                        it.copy(
-                            status = it.status + listOf(
-                                "Elements Session Completed"
-                            )
+        when (result) {
+            is PaymentSheetResult.Canceled -> {
+                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+            }
+            is PaymentSheetResult.Completed -> {
+                _state.update {
+                    it.copy(
+                        status = it.status + listOf(
+                            "Elements Session Completed"
                         )
-                    }
+                    )
                 }
-                is PaymentSheetResult.Failed -> {
-                    _state.update {
-                        it.copy(
-                            loading = false,
-                            status = it.status + "Failed! ${result.error}"
-                        )
-                    }
+            }
+            is PaymentSheetResult.Failed -> {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Failed! ${result.error}"
+                    )
                 }
             }
         }
