@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -315,6 +316,20 @@ internal class AccountPickerViewModelTest {
 
         navigationManager.assertNavigatedTo(
             destination = Pane.SUCCESS.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
+    fun `onEnterDetailsManually - clears cached accounts and navigates to manual entry`() = runTest {
+        val viewModel = buildViewModel(AccountPickerState())
+
+        viewModel.onEnterDetailsManually()
+
+        verify(updateCachedAccounts).invoke(eq(emptyList()))
+        navigationManager.assertNavigatedTo(
+            destination = Pane.MANUAL_ENTRY.destination,
             pane = Pane.ACCOUNT_PICKER,
             popUpTo = null,
         )
