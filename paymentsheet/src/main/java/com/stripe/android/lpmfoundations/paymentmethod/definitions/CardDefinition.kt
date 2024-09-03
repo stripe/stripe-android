@@ -142,7 +142,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
                 signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
                 canChangeSaveForFutureUse -> 6.dp
-                else -> 8.dp
+                else -> 2.dp
             },
             args = listOf(merchantName),
         )
