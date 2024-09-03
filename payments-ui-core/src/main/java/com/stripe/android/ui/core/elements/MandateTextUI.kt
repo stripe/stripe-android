@@ -30,7 +30,10 @@ fun MandateTextUI(
         ),
         color = MaterialTheme.stripeColors.placeholderText,
         modifier = Modifier
-            .padding(vertical = 8.dp)
+            .padding(
+                top = element.topPadding,
+                bottom = 8.dp
+            )
             .semantics(mergeDescendants = true) {} // makes it a separate accessibile item
             .testTag(MANDATE_TEST_TAG)
     )
