@@ -12,6 +12,10 @@ def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
 }
 
+def getShouldRunGooglePayTests() {
+    return project.hasProperty("STRIPE_SHOULD_RUN_GOOGLE_PAY_TESTS") && project.STRIPE_SHOULD_RUN_GOOGLE_PAY_TESTS.contains("true")
+}
+
 dependencies {
     implementation project(':payments')
     implementation project(':stripecardscan')
@@ -85,6 +89,7 @@ android {
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
+        buildConfigField "boolean", "SHOULD_RUN_GOOGLE_PAY_TESTS", "${getShouldRunGooglePayTests()}"
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"

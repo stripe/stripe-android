@@ -51,6 +51,7 @@ class TestRules private constructor(
                     }
                 }.around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
                 .around(CleanupChromeRule)
+                .around(GooglePayTestRule())
 
             return TestRules(chain, composeTestRule)
         }

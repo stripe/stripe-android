@@ -112,11 +112,12 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - android-build-for-ui-testing:
+      - android-build-for-ui-testing@0:
           inputs:
             - module: paymentsheet-example
             - variant: debug
-      - virtual-device-testing-for-android:
+            - arguments: -PSTRIPE_SHOULD_RUN_GOOGLE_PAY_TESTS=true
+      - virtual-device-testing-for-android@1:
           inputs:
           - test_type: instrumentation
           - auto_google_login: true
