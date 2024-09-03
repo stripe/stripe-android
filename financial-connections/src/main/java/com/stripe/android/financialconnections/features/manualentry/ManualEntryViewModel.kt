@@ -165,7 +165,7 @@ internal class ManualEntryViewModel @AssistedInject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
-    // #ir-magnesium-presser; keeping accounts selected can lead to them being passed along
+    // Keeping accounts selected can lead to them being passed along
     // to the Link signup/save call later in the flow. We don't need them anymore since we know
     // they've failed us in some way at this point.
     private suspend fun clearCachedAccounts() {
