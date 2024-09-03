@@ -24,8 +24,6 @@ import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -255,7 +253,7 @@ internal class AddPaymentMethodTest {
 
         val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()
 
-        val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(viewActionRecorder, initialState)
+        val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(initialState, viewActionRecorder)
 
         composeRule.setContent {
             AddPaymentMethod(interactor = addPaymentMethodInteractor)
@@ -269,23 +267,6 @@ internal class AddPaymentMethodTest {
         )
 
         Scenario(viewActionRecorder).apply(block)
-    }
-
-    class FakeAddPaymentMethodInteractor(
-        private val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>,
-        initialState: AddPaymentMethodInteractor.State,
-        override val isLiveMode: Boolean = true,
-    ) : AddPaymentMethodInteractor {
-
-        override val state: StateFlow<AddPaymentMethodInteractor.State> = MutableStateFlow(initialState)
-
-        override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
-            viewActionRecorder.record(viewAction)
-        }
-
-        override fun close() {
-            // Do nothing.
-        }
     }
 
     private data class Scenario(

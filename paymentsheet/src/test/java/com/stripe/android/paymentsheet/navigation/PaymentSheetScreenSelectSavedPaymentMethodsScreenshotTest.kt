@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
@@ -29,7 +28,7 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     )
 
     @get:Rule
-    val coroutineRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val coroutineRule = CoroutineTestRule()
 
     private val savedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
         displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(

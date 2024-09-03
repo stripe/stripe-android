@@ -71,6 +71,7 @@ workflows:
       - opts:
           is_expand: false
         NEEDS_ROBOLECTRIC: true
+      - INCLUDE_PAPARAZZI_ON_FAILURE: true
     before_run:
       - prepare_all
     after_run:
