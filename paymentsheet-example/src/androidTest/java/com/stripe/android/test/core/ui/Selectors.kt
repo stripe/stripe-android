@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CVC_RECOLLECTION_SCREEN_CONFIRM
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
@@ -314,10 +315,8 @@ internal class Selectors(
         )
     )
 
-    fun getCvcRecollectionScreenConfirm() = composeTestRule.onNodeWithTextAfterWaiting(
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            PaymentSheetR.string.stripe_paymentsheet_confirm
-        )
+    fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
+        hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
 
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {

@@ -35,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -241,7 +242,8 @@ private fun CvcRecollectionButton(
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(0.dp, 32.dp, 0.dp, 20.dp),
+            .padding(0.dp, 32.dp, 0.dp, 20.dp)
+            .testTag(CVC_RECOLLECTION_SCREEN_CONFIRM),
         contentAlignment = Alignment.Center
     ) {
         PrimaryButton(
@@ -269,3 +271,5 @@ private fun CvcRecollectionFieldPreview() {
         )
     }
 }
+
+const val CVC_RECOLLECTION_SCREEN_CONFIRM = "CVC_CONFIRM"
