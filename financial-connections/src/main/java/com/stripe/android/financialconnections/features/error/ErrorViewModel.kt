@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
-import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -31,7 +30,6 @@ internal class ErrorViewModel @AssistedInject constructor(
     @Assisted initialState: ErrorState,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getOrFetchSync: GetOrFetchSync,
-    private val updateCachedAccounts: UpdateCachedAccounts,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
@@ -85,13 +83,9 @@ internal class ErrorViewModel @AssistedInject constructor(
         // we may still attach `terminal_error` in the /complete call,
         // but we do that today in v2 and we will still successfully complete
         // the session.
-        viewModelScope.launch {
-            clearAccountsAndNavigateToManualEntry(
-                updateCachedAccounts = updateCachedAccounts,
-                navigationManager = navigationManager,
-                referrer = PANE
-            )
-        }
+        navigationManager.tryNavigateTo(
+            route = Destination.ManualEntry(referrer = PANE),
+        )
     }
 
     private fun reset() {
@@ -148,19 +142,5 @@ internal data class ErrorState(
         val error: Throwable,
         val disableLinkMoreAccounts: Boolean,
         val allowManualEntry: Boolean
-    )
-}
-
-// #ir-magnesium-presser; keeping accounts selected can lead to them being passed along
-// to the Link signup/save call later in the flow. We don't need them anymore since we know
-// they've failed us in some way at this point.
-internal suspend fun clearAccountsAndNavigateToManualEntry(
-    updateCachedAccounts: UpdateCachedAccounts,
-    navigationManager: NavigationManager,
-    referrer: Pane
-) {
-    runCatching { updateCachedAccounts(emptyList()) }
-    navigationManager.tryNavigateTo(
-        route = Destination.ManualEntry(referrer = referrer),
     )
 }

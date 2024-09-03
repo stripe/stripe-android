@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.attachpayment
 
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
@@ -14,11 +13,10 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
-import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.features.error.clearAccountsAndNavigateToManualEntry
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -33,13 +31,11 @@ import com.stripe.android.financialconnections.utils.measureTimeMillis
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.launch
 
 internal class AttachPaymentViewModel @AssistedInject constructor(
     @Assisted initialState: AttachPaymentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val successContentRepository: SuccessContentRepository,
-    private val updateCachedAccounts: UpdateCachedAccounts,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedAccounts: GetCachedAccounts,
@@ -109,15 +105,8 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         )
     }
 
-    fun onEnterDetailsManually() {
-        viewModelScope.launch {
-            clearAccountsAndNavigateToManualEntry(
-                updateCachedAccounts = updateCachedAccounts,
-                navigationManager = navigationManager,
-                referrer = PANE
-            )
-        }
-    }
+    fun onEnterDetailsManually() =
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
     fun onSelectAnotherBank() =
         navigationManager.tryNavigateTo(Reset(referrer = PANE))
