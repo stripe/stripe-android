@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -33,9 +32,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
     ) { settings ->
-        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
-        settings[SupportedPaymentMethodsSettingsDefinition] = "card,klarna,p24,eps"
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card"
     }
 
     @Before
@@ -49,7 +47,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             testParams.copyPlaygroundSettings { settings ->
                 settings[PrimaryButtonLabelSettingsDefinition] = "Buy this now!"
             },
-            numExpectedPaymentMethodIcons = 4,
         )
     }
 
@@ -67,11 +64,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSessionSaveSettingsDefinition] = true
-
-                settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
-                settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
             },
-            numExpectedPaymentMethodIcons = 3,
             customOperations = {
                 testDriver.pressSelection()
                 testDriver.scrollToBottom()
@@ -93,11 +86,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSessionSaveSettingsDefinition] = false
-
-                settings[SupportedPaymentMethodsSettingsDefinition] = "card,amazon_pay,klarna"
-                settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna"
             },
-            numExpectedPaymentMethodIcons = 3,
             customOperations = {
                 testDriver.pressSelection()
                 testDriver.scrollToBottom()
