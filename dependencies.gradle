@@ -12,7 +12,7 @@ ext.versions = [
         androidxArchCore            : '2.2.0',
         androidxBrowser             : '1.7.0',
         androidxCompose             : '1.5.4',
-        androidxComposeCompiler     : '1.5.15',
+        androidxComposeCompiler     : '1.5.14',
         androidxComposeRuntime      : '1.5.4',
         androidxComposeUi           : '1.5.4',
         androidxConstraintlayout    : '2.1.4',
