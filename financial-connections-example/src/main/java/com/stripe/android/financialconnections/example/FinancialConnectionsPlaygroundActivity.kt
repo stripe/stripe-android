@@ -158,12 +158,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            InstantDebits -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
+            InstantDebits -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
                 stripeAccountId = null,
                 clientSecret = paymentIntentSecret,
-                configuration = CollectBankAccountConfiguration.USBankAccount(
-                    name = "Sample name",
+                configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
                 )
             )
