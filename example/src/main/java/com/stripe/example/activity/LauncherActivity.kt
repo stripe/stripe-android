@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.view.TestComposeView
 import com.stripe.example.R
 import com.stripe.example.databinding.LauncherActivityBinding
 
@@ -36,6 +37,7 @@ class LauncherActivity : AppCompatActivity() {
         private val activity: Activity
     ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
+            Item("Test Compose View", TestComposeActivity::class.java),
             Item(
                 activity.getString(R.string.payment_auth_example),
                 PaymentAuthActivity::class.java
