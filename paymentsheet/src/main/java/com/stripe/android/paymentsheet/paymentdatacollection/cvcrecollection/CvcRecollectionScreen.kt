@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -272,4 +273,5 @@ private fun CvcRecollectionFieldPreview() {
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CVC_RECOLLECTION_SCREEN_CONFIRM = "CVC_CONFIRM"
