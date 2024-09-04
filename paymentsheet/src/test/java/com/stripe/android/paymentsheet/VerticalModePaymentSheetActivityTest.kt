@@ -8,6 +8,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -285,7 +289,23 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasDisplayedSavedPaymentMethod("pm_67890")
     }
 
+    @Test
+    fun `Primary button label is correctly applied`() = runTest(
+        primaryButtonLabel = "Gimme money!",
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        onView(withText("Gimme money!")).check(matches(isDisplayed()))
+    }
+
     private fun runTest(
+        primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
@@ -303,6 +323,11 @@ internal class VerticalModePaymentSheetActivityTest {
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                         .customer(customer)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .apply {
+                            if (primaryButtonLabel != null) {
+                                primaryButtonLabel(primaryButtonLabel)
+                            }
+                        }
                         .build(),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
