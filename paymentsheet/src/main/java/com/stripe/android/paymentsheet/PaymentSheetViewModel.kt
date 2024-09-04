@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -402,11 +403,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             launchAchFlow()
             return
         }
+        if (shouldConfirmAch()) {
+            confirmAch()
+            return
+        }
         checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
     }
 
     private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
     private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
+
+    private fun confirmAch() {
+        val screen = navigationHandler.currentScreen.value
+        val result = screen.intermediateResult as? CollectBankAccountResultInternal
+        Log.d("TILL123", result.toString())
+    }
 
     private fun launchAchFlow() {
         val metadata = paymentMethodMetadata.value ?: return
@@ -477,7 +488,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun shouldLaunchAchFlow(): Boolean {
         val selection = selection.value
         val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
-        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account"
+        val screen = navigationHandler.currentScreen.value
+
+        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account" &&
+            !screen.hasIntermediateResult
+    }
+
+    private fun shouldConfirmAch(): Boolean {
+        val selection = selection.value
+        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
+        val screen = navigationHandler.currentScreen.value
+
+        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account" &&
+            screen.hasIntermediateResult
     }
 
     fun checkoutWithGooglePay() {

@@ -97,12 +97,26 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
             builder.element(
                 BankAccountElement(
                     state = result.toBankAccountElementState(
-                        initialSaveForFutureUse = arguments.saveForFutureUseInitialValue,
-                        metadata = metadata,
                         onRemoveAccount = { arguments.onRemoveBankAccount() },
                     ),
                 )
             )
+
+            val showCheckbox = isSaveForFutureUseValueChangeable(
+                code = PaymentMethod.Type.USBankAccount.code,
+                intent = metadata.stripeIntent,
+                paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+                hasCustomerConfiguration = metadata.hasCustomerConfiguration,
+            )
+
+            if (showCheckbox) {
+                builder.element(
+                    SaveForFutureUseElement(
+                        initialValue = arguments.saveForFutureUseInitialValue,
+                        merchantName = metadata.merchantName,
+                    )
+                )
+            }
         } else if (result is CollectBankAccountResultInternal.Failed) {
             // TODO: Render error
         }
@@ -112,8 +126,6 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
 }
 
 private fun CollectBankAccountResultInternal.Completed.toBankAccountElementState(
-    initialSaveForFutureUse: Boolean,
-    metadata: PaymentMethodMetadata,
     onRemoveAccount: () -> Unit,
 ): BankAccountElement.State {
     val bankName = when (val paymentAccount = response.usBankAccountData?.financialConnectionsSession?.paymentAccount) {
@@ -128,21 +140,9 @@ private fun CollectBankAccountResultInternal.Completed.toBankAccountElementState
         null -> null
     }
 
-    val showCheckbox = isSaveForFutureUseValueChangeable(
-        code = PaymentMethod.Type.USBankAccount.code,
-        intent = metadata.stripeIntent,
-        paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
-        hasCustomerConfiguration = metadata.hasCustomerConfiguration,
-    )
-
     return BankAccountElement.State(
         bankName = bankName,
         last4 = last4,
-        showCheckbox = showCheckbox,
-        saveForFutureUseElement = SaveForFutureUseElement(
-            initialValue = initialSaveForFutureUse,
-            merchantName = metadata.merchantName,
-        ),
         onRemoveAccount = onRemoveAccount,
     )
 }

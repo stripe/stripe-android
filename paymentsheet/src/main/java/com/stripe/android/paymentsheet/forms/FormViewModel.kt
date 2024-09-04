@@ -11,16 +11,12 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -40,6 +36,16 @@ internal class FormViewModel(
     private val _elements = MutableStateFlow(initialElements)
     val elements: StateFlow<List<FormElement>> = _elements.asStateFlow()
 
+    private val currentFieldValues = _elements.flatMapLatestAsStateFlow { elements ->
+        if (elements.isEmpty()) {
+            stateFlowOf(emptyList())
+        } else {
+            combineAsStateFlow(elements.map(FormElement::getFormFieldValueFlow)) {
+                it.toList().flatten()
+            }
+        }
+    }
+
     private val cardBillingElement = initialElements.filterIsInstance<SectionElement>()
         .flatMap { it.fields }
         .filterIsInstance<CardBillingAddressElement>()
@@ -54,7 +60,7 @@ internal class FormViewModel(
     }
 
     fun updateFormElements(elements: List<FormElement>) {
-        _elements.value = elements
+        _elements.value = elements.toList()
     }
 
     @VisibleForTesting
@@ -70,8 +76,8 @@ internal class FormViewModel(
     }
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
-    private val userRequestedReuse = currentFieldValues().map { currentFieldValues ->
-        currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
+    private val userRequestedReuse = currentFieldValues.map { values ->
+        values.filter { it.first == IdentifierSpec.SaveForFutureUse }
             .map { it.second.value.toBoolean() }
             .map { saveForFutureUse ->
                 if (saveForFutureUse) {
@@ -85,27 +91,11 @@ internal class FormViewModel(
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
-            currentFieldValues().map { it.toMap() },
+            currentFieldValues.map { it.toMap() },
             hiddenIdentifiers,
             userRequestedReuse,
             defaultValuesToInclude,
         ).filterFlow()
-
-    private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return _elements.flatMapConcat { elements ->
-            if (elements.isEmpty()) {
-                flowOf(emptyList())
-            } else {
-                combine(
-                    elements.map {
-                        it.getFormFieldValueFlow()
-                    }
-                ) {
-                    it.toList().flatten()
-                }
-            }
-        }
-    }
 
     @VisibleForTesting
     val defaultValuesToInclude

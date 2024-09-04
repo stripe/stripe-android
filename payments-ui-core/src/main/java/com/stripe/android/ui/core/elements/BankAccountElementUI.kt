@@ -75,7 +75,7 @@ fun BankAccountElementUI(
 
                     Text(
                         text = "${state.bankName} •••• ${state.last4}",
-                        modifier = Modifier.alpha(if (enabled) 0.5f else 1f),
+                        modifier = Modifier.alpha(if (enabled) 1f else 0.5f),
                         color = MaterialTheme.stripeColors.onComponent,
                     )
                 }
@@ -93,13 +93,13 @@ fun BankAccountElementUI(
             }
         }
 
-        if (state.showCheckbox) {
-            SaveForFutureUseElementUI(
-                enabled = true,
-                element = state.saveForFutureUseElement,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+//        if (state.showCheckbox) {
+//            SaveForFutureUseElementUI(
+//                enabled = true,
+//                element = state.saveForFutureUseElement,
+//                modifier = Modifier.padding(top = 8.dp)
+//            )
+//        }
     }
 
     if (openDialog && state.last4 != null) {

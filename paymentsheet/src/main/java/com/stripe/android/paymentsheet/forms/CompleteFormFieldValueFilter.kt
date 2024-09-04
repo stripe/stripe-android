@@ -17,6 +17,7 @@ internal class CompleteFormFieldValueFilter(
     private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>,
     private val defaultValues: Map<IdentifierSpec, String>,
 ) {
+
     /**
      * This flow does not emit any value until all form field values are complete, then it emits an
      * object representing all the complete, non-hidden fields.
@@ -42,7 +43,7 @@ internal class CompleteFormFieldValueFilter(
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing
-        var processedFieldsMap = idFieldSnapshotMap.filter {
+        val processedFieldsMap = idFieldSnapshotMap.filter {
             !hiddenIdentifiers.contains(it.key)
         }.toMutableMap()
 
@@ -50,7 +51,7 @@ internal class CompleteFormFieldValueFilter(
         // Default values are added even if the field is hidden.
         for (entry in defaultValues) {
             val formValue = processedFieldsMap[entry.key]
-            if (formValue?.value.isNullOrBlank() && !entry.value.isNullOrBlank()) {
+            if (formValue?.value.isNullOrBlank() && entry.value.isNotBlank()) {
                 processedFieldsMap[entry.key] = FormFieldEntry(entry.value, true)
             }
         }
