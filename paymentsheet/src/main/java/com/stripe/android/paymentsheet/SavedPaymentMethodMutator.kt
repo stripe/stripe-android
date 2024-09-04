@@ -211,7 +211,6 @@ internal class SavedPaymentMethodMutator(
                     canRemove = canRemove.value,
                     isLiveMode = isLiveModeProvider(),
                 ),
-                isLiveMode = isLiveModeProvider(),
             )
         )
     }
