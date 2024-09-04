@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
+import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -586,6 +587,73 @@ internal class PlaygroundTestDriver(
         doAuthorization()
 
         afterBuyAction(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmCompleteWithSavePaymentMethodAndCvcRecollection(
+        customerId: String?,
+        testParameters: TestParameters
+    ): PlaygroundState? {
+        if (customerId == null) {
+            fail("No customer id")
+            return playgroundState
+        }
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+                settings[RequireCvcRecollectionDefinition] = true
+            }
+        )
+        launchComplete()
+
+        selectors.getCardCvc()
+            .performScrollTo().performTextInput("123")
+
+        val result = playgroundState
+
+        pressBuy()
+
+        doAuthorization()
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmCustomWithSavePaymentMethodAndCvcRecollection(
+        customerId: String?,
+        testParameters: TestParameters
+    ): PlaygroundState? {
+        if (customerId == null) {
+            fail("No customer id")
+            return playgroundState
+        }
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+                settings[RequireCvcRecollectionDefinition] = true
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
+            }
+        )
+
+        launchCustom(false)
+
+        selectors.playgroundBuyButton.click()
+
+        selectors.getCardCvc().performTextInput("123")
+
+        selectors.getCvcRecollectionScreenConfirm().performClick()
+
+        val result = playgroundState
+
+        doAuthorization()
 
         teardown()
 
