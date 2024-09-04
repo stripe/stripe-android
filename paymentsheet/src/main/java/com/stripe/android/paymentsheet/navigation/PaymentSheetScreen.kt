@@ -262,7 +262,6 @@ internal sealed interface PaymentSheetScreen {
 
     class EditPaymentMethod(
         val interactor: ModifiableEditPaymentMethodViewInteractor,
-        private val isLiveMode: Boolean,
     ) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = stateFlowOf(
@@ -277,7 +276,7 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     hasBackStack = true,
-                    isLiveMode = isLiveMode,
+                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
