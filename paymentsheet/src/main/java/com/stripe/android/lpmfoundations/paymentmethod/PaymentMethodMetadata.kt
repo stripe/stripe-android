@@ -190,11 +190,13 @@ internal data class PaymentMethodMetadata(
     fun formElementsForCode(
         code: String,
         uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
+        result: Any?,
     ): List<FormElement>? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
-                this,
-                uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+                metadata = this,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false),
+                result = result,
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
@@ -207,6 +209,7 @@ internal data class PaymentMethodMetadata(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
                 ),
+                result = result,
             )
         }
     }

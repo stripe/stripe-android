@@ -463,6 +463,7 @@ internal class CustomerSheetViewModel(
                             )
                         }
                     ),
+                    result = null, // TODO
                 ) ?: listOf(),
                 primaryButtonLabel = if (
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
@@ -807,7 +808,8 @@ internal class CustomerSheetViewModel(
                             "receive `InlineSignUpViewState` updates"
                     )
                 }
-            )
+            ),
+            result = null, // TODO
         ) ?: emptyList()
 
         transition(

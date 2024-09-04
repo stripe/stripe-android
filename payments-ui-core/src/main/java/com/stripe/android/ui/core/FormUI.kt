@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,8 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
+import com.stripe.android.ui.core.elements.BankAccountElement
+import com.stripe.android.ui.core.elements.BankAccountElementUI
 import com.stripe.android.ui.core.elements.BsbElement
 import com.stripe.android.ui.core.elements.BsbElementUI
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -119,6 +122,13 @@ private fun FormUIElement(
         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled)
+        is BankAccountElement -> BankAccountElementUI(
+            state = element.state,
+            enabled = enabled,
+            onRemoveAccount = {
+                Log.d("TILL123", "onRemoveAccount called")
+            },
+        )
         is EmptyFormElement -> {}
     }
 }

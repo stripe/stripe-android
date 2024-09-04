@@ -2,6 +2,7 @@ package com.stripe.android.payments.bankaccount
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
@@ -120,6 +121,21 @@ interface CollectBankAccountLauncher {
                 hostedSurface = hostedSurface,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
+                    CollectBankAccountContract(),
+                    callback,
+                )
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createForPaymentSheet(
+            hostedSurface: String,
+            activityResultCaller: ActivityResultCaller,
+            callback: (CollectBankAccountResultInternal) -> Unit,
+        ): CollectBankAccountLauncher {
+            return CollectBankAccountForACHLauncher(
+                hostedSurface = hostedSurface,
+                hostActivityLauncher = activityResultCaller.registerForActivityResult(
                     CollectBankAccountContract(),
                     callback,
                 )

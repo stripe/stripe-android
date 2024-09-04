@@ -68,7 +68,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
-    private val formElementsForCode: (code: String) -> List<FormElement>,
+    private val formElementsForCode: (code: String, result: Any?) -> List<FormElement>,
     private val requiresFormScreen: (code: String) -> Boolean,
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
@@ -358,7 +358,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
 
-                    formElementsForCode(viewAction.selectedPaymentMethodCode)
+                    formElementsForCode(viewAction.selectedPaymentMethodCode, null)
                         .firstNotNullOfOrNull { it.mandateText }?.let {
                             onMandateTextUpdated(it)
                         }
@@ -378,6 +378,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onEditPaymentMethod(viewAction.savedPaymentMethod)
             }
         }
+    }
+
+    private fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
+        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode, null).any { it.allowsUserInteraction }
+        return userInteractionAllowed ||
+            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
     }
 
     private fun updateSelectedPaymentMethod(selectedPaymentMethodCode: String) {

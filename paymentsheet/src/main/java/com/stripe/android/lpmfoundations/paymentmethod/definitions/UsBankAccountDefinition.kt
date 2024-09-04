@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.model.BankAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -9,8 +11,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.BankAccountElement
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -57,6 +62,7 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
+        result: Any?,
     ): List<FormElement> {
         val defaultName = arguments.initialValues[IdentifierSpec.Name]
         val defaultEmail = arguments.initialValues[IdentifierSpec.Email]
@@ -81,10 +87,51 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
             EmailElement(initialValue = defaultEmail)
         )
 
-        return FormElementsBuilder(arguments)
+        val builder = FormElementsBuilder(arguments)
             .header(headerElement)
             .element(nameElement)
             .element(emailElement)
-            .build()
+
+        if (result is CollectBankAccountResultInternal.Completed) {
+            builder.element(
+                BankAccountElement(
+                    state = result.toBankAccountElementState(
+                        initialSaveForFutureUse = arguments.saveForFutureUseInitialValue,
+                        merchantName = metadata.merchantName,
+                    ),
+                )
+            )
+        } else if (result is CollectBankAccountResultInternal.Failed) {
+            // TODO: Render error
+        }
+
+        return builder.build()
     }
+}
+
+private fun CollectBankAccountResultInternal.Completed.toBankAccountElementState(
+    initialSaveForFutureUse: Boolean,
+    merchantName: String?,
+): BankAccountElement.State {
+    val bankName = when (val paymentAccount = response.usBankAccountData?.financialConnectionsSession?.paymentAccount) {
+        is BankAccount -> paymentAccount.bankName
+        is FinancialConnectionsAccount -> paymentAccount.institutionName
+        null -> null
+    }
+
+    val last4 = when (val paymentAccount = response.usBankAccountData?.financialConnectionsSession?.paymentAccount) {
+        is BankAccount -> paymentAccount.last4
+        is FinancialConnectionsAccount -> paymentAccount.last4
+        null -> null
+    }
+
+    return BankAccountElement.State(
+        bankName = bankName,
+        last4 = last4,
+        showCheckbox = true, // TODO
+        saveForFutureUseElement = SaveForFutureUseElement(
+            initialValue = initialSaveForFutureUse,
+            merchantName = merchantName,
+        ),
+    )
 }

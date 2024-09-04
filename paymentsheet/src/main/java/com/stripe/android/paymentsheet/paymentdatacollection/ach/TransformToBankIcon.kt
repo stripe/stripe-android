@@ -6,7 +6,10 @@ import com.stripe.android.financialconnections.R as FinancialConnectionsR
 internal interface TransformToBankIcon {
     companion object {
         operator fun invoke(bankName: String?): Int {
-            if (bankName == null) return FinancialConnectionsR.drawable.stripe_ic_bank
+            if (bankName == null) {
+                return FinancialConnectionsR.drawable.stripe_ic_bank
+            }
+
             val bankNameRegexIconMap = mapOf(
                 Regex("Bank of America", RegexOption.IGNORE_CASE) to
                     StripeR.drawable.stripe_ic_bank_boa,

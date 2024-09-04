@@ -11,12 +11,14 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 internal interface VerticalModeFormInteractor {
     val isLiveMode: Boolean
@@ -26,6 +28,8 @@ internal interface VerticalModeFormInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     fun canGoBack(): Boolean
+
+    fun invalidate(result: Any?)
 
     fun close()
 
@@ -47,7 +51,7 @@ internal interface VerticalModeFormInteractor {
 internal class DefaultVerticalModeFormInteractor(
     private val selectedPaymentMethodCode: String,
     private val formArguments: FormArguments,
-    private val formElements: List<FormElement>,
+    private val formElements: (Any?) -> List<FormElement>,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues?, selectedPaymentMethodCode: String) -> Unit,
     private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
@@ -57,15 +61,23 @@ internal class DefaultVerticalModeFormInteractor(
     processing: StateFlow<Boolean>,
     private val coroutineScope: CoroutineScope,
 ) : VerticalModeFormInteractor {
-    override val state: StateFlow<VerticalModeFormInteractor.State> = processing.mapAsStateFlow { isProcessing ->
+
+    private val _state = MutableStateFlow(
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
-            isProcessing = isProcessing,
+            isProcessing = false,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
-            formElements = formElements,
+            formElements = formElements(null),
             headerInformation = headerInformation,
         )
+    )
+
+    override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
+        _state,
+        processing,
+    ) { state, processing ->
+        state.copy(isProcessing = processing)
     }
 
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
@@ -81,6 +93,15 @@ internal class DefaultVerticalModeFormInteractor(
 
     override fun canGoBack(): Boolean {
         return canGoBackDelegate()
+    }
+
+    override fun invalidate(result: Any?) {
+        val elements = formElements(result)
+        _state.update { state ->
+            state.copy(
+                formElements = elements,
+            )
+        }
     }
 
     override fun close() {
@@ -103,7 +124,7 @@ internal class DefaultVerticalModeFormInteractor(
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
-                formElements = formHelper.formElementsForCode(selectedPaymentMethodCode),
+                formElements = { result -> formHelper.formElementsForCode(selectedPaymentMethodCode, result) },
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 usBankAccountArguments = USBankAccountFormArguments.create(
                     viewModel = viewModel,

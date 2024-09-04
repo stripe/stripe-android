@@ -16,7 +16,10 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,24 +33,14 @@ import kotlinx.coroutines.launch
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 internal class FormViewModel(
-    val elements: List<FormElement>,
-    val formArguments: FormArguments,
+    initialElements: List<FormElement>,
+    private val formArguments: FormArguments,
 ) : ViewModel() {
-    internal class Factory(
-        val formElements: List<FormElement>,
-        val formArguments: FormArguments,
-    ) : ViewModelProvider.Factory {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FormViewModel(
-                elements = formElements,
-                formArguments = formArguments,
-            ) as T
-        }
-    }
+    private val _elements = MutableStateFlow(initialElements)
+    val elements: StateFlow<List<FormElement>> = _elements.asStateFlow()
 
-    private val cardBillingElement = elements.filterIsInstance<SectionElement>()
+    private val cardBillingElement = initialElements.filterIsInstance<SectionElement>()
         .flatMap { it.fields }
         .filterIsInstance<CardBillingAddressElement>()
         .firstOrNull()
@@ -56,8 +49,12 @@ internal class FormViewModel(
 
     init {
         viewModelScope.launch {
-            connectBillingDetailsFields(elements)
+            connectBillingDetailsFields(initialElements)
         }
+    }
+
+    fun updateFormElements(elements: List<FormElement>) {
+        _elements.value = elements
     }
 
     @VisibleForTesting
@@ -95,15 +92,17 @@ internal class FormViewModel(
         ).filterFlow()
 
     private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return if (elements.isEmpty()) {
-            flowOf(emptyList())
-        } else {
-            combine(
-                elements.map {
-                    it.getFormFieldValueFlow()
+        return _elements.flatMapConcat { elements ->
+            if (elements.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    elements.map {
+                        it.getFormFieldValueFlow()
+                    }
+                ) {
+                    it.toList().flatten()
                 }
-            ) {
-                it.toList().flatten()
             }
         }
     }
@@ -133,7 +132,7 @@ internal class FormViewModel(
             return defaults
         }
 
-    private val textFieldControllerIdsFlow = combineAsStateFlow(elements.map { it.getTextFieldIdentifiers() }) {
+    private val textFieldControllerIdsFlow = combineAsStateFlow(initialElements.map { it.getTextFieldIdentifiers() }) {
         it.toList().flatten()
     }
 
@@ -143,6 +142,20 @@ internal class FormViewModel(
     ) { hiddenIds, textFieldControllerIds ->
         textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
+        }
+    }
+
+    internal class Factory(
+        val formElements: List<FormElement>,
+        val formArguments: FormArguments,
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return FormViewModel(
+                initialElements = formElements,
+                formArguments = formArguments,
+            ) as T
         }
     }
 }

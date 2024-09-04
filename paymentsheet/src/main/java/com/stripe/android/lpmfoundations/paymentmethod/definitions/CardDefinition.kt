@@ -67,6 +67,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
+        result: Any?,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         return buildList {

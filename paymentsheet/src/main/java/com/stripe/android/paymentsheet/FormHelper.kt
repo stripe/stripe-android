@@ -45,7 +45,7 @@ internal class FormHelper(
         }
     }
 
-    fun formElementsForCode(code: String): List<FormElement> {
+    fun formElementsForCode(code: String, result: Any?): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
 
         return paymentMethodMetadata.formElementsForCode(
@@ -57,6 +57,7 @@ internal class FormHelper(
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),
+            result = result,
         ) ?: emptyList()
     }
 

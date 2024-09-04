@@ -94,7 +94,11 @@ internal sealed interface UiDefinitionFactory {
             return createSupportedPaymentMethod().asFormHeaderInformation()
         }
 
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
+        fun createFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+            result: Any?,
+        ): List<FormElement>
     }
 
     fun canBeDisplayedInUi(
@@ -153,11 +157,13 @@ internal sealed interface UiDefinitionFactory {
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
         arguments: Arguments,
+        result: Any?,
     ): List<FormElement>? = when (this) {
         is Simple -> {
             createFormElements(
                 metadata = metadata,
                 arguments = arguments,
+                result = result,
             )
         }
 

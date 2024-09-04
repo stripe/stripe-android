@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -25,6 +26,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -67,6 +73,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel @Inject internal constructor(
@@ -85,7 +92,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
-    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
+    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -390,7 +398,86 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             launchCvcRecollection()
             return
         }
+        if (shouldLaunchAchFlow()) {
+            launchAchFlow()
+            return
+        }
         checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
+    }
+
+    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+    private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
+
+    private fun launchAchFlow() {
+        val metadata = paymentMethodMetadata.value ?: return
+
+        val configuration = CollectBankAccountConfiguration.USBankAccount(
+            name = "Some name",
+            email = "email@email.com",
+        )
+
+        val paymentConfig = lazyPaymentConfig.get()
+        val clientSecret = metadata.stripeIntent.clientSecret
+
+        if (metadata.hasIntentToSetup()) {
+            if (clientSecret != null) {
+                collectBankAccountLauncher?.presentWithSetupIntent(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            } else {
+                collectBankAccountLauncher?.presentWithDeferredSetup(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    elementsSessionId = metadata.stripeIntent.id!!,
+                    configuration = configuration,
+                    customerId = null, // TODO
+                    onBehalfOf = null, // TODO
+                )
+            }
+        } else {
+            if (clientSecret != null) {
+                collectBankAccountLauncher?.presentWithPaymentIntent(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            } else {
+                collectBankAccountLauncher?.presentWithDeferredPayment(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    elementsSessionId = metadata.stripeIntent.id!!,
+                    configuration = configuration,
+                    amount = metadata.amount()!!.value.toInt(),
+                    currency = metadata.amount()!!.currencyCode,
+                    customerId = null, // TODO
+                    onBehalfOf = null, // TODO
+                )
+            }
+        }
+    }
+
+    private fun handleCollectBankAccountResult(
+        result: CollectBankAccountResultInternal,
+    ) {
+        // TODO
+        val screen = navigationHandler.currentScreen.value
+        screen.invalidate(result)
+    }
+
+    private fun handleCollectBankAccountForInstantDebitsResult(
+        result: CollectBankAccountForInstantDebitsResult,
+    ) {
+        // TODO
+    }
+
+    private fun shouldLaunchAchFlow(): Boolean {
+        val selection = selection.value
+        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
+        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account"
     }
 
     fun checkoutWithGooglePay() {
@@ -480,6 +567,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.registerFromActivity(activityResultCaller)
 
         intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
+
+        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::handleCollectBankAccountResult,
+        )
+
+        collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::handleCollectBankAccountForInstantDebitsResult,
+        )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {

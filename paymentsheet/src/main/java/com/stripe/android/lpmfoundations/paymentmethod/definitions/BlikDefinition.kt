@@ -37,7 +37,8 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
+        arguments: UiDefinitionFactory.Arguments,
+        result: Any?,
     ): List<FormElement> {
         return FormElementsBuilder(arguments).element(SectionElement.wrap(BlikElement())).build()
     }

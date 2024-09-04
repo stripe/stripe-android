@@ -49,6 +49,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
+        result: Any?,
     ): List<FormElement> {
         val defaultEmail = arguments.initialValues[IdentifierSpec.Email]
 

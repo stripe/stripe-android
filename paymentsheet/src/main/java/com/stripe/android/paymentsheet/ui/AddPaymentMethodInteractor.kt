@@ -18,6 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal interface AddPaymentMethodInteractor {
@@ -26,7 +27,7 @@ internal interface AddPaymentMethodInteractor {
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
-
+    fun invalidate(result: Any?)
     fun close()
 
     data class State(
@@ -56,7 +57,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val processing: StateFlow<Boolean>,
     private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val createFormArguments: (PaymentMethodCode) -> FormArguments,
-    private val formElementsForCode: (PaymentMethodCode) -> List<FormElement>,
+    private val formElementsForCode: (PaymentMethodCode, Any?) -> List<FormElement>,
     private val clearErrorMessages: () -> Unit,
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
@@ -119,7 +120,7 @@ internal class DefaultAddPaymentMethodInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             supportedPaymentMethods = supportedPaymentMethods,
             arguments = createFormArguments(selectedPaymentMethodCode),
-            formElements = formElementsForCode(selectedPaymentMethodCode),
+            formElements = formElementsForCode(selectedPaymentMethodCode, null),
             paymentSelection = selection.value,
             processing = processing.value,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
@@ -136,7 +137,7 @@ internal class DefaultAddPaymentMethodInteractor(
         coroutineScope.launch {
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
-                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
+                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode, null)
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
 
                 _state.value = _state.value.copy(
@@ -180,6 +181,15 @@ internal class DefaultAddPaymentMethodInteractor(
                     reportPaymentMethodTypeSelected(viewAction.code)
                 }
             }
+        }
+    }
+
+    override fun invalidate(result: Any?) {
+        val elements = formElementsForCode(initiallySelectedPaymentMethodType, result)
+        _state.update { state ->
+            state.copy(
+                formElements = elements,
+            )
         }
     }
 

@@ -33,7 +33,11 @@ internal fun PaymentMethodForm(
         )
     )
 
-    val elements = formViewModel.elements
+    LaunchedEffect(formElements) {
+        formViewModel.updateFormElements(formElements)
+    }
+
+    val elements by formViewModel.elements.collectAsState()
     val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState()
     val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState()
 

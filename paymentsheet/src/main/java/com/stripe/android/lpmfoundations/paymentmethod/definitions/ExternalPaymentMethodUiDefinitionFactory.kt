@@ -24,7 +24,8 @@ internal class ExternalPaymentMethodUiDefinitionFactory(
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
+        arguments: UiDefinitionFactory.Arguments,
+        result: Any?,
     ): List<FormElement> {
         return FormElementsBuilder(arguments).build()
     }

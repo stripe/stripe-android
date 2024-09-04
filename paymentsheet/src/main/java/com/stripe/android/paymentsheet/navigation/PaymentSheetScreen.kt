@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -83,10 +84,14 @@ internal sealed interface PaymentSheetScreen {
 
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
+    fun invalidate(result: Any?) {
+        Log.d("TILL123", "Hi there")
+    }
+
     @Composable
     fun Content(modifier: Modifier)
 
-    object Loading : PaymentSheetScreen {
+    data object Loading : PaymentSheetScreen {
 
         override val buyButtonState = stateFlowOf(
             BuyButtonState(visible = false)
@@ -274,6 +279,10 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(true)
         }
 
+        override fun invalidate(result: Any?) {
+            interactor.invalidate(result)
+        }
+
         @Composable
         override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
@@ -398,6 +407,10 @@ internal sealed interface PaymentSheetScreen {
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
             return stateFlowOf(showsWalletHeader)
+        }
+
+        override fun invalidate(result: Any?) {
+            interactor.invalidate(result)
         }
 
         @Composable
