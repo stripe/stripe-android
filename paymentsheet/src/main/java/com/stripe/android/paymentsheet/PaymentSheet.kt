@@ -355,7 +355,9 @@ class PaymentSheet internal constructor(
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
     @Parcelize
-    class IntentConfiguration @JvmOverloads @ExperimentalCvcRecollectionApi constructor(
+    class IntentConfiguration
+    @JvmOverloads @ExperimentalCvcRecollectionApi
+    constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,

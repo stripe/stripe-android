@@ -1746,7 +1746,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `Launches CVC Recollection & succeeds payment`()  {
+    fun `Launches CVC Recollection & succeeds payment`() {
         cvcRecollectionTest(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
         ) { flowController ->
