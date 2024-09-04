@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
@@ -285,7 +286,23 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasDisplayedSavedPaymentMethod("pm_67890")
     }
 
+    @Test
+    fun `Primary button label is correctly applied`() = runTest(
+        primaryButtonLabel = "Gimme money!",
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        composeTestRule.onNodeWithText("Gimme money!").assertExists()
+    }
+
     private fun runTest(
+        primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
@@ -303,6 +320,11 @@ internal class VerticalModePaymentSheetActivityTest {
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                         .customer(customer)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .apply {
+                            if (primaryButtonLabel != null) {
+                                primaryButtonLabel(primaryButtonLabel)
+                            }
+                        }
                         .build(),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
