@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
 
@@ -54,7 +53,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
-        viewModel.primaryButtonUiStateSource.update { null }
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -75,7 +73,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
-        viewModel.primaryButtonUiStateSource.update { null }
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)

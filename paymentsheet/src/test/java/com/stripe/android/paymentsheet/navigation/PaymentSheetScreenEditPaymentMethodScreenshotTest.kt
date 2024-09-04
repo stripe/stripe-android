@@ -9,11 +9,9 @@ import com.stripe.android.paymentsheet.FakeEditPaymentMethodInteractor
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
-import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,12 +31,9 @@ internal class PaymentSheetScreenEditPaymentMethodScreenshotTest {
         val interactor = FakeEditPaymentMethodInteractor(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val initialScreen = EditPaymentMethod(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
-        viewModel.primaryButtonUiStateSource.update { null }
 
         paparazziRule.snapshot {
-            ViewModelStoreOwnerContext {
-                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
-            }
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
         }
     }
 }
