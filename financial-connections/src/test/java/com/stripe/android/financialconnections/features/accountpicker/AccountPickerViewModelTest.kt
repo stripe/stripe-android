@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -50,7 +49,6 @@ internal class AccountPickerViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
-    private val updateCachedAccounts = mock<UpdateCachedAccounts>()
 
     private fun buildViewModel(
         state: AccountPickerState
