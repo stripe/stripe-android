@@ -4,22 +4,25 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MonotonicFrameClock
+import androidx.compose.runtime.PausableMonotonicFrameClock
+import androidx.compose.runtime.Recomposer
+import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.enableSavedStateHandles
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import kotlin.coroutines.EmptyCoroutineContext
 
 class TestComposeView(
     context: Context,
@@ -30,11 +33,13 @@ class TestComposeView(
     private val lifecycleDelegate = TestLifecycleOwnerDelegate()
 
     init {
-        val textView = ComposeView(context)
-        textView.setContent {
-            Text("Hello React Native")
+        val view = MyComposeView(context = context) {
+            Column {
+                Text(text = "Hello")
+                Text(text = "Does this work?")
+            }
         }
-        this.addView(textView)
+        this.addView(view)
     }
 
     override fun onAttachedToWindow() {
@@ -46,6 +51,44 @@ class TestComposeView(
         super.onDetachedFromWindow()
         lifecycleDelegate.destroyLifecycle(this)
     }
+}
+
+class MyComposeView(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    private val content: @Composable () -> Unit
+) : AbstractComposeView(context, attrs, defStyleAttr) {
+
+    private val lifecycleDelegate = TestLifecycleOwnerDelegate()
+
+    @Composable
+    override fun Content() {
+        content()
+    }
+
+    init {
+        val currentThreadContext = AndroidUiDispatcher.CurrentThread
+        val pausableClock = currentThreadContext[MonotonicFrameClock]?.let {
+            PausableMonotonicFrameClock(it).apply { pause() }
+        }
+        val contextWithClock = currentThreadContext + (pausableClock ?: EmptyCoroutineContext)
+        val recomposer = Recomposer(contextWithClock)
+        setParentCompositionContext(recomposer)
+    }
+
+    override fun onAttachedToWindow() {
+        lifecycleDelegate.initLifecycle(this)
+        super.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        lifecycleDelegate.destroyLifecycle(this)
+        super.onDetachedFromWindow()
+    }
+
+    override val shouldCreateCompositionOnAttachedToWindow: Boolean
+        get() = false
 }
 
 internal class TestLifecycleOwnerDelegate : LifecycleOwner, SavedStateRegistryOwner {
@@ -82,31 +125,3 @@ internal class TestLifecycleOwnerDelegate : LifecycleOwner, SavedStateRegistryOw
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 }
-
-//internal class TestLifecycleOwnerDelegate : LifecycleOwner {
-//
-//    fun initLifecycle(owner: View) {
-//        owner.findViewTreeLifecycleOwner() ?: run {
-//            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-//            attachToParent(owner)
-//            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-//        }
-//    }
-//
-//    fun destroyLifecycle(owner: View) {
-//        owner.findViewTreeLifecycleOwner() ?: run {
-//            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-//            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-//        }
-//    }
-//
-//    private fun attachToParent(owner: View) {
-//        owner.setViewTreeLifecycleOwner(this)
-//    }
-//
-//    // LifecycleOwner methods
-//    private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
-//
-//    override val lifecycle: Lifecycle
-//        get() = lifecycleRegistry
-//}
