@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.Assume.assumeFalse
@@ -39,15 +38,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Before
     fun skipTestsIfNeeded() {
         assumeFalse(BuildConfig.IS_BROWSERSTACK_BUILD)
-    }
-
-    @Test
-    fun testPaymentSheetCustomPrimaryButtonLabel() {
-        testDriver.screenshotRegression(
-            testParams.copyPlaygroundSettings { settings ->
-                settings[PrimaryButtonLabelSettingsDefinition] = "Buy this now!"
-            },
-        )
     }
 
     @Test

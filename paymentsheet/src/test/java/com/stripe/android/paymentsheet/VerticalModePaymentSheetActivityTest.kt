@@ -5,13 +5,10 @@ import android.os.Build
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -301,7 +298,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSavedPaymentMethods()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         verticalModePage.assertPrimaryButton(isEnabled())
-        onView(withText("Gimme money!")).check(matches(isDisplayed()))
+        composeTestRule.onNodeWithText("Gimme money!").assertExists()
     }
 
     private fun runTest(
