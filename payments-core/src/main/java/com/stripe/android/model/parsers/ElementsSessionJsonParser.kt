@@ -198,18 +198,20 @@ internal class ElementsSessionJsonParser(
             return null
         }
 
-        val paymentSheetComponent = parsePaymentSheetComponent(json.optJSONObject(FIELD_PAYMENT_SHEET))
+        val paymentElementComponent = parsePaymentElementComponent(json.optJSONObject(FIELD_MOBILE_PAYMENT_ELEMENT))
             ?: return null
         val customerSheetComponent = parseCustomerSheetComponent(json.optJSONObject(FIELD_CUSTOMER_SHEET))
             ?: return null
 
         return ElementsSession.Customer.Components(
-            paymentSheet = paymentSheetComponent,
+            mobilePaymentElement = paymentElementComponent,
             customerSheet = customerSheetComponent
         )
     }
 
-    private fun parsePaymentSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.PaymentSheet? {
+    private fun parsePaymentElementComponent(
+        json: JSONObject?
+    ): ElementsSession.Customer.Components.MobilePaymentElement? {
         if (json == null) {
             return null
         }
@@ -228,13 +230,13 @@ internal class ElementsSessionJsonParser(
                 allowRedisplay.value == allowRedisplayOverrideValue
             }
 
-            ElementsSession.Customer.Components.PaymentSheet.Enabled(
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
         } else {
-            ElementsSession.Customer.Components.PaymentSheet.Disabled
+            ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         }
     }
 
@@ -304,7 +306,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_CUSTOMER_API_KEY_EXPIRY = "api_key_expiry"
         private const val FIELD_CUSTOMER_NAME = "customer"
         private const val FIELD_COMPONENTS = "components"
-        private const val FIELD_PAYMENT_SHEET = "payment_sheet"
+        private const val FIELD_MOBILE_PAYMENT_ELEMENT = "mobile_payment_element"
         private const val FIELD_CUSTOMER_SHEET = "customer_sheet"
         private const val FIELD_ENABLED = "enabled"
         private const val FIELD_FEATURES = "features"

@@ -246,7 +246,7 @@ internal object ElementsSessionFixtures {
                       "enabled": false,
                       "features": null
                     },
-                    "payment_sheet": {
+                    "mobile_payment_element": {
                       "enabled": true,
                       "features": {
                         "payment_method_remove": "enabled",
@@ -377,7 +377,7 @@ internal object ElementsSessionFixtures {
                   "enabled": false,
                   "features": null
                 },
-                "payment_sheet": {
+                "mobile_payment_element": {
                   "enabled": false,
                   "features": null
                 },
