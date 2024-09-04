@@ -40,6 +40,7 @@ internal interface VerticalModeFormInteractor {
         val formArguments: FormArguments,
         val formElements: List<FormElement>,
         val headerInformation: FormHeaderInformation?,
+        val intermediateResult: Any? = null,
     )
 
     sealed interface ViewAction {
@@ -100,6 +101,7 @@ internal class DefaultVerticalModeFormInteractor(
         _state.update { state ->
             state.copy(
                 formElements = elements,
+                intermediateResult = result,
             )
         }
     }

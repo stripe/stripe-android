@@ -38,6 +38,7 @@ internal interface AddPaymentMethodInteractor {
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
+        val intermediateResult: Any? = null,
     )
 
     sealed class ViewAction {
@@ -189,6 +190,7 @@ internal class DefaultAddPaymentMethodInteractor(
         _state.update { state ->
             state.copy(
                 formElements = elements,
+                intermediateResult = result,
             )
         }
     }
