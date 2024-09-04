@@ -169,7 +169,6 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
-                                stripeAccountId = ""
                             )
                         )
                     )
