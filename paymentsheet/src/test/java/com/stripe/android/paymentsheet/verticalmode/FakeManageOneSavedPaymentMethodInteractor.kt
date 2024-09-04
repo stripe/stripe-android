@@ -6,7 +6,8 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 
 internal class FakeManageOneSavedPaymentMethodInteractor(
     private val paymentMethod: PaymentMethod,
-    private val viewActionRecorder: ViewActionRecorder<ManageOneSavedPaymentMethodInteractor.ViewAction> = ViewActionRecorder()
+    private val viewActionRecorder: ViewActionRecorder<ManageOneSavedPaymentMethodInteractor.ViewAction> =
+        ViewActionRecorder()
 ) : ManageOneSavedPaymentMethodInteractor {
     override val state: ManageOneSavedPaymentMethodInteractor.State
         get() = ManageOneSavedPaymentMethodInteractor.State(
