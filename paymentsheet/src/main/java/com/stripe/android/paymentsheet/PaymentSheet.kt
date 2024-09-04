@@ -355,13 +355,28 @@ class PaymentSheet internal constructor(
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
     @Parcelize
-    class IntentConfiguration @JvmOverloads constructor(
+    class IntentConfiguration @JvmOverloads @ExperimentalCvcRecollectionApi constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
-        val requireCvcRecollection: Boolean = false
+        internal val requireCvcRecollection: Boolean,
     ) : Parcelable {
+
+        @OptIn(ExperimentalCvcRecollectionApi::class)
+        @JvmOverloads
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+        ) : this(
+            mode = mode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = false
+        )
 
         /**
          * Contains information about the desired payment or setup flow.
