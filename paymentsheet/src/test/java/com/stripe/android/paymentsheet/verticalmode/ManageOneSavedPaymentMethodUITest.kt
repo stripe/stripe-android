@@ -7,7 +7,6 @@ import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import org.junit.Rule
@@ -58,17 +57,10 @@ class ManageOneSavedPaymentMethodUITest {
     ) {
         val viewActionRecorder = ViewActionRecorder<ManageOneSavedPaymentMethodInteractor.ViewAction>()
 
-        val manageScreenInteractor = object : ManageOneSavedPaymentMethodInteractor {
-            override val state: ManageOneSavedPaymentMethodInteractor.State
-                get() = ManageOneSavedPaymentMethodInteractor.State(
-                    paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(),
-                    isLiveMode = true,
-                )
-
-            override fun handleViewAction(viewAction: ManageOneSavedPaymentMethodInteractor.ViewAction) {
-                viewActionRecorder.record(viewAction)
-            }
-        }
+        val manageScreenInteractor = FakeManageOneSavedPaymentMethodInteractor(
+            paymentMethod = paymentMethod,
+            viewActionRecorder = viewActionRecorder,
+        )
 
         composeRule.setContent {
             ManageOneSavedPaymentMethodUI(interactor = manageScreenInteractor)

@@ -4,7 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
+import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.CvcRecollection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
@@ -13,7 +14,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import org.junit.Rule
 import org.junit.Test
 
-internal class PaymentSheetScreenLoadingScreenshotTest {
+internal class PaymentSheetScreenCvcRecollectionScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         boxModifier = Modifier
@@ -24,9 +25,10 @@ internal class PaymentSheetScreenLoadingScreenshotTest {
     val coroutineRule = CoroutineTestRule()
 
     @Test
-    fun displaysLoading() {
+    fun displaysCvcRecollectionScreen() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val initialScreen = Loading
+        val interactor = FakeCvcRecollectionInteractor
+        val initialScreen = CvcRecollection(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
         paparazziRule.snapshot {
