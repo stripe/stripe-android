@@ -172,7 +172,7 @@ private fun EditButton(onClick: () -> Unit) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
-        style = MaterialTheme.typography.button,
+        style = MaterialTheme.typography.subtitle1,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
@@ -194,7 +194,7 @@ private fun ViewMoreButton(
         Text(
             stringResource(id = R.string.stripe_view_more),
             color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.button,
+            style = MaterialTheme.typography.subtitle1,
         )
         Icon(
             imageVector = Icons.Filled.KeyboardArrowRight,
