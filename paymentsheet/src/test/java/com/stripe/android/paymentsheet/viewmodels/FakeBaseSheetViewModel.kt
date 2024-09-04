@@ -8,7 +8,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.NoOpEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -41,7 +41,7 @@ internal class FakeBaseSheetViewModel private constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
 ) : BaseSheetViewModel(
     config = PaymentSheet.Configuration.Builder("Example, Inc.").build(),
-    eventReporter = NoOpEventReporter(),
+    eventReporter = FakeEventReporter(),
     customerRepository = FakeCustomerRepository(),
     workContext = Dispatchers.IO,
     savedStateHandle = savedStateHandle,

@@ -325,7 +325,7 @@ class IntentConfirmationHandlerTest {
             PaymentConfirmationResult.Failed(
                 cause = cause,
                 message = message.resolvableString,
-                type = PaymentConfirmationErrorType.Internal,
+                type = PaymentConfirmationErrorType.Payment,
             )
         )
     }
@@ -820,6 +820,30 @@ class IntentConfirmationHandlerTest {
                 deferredIntentConfirmationType = null,
             )
         )
+    }
+
+    @Test
+    fun `On fail due to invalid deferred intent usage, should fail with expected integration error`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueFailureStep(
+                cause = InvalidDeferredIntentUsageException(),
+                message = "An error occurred!",
+            )
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            intentConfirmationInterceptor = interceptor,
+        )
+
+        intentConfirmationHandler.start(
+            arguments = DEFAULT_ARGUMENTS,
+        )
+
+        val failedResult = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(failedResult.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
+        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Payment)
+        assertThat(failedResult.message).isEqualTo("An error occurred!".resolvableString)
     }
 
     @Test

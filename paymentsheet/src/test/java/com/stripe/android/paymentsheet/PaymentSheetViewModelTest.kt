@@ -47,6 +47,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -65,6 +66,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -1069,6 +1071,30 @@ internal class PaymentSheetViewModelTest {
             val stripeIntent = awaitItem()?.stripeIntent
             assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
+    }
+
+    @Test
+    fun `On fail due to invalid deferred intent usage, should report with expected integration error`() = runTest {
+        val interceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueFailureStep(
+                cause = InvalidDeferredIntentUsageException(),
+                message = "An error occurred!",
+            )
+        }
+
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(
+            intentConfirmationInterceptor = interceptor,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        viewModel.checkout()
+
+        val error = eventReporter.paymentFailureCalls.awaitItem().error
+
+        assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
+        assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
     }
 
     @Test
@@ -2903,6 +2929,7 @@ internal class PaymentSheetViewModelTest {
             validationError = validationError,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
         shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
