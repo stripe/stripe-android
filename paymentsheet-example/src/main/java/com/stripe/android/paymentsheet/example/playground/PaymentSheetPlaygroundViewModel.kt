@@ -68,8 +68,6 @@ internal class PaymentSheetPlaygroundViewModel(
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
 
-    val cvcDeferred = playgroundSettingsFlow.value?.get(RequireCvcRecollectionDefinition)?.value == true
-
     private val baseUrl: String
         get() {
             val customEndpoint = playgroundSettingsFlow.value?.get(CustomEndpointDefinition)?.value
