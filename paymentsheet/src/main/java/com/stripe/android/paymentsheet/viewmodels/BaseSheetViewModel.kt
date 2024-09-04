@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -44,17 +43,16 @@ import kotlin.coroutines.CoroutineContext
  */
 @Suppress("TooManyFunctions")
 internal abstract class BaseSheetViewModel(
-    application: Application,
     val config: PaymentSheet.Configuration,
     val eventReporter: EventReporter,
     val customerRepository: CustomerRepository,
     val workContext: CoroutineContext = Dispatchers.IO,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
-    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
-) : AndroidViewModel(application) {
+) : ViewModel() {
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 

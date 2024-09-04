@@ -435,6 +435,19 @@ internal object PaymentMethodFixtures {
         darkThemeIconUrl = null,
     )
 
+    val CASHAPP_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+        label = "Cash App".resolvableString,
+        iconResource = 0,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(
+            billingDetails = PaymentMethod.BillingDetails(email = "example@email.com")
+        ),
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        paymentMethodOptionsParams = null,
+        paymentMethodExtraParams = null,
+    )
+
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
         labelResource = "Test",
         iconResource = 0,

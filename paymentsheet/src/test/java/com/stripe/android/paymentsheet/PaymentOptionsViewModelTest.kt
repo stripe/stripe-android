@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -39,6 +38,7 @@ import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -185,7 +185,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddAnotherPaymentMethod>()
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -760,16 +760,15 @@ internal class PaymentOptionsViewModelTest {
         linkState: LinkState? = args.state.linkState,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
-    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, linkInteractor, savedStateHandle ->
+    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
-            linkConfigurationCoordinator = linkInteractor,
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             editInteractorFactory = editInteractorFactory,
         )
     }

@@ -8,6 +8,8 @@
   <string name="stripe_inline_sign_up_header">Enregistrer mes informations pour payer en un clic de façon sécurisée avec Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Déconnexion de Link with Stripe</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Payer avec Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Définir comme moyen de paiement par défaut</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->

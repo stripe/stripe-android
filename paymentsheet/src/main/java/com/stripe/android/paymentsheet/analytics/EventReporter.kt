@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -28,7 +29,7 @@ internal interface EventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
+        linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
@@ -57,9 +58,9 @@ internal interface EventReporter {
     fun onShowExistingPaymentOptions()
 
     /**
-     * PaymentSheet is now being displayed and its first screen shows the payment method form.
+     * PaymentSheet is now being displayed and its first screen shows new payment methods.
      */
-    fun onShowNewPaymentOptionForm()
+    fun onShowNewPaymentOptions()
 
     /**
      * The customer has selected one of the available payment methods in the payment method form.

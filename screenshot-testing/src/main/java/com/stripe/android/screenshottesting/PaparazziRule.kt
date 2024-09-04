@@ -101,6 +101,7 @@ class PaparazziRule(
             environment = detectEnvironment().run {
                 copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
             },
+            theme = "Theme.MaterialComponents",
         )
     }
 }

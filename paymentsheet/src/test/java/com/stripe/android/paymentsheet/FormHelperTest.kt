@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
@@ -17,6 +16,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -164,7 +164,7 @@ internal class FormHelperTest {
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return FormHelper(
-            context = ApplicationProvider.getApplicationContext(),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

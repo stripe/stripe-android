@@ -15,6 +15,7 @@
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
+    <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
     <ID>LargeClass:IntentConfirmationHandlerTest.kt$IntentConfirmationHandlerTest</ID>
@@ -37,14 +38,12 @@
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, usBankAccountFormArgs: USBankAccountFormArguments, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( showCheckbox: Boolean, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
-    <ID>MagicNumber:AddPaymentMethodInteractor.kt$DefaultAddPaymentMethodInteractor.Companion$5_000</ID>
     <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.5f</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
-    <ID>MagicNumber:VerticalModeFormInteractor.kt$DefaultVerticalModeFormInteractor.Companion$5_000</ID>
     <ID>MaxLineLength:CardDefinition.kt$internal</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>
@@ -74,7 +73,7 @@
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
-    <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
+    <ID>TooManyFunctions:PaymentSheetCommonModule.kt$PaymentSheetCommonModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

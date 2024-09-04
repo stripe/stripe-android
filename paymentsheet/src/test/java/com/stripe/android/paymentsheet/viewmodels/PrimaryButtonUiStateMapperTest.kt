@@ -41,7 +41,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -64,7 +64,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -87,7 +87,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -110,7 +110,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -152,7 +152,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -174,7 +174,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -196,7 +196,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -223,7 +223,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -251,7 +251,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -277,7 +277,7 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `Enables button if cvc is not required and input is incomplete`() = runTest {
         val screen = stateFlowOf(
-            PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+            PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
         )
         val selection = PaymentSelection.Saved(
             paymentMethod = PaymentMethodFixtures.createCard()
@@ -303,7 +303,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -334,7 +334,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
@@ -364,7 +364,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
@@ -420,7 +420,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
