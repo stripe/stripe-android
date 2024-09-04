@@ -52,6 +52,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
+@Deprecated("")
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,

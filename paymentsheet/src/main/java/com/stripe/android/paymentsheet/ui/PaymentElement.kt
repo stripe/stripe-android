@@ -18,9 +18,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Link
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -119,13 +118,7 @@ internal fun FormElement(
                 }
             }
     ) {
-        if (selectedPaymentMethodCode == USBankAccount.code || selectedPaymentMethodCode == Link.code) {
-            USBankAccountForm(
-                formArgs = formArguments,
-                usBankAccountFormArgs = usBankAccountFormArguments,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-            )
-        } else {
+        if (FeatureFlags.bankFormRefactor.isEnabled) {
             PaymentMethodForm(
                 uuid = uuid,
                 args = formArguments,
@@ -134,7 +127,27 @@ internal fun FormElement(
                 formElements = formElements,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
+        } else {
+            if (selectedPaymentMethodCode == "us_bank_account" || selectedPaymentMethodCode == "link") {
+                USBankAccountForm(
+                    formArgs = formArguments,
+                    usBankAccountFormArgs = usBankAccountFormArguments,
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
+                )
+            } else {
+                PaymentMethodForm(
+                    uuid = uuid,
+                    args = formArguments,
+                    enabled = enabled,
+                    onFormFieldValuesChanged = onFormFieldValuesChanged,
+                    formElements = formElements,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                )
+            }
         }
+
+
+
     }
 }
 

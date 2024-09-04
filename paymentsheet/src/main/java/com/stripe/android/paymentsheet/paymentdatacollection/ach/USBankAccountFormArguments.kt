@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.update
 
 /**
- * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
+ * [USBankAccountFormArguments] provides the arguments required to render the bank account form.
  *
  * @param onBehalfOf the connected account of the business of record to attach this US bank account.
  * @param isCompleteFlow whether or not the USBankAccount is being presented in [PaymentSheet].

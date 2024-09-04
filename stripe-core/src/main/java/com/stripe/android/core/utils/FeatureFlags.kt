@@ -7,16 +7,19 @@ import com.stripe.android.core.BuildConfig
 @Suppress("unused")
 object FeatureFlags {
     // Add any feature flags here
+    val bankFormRefactor = FeatureFlag(enabledByDefault = true)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FeatureFlag {
+class FeatureFlag(
+    private val enabledByDefault: Boolean = false,
+) {
 
     private var overrideEnabledValue: Boolean? = null
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideEnabledValue ?: false
+            overrideEnabledValue ?: enabledByDefault
         } else {
             false
         }

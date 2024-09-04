@@ -1,12 +1,18 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 internal object InstantDebitsDefinition : PaymentMethodDefinition {
@@ -40,11 +46,28 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
-    // Instant Debits uses its own mechanism, not these form elements.
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
-        return emptyList()
+        val defaultEmail = arguments.initialValues[IdentifierSpec.Email]
+
+        val headerElement = StaticTextElement(
+            identifier = IdentifierSpec.Generic("static_text"),
+            stringResId = if (metadata.hasIntentToSetup()) {
+                R.string.stripe_paymentsheet_save_bank_title
+            } else {
+                R.string.stripe_paymentsheet_pay_with_bank_title
+            },
+        )
+
+        val emailElement = SectionElement.wrap(
+            EmailElement(initialValue = defaultEmail)
+        )
+
+        return FormElementsBuilder(arguments)
+            .header(headerElement)
+            .element(emailElement)
+            .build()
     }
 }
