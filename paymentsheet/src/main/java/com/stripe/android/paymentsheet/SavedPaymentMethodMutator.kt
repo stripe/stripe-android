@@ -119,15 +119,7 @@ internal class SavedPaymentMethodMutator(
                         // When returning to the vertical mode screen, reset editing to false.
                         _editing.value = false
                     }
-                    is PaymentSheetScreen.ManageSavedPaymentMethods,
-                    is PaymentSheetScreen.AddAnotherPaymentMethod,
-                    is PaymentSheetScreen.AddFirstPaymentMethod,
-                    is PaymentSheetScreen.CvcRecollection,
-                    is PaymentSheetScreen.EditPaymentMethod,
-                    PaymentSheetScreen.Loading,
-                    is PaymentSheetScreen.ManageOneSavedPaymentMethod,
-                    is PaymentSheetScreen.SelectSavedPaymentMethods,
-                    is PaymentSheetScreen.VerticalModeForm -> {
+                    else -> {
                         // Do nothing.
                     }
                 }
