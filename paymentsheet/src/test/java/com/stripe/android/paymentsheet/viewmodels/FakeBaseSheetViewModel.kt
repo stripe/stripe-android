@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.mockito.Mockito.mock
 
 private fun linkHandler(savedStateHandle: SavedStateHandle): LinkHandler {
@@ -60,6 +61,17 @@ internal class FakeBaseSheetViewModel private constructor(
                 navigationHandler.transitionTo(
                     initialScreen
                 )
+            }.also {
+                if (initialScreen.buyButtonState.value.visible) {
+                    it.primaryButtonUiStateSource.update {
+                        PrimaryButton.UIState(
+                            label = "Gimme money!".resolvableString,
+                            onClick = {},
+                            enabled = false,
+                            lockVisible = true,
+                        )
+                    }
+                }
             }
         }
     }
@@ -74,14 +86,7 @@ internal class FakeBaseSheetViewModel private constructor(
     val walletsProcessingStateSource = MutableStateFlow<WalletsProcessingState?>(null)
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = walletsProcessingStateSource.asStateFlow()
 
-    val primaryButtonUiStateSource = MutableStateFlow<PrimaryButton.UIState?>(
-        PrimaryButton.UIState(
-            label = "Gimme money!".resolvableString,
-            onClick = {},
-            enabled = false,
-            lockVisible = true,
-        )
-    )
+    val primaryButtonUiStateSource = MutableStateFlow<PrimaryButton.UIState?>(null)
     override val primaryButtonUiState: StateFlow<PrimaryButton.UIState?> = primaryButtonUiStateSource.asStateFlow()
 
     private val errorSource = MutableStateFlow<ResolvableString?>(null)
