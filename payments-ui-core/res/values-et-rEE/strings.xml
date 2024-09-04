@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Osta praegu või maksa <img/> abil hiljem]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Makske <num_installments/> <installment_price/> suuruse intressivaba osamaksega <img/> abil]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d intressivaba makset summas %2$s</string>

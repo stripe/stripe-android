@@ -698,8 +698,8 @@ internal class DefaultFlowController @Inject internal constructor(
         cause: Throwable
     ): PaymentSheetConfirmationError? {
         return when (this) {
-            PaymentConfirmationErrorType.ExternalPaymentMethod -> PaymentSheetConfirmationError.Stripe(cause)
-            PaymentConfirmationErrorType.Payment -> PaymentSheetConfirmationError.ExternalPaymentMethod
+            PaymentConfirmationErrorType.ExternalPaymentMethod -> PaymentSheetConfirmationError.ExternalPaymentMethod
+            PaymentConfirmationErrorType.Payment -> PaymentSheetConfirmationError.Stripe(cause)
             is PaymentConfirmationErrorType.GooglePay -> PaymentSheetConfirmationError.GooglePay(errorCode)
             PaymentConfirmationErrorType.Internal,
             PaymentConfirmationErrorType.MerchantIntegration,

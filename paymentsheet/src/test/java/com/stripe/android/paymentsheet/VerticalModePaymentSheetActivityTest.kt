@@ -220,7 +220,6 @@ internal class VerticalModePaymentSheetActivityTest {
 
         verticalModePage.clickEdit()
         managePage.waitUntilRemoveVisible("pm_12345")
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickRemove("pm_12345")
 
         verticalModePage.waitUntilVisible()

@@ -105,7 +105,7 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Select your payment method</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
-  <!-- Text shown in dialog to remove a saved bank account. E.g. 'Remove bank account ending in 4242' -->
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Something went wrong</string>

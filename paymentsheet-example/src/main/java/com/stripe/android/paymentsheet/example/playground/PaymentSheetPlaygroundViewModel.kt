@@ -311,7 +311,7 @@ internal class PaymentSheetPlaygroundViewModel(
             is PaymentSheetResult.Failed -> {
                 when (paymentResult.error) {
                     is ConfirmIntentEndpointException -> {
-                        "Couldn't process your payment."
+                        "Couldn't process your payment: ${paymentResult.error.message}"
                     }
 
                     is ConfirmIntentNetworkException -> {
@@ -319,7 +319,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     }
 
                     else -> {
-                        paymentResult.error.message
+                        "Something went wrong: ${paymentResult.error.message}"
                     }
                 }
             }

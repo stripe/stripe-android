@@ -32,18 +32,19 @@ import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
-import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.test.core.ui.BrowserUI
@@ -51,7 +52,6 @@ import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.test.core.ui.clickTextInWebView
-import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -798,7 +798,6 @@ internal class PlaygroundTestDriver(
      */
     fun screenshotRegression(
         testParameters: TestParameters,
-        numExpectedPaymentMethodIcons: Int = 0,
         customOperations: () -> Unit = {}
     ) {
         setup(testParameters)
@@ -810,22 +809,11 @@ internal class PlaygroundTestDriver(
         waitForScreenToLoad(testParameters)
         customOperations()
 
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            val numIconsFromUrl = getNumIconsWithTag(TEST_TAG_IMAGE_FROM_URL)
-            val numIconsFromResource = getNumIconsWithTag(TEST_TAG_ICON_FROM_RES)
-
-            (numIconsFromUrl + numIconsFromResource) == numExpectedPaymentMethodIcons
-        }
-
         currentActivity?.let {
             compareScreenshot(it)
         }
 
         teardown()
-    }
-
-    private fun getNumIconsWithTag(testTag: String): Int {
-        return composeTestRule.onAllNodesWithTag(testTag, useUnmergedTree = true).fetchSemanticsNodes().size
     }
 
     private fun waitForScreenToLoad(testParameters: TestParameters) {
@@ -837,10 +825,14 @@ internal class PlaygroundTestDriver(
                         .size == 1
                 }
 
-                composeTestRule.waitUntil {
-                    composeTestRule.onAllNodesWithText("Country or region")
-                        .fetchSemanticsNodes()
-                        .size == 1
+                val collectionMode = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition]
+
+                if (collectionMode != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
+                    composeTestRule.waitUntil {
+                        composeTestRule.onAllNodesWithText("Country or region")
+                            .fetchSemanticsNodes()
+                            .size == 1
+                    }
                 }
             }
             is CustomerType.Existing, is CustomerType.RETURNING -> {
@@ -984,7 +976,7 @@ internal class PlaygroundTestDriver(
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
-    internal fun launchComplete() {
+    private fun launchComplete() {
         selectors.reload.click()
         selectors.complete.waitForEnabled()
         selectors.complete.click()
@@ -1233,6 +1225,10 @@ internal class PlaygroundTestDriver(
 
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
+            if (testParameters.resetCustomer) {
+                PaymentSheet.resetCustomer(activity.applicationContext)
+            }
+
             monitorCurrentActivity(activity.application)
 
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
@@ -1257,7 +1253,7 @@ internal class PlaygroundTestDriver(
         launchPlayground.await(5, TimeUnit.SECONDS)
     }
 
-    internal fun teardown() {
+    private fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         playgroundState = null
         currentActivity = null

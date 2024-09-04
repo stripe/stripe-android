@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Şimdi satın alın veya daha sonra <img/> ile ödeyin.]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d tutarında %2$s faizsiz ödeme</string>
