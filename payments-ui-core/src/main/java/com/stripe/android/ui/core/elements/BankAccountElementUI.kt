@@ -33,9 +33,8 @@ import com.stripe.android.uicore.stripeColors
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun BankAccountElementUI(
-    state: BankAccountElement.State,
     enabled: Boolean,
-    onRemoveAccount: () -> Unit,
+    state: BankAccountElement.State,
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val bankIcon = remember(state.bankName) {
@@ -116,7 +115,7 @@ fun BankAccountElementUI(
             destructive = true,
             onConfirmListener = {
                 openDialog = false
-                onRemoveAccount()
+                state.onRemoveAccount()
             },
             onDismissListener = {
                 openDialog = false

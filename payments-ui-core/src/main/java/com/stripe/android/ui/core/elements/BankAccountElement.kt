@@ -27,5 +27,6 @@ data class BankAccountElement(
         val last4: String?,
         val showCheckbox: Boolean,
         val saveForFutureUseElement: SaveForFutureUseElement,
+        val onRemoveAccount: () -> Unit,
     )
 }

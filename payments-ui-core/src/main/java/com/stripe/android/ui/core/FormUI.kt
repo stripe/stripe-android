@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -123,11 +122,8 @@ private fun FormUIElement(
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled)
         is BankAccountElement -> BankAccountElementUI(
-            state = element.state,
             enabled = enabled,
-            onRemoveAccount = {
-                Log.d("TILL123", "onRemoveAccount called")
-            },
+            state = element.state,
         )
         is EmptyFormElement -> {}
     }

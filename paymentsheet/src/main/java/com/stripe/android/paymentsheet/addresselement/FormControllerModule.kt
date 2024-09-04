@@ -41,6 +41,9 @@ internal object FormControllerModule {
                     "`InlineSignUpViewState` updates should not be received by `FormController`!"
                 )
             },
+            onRemoveBankAccount = {
+                // TODO
+            }
         )
     )
 }

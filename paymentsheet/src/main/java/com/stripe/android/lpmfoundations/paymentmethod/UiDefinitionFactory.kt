@@ -28,6 +28,7 @@ internal sealed interface UiDefinitionFactory {
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+        val onRemoveBankAccount: () -> Unit,
     ) {
         interface Factory {
             fun create(
@@ -39,6 +40,7 @@ internal sealed interface UiDefinitionFactory {
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+                private val onRemoveBankAccount: () -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
             ) : Factory {
@@ -61,6 +63,7 @@ internal sealed interface UiDefinitionFactory {
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
+                        onRemoveBankAccount = onRemoveBankAccount,
                     )
                 }
             }

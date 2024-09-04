@@ -461,7 +461,10 @@ internal class CustomerSheetViewModel(
                                 "`CustomerSheet` does not implement `Link` and should not " +
                                     "receive `InlineSignUpViewState` updates"
                             )
-                        }
+                        },
+                        onRemoveBankAccount = {
+                            // TODO
+                        },
                     ),
                     result = null, // TODO
                 ) ?: listOf(),
@@ -807,7 +810,10 @@ internal class CustomerSheetViewModel(
                         "`CustomerSheet` does not implement `Link` and should not " +
                             "receive `InlineSignUpViewState` updates"
                     )
-                }
+                },
+                onRemoveBankAccount = {
+                    // TODO
+                },
             ),
             result = null, // TODO
         ) ?: emptyList()

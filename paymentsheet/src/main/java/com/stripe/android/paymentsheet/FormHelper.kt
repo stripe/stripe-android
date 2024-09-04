@@ -23,6 +23,7 @@ internal class FormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+    private val onRemoveBankAccount: () -> Unit,
 ) {
     companion object {
         fun create(
@@ -38,6 +39,10 @@ internal class FormHelper(
                 },
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
+                onRemoveBankAccount = {
+                    val screen = viewModel.navigationHandler.currentScreen.value
+                    screen.invalidate(result = null)
+                },
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 }
@@ -54,6 +59,7 @@ internal class FormHelper(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
+                onRemoveBankAccount = onRemoveBankAccount,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),
