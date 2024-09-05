@@ -442,6 +442,8 @@ internal class IntentConfirmationHandler(
                 merchantName = config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                existingPaymentMethodRequired = config.environment ==
+                    PaymentSheet.GooglePayConfiguration.Environment.Production,
             ),
             readyCallback = {
                 // Do nothing since we are skipping the ready check below
