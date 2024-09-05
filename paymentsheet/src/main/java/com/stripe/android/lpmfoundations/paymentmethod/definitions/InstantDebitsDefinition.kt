@@ -85,7 +85,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
             )
 
             val showCheckbox = isSaveForFutureUseValueChangeable(
-                code = PaymentMethod.Type.USBankAccount.code,
+                code = PaymentMethod.Type.Link.code,
                 intent = metadata.stripeIntent,
                 paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
                 hasCustomerConfiguration = metadata.hasCustomerConfiguration,

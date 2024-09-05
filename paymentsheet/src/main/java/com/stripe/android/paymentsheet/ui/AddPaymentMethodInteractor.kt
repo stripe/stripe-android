@@ -192,7 +192,7 @@ internal class DefaultAddPaymentMethodInteractor(
     }
 
     override fun invalidate(result: Any?) {
-        val elements = formElementsForCode(initiallySelectedPaymentMethodType, result)
+        val elements = formElementsForCode(selectedPaymentMethodCode.value, result)
         _state.update { state ->
             state.copy(
                 formElements = elements,
