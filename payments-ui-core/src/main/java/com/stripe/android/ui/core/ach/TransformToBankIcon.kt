@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.ach
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.financialconnections.R
 import kotlin.text.RegexOption.IGNORE_CASE
 import com.stripe.android.R as StripeR
 
@@ -9,7 +8,7 @@ import com.stripe.android.R as StripeR
 object TransformToBankIcon {
     operator fun invoke(bankName: String?): Int {
         if (bankName == null) {
-            return R.drawable.stripe_ic_bank
+            return StripeR.drawable.stripe_ic_bank
         }
 
         val bankNameRegexIconMap = mapOf(
@@ -32,6 +31,6 @@ object TransformToBankIcon {
         return bankNameRegexIconMap
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull { it.value }
-            ?: R.drawable.stripe_ic_bank
+            ?: StripeR.drawable.stripe_ic_bank
     }
 }

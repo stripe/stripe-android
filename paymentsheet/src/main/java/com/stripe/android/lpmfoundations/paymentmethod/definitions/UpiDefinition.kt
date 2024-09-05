@@ -38,7 +38,6 @@ private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-        result: Any?,
     ): List<FormElement> {
         val section = SectionElement.wrap(UpiElement(), label = R.string.stripe_paymentsheet_buy_using_upi_id)
         return FormElementsBuilder(arguments).element(section).build()

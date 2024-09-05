@@ -462,11 +462,11 @@ internal class CustomerSheetViewModel(
                                     "receive `InlineSignUpViewState` updates"
                             )
                         },
+                        intermediateResult = null,
                         onRemoveBankAccount = {
                             // TODO
                         },
                     ),
-                    result = null, // TODO
                 ) ?: listOf(),
                 primaryButtonLabel = if (
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
@@ -811,11 +811,11 @@ internal class CustomerSheetViewModel(
                             "receive `InlineSignUpViewState` updates"
                     )
                 },
+                intermediateResult = null,
                 onRemoveBankAccount = {
                     // TODO
                 },
             ),
-            result = null, // TODO
         ) ?: emptyList()
 
         transition(

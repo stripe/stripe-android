@@ -63,10 +63,10 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-        result: Any?,
     ): List<FormElement> {
         val defaultName = arguments.initialValues[IdentifierSpec.Name]
         val defaultEmail = arguments.initialValues[IdentifierSpec.Email]
+        val intermediateResult = arguments.intermediateResult
 
         val headerElement = StaticTextElement(
             identifier = IdentifierSpec.Generic("static_text"),
@@ -93,10 +93,10 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
             .element(nameElement)
             .element(emailElement)
 
-        if (result is CollectBankAccountResultInternal.Completed) {
+        if (intermediateResult is CollectBankAccountResultInternal.Completed) {
             builder.element(
                 BankAccountElement(
-                    state = result.toBankAccountElementState(
+                    state = intermediateResult.toBankAccountElementState(
                         onRemoveAccount = { arguments.onRemoveBankAccount() },
                     ),
                     isInstantDebits = false,
@@ -118,7 +118,7 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
-        } else if (result is CollectBankAccountResultInternal.Failed) {
+        } else if (intermediateResult is CollectBankAccountResultInternal.Failed) {
             // TODO: Render error
         }
 

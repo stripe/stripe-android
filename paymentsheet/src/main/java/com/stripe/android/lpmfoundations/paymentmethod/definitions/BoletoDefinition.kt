@@ -44,7 +44,6 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-        result: Any?,
     ): List<FormElement> {
         val taxIdElementIdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
         val taxIdElement = SimpleTextElement(

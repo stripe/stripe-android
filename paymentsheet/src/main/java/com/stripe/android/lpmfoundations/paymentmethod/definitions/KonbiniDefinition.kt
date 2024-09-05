@@ -45,7 +45,6 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-        result: Any?,
     ): List<FormElement> {
         val confirmationNumberElement = SimpleTextElement(
             identifier = IdentifierSpec.KonbiniConfirmationNumber,

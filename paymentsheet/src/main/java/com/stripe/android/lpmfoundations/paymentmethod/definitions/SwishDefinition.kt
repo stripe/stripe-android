@@ -36,7 +36,6 @@ private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-        result: Any?,
     ): List<FormElement> {
         return FormElementsBuilder(arguments).build()
     }

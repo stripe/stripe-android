@@ -27,6 +27,7 @@ internal sealed interface UiDefinitionFactory {
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
+        val intermediateResult: Any?,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val onRemoveBankAccount: () -> Unit,
     ) {
@@ -43,6 +44,7 @@ internal sealed interface UiDefinitionFactory {
                 private val onRemoveBankAccount: () -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+                private val intermediateResult: Any?,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -62,6 +64,7 @@ internal sealed interface UiDefinitionFactory {
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
+                        intermediateResult = intermediateResult,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         onRemoveBankAccount = onRemoveBankAccount,
                     )
@@ -100,7 +103,6 @@ internal sealed interface UiDefinitionFactory {
         fun createFormElements(
             metadata: PaymentMethodMetadata,
             arguments: Arguments,
-            result: Any?,
         ): List<FormElement>
     }
 
@@ -160,13 +162,11 @@ internal sealed interface UiDefinitionFactory {
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
         arguments: Arguments,
-        result: Any?,
     ): List<FormElement>? = when (this) {
         is Simple -> {
             createFormElements(
                 metadata = metadata,
                 arguments = arguments,
-                result = result,
             )
         }
 

@@ -62,8 +62,8 @@ internal class FormHelper(
                 onRemoveBankAccount = onRemoveBankAccount,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
+                intermediateResult = result,
             ),
-            result = result,
         ) ?: emptyList()
     }
 
