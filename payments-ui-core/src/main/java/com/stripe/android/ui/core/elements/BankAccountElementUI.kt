@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
+import com.stripe.android.ui.core.ach.TransformToBankIcon
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.stripeColors
@@ -38,8 +39,7 @@ fun BankAccountElementUI(
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val bankIcon = remember(state.bankName) {
-        // TODO
-        R.drawable.stripe_ic_bank
+        TransformToBankIcon(state.bankName)
     }
 
     Column(
@@ -92,14 +92,6 @@ fun BankAccountElementUI(
                 }
             }
         }
-
-//        if (state.showCheckbox) {
-//            SaveForFutureUseElementUI(
-//                enabled = true,
-//                element = state.saveForFutureUseElement,
-//                modifier = Modifier.padding(top = 8.dp)
-//            )
-//        }
     }
 
     if (openDialog && state.last4 != null) {

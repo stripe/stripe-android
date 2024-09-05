@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.ach.TransformToBankIcon
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal fun FormFieldValues.createBankAccountPaymentSelection(

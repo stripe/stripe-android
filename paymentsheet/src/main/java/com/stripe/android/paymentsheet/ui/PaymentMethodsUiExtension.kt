@@ -7,7 +7,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
+import com.stripe.android.ui.core.ach.TransformToBankIcon
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(forVerticalMode: Boolean = false): Int {

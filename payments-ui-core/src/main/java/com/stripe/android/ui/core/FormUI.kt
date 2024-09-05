@@ -121,10 +121,7 @@ private fun FormUIElement(
         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled)
-        is BankAccountElement -> BankAccountElementUI(
-            enabled = enabled,
-            state = element.state,
-        )
+        is BankAccountElement -> BankAccountElementUI(enabled, element.state)
         is EmptyFormElement -> {}
     }
 }
