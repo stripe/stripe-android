@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
@@ -46,6 +47,18 @@ internal class VerticalModePage(
         composeTestRule
             .onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(matcher))
             .assertExists()
+    }
+
+    fun assertMandateExists() {
+        composeTestRule
+            .onNode(hasTestTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG))
+            .assertExists()
+    }
+
+    fun assertMandateDoesNotExists() {
+        composeTestRule
+            .onNode(hasTestTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG))
+            .assertDoesNotExist()
     }
 
     fun assertHasSavedPaymentMethods() {

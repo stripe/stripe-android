@@ -318,12 +318,13 @@ private fun PaymentSheetContent(
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true) {
+        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(horizontal = horizontalPadding)
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = 8.dp)
+                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
 
@@ -342,12 +343,13 @@ private fun PaymentSheetContent(
     PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false) {
+        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontal = horizontalPadding)
+                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
     }
@@ -488,4 +490,5 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
 const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
+internal const val PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG = "PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L
