@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
-      - name: Upload Financial Connections example release bundle to Emerge
+      - name: Upload Payment Sheet example release bundle to Emerge
         run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
