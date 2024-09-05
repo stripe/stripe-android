@@ -127,7 +127,7 @@ private fun EditButton(
     }
 
     IconButton(
-        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
+        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).padding(end = 10.dp),
         enabled = isEnabled,
         onClick = onClick,
     ) {
