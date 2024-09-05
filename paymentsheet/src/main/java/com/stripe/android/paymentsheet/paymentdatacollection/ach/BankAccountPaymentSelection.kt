@@ -15,9 +15,12 @@ internal fun FormFieldValues.createBankAccountPaymentSelection(
 ): PaymentSelection.New.USBankAccount {
     val bankName = fieldValuePairs[IdentifierSpec.BankName]?.value
     val last4 = fieldValuePairs[IdentifierSpec.Last4]?.value
+    val usesMicrodeposits = fieldValuePairs[IdentifierSpec.UsesMicrodeposits]?.value?.toBoolean() ?: false
 
     return PaymentSelection.New.USBankAccount(
         code = PaymentMethod.Type.USBankAccount.code,
+        hasResult = fieldValuePairs.containsKey(IdentifierSpec.BankAccountId),
+        usesMicrodeposits = usesMicrodeposits,
         labelResource = resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             last4,
@@ -36,9 +39,12 @@ internal fun FormFieldValues.createInstantDebitsPaymentSelection(
 ): PaymentSelection.New.USBankAccount {
     val bankName = fieldValuePairs[IdentifierSpec.BankName]?.value
     val last4 = fieldValuePairs[IdentifierSpec.Last4]?.value
+    val usesMicrodeposits = fieldValuePairs[IdentifierSpec.UsesMicrodeposits]?.value?.toBoolean() ?: false
 
     return PaymentSelection.New.USBankAccount(
         code = PaymentMethod.Type.Link.code,
+        hasResult = fieldValuePairs.containsKey(IdentifierSpec.LinkPaymentMethodId),
+        usesMicrodeposits = usesMicrodeposits,
         labelResource = resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             last4,

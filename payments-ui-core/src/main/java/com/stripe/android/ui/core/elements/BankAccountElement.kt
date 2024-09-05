@@ -31,6 +31,7 @@ data class BankAccountElement(
 
             add(IdentifierSpec.BankName to FormFieldEntry(state.bankName, isComplete = true))
             add(IdentifierSpec.Last4 to FormFieldEntry(state.last4, isComplete = true))
+            add(IdentifierSpec.UsesMicrodeposits to FormFieldEntry(state.usesMicrodeposits.toString(), isComplete = true))
         }
 
         return stateFlowOf(formFieldValues)
@@ -40,6 +41,7 @@ data class BankAccountElement(
         val id: String,
         val bankName: String?,
         val last4: String?,
+        val usesMicrodeposits: Boolean,
         val onRemoveAccount: () -> Unit,
     )
 }

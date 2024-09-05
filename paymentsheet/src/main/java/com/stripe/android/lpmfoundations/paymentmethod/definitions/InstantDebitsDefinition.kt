@@ -115,5 +115,6 @@ private fun CollectBankAccountForInstantDebitsResult.Completed.toBankAccountElem
         bankName = bankName,
         last4 = last4,
         onRemoveAccount = onRemoveAccount,
+        usesMicrodeposits = false,
     )
 }

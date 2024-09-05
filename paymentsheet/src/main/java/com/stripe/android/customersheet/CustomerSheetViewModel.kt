@@ -17,6 +17,7 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -62,6 +63,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -865,7 +867,7 @@ internal class CustomerSheetViewModel(
                 },
                 intermediateResult = null,
                 onRemoveBankAccount = {
-                    // TODO
+                    error("Not expected to call onRemoveBankAccount on initial form arguments")
                 },
             ),
         ) ?: emptyList()
@@ -953,6 +955,33 @@ internal class CustomerSheetViewModel(
 
     private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            // TODO: Compute this better!
+
+            val merchantName = configuration.merchantDisplayName
+
+            val mandateText = if (bankAccountResult != null) {
+                USBankAccountTextBuilder.getContinueMandateText(
+                    merchantName = merchantName,
+                    isSaveForFutureUseSelected = true,
+                    isInstantDebits = false,
+                    isSetupFlow = true,
+                )
+            } else {
+                null
+            }
+
+            val microdepositsText = if (bankAccountResult is CollectBankAccountResultInternal.Completed && bankAccountResult.response.usBankAccountData?.financialConnectionsSession?.paymentAccount is com.stripe.android.financialconnections.model.BankAccount) {
+                resolvableString(R.string.stripe_paymentsheet_microdeposit, merchantName)
+            } else {
+                null
+            }
+
+            val fullMandate = if (mandateText != null && microdepositsText != null) {
+                mandateText + "\n".resolvableString + microdepositsText
+            } else {
+                mandateText
+            }
+
             it.copy(
                 bankAccountResult = bankAccountResult,
                 formElements = createFormElements(
@@ -964,6 +993,7 @@ internal class CustomerSheetViewModel(
                 } else {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
+                mandateText = fullMandate,
             )
         }
     }

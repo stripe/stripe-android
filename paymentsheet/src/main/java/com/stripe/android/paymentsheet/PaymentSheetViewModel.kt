@@ -23,6 +23,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -424,15 +425,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val paymentConfig = lazyPaymentConfig.get()
         val clientSecret = metadata.stripeIntent.clientSecret
 
-        if (metadata.hasIntentToSetup()) {
-            collectBankAccountForInstantDebitsLauncher?.presentWithSetupIntent(
+        if (metadata.stripeIntent is PaymentIntent) {
+            collectBankAccountForInstantDebitsLauncher?.presentWithPaymentIntent(
                 publishableKey = paymentConfig.publishableKey,
                 stripeAccountId = paymentConfig.stripeAccountId,
                 clientSecret = clientSecret!!,
                 configuration = configuration,
             )
         } else {
-            collectBankAccountForInstantDebitsLauncher?.presentWithPaymentIntent(
+            collectBankAccountForInstantDebitsLauncher?.presentWithSetupIntent(
                 publishableKey = paymentConfig.publishableKey,
                 stripeAccountId = paymentConfig.stripeAccountId,
                 clientSecret = clientSecret!!,
@@ -452,25 +453,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val paymentConfig = lazyPaymentConfig.get()
         val clientSecret = metadata.stripeIntent.clientSecret
 
-        if (metadata.hasIntentToSetup()) {
-            if (clientSecret != null) {
-                collectBankAccountLauncher?.presentWithSetupIntent(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    clientSecret = clientSecret,
-                    configuration = configuration,
-                )
-            } else {
-                collectBankAccountLauncher?.presentWithDeferredSetup(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    elementsSessionId = metadata.stripeIntent.id!!,
-                    configuration = configuration,
-                    customerId = null, // TODO
-                    onBehalfOf = null, // TODO
-                )
-            }
-        } else {
+        val onBehalfOf = (args.initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            ?.intentConfiguration
+            ?.onBehalfOf
+
+        if (metadata.stripeIntent is PaymentIntent) {
             if (clientSecret != null) {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
                     publishableKey = paymentConfig.publishableKey,
@@ -486,8 +473,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     configuration = configuration,
                     amount = metadata.amount()!!.value.toInt(),
                     currency = metadata.amount()!!.currencyCode,
-                    customerId = null, // TODO
-                    onBehalfOf = null, // TODO
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
+                )
+            }
+        } else {
+            if (clientSecret != null) {
+                collectBankAccountLauncher?.presentWithSetupIntent(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            } else {
+                collectBankAccountLauncher?.presentWithDeferredSetup(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    elementsSessionId = metadata.stripeIntent.id!!,
+                    configuration = configuration,
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
@@ -14,6 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import kotlinx.parcelize.IgnoredOnParcel
@@ -161,8 +163,10 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class USBankAccount(
+        data class USBankAccount constructor(
             val code: String,
+            val hasResult: Boolean,
+            val usesMicrodeposits: Boolean,
             val labelResource: ResolvableString,
             @DrawableRes val iconResource: Int,
             @Deprecated("This field will be removed.")
@@ -181,7 +185,30 @@ internal sealed class PaymentSelection : Parcelable {
                 merchantName: String,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
-                return screenState?.mandateText
+                val isSaveForFutureUseSelected = customerRequestedSave == RequestReuse
+
+                val mandateText = if (hasResult) {
+                    USBankAccountTextBuilder.getContinueMandateText(
+                        merchantName = merchantName,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isInstantDebits = code == PaymentMethod.Type.Link.code,
+                        isSetupFlow = isSetupFlow,
+                    )
+                } else {
+                    null
+                }
+
+                val microdepositsText = if (usesMicrodeposits) {
+                    resolvableString(R.string.stripe_paymentsheet_microdeposit, merchantName)
+                } else {
+                    null
+                }
+
+                return if (mandateText != null && microdepositsText != null) {
+                    mandateText + "\n".resolvableString + microdepositsText
+                } else {
+                    mandateText
+                }
             }
 
             @Parcelize

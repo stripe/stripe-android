@@ -88,6 +88,7 @@ data class IdentifierSpec(
         val LinkPaymentMethodId = IdentifierSpec("link[payment_method_id]")
         val BankName = IdentifierSpec("bank_name", ignoreField = true)
         val Last4 = IdentifierSpec("last4", ignoreField = true)
+        val UsesMicrodeposits = IdentifierSpec("uses_microdeposits", ignoreField = true)
 
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")

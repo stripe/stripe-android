@@ -47,6 +47,10 @@ fun resolvableString(value: String, vararg formatArgs: @RawValue Any?): Resolvab
     return StaticResolvableString(value, formatArgs.toList())
 }
 
+operator fun ResolvableString.plus(other: ResolvableString): ResolvableString {
+    return ConcatResolvableString(this, other)
+}
+
 /**
  * Creates a [ResolvableString] from a given string value.
  */

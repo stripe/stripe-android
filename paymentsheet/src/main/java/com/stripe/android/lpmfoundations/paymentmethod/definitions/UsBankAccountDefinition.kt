@@ -143,10 +143,17 @@ private fun CollectBankAccountResultInternal.Completed.toBankAccountElementState
         null -> null
     }
 
+    val usesMicrodeposits = when (usBankAccountData.financialConnectionsSession.paymentAccount) {
+        is BankAccount -> true
+        is FinancialConnectionsAccount -> false
+        null -> false
+    }
+
     return BankAccountElement.State(
         id = usBankAccountData.financialConnectionsSession.id,
         bankName = bankName,
         last4 = last4,
         onRemoveAccount = onRemoveAccount,
+        usesMicrodeposits = usesMicrodeposits,
     )
 }

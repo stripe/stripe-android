@@ -617,6 +617,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 address = address.value,
                 saveForFutureUse = saveForFutureUse.value,
             ),
+            hasResult = true,
+            usesMicrodeposits = currentScreenState.value is USBankAccountFormScreenState.VerifyWithMicrodeposits,
         )
     }
 
