@@ -250,7 +250,7 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
 ) {
     @Composable
-    fun Content(modifierProvider: () -> Modifier) {
+    fun Content(modifier: Modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
             headerText = headerText,
@@ -259,17 +259,17 @@ private fun PaymentSheetContent(
             error = error,
             currentScreen = currentScreen,
             mandateText = mandateText,
-            modifierProvider = modifierProvider
+            modifier = modifier
         )
     }
 
     when (currentScreen.animationStyle) {
         PaymentSheetScreen.AnimationStyle.PrimaryButtonAnchored -> {
-            Content(modifierProvider = { Modifier.animateContentSize() })
+            Content(modifier = Modifier.animateContentSize())
         }
         PaymentSheetScreen.AnimationStyle.FullPage -> {
             Column(modifier = Modifier.animateContentSize()) {
-                Content(modifierProvider = { Modifier })
+                Content(modifier = Modifier)
             }
         }
     }
@@ -284,11 +284,11 @@ private fun PaymentSheetContent(
     error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    modifierProvider: () -> Modifier,
+    modifier: Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = modifierProvider()) {
+    Column(modifier = modifier) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -341,7 +341,7 @@ private fun PaymentSheetContent(
 
     PrimaryButton(viewModel)
 
-    Box(modifier = modifierProvider()) {
+    Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
