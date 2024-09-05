@@ -39,11 +39,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -68,6 +70,8 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -105,6 +109,7 @@ internal class CustomerSheetViewModel(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
 ) : ViewModel() {
 
     @Inject constructor(
@@ -122,6 +127,7 @@ internal class CustomerSheetViewModel(
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
         errorReporter: ErrorReporter,
+        lazyPaymentConfig: Provider<PaymentConfiguration>,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -140,6 +146,7 @@ internal class CustomerSheetViewModel(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         editInteractorFactory = editInteractorFactory,
         errorReporter = errorReporter,
+        lazyPaymentConfig = lazyPaymentConfig,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
@@ -212,7 +219,10 @@ internal class CustomerSheetViewModel(
     }
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
+    var paymentMethodMetadata: PaymentMethodMetadata? = null
+
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
+    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
     init {
         configuration.appearance.parseAppearance()
@@ -327,6 +337,12 @@ internal class CustomerSheetViewModel(
         intentConfirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
+        )
+
+        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::onCollectUSBankAccountResult,
         )
     }
 
@@ -448,28 +464,9 @@ internal class CustomerSheetViewModel(
                     merchantName = configuration.merchantDisplayName,
                     cbcEligibility = customerState.cbcEligibility,
                 ),
-                formElements = paymentMethodMetadata?.formElementsForCode(
-                    code = paymentMethod.code,
-                    uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                        /*
-                         * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
-                         */
-                        linkConfigurationCoordinator = null,
-                        onLinkInlineSignupStateChanged = {
-                            throw IllegalStateException(
-                                "`CustomerSheet` does not implement `Link` and should not " +
-                                    "receive `InlineSignUpViewState` updates"
-                            )
-                        },
-                        intermediateResult = null,
-                        onRemoveBankAccount = {
-                            // TODO
-                        },
-                    ),
-                ) ?: listOf(),
+                formElements = createFormElements(paymentMethod.code),
                 primaryButtonLabel = if (
-                    paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
+                    paymentMethod.code == USBankAccount.code &&
                     it.bankAccountResult !is CollectBankAccountResultInternal.Completed
                 ) {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
@@ -483,6 +480,32 @@ internal class CustomerSheetViewModel(
                 primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
             )
         }
+    }
+
+    private fun createFormElements(
+        paymentMethodCode: String,
+        intermediateResult: Any? = null,
+    ): List<FormElement> {
+        return paymentMethodMetadata?.formElementsForCode(
+            code = paymentMethodCode,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                /*
+                 * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
+                 */
+                linkConfigurationCoordinator = null,
+                onLinkInlineSignupStateChanged = {
+                    throw IllegalStateException(
+                        "`CustomerSheet` does not implement `Link` and should not " +
+                            "receive `InlineSignUpViewState` updates"
+                    )
+                },
+                intermediateResult = intermediateResult,
+                onRemoveBankAccount = {
+                    onCollectUSBankAccountResult(bankAccountResult = null)
+                },
+            ),
+        ).orEmpty()
     }
 
     private fun onFormFieldValuesCompleted(formFieldValues: FormFieldValues?) {
@@ -705,11 +728,40 @@ internal class CustomerSheetViewModel(
         }
     }
 
+    private val CustomerSheetViewState.AddPaymentMethod.shouldLaunchAchFlow: Boolean
+        get() {
+            return paymentMethodCode == USBankAccount.code && bankAccountResult == null
+        }
+
+    private fun CustomerSheetViewState.AddPaymentMethod.launchAchFlow() {
+        val sessionId = usBankAccountFormArguments.stripeIntentId ?: return
+        val name = formFieldValues?.fieldValuePairs?.get(IdentifierSpec.Name)?.value ?: return
+        val email = formFieldValues.fieldValuePairs[IdentifierSpec.Email]?.value
+        val paymentConfig = lazyPaymentConfig.get()
+
+        collectBankAccountLauncher?.presentWithDeferredSetup(
+            publishableKey = paymentConfig.publishableKey,
+            stripeAccountId = paymentConfig.stripeAccountId,
+            elementsSessionId = sessionId,
+            customerId = null,
+            onBehalfOf = null,
+            configuration = CollectBankAccountConfiguration.USBankAccount(
+                name = name,
+                email = email,
+            ),
+        )
+    }
+
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
                 if (currentViewState.customPrimaryButtonUiState != null) {
                     currentViewState.customPrimaryButtonUiState.onClick()
+                    return
+                }
+
+                if (currentViewState.shouldLaunchAchFlow) {
+                    currentViewState.launchAchFlow()
                     return
                 }
 
@@ -899,10 +951,14 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
+    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 bankAccountResult = bankAccountResult,
+                formElements = createFormElements(
+                    paymentMethodCode = USBankAccount.code,
+                    intermediateResult = bankAccountResult,
+                ),
                 primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
                     R.string.stripe_paymentsheet_save.resolvableString
                 } else {
