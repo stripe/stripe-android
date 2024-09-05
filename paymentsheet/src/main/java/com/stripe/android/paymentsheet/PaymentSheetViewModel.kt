@@ -1,9 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -13,34 +10,26 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.analytics.SessionSavedStateHandler
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -48,18 +37,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
@@ -67,74 +54,63 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import dagger.Lazy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.R as StripeR
-
-private const val AwaitingPaymentResultKey = "AwaitingPaymentResult"
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
-    application: Application,
     internal val args: PaymentSheetContractV2.Args,
     eventReporter: EventReporter,
-    // Properties provided through injection
-    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
-    prefsRepository: PrefsRepository,
-    private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    logger: Logger,
+    private val prefsRepository: PrefsRepository,
+    private val logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
+    internal val cvcRecollectionHandler: CvcRecollectionHandler
 ) : BaseSheetViewModel(
-    application = application,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
-    prefsRepository = prefsRepository,
     workContext = workContext,
-    logger = logger,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    linkConfigurationCoordinator = linkConfigurationCoordinator,
-    headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
-    editInteractorFactory = editInteractorFactory
+    cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+    editInteractorFactory = editInteractorFactory,
+    isCompleteFlow = true,
 ) {
 
+    private val _contentVisible = MutableStateFlow(true)
+    internal val contentVisible: StateFlow<Boolean> = _contentVisible
+
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
-        context = getApplication(),
         config = config,
         isProcessingPayment = isProcessingPaymentIntent,
-        currentScreenFlow = currentScreen,
+        currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
-            reportConfirmButtonPressed()
+            eventReporter.onPressConfirmButton(selection.value)
             checkout()
         },
     )
@@ -156,14 +132,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override var newPaymentSelection: NewOrExternalPaymentSelection? = null
 
-    private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
-
-    private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
-
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
-
-    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
-
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
             PaymentSheet.GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
@@ -176,8 +144,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
             null -> GooglePayButtonType.Pay
         }
-
-    private var pendingPaymentResultChannel = Channel<InternalPaymentResult>(capacity = 1)
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -197,7 +163,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             GooglePayEnvironment.Test
                     },
                     merchantCountryCode = config.countryCode,
-                    merchantName = merchantName,
+                    merchantName = this.config.merchantDisplayName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
                     billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 )
@@ -210,29 +176,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    override val error: StateFlow<String?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
+    override val error: StateFlow<ResolvableString?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkEmailFlow,
-        googlePayState,
+        linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-        supportedPaymentMethodsFlow,
-        backStack,
-    ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes, stack ->
+        paymentMethodMetadata,
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
-            googlePayState = googlePayState,
+            isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
-            screen = stack.last(),
-            isCompleteFlow = true,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
-            isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
         )
     }
 
@@ -240,16 +202,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (val viewState = mapViewStateToCheckoutIdentifier(vs, CheckoutIdentifier.SheetTopWallet)) {
             null -> null
             is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
-                error = viewState.errorMessage?.message?.let { message ->
-                    resolvableString(message)
-                }
+                error = viewState.errorMessage?.message
             )
             is PaymentSheetViewState.StartProcessing -> WalletsProcessingState.Processing
             is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
         }
     }
 
-    private var paymentLauncher: StripePaymentLauncher? = null
+    private val intentConfirmationHandler = intentConfirmationHandlerFactory.create(viewModelScope.plus(workContext))
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -272,8 +232,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override val shouldCompleteLinkFlowInline: Boolean = true
-
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
@@ -292,7 +250,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message)
+                onError(processingState.message?.resolvableString)
             }
             LinkHandler.ProcessingState.Launched -> {
                 startProcessing(CheckoutIdentifier.SheetTopWallet)
@@ -323,13 +281,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun loadPaymentSheetState() {
-        val isReloadingAfterProcessDeath = savedStateHandle.contains(AwaitingPaymentResultKey)
-
         val result = withContext(workContext) {
             paymentSheetLoader.load(
                 initializationMode = args.initializationMode,
                 paymentSheetConfiguration = args.config,
-                isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+                isReloadingAfterProcessDeath = intentConfirmationHandler.hasReloadedFromProcessDeath,
+                initializedViaCompose = args.initializedViaCompose,
             )
         }
 
@@ -345,74 +302,79 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        if (state.validationError != null) {
-            handlePaymentSheetStateLoadedWithInvalidIntent(
-                stripeIntent = state.stripeIntent,
-                error = state.validationError,
+        val pendingResult = intentConfirmationHandler.awaitIntentResult()
+
+        if (pendingResult is PaymentConfirmationResult.Succeeded) {
+            // If we just received a transaction result after process death, we don't error. Instead, we dismiss
+            // PaymentSheet and return a `Completed` result to the caller.
+            handlePaymentCompleted(
+                intent = pendingResult.intent,
+                deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
+                finishImmediately = true
             )
+        } else if (state.validationError != null) {
+            handlePaymentSheetStateLoadFailure(state.validationError)
         } else {
             initializeWithState(state)
         }
     }
 
-    private suspend fun handlePaymentSheetStateLoadedWithInvalidIntent(
-        stripeIntent: StripeIntent,
-        error: Throwable,
-    ) {
-        val pendingResult = awaitPaymentResult()
-
-        if (pendingResult is InternalPaymentResult.Completed) {
-            // If we just received a transaction result after process death, we don't error. Instead, we dismiss
-            // PaymentSheet and return a `Completed` result to the caller.
-            val usedPaymentMethod = stripeIntent.paymentMethod
-            handlePaymentCompleted(usedPaymentMethod, finishImmediately = true)
-        } else {
-            handlePaymentSheetStateLoadFailure(error)
-        }
-    }
-
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customer = state.customer
+        customerStateHolder.setCustomerState(state.customer)
 
         updateSelection(state.paymentSelection)
 
-        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
-            GooglePayState.Available
-        } else {
-            GooglePayState.NotAvailable
-        }
-
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        val linkState = state.linkState
+        linkHandler.setupLink(state.linkState)
 
-        linkHandler.setupLink(linkState)
-
-        val pendingFailedPaymentResult = awaitPaymentResult() as? InternalPaymentResult.Failed
-        val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage(getApplication())
+        val pendingFailedPaymentResult = intentConfirmationHandler.awaitIntentResult()
+            as? PaymentConfirmationResult.Failed
+        val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
         resetViewState(errorMessage)
-        transitionToFirstScreen()
-    }
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
+            )
+        )
 
-    fun setupGooglePay(
-        lifecycleScope: CoroutineScope,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
-    ) {
-        googlePayLauncherConfig?.let { config ->
-            googlePayPaymentMethodLauncher =
-                googlePayPaymentMethodLauncherFactory.create(
-                    lifecycleScope = lifecycleScope,
-                    config = config,
-                    readyCallback = { /* Nothing to do here */ },
-                    activityResultLauncher = activityResultLauncher
-                )
+        viewModelScope.launch {
+            intentConfirmationHandler.state.collectLatest { state ->
+                when (state) {
+                    is IntentConfirmationHandler.State.Idle -> Unit
+                    is IntentConfirmationHandler.State.Preconfirming -> {
+                        if (
+                            state.inPreconfirmFlow &&
+                            state.confirmationOption is PaymentConfirmationOption.GooglePay
+                        ) {
+                            setContentVisible(false)
+                        } else {
+                            setContentVisible(true)
+                        }
+
+                        startProcessing(checkoutIdentifier)
+                    }
+                    is IntentConfirmationHandler.State.Confirming -> {
+                        setContentVisible(true)
+
+                        if (viewState.value !is PaymentSheetViewState.StartProcessing) {
+                            startProcessing(checkoutIdentifier)
+                        }
+                    }
+                    is IntentConfirmationHandler.State.Complete -> {
+                        setContentVisible(true)
+                        processIntentResult(state.result)
+                    }
+                }
+            }
         }
     }
 
-    private fun resetViewState(userErrorMessage: String? = null) {
+    private fun resetViewState(userErrorMessage: ResolvableString? = null) {
         viewState.value =
-            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+            PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
     }
 
@@ -423,12 +385,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout() {
-        val paymentSelection = selection.value
-        checkout(paymentSelection, CheckoutIdentifier.SheetBottomBuy)
+        if (shouldLaunchCvcRecollectionScreen()) {
+            launchCvcRecollection()
+            return
+        }
+        checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
     }
 
     fun checkoutWithGooglePay() {
-        setContentVisible(false)
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
@@ -436,116 +400,68 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
     ) {
-        startProcessing(identifier)
+        this.checkoutIdentifier = identifier
 
-        if (paymentSelection is PaymentSelection.GooglePay) {
-            paymentMethodMetadata.value?.stripeIntent?.let { stripeIntent ->
-                googlePayPaymentMethodLauncher?.present(
-                    currencyCode = (stripeIntent as? PaymentIntent)?.currency
-                        ?: args.googlePayConfig?.currencyCode.orEmpty(),
-                    amount = when (stripeIntent) {
-                        is PaymentIntent -> stripeIntent.amount ?: 0L
-                        is SetupIntent -> args.googlePayConfig?.amount ?: 0L
-                    },
-                    transactionId = stripeIntent.id,
-                    label = args.googlePayConfig?.label,
-                )
-            }
-        } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
-            ExternalPaymentMethodInterceptor.intercept(
-                externalPaymentMethodType = paymentSelection.type,
-                billingDetails = paymentSelection.billingDetails,
-                onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
-                errorReporter = errorReporter,
-            )
-        } else if (
-            paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-            paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
-        ) {
-            BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
-                runCatching {
-                    requireNotNull(bacsMandateConfirmationLauncher)
-                }.onSuccess { launcher ->
-                    launcher.launch(
-                        data = data,
-                        appearance = config.appearance
-                    )
-                }.onFailure {
-                    resetViewState(
-                        userErrorMessage = getApplication<Application>()
-                            .resources
-                            .getString(R.string.stripe_something_went_wrong)
-                    )
-                }
-            } ?: run {
-                resetViewState(
-                    userErrorMessage = getApplication<Application>()
-                        .resources
-                        .getString(R.string.stripe_something_went_wrong)
-                )
-            }
-        } else {
-            confirmPaymentSelection(paymentSelection)
-        }
-    }
-
-    fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (confirmStripeIntentParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                }
-                storeAwaitingPaymentResult()
-            },
-            onFailure = ::onFatal
-        )
-    }
-
-    private fun handleNextAction(
-        clientSecret: String,
-        stripeIntent: StripeIntent,
-    ) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (stripeIntent) {
-                    is PaymentIntent -> {
-                        it.handleNextActionForPaymentIntent(clientSecret)
-                    }
-                    is SetupIntent -> {
-                        it.handleNextActionForSetupIntent(clientSecret)
-                    }
-                }
-                storeAwaitingPaymentResult()
-            },
-            onFailure = ::onFatal
-        )
+        confirmPaymentSelection(paymentSelection)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
-        if (!editing.value && selection != this.selection.value) {
+        if (selection != this.selection.value) {
             updateSelection(selection)
         }
     }
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
-        reportConfirmButtonPressed()
+        eventReporter.onPressConfirmButton(selection.value)
         checkout()
     }
 
     override fun clearErrorMessages() {
         if (viewState.value is PaymentSheetViewState.Reset) {
             viewState.value = PaymentSheetViewState.Reset(message = null)
+        }
+    }
+
+    private fun launchCvcRecollection() {
+        cvcRecollectionHandler.launch(
+            paymentSelection = selection.value
+        ) { cvcRecollectionData ->
+            val interactor = DefaultCvcRecollectionInteractor(
+                args = Args(
+                    lastFour = cvcRecollectionData.lastFour ?: "",
+                    cardBrand = cvcRecollectionData.brand,
+                    isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
+                )
+            )
+            viewModelScope.launch {
+                interactor.cvcCompletionState.collectLatest(::handleCvcCompletionState)
+            }
+            navigationHandler.transitionTo(PaymentSheetScreen.CvcRecollection(interactor))
+        }
+    }
+
+    private fun handleCvcCompletionState(completionState: CvcCompletionState) {
+        (selection.value as? PaymentSelection.Saved)?.let {
+            val paymentMethodOptionsParams = when (completionState) {
+                is CvcCompletionState.Completed -> {
+                    PaymentMethodOptionsParams.Card(
+                        cvc = completionState.cvc,
+                    )
+                }
+                CvcCompletionState.Incomplete -> {
+                    PaymentMethodOptionsParams.Card(
+                        cvc = "",
+                    )
+                }
+            }
+            updateSelection(
+                selection = PaymentSelection.Saved(
+                    paymentMethod = it.paymentMethod,
+                    walletType = it.walletType,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams
+                )
+            )
         }
     }
 
@@ -559,37 +475,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
-        val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            BacsMandateConfirmationContract(),
-            ::onBacsMandateResult
-        )
-
-        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(
-            bacsActivityResultLauncher
-        )
-
-        paymentLauncher = paymentLauncherFactory.create(
-            publishableKey = { lazyPaymentConfig.get().publishableKey },
-            stripeAccountId = { lazyPaymentConfig.get().stripeAccountId },
-            statusBarColor = args.statusBarColor,
-            hostActivityLauncher = activityResultCaller.registerForActivityResult(
-                PaymentLauncherContract(),
-                ::onInternalPaymentResult
-            ),
-            includePaymentSheetAuthenticators = true,
-        )
-
-        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(errorReporter),
-            ::onExternalPaymentMethodResult
-        )
+        intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    paymentLauncher = null
-                    bacsMandateConfirmationLauncher = null
-                    bacsActivityResultLauncher.unregister()
                     linkHandler.unregisterFromActivity()
                     super.onDestroy(owner)
                 }
@@ -597,55 +487,59 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
-        viewModelScope.launch(workContext) {
-            val stripeIntent = awaitStripeIntent()
-
-            val nextStep = intentConfirmationInterceptor.intercept(
-                initializationMode = args.initializationMode,
-                paymentSelection = paymentSelection,
-                shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
-                context = getApplication(),
+    @Suppress("ComplexCondition")
+    private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
+        if (paymentSelection !is PaymentSelection.Saved) return paymentSelection
+        return if (shouldAttachCvc()) {
+            val paymentMethodOptionsParams =
+                (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
+                    ?: PaymentMethodOptionsParams.Card()
+            paymentSelection.copy(
+                paymentMethodOptionsParams = paymentMethodOptionsParams.copy(
+                    cvc = cvcControllerFlow.value.fieldValue.value
+                )
             )
-
-            deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
-
-            when (nextStep) {
-                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    handleNextAction(
-                        clientSecret = nextStep.clientSecret,
-                        stripeIntent = stripeIntent,
-                    )
-                }
-                is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                    confirmStripeIntent(nextStep.confirmParams)
-                }
-                is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onError(nextStep.message)
-                }
-                is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    processPayment(stripeIntent, PaymentResult.Completed)
-                }
-            }
+        } else {
+            paymentSelection
         }
     }
 
-    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
-        val selection = selection.value
-        when (paymentResult) {
-            is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
-                selection,
-                deferredIntentConfirmationType = null
-            )
+    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
+        viewModelScope.launch(workContext) {
+            val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
+                ?.toPaymentConfirmationOption(args.initializationMode, config)
 
-            is PaymentResult.Failed -> eventReporter.onPaymentFailure(
-                selection,
-                error = PaymentSheetConfirmationError.ExternalPaymentMethod
-            )
+            confirmationOption?.let { option ->
+                val stripeIntent = awaitStripeIntent()
 
-            is PaymentResult.Canceled -> Unit
+                intentConfirmationHandler.start(
+                    arguments = IntentConfirmationHandler.Args(
+                        intent = stripeIntent,
+                        confirmationOption = option,
+                    ),
+                )
+            } ?: run {
+                val message = paymentSelection?.let {
+                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
+                } ?: "Cannot confirm without a payment selection!"
+
+                val exception = IllegalStateException(message)
+
+                val event = paymentSelection?.let {
+                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+                errorReporter.report(event, StripeException.create(exception))
+
+                processIntentResult(
+                    PaymentConfirmationResult.Failed(
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
+                        type = PaymentConfirmationErrorType.Internal,
+                    )
+                )
+            }
         }
-        onPaymentResult(paymentResult)
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
@@ -655,49 +549,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun onInternalPaymentResult(launcherResult: InternalPaymentResult) {
-        val intent = paymentMethodMetadata.value?.stripeIntent
-
-        if (intent == null) {
-            // We're recovering from process death. Wait for the pending payment result
-            // to be handled after re-loading.
-            pendingPaymentResultChannel.trySend(launcherResult)
-            return
-        }
-
-        when (launcherResult) {
-            is InternalPaymentResult.Completed -> {
-                processPayment(launcherResult.intent, PaymentResult.Completed)
-            }
-            is InternalPaymentResult.Failed -> {
-                processPayment(intent, PaymentResult.Failed(launcherResult.throwable))
-            }
-            is InternalPaymentResult.Canceled -> {
-                processPayment(intent, PaymentResult.Canceled)
-            }
-        }
-    }
-
-    private fun handlePaymentFailed(error: Throwable) {
+    private fun handlePaymentFailed(
+        error: PaymentSheetConfirmationError,
+        message: ResolvableString
+    ) {
         eventReporter.onPaymentFailure(
             paymentSelection = selection.value,
-            error = PaymentSheetConfirmationError.Stripe(error),
+            error = error,
         )
 
         resetViewState(
-            userErrorMessage = error.stripeErrorMessage(getApplication())
+            userErrorMessage = message
         )
     }
 
-    private fun handlePaymentCompleted(paymentMethod: PaymentMethod?, finishImmediately: Boolean) {
+    private fun handlePaymentCompleted(
+        intent: StripeIntent,
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        finishImmediately: Boolean
+    ) {
         val currentSelection = selection.value
         eventReporter.onPaymentSuccess(
             paymentSelection = currentSelection,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
         )
-
-        // Reset after sending event
-        deferredIntentConfirmationType = null
 
         // Log out of Link to invalidate the token
         if (currentSelection != null && currentSelection.isLink) {
@@ -710,7 +585,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
          * for usage, or the customer has requested the payment method be saved.
          */
         when (currentSelection) {
-            is PaymentSelection.New -> paymentMethod.takeIf {
+            is PaymentSelection.New -> intent.paymentMethod.takeIf {
                 currentSelection.canSave(args.initializationMode)
             }?.let { method ->
                 PaymentSelection.Saved(method)
@@ -729,13 +604,53 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun processIntentResult(result: PaymentConfirmationResult?) {
+        when (result) {
+            is PaymentConfirmationResult.Succeeded -> handlePaymentCompleted(
+                intent = result.intent,
+                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                finishImmediately = false,
+            )
+            is PaymentConfirmationResult.Failed -> processIntentFailure(result)
+            is PaymentConfirmationResult.Canceled,
+            null -> resetViewState()
+        }
+    }
+
+    private fun processIntentFailure(failure: PaymentConfirmationResult.Failed) {
+        when (failure.type) {
+            PaymentConfirmationErrorType.Payment -> handlePaymentFailed(
+                error = PaymentSheetConfirmationError.Stripe(failure.cause),
+                message = failure.message,
+            )
+            PaymentConfirmationErrorType.ExternalPaymentMethod -> handlePaymentFailed(
+                error = PaymentSheetConfirmationError.ExternalPaymentMethod,
+                message = failure.message,
+            )
+            is PaymentConfirmationErrorType.GooglePay -> handlePaymentFailed(
+                error = PaymentSheetConfirmationError.GooglePay(failure.type.errorCode),
+                message = failure.message,
+            )
+            PaymentConfirmationErrorType.Fatal -> onFatal(failure.cause)
+            PaymentConfirmationErrorType.MerchantIntegration,
+            PaymentConfirmationErrorType.Internal -> onError(failure.message)
+        }
+    }
+
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                handlePaymentCompleted(paymentMethod = stripeIntent.paymentMethod, finishImmediately = false)
+                handlePaymentCompleted(
+                    intent = stripeIntent,
+                    deferredIntentConfirmationType = null,
+                    finishImmediately = false
+                )
             }
             is PaymentResult.Failed -> {
-                handlePaymentFailed(paymentResult.throwable)
+                handlePaymentFailed(
+                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
+                    message = paymentResult.throwable.stripeErrorMessage(),
+                )
             }
             is PaymentResult.Canceled -> {
                 resetViewState()
@@ -743,105 +658,64 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
-        setContentVisible(true)
-        when (result) {
-            is GooglePayPaymentMethodLauncher.Result.Completed -> {
-                val newPaymentSelection = PaymentSelection.Saved(
-                    paymentMethod = result.paymentMethod,
-                    walletType = PaymentSelection.Saved.WalletType.GooglePay,
-                )
-
-                updateSelection(newPaymentSelection)
-                confirmPaymentSelection(newPaymentSelection)
-            }
-            is GooglePayPaymentMethodLauncher.Result.Failed -> {
-                logger.error("Error processing Google Pay payment", result.error)
-                eventReporter.onPaymentFailure(
-                    paymentSelection = PaymentSelection.GooglePay,
-                    error = PaymentSheetConfirmationError.GooglePay(result.errorCode),
-                )
-                onError(
-                    when (result.errorCode) {
-                        GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                            StripeR.string.stripe_failure_connection_error
-                        else -> StripeR.string.stripe_internal_error
-                    }
-                )
-            }
-            is GooglePayPaymentMethodLauncher.Result.Canceled -> {
-                resetViewState()
-            }
-        }
-    }
-
-    private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
-        when (result) {
-            is BacsMandateConfirmationResult.Confirmed -> {
-                val paymentSelection = selection.value
-
-                if (
-                    paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
-                    paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
-                ) {
-                    confirmPaymentSelection(paymentSelection)
-                }
-            }
-            is BacsMandateConfirmationResult.ModifyDetails,
-            is BacsMandateConfirmationResult.Cancelled -> resetViewState(userErrorMessage = null)
-        }
-    }
-
-    override fun onFatal(throwable: Throwable) {
+    private fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        mostRecentError = throwable
         _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
     }
 
     override fun onUserCancel() {
-        reportDismiss()
+        eventReporter.onDismiss()
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
-    override fun onFinish() {
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
-    }
+    override fun onError(error: ResolvableString?) = resetViewState(error)
 
-    override fun onError(@IntegerRes error: Int?) =
-        onError(error?.let { getApplication<Application>().resources.getString(it) })
-
-    override fun onError(error: String?) = resetViewState(error)
-
-    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+    private fun determineInitialBackStack(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerStateHolder: CustomerStateHolder,
+    ): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(VerticalModeInitialScreenFactory.create(this))
+            return listOf(
+                VerticalModeInitialScreenFactory.create(
+                    viewModel = this,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
+                    savedPaymentMethodMutator = savedPaymentMethodMutator,
+                )
+            )
         }
-        val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
+        val hasPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
         val target = if (hasPaymentMethods) {
-            PaymentSheetScreen.SelectSavedPaymentMethods
+            val interactor = DefaultSelectSavedPaymentMethodsInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
+                savedPaymentMethodMutator = savedPaymentMethodMutator,
+            )
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                interactor = interactor,
+                cvcRecollectionState = getCvcRecollectionState()
+            )
         } else {
-            PaymentSheetScreen.AddFirstPaymentMethod
+            val interactor = DefaultAddPaymentMethodInteractor.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            PaymentSheetScreen.AddFirstPaymentMethod(interactor = interactor)
         }
         return listOf(target)
     }
 
-    private suspend fun awaitPaymentResult(): InternalPaymentResult? {
-        val shouldAwait = savedStateHandle.remove<Boolean>(AwaitingPaymentResultKey) ?: false
-        return if (shouldAwait) {
-            withTimeoutOrNull(1.seconds) {
-                pendingPaymentResultChannel.receive()
-            }
-        } else {
-            null
-        }
-    }
-
-    private fun storeAwaitingPaymentResult() {
-        savedStateHandle[AwaitingPaymentResultKey] = true
-    }
-
     private suspend fun awaitStripeIntent(): StripeIntent {
         return paymentMethodMetadata.filterNotNull().first().stripeIntent
+    }
+
+    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
+        return if (isCvcRecollectionEnabled()) {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
+        } else {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
+        }
     }
 
     private fun mapViewStateToCheckoutIdentifier(
@@ -853,6 +727,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         } else {
             viewState
         }
+    }
+
+    private fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
     }
 
     internal class Factory(

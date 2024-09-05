@@ -1,19 +1,24 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import android.content.Context
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.combine
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
-    private val context: Context,
     private val config: PaymentSheet.Configuration,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
@@ -21,6 +26,7 @@ internal class PrimaryButtonUiStateMapper(
     private val amountFlow: StateFlow<Amount?>,
     private val selectionFlow: StateFlow<PaymentSelection?>,
     private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
+    private val cvcCompleteFlow: StateFlow<Boolean>,
     private val onClick: () -> Unit,
 ) {
 
@@ -31,14 +37,18 @@ internal class PrimaryButtonUiStateMapper(
             amountFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton ->
-            customPrimaryButton ?: PrimaryButton.UIState(
-                label = buyButtonLabel(amount),
-                onClick = onClick,
-                enabled = buttonsEnabled && selection != null,
-                lockVisible = true,
-            ).takeIf { screen.showsBuyButton }
-        }
+            cvcCompleteFlow
+        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
+            screen.buyButtonState.map { buyButtonState ->
+                customPrimaryButton ?: PrimaryButton.UIState(
+                    label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(amount),
+                    onClick = onClick,
+                    enabled = buttonsEnabled && selection != null &&
+                        cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
+                    lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+                ).takeIf { buyButtonState.visible }
+            }
+        }.flatMapLatest { it }
     }
 
     fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
@@ -59,19 +69,38 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    private fun buyButtonLabel(amount: Amount?): String {
-        return if (config.primaryButtonLabel != null) {
-            config.primaryButtonLabel
-        } else if (isProcessingPayment) {
-            val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
-            amount?.buildPayButtonLabel(context.resources) ?: fallback
-        } else {
-            context.getString(StripeUiCoreR.string.stripe_setup_button_label)
+    private fun buyButtonLabel(amount: Amount?): ResolvableString {
+        return config.primaryButtonLabel?.let {
+            it.resolvableString
+        } ?: run {
+            if (isProcessingPayment) {
+                val fallback = R.string.stripe_paymentsheet_pay_button_label.resolvableString
+                amount?.buildPayButtonLabel() ?: fallback
+            } else {
+                StripeUiCoreR.string.stripe_setup_button_label.resolvableString
+            }
         }
     }
 
-    private fun continueButtonLabel(): String {
-        val customLabel = config.primaryButtonLabel
-        return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
+    private fun continueButtonLabel(): ResolvableString {
+        return config.primaryButtonLabel?.resolvableString
+            ?: StripeUiCoreR.string.stripe_continue_button_label.resolvableString
+    }
+
+    private fun cvcRecollectionCompleteOrNotRequired(
+        screen: PaymentSheetScreen,
+        complete: Boolean,
+        selection: PaymentSelection
+    ): Boolean {
+        return if (
+            (screen as? PaymentSheetScreen.SelectSavedPaymentMethods)
+                ?.cvcRecollectionState is CvcRecollectionState.Required &&
+            (selection as? PaymentSelection.Saved)
+                ?.paymentMethod?.type == PaymentMethod.Type.Card
+        ) {
+            complete
+        } else {
+            true
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.accountupdate
 
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -13,9 +12,12 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.UnclassifiedError
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.UpdateRequired.Type
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
@@ -26,7 +28,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     @Assisted initialState: AccountUpdateRequiredState,
@@ -46,11 +47,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     }
 
     private fun loadContent() {
-        suspend {
-            requireNotNull(updateRequiredContentRepository.get()?.payload)
-        }.execute {
-            copy(payload = it)
-        }
+        suspend { requireNotNull(updateRequiredContentRepository.get()?.payload) }.execute { copy(payload = it) }
     }
 
     override fun updateTopAppBar(state: AccountUpdateRequiredState): TopAppBarStateUpdate? {
@@ -61,13 +58,11 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val state = stateFlow.value
             val referrer = state.referrer
-            val type = requireNotNull(state.payload()?.type)
-
-            when (type) {
-                is AccountUpdateRequiredState.Type.Repair -> {
+            when (val type = requireNotNull(state.payload()?.type)) {
+                is Type.Repair -> {
                     handleUnsupportedRepairAction(referrer)
                 }
-                is AccountUpdateRequiredState.Type.PartnerAuth -> {
+                is Type.Supportability -> {
                     openPartnerAuth(type.institution, referrer)
                 }
             }
@@ -82,7 +77,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             pane = PANE,
         )
         // Fall back to the institution picker for now
-        navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer))
+        navigationManager.tryNavigateTo(InstitutionPicker(referrer))
     }
 
     private fun openPartnerAuth(
@@ -96,7 +91,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             navigationManager.tryNavigateTo(Destination.PartnerAuth(referrer))
         } else {
             // Fall back to the institution picker
-            navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer))
+            navigationManager.tryNavigateTo(InstitutionPicker(referrer))
         }
     }
 
@@ -133,25 +128,10 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
 
 internal data class AccountUpdateRequiredState(
     val referrer: Pane,
-    val payload: Async<Payload> = Uninitialized,
+    val payload: Async<UpdateRequired> = Uninitialized,
 ) {
 
     constructor(arguments: Bundle?) : this(
         referrer = Destination.referrer(arguments)!!,
     )
-
-    @Parcelize
-    data class Payload(
-        val iconUrl: String? = null,
-        val type: Type,
-    ) : Parcelable
-
-    sealed interface Type : Parcelable {
-
-        @Parcelize
-        data class Repair(val authorization: String?) : Type
-
-        @Parcelize
-        data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type
-    }
 }

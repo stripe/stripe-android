@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -42,7 +43,7 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Can use existing payment selection if it's still supported`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "Sofort",
+            label = "Sofort".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -178,7 +179,7 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "paypal",
+            label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -206,7 +207,7 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `PaymentSelection is preserved when payment method no longer requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "paypal",
+            label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -236,7 +237,7 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `PaymentSelection is preserved when payment method still requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "paypal",
+            label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -343,10 +344,8 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
-            isEligibleForCardBrandChoice = false,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
@@ -358,6 +357,7 @@ class PaymentSelectionUpdaterTest {
                     SharedDataSpec("sofort"),
                 ),
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                isGooglePayReady = true,
             ),
         )
     }
@@ -375,15 +375,14 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
-            isEligibleForCardBrandChoice = false,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
                     paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
-                )
+                ),
+                isGooglePayReady = true,
             ),
         )
     }

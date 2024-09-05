@@ -4,8 +4,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal data class SupportedPaymentMethod(
@@ -42,7 +46,7 @@ internal data class SupportedPaymentMethod(
         subtitle: ResolvableString? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
-        displayName = resolvableString(id = displayNameResource),
+        displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
@@ -60,11 +64,48 @@ internal data class SupportedPaymentMethod(
         subtitle: ResolvableString? = null,
     ) : this(
         code = code,
-        displayName = resolvableString(id = displayNameResource),
+        displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
     )
+
+    fun asFormHeaderInformation(): FormHeaderInformation {
+        return FormHeaderInformation(
+            displayName = displayName,
+            shouldShowIcon = true,
+            iconResource = iconResource,
+            lightThemeIconUrl = lightThemeIconUrl,
+            darkThemeIconUrl = darkThemeIconUrl,
+            iconRequiresTinting = iconRequiresTinting,
+        )
+    }
+
+    fun asDisplayablePaymentMethod(
+        customerSavedPaymentMethods: List<PaymentMethod>,
+        onClick: () -> Unit,
+    ): DisplayablePaymentMethod {
+        fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
+            return customerSavedPaymentMethods.any { it.type == type } && code == type.code
+        }
+
+        val displayName = if (isTypeAndHasCustomerSavedPaymentMethodsOfType(PaymentMethod.Type.Card)) {
+            R.string.stripe_paymentsheet_new_card.resolvableString
+        } else {
+            displayName
+        }
+
+        return DisplayablePaymentMethod(
+            code = code,
+            displayName = displayName,
+            iconResource = iconResource,
+            lightThemeIconUrl = lightThemeIconUrl,
+            darkThemeIconUrl = darkThemeIconUrl,
+            iconRequiresTinting = iconRequiresTinting,
+            subtitle = subtitle,
+            onClick = onClick,
+        )
+    }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -20,7 +21,7 @@ internal interface EventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted()
+    fun onLoadStarted(initializedViaCompose: Boolean)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
@@ -28,9 +29,11 @@ internal interface EventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
+        linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
+        initializationMode: PaymentSheet.InitializationMode,
+        orderedLpms: List<String>,
     )
 
     /**
@@ -55,9 +58,9 @@ internal interface EventReporter {
     fun onShowExistingPaymentOptions()
 
     /**
-     * PaymentSheet is now being displayed and its first screen shows the payment method form.
+     * PaymentSheet is now being displayed and its first screen shows new payment methods.
      */
-    fun onShowNewPaymentOptionForm()
+    fun onShowNewPaymentOptions()
 
     /**
      * The customer has selected one of the available payment methods in the payment method form.

@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">주를 입력하십시오</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt;으로 할부 결제하십시오.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Affirm으로 할부 결제하십시오.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">계좌 명의</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">잘못된 배송 주소</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">우편번호가 불완전합니다.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">간단하고 안전한 원클릭 결제</string>
   <string name="stripe_payment_method_add_new_card">새 카드 추가…</string>
   <string name="stripe_payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">배송 방법 선택</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">카드 업데이트</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">업데이트</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">결제 확인</string>
 </resources>

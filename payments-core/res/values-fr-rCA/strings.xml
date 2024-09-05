@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Veuillez entrer votre adresse</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Payez par versements échelonnés avec &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Payez par versements échelonnés avec Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Nom du titulaire du compte</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">Adresse de livraison non valide</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Votre code postal est incomplet.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Des paiements simples et sécurisés en un seul clic</string>
   <string name="stripe_payment_method_add_new_card">Ajouter une carte…</string>
   <string name="stripe_payment_method_add_new_fpx">Sélectionner un compte bancaire (FPX)…</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">Choisir mode de livraison</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Mettre à jour la carte</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Mettre à jour</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Vérifiez votre paiement</string>
 </resources>

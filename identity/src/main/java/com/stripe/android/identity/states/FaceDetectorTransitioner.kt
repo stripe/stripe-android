@@ -247,7 +247,7 @@ internal class FaceDetectorTransitioner(
         return abs(1 - (boundingBox.top + boundingBox.top + boundingBox.height)) <
             selfieCapturePage.maxCenteredThresholdY &&
             abs(1 - (boundingBox.left + boundingBox.left + boundingBox.width)) <
-                selfieCapturePage.maxCenteredThresholdX
+            selfieCapturePage.maxCenteredThresholdX
     }
 
     private fun isFaceAwayFromEdges(boundingBox: BoundingBox): Boolean {

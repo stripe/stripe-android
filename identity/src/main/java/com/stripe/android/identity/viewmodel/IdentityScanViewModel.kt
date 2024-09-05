@@ -11,7 +11,6 @@ import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.update
 internal abstract class IdentityScanViewModel(
     private val applicationContext: Application,
     open val fpsTracker: FPSTracker,
-    open val identityRepository: IdentityRepository,
     open val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
@@ -29,7 +27,6 @@ internal abstract class IdentityScanViewModel(
     CameraViewModel(
         modelPerformanceTracker,
         laplacianBlurDetector,
-        identityRepository,
         identityAnalyticsRequestFactory
     ) {
 

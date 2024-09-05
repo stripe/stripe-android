@@ -281,4 +281,44 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(cardNumber = "4000000000003220")
         )
     }
+
+    @Test
+    fun testCardWithCvcRecollectionComplete() {
+        val testParameters = testParameters.copy(saveCheckboxValue = true)
+
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            values = FieldPopulator.Values(
+                cardNumber = "6011111111111117",
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+
+        testDriver.confirmCompleteWithSavePaymentMethodAndCvcRecollection(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters
+        )
+    }
+
+    @Test
+    fun testCardWithCvcRecollectionCustom() {
+        val testParameters = testParameters.copy(saveCheckboxValue = true)
+
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            values = FieldPopulator.Values(
+                cardNumber = "6011111111111117",
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+
+        testDriver.confirmCustomWithSavePaymentMethodAndCvcRecollection(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters
+        )
+    }
 }

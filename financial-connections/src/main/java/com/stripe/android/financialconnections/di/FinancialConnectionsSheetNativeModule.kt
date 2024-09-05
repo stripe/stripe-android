@@ -9,8 +9,18 @@ import com.stripe.android.core.error.SentryErrorReporter
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
+import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForNetworking
+import com.stripe.android.financialconnections.features.notice.PresentSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
@@ -20,11 +30,14 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
+import com.stripe.android.financialconnections.repository.api.RealProvideApiRequestOptions
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -33,18 +46,14 @@ import dagger.Module
 import dagger.Provides
 import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
 internal interface FinancialConnectionsSheetNativeModule {
 
     @Binds
-    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
-
-    @Binds
-    fun bindsPresentAccountUpdateRequiredSheet(
-        impl: RealPresentAccountUpdateRequiredSheet,
-    ): PresentAccountUpdateRequiredSheet
+    fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
     @Singleton
     @Binds
@@ -58,6 +67,20 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsHandleError(
         impl: RealHandleError
     ): HandleError
+
+    @Binds
+    @Singleton
+    fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
+
+    @Binds
+    fun bindsAttachConsumerToLinkAccountSession(
+        impl: RealAttachConsumerToLinkAccountSession,
+    ): AttachConsumerToLinkAccountSession
+
+    @Binds
+    fun bindsCreateInstantDebitsPaymentMethod(
+        impl: RealCreateInstantDebitsResult,
+    ): CreateInstantDebitsResult
 
     companion object {
         @Provides
@@ -86,14 +109,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesFinancialConnectionsManifestRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             locale: Locale?,
             logger: Logger,
             @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
         ) = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
-            apiOptions = apiOptions,
+            provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
             initialSync = initialSynchronizeSessionResponse
@@ -103,16 +126,20 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsConsumerSessionRepository(
             consumersApiService: ConsumersApiService,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
+            consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
             logger: Logger,
+            isLinkWithStripe: IsLinkWithStripe,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+            provideApiRequestOptions = provideApiRequestOptions,
             consumersApiService = consumersApiService,
-            apiOptions = apiOptions,
+            consumerSessionRepository = consumerSessionRepository,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
+            isLinkWithStripe = isLinkWithStripe,
         )
 
         @Singleton
@@ -132,14 +159,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsAccountsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             apiRequestFactory: ApiRequest.Factory,
             logger: Logger,
             savedStateHandle: SavedStateHandle,
         ) = FinancialConnectionsAccountsRepository(
             requestExecutor = requestExecutor,
+            provideApiRequestOptions = provideApiRequestOptions,
             apiRequestFactory = apiRequestFactory,
-            apiOptions = apiOptions,
             logger = logger,
             savedStateHandle = savedStateHandle,
         )
@@ -148,11 +175,11 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesFinancialConnectionsInstitutionsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options
         ) = FinancialConnectionsInstitutionsRepository(
             requestExecutor = requestExecutor,
-            apiOptions = apiOptions,
+            provideApiRequestOptions = provideApiRequestOptions,
             apiRequestFactory = apiRequestFactory
         )
 
@@ -166,5 +193,18 @@ internal interface FinancialConnectionsSheetNativeModule {
             apiRequestFactory = apiRequestFactory,
             requestExecutor = requestExecutor
         )
+
+        @Provides
+        internal fun provideLinkSignupHandler(
+            isLinkWithStripe: IsLinkWithStripe,
+            linkSignupHandlerForInstantDebits: Provider<LinkSignupHandlerForInstantDebits>,
+            linkSignupHandlerForNetworking: Provider<LinkSignupHandlerForNetworking>,
+        ): LinkSignupHandler {
+            return if (isLinkWithStripe()) {
+                linkSignupHandlerForInstantDebits.get()
+            } else {
+                linkSignupHandlerForNetworking.get()
+            }
+        }
     }
 }

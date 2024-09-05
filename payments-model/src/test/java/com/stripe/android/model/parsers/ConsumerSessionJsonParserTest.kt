@@ -23,8 +23,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
-                authSessionClientSecret = "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
-                publishableKey = "asdfg123"
             )
         )
     }
@@ -45,8 +43,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Verified
                     )
                 ),
-                authSessionClientSecret = null,
-                publishableKey = null
             )
         )
     }
@@ -67,8 +63,6 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
-                authSessionClientSecret = null,
-                publishableKey = null
             )
         )
     }

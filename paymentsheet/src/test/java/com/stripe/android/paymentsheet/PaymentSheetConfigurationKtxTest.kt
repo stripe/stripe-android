@@ -129,6 +129,44 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
+        val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "ek_12345"
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
+                "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        ) {
+            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate()
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
+        val configWithInvalidCustomerSessionClientSecret = configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "total_12345"
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "Argument does not look like a CustomerSession client secret. " +
+                "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        ) {
+            configWithInvalidCustomerSessionClientSecret.validate()
+        }
+    }
+
     private companion object {
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",

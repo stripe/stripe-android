@@ -2,7 +2,6 @@ package com.stripe.android.identity.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.stripe.android.identity.R
@@ -14,6 +13,7 @@ import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.core.R as CoreR
 
 /**
@@ -50,8 +50,8 @@ internal fun NameSection(
         )
     }
 
-    val firstName by firstNameController.fieldValue.collectAsState("")
-    val lastName by lastNameController.fieldValue.collectAsState("")
+    val firstName by firstNameController.fieldValue.collectAsState()
+    val lastName by lastNameController.fieldValue.collectAsState()
 
     SectionElementUI(
         enabled = enabled,

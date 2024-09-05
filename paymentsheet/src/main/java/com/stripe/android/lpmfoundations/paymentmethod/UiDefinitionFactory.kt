@@ -1,6 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -17,6 +20,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal sealed interface UiDefinitionFactory {
     class Arguments(
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
         val shippingValues: Map<IdentifierSpec, String?>?,
         val amount: Amount?,
@@ -25,6 +29,7 @@ internal sealed interface UiDefinitionFactory {
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
+        val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
     ) {
         interface Factory {
             fun create(
@@ -34,6 +39,8 @@ internal sealed interface UiDefinitionFactory {
 
             class Default(
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+                private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+                private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
             ) : Factory {
@@ -43,6 +50,7 @@ internal sealed interface UiDefinitionFactory {
                 ): Arguments {
                     return Arguments(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                        linkConfigurationCoordinator = linkConfigurationCoordinator,
                         amount = metadata.amount(),
                         merchantName = metadata.merchantName,
                         cbcEligibility = metadata.cbcEligibility,
@@ -55,6 +63,7 @@ internal sealed interface UiDefinitionFactory {
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
+                        onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                     )
                 }
             }
@@ -65,6 +74,10 @@ internal sealed interface UiDefinitionFactory {
         fun createSupportedPaymentMethod(
             sharedDataSpec: SharedDataSpec,
         ): SupportedPaymentMethod
+
+        fun createFormHeaderInformation(sharedDataSpec: SharedDataSpec): FormHeaderInformation {
+            return createSupportedPaymentMethod(sharedDataSpec).asFormHeaderInformation()
+        }
 
         fun createFormElements(
             metadata: PaymentMethodMetadata,
@@ -79,6 +92,11 @@ internal sealed interface UiDefinitionFactory {
 
     interface Simple : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
+
+        fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+            return createSupportedPaymentMethod().asFormHeaderInformation()
+        }
+
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
     }
 
@@ -107,6 +125,26 @@ internal sealed interface UiDefinitionFactory {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
                 createSupportedPaymentMethod(sharedDataSpec)
+            } else {
+                null
+            }
+        }
+    }
+
+    fun formHeaderInformation(
+        definition: PaymentMethodDefinition,
+        metadata: PaymentMethodMetadata,
+        sharedDataSpecs: List<SharedDataSpec>,
+        customerHasSavedPaymentMethods: Boolean,
+    ): FormHeaderInformation? = when (this) {
+        is Simple -> {
+            createFormHeaderInformation(customerHasSavedPaymentMethods = customerHasSavedPaymentMethods)
+        }
+
+        is RequiresSharedDataSpec -> {
+            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
+            if (sharedDataSpec != null) {
+                createFormHeaderInformation(sharedDataSpec)
             } else {
                 null
             }

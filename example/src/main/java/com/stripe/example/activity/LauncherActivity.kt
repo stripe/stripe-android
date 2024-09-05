@@ -201,6 +201,18 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.alma_example),
                 AlmaActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.sunbit_example),
+                SunbitActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.billie_example),
+                BillieActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.satispay_example),
+                SatispayActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",

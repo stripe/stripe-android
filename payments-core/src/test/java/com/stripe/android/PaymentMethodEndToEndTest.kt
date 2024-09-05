@@ -484,6 +484,33 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withSunbit_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SUNBIT
+        val stripe = Stripe(context, ApiKeyFixtures.SUNBIT_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Sunbit)
+    }
+
+    @Test
+    fun createPaymentMethod_withBillie_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.BILLIE
+        val stripe = Stripe(context, ApiKeyFixtures.BILLIE_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Billie)
+    }
+
+    @Test
+    fun createPaymentMethod_withSatispay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SATISPAY
+        val stripe = Stripe(context, ApiKeyFixtures.SATISPAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Satispay)
+    }
+
+    @Test
     fun createPaymentMethod_withMultibanco_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.MULTIBANCO
         val stripe = Stripe(context, ApiKeyFixtures.MULTIBANCO_PUBLISHABLE_KEY)

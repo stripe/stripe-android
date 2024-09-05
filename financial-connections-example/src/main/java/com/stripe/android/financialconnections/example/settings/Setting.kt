@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
 import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
@@ -21,7 +22,11 @@ sealed class Setting<T> {
         return this as? Saveable<T>?
     }
 
-    open fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean = true
+    open fun shouldDisplay(
+        merchant: Merchant,
+        flow: Flow,
+        experience: Experience,
+    ): Boolean = true
 
     abstract val displayName: String
     abstract val selectedOption: T

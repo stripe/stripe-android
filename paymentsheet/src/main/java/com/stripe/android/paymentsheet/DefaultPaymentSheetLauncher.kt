@@ -16,12 +16,14 @@ import org.jetbrains.annotations.TestOnly
  * This is used internally for integrations that don't use Jetpack Compose and are
  * able to pass in an activity.
  */
+@OptIn(ExperimentalCvcRecollectionApi::class)
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     private val activity: Activity,
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
+    private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -29,6 +31,7 @@ internal class DefaultPaymentSheetLauncher(
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = null
                     super.onDestroy(owner)
                 }
             }
@@ -91,6 +94,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = activity.window?.statusBarColor,
+            initializedViaCompose = initializedViaCompose,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

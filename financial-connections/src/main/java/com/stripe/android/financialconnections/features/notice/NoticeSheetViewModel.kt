@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.notice
 
+import FinancialConnectionsGenericInfoScreen
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.navigation.Destination
@@ -120,6 +122,11 @@ internal data class NoticeSheetState(
     internal sealed interface NoticeSheetContent : Parcelable {
 
         @Parcelize
+        data class Generic(
+            val generic: FinancialConnectionsGenericInfoScreen,
+        ) : NoticeSheetContent
+
+        @Parcelize
         data class Legal(
             val legalDetails: LegalDetailsNotice,
         ) : NoticeSheetContent
@@ -128,6 +135,21 @@ internal data class NoticeSheetState(
         data class DataAccess(
             val dataAccess: DataAccessNotice,
         ) : NoticeSheetContent
+
+        @Parcelize
+        data class UpdateRequired(
+            val generic: FinancialConnectionsGenericInfoScreen,
+            val type: Type,
+        ) : NoticeSheetContent {
+            sealed interface Type : Parcelable {
+
+                @Parcelize
+                data class Repair(val authorization: String?) : Type
+
+                @Parcelize
+                data class Supportability(val institution: FinancialConnectionsInstitution?) : Type
+            }
+        }
     }
 
     internal sealed interface ViewEffect {

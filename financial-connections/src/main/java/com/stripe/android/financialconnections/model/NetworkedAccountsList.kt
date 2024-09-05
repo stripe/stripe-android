@@ -13,5 +13,7 @@ internal data class NetworkedAccountsList(
 
     @SerialName(value = "next_pane_on_add_account") val nextPaneOnAddAccount: Pane? = null,
 
-    @SerialName(value = "partner_to_core_auths") val partnerToCoreAuths: Map<String, String>? = null
+    @SerialName(value = "partner_to_core_auths") val partnerToCoreAuths: Map<String, String>? = null,
+
+    @SerialName(value = "acquire_consent_on_primary_cta_click") val acquireConsentOnPrimaryCtaClick: Boolean? = false,
 )

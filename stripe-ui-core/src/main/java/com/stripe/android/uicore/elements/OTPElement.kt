@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,9 @@ data class OTPElement(
     override val identifier: IdentifierSpec,
     override val controller: OTPController
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.fieldValue.mapAsStateFlow {
             listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))

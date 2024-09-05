@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 
 internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialConnectionsAccountsRepository {
@@ -33,7 +33,7 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
-    override suspend fun postLinkAccountSessionPaymentAccount(
+    override suspend fun postAttachPaymentAccountToLinkAccountSession(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
         consumerSessionClientSecret: String?
@@ -53,8 +53,9 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
     override suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountIds: Set<String>
-    ): InstitutionResponse {
+        selectedAccountIds: Set<String>,
+        consentAcquired: Boolean?
+    ): ShareNetworkedAccountsResponse {
         TODO("Not yet implemented")
     }
 

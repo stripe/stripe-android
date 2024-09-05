@@ -31,8 +31,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.DeferredIntentParams
@@ -216,15 +214,15 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testConfirmPaymentIntentUrl() {
-        assertThat(StripeApiRepository.getConfirmPaymentIntentUrl("pi123"))
-            .isEqualTo("https://api.stripe.com/v1/payment_intents/pi123/confirm")
+    fun testGetRefreshSetupIntentUrl() {
+        assertThat(StripeApiRepository.getRefreshSetupIntentUrl("pi123"))
+            .isEqualTo("https://api.stripe.com/v1/setup_intents/pi123/refresh")
     }
 
     @Test
-    fun testConsumerSignUpUrl() {
-        assertThat(StripeApiRepository.consumerSignUpUrl)
-            .isEqualTo("https://api.stripe.com/v1/consumers/accounts/sign_up")
+    fun testConfirmPaymentIntentUrl() {
+        assertThat(StripeApiRepository.getConfirmPaymentIntentUrl("pi123"))
+            .isEqualTo("https://api.stripe.com/v1/payment_intents/pi123/confirm")
     }
 
     @Test
@@ -1223,7 +1221,7 @@ internal class StripeApiRepositoryTest {
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         ).getOrThrow()
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(26)
+            .isEqualTo(27)
     }
 
     @Test
@@ -1235,7 +1233,7 @@ internal class StripeApiRepositoryTest {
             )
         ).getOrThrow()
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(26)
+            .isEqualTo(27)
     }
 
     @Test
@@ -1713,48 +1711,31 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `consumerSignUp() sends all parameters`() =
+    fun verifyRefreshSetupIntent() =
         runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString(),
-                emptyMap()
-            )
+            val clientSecret = "seti_1234_secret_5678"
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        SetupIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION_JSON.toString(),
+                        emptyMap()
+                    )
+                )
 
-            val email = "email@example.com"
-            val phoneNumber = "phone number"
-            val country = "US"
-            val name = "name"
-            val locale = Locale.US
-            val cookie = "cookie1"
-            val consentAction = ConsumerSignUpConsentAction.Implied
-            create().consumerSignUp(
-                email,
-                phoneNumber,
-                country,
-                name,
-                locale,
-                cookie,
-                consentAction,
-                DEFAULT_OPTIONS
+            create().refreshSetupIntent(
+                clientSecret,
+                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ).getOrThrow()
+
+            verify(stripeNetworkClient).executeRequest(
+                argWhere<ApiRequest> {
+                    it.options.apiKey == ApiKeyFixtures.FAKE_PUBLISHABLE_KEY &&
+                        it.params?.get("client_secret") == clientSecret
+                }
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertThat(this["email_address"]).isEqualTo(email)
-                assertThat(this["phone_number"]).isEqualTo(phoneNumber)
-                assertThat(this["country"]).isEqualTo(country)
-                assertThat(this["legal_name"]).isEqualTo(name)
-                assertThat(this["locale"]).isEqualTo(locale.toLanguageTag())
-                assertThat(this["consent_action"]).isEqualTo("implied_consent_withspm_mobile_v0")
-                withNestedParams("cookies") {
-                    assertThat(this["verification_session_client_secrets"]).isEqualTo(listOf(cookie))
-                }
-            }
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRefresh)
         }
 
     @Test
@@ -1778,6 +1759,7 @@ internal class StripeApiRepositoryTest {
                     customer = "customer_id",
                     onBehalfOf = null,
                     amount = 1000,
+                    hostedSurface = "payment_element",
                     currency = "usd"
                 ),
                 DEFAULT_OPTIONS
@@ -1795,108 +1777,8 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["customer"]).isEqualTo("customer_id")
                 assertThat(this["on_behalf_of"]).isEqualTo(null)
                 assertThat(this["amount"]).isEqualTo(1000)
+                assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
-            }
-        }
-
-    @Test
-    fun `createPaymentDetails() for card sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val email = "email@stripe.com"
-            val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
-                email
-            )
-            create().createPaymentDetails(
-                clientSecret,
-                paymentDetailsCreateParams,
-                DEFAULT_OPTIONS,
-                false,
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertThat(this["request_surface"]).isEqualTo("android_payment_element")
-                withNestedParams("credentials") {
-                    assertThat(this["consumer_session_client_secret"]).isEqualTo(clientSecret)
-                }
-                assertThat(this["active"]).isEqualTo(false)
-                assertThat(this["type"]).isEqualTo("card")
-                assertThat(this["billing_email_address"]).isEqualTo(email)
-                withNestedParams("billing_address") {
-                    assertThat(this["country_code"]).isEqualTo("US")
-                    assertThat(this["postal_code"]).isEqualTo("94111")
-                }
-                withNestedParams("card") {
-                    assertThat(this["number"]).isEqualTo("4242424242424242")
-                    assertThat(this["exp_month"]).isEqualTo(1)
-                    assertThat(this["exp_year"]).isEqualTo(2054)
-                }
-            }
-        }
-
-    @Test
-    fun `createPaymentDetails() for card with card brand choice sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val email = "email@stripe.com"
-            val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-                    card = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.card?.copy(
-                        networks = PaymentMethodCreateParams.Card.Networks(
-                            preferred = "cartes_bancaires"
-                        )
-                    )
-                ).toParamMap(),
-                email
-            )
-            create().createPaymentDetails(
-                clientSecret,
-                paymentDetailsCreateParams,
-                DEFAULT_OPTIONS,
-                false,
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertThat(this["request_surface"]).isEqualTo("android_payment_element")
-                withNestedParams("credentials") {
-                    assertThat(this["consumer_session_client_secret"]).isEqualTo(clientSecret)
-                }
-                assertThat(this["active"]).isEqualTo(false)
-                assertThat(this["type"]).isEqualTo("card")
-                assertThat(this["billing_email_address"]).isEqualTo(email)
-                withNestedParams("billing_address") {
-                    assertThat(this["country_code"]).isEqualTo("US")
-                    assertThat(this["postal_code"]).isEqualTo("94111")
-                }
-                withNestedParams("card") {
-                    assertThat(this["number"]).isEqualTo("4242424242424242")
-                    assertThat(this["exp_month"]).isEqualTo(1)
-                    assertThat(this["exp_year"]).isEqualTo(2054)
-                    assertThat(this["preferred_network"]).isEqualTo("cartes_bancaires")
-                }
             }
         }
 
@@ -1917,6 +1799,7 @@ internal class StripeApiRepositoryTest {
                 consumerSessionClientSecret = clientSecret,
                 id = id,
                 requestOptions = DEFAULT_OPTIONS,
+                extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123")))
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1928,6 +1811,12 @@ internal class StripeApiRepositoryTest {
                     assertThat(this["consumer_session_client_secret"]).isEqualTo(clientSecret)
                 }
                 assertThat(this["id"]).isEqualTo(id)
+                assertThat(this["payment_user_agent"].toString()).startsWith("stripe-android/")
+                withNestedParams("payment_method_options") {
+                    withNestedParams("card") {
+                        assertThat(this["cvc"]).isEqualTo("123")
+                    }
+                }
             }
         }
 
@@ -2055,6 +1944,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2069,6 +1959,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2095,7 +1986,8 @@ internal class StripeApiRepositoryTest {
             paymentIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )
@@ -2140,6 +2032,7 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS
@@ -2155,6 +2048,7 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
+            assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2181,7 +2075,8 @@ internal class StripeApiRepositoryTest {
             setupIntentId = id,
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                hostedSurface = "payment_element"
             ),
             DEFAULT_OPTIONS
         )
@@ -2592,6 +2487,72 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("setup_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_secret"]).isEqualTo("client_secret")
+        }
+    }
+
+    @Test
+    fun `Verify 'client_default_payment_method' is in params when provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                defaultPaymentMethodId = "pm_123",
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isEqualTo("pm_123")
+        }
+    }
+
+    @Test
+    fun `Verify 'client_default_payment_method' not in params when not provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                defaultPaymentMethodId = null,
+                externalPaymentMethods = emptyList(),
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_default_payment_method"]).isNull()
         }
     }
 

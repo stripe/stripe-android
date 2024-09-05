@@ -2,20 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
 class EditPaymentMethodUiScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule(
-        listOf(SystemAppearance.LightTheme),
-        listOf(FontSize.DefaultFont),
-        listOf(PaymentSheetAppearance.DefaultAppearance),
-    )
+    val paparazziRule = PaparazziRule()
 
     @Test
     fun testEnabledState() {
@@ -133,9 +126,9 @@ class EditPaymentMethodUiScreenshotTest {
                     brand = CardBrand.CartesBancaires
                 )
             ),
-            displayName = "Card",
+            displayName = "Card".resolvableString,
             confirmRemoval = confirmRemoval,
-            error = error?.let { resolvableString(it) },
+            error = error?.resolvableString,
             canRemove = canRemove,
         )
     }

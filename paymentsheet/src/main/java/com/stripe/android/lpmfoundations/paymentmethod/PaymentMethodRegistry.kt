@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AmazonPayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AuBecsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BacsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BancontactDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BillieDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BoletoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -26,8 +27,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
@@ -46,6 +49,7 @@ internal object PaymentMethodRegistry {
         AuBecsDebitDefinition,
         BacsDebitDefinition,
         BancontactDefinition,
+        BillieDefinition,
         BlikDefinition,
         BoletoDefinition,
         CardDefinition,
@@ -64,8 +68,10 @@ internal object PaymentMethodRegistry {
         P24Definition,
         PayPalDefinition,
         RevolutPayDefinition,
+        SatispayDefinition,
         SepaDebitDefinition,
         SofortDefinition,
+        SunbitDefinition,
         SwishDefinition,
         TwintDefinition,
         UpiDefinition,

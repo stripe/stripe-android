@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Masukkan negara bagian Anda</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Bayar dengan jangka waktu dengan &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Bayar dengan jangka waktu dengan Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Nama pada rekening</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">Alamat Pengiriman Tidak Valid</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Kode pos Anda tidak lengkap.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Pembayaran sekali klik yang mudah dan aman</string>
   <string name="stripe_payment_method_add_new_card">Tambahkan kartu baru...</string>
   <string name="stripe_payment_method_add_new_fpx">Pilih Rekening Bank (FPX)…</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">Pilih Metode Pengiriman</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Perbarui kartu</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Perbarui</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifikasikan pembayaran Anda</string>
 </resources>

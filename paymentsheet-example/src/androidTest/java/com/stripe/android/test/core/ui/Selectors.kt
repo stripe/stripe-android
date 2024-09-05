@@ -2,6 +2,7 @@ package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
@@ -22,10 +23,11 @@ import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CVC_RECOLLECTION_SCREEN_CONFIRM
 import com.stripe.android.test.core.AuthorizeAction
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
@@ -127,18 +129,6 @@ internal class Selectors(
         device.waitForIdle()
     }
 
-    fun blockUntilUSBankAccountPageLoaded() {
-        assertThat(
-            device.wait(
-                Until.findObject(
-                    By.textContains("Agree and continue")
-                ),
-                HOOKS_PAGE_LOAD_TIMEOUT * 1000
-            )
-        ).isNotNull()
-        device.waitForIdle()
-    }
-
     fun getInstalledBrowsers() = getInstalledPackages()
         .mapNotNull {
             when (it.packageName) {
@@ -155,14 +145,11 @@ internal class Selectors(
         .packageManager
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
-    private val checkoutMode =
-        testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
-
     @OptIn(ExperimentalTestApi::class)
     val authorizeAction = when (testParameters.authorizationAction) {
         is AuthorizeAction.AuthorizePayment -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -182,7 +169,7 @@ internal class Selectors(
 
         is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -194,7 +181,7 @@ internal class Selectors(
 
         is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {}
@@ -202,7 +189,7 @@ internal class Selectors(
 
         is AuthorizeAction.Bacs.Confirm -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -215,7 +202,7 @@ internal class Selectors(
                         )
                     )
 
-                    composeTestRule.onNodeWithText(
+                    composeTestRule.onNodeWithTextAfterWaiting(
                         getResourceString(PaymentSheetR.string.stripe_paymentsheet_confirm)
                     ).performClick()
                 }
@@ -224,7 +211,7 @@ internal class Selectors(
 
         is AuthorizeAction.Bacs.ModifyDetails -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text(checkoutMode),
+                label = testParameters.authorizationAction.text(testParameters.isSetupMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -233,7 +220,7 @@ internal class Selectors(
                         hasText(getResourceString(PaymentSheetR.string.stripe_paymentsheet_bacs_mandate_title))
                     )
 
-                    composeTestRule.onNodeWithText(
+                    composeTestRule.onNodeWithTextAfterWaiting(
                         getResourceString(
                             PaymentSheetR
                                 .string
@@ -270,9 +257,9 @@ internal class Selectors(
     )
 
     fun selectState(value: String) {
-        composeTestRule.onNodeWithText(getResourceString(CoreR.string.stripe_address_label_state))
+        composeTestRule.onNodeWithTextAfterWaiting(getResourceString(CoreR.string.stripe_address_label_state))
             .performClick()
-        composeTestRule.onNodeWithText(value)
+        composeTestRule.onNodeWithTextAfterWaiting(value)
             .performClick()
     }
 
@@ -284,21 +271,21 @@ internal class Selectors(
         getResourceString(CoreR.string.stripe_address_label_postal_code)
     )
 
-    fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithText(labelText)
+    fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
 
-    fun getAuBsb() = composeTestRule.onNodeWithText(
+    fun getAuBsb() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
-    fun getAuAccountNumber() = composeTestRule.onNodeWithText(
+    fun getAuAccountNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
-    fun getBacsSortCode() = composeTestRule.onNodeWithText(
+    fun getBacsSortCode() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
     )
 
-    fun getBacsAccountNumber() = composeTestRule.onNodeWithText(
+    fun getBacsAccountNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
@@ -306,33 +293,40 @@ internal class Selectors(
         isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))
     )
 
-    fun getBoletoTaxId() = composeTestRule.onNodeWithText(
+    fun getBoletoTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
-    fun getGoogleDividerText() = composeTestRule.onNodeWithText(
-        "Or pay",
-        substring = true,
-        useUnmergedTree = true
-    )
-
-    fun getCardNumber() = composeTestRule.onNodeWithText(
+    fun getCardNumber() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             StripeR.string.stripe_acc_label_card_number
         )
     )
 
-    fun getCardExpiration() = composeTestRule.onNodeWithText(
+    fun getCardExpiration() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             UiCoreR.string.stripe_expiration_date_hint
         )
     )
 
-    fun getCardCvc() = composeTestRule.onNodeWithText(
+    fun getCardCvc() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
             StripeR.string.stripe_cvc_number_hint
         )
     )
+
+    fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
+        hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
+    )
+
+    private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
+        this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            this.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
+        }
+        return this.onNodeWithText(
+            text
+        )
+    }
 
     companion object {
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =

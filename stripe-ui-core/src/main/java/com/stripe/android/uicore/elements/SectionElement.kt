@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,10 @@ data class SectionElement(
         field: SectionFieldElement,
         controller: SectionController
     ) : this(identifier, listOf(field), controller)
+
+    override val allowsUserInteraction: Boolean = fields.any { it.allowsUserInteraction }
+
+    override val mandateText: ResolvableString? = fields.firstNotNullOfOrNull { it.mandateText }
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {

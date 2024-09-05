@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -42,19 +43,19 @@ internal fun CustomerSheetScreen(
     displayAddForm: Boolean = true,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
-    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
 ) {
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                state = viewState.topBarState,
+                state = viewState.topBarState {
+                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
+                },
+                isEnabled = !viewState.isProcessing,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed
                     )
-                },
-                toggleEditing = {
-                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
                 },
             )
         },
@@ -97,7 +98,7 @@ internal fun CustomerSheetScreen(
 internal fun SelectPaymentMethod(
     viewState: CustomerSheetViewState.SelectPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
-    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
@@ -114,15 +115,19 @@ internal fun SelectPaymentMethod(
                 .padding(horizontal = horizontalPadding)
         )
 
+        val paymentOptionsState = PaymentOptionsStateFactory.create(
+            paymentMethods = viewState.savedPaymentMethods,
+            showGooglePay = viewState.isGooglePayEnabled,
+            showLink = false,
+            currentSelection = viewState.paymentSelection,
+            nameProvider = paymentMethodNameProvider,
+            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
+            isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+        )
+
         SavedPaymentMethodTabLayoutUI(
-            state = PaymentOptionsStateFactory.create(
-                paymentMethods = viewState.savedPaymentMethods,
-                showGooglePay = viewState.isGooglePayEnabled,
-                showLink = false,
-                currentSelection = viewState.paymentSelection,
-                nameProvider = paymentMethodNameProvider,
-                isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
-            ),
+            paymentOptionsItems = paymentOptionsState.items,
+            selectedPaymentOptionsItem = paymentOptionsState.selectedItem,
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
@@ -159,7 +164,7 @@ internal fun SelectPaymentMethod(
         }
 
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -214,12 +219,9 @@ internal fun AddPaymentMethod(
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
                 selectedItemCode = viewState.paymentMethodCode,
                 formElements = viewState.formElements,
-                linkSignupMode = null,
-                linkConfigurationCoordinator = null,
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
-                onLinkSignupStateChanged = { _ -> },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
                 onFormFieldValuesChanged = {
@@ -232,14 +234,14 @@ internal fun AddPaymentMethod(
 
     viewState.errorMessage?.let { error ->
         ErrorMessage(
-            error = error,
+            error = error.resolve(),
             modifier = Modifier.padding(horizontal = horizontalPadding)
         )
     }
 
     if (viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -263,7 +265,7 @@ internal fun AddPaymentMethod(
 
     if (!viewState.showMandateAbovePrimaryButton) {
         Mandate(
-            mandateText = viewState.mandateText,
+            mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)

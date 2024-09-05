@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">Baksiden av førerkortet er valgt</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Baksiden av identitetskortet</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Baksiden av identitetsdokumentet</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Baksiden av ID-en er valgt</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">Forsiden av førerkortet er valgt</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Forsiden av identitetskortet</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Forsiden av identitetsdokumentet</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Forsiden av ID-en er valgt</string>
   <!-- Button to go back to the previous screen -->

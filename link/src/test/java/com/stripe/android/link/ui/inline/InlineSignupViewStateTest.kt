@@ -11,10 +11,12 @@ class InlineSignupViewStateTest {
     fun `Allows full prefill if showing instead of save-for-future-use for US customers`() {
         val linkConfig = createLinkConfig(
             countryCode = "US",
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         )
 
-        val viewState = InlineSignupViewState.create(linkConfig)
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        )
 
         assertThat(viewState.prefillEligibleFields).containsExactly(
             LinkSignupField.Email,
@@ -26,10 +28,12 @@ class InlineSignupViewStateTest {
     fun `Allows full prefill if showing instead of save-for-future-use for non-US customers`() {
         val linkConfig = createLinkConfig(
             countryCode = "CA",
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         )
 
-        val viewState = InlineSignupViewState.create(linkConfig)
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        )
 
         assertThat(viewState.prefillEligibleFields).containsExactly(
             LinkSignupField.Email,
@@ -42,10 +46,12 @@ class InlineSignupViewStateTest {
     fun `Limits prefill if showing alongside save-for-future-use if all fields have prefills`() {
         val linkConfig = createLinkConfig(
             countryCode = "CA",
-            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
         )
 
-        val viewState = InlineSignupViewState.create(linkConfig)
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            config = linkConfig
+        )
 
         assertThat(viewState.prefillEligibleFields).containsExactly(
             LinkSignupField.Email,
@@ -57,11 +63,13 @@ class InlineSignupViewStateTest {
     fun `Correct prefill if showing alongside save-for-future-use if not all fields have prefills`() {
         val linkConfig = createLinkConfig(
             countryCode = "CA",
-            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
             email = null,
         )
 
-        val viewState = InlineSignupViewState.create(linkConfig)
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            config = linkConfig
+        )
 
         assertThat(viewState.prefillEligibleFields).containsExactly(
             LinkSignupField.Phone,
@@ -71,12 +79,10 @@ class InlineSignupViewStateTest {
 
     private fun createLinkConfig(
         countryCode: String,
-        signupMode: LinkSignupMode,
         email: String? = "john@doe.ca",
     ): LinkConfiguration {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(countryCode = countryCode),
-            signupMode = signupMode,
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "usd",
             customerInfo = LinkConfiguration.CustomerInfo(

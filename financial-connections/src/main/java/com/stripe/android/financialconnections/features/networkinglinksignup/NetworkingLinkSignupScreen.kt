@@ -19,7 +19,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +28,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -44,7 +44,6 @@ import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -62,21 +61,28 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
     val viewModel: NetworkingLinkSignupViewModel = paneViewModel(NetworkingLinkSignupViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
-    val state = viewModel.stateFlow.collectAsState()
-    BackHandler(enabled = true) {}
+
+    val state by viewModel.stateFlow.collectAsState()
     val uriHandler = LocalUriHandler.current
 
-    state.value.viewEffect?.let { viewEffect ->
+    BackHandler(enabled = !state.isInstantDebits) {
+        // Block back navigation if not in the Instant Debits flow. The consumer has already
+        // connected their bank accounts, so allowing to go back doesn't make a lot of sense.
+    }
+
+    state.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
@@ -86,7 +92,7 @@ internal fun NetworkingLinkSignupScreen() {
     }
 
     NetworkingLinkSignupContent(
-        state = state.value,
+        state = state,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -109,7 +115,7 @@ private fun NetworkingLinkSignupContent(
                 validForm = state.valid,
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
-                saveAccountToLinkSync = state.saveAccountToLink,
+                isLoading = state.saveAccountToLink is Loading,
                 showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
@@ -125,15 +131,22 @@ private fun NetworkingLinkSignupContent(
 private fun NetworkingLinkSignupLoaded(
     validForm: Boolean,
     payload: Payload,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    isLoading: Boolean,
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
-    onSkipClick: () -> Unit
+    onSkipClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val emailFocusRequester = remember { FocusRequester() }
     val phoneNumberFocusRequester = remember { FocusRequester() }
+
+    if (payload.focusEmailField) {
+        LaunchedEffect(Unit) {
+            emailFocusRequester.requestFocus()
+        }
+    }
 
     LaunchedEffect(showFullForm) {
         if (showFullForm) {
@@ -148,7 +161,12 @@ private fun NetworkingLinkSignupLoaded(
             Title(payload.content.title)
             Spacer(modifier = Modifier.size(24.dp))
 
-            for (bullet in payload.content.body.bullets) {
+            if (payload.content.message != null) {
+                Body(payload.content.message)
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+
+            for (bullet in payload.content.bullets) {
                 ListItem(
                     bullet = BulletUI.from(bullet),
                     onClickableTextClick = onClickableTextClick
@@ -161,6 +179,7 @@ private fun NetworkingLinkSignupLoaded(
                 loading = lookupAccountSync is Loading,
                 emailController = payload.emailController,
                 enabled = true,
+                focusRequester = emailFocusRequester,
             )
 
             AnimatedVisibility(showFullForm) {
@@ -174,7 +193,7 @@ private fun NetworkingLinkSignupLoaded(
             NetworkingLinkSignupFooter(
                 payload = payload,
                 onClickableTextClick = onClickableTextClick,
-                saveAccountToLinkSync = saveAccountToLinkSync,
+                isLoading = isLoading,
                 validForm = validForm,
                 onSaveToLink = onSaveToLink,
                 onSkipClick = onSkipClick
@@ -188,7 +207,7 @@ private fun NetworkingLinkSignupLoaded(
 private fun NetworkingLinkSignupFooter(
     payload: Payload,
     onClickableTextClick: (String) -> Unit,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    isLoading: Boolean,
     validForm: Boolean,
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
@@ -204,7 +223,7 @@ private fun NetworkingLinkSignupFooter(
     )
     Spacer(modifier = Modifier.size(16.dp))
     FinancialConnectionsButton(
-        loading = saveAccountToLinkSync is Loading,
+        loading = isLoading,
         enabled = validForm,
         type = FinancialConnectionsButton.Type.Primary,
         onClick = onSaveToLink,
@@ -213,16 +232,20 @@ private fun NetworkingLinkSignupFooter(
     ) {
         Text(text = payload.content.cta)
     }
-    Spacer(modifier = Modifier.size(8.dp))
-    FinancialConnectionsButton(
-        type = FinancialConnectionsButton.Type.Secondary,
-        onClick = onSkipClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics { testTagsAsResourceId = true }
-            .testTag("skip_cta")
-    ) {
-        Text(text = payload.content.skipCta)
+
+    if (payload.content.skipCta != null) {
+        Spacer(modifier = Modifier.size(8.dp))
+
+        FinancialConnectionsButton(
+            type = FinancialConnectionsButton.Type.Secondary,
+            onClick = onSkipClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { testTagsAsResourceId = true }
+                .testTag("skip_cta")
+        ) {
+            Text(text = payload.content.skipCta)
+        }
     }
 }
 
@@ -268,11 +291,21 @@ private fun Title(title: String) {
 }
 
 @Composable
+private fun Body(body: String) {
+    AnnotatedText(
+        text = TextResource.Text(fromHtml(body)),
+        defaultStyle = typography.bodyMedium,
+        onClickableTextClick = {},
+    )
+}
+
+@Composable
 internal fun EmailSection(
     enabled: Boolean,
     emailController: TextFieldController,
     showFullForm: Boolean,
-    loading: Boolean
+    loading: Boolean,
+    focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
     StripeThemeForConnections {
@@ -283,7 +316,9 @@ internal fun EmailSection(
             contentAlignment = Alignment.CenterEnd
         ) {
             TextFieldSection(
-                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focused = it.isFocused },
                 isSelected = focused,
                 textFieldController = emailController,
                 imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
@@ -319,7 +354,9 @@ internal fun NetworkingLinkSignupScreenPreview(
     @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
     state: NetworkingLinkSignupState
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(
+        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+    ) {
         NetworkingLinkSignupContent(
             state = state,
             onSaveToLink = {},

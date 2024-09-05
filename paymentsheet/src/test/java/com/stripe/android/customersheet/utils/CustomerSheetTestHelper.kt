@@ -2,10 +2,12 @@ package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
@@ -16,31 +18,40 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
@@ -60,6 +71,7 @@ internal object CustomerSheetTestHelper {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onCollectBankAccountResult = { },
         onConfirmUSBankAccount = { },
@@ -80,6 +92,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -103,12 +116,13 @@ internal object CustomerSheetTestHelper {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
+        primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     internal fun createViewModel(
@@ -164,27 +178,48 @@ internal object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
-                override fun create(
-                    publishableKey: () -> String,
-                    stripeAccountId: () -> String?,
-                    statusBarColor: Int?,
-                    includePaymentSheetAuthenticators: Boolean,
-                    hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
-                ): StripePaymentLauncher {
-                    return mock()
-                }
-            },
-            statusBarColor = null,
+            intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                paymentConfigurationProvider = { paymentConfiguration },
+                bacsMandateConfirmationLauncherFactory = {
+                    FakeBacsMandateConfirmationLauncher()
+                },
+                stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
+                    override fun create(
+                        publishableKey: () -> String,
+                        stripeAccountId: () -> String?,
+                        statusBarColor: Int?,
+                        includePaymentSheetNextHandlers: Boolean,
+                        hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                    ): StripePaymentLauncher {
+                        return mock()
+                    }
+                },
+                googlePayPaymentMethodLauncherFactory = object : GooglePayPaymentMethodLauncherFactory {
+                    override fun create(
+                        lifecycleScope: CoroutineScope,
+                        config: GooglePayPaymentMethodLauncher.Config,
+                        readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                        skipReadyCheck: Boolean
+                    ): GooglePayPaymentMethodLauncher = mock()
+                },
+                statusBarColor = { null },
+                savedStateHandle = SavedStateHandle(),
+                errorReporter = FakeErrorReporter(),
+                logger = FakeUserFacingLogger(),
+            ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
+            errorReporter = FakeErrorReporter(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
 
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = isGooglePayAvailable,
+            )
         }
     }
 
@@ -197,17 +232,19 @@ internal object CustomerSheetTestHelper {
                 eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
                 removeExecutor: PaymentMethodRemoveOperation,
                 updateExecutor: PaymentMethodUpdateOperation,
-                displayName: String,
+                displayName: ResolvableString,
                 canRemove: Boolean,
+                isLiveMode: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
-                    displayName = "Card",
+                    displayName = "Card".resolvableString,
                     removeExecutor = removeExecutor,
                     updateExecutor = updateExecutor,
                     eventHandler = eventHandler,
                     workContext = workContext,
                     canRemove = canRemove,
+                    isLiveMode = isLiveMode,
                 )
             }
         }

@@ -6,7 +6,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking&financial_connections_test_mode=true&permissions=transactions,payment_method&financial_connections_confirm_intent=true
+- openLink: stripeconnectionsexample://playground?experience=FinancialConnections&flow=PaymentIntent&financial_connections_override_native=native&merchant=networking&financial_connections_test_mode=true&permissions=transactions,payment_method&financial_connections_confirm_intent=true
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
@@ -41,7 +41,7 @@ tags:
     element:
       text: ".*555.*" # wait for placeholder to be visible
 - inputText: "6223115555"
-- tapOn: "Save to Link"
+- tapOn: "Save with Link"
 # CONFIRM AND COMPLETE
 - assertVisible: "Your account was connected and saved with Link."
 - tapOn:

@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.utils.Experiment
+import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_MOBILE_NATIVE
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
 import javax.inject.Inject
@@ -19,25 +19,18 @@ internal class NativeAuthFlowRouter @Inject constructor(
 
     fun nativeAuthFlowEnabled(
         manifest: FinancialConnectionsSessionManifest,
-        isInstantDebits: Boolean
     ): Boolean {
         debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
-        val nativeExperimentEnabled = manifest
-            .experimentAssignment(Experiment.CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
-        return isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
+        return killSwitchEnabled.not() && nativeExperienceEnabled(manifest)
     }
 
     fun logExposure(
         manifest: FinancialConnectionsSessionManifest,
-        isInstantDebits: Boolean,
     ) {
-        if (isInstantDebits || debugConfiguration.overriddenNative != null) {
-            return
-        }
-        if (nativeKillSwitchActive(manifest).not()) {
+        if (shouldLogExposure(manifest)) {
             eventTracker.trackExposure(
-                experiment = Experiment.CONNECTIONS_MOBILE_NATIVE,
+                experiment = CONNECTIONS_MOBILE_NATIVE,
                 manifest = manifest
             )
         }
@@ -47,6 +40,20 @@ internal class NativeAuthFlowRouter @Inject constructor(
         manifest.features
             ?.any { it.key == FEATURE_KEY_NATIVE_KILLSWITCH && it.value }
             ?: true
+
+    private fun nativeExperienceEnabled(
+        manifest: FinancialConnectionsSessionManifest,
+    ): Boolean {
+        val isInstantDebits = manifest.isLinkWithStripe ?: false
+        return isInstantDebits ||
+            manifest.experimentAssignment(CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
+    }
+
+    private fun shouldLogExposure(manifest: FinancialConnectionsSessionManifest): Boolean {
+        val isForcingNative = debugConfiguration.overriddenNative != null
+        val isInstantDebits = manifest.isLinkWithStripe ?: false
+        return isForcingNative.not() && isInstantDebits.not() && nativeKillSwitchActive(manifest).not()
+    }
 
     companion object {
         private const val FEATURE_KEY_NATIVE_KILLSWITCH =

@@ -16,13 +16,37 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
+    private fun interactor(cvc: String? = null, isTestMode: Boolean = true): CvcRecollectionInteractor {
+        return DefaultCvcRecollectionInteractor(
+            args = Args(
+                lastFour = "4242",
+                cardBrand = CardBrand.Visa,
+                cvc = cvc,
+                isTestMode = isTestMode
+            ),
+        )
+    }
+
     @Test
     fun testEmpty() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
                 lastFour = "4242",
+                isTestMode = false,
+                cvcState = CvcState(
+                    cardBrand = CardBrand.Visa,
+                    cvc = ""
+                ),
                 viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
+    fun testEmptyPaymentScreenDisplayMode() {
+        paparazziRule.snapshot {
+            CvcRecollectionPaymentSheetScreen(
+                interactor = interactor()
             )
         }
     }
@@ -31,9 +55,28 @@ class CvcRecollectionScreenScreenshotTest {
     fun testFilled() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
                 lastFour = "4242",
-                viewActionHandler = {}
+                isTestMode = false,
+                viewActionHandler = {},
+                cvcState = CvcState(
+                    cardBrand = CardBrand.Visa,
+                    cvc = ""
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testFilledTestMode() {
+        paparazziRule.snapshot {
+            CvcRecollectionScreen(
+                lastFour = "4242",
+                isTestMode = true,
+                viewActionHandler = {},
+                cvcState = CvcState(
+                    cardBrand = CardBrand.Visa,
+                    cvc = ""
+                ),
             )
         }
     }

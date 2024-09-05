@@ -6,6 +6,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.Theme.DefaultLight
+import com.stripe.android.financialconnections.ui.theme.Theme.LinkLight
 
 /**
  *  Class containing all of the data needed to represent the screen.
@@ -19,6 +22,10 @@ internal data class FinancialConnectionsSheetState(
 ) {
     val isInstantDebits: Boolean
         get() = initialArgs is FinancialConnectionsSheetActivityArgs.ForInstantDebits
+
+    val theme: Theme
+        // We can't rely on the value coming from the `manifest` here, because its initial value will be null
+        get() = if (isInstantDebits) LinkLight else DefaultLight
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret

@@ -2,6 +2,7 @@ package com.stripe.android.test.core
 
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -21,10 +22,15 @@ internal data class TestParameters(
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
+    val resetCustomer: Boolean = false,
     val authorizationAction: AuthorizeAction? = null,
     val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
 ) {
+    val isSetupMode: Boolean =
+        playgroundSettingsSnapshot.configurationData.integrationType.isCustomerFlow() ||
+            playgroundSettingsSnapshot[CheckoutModeSettingsDefinition] == CheckoutMode.SETUP
+
     fun copyPlaygroundSettings(block: (PlaygroundSettings) -> Unit): TestParameters {
         val playgroundSettings = playgroundSettingsSnapshot.playgroundSettings()
         block(playgroundSettings)
@@ -37,12 +43,13 @@ internal data class TestParameters(
             requiresBrowser: Boolean = true,
             authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
             executeInNightlyRun: Boolean = false,
+            saveForFutureUseCheckboxVisible: Boolean = false,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
                 saveCheckboxValue = false,
-                saveForFutureUseCheckboxVisible = false,
+                saveForFutureUseCheckboxVisible = saveForFutureUseCheckboxVisible,
                 authorizationAction = authorizationAction,
                 executeInNightlyRun = executeInNightlyRun,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
@@ -78,13 +85,13 @@ enum class Browser {
  */
 internal sealed interface AuthorizeAction {
 
-    fun text(checkoutMode: CheckoutMode): String
+    fun text(isSetup: Boolean): String
 
     val requiresBrowser: Boolean
     val isConsideredDone: Boolean
 
     data object PollingSucceedsAfterDelay : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutMode): String = "POLLING SUCCEEDS AFTER DELAY"
+        override fun text(isSetup: Boolean): String = "POLLING SUCCEEDS AFTER DELAY"
 
         override val requiresBrowser: Boolean = false
         override val isConsideredDone: Boolean = true
@@ -93,7 +100,7 @@ internal sealed interface AuthorizeAction {
     data object Authorize3ds2 : AuthorizeAction {
         override val requiresBrowser: Boolean = false
 
-        override fun text(checkoutMode: CheckoutMode): String {
+        override fun text(isSetup: Boolean): String {
             return "COMPLETE"
         }
         override val isConsideredDone: Boolean = true
@@ -102,8 +109,8 @@ internal sealed interface AuthorizeAction {
     data class AuthorizePayment(
         override val requiresBrowser: Boolean = true,
     ) : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutMode): String {
-            return if (checkoutMode == CheckoutMode.SETUP) {
+        override fun text(isSetup: Boolean): String {
+            return if (isSetup) {
                 "AUTHORIZE TEST SETUP"
             } else {
                 "AUTHORIZE TEST PAYMENT"
@@ -113,34 +120,34 @@ internal sealed interface AuthorizeAction {
     }
 
     data object DisplayQrCode : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutMode): String = "Display QR code"
+        override fun text(isSetup: Boolean): String = "Display QR code"
 
         override val requiresBrowser: Boolean = false
         override val isConsideredDone: Boolean = true
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutMode): String = "FAIL TEST PAYMENT"
+        override fun text(isSetup: Boolean): String = "FAIL TEST PAYMENT"
 
         override val requiresBrowser: Boolean = true
         override val isConsideredDone: Boolean = false
     }
 
     data object Cancel : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutMode): String = ""
+        override fun text(isSetup: Boolean): String = ""
         override val requiresBrowser: Boolean = true
         override val isConsideredDone: Boolean = false
     }
 
     sealed interface Bacs : AuthorizeAction {
         data object Confirm : Bacs {
-            override fun text(checkoutMode: CheckoutMode): String = "Confirm"
+            override fun text(isSetup: Boolean): String = "Confirm"
             override val requiresBrowser: Boolean = false
             override val isConsideredDone: Boolean = false
         }
 
         data object ModifyDetails : Bacs {
-            override fun text(checkoutMode: CheckoutMode): String = "Modify details"
+            override fun text(isSetup: Boolean): String = "Modify details"
             override val requiresBrowser: Boolean = false
             override val isConsideredDone: Boolean = false
         }

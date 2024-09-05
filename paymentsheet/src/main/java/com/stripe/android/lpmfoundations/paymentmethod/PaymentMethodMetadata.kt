@@ -1,15 +1,22 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -35,6 +42,9 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val hasCustomerConfiguration: Boolean,
+    val isGooglePayReady: Boolean,
+    val linkInlineConfiguration: LinkInlineConfiguration?,
+    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -146,6 +156,26 @@ internal data class PaymentMethodMetadata(
         return null
     }
 
+    fun formHeaderInformationForCode(
+        code: String,
+        customerHasSavedPaymentMethods: Boolean,
+    ): FormHeaderInformation? {
+        return if (isExternalPaymentMethod(code)) {
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
+            )
+        } else {
+            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+
+            definition.uiDefinitionFactory().formHeaderInformation(
+                metadata = this,
+                definition = definition,
+                sharedDataSpecs = sharedDataSpecs,
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+            )
+        }
+    }
+
     fun formElementsForCode(
         code: String,
         uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
@@ -166,6 +196,114 @@ internal data class PaymentMethodMetadata(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
                 ),
+            )
+        }
+    }
+
+    fun allowRedisplay(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
+        return if (hasIntentToSetup()) {
+            allowRedisplayForSetupIntent(customerRequestedSave)
+        } else {
+            allowRedisplayForPaymentIntent(customerRequestedSave)
+        }
+    }
+
+    private fun allowRedisplayForSetupIntent(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
+        return when (paymentMethodSaveConsentBehavior) {
+            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Disabled -> {
+                paymentMethodSaveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
+            }
+            is PaymentMethodSaveConsentBehavior.Enabled -> {
+                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
+                    PaymentMethod.AllowRedisplay.ALWAYS
+                } else {
+                    PaymentMethod.AllowRedisplay.LIMITED
+                }
+            }
+        }
+    }
+
+    private fun allowRedisplayForPaymentIntent(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentMethod.AllowRedisplay {
+        return when (paymentMethodSaveConsentBehavior) {
+            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
+            is PaymentMethodSaveConsentBehavior.Enabled -> {
+                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
+                    PaymentMethod.AllowRedisplay.ALWAYS
+                } else {
+                    PaymentMethod.AllowRedisplay.UNSPECIFIED
+                }
+            }
+        }
+    }
+
+    internal companion object {
+        internal fun create(
+            elementsSession: ElementsSession,
+            configuration: PaymentSheet.Configuration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+            isGooglePayReady: Boolean,
+            linkInlineConfiguration: LinkInlineConfiguration?,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = configuration
+                    .allowsPaymentMethodsRequiringShippingAddress,
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    preferredNetworks = configuration.preferredNetworks,
+                ),
+                merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = configuration.shippingDetails,
+                hasCustomerConfiguration = configuration.customer != null,
+                sharedDataSpecs = sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+                linkInlineConfiguration = linkInlineConfiguration,
+                isGooglePayReady = isGooglePayReady,
+            )
+        }
+
+        @OptIn(ExperimentalCustomerSheetApi::class)
+        internal fun create(
+            elementsSession: ElementsSession,
+            configuration: CustomerSheet.Configuration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            isGooglePayReady: Boolean,
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    preferredNetworks = configuration.preferredNetworks,
+                ),
+                merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = null,
+                hasCustomerConfiguration = true,
+                sharedDataSpecs = sharedDataSpecs,
+                isGooglePayReady = isGooglePayReady,
+                linkInlineConfiguration = null,
+                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                externalPaymentMethodSpecs = emptyList(),
             )
         }
     }

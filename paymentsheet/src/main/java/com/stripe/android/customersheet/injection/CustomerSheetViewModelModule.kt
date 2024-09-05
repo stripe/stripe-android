@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -27,10 +28,14 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
@@ -129,6 +134,33 @@ internal interface CustomerSheetViewModelModule {
             analyticsRequestFactory = analyticsRequestFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
         )
+
+        @Provides
+        fun providesBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory =
+            DefaultBacsMandateConfirmationLauncherFactory
+
+        @Provides
+        fun providesIntentConfirmationHandlerFactory(
+            savedStateHandle: SavedStateHandle,
+            paymentConfigurationProvider: Provider<PaymentConfiguration>,
+            bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
+            stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
+            statusBarColor: Int?,
+            intentConfirmationInterceptor: IntentConfirmationInterceptor,
+            errorReporter: ErrorReporter,
+        ): IntentConfirmationHandler.Factory {
+            return IntentConfirmationHandler.Factory(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                paymentConfigurationProvider = paymentConfigurationProvider,
+                stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory = null,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+                statusBarColor = { statusBarColor },
+                savedStateHandle = savedStateHandle,
+                errorReporter = errorReporter,
+                logger = null,
+            )
+        }
 
         @Provides
         fun resources(application: Application): Resources {

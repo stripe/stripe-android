@@ -2,6 +2,81 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.48.6 - 2024-08-26
+* Stability and efficiency improvements.
+
+## 20.48.5 - 2024-08-21
+
+### PaymentSheet
+* [FIXED][9111](https://github.com/stripe/stripe-android/pull/9111) Fixed an issue where Google Pay was displaying an error.
+
+## 20.48.4 - 2024-08-09
+
+### Payments
+* [FIXED][9011](https://github.com/stripe/stripe-android/pull/9011) Fixed an issue where rendering Card Element in React Native and the base `Activity` would cause a crash.
+
+## 20.48.3 - 2024-08-05
+
+### PaymentSheet
+* [FIXED][8971](https://github.com/stripe/stripe-android/pull/8971) Fixed a crash caused by an index out of bounds exception
+
+## 20.48.2 - 2024-07-29
+
+### PaymentSheet
+* [FIXED][8825](https://github.com/stripe/stripe-android/pull/8825) Fixed an issue the amount in the buy button in `PaymentSheet` did not formatted with set per-application locale.
+* [FIXED][8928](https://github.com/stripe/stripe-android/pull/8928) Fixed an issue in where changing country from the US to Canada would crash if certain states were selected.
+
+## 20.48.1 - 2024-07-15
+
+### PaymentSheet
+* [FIXED][8746](https://github.com/stripe/stripe-android/pull/8746) Fixed an issue where successful TWINT payments were sometimes incorrectly considered 'canceled'.
+* [FIXED][8670](https://github.com/stripe/stripe-android/pull/8670) Fixed `PaymentSheet` PrimaryButton text not translating for per app localization.
+
+## 20.48.0 - 2024-07-01
+
+### PaymentSheet
+* [FIXED][8710](https://github.com/stripe/stripe-android/pull/8710) Fixed issue where no payment method was selected after navigating back to the select saved payment method screen.
+* [ADDED][8717](https://github.com/stripe/stripe-android/pull/8717) Add CVC Recollection functionality to `PaymentSheet` and `PaymentSheet.FlowController`
+
+## 20.47.4 - 2024-06-27
+
+### PaymentSheet
+
+* [FIXED][8697](https://github.com/stripe/stripe-android/pull/8697) Fixed a bug where payment methods using `payment_method_options` were not saved properly when using the deferred client-side confirmation flow.
+
+## 20.47.3 - 2024-06-25
+
+### Identity
+* [FIXED][8683](https://github.com/stripe/stripe-android/pull/8683) Removed the `usesCleartextTraffic` flag, which was enabled in the Stripe Identity SDK manifest. This flag was unnecessary as the Stripe API enforces HTTPS on all connections.
+
+## 20.47.0 - 2024-06-24
+
+### PaymentSheet
+* [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to PaymentSheet.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to PaymentSheet.
+* [FIXED][8672](https://github.com/stripe/stripe-android/pull/8672) Fixed a bug where [FlowController] would show a blank screen when Google Pay was enabled without a customer attached.
+
+### Payments
+* [ADDED][8651](https://github.com/stripe/stripe-android/pull/8651) Added support for Billie to API bindings.
+* [ADDED][8654](https://github.com/stripe/stripe-android/pull/8654) Added support for Satispay to API bindings.
+
+## 20.46.0 - 2024-06-14
+
+### PaymentSheet
+* [ADDED][8607](https://github.com/stripe/stripe-android/pull/8607) Add builder pattern for constructing instances of `PaymentSheet` and `PaymentSheet.FlowController`.
+
+## 20.45.0 - 2024-06-10
+
+### AddressElement
+* [FIXED][8596](https://github.com/stripe/stripe-android/pull/8596) Fixed issue where "Enter address manually" button only worked the first time it was clicked.
+
+### PaymentSheet
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Sunbit to PaymentSheet.
+
+### Payments
+* [FIXED][8590](https://github.com/stripe/stripe-android/pull/8590) Fix an issue where cancelling payment for Amazon Pay and Cash App Pay would show an error
+* [ADDED][8595](https://github.com/stripe/stripe-android/pull/8595) Added support for Sunbit to API bindings.
+
 ## 20.44.2 - 2024-06-03
 
 ### Identity

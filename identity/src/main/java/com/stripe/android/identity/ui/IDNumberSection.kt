@@ -6,7 +6,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,6 +35,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.utils.collectAsState
 
 /**
  * Section to collect User's ID number from different countries.
@@ -64,22 +64,22 @@ internal fun IDNumberSection(
             controller = SimpleTextFieldController(textFieldConfig = USIDConfig)
         )
     }
-    val usId by usElement.controller.fieldValue.collectAsState("")
+    val usId by usElement.controller.fieldValue.collectAsState()
     val sgElement = remember {
         SimpleTextElement(
             identifier = SINGAPORE_SPEC,
             controller = SimpleTextFieldController(textFieldConfig = SGIDConfig)
         )
     }
-    val sgId by sgElement.controller.fieldValue.collectAsState("")
+    val sgId by sgElement.controller.fieldValue.collectAsState()
     val brElement = remember {
         SimpleTextElement(
             identifier = BRAZIL_SPEC,
             controller = SimpleTextFieldController(textFieldConfig = BRIDConfig)
         )
     }
-    val brId by brElement.controller.fieldValue.collectAsState("")
-    val selectedCountryCode by controller.rawFieldValue.collectAsState(idNumberCountries[0].code.value)
+    val brId by brElement.controller.fieldValue.collectAsState()
+    val selectedCountryCode by controller.rawFieldValue.collectAsState()
     val idNumberParam: IdNumberParam? by remember(usId, sgId, brId) {
         derivedStateOf {
             when (selectedCountryCode) {
@@ -154,7 +154,7 @@ private fun IDNumberContent(
         )
     }
     val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
-        .collectAsState(initial = emptyList())
+        .collectAsState()
 
     LaunchedEffect(idNumberParam) {
         onIdNumberCollected(

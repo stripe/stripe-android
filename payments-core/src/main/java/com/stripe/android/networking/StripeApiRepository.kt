@@ -50,10 +50,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -78,7 +75,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
-import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
@@ -334,6 +330,39 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
+            )
+        }
+    }
+
+    /**
+     * Refresh a [SetupIntent] using its client_secret
+     *
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRefresh]
+     *
+     * @param clientSecret client_secret of the SetupIntent to retrieve
+     */
+    override suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRefreshSetupIntentUrl(setupIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, emptyList()),
+            ),
+            jsonParser = SetupIntentJsonParser(),
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRefresh)
             )
         }
     }
@@ -1034,78 +1063,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    /**
-     * Creates a new Link account for the credentials provided.
-     */
-    override suspend fun consumerSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        authSessionCookie: String?,
-        consentAction: ConsumerSignUpConsentAction,
-        requestOptions: ApiRequest.Options
-    ): Result<ConsumerSession> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = consumerSignUpUrl,
-                options = requestOptions,
-                params = mapOf(
-                    "request_surface" to "android_payment_element",
-                    "country_inferring_method" to "PHONE_NUMBER",
-                    "email_address" to email.lowercase(),
-                    "phone_number" to phoneNumber,
-                    "country" to country,
-                    "consent_action" to consentAction.value
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
-                ).plus(
-                    locale?.let {
-                        mapOf("locale" to it.toLanguageTag())
-                    } ?: emptyMap()
-                ).plus(
-                    name?.let {
-                        mapOf("legal_name" to it)
-                    } ?: emptyMap()
-                )
-            ),
-            jsonParser = ConsumerSessionJsonParser(),
-        )
-    }
-
-    override suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options,
-        active: Boolean,
-    ): Result<ConsumerPaymentDetails> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = consumerPaymentDetailsUrl,
-                options = requestOptions,
-                params = mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "active" to active,
-                ).plus(
-                    paymentDetailsCreateParams.toParamMap()
-                )
-            ),
-            jsonParser = ConsumerPaymentDetailsJsonParser(),
-        )
-    }
-
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String> {
         return fetchStripeModelResult(
@@ -1118,8 +1079,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "id" to id,
-                    PAYMENT_USER_AGENT to buildPaymentUserAgentPair()
-                )
+                    buildPaymentUserAgentPair(),
+                ).plus(extraParams ?: emptyMap())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.id }
@@ -1495,6 +1456,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
+            params.defaultPaymentMethodId?.let { this["client_default_payment_method"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
@@ -1802,13 +1764,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             get() = getApiUrl("payment_methods")
 
         /**
-         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
-         */
-        internal val consumerSignUpUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/accounts/sign_up")
-
-        /**
          * @return `https://api.stripe.com/v1/consumers/sessions/log_out`
          */
         internal val logoutConsumerUrl: String
@@ -1881,6 +1836,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRefreshPaymentIntentUrl(paymentIntentId: String): String {
             return getApiUrl("payment_intents/%s/refresh", paymentIntentId)
+        }
+
+        /**
+         * This is an undocumented API and is only used for certain SIs which have a delay to
+         * transfer its status out of "requires_action" after user performs the confirmation.
+         *
+         * @return `https://api.stripe.com/v1/setup_intents/:id/refresh`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getRefreshSetupIntentUrl(paymentIntentId: String): String {
+            return getApiUrl("setup_intents/%s/refresh", paymentIntentId)
         }
 
         /**

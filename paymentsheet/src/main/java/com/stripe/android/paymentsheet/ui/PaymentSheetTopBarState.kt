@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -13,21 +11,34 @@ internal data class PaymentSheetTopBarState(
     @StringRes val contentDescription: Int,
     val showTestModeLabel: Boolean,
     val showEditMenu: Boolean,
-    @StringRes val editMenuLabel: Int,
-    val isEnabled: Boolean,
-)
+    val isEditing: Boolean,
+    val onEditIconPressed: () -> Unit,
+) {
+    @get:StringRes val editMenuLabel: Int
+        get() {
+            return if (isEditing) {
+                StripeR.string.stripe_done
+            } else {
+                StripeR.string.stripe_edit
+            }
+        }
+
+    sealed interface Editable {
+        data object Never : Editable
+        data class Maybe(
+            val isEditing: Boolean,
+            val canEdit: Boolean,
+            val onEditIconPressed: () -> Unit,
+        ) : Editable
+    }
+}
 
 internal object PaymentSheetTopBarStateFactory {
-
     fun create(
-        screen: PaymentSheetScreen,
+        hasBackStack: Boolean,
         isLiveMode: Boolean,
-        isProcessing: Boolean,
-        isEditing: Boolean,
-        canEdit: Boolean,
+        editable: PaymentSheetTopBarState.Editable,
     ): PaymentSheetTopBarState {
-        val hasBackStack = screen.canNavigateBack
-
         val icon = if (hasBackStack) {
             R.drawable.stripe_ic_paymentsheet_back
         } else {
@@ -40,32 +51,14 @@ internal object PaymentSheetTopBarStateFactory {
             R.string.stripe_paymentsheet_close
         }
 
-        val editMenuLabel = if (isEditing) {
-            StripeR.string.stripe_done
-        } else {
-            StripeR.string.stripe_edit
-        }
-
-        val showEditMenu =
-            (screen is SelectSavedPaymentMethods || screen is PaymentSheetScreen.ManageSavedPaymentMethods) && canEdit
-
         return PaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = showEditMenu,
-            editMenuLabel = editMenuLabel,
-            isEnabled = !isProcessing,
-        )
-    }
-
-    fun createDefault(): PaymentSheetTopBarState {
-        return create(
-            screen = PaymentSheetScreen.Loading,
-            canEdit = false,
-            isLiveMode = true,
-            isProcessing = false,
-            isEditing = false,
+            showEditMenu = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.canEdit == true,
+            isEditing = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.isEditing == true,
+            onEditIconPressed = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.onEditIconPressed
+                ?: {},
         )
     }
 }

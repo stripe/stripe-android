@@ -44,6 +44,7 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -62,8 +63,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.paymentsheet.rememberPaymentSheet
-import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -85,23 +84,26 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCvcRecollectionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val paymentSheet = rememberPaymentSheet(
-                paymentResultCallback = viewModel::onPaymentSheetResult,
-                createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = this,
+            val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                .externalPaymentMethodConfirmHandler(this)
+                .createIntentCallback(viewModel::createIntentCallback)
+                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
+                .build()
+            val flowController = PaymentSheet.FlowController.Builder(
+                viewModel::onPaymentSheetResult,
+                viewModel::onPaymentOptionSelected
             )
-            val flowController = rememberPaymentSheetFlowController(
-                paymentOptionCallback = viewModel::onPaymentOptionSelected,
-                paymentResultCallback = viewModel::onPaymentSheetResult,
-                createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = this,
-            )
+                .externalPaymentMethodConfirmHandler(this)
+                .createIntentCallback(viewModel::createIntentCallback)
+                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
+                .build()
+
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )

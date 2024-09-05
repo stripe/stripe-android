@@ -179,6 +179,9 @@ internal data class FinancialConnectionsSessionManifest(
 
     @SerialName("skip_success_pane")
     val skipSuccessPane: Boolean? = null,
+
+    @SerialName("theme")
+    val theme: Theme? = null,
 ) : Parcelable {
 
     /**
@@ -386,5 +389,23 @@ internal data class FinancialConnectionsSessionManifest(
                 entries.toTypedArray(),
                 UNKNOWN
             )
+    }
+
+    @Serializable(with = FinancialConnectionsSessionManifest.Theme.Serializer::class)
+    enum class Theme {
+
+        @SerialName(value = "light")
+        LIGHT,
+
+        @SerialName(value = "dashboard_light")
+        DASHBOARD_LIGHT,
+
+        @SerialName(value = "link_light")
+        LINK_LIGHT;
+
+        internal object Serializer : EnumIgnoreUnknownSerializer<Theme>(
+            values = entries.toTypedArray(),
+            defaultValue = LIGHT,
+        )
     }
 }

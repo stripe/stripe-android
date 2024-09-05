@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.R
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
@@ -19,6 +22,10 @@ data class AuBecsDebitMandateTextElement(
     val merchantName: String?,
     override val controller: InputController? = null
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = false
+    override val mandateText: ResolvableString =
+        resolvableString(id = R.string.stripe_au_becs_mandate, merchantName ?: "")
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 }

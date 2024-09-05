@@ -8,6 +8,8 @@
   <string name="stripe_inline_sign_up_header">Mentse el az adatait a biztonságos egykattintásos fizetéshez a Linkkel</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kijelentkezés a Link</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Fizetés Linkkel</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Legyen ez az alapértelmezett fizetési mód</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -19,11 +21,11 @@
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
   <string name="stripe_sign_up_message">Gyorsabban fizethet a(z) %s számára és még ezernyi kereskedőnek.</string>
   <!-- Legal text shown when creating a Link account. -->
-  <string name="stripe_sign_up_terms"><![CDATA[A Linkhez történő csatlakozással Őn elfogadja a <terms>feltételeket</terms> és az </privacy>adatvédelmi szabályzatot<privacy>.]]></string>
+  <string name="stripe_sign_up_terms"><![CDATA[A Linkhez történő csatlakozással Őn elfogadja a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Az e-mail-címe megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a <terms>Link feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[A telefonszáma megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a <terms>Link feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[A telefonszáma megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">E-mail-cím módosítása</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

@@ -2,15 +2,27 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
@@ -506,6 +518,50 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = "card",
+            customerHasSavedPaymentMethods = true
+        )!!
+        assertThat(headerInformation.displayName).isEqualTo(R.string.stripe_paymentsheet_add_new_card.resolvableString)
+        assertThat(headerInformation.shouldShowIcon).isFalse()
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "bancontact")
+            ),
+        )
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = "bancontact",
+            customerHasSavedPaymentMethods = true,
+        )!!
+        assertThat(headerInformation.displayName)
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_bancontact.resolvableString)
+        assertThat(headerInformation.shouldShowIcon).isTrue()
+        assertThat(headerInformation.iconResource).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is constructed correctly for external payment method`() = runTest {
+        val paypalSpec = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+        val metadata = PaymentMethodMetadataFactory.create(externalPaymentMethodSpecs = listOf(paypalSpec))
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = paypalSpec.type,
+            customerHasSavedPaymentMethods = true,
+        )!!
+        assertThat(headerInformation.displayName).isEqualTo(paypalSpec.label.resolvableString)
+        assertThat(headerInformation.shouldShowIcon).isTrue()
+        assertThat(headerInformation.iconResource).isEqualTo(0)
+        assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
+        assertThat(headerInformation.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
+        assertThat(headerInformation.iconRequiresTinting).isFalse()
+    }
+
+    @Test
     fun `When external payment methods are present and no payment method order, EPMs are shown last`() =
         runTest {
             val metadata = PaymentMethodMetadataFactory.create(
@@ -622,7 +678,7 @@ internal class PaymentMethodMetadataTest {
         )
         val expectedSupportedPaymentMethod = SupportedPaymentMethod(
             code = "external_paypal",
-            displayName = resolvableString("PayPal"),
+            displayName = "PayPal".resolvableString,
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,
@@ -668,5 +724,546 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
+    }
+
+    @Test
+    fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+
+        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
+
+        val linkInlineConfiguration = createLinkInlineConfiguration()
+
+        val metadata = PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isEligibleForCardBrandChoice = true,
+            ),
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant Inc.",
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_1"
+                ),
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            isGooglePayReady = false,
+            linkInlineConfiguration = linkInlineConfiguration,
+        )
+
+        assertThat(metadata).isEqualTo(
+            PaymentMethodMetadata(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                ),
+                merchantName = "Merchant Inc.",
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                sharedDataSpecs = listOf(SharedDataSpec("card")),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+                hasCustomerConfiguration = true,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                isGooglePayReady = false,
+                linkInlineConfiguration = linkInlineConfiguration,
+            )
+        )
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Test
+    fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+
+        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .defaultBillingDetails(defaultBillingDetails)
+            .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+            .paymentMethodOrder(listOf("us_bank_account", "card", "sepa_debit"))
+            .build()
+
+        val metadata = PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isEligibleForCardBrandChoice = true,
+            ),
+            configuration = configuration,
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            isGooglePayReady = true,
+            isFinancialConnectionsAvailable = {
+                false
+            }
+        )
+
+        assertThat(metadata).isEqualTo(
+            PaymentMethodMetadata(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = true,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+                ),
+                merchantName = "Merchant Inc.",
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = null,
+                sharedDataSpecs = listOf(SharedDataSpec("card")),
+                externalPaymentMethodSpecs = listOf(),
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                financialConnectionsAvailable = false,
+                linkInlineConfiguration = null,
+            )
+        )
+    }
+
+    @Test
+    fun `consent behavior should be Always for Payment Sheet is customer session save is enabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                isPaymentMethodSaveEnabled = true,
+                isPaymentMethodRemoveEnabled = true,
+                allowRedisplayOverride = null,
+            )
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Enabled)
+    }
+
+    @Test
+    fun `consent behavior should be Disabled for Payment Sheet is customer session save is disabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                isPaymentMethodSaveEnabled = false,
+                isPaymentMethodRemoveEnabled = true,
+                allowRedisplayOverride = null,
+            ),
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior)
+            .isEqualTo(
+                PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = null,
+                ),
+            )
+    }
+
+    @Test
+    fun `consent behavior should be Legacy for Payment Sheet if payment sheet component is disabled`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+    }
+
+    @Test
+    fun `consent behavior should be Legacy for Payment Sheet if no customer session provided`() {
+        val metadata = createPaymentMethodMetadataForPaymentSheet(
+            mobilePaymentElementComponent = null,
+        )
+
+        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+    }
+
+    private fun createPaymentMethodMetadataForPaymentSheet(
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement?,
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadata.create(
+            elementsSession = createElementsSession(
+                mobilePaymentElementComponent = mobilePaymentElementComponent
+            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            sharedDataSpecs = listOf(),
+            externalPaymentMethodSpecs = listOf(),
+            isGooglePayReady = false,
+            linkInlineConfiguration = null,
+        )
+    }
+
+    private fun createElementsSession(
+        intent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        isEligibleForCardBrandChoice: Boolean = true,
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
+    ): ElementsSession {
+        return ElementsSession(
+            stripeIntent = intent,
+            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            merchantCountry = null,
+            isGooglePayEnabled = false,
+            customer = mobilePaymentElementComponent?.let { component ->
+                ElementsSession.Customer(
+                    paymentMethods = listOf(),
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_123",
+                        customerId = "cus_123",
+                        liveMode = false,
+                        apiKey = "123",
+                        apiKeyExpiry = 999999999,
+                        components = ElementsSession.Customer.Components(
+                            mobilePaymentElement = component,
+                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            },
+            linkSettings = null,
+            externalPaymentMethodData = null,
+            paymentMethodSpecs = null,
+        )
+    }
+
+    @Test
+    fun `allowRedisplay returns Unspecified when consent behavior is Legacy`() = runTest {
+        val metadataForPaymentIntent = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
+        )
+
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
+        )
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OnSession,
+            ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
+        )
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+    }
+
+    @Test
+    fun `allowRedisplay returns Always when consent behavior is Enabled, setting up, and is saving for future use`() =
+        runTest {
+            val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+
+            val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    setupFutureUsage = StripeIntent.Usage.OnSession,
+                ),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+        }
+
+    @Test
+    fun `allowRedisplay returns Limited when consent behavior is Enabled, setting up, and is not saving`() =
+        runTest {
+            val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+            val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    setupFutureUsage = StripeIntent.Usage.OnSession,
+                ),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+        }
+
+    @Test
+    fun `allowRedisplay returns Always when consent behavior is Enabled, not setting up, and is saving`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+        }
+
+    @Test
+    fun `allowRedisplay returns Unspecified when consent behavior is Enabled, not setting up, and is not saving`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+            )
+
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+            assertThat(
+                metadata.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        }
+
+    @Test
+    fun `allowRedisplay returns Unspecified when consent behavior is Disabled and not setting up`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
+            ),
+        )
+
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+        assertThat(
+            metadata.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+    }
+
+    @Test
+    fun `allowRedisplay returns Limited when consent behavior is Disabled and setting up`() = runTest {
+        val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
+            ),
+        )
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OnSession,
+            ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
+            ),
+        )
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+
+        assertThat(
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+    }
+
+    @Test
+    fun `allowRedisplay returns override when consent behavior is Disabled with override value and setting up`() =
+        runTest {
+            val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+                ),
+            )
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+
+            assertThat(
+                metadataForSetupIntent.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
+
+            val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    setupFutureUsage = StripeIntent.Usage.OnSession,
+                ),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+                ),
+            )
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+            assertThat(
+                metadataForPaymentIntentWithSfu.allowRedisplay(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
+        }
+
+    private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
+        return LinkInlineConfiguration(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            linkConfiguration = LinkConfiguration(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                customerInfo = LinkConfiguration.CustomerInfo(
+                    email = "john@email.com",
+                    name = "John Doe",
+                    billingCountryCode = "CA",
+                    phone = "1234567890"
+                ),
+                merchantName = "Merchant Inc.",
+                merchantCountryCode = "CA",
+                shippingValues = mapOf(),
+                flags = mapOf(),
+                passthroughModeEnabled = false,
+            ),
+        )
     }
 }

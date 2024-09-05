@@ -6,9 +6,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -47,6 +49,7 @@ import kotlin.test.Test
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
+        instantDebits = false,
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
@@ -65,7 +68,7 @@ class USBankAccountFormViewModelTest {
         onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
-        instantDebits = false,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -137,9 +140,9 @@ class USBankAccountFormViewModelTest {
 
             assertThat(
                 currentScreenState
-            ).isInstanceOf(
-                USBankAccountFormScreenState.BillingDetailsCollection::class.java
-            )
+            ).isInstanceOf<
+                USBankAccountFormScreenState.BillingDetailsCollection
+                >()
 
             viewModel.handlePrimaryButtonClick(
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -293,7 +296,7 @@ class USBankAccountFormViewModelTest {
                         intentId = "intent_1234",
                         bankName = "Stripe Bank",
                         last4 = "6789",
-                        primaryButtonText = "Continue",
+                        primaryButtonText = "Continue".resolvableString,
                         mandateText = null,
                     ),
                 )
@@ -345,7 +348,7 @@ class USBankAccountFormViewModelTest {
                         intentId = "intent_1234",
                         bankName = "Stripe Bank",
                         last4 = "6789",
-                        primaryButtonText = "Continue",
+                        primaryButtonText = "Continue".resolvableString,
                         mandateText = null,
                     ),
                 )
@@ -388,7 +391,7 @@ class USBankAccountFormViewModelTest {
     fun `Restores screen state when re-opening screen`() = runTest {
         val screenStates = listOf(
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = "Continue",
+                primaryButtonText = "Continue".resolvableString,
                 isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
@@ -396,7 +399,7 @@ class USBankAccountFormViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = null,
-                primaryButtonText = "Continue",
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
             USBankAccountFormScreenState.VerifyWithMicrodeposits(
@@ -406,7 +409,7 @@ class USBankAccountFormViewModelTest {
                     id = "bank_id",
                     last4 = "6789",
                 ),
-                primaryButtonText = "Continue",
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
             USBankAccountFormScreenState.SavedAccount(
@@ -414,7 +417,7 @@ class USBankAccountFormViewModelTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )
@@ -467,7 +470,7 @@ class USBankAccountFormViewModelTest {
                             intentId = "intent_1234",
                             bankName = "Stripe Bank",
                             last4 = "6789",
-                            primaryButtonText = "Continue",
+                            primaryButtonText = "Continue".resolvableString,
                             mandateText = null,
                         ),
                     )
@@ -479,9 +482,9 @@ class USBankAccountFormViewModelTest {
 
             assertThat(
                 currentScreenState
-            ).isInstanceOf(
-                USBankAccountFormScreenState.SavedAccount::class.java
-            )
+            ).isInstanceOf<
+                USBankAccountFormScreenState.SavedAccount
+                >()
         }
 
     @Test
@@ -782,9 +785,9 @@ class USBankAccountFormViewModelTest {
 
         assertThat(
             currentScreenState
-        ).isInstanceOf(
-            USBankAccountFormScreenState.BillingDetailsCollection::class.java
-        )
+        ).isInstanceOf<
+            USBankAccountFormScreenState.BillingDetailsCollection
+            >()
 
         viewModel.handlePrimaryButtonClick(
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -818,9 +821,9 @@ class USBankAccountFormViewModelTest {
 
         assertThat(
             currentScreenState
-        ).isInstanceOf(
-            USBankAccountFormScreenState.BillingDetailsCollection::class.java
-        )
+        ).isInstanceOf<
+            USBankAccountFormScreenState.BillingDetailsCollection
+            >()
 
         viewModel.handlePrimaryButtonClick(
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -858,7 +861,7 @@ class USBankAccountFormViewModelTest {
                 viewModel.currentScreenState.value
 
             assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
         }
     }
 
@@ -941,7 +944,7 @@ class USBankAccountFormViewModelTest {
 
         viewModel.currentScreenState.test {
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
             val verifiedAccount = mockVerifiedBankAccount()
             viewModel.handleCollectBankAccountResult(
@@ -949,13 +952,13 @@ class USBankAccountFormViewModelTest {
             )
 
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
 
             viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
             viewModel.reset()
 
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
         }
     }
 
@@ -965,17 +968,17 @@ class USBankAccountFormViewModelTest {
 
         viewModel.currentScreenState.test {
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
             viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
 
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
             viewModel.reset()
 
             assertThat(awaitItem())
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
         }
     }
 

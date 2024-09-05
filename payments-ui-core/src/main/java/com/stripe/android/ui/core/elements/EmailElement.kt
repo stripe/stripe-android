@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
@@ -15,4 +16,7 @@ data class EmailElement(
         EmailConfig(),
         initialValue = initialValue
     )
-) : SectionSingleFieldElement(identifier)
+) : SectionSingleFieldElement(identifier) {
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
+}

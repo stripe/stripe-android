@@ -3,19 +3,16 @@ package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.PaymentConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.junit.Test
 
 class BacsMandateDataTest {
     @Test
-    fun `when payment selection is Bacs and name & email are provided, 'fromPaymentSelection' should return data`() {
-        val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
-            iconResource = 0,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+    fun `when payment option is Bacs and name & email are provided, 'fromConfirmationOption' should return data`() {
+        val option = createPaymentConfirmationOption(
+            createParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
                     sortCode = "10-88-00"
@@ -24,10 +21,10 @@ class BacsMandateDataTest {
                     name = "John Doe",
                     email = "johndoe@email.com"
                 )
-            )
+            ),
         )
 
-        assertThat(BacsMandateData.fromPaymentSelection(selection)).isEqualTo(
+        assertThat(BacsMandateData.fromConfirmationOption(option)).isEqualTo(
             BacsMandateData(
                 name = "John Doe",
                 email = "johndoe@email.com",
@@ -38,39 +35,43 @@ class BacsMandateDataTest {
     }
 
     @Test
-    fun `when payment selection is Bacs but without name or email, 'fromPaymentSelection' should return null`() {
-        val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
-            iconResource = 0,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+    fun `when payment option is Bacs but without name or email, 'fromConfirmationOption' should return null`() {
+        val option = createPaymentConfirmationOption(
+            createParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
                     sortCode = "10-88-00"
                 ),
                 billingDetails = PaymentMethod.BillingDetails()
-            )
+            ),
         )
 
-        assertThat(BacsMandateData.fromPaymentSelection(selection)).isNull()
+        assertThat(BacsMandateData.fromConfirmationOption(option)).isNull()
     }
 
     @Test
-    fun `when payment selection is not Bacs, 'fromPaymentSelection' should return null`() {
-        val selection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "",
-            iconResource = 0,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+    fun `when payment option is not Bacs, 'fromConfirmationOption' should return null`() {
+        val option = createPaymentConfirmationOption(
+            createParams = PaymentMethodCreateParams.Companion.create(
                 card = PaymentMethodCreateParams.Card(),
                 billingDetails = PaymentMethod.BillingDetails()
-            )
+            ),
         )
 
-        assertThat(BacsMandateData.fromPaymentSelection(selection)).isNull()
+        assertThat(BacsMandateData.fromConfirmationOption(option)).isNull()
+    }
+
+    private fun createPaymentConfirmationOption(
+        createParams: PaymentMethodCreateParams,
+    ): PaymentConfirmationOption.BacsPaymentMethod {
+        return PaymentConfirmationOption.BacsPaymentMethod(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123",
+            ),
+            shippingDetails = null,
+            createParams = createParams,
+            optionsParams = null,
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
+        )
     }
 }

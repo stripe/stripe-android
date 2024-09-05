@@ -30,7 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
@@ -81,11 +81,17 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColo
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun InstitutionPickerScreen() {
-    val viewModel: InstitutionPickerViewModel = paneViewModel { InstitutionPickerViewModel.factory(it) }
+internal fun InstitutionPickerScreen(
+    backStackEntry: NavBackStackEntry,
+) {
+    val viewModel: InstitutionPickerViewModel = paneViewModel {
+        InstitutionPickerViewModel.factory(parentComponent = it, backStackEntry.arguments)
+    }
+
     val state: InstitutionPickerState by viewModel.stateFlow.collectAsState()
     val listState = rememberLazyListState()
 
@@ -334,7 +340,8 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
-        style = typography.headingXLarge
+        style = typography.headingXLarge,
+        color = colors.textDefault,
     )
 }
 
@@ -373,7 +380,9 @@ private fun SearchRow(
             trailingIcon = query
                 .takeIf { it.isNotEmpty() }
                 ?.let {
-                    { ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors) }
+                    {
+                        ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors)
+                    }
                 },
             placeholder = {
                 Text(
@@ -399,13 +408,13 @@ private fun ClearSearchButton(
             .size(16.dp)
             .clickable { onQueryChanged("") }
             .background(
-                color = colors.border,
+                color = colors.textSubdued,
                 shape = CircleShape
             )
             .padding(2.dp)
     ) {
         Icon(
-            Icons.Filled.Clear,
+            imageVector = Icons.Filled.Clear,
             tint = colors.backgroundSurface,
             contentDescription = "Clear search",
         )

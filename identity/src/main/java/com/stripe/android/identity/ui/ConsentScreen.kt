@@ -9,7 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +41,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal const val TITLE_TAG = "Title"
@@ -70,7 +70,7 @@ internal fun ConsentScreen(
     ) {
         val verificationPage = remember { it }
         val visitedIndividualWelcomePage by
-        identityViewModel.visitedIndividualWelcomeScreen.collectAsState()
+            identityViewModel.visitedIndividualWelcomeScreen.collectAsState()
         LaunchedEffect(Unit) {
             identityViewModel.updateAnalyticsState { oldState ->
                 oldState.copy(

@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -45,6 +47,7 @@ internal class CustomerSheetScreenshotTest {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         onMandateTextChanged = { _, _ -> },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },
@@ -65,6 +68,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        canRemovePaymentMethods = true,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -88,12 +92,13 @@ internal class CustomerSheetScreenshotTest {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = resolvableString("Save"),
+        primaryButtonLabel = "Save".resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        errorReporter = FakeErrorReporter(),
     )
 
     @Test
@@ -101,7 +106,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -135,7 +140,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -172,7 +177,7 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = {
                     counter++
-                    "424$counter"
+                    "424$counter".resolvableString
                 },
             )
         }
@@ -189,7 +194,7 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -210,9 +215,9 @@ internal class CustomerSheetScreenshotTest {
                     isGooglePayEnabled = false,
                     primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
-                    mandateText = "Some mandate text."
+                    mandateText = "Some mandate text.".resolvableString
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -225,10 +230,10 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -242,10 +247,10 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
-                    mandateText = "This is a mandate.",
+                    mandateText = "This is a mandate.".resolvableString,
                     showMandateAbovePrimaryButton = false,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -259,7 +264,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
                     displayDismissConfirmationModal = true,
                 ),
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
                 displayAddForm = false,
             )
         }
@@ -279,22 +284,24 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
                 canRemove = true,
+                isLiveMode = true,
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }
@@ -313,22 +320,24 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
                 eventHandler = {},
                 canRemove = false,
+                isLiveMode = true,
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
             allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!! },
+                paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
     }

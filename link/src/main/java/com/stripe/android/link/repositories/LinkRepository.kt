@@ -3,6 +3,7 @@ package com.stripe.android.link.repositories
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -16,8 +17,7 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String?,
-        authSessionCookie: String?
+        email: String,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -28,9 +28,8 @@ internal interface LinkRepository {
         phone: String,
         country: String,
         name: String?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
-    ): Result<ConsumerSession>
+    ): Result<ConsumerSessionSignup>
 
     /**
      * Create a new card payment method in the consumer account.

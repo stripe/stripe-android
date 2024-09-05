@@ -2,7 +2,6 @@ package com.stripe.android.identity.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,6 +22,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.utils.collectAsState
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,7 +42,7 @@ internal fun DOBSection(
             textFieldConfig = DobTextFieldConfig
         )
     }
-    val dateString by dateController.fieldValue.collectAsState(initial = "")
+    val dateString by dateController.fieldValue.collectAsState()
     val dob: DobParam? by remember {
         derivedStateOf {
             dateString.toDob()

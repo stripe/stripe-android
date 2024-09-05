@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Vui lòng nhập tên tiểu bang</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Trả dần bằng &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Trả dần bằng Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Tên trên tài khoản</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Mã bưu điện chưa đầy đủ.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Thanh toán đơn giản, an toàn chỉ bằng một cú nhấp chuột</string>
   <string name="stripe_payment_method_add_new_card">Thêm thẻ mới...</string>
   <string name="stripe_payment_method_add_new_fpx">Chọn Tài khoản Ngân hàng (FPX)...</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">Chọn phương thức vận chuyển</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Cập nhật thẻ</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Cập nhật</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Xác minh thanh toán của quý vị</string>
 </resources>

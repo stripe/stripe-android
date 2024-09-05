@@ -2,11 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import com.stripe.android.uicore.utils.collectAsState
 
 const val SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG = "SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG"
 
@@ -25,7 +25,7 @@ fun SaveForFutureUseElementUI(
     CheckboxElementUI(
         automationTestTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG,
         isChecked = checked,
-        label = label?.let { resources.getString(it, element.merchantName) },
+        label = resources.getString(label, element.merchantName),
         isEnabled = enabled,
         modifier = modifier,
         onValueChange = {

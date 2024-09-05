@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -24,6 +23,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun ExitModal(
@@ -67,10 +67,14 @@ private fun ExitModalContent(
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
-            style = typography.headingMedium,
+            style = typography.headingLarge,
         )
         Spacer(modifier = Modifier.size(8.dp))
-        Text(text = description.toText().toString())
+        Text(
+            text = description.toText().toString(),
+            style = typography.bodyMedium,
+            color = colors.textDefault,
+        )
         Spacer(modifier = Modifier.size(24.dp))
         FinancialConnectionsButton(
             modifier = Modifier.fillMaxWidth(),

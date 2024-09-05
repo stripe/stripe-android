@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -36,6 +38,13 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
     )
+
+    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+            displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
+            shouldShowIcon = false,
+        )
+    }
 
     // US Bank Account uses it's own mechanism, not these form elements.
     override fun createFormElements(

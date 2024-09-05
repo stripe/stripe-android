@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONArray
 import org.json.JSONObject
@@ -180,14 +181,83 @@ internal class ElementsSessionJsonParser(
         val apiKey = json.optString(FIELD_CUSTOMER_API_KEY) ?: return null
         val apiKeyExpiry = json.optInt(FIELD_CUSTOMER_API_KEY_EXPIRY)
         val name = json.optString(FIELD_CUSTOMER_NAME) ?: return null
+        val components = parseComponents(json.optJSONObject(FIELD_COMPONENTS)) ?: return null
 
         return ElementsSession.Customer.Session(
             id = id,
             liveMode = liveMode,
             apiKey = apiKey,
             apiKeyExpiry = apiKeyExpiry,
-            customerId = name
+            customerId = name,
+            components = components,
         )
+    }
+
+    private fun parseComponents(json: JSONObject?): ElementsSession.Customer.Components? {
+        if (json == null) {
+            return null
+        }
+
+        val paymentElementComponent = parsePaymentElementComponent(json.optJSONObject(FIELD_MOBILE_PAYMENT_ELEMENT))
+            ?: return null
+        val customerSheetComponent = parseCustomerSheetComponent(json.optJSONObject(FIELD_CUSTOMER_SHEET))
+            ?: return null
+
+        return ElementsSession.Customer.Components(
+            mobilePaymentElement = paymentElementComponent,
+            customerSheet = customerSheetComponent
+        )
+    }
+
+    private fun parsePaymentElementComponent(
+        json: JSONObject?
+    ): ElementsSession.Customer.Components.MobilePaymentElement? {
+        if (json == null) {
+            return null
+        }
+
+        val paymentSheetEnabled = json.optBoolean(FIELD_ENABLED)
+
+        return if (paymentSheetEnabled) {
+            val paymentSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+
+            val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
+            val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val allowRedisplayOverrideValue = paymentSheetFeatures
+                .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
+
+            val allowRedisplayOverride = PaymentMethod.AllowRedisplay.entries.firstOrNull { allowRedisplay ->
+                allowRedisplay.value == allowRedisplayOverrideValue
+            }
+
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                allowRedisplayOverride = allowRedisplayOverride,
+            )
+        } else {
+            ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+        }
+    }
+
+    private fun parseCustomerSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.CustomerSheet? {
+        if (json == null) {
+            return null
+        }
+
+        val customerSheetEnabled = json.optBoolean(FIELD_ENABLED)
+
+        return if (customerSheetEnabled) {
+            val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+
+            val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+
+            ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+            )
+        } else {
+            ElementsSession.Customer.Components.CustomerSheet.Disabled
+        }
     }
 
     private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
@@ -235,6 +305,16 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_CUSTOMER_API_KEY = "api_key"
         private const val FIELD_CUSTOMER_API_KEY_EXPIRY = "api_key_expiry"
         private const val FIELD_CUSTOMER_NAME = "customer"
+        private const val FIELD_COMPONENTS = "components"
+        private const val FIELD_MOBILE_PAYMENT_ELEMENT = "mobile_payment_element"
+        private const val FIELD_CUSTOMER_SHEET = "customer_sheet"
+        private const val FIELD_ENABLED = "enabled"
+        private const val FIELD_FEATURES = "features"
+        private const val FIELD_PAYMENT_METHOD_SAVE = "payment_method_save"
+        private const val FIELD_PAYMENT_METHOD_REMOVE = "payment_method_remove"
+        private const val FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE =
+            "payment_method_save_allow_redisplay_override"
+        private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()

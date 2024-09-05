@@ -52,19 +52,23 @@ internal class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
-        if (testParameters.saveForFutureUseCheckboxVisible) {
-            selectors.saveForFutureCheckbox.assertExists()
-            if (testParameters.saveCheckboxValue) {
-                if (!isSaveForFutureUseSelected()) {
-                    selectors.saveForFutureCheckbox.performClick()
+        Espresso.onIdle()
+
+        if (testParameters.playgroundSettingsSnapshot.configurationData.integrationType.isPaymentFlow()) {
+            if (testParameters.saveForFutureUseCheckboxVisible) {
+                selectors.saveForFutureCheckbox.assertExists()
+                if (testParameters.saveCheckboxValue) {
+                    if (!isSaveForFutureUseSelected()) {
+                        selectors.saveForFutureCheckbox.performClick()
+                    }
+                } else {
+                    if (isSaveForFutureUseSelected()) {
+                        selectors.saveForFutureCheckbox.performClick()
+                    }
                 }
             } else {
-                if (isSaveForFutureUseSelected()) {
-                    selectors.saveForFutureCheckbox.performClick()
-                }
+                selectors.saveForFutureCheckbox.assertDoesNotExist()
             }
-        } else {
-            selectors.saveForFutureCheckbox.assertDoesNotExist()
         }
     }
 
@@ -241,10 +245,20 @@ internal class FieldPopulator(
     }
 
     fun populateBacs() {
-        selectors.getBacsAccountNumber()
-            .performTextInput(values.bacsAccountNumber)
         selectors.getBacsSortCode()
+            .performScrollTo()
             .performTextInput(values.bacsSortCode)
+
+        selectors.composeTestRule.waitForIdle()
+
+        selectors.getBacsAccountNumber()
+            .performScrollTo()
+            .performTextInput(values.bacsAccountNumber)
+
+        selectors.composeTestRule.waitForIdle()
+
+        Espresso.closeSoftKeyboard()
+        Espresso.onIdle()
 
         selectors.getBacsConfirmed()
             .performScrollTo()

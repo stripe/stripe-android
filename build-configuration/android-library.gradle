@@ -9,6 +9,7 @@ apply plugin: "org.jetbrains.dokka"
 
 apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
+apply from: rootProject.file('build-configuration/lint.gradle')
 
 assemble.dependsOn('lint')
 check.dependsOn('ktlint')

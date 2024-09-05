@@ -14,25 +14,27 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.features.notice.PresentSheet
+import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.model.LinkLoginPane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
-import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -58,46 +60,59 @@ import com.stripe.android.financialconnections.navigation.Destination.Success as
 internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkSignupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
     private val uriUtils: UriUtils,
-    private val getCachedAccounts: GetCachedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
+    private val linkSignupHandler: LinkSignupHandler,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
+
+    private val pane: Pane
+        get() = stateFlow.value.pane
 
     private var searchJob = ConflatedJob()
 
     init {
         observeAsyncs()
         suspend {
-            val sync = getOrFetchSync(
+            val refetchCondition = if (initialState.isInstantDebits) {
+                RefetchCondition.None
+            } else {
                 // Force synchronize to retrieve the networking signup pane content.
-                refetchCondition = RefetchCondition.Always
-            )
-            val content = requireNotNull(sync.text?.networkingLinkSignupPane)
-            eventTracker.track(PaneLoaded(PANE))
+                RefetchCondition.Always
+            }
+
+            val sync = getOrFetchSync(refetchCondition)
+
+            val content = sync.text?.let { text ->
+                text.linkLoginPane?.toContent() ?: text.networkingLinkSignupPane?.toContent()
+            }
+
+            eventTracker.track(PaneLoaded(pane))
+
             NetworkingLinkSignupState.Payload(
-                content = content,
+                content = requireNotNull(content),
                 merchantName = sync.manifest.getBusinessName(),
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
                     initialValue = sync.manifest.accountholderCustomerEmailAddress,
                     showOptionalLabel = false
                 ),
-                phoneController = PhoneNumberController
-                    .createPhoneNumberController(sync.manifest.accountholderPhoneNumber ?: ""),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = sync.manifest.accountholderPhoneNumber ?: "",
+                ),
+                isInstantDebits = initialState.isInstantDebits,
             )
         }.execute { copy(payload = it) }
     }
 
     override fun updateTopAppBar(state: NetworkingLinkSignupState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
-            pane = PANE,
-            allowBackNavigation = false,
+            pane = pane,
+            allowBackNavigation = state.isInstantDebits,
             error = state.payload.error,
         )
     }
@@ -113,10 +128,10 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             NetworkingLinkSignupState::lookupAccount,
             onSuccess = { consumerSession ->
                 if (consumerSession.exists) {
-                    eventTracker.track(NetworkingReturningConsumer(PANE))
+                    eventTracker.track(NetworkingReturningConsumer(pane))
                     navigateToLinkVerification()
                 } else {
-                    eventTracker.track(NetworkingNewConsumer(PANE))
+                    eventTracker.track(NetworkingNewConsumer(pane))
                 }
             },
             onFail = { error ->
@@ -124,7 +139,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                     extraMessage = "Error looking up account",
                     error = error,
                     logger = logger,
-                    pane = PANE
+                    pane = pane
                 )
             },
         )
@@ -133,18 +148,11 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private fun observeSaveAccountResult() {
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = {
-                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
+            onSuccess = { nextPane ->
+                val destination = nextPane.destination(referrer = pane)
+                navigationManager.tryNavigateTo(destination)
             },
-            onFail = { error ->
-                eventTracker.logError(
-                    extraMessage = "Error saving account to Link",
-                    error = error,
-                    logger = logger,
-                    pane = PANE
-                )
-                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
-            },
+            onFail = linkSignupHandler::handleSignupFailure,
         )
     }
 
@@ -169,7 +177,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                     extraMessage = "Error fetching payload",
                     error = error,
                     logger = logger,
-                    pane = PANE
+                    pane = pane
                 )
             },
         )
@@ -204,13 +212,13 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
         if (validEmail.endsWith(".com")) SEARCH_DEBOUNCE_FINISHED_EMAIL_MS else SEARCH_DEBOUNCE_MS
 
     fun onSkipClick() = viewModelScope.launch {
-        eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
-        navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
+        eventTracker.track(Click(eventName = "click.not_now", pane = pane))
+        navigationManager.tryNavigateTo(SuccessDestination(referrer = pane))
     }
 
     fun onSaveAccount() {
         withState { state ->
-            eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
+            eventTracker.track(Click(eventName = "click.save_to_link", pane = pane))
 
             val hasExistingAccount = state.lookupAccount()?.exists == true
             if (hasExistingAccount) {
@@ -223,30 +231,21 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
     private fun saveNewAccount() {
         suspend {
-            eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = stateFlow.value
-            val selectedAccounts = getCachedAccounts()
-            val manifest = getOrFetchSync().manifest
-            val phoneController = state.payload()!!.phoneController
-            require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
-            saveAccountToLink.new(
-                country = phoneController.getCountryCode(),
-                email = state.validEmail!!,
-                phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
-                selectedAccounts = selectedAccounts,
-                shouldPollAccountNumbers = manifest.isDataFlow,
-            )
-        }.execute { copy(saveAccountToLink = it) }
+            linkSignupHandler.performSignup(state)
+        }.execute {
+            copy(saveAccountToLink = it)
+        }
     }
 
     private fun navigateToLinkVerification() {
-        navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
+        linkSignupHandler.navigateToVerification()
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         // if clicked uri contains an eventName query param, track click event.
         uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(Click(eventName, pane = PANE))
+            eventTracker.track(Click(eventName, pane = pane))
         }
         val date = Date()
         if (URLUtil.isNetworkUrl(uri)) {
@@ -266,9 +265,9 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.payload()?.content?.legalDetailsNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = Legal(notice),
-            referrer = PANE,
+            referrer = pane,
         )
     }
 
@@ -294,13 +293,14 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent.networkingLinkSignupViewModelFactory.create(NetworkingLinkSignupState())
+                    val parentState = parentComponent.viewModel.stateFlow.value
+                    val state = NetworkingLinkSignupState(parentState)
+                    parentComponent.networkingLinkSignupViewModelFactory.create(state)
                 }
             }
 
         private const val SEARCH_DEBOUNCE_MS = 1000L
         private const val SEARCH_DEBOUNCE_FINISHED_EMAIL_MS = 300L
-        internal val PANE = Pane.NETWORKING_LINK_SIGNUP_PANE
     }
 }
 
@@ -308,10 +308,15 @@ internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
     val validEmail: String? = null,
     val validPhone: String? = null,
-    val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
+    val saveAccountToLink: Async<Pane> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
-    val viewEffect: ViewEffect? = null
+    val viewEffect: ViewEffect? = null,
+    val isInstantDebits: Boolean = false,
 ) {
+
+    constructor(parentState: FinancialConnectionsSheetNativeState) : this(
+        isInstantDebits = parentState.isLinkWithStripe,
+    )
 
     val showFullForm: Boolean
         get() = lookupAccount()?.let { !it.exists } ?: false
@@ -322,11 +327,29 @@ internal data class NetworkingLinkSignupState(
             return validEmail != null && (hasExistingAccount || validPhone != null)
         }
 
+    val pane: Pane
+        get() = if (isInstantDebits) LINK_LOGIN else NETWORKING_LINK_SIGNUP_PANE
+
     data class Payload(
         val merchantName: String?,
         val emailController: SimpleTextFieldController,
         val phoneController: PhoneNumberController,
-        val content: NetworkingLinkSignupPane
+        val isInstantDebits: Boolean,
+        val content: Content,
+    ) {
+
+        val focusEmailField: Boolean
+            get() = isInstantDebits && emailController.initialValue.isNullOrBlank()
+    }
+
+    data class Content(
+        val title: String,
+        val message: String?,
+        val bullets: List<Bullet>,
+        val aboveCta: String,
+        val cta: String,
+        val skipCta: String?,
+        val legalDetailsNotice: LegalDetailsNotice?,
     )
 
     sealed class ViewEffect {
@@ -339,4 +362,28 @@ internal data class NetworkingLinkSignupState(
 
 private enum class NetworkingLinkSignupClickableText(val value: String) {
     LEGAL_DETAILS("stripe://legal-details-notice"),
+}
+
+internal fun NetworkingLinkSignupPane.toContent(): NetworkingLinkSignupState.Content {
+    return NetworkingLinkSignupState.Content(
+        title = title,
+        message = null,
+        bullets = body.bullets,
+        aboveCta = aboveCta,
+        cta = cta,
+        skipCta = skipCta,
+        legalDetailsNotice = legalDetailsNotice,
+    )
+}
+
+internal fun LinkLoginPane.toContent(): NetworkingLinkSignupState.Content {
+    return NetworkingLinkSignupState.Content(
+        title = title,
+        message = body,
+        bullets = emptyList(),
+        aboveCta = aboveCta,
+        cta = cta,
+        skipCta = null,
+        legalDetailsNotice = null,
+    )
 }

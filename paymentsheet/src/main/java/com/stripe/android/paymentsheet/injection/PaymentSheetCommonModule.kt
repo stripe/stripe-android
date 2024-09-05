@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -11,6 +13,8 @@ import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -25,6 +29,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -76,6 +82,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
 
     @Binds
+    abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
+
+    @Binds
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
@@ -93,6 +102,12 @@ internal abstract class PaymentSheetCommonModule {
     @Binds
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
+    @Binds
+    abstract fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Suppress("TooManyFunctions")
     companion object {
         /**
          * Provides a non-singleton PaymentConfiguration.
@@ -147,6 +162,12 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
             return DefaultCvcRecollectionLauncherFactory
+        }
+
+        @Provides
+        @Singleton
+        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
+            return CvcRecollectionHandlerImpl()
         }
 
         @Provides

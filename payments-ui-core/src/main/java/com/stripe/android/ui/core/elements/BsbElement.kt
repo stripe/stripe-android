@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -21,6 +22,8 @@ class BsbElement(
         get() = null
     override val identifier: IdentifierSpec
         get() = identifierSpec
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
 
     internal val textElement: SimpleTextElement = SimpleTextElement(
         identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),

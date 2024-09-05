@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +33,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 
 internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
@@ -84,7 +84,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
                 viewModel.onDismissed()
             }
 
-            FinancialConnectionsTheme(state.isInstantDebits) {
+            FinancialConnectionsTheme(state.theme) {
                 FinancialConnectionsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onDismissed,

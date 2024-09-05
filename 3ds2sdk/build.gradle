@@ -1,0 +1,102 @@
+apply from: configs.androidLibrary
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
+android {
+    defaultConfig {
+        // Required by Section 2.2 Minimum Supported Platform Versions of SDK—Device Information
+        minSdkVersion 21
+        consumerProguardFiles "consumer-rules.pro"
+
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    buildTypes {
+        // The 3ds2reference app requires a production variant to build with the SDK locally.
+        production {
+            initWith buildTypes.debug
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs += 'src/main/kotlin'
+            java.srcDirs += 'src/main/java'
+        }
+        test {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs += 'src/test/kotlin'
+            kotlin.srcDirs += 'src/test/kotlin'
+        }
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using BuildConfig will fail.
+            includeAndroidResources = true
+            all {
+                System.setProperty(
+                        "robolectric.dependency.repo.url",
+                        "https://artifactory-content.stripe.build/artifactory/maven-central/"
+                )
+                System.setProperty("robolectric.dependency.repo.id", "mavenCentralArtifactory")
+            }
+        }
+
+    }
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+        androidResources = true
+    }
+    lint {
+        disable += "HardwareIds"
+        disable += "Overdraw"
+        disable += "ObsoleteLintCustomCheck"
+        disable += "GradleDependency"
+        disable += "UnusedResources"
+        disable += "IconLocation"
+        disable += "LongMethod"
+        disable += "ResourceName"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+    implementation libs.androidx.appCompat
+    implementation libs.material
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.activity
+    implementation libs.androidx.fragment
+
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+
+    implementation libs.bouncyCastle
+
+    implementation libs.nimbusJwt
+
+    testImplementation testLibs.androidx.coreKtx
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.json
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.truth
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.androidx.archCore
+}
+
+// Uncomment to publish locally with `./gradlew publishToMavenLocal`
+// apply from: "${rootDir}/3ds2sdk/publish.gradle"

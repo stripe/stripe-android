@@ -40,7 +40,7 @@ class PaymentLauncherConfirmationActivityTest {
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
-                    includePaymentSheetAuthenticators = false,
+                    includePaymentSheetNextHandlers = false,
                     confirmStripeIntentParams = mock(),
                     statusBarColor = Color.CYAN
                 ).toBundle()
@@ -65,7 +65,7 @@ class PaymentLauncherConfirmationActivityTest {
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
-                    includePaymentSheetAuthenticators = false,
+                    includePaymentSheetNextHandlers = false,
                     confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
@@ -92,7 +92,7 @@ class PaymentLauncherConfirmationActivityTest {
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
-                    includePaymentSheetAuthenticators = false,
+                    includePaymentSheetNextHandlers = false,
                     confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
@@ -136,7 +136,7 @@ class PaymentLauncherConfirmationActivityTest {
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
-                    includePaymentSheetAuthenticators = false,
+                    includePaymentSheetNextHandlers = false,
                     setupIntentClientSecret = CLIENT_SECRET,
                     statusBarColor = Color.RED,
                 ).toBundle()
@@ -172,8 +172,7 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    private fun mockViewModelActivityScenario():
-        InjectableActivityScenario<PaymentLauncherConfirmationActivity> {
+    private fun mockViewModelActivityScenario(): InjectableActivityScenario<PaymentLauncherConfirmationActivity> {
         return injectableActivityScenario {
             injectActivity {
                 viewModelFactory = testFactory
@@ -191,7 +190,7 @@ class PaymentLauncherConfirmationActivityTest {
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
-                includePaymentSheetAuthenticators = false,
+                includePaymentSheetNextHandlers = false,
                 paymentIntentClientSecret = CLIENT_SECRET,
                 statusBarColor = Color.RED,
             )

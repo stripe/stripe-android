@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,6 +10,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -253,12 +254,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = if (args.instantDebits) {
-            CollectBankAccountForInstantDebitsLauncher.create(
+            CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+                hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleInstantDebitsResult,
             )
         } else {
-            CollectBankAccountLauncher.create(
+            CollectBankAccountLauncher.createForPaymentSheet(
+                hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 callback = ::handleCollectBankAccountResult,
             )
@@ -275,7 +278,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             is CollectBankAccountResultInternal.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
@@ -292,7 +295,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
                 reset()
@@ -309,7 +312,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (usBankAccountData != null) {
             handleResultForACH(usBankAccountData, intentId)
         } else {
-            reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+            reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
         }
     }
 
@@ -361,7 +364,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             null -> {
-                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
         }
     }
@@ -405,7 +408,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun reset(@StringRes error: Int? = null) {
+    fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)
@@ -413,9 +416,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
-                primaryButtonText = application.getString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -440,9 +441,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = application.getString(
-                    StripeUiCoreR.string.stripe_continue_button_label
-                ),
+                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 isProcessing = false,
             )
         }
@@ -605,27 +604,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    private fun buildPrimaryButtonText(): String {
+    private fun buildPrimaryButtonText(): ResolvableString {
         return when {
             args.isCompleteFlow -> {
                 if (args.isPaymentFlow) {
-                    args.formArgs.amount!!.buildPayButtonLabel(application.resources)
+                    args.formArgs.amount!!.buildPayButtonLabel()
                 } else {
-                    application.getString(
-                        StripeUiCoreR.string.stripe_setup_button_label
-                    )
+                    StripeUiCoreR.string.stripe_setup_button_label.resolvableString
                 }
             }
 
-            else -> application.getString(
-                StripeUiCoreR.string.stripe_continue_button_label
-            )
+            else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
         }
     }
 
-    private fun buildMandateText(): String {
+    private fun buildMandateText(): ResolvableString {
         return USBankAccountTextBuilder.getContinueMandateText(
-            context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
             isInstantDebits = args.instantDebits,
@@ -661,6 +655,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
+        val hostedSurface: String,
     )
 
     private companion object {

@@ -41,6 +41,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +57,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
+import com.stripe.android.financialconnections.ui.theme.Theme
 
 private val DefaultSpinnerHeight = 24.dp
 
@@ -84,7 +87,7 @@ internal fun FinancialConnectionsButton(
         // We need to flip the direction of the gradient when rendering in a primary button
         // due to its background color. Otherwise, the spinner looks inverted.
         when (type) {
-            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.iconWhite))
+            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.contentOnBrand))
             Secondary -> Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
         }
     }
@@ -167,10 +170,10 @@ internal object FinancialConnectionsButton {
         data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.iconBrand,
-                contentColor = colors.textWhite,
-                disabledBackgroundColor = colors.iconBrand,
-                disabledContentColor = colors.textWhite.copy(alpha = 0.4f)
+                backgroundColor = colors.buttonPrimary,
+                contentColor = colors.contentOnBrand,
+                disabledBackgroundColor = colors.buttonPrimary,
+                disabledContentColor = colors.contentOnBrand.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Brand400
@@ -221,10 +224,14 @@ internal object FinancialConnectionsButton {
     }
 }
 
+internal class ThemePreviewParameterProvider : CollectionPreviewParameterProvider<Theme>(Theme.entries)
+
 @Preview(group = "Components", name = "Button - primary - idle")
 @Composable
-internal fun FinancialConnectionsButtonPreview() {
-    FinancialConnectionsPreview {
+internal fun FinancialConnectionsButtonPreview(
+    @PreviewParameter(provider = ThemePreviewParameterProvider::class) theme: Theme,
+) {
+    FinancialConnectionsPreview(theme) {
         Column(
             modifier = Modifier
                 .background(colors.backgroundSurface)

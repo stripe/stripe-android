@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <application
-        android:usesCleartextTraffic="true"
-        tools:targetApi="m">
+    <application>
         <activity
             android:name=".IdentityActivity"
             android:screenOrientation="portrait"

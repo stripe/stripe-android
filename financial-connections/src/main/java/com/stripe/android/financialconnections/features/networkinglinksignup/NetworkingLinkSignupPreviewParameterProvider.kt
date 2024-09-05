@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.LinkLoginPane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.presentation.Async.Success
@@ -15,7 +16,8 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
     override val values = sequenceOf(
         default(),
         emailEntered(),
-        invalidEmail()
+        invalidEmail(),
+        instantDebits(),
     )
 
     private fun default() = NetworkingLinkSignupState(
@@ -27,7 +29,8 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
-                content = networkingLinkSignupPane()
+                isInstantDebits = false,
+                content = networkingLinkSignupPane(),
             )
         ),
         validEmail = null,
@@ -45,7 +48,8 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
-                content = networkingLinkSignupPane()
+                isInstantDebits = false,
+                content = networkingLinkSignupPane(),
             )
         ),
         validEmail = "test@test.com",
@@ -69,7 +73,8 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
-                content = networkingLinkSignupPane()
+                isInstantDebits = false,
+                content = networkingLinkSignupPane(),
             )
         ),
         validEmail = "test@test.com",
@@ -84,20 +89,47 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         saveAccountToLink = Uninitialized
     )
 
+    private fun instantDebits() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController(initialValue = null),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "",
+                    initiallySelectedCountryCode = null,
+                ),
+                isInstantDebits = true,
+                content = linkLoginPane(),
+            )
+        ),
+        validEmail = null,
+        validPhone = null,
+        lookupAccount = Uninitialized,
+        saveAccountToLink = Uninitialized,
+        isInstantDebits = true,
+    )
+
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
         aboveCta = "By saving your account to Link, you agree to Link’s Terms and Privacy Policy",
         body = NetworkingLinkSignupBody(
             listOf(
                 Bullet(
-                    title = "Connect your account faster on RandomBusiness and everywhere Link is accepted.",
+                    title = "Connect your account faster everywhere Link is accepted.",
                 ),
                 Bullet(
                     title = "Link encrypts your data and never shares your login details.",
                 ),
             )
         ),
-        cta = "Save to Link",
+        cta = "Save with Link",
         skipCta = "Not now",
-        title = "Save your account to Link"
-    )
+        title = "Save account with Link"
+    ).toContent()
+
+    private fun linkLoginPane() = LinkLoginPane(
+        title = "Sign up or log in",
+        body = "Connect your account to RandomBusiness using Link.",
+        aboveCta = "By using Link, you authorize debits under these Terms.",
+        cta = "Continue with Link",
+    ).toContent()
 }

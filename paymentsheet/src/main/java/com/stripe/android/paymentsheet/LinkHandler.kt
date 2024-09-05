@@ -11,12 +11,11 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,17 +28,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     private val linkStore: LinkStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
@@ -70,29 +65,11 @@ internal class LinkHandler @Inject constructor(
         MutableSharedFlow<ProcessingState>(replay = 1, extraBufferCapacity = 5)
     val processingState: Flow<ProcessingState> = _processingState
 
-    val linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
-
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
     private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
-
-    val accountStatus: Flow<AccountStatus> = _linkConfiguration
-        .filterNotNull()
-        .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
-
-    val linkSignupMode: Flow<LinkSignupMode?> = combine(
-        linkConfiguration,
-        linkInlineSelection,
-        accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
-    ) { linkConfig, linkInlineSelection, linkAccountStatus ->
-        val linkInlineSelectionValid = linkInlineSelection != null
-        val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
-        val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
-        val ableToShowLink = validFundingSource && (notLoggedIn || linkInlineSelectionValid)
-        linkConfig?.signupMode.takeIf { ableToShowLink }
-    }
 
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
@@ -187,12 +164,7 @@ internal class LinkHandler @Inject constructor(
                     PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
                 }
                 is LinkPaymentDetails.Saved -> {
-                    val last4 = when (val paymentDetails = linkPaymentDetails.paymentDetails) {
-                        is ConsumerPaymentDetails.Card -> paymentDetails.last4
-                        is ConsumerPaymentDetails.Passthrough -> paymentDetails.last4
-                        is ConsumerPaymentDetails.BankAccount -> paymentDetails.last4
-                        else -> null
-                    }
+                    val last4 = linkPaymentDetails.paymentDetails.last4
 
                     PaymentSelection.Saved(
                         paymentMethod = PaymentMethod.Builder()
@@ -207,8 +179,12 @@ internal class LinkHandler @Inject constructor(
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
-                        requiresSaveOnConfirmation = customerRequestedSave ==
-                            PaymentSelection.CustomerRequestedSave.RequestReuse,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                                customerRequestedSave ==
+                                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                            } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        )
                     )
                 }
                 null -> null

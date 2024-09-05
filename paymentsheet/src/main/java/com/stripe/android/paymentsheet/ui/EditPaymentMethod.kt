@@ -28,7 +28,6 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +60,7 @@ import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as UiCoreR
@@ -90,7 +90,9 @@ internal fun EditPaymentMethodUi(
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
-        modifier = modifier.padding(horizontal = padding)
+        modifier = modifier
+            .padding(horizontal = padding)
+            .testTag(TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN)
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -125,10 +127,11 @@ internal fun EditPaymentMethodUi(
         }
 
         PrimaryButton(
-            label = stringResource(id = StripeR.string.stripe_title_update_card),
+            label = stringResource(id = StripeR.string.stripe_update),
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
             isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
+            modifier = Modifier.testTag(TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON)
         )
 
         if (viewState.canRemove) {
@@ -143,7 +146,7 @@ internal fun EditPaymentMethodUi(
     if (viewState.confirmRemoval) {
         val title = stringResource(
             R.string.stripe_paymentsheet_remove_pm,
-            viewState.displayName,
+            viewState.displayName.resolve(),
         )
 
         val message = stringResource(
@@ -190,11 +193,13 @@ private fun RemoveButton(
     ) {
         Box(
             modifier = Modifier
+                .testTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
                 .fillMaxWidth()
                 .padding(
                     start = 8.dp,
                     end = 8.dp
-                ).offset(y = 8.dp),
+                )
+                .offset(y = 8.dp),
         ) {
             CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
                 TextButton(
@@ -261,9 +266,7 @@ private fun Dropdown(
 
         SingleChoiceDropdown(
             expanded = expanded,
-            title = resolvableString(
-                id = PaymentsCoreR.string.stripe_card_brand_choice_selection_header
-            ),
+            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentChoice = viewState.selectedBrand,
             choices = viewState.availableBrands,
             headerTextColor = MaterialTheme.stripeColors.subtitle,
@@ -310,7 +313,7 @@ private fun EditPaymentMethodPreview() {
             viewState = EditPaymentMethodViewState(
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
-                displayName = "Card",
+                displayName = "Card".resolvableString,
                 selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),
@@ -329,3 +332,7 @@ private fun EditPaymentMethodPreview() {
         )
     }
 }
+
+internal const val PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON = "PaymentSheetEditScreenRemoveButton"
+internal const val TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN = "TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN"
+internal const val TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON = "TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON"

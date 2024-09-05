@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.Resources
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.R as StripeR
 
 internal sealed class PaymentOptionsItem {
 
@@ -29,39 +27,17 @@ internal sealed class PaymentOptionsItem {
      */
     data class SavedPaymentMethod(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        private val canRemovePaymentMethods: Boolean,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
-        override val isEnabledDuringEditing: Boolean = true
+
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         val isModifiable: Boolean by lazy { displayableSavedPaymentMethod.isModifiable() }
 
-        fun getDescription(resources: Resources) = when (paymentMethod.type) {
-            PaymentMethod.Type.Card -> resources.getString(
-                StripeR.string.stripe_card_ending_in,
-                paymentMethod.card?.brand,
-                paymentMethod.card?.last4
-            )
-            PaymentMethod.Type.SepaDebit -> resources.getString(
-                R.string.stripe_bank_account_ending_in,
-                paymentMethod.sepaDebit?.last4
-            )
-            PaymentMethod.Type.USBankAccount -> resources.getString(
-                R.string.stripe_bank_account_ending_in,
-                paymentMethod.usBankAccount?.last4
-            )
-            else -> ""
+        override val isEnabledDuringEditing: Boolean by lazy {
+            isModifiable || canRemovePaymentMethods
         }
-
-        fun getModifyDescription(resources: Resources) = resources.getString(
-            R.string.stripe_paymentsheet_modify_pm,
-            getDescription(resources)
-        )
-
-        fun getRemoveDescription(resources: Resources) = resources.getString(
-            R.string.stripe_paymentsheet_remove_pm,
-            getDescription(resources)
-        )
     }
 
     enum class ViewType {

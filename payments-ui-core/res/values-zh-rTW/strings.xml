@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[用 <img/> 先買後付]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，無利息，每期 <installment_price/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d無息付款 %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">確認您的 Amazon Pay 付款即表示您允許 %s 按照其條款從您的 Amazon Pay 帳戶扣取未來款項。</string>
   <!-- Text for back button -->
@@ -37,7 +41,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您輸入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，\"%s\" 是不支援的國家代碼。</string>
+  <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，「%s」是不支援的國家代碼。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">您的 IBAN 應以兩個字母的國家代碼開頭。</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -65,8 +69,14 @@
   <string name="stripe_pay_button_amount">支付 %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">銀行</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">添加卡</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">添加新卡</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">金融卡資訊</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">添加美國銀行帳戶</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">用 UPI ID 購買</string>
   <!-- Payment Method type brand name. -->
@@ -85,6 +95,8 @@
   <string name="stripe_revolut_mandate">確認您的 RevolutPay 付款即表示您允許 %s 按照其條款從您的 RevolutPay 帳戶扣取未來款項。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">保存以用於未來的%s付款</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">將支付資訊保存到 %s 以備將來購物使用</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">掃描卡</string>
   <!-- SEPA mandate text -->

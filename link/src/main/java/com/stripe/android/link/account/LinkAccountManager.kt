@@ -14,6 +14,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -34,10 +35,6 @@ internal class LinkAccountManager @Inject constructor(
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     val linkAccount: StateFlow<LinkAccount?> = _linkAccount
-
-    @Volatile
-    @VisibleForTesting
-    var authSessionCookie: String? = null
 
     /**
      * The publishable key for the signed in Link account.
@@ -61,17 +58,14 @@ internal class LinkAccountManager @Inject constructor(
         email: String,
         startSession: Boolean = true,
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, authSessionCookie)
+        linkRepository.lookupConsumer(email)
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
-                consumerSessionLookup.consumerSession?.let { consumerSession ->
-                    if (startSession) {
-                        setAccountNullable(consumerSession)
-                    } else {
-                        LinkAccount(consumerSession)
-                    }
-                }
+                setLinkAccountFromLookupResult(
+                    lookup = consumerSessionLookup,
+                    startSession = startSession,
+                )
             }
 
     /**
@@ -173,9 +167,12 @@ internal class LinkAccountManager @Inject constructor(
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
-            .map { consumerSession ->
-                setAccount(consumerSession)
+        linkRepository.consumerSignUp(email, phone, country, name, consentAction.consumerAction)
+            .map { consumerSessionSignup ->
+                setAccount(
+                    consumerSession = consumerSessionSignup.consumerSession,
+                    publishableKey = consumerSessionSignup.publishableKey,
+                )
             }
 
     /**
@@ -220,23 +217,45 @@ internal class LinkAccountManager @Inject constructor(
         }
     }
 
-    private fun setAccount(consumerSession: ConsumerSession): LinkAccount {
-        maybeUpdateConsumerPublishableKey(consumerSession)
+    private fun setAccount(
+        consumerSession: ConsumerSession,
+        publishableKey: String?,
+    ): LinkAccount {
+        maybeUpdateConsumerPublishableKey(consumerSession.emailAddress, publishableKey)
         val newAccount = LinkAccount(consumerSession)
         _linkAccount.value = newAccount
-        authSessionCookie = newAccount.getAuthSessionCookie()
         return newAccount
     }
 
+    fun setLinkAccountFromLookupResult(
+        lookup: ConsumerSessionLookup,
+        startSession: Boolean,
+    ): LinkAccount? {
+        return lookup.consumerSession?.let { consumerSession ->
+            if (startSession) {
+                setAccountNullable(
+                    consumerSession = consumerSession,
+                    publishableKey = lookup.publishableKey,
+                )
+            } else {
+                LinkAccount(consumerSession)
+            }
+        }
+    }
+
     @VisibleForTesting
-    fun setAccountNullable(consumerSession: ConsumerSession?): LinkAccount? =
-        consumerSession?.let {
-            setAccount(it)
+    private fun setAccountNullable(
+        consumerSession: ConsumerSession?,
+        publishableKey: String?,
+    ): LinkAccount? {
+        return consumerSession?.let {
+            setAccount(consumerSession = it, publishableKey = publishableKey)
         } ?: run {
             _linkAccount.value = null
             consumerPublishableKey = null
             null
         }
+    }
 
     /**
      * Update the [consumerPublishableKey] value if needed.
@@ -244,13 +263,16 @@ internal class LinkAccountManager @Inject constructor(
      * Only calls to [lookupConsumer] and [signUp] return the publishable key. For other calls, we
      * want to keep using the current key unless the user signed out.
      */
-    private fun maybeUpdateConsumerPublishableKey(newSession: ConsumerSession) {
-        newSession.publishableKey?.let {
+    private fun maybeUpdateConsumerPublishableKey(
+        newEmail: String,
+        publishableKey: String?,
+    ) {
+        if (publishableKey != null) {
             // If the session has a key, start using it
-            consumerPublishableKey = it
-        } ?: run {
+            consumerPublishableKey = publishableKey
+        } else {
             // Keep the current key if it's the same user, reset it if the user changed
-            if (_linkAccount.value?.email != newSession.emailAddress) {
+            if (_linkAccount.value?.email != newEmail) {
                 consumerPublishableKey = null
             }
         }

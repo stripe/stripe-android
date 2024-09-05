@@ -1,15 +1,25 @@
+@file:OptIn(ExperimentalTestApi::class)
+
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
+import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class PaymentSheetPage(
@@ -30,6 +40,23 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun clearCard() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("4242 4242 4242 4242")
+
+        replaceText("4242 4242 4242 4242", "")
+    }
+
+    fun fillCard() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Card number")
+        replaceText("Card number", "4242424242424242")
+    }
+
     fun fillOutLink() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -38,12 +65,12 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
-    fun clickOnSaveForFutureUsage(merchantName: String) {
+    fun clickOnSaveForFutureUsage() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        waitForText("Save for future $merchantName payments", true)
-        clickViewWithText("Save for future $merchantName payments")
+        waitForTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+        clickViewWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
     }
 
     fun clickOnLinkCheckbox() {
@@ -126,6 +153,20 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun clickViewWithTag(testTag: String) {
+        composeTestRule.onNode(hasTestTag(testTag))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun waitForTag(testTag: String) {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     fun waitForText(text: String, substring: Boolean = false) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
@@ -162,5 +203,35 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
             .performScrollTo()
             .performClick()
+    }
+
+    fun checkSaveForFuture() {
+        composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun clickOnLpm(code: String) {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(FORM_ELEMENT_TEST_TAG)
+        )
+        val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + code)
+
+        composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
+            .performScrollToNode(paymentMethodMatcher)
+        composeTestRule.waitForIdle()
+        composeTestRule
+            .onNode(paymentMethodMatcher)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
+
+        composeTestRule.waitForIdle()
+    }
+
+    fun fillOutKonbini(fullName: String, email: String, phone: String) {
+        replaceText("Full name", fullName)
+        replaceText("Email", email)
+        replaceText("Phone (optional)", phone)
     }
 }

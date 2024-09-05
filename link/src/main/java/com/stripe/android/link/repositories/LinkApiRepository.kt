@@ -12,6 +12,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -39,14 +40,12 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
-        email: String?,
-        authSessionCookie: String?
+        email: String,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
                     requestOptions = buildRequestOptions(),
                 )
@@ -59,18 +58,17 @@ internal class LinkApiRepository @Inject constructor(
         phone: String,
         country: String,
         name: String?,
-        authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
-    ): Result<ConsumerSession> = withContext(workContext) {
-        stripeRepository.consumerSignUp(
+    ): Result<ConsumerSessionSignup> = withContext(workContext) {
+        consumersApiService.signUp(
             email = email,
             phoneNumber = phone,
             country = country,
             name = name,
             locale = locale,
-            authSessionCookie = authSessionCookie,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
+            requestSurface = REQUEST_SURFACE,
         )
     }
 
@@ -82,17 +80,18 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
-        stripeRepository.createPaymentDetails(
+        consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
+                active = active,
             ),
-            active = active,
+            requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
-            val extraParams = extraConfirmationParams(paymentMethodCreateParams)
+            val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
 
             val createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
@@ -119,6 +118,9 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
+            extraParams = mapOf(
+                "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+            ),
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -131,7 +133,7 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams)
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
                 ),
             )
         }

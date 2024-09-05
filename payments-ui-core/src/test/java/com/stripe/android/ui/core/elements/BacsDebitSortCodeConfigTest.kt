@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 
 class BacsDebitSortCodeConfigTest {
@@ -49,17 +50,17 @@ class BacsDebitSortCodeConfigTest {
     fun `verify incomplete sort code is in incomplete state`() {
         assertThat(
             bacsDebitSortCodeConfig.determineState("123")
-        ).isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+        ).isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
 
         assertThat(
             bacsDebitSortCodeConfig.determineState("12345")
-        ).isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+        ).isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
     }
 
     @Test
     fun `verify valid sort code is in valid state`() {
         assertThat(
             bacsDebitSortCodeConfig.determineState("653987")
-        ).isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
+        ).isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
 }

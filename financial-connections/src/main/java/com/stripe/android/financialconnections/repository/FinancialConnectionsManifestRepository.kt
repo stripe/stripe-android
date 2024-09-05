@@ -13,6 +13,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
+import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -120,7 +122,7 @@ internal interface FinancialConnectionsManifestRepository {
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>
+        selectedAccounts: Set<String>?
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -132,7 +134,8 @@ internal interface FinancialConnectionsManifestRepository {
      */
     suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -168,7 +171,7 @@ internal interface FinancialConnectionsManifestRepository {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
-            apiOptions: ApiRequest.Options,
+            provideApiRequestOptions: ProvideApiRequestOptions,
             logger: Logger,
             locale: Locale,
             initialSync: SynchronizeSessionResponse?
@@ -176,7 +179,7 @@ internal interface FinancialConnectionsManifestRepository {
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
                 apiRequestFactory,
-                apiOptions,
+                provideApiRequestOptions,
                 locale,
                 logger,
                 initialSync
@@ -187,7 +190,7 @@ internal interface FinancialConnectionsManifestRepository {
 private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
-    val apiOptions: ApiRequest.Options,
+    val provideApiRequestOptions: ProvideApiRequestOptions,
     val locale: Locale,
     val logger: Logger,
     initialSync: SynchronizeSessionResponse?
@@ -215,7 +218,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 "expand" to listOf("manifest.active_auth_session"),
                 "emit_events" to true,
@@ -238,7 +241,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest = mutex.withLock {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = consentAcquiredUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -257,7 +260,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizationSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
@@ -283,7 +286,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = eventsAuthSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "client_timestamp" to clientTimestamp.time.toString(),
@@ -304,7 +307,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = cancelAuthSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -324,7 +327,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
         request = apiRequestFactory.createPost(
             url = retrieveAuthSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -343,7 +346,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizeSessionUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -363,7 +366,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = linkMoreAccountsUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -384,11 +387,16 @@ private class FinancialConnectionsManifestRepositoryImpl(
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>,
+        selectedAccounts: Set<String>?,
     ): FinancialConnectionsSessionManifest {
+        // Accounts to be saved can be null in case of manual entry.
+        val accounts: Map<String, Any> = selectedAccounts
+            ?.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
+            ?.toMap()
+            ?: emptyMap()
         val request = apiRequestFactory.createPost(
             url = saveAccountToLinkUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
@@ -397,9 +405,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "locale" to locale,
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ).filterNotNullValues() + selectedAccounts.mapIndexed { index, account ->
-                "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account
-            }
+            ).filterNotNullValues() + accounts
         )
         return requestExecutor.execute(
             request,
@@ -411,14 +417,16 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun disableNetworking(
         clientSecret: String,
-        disabledReason: String?
+        disabledReason: String?,
+        clientSuggestedNextPaneOnDisableNetworking: String?
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = disableNetworking,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("active_auth_session"),
+                "client_requested_next_pane_on_disable_networking" to clientSuggestedNextPaneOnDisableNetworking,
                 "disabled_reason" to disabledReason,
             ).filterNotNullValues()
         )
@@ -435,7 +443,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = linkVerifiedUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("active_auth_session"),
@@ -454,7 +462,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = linkStepUpVerifiedUrl,
-            options = apiOptions,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("active_auth_session"),

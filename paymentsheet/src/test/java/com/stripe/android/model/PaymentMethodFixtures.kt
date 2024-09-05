@@ -1,9 +1,14 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import org.json.JSONObject
+import org.mockito.kotlin.mock
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
@@ -79,6 +84,16 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
         code = "paypal"
+    )
+
+    val LINK_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Link,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        code = "link"
     )
 //
 //    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -405,6 +420,57 @@ internal object PaymentMethodFixtures {
 
     val US_BANK_ACCOUNT = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_JSON)
 
+    val CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
+        PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+        CardBrand.Visa,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+    )
+
+    val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        label = "PayPal".resolvableString,
+        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+    )
+
+    val CASHAPP_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+        label = "Cash App".resolvableString,
+        iconResource = 0,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(
+            billingDetails = PaymentMethod.BillingDetails(email = "example@email.com")
+        ),
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        paymentMethodOptionsParams = null,
+        paymentMethodExtraParams = null,
+    )
+
+    val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
+        labelResource = "Test",
+        iconResource = 0,
+        paymentMethodCreateParams = mock(),
+        customerRequestedSave = mock(),
+        input = PaymentSelection.New.USBankAccount.Input(
+            name = "",
+            email = null,
+            phone = null,
+            address = null,
+            saveForFutureUse = false,
+        ),
+        instantDebits = null,
+        screenState = USBankAccountFormScreenState.SavedAccount(
+            financialConnectionsSessionId = "session_1234",
+            intentId = "intent_1234",
+            bankName = "Stripe Bank",
+            last4 = "6789",
+            primaryButtonText = "Continue".resolvableString,
+            mandateText = null,
+        ),
+    )
+
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """
@@ -494,7 +560,7 @@ internal object PaymentMethodFixtures {
     fun createExternalPaymentMethod(spec: ExternalPaymentMethodSpec): PaymentSelection.ExternalPaymentMethod {
         return PaymentSelection.ExternalPaymentMethod(
             type = spec.type,
-            label = spec.type,
+            label = spec.type.resolvableString,
             iconResource = 0,
             lightThemeIconUrl = spec.lightImageUrl,
             darkThemeIconUrl = spec.darkImageUrl,
@@ -514,6 +580,19 @@ internal object PaymentMethodFixtures {
             paymentMethod
         }
     }
+
+    fun displayableCard(): DisplayableSavedPaymentMethod {
+        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+    }
+
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
+        return DisplayableSavedPaymentMethod(
+            displayName = (this.card?.last4 ?: this.usBankAccount?.last4 ?: "").resolvableString,
+            paymentMethod = this,
+            isCbcEligible = true,
+        )
+    }
+
 //
 //    fun createPaymentMethod(type: PaymentMethod.Type): PaymentMethod {
 //        return PaymentMethod(

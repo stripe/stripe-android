@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -142,7 +143,16 @@ constructor(
      *
      * [us_bank_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account)
      */
-    @JvmField val usBankAccount: USBankAccount? = null
+    @JvmField val usBankAccount: USBankAccount? = null,
+
+    /**
+     * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
+     * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved
+     * payment method in a checkout flow. The field defaults to "unspecified".
+     *
+     * [allow_redisplay](https://docs.stripe.com/api/payment_methods/object#payment_method_object-allow_redisplay)
+     */
+    @JvmField val allowRedisplay: AllowRedisplay? = null,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -161,13 +171,13 @@ constructor(
         }
 
     @Parcelize
-    enum class Type constructor(
+    enum class Type(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
         private val hasDelayedSettlement: Boolean,
-        internal val shouldRefreshIfIntentRequiresAction: Boolean,
+        internal val afterRedirectAction: AfterRedirectAction = AfterRedirectAction.None,
     ) : Parcelable {
         Link(
             "link",
@@ -175,7 +185,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Card(
             "card",
@@ -183,7 +192,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         CardPresent(
             "card_present",
@@ -191,7 +199,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Fpx(
             "fpx",
@@ -199,7 +206,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Ideal(
             "ideal",
@@ -207,7 +213,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         SepaDebit(
             "sepa_debit",
@@ -215,7 +220,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         AuBecsDebit(
             "au_becs_debit",
@@ -223,7 +227,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         BacsDebit(
             "bacs_debit",
@@ -231,7 +234,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Sofort(
             "sofort",
@@ -239,7 +241,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Upi(
             "upi",
@@ -247,7 +248,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         P24(
             "p24",
@@ -255,7 +256,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Bancontact(
             "bancontact",
@@ -263,7 +263,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Giropay(
             "giropay",
@@ -271,7 +270,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Eps(
             "eps",
@@ -279,7 +277,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Oxxo(
             "oxxo",
@@ -287,7 +284,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Alipay(
             "alipay",
@@ -295,7 +291,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         GrabPay(
             "grabpay",
@@ -303,7 +298,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         PayPal(
             "paypal",
@@ -311,7 +305,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         AfterpayClearpay(
             "afterpay_clearpay",
@@ -319,7 +312,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Netbanking(
             "netbanking",
@@ -327,7 +319,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Blik(
             "blik",
@@ -335,7 +326,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         WeChatPay(
             "wechat_pay",
@@ -343,7 +333,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Refresh(retryCount = MAX_RETRIES),
         ),
         Klarna(
             "klarna",
@@ -351,7 +341,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Affirm(
             "affirm",
@@ -359,7 +348,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         RevolutPay(
             "revolut_pay",
@@ -367,7 +355,27 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+        ),
+        Sunbit(
+            "sunbit",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+        ),
+        Billie(
+            "billie",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+        ),
+        Satispay(
+            "satispay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
         ),
         AmazonPay(
             "amazon_pay",
@@ -375,7 +383,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
         ),
         Alma(
             "alma",
@@ -383,7 +390,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         MobilePay(
             "mobilepay",
@@ -391,7 +397,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Multibanco(
             "multibanco",
@@ -399,7 +404,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Zip(
             "zip",
@@ -407,7 +411,6 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         USBankAccount(
             code = "us_bank_account",
@@ -415,7 +418,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         CashAppPay(
             code = "cashapp",
@@ -423,7 +425,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         Boleto(
             code = "boleto",
@@ -431,7 +433,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Konbini(
             code = "konbini",
@@ -439,7 +440,6 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
-            shouldRefreshIfIntentRequiresAction = false,
         ),
         Swish(
             code = "swish",
@@ -447,7 +447,11 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = true,
+            // We are intentionally polling for Swish even though it uses the redirect trampoline.
+            // About 50% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Twint(
             code = "twint",
@@ -455,7 +459,11 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            // We are intentionally polling for Twint even though it uses the redirect trampoline.
+            // About 50% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
+            afterRedirectAction = AfterRedirectAction.Poll(),
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -475,6 +483,32 @@ constructor(
         }
     }
 
+    internal sealed interface AfterRedirectAction : Parcelable {
+        val shouldRefresh: Boolean
+        val retryCount: Int
+
+        @Parcelize
+        data object None : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = false
+
+            @IgnoredOnParcel
+            override val retryCount: Int = MAX_RETRIES
+        }
+
+        @Parcelize
+        data class Poll(override val retryCount: Int = MAX_RETRIES) : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = true
+        }
+
+        @Parcelize
+        data class Refresh(override val retryCount: Int = 1) : AfterRedirectAction {
+            @IgnoredOnParcel
+            override val shouldRefresh: Boolean = true
+        }
+    }
+
     class Builder {
         private var id: String? = null
         private var created: Long? = null
@@ -482,6 +516,7 @@ constructor(
         private var type: Type? = null
         private var code: PaymentMethodCode? = null
         private var billingDetails: BillingDetails? = null
+        private var allowRedisplay: AllowRedisplay? = null
         private var metadata: Map<String, String>? = null
         private var customerId: String? = null
         private var card: Card? = null
@@ -518,6 +553,10 @@ constructor(
 
         fun setBillingDetails(billingDetails: BillingDetails?): Builder = apply {
             this.billingDetails = billingDetails
+        }
+
+        fun setAllowRedisplay(allowRedisplay: AllowRedisplay?): Builder = apply {
+            this.allowRedisplay = allowRedisplay
         }
 
         fun setCard(card: Card?): Builder = apply {
@@ -580,6 +619,7 @@ constructor(
                 type = type,
                 code = code,
                 billingDetails = billingDetails,
+                allowRedisplay = allowRedisplay,
                 customerId = customerId,
                 card = card,
                 cardPresent = cardPresent,
@@ -709,6 +749,21 @@ constructor(
                 )
             }
         }
+    }
+
+    @Parcelize
+    enum class AllowRedisplay(internal val value: String) : StripeModel {
+        // Default value for payment methods where `allow_redisplay` was not set.
+        UNSPECIFIED("unspecified"),
+
+        /*
+         * Indicates that the payment method can’t always be shown to a customer in a checkout flow. For example,
+         * it can only be shown in the context of a specific subscription.
+         */
+        LIMITED("limited"),
+
+        // Indicates that the payment method can always be shown to a customer in a checkout flow.
+        ALWAYS("always"),
     }
 
     sealed class TypeData : StripeModel {

@@ -1,27 +1,36 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 
 internal fun isSaveForFutureUseValueChangeable(
     code: PaymentMethodCode,
-    metadata: PaymentMethodMetadata,
+    paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    intent: StripeIntent,
+    hasCustomerConfiguration: Boolean,
 ): Boolean {
-    return when (metadata.stripeIntent) {
-        is PaymentIntent -> {
-            val isSetupFutureUsageSet = metadata.stripeIntent.isSetupFutureUsageSet(code)
+    return when (paymentMethodSaveConsentBehavior) {
+        is PaymentMethodSaveConsentBehavior.Disabled -> false
+        is PaymentMethodSaveConsentBehavior.Enabled -> hasCustomerConfiguration
+        is PaymentMethodSaveConsentBehavior.Legacy -> {
+            when (intent) {
+                is PaymentIntent -> {
+                    val isSetupFutureUsageSet = intent.isSetupFutureUsageSet(code)
 
-            if (isSetupFutureUsageSet) {
-                false
-            } else {
-                metadata.hasCustomerConfiguration
+                    if (isSetupFutureUsageSet) {
+                        false
+                    } else {
+                        hasCustomerConfiguration
+                    }
+                }
+
+                is SetupIntent -> {
+                    false
+                }
             }
-        }
-
-        is SetupIntent -> {
-            false
         }
     }
 }

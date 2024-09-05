@@ -32,6 +32,7 @@ dependencies {
 
     ksp libs.daggerCompiler
 
+    testImplementation project(':network-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment

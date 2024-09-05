@@ -375,6 +375,7 @@ class CollectBankAccountViewModelTest {
                         name = name,
                         email = email
                     ),
+                    hostedSurface = "payment_element"
                 )
             }.doReturn(result)
         }
@@ -422,7 +423,8 @@ class CollectBankAccountViewModelTest {
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = name,
                         email = email
-                    )
+                    ),
+                    hostedSurface = "payment_element"
                 )
             }.doReturn(result)
         }
@@ -440,7 +442,8 @@ class CollectBankAccountViewModelTest {
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
                     amount = 1000,
-                    currency = "usd"
+                    currency = "usd",
+                    hostedSurface = "payment_element"
                 )
             }.doReturn(result)
         }
@@ -458,7 +461,8 @@ class CollectBankAccountViewModelTest {
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
                     amount = null,
-                    currency = null
+                    currency = null,
+                    hostedSurface = "payment_element"
                 )
             }.doReturn(result)
         }
@@ -501,7 +505,8 @@ class CollectBankAccountViewModelTest {
                 name,
                 email
             ),
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            hostedSurface = "payment_element"
         )
     }
 
@@ -516,7 +521,8 @@ class CollectBankAccountViewModelTest {
                 name,
                 email
             ),
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            hostedSurface = "payment_element"
         )
     }
 
@@ -532,7 +538,8 @@ class CollectBankAccountViewModelTest {
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
             amount = 1000,
-            currency = "usd"
+            currency = "usd",
+            hostedSurface = "payment_element"
         )
     }
 
@@ -547,6 +554,7 @@ class CollectBankAccountViewModelTest {
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
+            hostedSurface = "payment_element"
         )
     }
 }

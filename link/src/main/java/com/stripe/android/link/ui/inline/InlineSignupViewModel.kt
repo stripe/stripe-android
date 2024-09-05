@@ -20,6 +20,8 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,21 +31,22 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 internal const val LOOKUP_DEBOUNCE_MS = 1000L
 
-internal class InlineSignupViewModel @Inject constructor(
+internal class InlineSignupViewModel @AssistedInject constructor(
+    @Assisted val signupMode: LinkSignupMode,
     config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
 ) : ViewModel() {
 
-    private val initialViewState = InlineSignupViewState.create(config)
+    private val initialViewState = InlineSignupViewState.create(signupMode, config)
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
 
+    private val showOptionalLabel = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
     private val prefillEligibleFields = initialViewState.prefillEligibleFields
 
     private val prefilledEmail = config.customerInfo.email.takeIf { Email in prefillEligibleFields }
@@ -52,13 +55,13 @@ internal class InlineSignupViewModel @Inject constructor(
 
     val emailController = EmailConfig.createController(
         initialValue = prefilledEmail,
-        showOptionalLabel = initialViewState.isShowingEmailFirst && config.showOptionalLabel,
+        showOptionalLabel = initialViewState.isShowingEmailFirst && showOptionalLabel,
     )
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
         initialValue = prefilledPhone,
         initiallySelectedCountryCode = config.customerInfo.billingCountryCode,
-        showOptionalLabel = initialViewState.isShowingPhoneFirst && config.showOptionalLabel,
+        showOptionalLabel = initialViewState.isShowingPhoneFirst && showOptionalLabel,
     )
 
     val nameController = NameConfig.createController(prefilledName)
@@ -276,11 +279,12 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     internal class Factory(
+        private val signupMode: LinkSignupMode,
         private val linkComponent: LinkComponent
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return linkComponent.inlineSignupViewModel as T
+            return linkComponent.inlineSignupViewModelFactory.create(signupMode) as T
         }
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -44,11 +43,14 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
-import com.stripe.android.financialconnections.ui.theme.LinkColors
+import com.stripe.android.financialconnections.ui.theme.LinkGreen200
+import com.stripe.android.financialconnections.ui.theme.LinkGreen900
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen(
-    backStackEntry: NavBackStackEntry,
+    backStackEntry: NavBackStackEntry
 ) {
     val viewModel: NetworkingLinkLoginWarmupViewModel = paneViewModel {
         NetworkingLinkLoginWarmupViewModel.factory(it, backStackEntry.arguments)
@@ -56,7 +58,7 @@ internal fun NetworkingLinkLoginWarmupScreen(
     val state by viewModel.stateFlow.collectAsState()
     NetworkingLinkLoginWarmupContent(
         state = state,
-        onSkipClicked = viewModel::onSkipClicked,
+        onSkipClicked = viewModel::onSecondaryButtonClicked,
         onContinueClick = viewModel::onContinueClick,
     )
 }
@@ -82,8 +84,9 @@ private fun NetworkingLinkLoginWarmupContent(
         footer = {
             Footer(
                 loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+                secondaryButtonLabel = state.secondaryButtonLabel,
                 onContinueClick = onContinueClick,
-                onSkipClicked = onSkipClicked
+                onSkipClicked = onSkipClicked,
             )
         }
     )
@@ -113,6 +116,7 @@ private fun HeaderSection() {
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
     loading: Boolean,
+    secondaryButtonLabel: Int,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
@@ -140,7 +144,7 @@ private fun Footer(
                 .testTag("skip-button")
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.stripe_networking_link_login_warmup_cta_skip))
+            Text(text = stringResource(id = secondaryButtonLabel))
         }
     }
 }
@@ -167,12 +171,12 @@ internal fun ExistingEmailSection(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(32.dp)
-                .background(color = LinkColors.Brand200, shape = CircleShape)
+                .background(color = LinkGreen200, shape = CircleShape)
         ) {
             Text(
                 text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
                 style = typography.bodySmall,
-                color = LinkColors.Brand900,
+                color = LinkGreen900,
             )
         }
         Spacer(modifier = Modifier.size(12.dp))
@@ -192,7 +196,9 @@ internal fun ExistingEmailSection(
 internal fun NetworkingLinkLoginWarmupScreenPreview(
     @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(
+        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+    ) {
         NetworkingLinkLoginWarmupContent(
             state = state,
             onContinueClick = {},

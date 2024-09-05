@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Immaġni tal-Emittent</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Immaġni tas-Sistema ta\' Pagament</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Le</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Iva</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Ikkanċella</string>
+    <string name="stripe_3ds2_hzv_header_label">Checkout Sigur</string>
+    <string name="stripe_3ds2_processing">Qed ikun ipproċessat\u2026</string>
+</resources>

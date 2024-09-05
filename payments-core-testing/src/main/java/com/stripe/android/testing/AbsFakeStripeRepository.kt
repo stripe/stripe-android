@@ -9,10 +9,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -37,7 +34,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.networking.StripeRepository
-import java.util.Locale
 
 abstract class AbsFakeStripeRepository : StripeRepository {
 
@@ -92,6 +88,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
+    ): Result<SetupIntent> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
@@ -288,31 +291,10 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun consumerSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        authSessionCookie: String?,
-        consentAction: ConsumerSignUpConsentAction,
-        requestOptions: ApiRequest.Options
-    ): Result<ConsumerSession> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options,
-        active: Boolean,
-    ): Result<ConsumerPaymentDetails> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         id: String,
+        extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<String> {
         TODO("Not yet implemented")

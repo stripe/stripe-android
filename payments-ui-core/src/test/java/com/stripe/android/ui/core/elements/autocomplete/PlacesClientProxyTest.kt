@@ -20,6 +20,7 @@ import com.google.android.libraries.places.api.net.SearchByTextResponse
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.IsPlacesAvailable
+import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -61,7 +62,7 @@ class PlacesClientProxyTest {
             errorReporter = FakeErrorReporter(),
         )
 
-        assertThat(client).isInstanceOf(DefaultPlacesClientProxy::class.java)
+        assertThat(client).isInstanceOf<DefaultPlacesClientProxy>()
     }
 
     @Test
@@ -79,7 +80,7 @@ class PlacesClientProxyTest {
             errorReporter = FakeErrorReporter(),
         )
 
-        assertThat(client).isInstanceOf(UnsupportedPlacesClientProxy::class.java)
+        assertThat(client).isInstanceOf<UnsupportedPlacesClientProxy>()
     }
 
     @Test

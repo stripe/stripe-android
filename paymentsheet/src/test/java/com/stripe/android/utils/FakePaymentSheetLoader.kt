@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -23,6 +24,7 @@ internal class FakePaymentSheetLoader(
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
     private val validationError: PaymentSheetLoadingException? = null,
+    private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
 ) : PaymentSheetLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -38,6 +40,7 @@ internal class FakePaymentSheetLoader(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean,
+        initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> {
         delay(delay)
         return if (shouldFail) {
@@ -47,10 +50,8 @@ internal class FakePaymentSheetLoader(
                 PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
                     customer = customer,
-                    isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
-                    isEligibleForCardBrandChoice = false,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
@@ -59,6 +60,8 @@ internal class FakePaymentSheetLoader(
                         allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
                         allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                             .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = isGooglePayAvailable,
+                        cbcEligibility = cbcEligibility,
                     ),
                 )
             )

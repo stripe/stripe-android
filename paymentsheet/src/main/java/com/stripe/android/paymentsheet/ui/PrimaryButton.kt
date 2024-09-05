@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.uicore.PrimaryButtonStyle
@@ -31,6 +33,7 @@ import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
+import com.stripe.android.uicore.strings.resolve
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -47,12 +50,12 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     // This is the text set by the client.  The internal label text is set to this value
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
-    private var originalLabel: String? = null
+    private var originalLabel: ResolvableString? = null
 
     private var defaultLabelColor: Int? = null
 
     @VisibleForTesting
-    internal var externalLabel: String? = null
+    internal var externalLabel: ResolvableString? = null
 
     @VisibleForTesting
     internal val viewBinding = StripePrimaryButtonBinding.inflate(
@@ -85,7 +88,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
         getTextAttributeValue(attrs)?.let {
-            setLabel(it.toString())
+            setLabel(it.toString().resolvableString)
         }
 
         isClickable = true
@@ -150,7 +153,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         return text
     }
 
-    private fun setLabel(text: String?) {
+    private fun setLabel(text: ResolvableString?) {
         externalLabel = text
         text?.let {
             if (state !is State.StartProcessing) {
@@ -158,7 +161,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             }
             viewBinding.label.setContent {
                 LabelUI(
-                    label = text,
+                    label = text.resolve(),
                     color = defaultLabelColor,
                 )
             }
@@ -182,7 +185,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = true
         isClickable = false
         setLabel(
-            resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
+            R.string.stripe_paymentsheet_primary_button_processing.resolvableString
         )
     }
 
@@ -215,6 +218,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
             isEnabled = uiState.enabled
             lockVisible = uiState.lockVisible
+            viewBinding.lockIcon.isVisible = lockVisible
             setOnClickListener { uiState.onClick() }
         }
     }
@@ -271,7 +275,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     internal data class UIState(
-        val label: String,
+        val label: ResolvableString,
         val onClick: () -> Unit,
         val enabled: Boolean,
         val lockVisible: Boolean,

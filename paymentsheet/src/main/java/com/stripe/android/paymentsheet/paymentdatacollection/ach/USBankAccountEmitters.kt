@@ -4,9 +4,9 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNot
 
 @Composable
@@ -49,7 +49,6 @@ internal fun USBankAccountEmitters(
         }.collect { saved ->
             val merchantName = viewModel.formattedMerchantName()
             val mandateText = USBankAccountTextBuilder.getContinueMandateText(
-                context = context,
                 merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
                 isInstantDebits = usBankAccountFormArgs.instantDebits,

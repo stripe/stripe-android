@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.uicore.utils.collectAsStateSafely
+import com.stripe.android.uicore.utils.collectAsState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +46,7 @@ class AddressElementUiTest {
         val formValues = element.getFormFieldValueFlow()
 
         composeTestRule.setContent {
-            val formValuesState by formValues.collectAsStateSafely()
+            val formValuesState by formValues.collectAsState()
 
             Text(formValuesState.toString())
 

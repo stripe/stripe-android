@@ -144,6 +144,67 @@ internal class CustomerSheetTest {
     }
 
     @Test
+    fun testDeleteSavedCard() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
+        resultCallback = { result ->
+            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+
+            val selected = result as CustomerSheetResult.Selected
+
+            assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
+
+            val paymentMethodSelection = selected.selection as PaymentOptionSelection.PaymentMethod
+
+            val card = paymentMethodSelection.paymentMethod.card
+
+            assertThat(card?.last4).isEqualTo("4242")
+            assertThat(card?.brand).isEqualTo(CardBrand.Visa)
+        }
+    ) { context ->
+        context.scenario.onActivity {
+            PrefsTestStore(it).clear()
+        }
+
+        networkRule.enqueue(
+            retrieveElementsSessionRequest(),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        context.presentCustomerSheet()
+
+        networkRule.enqueue(
+            detachRequest(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-detach.json")
+        }
+
+        page.clickEditButton()
+        page.clickDeleteButton(forEndsWith = "4242")
+        page.clickDialogRemoveButton()
+
+        page.waitUntilRemoved(text = "4242", substring = true)
+
+        context.markTestSucceeded()
+    }
+
+    @Test
     fun testSuccessfulCardSaveWithFullBillingDetailsCollection(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
@@ -400,6 +461,14 @@ internal class CustomerSheetTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/setup_intents/seti_12345/confirm")
+        )
+    }
+
+    private fun detachRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods/pm_67890/detach")
         )
     }
 

@@ -8,7 +8,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
+import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2NextActionHandler
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.runTest
@@ -37,7 +37,7 @@ class Stripe3DS2AuthenticatorTest {
             .build()
     ).build()
 
-    private val authenticator = Stripe3DS2Authenticator(
+    private val authenticator = Stripe3DS2NextActionHandler(
         paymentAuthConfig,
         enableLogging = false,
         publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
@@ -49,7 +49,7 @@ class Stripe3DS2AuthenticatorTest {
         runTest {
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
 
-            authenticator.authenticate(
+            authenticator.performNextAction(
                 host,
                 paymentIntent,
                 REQUEST_OPTIONS
@@ -73,7 +73,7 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.stripe3ds2CompletionLauncher = mockLauncher
 
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            authenticator.authenticate(
+            authenticator.performNextAction(
                 host,
                 paymentIntent,
                 REQUEST_OPTIONS

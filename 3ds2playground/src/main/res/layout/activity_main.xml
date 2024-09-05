@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/launch_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_challenge" />
+
+            <Button
+                android:id="@+id/launch_default_custom_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_default_custom_challenge" />
+
+            <Button
+                android:id="@+id/launch_custom_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_custom_challenge" />
+
+            <Button
+                android:id="@+id/launch_single_select_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_single_select_challenge" />
+
+            <Button
+                android:id="@+id/launch_custom_single_select_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_custom_single_select_challenge" />
+
+            <Button
+                android:id="@+id/launch_multi_select_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_multi_select_challenge" />
+
+            <Button
+                android:id="@+id/launch_custom_multi_select_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_custom_multi_select_challenge" />
+
+            <Button
+                android:id="@+id/launch_oob_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_oob_challenge" />
+
+            <Button
+                android:id="@+id/launch_custom_oob_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_custom_oob_challenge" />
+
+            <Button
+                android:id="@+id/launch_html_challenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_html_challenge" />
+
+            <Button
+                android:id="@+id/show_challenge_progress_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_challenge_progress_view" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/divider" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_visa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_visa"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_visa" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_mastercard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_mastercard"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_mastercard" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_amex"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_amex"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_amex" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_discover"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_discover"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_discover" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_cartes_bancaires"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_cartesbancaires"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_brand_cartesbancaires" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_unionpay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/stripe_3ds2_brand_unionpay"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_unionpay" />
+
+                <ImageButton
+                    android:id="@+id/show_areq_progress_unknown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@null"
+                    android:padding="10dp"
+                    android:src="@drawable/stripe_3ds2_ic_unknown" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/show_progress_view"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/divider" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

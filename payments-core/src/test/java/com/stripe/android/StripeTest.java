@@ -43,9 +43,7 @@ import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -73,7 +71,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -462,36 +459,6 @@ public class StripeTest {
         assertNotNull(bancontactSource.getRedirect());
         assertEquals("John Doe", bancontactSource.getOwner().getName());
         assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
-    }
-
-    @Test
-    public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
-            throws StripeException {
-        final SourceParams params = SourceParams.createGiropayParams(
-                2000L,
-                "Mr. X",
-                "example://redirect",
-                "a well-described statement");
-        final Map<String, String> metamap = new HashMap<String, String>() {{
-            put("giro", "with chicken");
-            put("type", "wrap");
-        }};
-        params.setMetadata(metamap);
-
-        final Source giropaySource = defaultStripe.createSourceSynchronous(params);
-        assertNotNull(giropaySource);
-        assertNotNull(giropaySource.getClientSecret());
-        assertNotNull(giropaySource.getId());
-        assertNotNull(giropaySource.getAmount());
-        assertEquals("eur", giropaySource.getCurrency());
-        assertEquals(2000L, giropaySource.getAmount().longValue());
-        assertEquals(Source.SourceType.GIROPAY, giropaySource.getType());
-        assertNotNull(giropaySource.getSourceTypeData());
-        assertNull(giropaySource.getSourceTypeModel());
-        assertNotNull(giropaySource.getOwner());
-        assertNotNull(giropaySource.getRedirect());
-        assertEquals("Mr. X", giropaySource.getOwner().getName());
-        assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
     }
 
     @Test

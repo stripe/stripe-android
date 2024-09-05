@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -22,6 +23,9 @@ class CardDetailsSectionElement(
         cbcEligibility = cbcEligibility,
     ),
 ) : FormElement {
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
+
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()
 

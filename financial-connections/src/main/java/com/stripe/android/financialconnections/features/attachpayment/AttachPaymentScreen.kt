@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.attachpayment
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
@@ -18,6 +17,7 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun AttachPaymentScreen() {

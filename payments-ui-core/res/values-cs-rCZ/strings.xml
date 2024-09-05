@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Kupte nyní nebo zaplaťte později pomocí <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Platbu proveďte v <num_installments/> bezúročných splátkách, každou ve výši <installment_price/>, splácených přes <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d bezúročné platby %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Potvrzením platby prostřednictvím služby Amazon Pay povolujete společnosti %s, aby v souladu se svými podmínkami účtovala budoucí platby z vašeho účtu Amazon Pay.</string>
   <!-- Text for back button -->
@@ -65,8 +69,14 @@
   <string name="stripe_pay_button_amount">Zaplatit %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">Přidat kartu</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">Přidat novou kartu</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informace o kartě</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Přidat bankovní účet v USA</string>
   <!-- Header text shown above a UPI ID text field -->
   <string name="stripe_paymentsheet_buy_using_upi_id">Koupit pomocí UPI ID</string>
   <!-- Payment Method type brand name. -->
@@ -85,6 +95,8 @@
   <string name="stripe_revolut_mandate">Potvrzením platby prostřednictvím služby RevolutPay povolujete společnosti %s, aby v souladu se svými podmínkami stahovala peníze z vašeho účtu RevolutPay pro budoucí platby.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Uložit pro budoucí platby %s</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Uložit platební údaje do  %s  pro budoucí nákupy</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Naskenovat kartu</string>
   <!-- SEPA mandate text -->

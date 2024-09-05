@@ -39,7 +39,7 @@ import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -84,7 +84,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
     @Assisted initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
@@ -112,9 +112,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         // auth session in the manifest.
         // if coming from a process kill, we'll fetch the current manifest from network,
         // that should contain the active auth session.
-        val sync: SynchronizeSessionResponse = getOrFetchSync(
-            refetchCondition = IfMissingActiveAuthSession
-        )
+        val sync: SynchronizeSessionResponse = getOrFetchSync()
         val manifest = sync.manifest
         val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
             institution = requireNotNull(manifest.activeInstitution),
@@ -451,7 +449,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     private fun presentDataAccessBottomSheet() {
         val authSession = stateFlow.value.payload()?.authSession
         val notice = authSession?.display?.text?.consent?.dataAccessNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(notice),
             referrer = PANE,
         )

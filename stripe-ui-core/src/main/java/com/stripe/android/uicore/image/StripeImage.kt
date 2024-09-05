@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
@@ -36,6 +37,7 @@ import com.stripe.android.uicore.image.StripeImageState.Success
  * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
  * @param debugPainter If provided, this painter will be render on Compose previews.
  * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
+ * @param disableAnimations If true, there will be no animations between icon states.
  * @param errorContent content to render when image loading fails.
  * @param loadingContent content to render when image loads.
  * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
@@ -51,6 +53,8 @@ fun StripeImage(
     contentScale: ContentScale = ContentScale.Fit,
     colorFilter: ColorFilter? = null,
     debugPainter: Painter? = null,
+    alignment: Alignment = Alignment.Center,
+    disableAnimations: Boolean = false,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
@@ -78,7 +82,16 @@ fun StripeImage(
         }
         AnimatedContent(
             targetState = state.value,
-            label = "loading_image_animation"
+            label = "loading_image_animation",
+            contentKey = { targetState ->
+                if (disableAnimations) {
+                    // Animations only occur when the content key changes, by setting the content key to a constant
+                    // value here, we can effectively disable animations.
+                    true
+                } else {
+                    targetState
+                }
+            }
         ) {
             when (it) {
                 Error -> errorContent()
@@ -88,6 +101,7 @@ fun StripeImage(
                     colorFilter = colorFilter,
                     contentDescription = contentDescription,
                     contentScale = contentScale,
+                    alignment = alignment,
                     painter = it.painter
                 )
             }

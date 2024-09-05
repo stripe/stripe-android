@@ -31,24 +31,26 @@ internal class NativeAuthFlowRouterTest {
             assignments = mapOf(
                 "connections_mobile_native" to "treatment"
             ),
-            features = mapOf()
+            features = mapOf(),
+            isInstantDebits = false,
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isTrue()
     }
 
     @Test
-    fun `nativeAuthFlowEnabled - false if experiment is treatment but instant debits`() {
+    fun `nativeAuthFlowEnabled - true if experiment is treatment and no kill switch in instant debits`() {
         val syncResponse = syncWithAssignments(
             assignments = mapOf(
                 "connections_mobile_native" to "treatment"
             ),
-            features = mapOf()
+            features = mapOf(),
+            isInstantDebits = true,
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = true)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
-        assertThat(nativeAuthFlowEnabled).isFalse()
+        assertThat(nativeAuthFlowEnabled).isTrue()
     }
 
     @Test
@@ -59,9 +61,26 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf(
                 "bank_connections_mobile_native_version_killswitch" to true
-            )
+            ),
+            isInstantDebits = false,
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
+
+        assertThat(nativeAuthFlowEnabled).isFalse()
+    }
+
+    @Test
+    fun `nativeAuthFlowEnabled - false if experiment is treatment but kill switch is on in instant debits`() {
+        val syncResponse = syncWithAssignments(
+            assignments = mapOf(
+                "connections_mobile_native" to "treatment"
+            ),
+            features = mapOf(
+                "bank_connections_mobile_native_version_killswitch" to true
+            ),
+            isInstantDebits = true,
+        )
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -74,9 +93,10 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf(
                 "bank_connections_mobile_native_version_killswitch" to false
-            )
+            ),
+            isInstantDebits = false,
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -89,9 +109,10 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf(
                 "bank_connections_mobile_native_version_killswitch" to false
-            )
+            ),
+            isInstantDebits = false,
         )
-        router.logExposure(syncResponse.manifest, isInstantDebits = false)
+        router.logExposure(syncResponse.manifest)
 
         verify(eventTracker).track(
             Exposure(
@@ -110,9 +131,10 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf(
                 "bank_connections_mobile_native_version_killswitch" to false
-            )
+            ),
+            isInstantDebits = true,
         )
-        router.logExposure(syncResponse.manifest, isInstantDebits = true)
+        router.logExposure(syncResponse.manifest)
 
         verifyNoInteractions(eventTracker)
     }
@@ -125,22 +147,25 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf(
                 "bank_connections_mobile_native_version_killswitch" to true
-            )
+            ),
+            isInstantDebits = false,
         )
-        router.logExposure(syncResponse.manifest, isInstantDebits = false)
+        router.logExposure(syncResponse.manifest)
 
         verifyNoInteractions(eventTracker)
     }
 
     private fun syncWithAssignments(
         assignments: Map<String, String>,
-        features: Map<String, Boolean>
+        features: Map<String, Boolean>,
+        isInstantDebits: Boolean,
     ) = ApiKeyFixtures.syncResponse().copy(
         manifest = ApiKeyFixtures.sessionManifest().copy(
             assignmentEventId = "id",
             accountholderToken = "token",
             experimentAssignments = assignments,
-            features = features
+            features = features,
+            isLinkWithStripe = isInstantDebits,
         )
     )
 }

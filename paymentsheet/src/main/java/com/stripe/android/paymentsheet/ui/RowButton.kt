@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,8 +19,10 @@ import com.stripe.android.uicore.stripeColors
 internal fun RowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
+    isClickable: Boolean = isEnabled,
     onClick: () -> Unit,
     contentPaddingValues: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
     modifier: Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -35,10 +38,11 @@ internal fun RowButton(
             modifier = Modifier
                 .selectable(
                     selected = isSelected,
-                    enabled = isEnabled,
+                    enabled = isClickable,
                     onClick = onClick
                 )
-                .padding(contentPaddingValues)
+                .padding(contentPaddingValues),
+            verticalArrangement = verticalArrangement,
         ) {
             content()
         }

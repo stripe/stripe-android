@@ -1,11 +1,14 @@
 package com.stripe.android.financialconnections.features.success
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntOffsetAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,26 +16,31 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -40,6 +48,10 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
@@ -54,11 +66,23 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
-private const val CHECK_ALPHA_DURATION_MS = 250
 private const val SLIDE_IN_ANIMATION_FRACTION = 4
+
+private const val ICON_SIZE = 56
+private const val SUCCESS_BODY_OFFSET = ICON_SIZE + 32
+
+private val FADE_IN_ANIMATION = fadeIn(
+    animationSpec = tween(ENTER_TRANSITION_DURATION_MS),
+)
+
+private val SUCCESS_SLIDE_IN_ANIMATION = FADE_IN_ANIMATION + slideInVertically(
+    initialOffsetY = { fullHeight -> fullHeight / SLIDE_IN_ANIMATION_FRACTION },
+)
 
 @Composable
 internal fun SuccessContent(
@@ -67,8 +91,6 @@ internal fun SuccessContent(
     onDoneClick: () -> Unit,
 ) {
     SuccessContentInternal(
-        // Just enabled on Compose Previews: allows to preview the post-animation state.
-        overrideAnimationForPreview = false,
         payloadAsync = payloadAsync,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
@@ -77,7 +99,8 @@ internal fun SuccessContent(
 
 @Composable
 private fun SuccessContentInternal(
-    overrideAnimationForPreview: Boolean,
+    overrideAnimationForPreview: Boolean = false,
+    overrideSuccessBodyHeightForPreview: Dp? = null,
     payloadAsync: Async<Payload>,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
@@ -94,30 +117,30 @@ private fun SuccessContentInternal(
         }
     }
 
-    Box {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+    ) {
+        SpinnerToSuccessAnimation(
+            content = payload?.content,
+            title = payload?.title,
+            showSpinner = showSpinner || payload == null,
+            initialSuccessBodyHeight = overrideSuccessBodyHeightForPreview,
+        )
+
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            AnimatedVisibility(
+                visible = !showSpinner,
+                enter = FADE_IN_ANIMATION,
             ) {
-                SpinnerToSuccessAnimation(
-                    customSuccessMessage = payload?.customSuccessMessage,
-                    accountsCount = payload?.accountsCount ?: 0,
-                    showSpinner = showSpinner || payload == null
+                SuccessFooter(
+                    merchantName = payload?.businessName,
+                    loading = completeSessionAsync is Loading,
+                    enabled = !showSpinner,
+                    onDoneClick = onDoneClick,
                 )
             }
-            SuccessFooter(
-                modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
-                merchantName = payload?.businessName,
-                loading = completeSessionAsync is Loading,
-                onDoneClick = onDoneClick
-            )
         }
     }
 }
@@ -125,98 +148,77 @@ private fun SuccessContentInternal(
 @Composable
 private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
-    accountsCount: Int,
-    customSuccessMessage: TextResource?
+    initialSuccessBodyHeight: Dp?,
+    content: TextResource?,
+    title: TextResource?,
+    modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        // Define the animation specs
-        val enterTransition = fadeIn(animationSpec = tween(ENTER_TRANSITION_DURATION_MS))
-        val exitTransition = fadeOut(animationSpec = tween(ENTER_TRANSITION_DURATION_MS))
+    val density = LocalDensity.current
+    val hapticFeedback = LocalHapticFeedback.current
 
-        // Delay the appearance of the check icon
-        val checkAlpha: Float by animateFloatAsState(
-            targetValue = if (showSpinner) 0f else 1f,
-            animationSpec = tween(
-                delayMillis = CHECK_ALPHA_DURATION_MS,
-                durationMillis = CHECK_ALPHA_DURATION_MS,
-                easing = LinearEasing,
-            ),
-            label = "check_icon_alpha"
-        )
+    val scope = rememberCoroutineScope()
+    var didPerformHaptics = rememberSaveable { false }
 
-        // Fade out loading spinner
-        AnimatedVisibility(
-            visible = showSpinner,
-            enter = enterTransition,
-            exit = exitTransition,
-        ) {
-            LoadingSpinner(
-                modifier = Modifier.size(56.dp)
-            )
-        }
+    var targetCheckmarkScale by rememberSaveable {
+        mutableFloatStateOf(if (showSpinner) 0f else 1f)
+    }
 
-        // Fade in + slide success content.
-        AnimatedVisibility(
-            visible = !showSpinner,
-            enter = enterTransition + slideInVertically(initialOffsetY = { it / SLIDE_IN_ANIMATION_FRACTION }),
-            exit = exitTransition
-        ) {
-            SuccessCompletedContent(
-                checkAlpha = checkAlpha,
-                customSuccessMessage = customSuccessMessage,
-                accountsCount = accountsCount
-            )
+    var successBodyHeight by remember { mutableStateOf(initialSuccessBodyHeight ?: 0.dp) }
+
+    if (!showSpinner && !didPerformHaptics) {
+        LaunchedEffect(Unit) {
+            hapticFeedback.performHapticFeedback(LongPress)
+            didPerformHaptics = true
         }
     }
-}
 
-@Composable
-private fun SuccessCompletedContent(
-    checkAlpha: Float,
-    customSuccessMessage: TextResource?,
-    accountsCount: Int
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        val finalOffset = remember(successBodyHeight) {
+            density.calculateFinalSpinnerOffset(successBodyHeight)
+        }
+
+        val spinnerPosition by animateIntOffsetAsState(
+            targetValue = if (showSpinner) {
+                IntOffset.Zero
+            } else {
+                finalOffset
+            },
+            label = "SpinnerPositionOffset",
+            finishedListener = {
+                scope.launch {
+                    targetCheckmarkScale = 1f
+                }
+            },
+        )
+
+        Crossfade(
+            targetState = showSpinner,
+            label = "SpinnerToCheckmarkCrossfade",
             modifier = Modifier
-                .size(56.dp)
-                .background(FinancialConnectionsTheme.colors.iconBrand, CircleShape)
-        ) {
-            Icon(
-                modifier = Modifier.graphicsLayer { alpha = checkAlpha },
-                imageVector = Icons.Default.Check,
-                contentDescription = stringResource(id = R.string.stripe_success_pane_title),
-                tint = Color.White
+                .size(ICON_SIZE.dp)
+                .offset { spinnerPosition },
+        ) { shouldShowSpinner ->
+            SpinnerToCheckmark(
+                showSpinner = shouldShowSpinner,
+                targetCheckmarkScale = { targetCheckmarkScale },
             )
         }
-        Text(
-            stringResource(id = R.string.stripe_success_pane_title),
-            style = typography.headingXLarge,
-            textAlign = TextAlign.Center
-        )
-        AnnotatedText(
-            text = customSuccessMessage ?: TextResource.PluralId(
-                value = R.plurals.stripe_success_pane_desc,
-                count = accountsCount,
-                args = emptyList()
-            ),
-            defaultStyle = typography.bodyMedium.copy(
-                textAlign = TextAlign.Center
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
-                    textAlign = TextAlign.Center,
-                ).toSpanStyle()
-            ),
-            onClickableTextClick = {}
-        )
+
+        AnimatedVisibility(
+            visible = !showSpinner,
+            enter = SUCCESS_SLIDE_IN_ANIMATION,
+        ) {
+            SuccessBody(
+                content = content,
+                title = title,
+                modifier = Modifier.onGloballyPositioned {
+                    successBodyHeight = with(density) { it.size.height.toDp() }
+                },
+            )
+        }
     }
 }
 
@@ -225,23 +227,100 @@ private fun SuccessCompletedContent(
 private fun SuccessFooter(
     modifier: Modifier = Modifier,
     loading: Boolean,
+    enabled: Boolean,
     merchantName: String?,
     onDoneClick: () -> Unit
 ) {
-    Box(modifier) {
-        FinancialConnectionsButton(
-            loading = loading,
-            onClick = onDoneClick,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("done_button")
-                .fillMaxWidth()
+    FinancialConnectionsButton(
+        loading = loading,
+        enabled = enabled,
+        onClick = onDoneClick,
+        modifier = modifier
+            .semantics { testTagsAsResourceId = true }
+            .testTag("done_button")
+            .fillMaxWidth()
+    ) {
+        MiddleEllipsisText(
+            text = when (merchantName) {
+                null -> stringResource(id = R.string.stripe_success_pane_done)
+                else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
+            }
+        )
+    }
+}
+
+@Composable
+private fun SpinnerToCheckmark(
+    showSpinner: Boolean,
+    targetCheckmarkScale: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val checkmarkScale by animateFloatAsState(
+        targetValue = targetCheckmarkScale(),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium,
+        ),
+        label = "CheckmarkScale",
+    )
+
+    if (showSpinner) {
+        LoadingSpinner(
+            modifier = modifier.fillMaxSize(),
+        )
+    } else {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .size(ICON_SIZE.dp)
+                .background(FinancialConnectionsTheme.colors.buttonPrimary, CircleShape)
         ) {
-            Text(
-                text = when (merchantName) {
-                    null -> stringResource(id = R.string.stripe_success_pane_done)
-                    else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
-                }
+            Icon(
+                modifier = Modifier.graphicsLayer {
+                    scaleX = checkmarkScale
+                    scaleY = checkmarkScale
+                },
+                imageVector = Icons.Default.Check,
+                contentDescription = stringResource(id = R.string.stripe_success_pane_title),
+                tint = FinancialConnectionsTheme.colors.contentOnBrand,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuccessBody(
+    content: TextResource?,
+    title: TextResource?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+    ) {
+        title?.let {
+            AnnotatedText(
+                text = it,
+                defaultStyle = typography.headingXLarge.copy(
+                    textAlign = TextAlign.Center
+                ),
+                onClickableTextClick = {}
+            )
+        }
+
+        content?.let {
+            AnnotatedText(
+                text = content,
+                defaultStyle = typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
+                        textAlign = TextAlign.Center,
+                    ).toSpanStyle()
+                ),
+                onClickableTextClick = {}
             )
         }
     }
@@ -274,11 +353,39 @@ internal fun SuccessScreenAnimationCompletedPreview(
     @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
 ) {
     FinancialConnectionsPreview {
+        val configuration = LocalConfiguration.current
+        val successBodyHeight = calculateBodyHeightForPreview(configuration)
+
         SuccessContentInternal(
             overrideAnimationForPreview = true,
+            overrideSuccessBodyHeightForPreview = successBodyHeight,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
             onDoneClick = {},
         )
     }
+}
+
+private fun calculateBodyHeightForPreview(config: Configuration): Dp {
+    // We need to manually calculate this for our screenshot tests, as we've been unable to
+    // delay the capture until the offset animation finishes.
+    val isPhone = config.orientation == Configuration.ORIENTATION_PORTRAIT
+    return if (isPhone) {
+        120.dp
+    } else {
+        72.dp
+    }
+}
+
+private fun Density.calculateFinalSpinnerOffset(
+    successBodyHeight: Dp,
+): IntOffset {
+    val offsetInDp = DpOffset(
+        x = 0.dp,
+        y = (SUCCESS_BODY_OFFSET.dp + successBodyHeight) / 2 * (-1),
+    )
+    return IntOffset(
+        x = offsetInDp.x.roundToPx(),
+        y = offsetInDp.y.roundToPx(),
+    )
 }

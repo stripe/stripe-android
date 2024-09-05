@@ -34,18 +34,18 @@ class BacsMandateConfirmationViewModelTest {
                 sortCode = "10-88-00",
                 email = "email@email.com",
                 nameOnAccount = "John Doe",
-                payer = resolvableString(R.string.stripe_paymentsheet_bacs_notice_default_payer),
+                payer = R.string.stripe_paymentsheet_bacs_notice_default_payer.resolvableString,
                 debitGuaranteeAsHtml = resolvableString(
                     R.string.stripe_paymentsheet_bacs_guarantee_format,
-                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee_url),
-                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee)
+                    R.string.stripe_paymentsheet_bacs_guarantee_url.resolvableString,
+                    R.string.stripe_paymentsheet_bacs_guarantee.resolvableString
                 ),
                 supportAddressAsHtml = resolvableString(
                     R.string.stripe_paymentsheet_bacs_support_address_format,
-                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
-                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
-                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email),
-                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email)
+                    R.string.stripe_paymentsheet_bacs_support_default_address_line_one.resolvableString,
+                    R.string.stripe_paymentsheet_bacs_support_default_address_line_two.resolvableString,
+                    R.string.stripe_paymentsheet_bacs_support_default_email.resolvableString,
+                    R.string.stripe_paymentsheet_bacs_support_default_email.resolvableString
                 ),
             )
         )

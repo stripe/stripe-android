@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import FinancialConnectionsGenericInfoScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.features.generic.GenericScreen
+import com.stripe.android.financialconnections.features.generic.GenericScreenState
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.TextResource
@@ -120,6 +123,21 @@ internal fun LegalDetailsBottomSheetContent(
 }
 
 @Composable
+internal fun GenericBottomSheetContent(
+    screen: FinancialConnectionsGenericInfoScreen,
+    onClickableTextClick: (String) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
+) {
+    GenericScreen(
+        state = GenericScreenState(screen, inModal = true),
+        onPrimaryButtonClick = onPrimaryButtonClick,
+        onSecondaryButtonClick = onSecondaryButtonClick,
+        onClickableTextClick = onClickableTextClick,
+    )
+}
+
+@Composable
 private fun Links(
     links: List<TextResource.Text>,
     onClickableTextClick: (String) -> Unit,
@@ -127,9 +145,11 @@ private fun Links(
     Column {
         val linkStyle = typography.labelLargeEmphasized.copy(color = colors.textBrand)
         links.forEachIndexed { index, link ->
-            Divider(color = colors.border)
+            Divider(color = colors.border, thickness = 0.5.dp)
             AnnotatedText(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
                 text = link,
                 defaultStyle = linkStyle,
                 annotationStyles = mapOf(
@@ -138,7 +158,7 @@ private fun Links(
                 onClickableTextClick = onClickableTextClick,
             )
             if (links.lastIndex == index) {
-                Divider(color = colors.border)
+                Divider(color = colors.border, thickness = 0.5.dp)
             }
         }
     }
@@ -151,7 +171,7 @@ private fun Title(
 ) {
     AnnotatedText(
         text = title,
-        defaultStyle = typography.headingMedium.copy(
+        defaultStyle = typography.headingLarge.copy(
             color = colors.textDefault
         ),
         onClickableTextClick = onClickableTextClick

@@ -4,23 +4,40 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -30,24 +47,85 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
-import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.R as StripeR
+
+@Composable
+internal fun SavedPaymentMethodTabLayoutUI(
+    interactor: SelectSavedPaymentMethodsInteractor,
+    cvcRecollectionState: CvcRecollectionState,
+    modifier: Modifier,
+) {
+    val state by interactor.state.collectAsState()
+
+    SavedPaymentMethodTabLayoutUI(
+        paymentOptionsItems = state.paymentOptionsItems,
+        selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        isEditing = state.isEditing,
+        isProcessing = state.isProcessing,
+        onAddCardPressed = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
+            )
+        },
+        onItemSelected = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod(
+                    it
+                )
+            )
+        },
+        onModifyItem = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
+            )
+        },
+        onItemRemoved = {
+            interactor.handleViewAction(
+                SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
+            )
+        },
+        modifier = modifier.testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+    )
+
+    if (
+        cvcRecollectionState is CvcRecollectionState.Required &&
+        (state.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)
+            ?.paymentMethod?.type == PaymentMethod.Type.Card
+    ) {
+        CvcRecollectionField(
+            cvcControllerFlow = cvcRecollectionState.cvcControllerFlow,
+            state.isProcessing
+        )
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun SavedPaymentMethodTabLayoutUI(
-    state: PaymentOptionsState,
+    paymentOptionsItems: List<PaymentOptionsItem>,
+    selectedPaymentOptionsItem: PaymentOptionsItem?,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -66,11 +144,11 @@ internal fun SavedPaymentMethodTabLayoutUI(
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
             items(
-                items = state.items,
+                items = paymentOptionsItems,
                 key = { it.key },
             ) { item ->
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
-                val isSelected = item == state.selectedItem && !isEditing
+                val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
                     item = item,
@@ -97,42 +175,42 @@ internal fun SavedPaymentMethodTabLayoutUI(
 private fun SavedPaymentMethodsTabLayoutPreview() {
     DefaultStripeTheme {
         SavedPaymentMethodTabLayoutUI(
-            state = PaymentOptionsState(
-                items = listOf(
-                    PaymentOptionsItem.AddCard,
-                    PaymentOptionsItem.Link,
-                    PaymentOptionsItem.GooglePay,
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "001",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.Card.code,
-                                type = PaymentMethod.Type.Card,
-                                card = PaymentMethod.Card(
-                                    brand = CardBrand.Visa,
-                                    last4 = "4242",
-                                )
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link,
+                PaymentOptionsItem.GooglePay,
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242".resolvableString,
+                        paymentMethod = PaymentMethod(
+                            id = "001",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Card.code,
+                            type = PaymentMethod.Type.Card,
+                            card = PaymentMethod.Card(
+                                brand = CardBrand.Visa,
+                                last4 = "4242",
                             )
                         )
                     ),
-                    PaymentOptionsItem.SavedPaymentMethod(
-                        DisplayableSavedPaymentMethod(
-                            displayName = "4242",
-                            paymentMethod = PaymentMethod(
-                                id = "002",
-                                created = null,
-                                liveMode = false,
-                                code = PaymentMethod.Type.SepaDebit.code,
-                                type = PaymentMethod.Type.SepaDebit,
-                            )
-                        )
-                    ),
+                    canRemovePaymentMethods = true,
                 ),
-                selectedIndex = 1
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod(
+                        displayName = "4242".resolvableString,
+                        paymentMethod = PaymentMethod(
+                            id = "002",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.SepaDebit.code,
+                            type = PaymentMethod.Type.SepaDebit,
+                        )
+                    ),
+                    canRemovePaymentMethods = true,
+                ),
             ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -291,46 +369,131 @@ private fun SavedPaymentMethodTab(
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(context.resources) ?: return
-
-    val removeTitle = stringResource(
-        R.string.stripe_paymentsheet_remove_pm,
-        paymentMethod.displayName,
-    )
+    val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {
             testTag = SAVED_PAYMENT_OPTION_TEST_TAG
             selected = isSelected
             text = AnnotatedString(labelText)
+
+            if (!isEnabled) {
+                disabled()
+            }
         }
     ) {
         SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
-                isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEditing -> PaymentOptionEditState.Removable
+                isEnabled && isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEnabled && isEditing -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
             isSelected = isSelected,
             isEnabled = isEnabled,
+            isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
             labelIcon = labelIcon,
             labelText = labelText,
-            removePmDialogTitle = removeTitle,
-            description = paymentMethod.getDescription(context.resources),
+            paymentMethod = paymentMethod.displayableSavedPaymentMethod,
+            description = paymentMethod
+                .displayableSavedPaymentMethod
+                .getDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onModifyAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getModifyDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
-            onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
+            onRemoveAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getRemoveDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
+            onItemSelectedListener = {
+                onItemSelected(paymentMethod.toPaymentSelection())
+            },
             modifier = modifier,
         )
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+internal fun CvcRecollectionField(
+    cvcControllerFlow: StateFlow<CvcController>,
+    isProcessing: Boolean,
+    animationDuration: Int = ANIMATION_DURATION,
+    animationDelay: Int = ANIMATION_DELAY
+) {
+    val controller by cvcControllerFlow.collectAsState()
+    val error = controller.error.collectAsState()
+    val element = CvcElement(
+        IdentifierSpec(),
+        controller
+    )
+    val focusRequester = remember { FocusRequester() }
+    var visible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(isProcessing) {
+        // Clear focus once primary button is clicked
+        if (isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        delay(animationDelay.toLong())
+        visible = true
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(tween(animationDuration, animationDelay)) {
+            it
+        }
+    ) {
+        Column(
+            Modifier.padding(20.dp, 20.dp, 20.dp, 0.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.stripeColors.subtitle
+            )
+            SectionCard(
+                Modifier
+                    .padding(0.dp, 8.dp, 0.dp, 8.dp)
+                    .height(IntrinsicSize.Min)
+            ) {
+                element.controller.ComposeUI(
+                    enabled = !isProcessing,
+                    field = element,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    hiddenIdentifiers = setOf(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Exit,
+                    previousFocusDirection = FocusDirection.Previous
+                )
+            }
+            error.value?.errorMessage?.let {
+                Row {
+                    SectionError(error = stringResource(id = it))
+                }
+            }
+        }
+    }
+}
+
+internal const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
+
 @VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
+private const val ANIMATION_DELAY = 400
+private const val ANIMATION_DURATION = 500

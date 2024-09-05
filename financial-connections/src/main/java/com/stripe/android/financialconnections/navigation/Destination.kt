@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,7 +12,9 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredModal
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
@@ -47,11 +50,19 @@ internal sealed class Destination(
     protected val route: String,
     val closeWithoutConfirmation: Boolean,
     val logPaneLaunched: Boolean,
-    paramKeys: List<String> = listOf(KEY_REFERRER),
+    extraArgs: List<NamedNavArgument> = emptyList(),
     protected val composable: @Composable (NavBackStackEntry) -> Unit
 ) {
+
+    val arguments = listOf(
+        navArgument(KEY_REFERRER) {
+            type = NavType.StringType
+            nullable = true
+        },
+    ) + extraArgs
+
     val fullRoute: String by lazy {
-        val placeholders = paramKeys.map { "{$it}" }
+        val placeholders = arguments.map { it.name }.associateWith { "{$it}" }
         route.appendParamValues(placeholders)
     }
 
@@ -77,13 +88,14 @@ internal sealed class Destination(
      */
     operator fun invoke(
         referrer: Pane,
-    ): String = route.appendParamValues(listOf(referrer.value))
+        extraArgs: Map<String, String?> = emptyMap()
+    ): String = route.appendParamValues(extraArgs.plus(KEY_REFERRER to referrer.value))
 
     data object InstitutionPicker : Destination(
         route = Pane.INSTITUTION_PICKER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
-        composable = { InstitutionPickerScreen() }
+        composable = { InstitutionPickerScreen(it) },
     )
 
     data object Consent : Destination(
@@ -144,6 +156,12 @@ internal sealed class Destination(
 
     data object NetworkingLinkLoginWarmup : Destination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
+        extraArgs = listOf(
+            navArgument(KEY_NEXT_PANE_ON_DISABLE_NETWORKING) {
+                type = NavType.StringType
+                nullable = true
+            }
+        ),
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
@@ -232,24 +250,26 @@ internal sealed class Destination(
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
+        const val KEY_NEXT_PANE_ON_DISABLE_NETWORKING = "next_pane_on_disable_networking"
     }
 }
 
-internal fun String.appendParamValues(params: List<String>): String {
-    return buildString {
-        append(this@appendParamValues)
-        params.forEach { append("/$it") }
+internal fun String.appendParamValues(params: Map<String, String?>): String {
+    if (params.isEmpty()) return this
+    val uriBuilder = Uri.parse(this).buildUpon()
+    params.forEach { (key, value) ->
+        if (value != null) uriBuilder.appendQueryParameter(key, value)
     }
+    return uriBuilder.build().toString()
 }
 
 internal fun NavGraphBuilder.composable(
     destination: Destination,
-    arguments: List<NamedNavArgument> = emptyList(),
     deepLinks: List<NavDeepLink> = emptyList(),
 ) {
     composable(
         route = destination.fullRoute,
-        arguments = arguments,
+        arguments = destination.arguments,
         deepLinks = deepLinks,
         content = { destination.Composable(navBackStackEntry = it) }
     )
@@ -257,12 +277,11 @@ internal fun NavGraphBuilder.composable(
 
 internal fun NavGraphBuilder.bottomSheet(
     destination: Destination,
-    arguments: List<NamedNavArgument> = emptyList(),
     deepLinks: List<NavDeepLink> = emptyList(),
 ) {
     bottomSheet(
         route = destination.fullRoute,
-        arguments = arguments,
+        arguments = destination.arguments,
         deepLinks = deepLinks,
         content = { destination.Composable(navBackStackEntry = it) }
     )

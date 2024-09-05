@@ -54,6 +54,7 @@ dependencies {
 
     testImplementation project(':link')
     testImplementation project(':financial-connections')
+    testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
     testImplementation project(':screenshot-testing')
 
@@ -129,6 +130,16 @@ android {
 
         kotlinOptions {
             freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+
+        managedDevices {
+            localDevices {
+                register("pixel2api33") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "aosp"
+                }
+            }
         }
     }
 

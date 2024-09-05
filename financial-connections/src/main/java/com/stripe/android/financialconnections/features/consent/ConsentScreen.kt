@@ -13,7 +13,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -28,6 +27,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.consent.ConsentPreviewParameterProvider.ConsentPreviewState
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
 import com.stripe.android.financialconnections.model.ConsentPane
@@ -48,6 +48,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.uicore.utils.collectAsState
 
 @ExperimentalMaterialApi
 @Composable
@@ -159,6 +160,7 @@ private fun LazyListScope.consentBody(
         ConsentLogoHeader(
             modifier = Modifier.fillMaxWidth(),
             logos = payload.merchantLogos,
+            showDots = payload.showAnimatedDots,
         )
         Spacer(modifier = Modifier.size(32.dp))
     }
@@ -235,11 +237,11 @@ private fun ConsentFooter(
 @Composable
 internal fun ContentPreview(
     @PreviewParameter(provider = ConsentPreviewParameterProvider::class)
-    state: ConsentState,
+    previewState: ConsentPreviewState,
 ) {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(theme = previewState.theme) {
         ConsentContent(
-            state = state,
+            state = previewState.state,
             onContinueClick = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {}

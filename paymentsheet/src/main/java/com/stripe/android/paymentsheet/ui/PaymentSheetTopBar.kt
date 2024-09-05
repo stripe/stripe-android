@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.graphics.Typeface
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -32,32 +33,33 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 
 @Composable
 internal fun PaymentSheetTopBar(
-    state: PaymentSheetTopBarState,
+    state: PaymentSheetTopBarState?,
+    isEnabled: Boolean,
     handleBackPressed: () -> Unit,
-    toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    PaymentSheetTopBar(
-        state = state,
-        elevation = elevation,
-        onNavigationIconPressed = handleBackPressed,
-        onEditIconPressed = toggleEditing,
-    )
+    if (state != null) {
+        PaymentSheetTopBar(
+            state = state,
+            isEnabled = isEnabled,
+            elevation = elevation,
+            onNavigationIconPressed = handleBackPressed,
+        )
+    }
 }
 
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState,
+    isEnabled: Boolean,
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
-    onEditIconPressed: () -> Unit,
 ) {
     val keyboardController = LocalTextInputService.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
@@ -70,7 +72,7 @@ internal fun PaymentSheetTopBar(
         },
         navigationIcon = {
             IconButton(
-                enabled = state.isEnabled,
+                enabled = isEnabled,
                 onClick = {
                     @Suppress("DEPRECATION")
                     keyboardController?.hideSoftwareKeyboard()
@@ -91,9 +93,9 @@ internal fun PaymentSheetTopBar(
             if (state.showEditMenu) {
                 EditButton(
                     labelResourceId = state.editMenuLabel,
-                    isEnabled = state.isEnabled,
+                    isEnabled = isEnabled,
                     tintColor = tintColor,
-                    onClick = onEditIconPressed,
+                    onClick = state.onEditIconPressed,
                 )
             }
         },
@@ -125,6 +127,7 @@ private fun EditButton(
     }
 
     IconButton(
+        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
         enabled = isEnabled,
         onClick = onClick,
     ) {
@@ -165,15 +168,15 @@ internal fun PaymentSheetTopBar_Preview() {
             contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = StripeR.string.stripe_edit,
-            isEnabled = true,
+            isEditing = false,
+            onEditIconPressed = {},
         )
 
         PaymentSheetTopBar(
             state = state,
+            isEnabled = true,
             elevation = 0.dp,
             onNavigationIconPressed = {},
-            onEditIconPressed = {},
         )
     }
 }
@@ -185,3 +188,6 @@ internal fun TestModeBadge_Preview() {
         TestModeBadge()
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG = "PaymentSheetEditButton"

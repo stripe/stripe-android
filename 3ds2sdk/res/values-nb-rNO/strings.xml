@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Utstederbilde</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Systembilde for betaling</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Nei</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Ja</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Avbryt</string>
+    <string name="stripe_3ds2_hzv_header_label">Sikker utsjekking</string>
+    <string name="stripe_3ds2_processing">Behandler\u2026</string>
+</resources>

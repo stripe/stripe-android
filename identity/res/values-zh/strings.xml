@@ -14,6 +14,8 @@
   <string name="stripe_back_of_dl_selected">已选择驾驶证背面</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">身份证背面</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">身份证件背面</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">已选择身份证背面</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -106,6 +108,8 @@
   <string name="stripe_front_of_dl_selected">已选择驾驶证正面</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">身份证正面</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">身份证件正面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">已选择身份证正面</string>
   <!-- Button to go back to the previous screen -->

@@ -11,6 +11,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSessionParams
@@ -29,6 +30,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -36,6 +38,7 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
@@ -99,12 +102,12 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.paymentMethodMetadata.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -151,12 +154,12 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -189,11 +192,11 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata).isNotNull()
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
@@ -227,6 +230,7 @@ class DefaultCustomerSheetLoaderTest {
         val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
             customer = null,
             externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
@@ -260,6 +264,7 @@ class DefaultCustomerSheetLoaderTest {
         val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
             customer = null,
             externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
@@ -286,13 +291,13 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
@@ -322,13 +327,13 @@ class DefaultCustomerSheetLoaderTest {
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.isGooglePayReady).isFalse()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
-        assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
@@ -563,6 +568,7 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
+            workContext = coroutineContext,
         )
 
         val completable = CompletableDeferred<Unit>()
@@ -600,11 +606,12 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
+            workContext = coroutineContext,
         )
 
         val result = loader.load(configuration)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf<IllegalStateException>()
     }
 
     @Test
@@ -719,6 +726,7 @@ class DefaultCustomerSheetLoaderTest {
         ),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
             isLiveModeProvider = isLiveModeProvider,
@@ -730,6 +738,7 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = customerAdapterProvider,
             errorReporter = errorReporter,
+            workContext = workContext,
         )
     }
 

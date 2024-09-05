@@ -52,6 +52,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
                 customer = null,
                 externalPaymentMethods = emptyList(),
+                defaultPaymentMethodId = null,
             ).getOrThrow()
         }
 
@@ -80,6 +81,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
+                    defaultPaymentMethodId = null,
                 ).getOrThrow()
             }
 
@@ -105,6 +107,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
+                    defaultPaymentMethodId = null,
                 ).getOrThrow()
             }
 
@@ -136,6 +139,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -172,6 +176,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         )
 
         assertThat(session.getOrNull()).isNull()
@@ -207,6 +212,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "customer_session_client_secret"
             ),
             externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -215,6 +221,47 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
+                    defaultPaymentMethodId = null,
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @Test
+    fun `Verify default payment method id is passed to 'StripeRepository'`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        )
+
+        repository.get(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = "pm_123",
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "client_secret",
+                    externalPaymentMethods = emptyList(),
+                    defaultPaymentMethodId = "pm_123",
                 )
             ),
             options = any()

@@ -19,10 +19,13 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
-import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -48,7 +51,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val presentNoticeSheet: PresentNoticeSheet,
+    private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -62,7 +65,8 @@ internal class ConsentViewModel @AssistedInject constructor(
             ConsentState.Payload(
                 consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
-                merchantLogos = sync.visual.merchantLogos
+                merchantLogos = sync.visual.merchantLogos,
+                showAnimatedDots = sync.manifest.showAnimatedDots,
             )
         }.execute { copy(consent = it) }
     }
@@ -121,15 +125,30 @@ internal class ConsentViewModel @AssistedInject constructor(
                 },
                 // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
                 ConsentClickableText.MANUAL_ENTRY.value to {
-                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                    navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
                 },
+                // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
+                ConsentClickableText.LINK_LOGIN_WARMUP.value to {
+                    navigationManager.tryNavigateTo(
+                        NetworkingLinkLoginWarmup(
+                            referrer = Pane.CONSENT,
+                            extraArgs = mapOf(KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta)
+                        )
+                    )
+                },
+                // Surfaces where user has signed in to Link and then launches the auth flow.
+                ConsentClickableText.LINK_ACCOUNT_PICKER.value to {
+                    navigationManager.tryNavigateTo(
+                        route = Destination.LinkAccountPicker(referrer = Pane.CONSENT)
+                    )
+                }
             )
         )
     }
 
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = DataAccess(dataAccessNotice),
             referrer = Pane.CONSENT,
         )
@@ -137,7 +156,7 @@ internal class ConsentViewModel @AssistedInject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
-        presentNoticeSheet(
+        presentSheet(
             content = Legal(notice),
             referrer = Pane.CONSENT,
         )
@@ -162,3 +181,9 @@ internal class ConsentViewModel @AssistedInject constructor(
             }
     }
 }
+
+private val FinancialConnectionsSessionManifest.showAnimatedDots: Boolean
+    get() {
+        val isInstantDebits = isLinkWithStripe ?: false
+        return !isInstantDebits
+    }

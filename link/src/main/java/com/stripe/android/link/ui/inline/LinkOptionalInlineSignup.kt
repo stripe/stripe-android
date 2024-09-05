@@ -16,7 +16,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,8 +36,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
@@ -53,51 +50,46 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 
 @Composable
-fun LinkOptionalInlineSignup(
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+internal fun LinkOptionalInlineSignup(
+    viewModel: InlineSignupViewModel,
     enabled: Boolean,
     onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkConfigurationCoordinator.component?.let { component ->
-        val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component)
-        )
+    val viewState by viewModel.viewState.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
-        val viewState by viewModel.viewState.collectAsState()
-        val errorMessage by viewModel.errorMessage.collectAsState()
-
-        LaunchedEffect(viewState) {
-            onStateChanged(viewState)
-        }
-
-        val focusManager = LocalFocusManager.current
-        val textInputService = LocalTextInputService.current
-
-        LaunchedEffect(viewState.signUpState) {
-            if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
-                focusManager.clearFocus(true)
-                @Suppress("DEPRECATION")
-                textInputService?.hideSoftwareKeyboard()
-            }
-        }
-
-        LinkOptionalInlineSignup(
-            sectionController = viewModel.sectionController,
-            emailController = viewModel.emailController,
-            phoneNumberController = viewModel.phoneController,
-            nameController = viewModel.nameController,
-            signUpState = viewState.signUpState,
-            isShowingPhoneFirst = viewState.isShowingPhoneFirst,
-            enabled = enabled,
-            requiresNameCollection = viewModel.requiresNameCollection,
-            errorMessage = errorMessage,
-            modifier = modifier
-        )
+    LaunchedEffect(viewState) {
+        onStateChanged(viewState)
     }
+
+    val focusManager = LocalFocusManager.current
+    val textInputService = LocalTextInputService.current
+
+    LaunchedEffect(viewState.signUpState) {
+        if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
+            focusManager.clearFocus(true)
+            @Suppress("DEPRECATION")
+            textInputService?.hideSoftwareKeyboard()
+        }
+    }
+
+    LinkOptionalInlineSignup(
+        sectionController = viewModel.sectionController,
+        emailController = viewModel.emailController,
+        phoneNumberController = viewModel.phoneController,
+        nameController = viewModel.nameController,
+        signUpState = viewState.signUpState,
+        isShowingPhoneFirst = viewState.isShowingPhoneFirst,
+        enabled = enabled,
+        requiresNameCollection = viewModel.requiresNameCollection,
+        errorMessage = errorMessage,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

@@ -1,45 +1,48 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
-internal const val TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON = "TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON = "TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON"
 
 @Composable
 internal fun NewPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
-    supportedPaymentMethod: SupportedPaymentMethod,
+    displayablePaymentMethod: DisplayablePaymentMethod,
     imageLoader: StripeImageLoader,
-    onClick: (SupportedPaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val iconUrl = if (isSystemInDarkTheme() && supportedPaymentMethod.darkThemeIconUrl != null) {
-        supportedPaymentMethod.darkThemeIconUrl
+    val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
+        displayablePaymentMethod.darkThemeIconUrl
     } else {
-        supportedPaymentMethod.lightThemeIconUrl
+        displayablePaymentMethod.lightThemeIconUrl
     }
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        iconRes = supportedPaymentMethod.iconResource,
+        iconRes = displayablePaymentMethod.iconResource,
         iconUrl = iconUrl,
         imageLoader = imageLoader,
-        title = supportedPaymentMethod.displayName.resolve(),
-        subtitle = supportedPaymentMethod.subtitle?.resolve(),
-        iconRequiresTinting = supportedPaymentMethod.iconRequiresTinting,
+        title = displayablePaymentMethod.displayName.resolve(),
+        subtitle = displayablePaymentMethod.subtitle?.resolve(),
+        iconRequiresTinting = displayablePaymentMethod.iconRequiresTinting,
         onClick = {
-            onClick(supportedPaymentMethod)
+            displayablePaymentMethod.onClick()
         },
-        modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${supportedPaymentMethod.code}"),
+        modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
     )
 }
 
@@ -65,7 +68,8 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = Modifier.size(20.dp),
+                modifier = modifier.height(iconHeight).width(iconWidth),
+                contentAlignment = Alignment.Center,
             )
         },
         title = title,

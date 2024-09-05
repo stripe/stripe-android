@@ -19,12 +19,13 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
+import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
@@ -45,6 +46,7 @@ internal class ManualEntryViewModel @AssistedInject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val successContentRepository: SuccessContentRepository,
+    private val updateCachedAccounts: UpdateCachedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -143,23 +145,31 @@ internal class ManualEntryViewModel @AssistedInject constructor(
             pollAttachPaymentAccount(
                 sync = sync,
                 activeInstitution = null,
-                consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(routing),
-                    accountNumber = requireNotNull(account)
+                    routingNumber = routing,
+                    accountNumber = account
                 )
             ).also {
+                clearCachedAccounts()
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
                     successContentRepository.set(
-                        customSuccessMessage = TextResource.StringId(
+                        message = TextResource.StringId(
                             R.string.stripe_success_pane_desc_microdeposits,
                             listOf(account.takeLast(4))
                         )
                     )
                 }
-                navigationManager.tryNavigateTo(Destination.ManualEntrySuccess(referrer = PANE))
+                val nextPane = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination(referrer = PANE)
+                navigationManager.tryNavigateTo(nextPane)
             }
         }.execute { copy(linkPaymentAccount = it) }
+    }
+
+    // Keeping accounts selected can lead to them being passed along
+    // to the Link signup/save call later in the flow. We don't need them anymore since we know
+    // they've failed us in some way at this point.
+    private suspend fun clearCachedAccounts() {
+        runCatching { updateCachedAccounts(emptyList()) }
     }
 
     fun onTestFill() {

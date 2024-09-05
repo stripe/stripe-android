@@ -108,6 +108,8 @@ class FormElementsBuilderTest {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,
+            linkConfigurationCoordinator = null,
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
         )
     }
 }

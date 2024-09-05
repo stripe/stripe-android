@@ -27,41 +27,77 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
+import com.stripe.android.uicore.R as StripeUiCoreR
+
+internal enum class Theme {
+    DefaultLight,
+    LinkLight;
+
+    val colors: FinancialConnectionsColors
+        get() = when (this) {
+            DefaultLight -> Colors
+            LinkLight -> InstantDebitsColors
+        }
+
+    val icon: Int
+        get() = when (this) {
+            DefaultLight -> R.drawable.stripe_logo
+            LinkLight -> StripeUiCoreR.drawable.stripe_link_logo_bw
+        }
+
+    companion object {
+        val default: Theme = DefaultLight
+    }
+}
 
 private val Colors = FinancialConnectionsColors(
-    textDefault = Color(0xFF353A44),
-    textSubdued = Color(0xFF596171),
-    textDisabled = Color(0xFF818DA0),
-    textWhite = Color(0xFFFFFFFF),
-    textBrand = Color(0xFF533AFD),
-    textCritical = Color(0xFFC0123C),
-    iconDefault = Color(0xFF474E5A),
-    iconSubdued = Color(0xFF6C7688),
-    iconWhite = Color(0xFFFFFFFF),
-    iconBrand = Color(0xFF675DFF),
-    iconCaution = Color(0xFFFF8F0E),
-    buttonPrimary = Color(0xFF675DFF),
-    buttonPrimaryHover = Color(0xFF857AFE),
-    buttonPrimaryPressed = Color(0xFF533AFD),
-    buttonSecondary = Color(0xFFF5F6F8),
-    buttonSecondaryHover = Color(0xFFF5F6F8),
-    buttonSecondaryPressed = Color(0xFFEBEEF1),
-    background = Color(0xFFF5F6F8),
-    backgroundSurface = Color(0xFFFFFFFF),
-    backgroundOffset = Color(0xFFF6F8FA),
-    backgroundBrand = Color(0xFFF5F6F8),
-    backgroundCaution = Color(0xFFFEF9DA),
-    border = Color(0xFFD8DEE4),
-    borderBrand = Color(0xFF675DFF),
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
+    textBrand = Brand600,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
+    iconBrand = Brand500,
+    iconCaution = Attention300,
+    iconBackground = Brand50,
+    buttonPrimary = Brand500,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
+    borderBrand = Brand500,
+    contentOnBrand = Neutral0,
 )
 
-internal val InstantDebitsColors = Colors.copy(
-    textBrand = Color(0XFF00A355),
-    iconBrand = Color(0XFF00D66F),
-    buttonPrimary = Color(0XFF00D66F),
-    buttonPrimaryPressed = Color(0XFF00D66F),
-    borderBrand = Color(0XFF00D66F),
+private val InstantDebitsColors = FinancialConnectionsColors(
+    textDefault = Neutral800,
+    textSubdued = Neutral600,
+    textDisabled = Neutral300,
+    textWhite = Neutral0,
+    textBrand = LinkGreen500,
+    textCritical = Critical500,
+    iconDefault = Neutral700,
+    iconWhite = Neutral0,
+    iconBrand = LinkGreen500,
+    iconCaution = Attention300,
+    iconBackground = LinkGreen50,
+    buttonPrimary = LinkGreen200,
+    buttonSecondary = Neutral25,
+    background = Neutral25,
+    backgroundSurface = Neutral0,
+    backgroundOffset = Neutral50,
+    backgroundBrand = Neutral25,
+    backgroundCaution = Attention50,
+    border = Neutral100,
+    borderBrand = LinkGreen200,
+    contentOnBrand = LinkGreen900,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -72,14 +108,14 @@ private val lineHeightStyle = LineHeightStyle(
 private val Typography = FinancialConnectionsTypography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
     ).toCompat(),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
-        lineHeight = 32.sp,
+        lineHeight = 36.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
@@ -148,35 +184,37 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
-private val TextSelectionColors = TextSelectionColors(
-    handleColor = Colors.textBrand,
-    backgroundColor = Colors.textBrand.copy(alpha = 0.4f)
-)
+internal val TextSelectionColors: TextSelectionColors
+    @Composable
+    get() = TextSelectionColors(
+        handleColor = FinancialConnectionsTheme.colors.textDefault,
+        backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
+    )
 
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = Colors.textBrand,
-        lightTheme = MaterialTheme.colors.isLight
+        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        lightTheme = MaterialTheme.colors.isLight,
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = Colors.textBrand,
-        lightTheme = MaterialTheme.colors.isLight
+        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        lightTheme = MaterialTheme.colors.isLight,
     )
 }
 
 @Composable
 internal fun FinancialConnectionsTheme(
-    instantDebits: Boolean = false,
+    theme: Theme = Theme.default,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
         LocalNavHostController provides rememberNavController(),
         LocalTypography provides Typography,
-        LocalColors provides if (instantDebits) InstantDebitsColors else Colors
+        LocalColors provides theme.colors,
     ) {
         val view = LocalView.current
         val window = findWindow()

@@ -54,31 +54,35 @@ class PaparazziRule(
                 description.methodName + testCase.name,
             )
 
-            paparazzi.prepare(newDescription)
-
             try {
-                val deviceConfig = testCase.apply(defaultDeviceConfig)
-                if (deviceConfig != defaultDeviceConfig) {
-                    paparazzi.unsafeUpdateConfig(deviceConfig)
-                }
+                paparazzi.apply(
+                    base = object : Statement() {
+                        override fun evaluate() {
+                            val deviceConfig = testCase.apply(defaultDeviceConfig)
+                            if (deviceConfig != defaultDeviceConfig) {
+                                paparazzi.unsafeUpdateConfig(deviceConfig)
+                            }
 
-                paparazzi.snapshot {
-                    CompositionLocalProvider(LocalInspectionMode provides true) {
-                        StripeTheme {
-                            Surface(color = MaterialTheme.colors.surface) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = boxModifier,
-                                ) {
-                                    content()
+                            paparazzi.snapshot {
+                                CompositionLocalProvider(LocalInspectionMode provides true) {
+                                    StripeTheme {
+                                        Surface(color = MaterialTheme.colors.surface) {
+                                            Box(
+                                                contentAlignment = Alignment.Center,
+                                                modifier = boxModifier,
+                                            ) {
+                                                content()
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
+                    },
+                    description = newDescription,
+                ).evaluate()
             } finally {
                 testCase.reset()
-                paparazzi.close()
             }
         }
     }
@@ -97,6 +101,7 @@ class PaparazziRule(
             environment = detectEnvironment().run {
                 copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
             },
+            theme = "Theme.MaterialComponents",
         )
     }
 }

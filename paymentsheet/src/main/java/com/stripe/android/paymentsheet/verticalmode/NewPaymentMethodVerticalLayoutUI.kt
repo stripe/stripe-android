@@ -6,17 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.uicore.image.StripeImageLoader
 
 internal const val TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI = "TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI"
 
 @Composable
 internal fun NewPaymentMethodVerticalLayoutUI(
-    paymentMethods: List<SupportedPaymentMethod>,
+    paymentMethods: List<DisplayablePaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
@@ -28,9 +26,8 @@ internal fun NewPaymentMethodVerticalLayoutUI(
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
                 isSelected = index == selectedIndex,
-                supportedPaymentMethod = item,
+                displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                onClick = onItemSelectedListener
             )
         }
     }

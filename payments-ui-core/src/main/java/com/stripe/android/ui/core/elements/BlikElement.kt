@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
@@ -16,6 +17,8 @@ class BlikElement(
         textFieldConfig = BlikConfig()
     )
 ) : SectionSingleFieldElement(identifier = identifier) {
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.formFieldValue.mapAsStateFlow { entry ->

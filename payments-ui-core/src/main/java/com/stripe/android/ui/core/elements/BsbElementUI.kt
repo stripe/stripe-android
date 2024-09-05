@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -13,6 +12,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

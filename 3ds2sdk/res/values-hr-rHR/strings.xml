@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Slika izdavatelja</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Slika sustava plaćanja</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Ne</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Da</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Otkaži</string>
+    <string name="stripe_3ds2_hzv_header_label">Sigurna naplata</string>
+    <string name="stripe_3ds2_processing">Obrađuje se\u2026</string>
+</resources>

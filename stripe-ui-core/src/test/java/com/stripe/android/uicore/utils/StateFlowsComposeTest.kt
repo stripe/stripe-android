@@ -23,7 +23,7 @@ class StateFlowsComposeTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `'collectAsStateSafely' only produces initial value on initial composition`() {
+    fun `Custom 'collectAsState' only produces initial value on initial composition`() {
         val stateFlow = MutableStateFlow(2)
         var initialValueProducedCount = 0
 
@@ -44,7 +44,7 @@ class StateFlowsComposeTest {
                 text
             }
 
-            val testState by testStateFlow.collectAsStateSafely()
+            val testState by testStateFlow.collectAsState()
 
             SideEffect {
                 recompositionCount++
@@ -72,11 +72,11 @@ class StateFlowsComposeTest {
     }
 
     @Test
-    fun `'collectAsStateSafely' recomposes on state updates`() {
+    fun `Custom 'collectAsState' recomposes on state updates`() {
         val testStateFlow = MutableStateFlow("Hello")
 
         composeTestRule.setContent {
-            val testState by testStateFlow.collectAsStateSafely()
+            val testState by testStateFlow.collectAsState()
 
             Text(testState)
         }

@@ -93,7 +93,7 @@ private class NetworkStatement(
         override fun open(
             request: StripeRequest,
             callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpURLConnection {
+        ): HttpsURLConnection {
             val requestHost = request.url.hostFromUrl()
             if (!hostsToTrack.contains(requestHost)) {
                 throw RequestNotFoundException(
@@ -109,10 +109,8 @@ private class NetworkStatement(
                     mockWebServer.baseUrl.toString().removeSuffix("/")
                 )
             )
-            return (URL(delegatingRequest.url).openConnection() as HttpURLConnection).apply {
-                if (this is HttpsURLConnection) {
-                    sslSocketFactory = mockWebServer.clientSocketFactory()
-                }
+            return (URL(delegatingRequest.url).openConnection() as HttpsURLConnection).apply {
+                sslSocketFactory = mockWebServer.clientSocketFactory()
                 callback(delegatingRequest)
             }
         }

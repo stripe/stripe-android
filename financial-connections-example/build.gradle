@@ -48,6 +48,7 @@ def getBackendUrl() {
 dependencies {
     implementation project(':financial-connections')
     implementation project(':payments-core')
+    implementation project(':paymentsheet')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat

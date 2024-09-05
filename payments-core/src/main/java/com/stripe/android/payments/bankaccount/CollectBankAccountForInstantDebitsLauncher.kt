@@ -9,7 +9,8 @@ import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CollectBankAccountForInstantDebitsLauncher(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+    private val hostedSurface: String?
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(
@@ -24,6 +25,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -41,6 +43,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                hostedSurface = hostedSurface,
                 attachToIntent = true
             )
         )
@@ -80,12 +83,16 @@ class CollectBankAccountForInstantDebitsLauncher(
         private const val LAUNCHER_KEY = "CollectBankAccountForInstantDebitsLauncher"
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun create(
+        fun createForPaymentSheet(
+            hostedSurface: String,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForInstantDebitsLauncher(
-                activityResultRegistryOwner.activityResultRegistry.register(
+                // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
+                // use a separate method and ensure the correct hostedSurface is set.
+                hostedSurface = hostedSurface,
+                hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract()
                 ) {

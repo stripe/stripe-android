@@ -37,6 +37,17 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
+    val linkMode: LinkMode?
+        get() = if (isLinkEnabled) {
+            if (linkPassthroughModeEnabled) {
+                LinkMode.Passthrough
+            } else {
+                LinkMode.PaymentMethod
+            }
+        } else {
+            null
+        }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -60,8 +71,44 @@ data class ElementsSession(
             val liveMode: Boolean,
             val apiKey: String,
             val apiKeyExpiry: Int,
-            val customerId: String
+            val customerId: String,
+            val components: Components,
         ) : StripeModel
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Components(
+            val mobilePaymentElement: MobilePaymentElement,
+            val customerSheet: CustomerSheet,
+        ) : StripeModel {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            sealed interface MobilePaymentElement : StripeModel {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data object Disabled : MobilePaymentElement
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class Enabled(
+                    val isPaymentMethodSaveEnabled: Boolean,
+                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
+                ) : MobilePaymentElement
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            sealed interface CustomerSheet : StripeModel {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data object Disabled : CustomerSheet
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class Enabled(
+                    val isPaymentMethodRemoveEnabled: Boolean,
+                ) : CustomerSheet
+            }
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

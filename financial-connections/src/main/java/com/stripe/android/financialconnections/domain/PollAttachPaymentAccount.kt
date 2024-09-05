@@ -8,6 +8,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -17,6 +19,8 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class PollAttachPaymentAccount @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
+    private val consumerSessionProvider: ConsumerSessionProvider,
+    private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
 
@@ -24,8 +28,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
         sync: SynchronizeSessionResponse,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
-        // null, if account should not be saved to Link user.
-        consumerSessionClientSecret: String?,
+
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(
@@ -35,11 +38,14 @@ internal class PollAttachPaymentAccount @Inject constructor(
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
-                repository.postLinkAccountSessionPaymentAccount(
+                repository.postAttachPaymentAccountToLinkAccountSession(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
                     paymentAccount = params,
-                    consumerSessionClientSecret = consumerSessionClientSecret
-                )
+                    // null, if account should not be saved to Link user.
+                    consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret,
+                ).also {
+                    attachedPaymentAccountRepository.set(params)
+                }
             } catch (e: StripeException) {
                 throw e.toDomainException(
                     activeInstitution,

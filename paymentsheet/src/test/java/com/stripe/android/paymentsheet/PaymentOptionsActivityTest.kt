@@ -23,8 +23,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -43,6 +43,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -129,7 +130,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity {
                 // We use US Bank Account because they don't dismiss PaymentSheet upon selection
                 // due to their mandate requirement.
-                val usBankAccountLabel = usBankAccount.getLabel(context.resources)
+                val usBankAccountLabel = usBankAccount.getLabel()?.resolve(context)
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
@@ -213,7 +214,7 @@ internal class PaymentOptionsActivityTest {
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
-                assertThat(activity.continueButton.externalLabel)
+                assertThat(activity.continueButton.externalLabel?.resolve(context))
                     .isEqualTo("Continue")
 
                 activity.finish()
@@ -259,7 +260,7 @@ internal class PaymentOptionsActivityTest {
     fun `notes visibility is set correctly`() {
         val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
 
-        val label = usBankAccount.getLabel(context.resources)
+        val label = usBankAccount.getLabel()?.resolve(context)
         val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
 
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
@@ -366,14 +367,14 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -392,14 +393,43 @@ internal class PaymentOptionsActivityTest {
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, true)
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, true)
+                viewModel.mandateHandler.updateMandateText(null, true)
+                mandateNode.assertDoesNotExist()
+            }
+        }
+    }
+
+    @Test
+    fun `mandate text is shown above primary button when in vertical mode`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.state.config.copy(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+                viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -418,18 +448,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+        ) { linkHandler, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
-                prefsRepositoryFactory = { FakePrefsRepository() },
                 eventReporter = eventReporter,
                 customerRepository = FakeCustomerRepository(),
                 workContext = testDispatcher,
-                application = ApplicationProvider.getApplicationContext(),
-                logger = Logger.noop(),
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationCoordinator = linkInteractor,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = mock()
             )
         }

@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet.model
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -27,11 +27,9 @@ internal sealed class PaymentSelection : Parcelable {
     abstract val requiresConfirmation: Boolean
 
     abstract fun mandateText(
-        context: Context,
         merchantName: String,
-        isSaveForFutureUseSelected: Boolean,
         isSetupFlow: Boolean,
-    ): String?
+    ): ResolvableString?
 
     @Parcelize
     data object GooglePay : PaymentSelection() {
@@ -40,11 +38,9 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -56,11 +52,9 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -69,7 +63,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class ExternalPaymentMethod(
         val type: String,
         val billingDetails: PaymentMethod.BillingDetails?,
-        val label: String,
+        val label: ResolvableString,
         // In practice, we don't have an iconResource for external payment methods.
         @DrawableRes val iconResource: Int,
         // In practice, we always have a lightThemeIconUrl for external payment methods.
@@ -80,11 +74,9 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean
-        ): String? {
+        ): ResolvableString? {
             return null
         }
     }
@@ -93,8 +85,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
-        val requiresSaveOnConfirmation: Boolean = false,
-        val recollectedCvc: String? = null
+        val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
@@ -111,23 +102,20 @@ internal sealed class PaymentSelection : Parcelable {
                 paymentMethod.type == PaymentMethod.Type.SepaDebit
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
                     USBankAccountTextBuilder.getContinueMandateText(
-                        context = context,
                         merchantName = merchantName,
-                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isSaveForFutureUseSelected = false,
                         isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
                     )
                 }
                 PaymentMethod.Type.SepaDebit -> {
-                    context.getString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
+                    resolvableString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
                 }
                 else -> {
                     null
@@ -153,11 +141,9 @@ internal sealed class PaymentSelection : Parcelable {
             get() = false
 
         override fun mandateText(
-            context: Context,
             merchantName: String,
-            isSaveForFutureUseSelected: Boolean,
             isSetupFlow: Boolean,
-        ): String? {
+        ): ResolvableString? {
             return null
         }
 
@@ -187,11 +173,9 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New() {
 
             override fun mandateText(
-                context: Context,
                 merchantName: String,
-                isSaveForFutureUseSelected: Boolean,
                 isSetupFlow: Boolean,
-            ): String? {
+            ): ResolvableString? {
                 return screenState.mandateText
             }
 
@@ -234,21 +218,12 @@ internal sealed class PaymentSelection : Parcelable {
             val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
-            val label = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card ->
-                    "····${paymentDetails.last4}"
-
-                is ConsumerPaymentDetails.BankAccount ->
-                    "····${paymentDetails.last4}"
-
-                is ConsumerPaymentDetails.Passthrough ->
-                    "····${paymentDetails.last4}"
-            }
+            val label = "····${paymentDetails.last4}"
         }
 
         @Parcelize
         data class GenericPaymentMethod(
-            val labelResource: String,
+            val label: ResolvableString,
             @DrawableRes val iconResource: Int,
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
@@ -268,4 +243,10 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
+    }
+
+internal val PaymentSelection.isSaved: Boolean
+    get() = when (this) {
+        is PaymentSelection.Saved -> true
+        else -> false
     }

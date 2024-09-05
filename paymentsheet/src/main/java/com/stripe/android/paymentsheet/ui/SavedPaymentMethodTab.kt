@@ -35,23 +35,22 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.R as StripeR
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
 
 internal const val TEST_TAG_REMOVE_BADGE = "remove_badge"
+internal const val TEST_TAG_MODIFY_BADGE = "modify_badge"
 
 private const val EDIT_ICON_SCALE = 0.6f
 private val editIconColorLight = Color(0x99000000)
@@ -69,12 +68,13 @@ internal fun SavedPaymentMethodTab(
     isSelected: Boolean,
     editState: PaymentOptionEditState,
     isEnabled: Boolean,
+    isClickable: Boolean = isEnabled,
     iconRes: Int,
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
     @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
-    removePmDialogTitle: String = "",
+    paymentMethod: DisplayableSavedPaymentMethod? = null,
     description: String,
     shouldOpenRemoveDialog: Boolean = false,
     onRemoveListener: (() -> Unit)? = null,
@@ -100,7 +100,7 @@ internal fun SavedPaymentMethodTab(
             Column {
                 SavedPaymentMethodCard(
                     isSelected = isSelected,
-                    isEnabled = isEnabled,
+                    isClickable = isClickable,
                     labelText = labelText,
                     iconRes = iconRes,
                     iconTint = iconTint,
@@ -115,10 +115,7 @@ internal fun SavedPaymentMethodTab(
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
-                            // This makes the screen reader read out numbers digit by digit
-                            // one one one one vs one thousand one hundred eleven
-                            this.contentDescription =
-                                description.replace("\\d".toRegex(), "$0 ")
+                            contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
             }
@@ -129,13 +126,10 @@ internal fun SavedPaymentMethodTab(
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )
 
-    if (openRemoveDialog.value && editState == PaymentOptionEditState.Removable && onRemoveListener != null) {
-        SimpleDialogElementUI(
-            titleText = removePmDialogTitle,
-            messageText = description,
-            confirmText = stringResource(StripeR.string.stripe_remove),
-            dismissText = stringResource(StripeR.string.stripe_cancel),
-            destructive = true,
+    val displayRemoveDialog = openRemoveDialog.value && editState == PaymentOptionEditState.Removable
+    if (displayRemoveDialog && onRemoveListener != null && paymentMethod != null) {
+        RemovePaymentMethodDialogUI(
+            paymentMethod = paymentMethod,
             onConfirmListener = {
                 openRemoveDialog.value = false
                 onRemoveListener()
@@ -178,7 +172,7 @@ private fun SavedPaymentMethodBadge(
 @Composable
 private fun SavedPaymentMethodCard(
     isSelected: Boolean,
-    isEnabled: Boolean,
+    isClickable: Boolean,
     iconRes: Int,
     iconTint: Color?,
     labelText: String,
@@ -200,7 +194,7 @@ private fun SavedPaymentMethodCard(
                 .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
                 .selectable(
                     selected = isSelected,
-                    enabled = isEnabled,
+                    enabled = isClickable,
                     onClick = onItemSelectedListener,
                 ),
         ) {
@@ -272,7 +266,8 @@ private fun ModifyBadge(
             .size(20.dp)
             .clip(CircleShape)
             .background(color = backgroundColor)
-            .clickable(onClick = onPressed),
+            .clickable(onClick = onPressed)
+            .testTag(TEST_TAG_MODIFY_BADGE),
     )
 }
 

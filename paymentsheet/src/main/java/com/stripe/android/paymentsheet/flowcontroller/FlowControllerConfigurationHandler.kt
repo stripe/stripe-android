@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,6 +39,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         scope: CoroutineScope,
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
+        initializedViaCompose: Boolean,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         val oldJob = job.getAndSet(
@@ -47,6 +47,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                 configureInternal(
                     initializationMode = initializationMode,
                     configuration = configuration,
+                    initializedViaCompose = initializedViaCompose,
                     callback = callback,
                 )
             }
@@ -57,6 +58,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun configureInternal(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
+        initializedViaCompose: Boolean,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
@@ -85,7 +87,12 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         viewModel.resetSession()
 
-        paymentSheetLoader.load(initializationMode, configuration).fold(
+        paymentSheetLoader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = configuration,
+            isReloadingAfterProcessDeath = false,
+            initializedViaCompose = initializedViaCompose,
+        ).fold(
             onSuccess = { state ->
                 if (state.validationError != null) {
                     onConfigured(state.validationError)

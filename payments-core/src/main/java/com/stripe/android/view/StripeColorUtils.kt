@@ -16,6 +16,7 @@ internal class StripeColorUtils(private val context: Context) {
     val colorControlNormal: Int = getTypedValue(android.R.attr.colorControlNormal).data
     val textColorPrimary: Int = getTypedValue(android.R.attr.textColorPrimary).data
     val textColorSecondary: Int = getTypedValue(android.R.attr.textColorSecondary).data
+    val colorPrimary: Int = getTypedValue(android.R.attr.colorPrimary).data
 
     private fun getTypedValue(@AttrRes idRes: Int) = TypedValue().also {
         context.theme.resolveAttribute(idRes, it, true)

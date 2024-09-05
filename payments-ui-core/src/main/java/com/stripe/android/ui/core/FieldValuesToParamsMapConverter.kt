@@ -24,7 +24,8 @@ class FieldValuesToParamsMapConverter {
         fun transformToPaymentMethodCreateParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
-            requiresMandate: Boolean
+            requiresMandate: Boolean,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
@@ -43,7 +44,8 @@ class FieldValuesToParamsMapConverter {
                         requiresMandate = requiresMandate,
                         billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
                         overrideParamMap = this,
-                        productUsage = setOf("PaymentSheet")
+                        productUsage = setOf("PaymentSheet"),
+                        allowRedisplay = allowRedisplay,
                     )
                 }
         }

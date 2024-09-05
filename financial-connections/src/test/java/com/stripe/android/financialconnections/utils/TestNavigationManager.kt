@@ -49,4 +49,9 @@ internal class TestNavigationManager : NavigationManager {
         assertThat(last.route).isEqualTo(destination(pane))
         assertThat(last.popUpTo).isEqualTo(popUpTo)
     }
+
+    fun assertNavigatedBack() {
+        val last: NavigationIntent = emittedIntents.last()
+        assertIs<NavigationIntent.NavigateBack>(last)
+    }
 }

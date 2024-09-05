@@ -35,6 +35,8 @@ internal interface EditPaymentMethodViewInteractor {
 }
 
 internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethodViewInteractor {
+    val isLiveMode: Boolean
+
     fun close()
 
     interface Factory {
@@ -43,28 +45,29 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
 
 internal class DefaultEditPaymentMethodViewInteractor(
     initialPaymentMethod: PaymentMethod,
-    displayName: String,
+    displayName: ResolvableString,
     private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
+    override val isLiveMode: Boolean,
     workContext: CoroutineContext = Dispatchers.Default,
-) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
+) : ModifiableEditPaymentMethodViewInteractor {
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
     private val paymentMethod = MutableStateFlow(initialPaymentMethod)
     private val confirmRemoval = MutableStateFlow(false)
     private val error = MutableStateFlow<ResolvableString?>(null)
-
-    override val coroutineContext: CoroutineContext = workContext + SupervisorJob()
+    private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
 
     override val viewState = combineAsStateFlow(
         paymentMethod,
@@ -102,7 +105,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
     }
 
     override fun close() {
-        cancel()
+        coroutineScope.cancel()
     }
 
     private fun onRemovePressed() {
@@ -112,7 +115,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private fun onRemoveConfirmed() {
         confirmRemoval.value = false
 
-        launch {
+        coroutineScope.launch {
             error.emit(null)
             status.emit(EditPaymentMethodViewState.Status.Removing)
 
@@ -129,7 +132,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         val currentChoice = choice.value
 
         if (currentPaymentMethod.getPreferredChoice() != currentChoice) {
-            launch {
+            coroutineScope.launch {
                 error.emit(null)
                 status.emit(EditPaymentMethodViewState.Status.Updating)
 
@@ -195,8 +198,9 @@ internal class DefaultEditPaymentMethodViewInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String,
+            displayName: ResolvableString,
             canRemove: Boolean,
+            isLiveMode: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -205,6 +209,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 updateExecutor = updateExecutor,
                 displayName = displayName,
                 canRemove = canRemove,
+                isLiveMode = isLiveMode,
             )
         }
     }

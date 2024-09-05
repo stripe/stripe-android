@@ -21,7 +21,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
@@ -57,55 +54,50 @@ import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 
 @Composable
-fun LinkInlineSignup(
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+internal fun LinkInlineSignup(
+    viewModel: InlineSignupViewModel,
     enabled: Boolean,
     onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkConfigurationCoordinator.component?.let { component ->
-        val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component)
-        )
+    val viewState by viewModel.viewState.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
-        val viewState by viewModel.viewState.collectAsState()
-        val errorMessage by viewModel.errorMessage.collectAsState()
-
-        LaunchedEffect(viewState) {
-            onStateChanged(viewState)
-        }
-
-        val focusManager = LocalFocusManager.current
-        val textInputService = LocalTextInputService.current
-
-        LaunchedEffect(viewState.signUpState) {
-            if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
-                focusManager.clearFocus(true)
-                @Suppress("DEPRECATION")
-                textInputService?.hideSoftwareKeyboard()
-            }
-        }
-
-        LinkInlineSignup(
-            merchantName = viewState.merchantName,
-            sectionController = viewModel.sectionController,
-            emailController = viewModel.emailController,
-            phoneNumberController = viewModel.phoneController,
-            nameController = viewModel.nameController,
-            signUpState = viewState.signUpState,
-            enabled = enabled,
-            expanded = viewState.isExpanded,
-            requiresNameCollection = viewModel.requiresNameCollection,
-            errorMessage = errorMessage,
-            toggleExpanded = viewModel::toggleExpanded,
-            modifier = modifier
-        )
+    LaunchedEffect(viewState) {
+        onStateChanged(viewState)
     }
+
+    val focusManager = LocalFocusManager.current
+    val textInputService = LocalTextInputService.current
+
+    LaunchedEffect(viewState.signUpState) {
+        if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
+            focusManager.clearFocus(true)
+            @Suppress("DEPRECATION")
+            textInputService?.hideSoftwareKeyboard()
+        }
+    }
+
+    LinkInlineSignup(
+        merchantName = viewState.merchantName,
+        sectionController = viewModel.sectionController,
+        emailController = viewModel.emailController,
+        phoneNumberController = viewModel.phoneController,
+        nameController = viewModel.nameController,
+        signUpState = viewState.signUpState,
+        enabled = enabled,
+        expanded = viewState.isExpanded,
+        requiresNameCollection = viewModel.requiresNameCollection,
+        errorMessage = errorMessage,
+        toggleExpanded = viewModel::toggleExpanded,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -217,8 +209,7 @@ private fun LinkCheckbox(
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface
-                    .copy(alpha = contentAlpha)
+                color = MaterialTheme.stripeColors.subtitle
             )
         }
     }

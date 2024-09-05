@@ -7,16 +7,15 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
 
 /**
@@ -46,7 +45,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         if (!applicationIsTaskOwner()) {
-            viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+            viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
         setContent {
@@ -61,6 +60,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     viewModel.paymentOptionResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
+                        viewModel.navigationHandler.closeScreens()
                         finish()
                     }
                 }
@@ -69,7 +69,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     state = bottomSheetState,
                     onDismissed = viewModel::onUserCancel,
                 ) {
-                    PaymentSheetScreen(viewModel, type = Custom)
+                    PaymentSheetScreen(viewModel)
                 }
             }
         }

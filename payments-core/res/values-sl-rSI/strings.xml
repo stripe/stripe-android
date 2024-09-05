@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Vnesite zvezno državo</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Uporabite &lt;img src=\"affirm\"&gt; za poznejše plačilo</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Uporabite Affirm za poznejše plačilo.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Ime na računu</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">Neveljaven dostavni naslov</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Vaša poštna številka ni popolna.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Enostavna in varna plačila z enim klikom</string>
   <string name="stripe_payment_method_add_new_card">Dodajte novo kartico ...</string>
   <string name="stripe_payment_method_add_new_fpx">Izberite bančni račun (FPX) …</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">Izberite način dostave</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Posodobite kartico</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Posodobi</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Preverite svoje plačilo</string>
 </resources>

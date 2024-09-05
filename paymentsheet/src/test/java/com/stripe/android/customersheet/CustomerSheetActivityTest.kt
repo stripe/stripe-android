@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
@@ -21,6 +22,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -90,7 +92,7 @@ internal class CustomerSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData,
             )
-            assertThat(result).isInstanceOf(InternalCustomerSheetResult.Error::class.java)
+            assertThat(result).isInstanceOf<InternalCustomerSheetResult.Error>()
         }
     }
 
@@ -311,6 +313,7 @@ internal class CustomerSheetActivityTest {
             primaryButtonLabel = primaryButtonLabel,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemovePaymentMethods = true,
         )
     }
 
@@ -340,12 +343,13 @@ internal class CustomerSheetActivityTest {
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isFirstPaymentMethod = false,
-            primaryButtonLabel = resolvableString("Save"),
+            primaryButtonLabel = "Save".resolvableString,
             primaryButtonEnabled = false,
             customPrimaryButtonUiState = null,
             bankAccountResult = null,
             draftPaymentSelection = null,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            errorReporter = FakeErrorReporter(),
         )
     }
 

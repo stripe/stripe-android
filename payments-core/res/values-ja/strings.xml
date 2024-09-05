@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">都道府県を入力してください</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt; で時間をかけて支払う</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Affirm で分割払いに。</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">口座名義人</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">配送先住所が無効です</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">郵便番号の入力に不備があります。</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">シンプルで安全なワンクリック決済</string>
   <string name="stripe_payment_method_add_new_card">新しいカードを追加...</string>
   <string name="stripe_payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">配送方法を選択してください</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">カードを更新</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">更新する</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">支払いの確認</string>
 </resources>

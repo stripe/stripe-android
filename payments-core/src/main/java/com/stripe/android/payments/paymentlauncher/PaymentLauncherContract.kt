@@ -33,7 +33,7 @@ class PaymentLauncherContract :
         open val stripeAccountId: String?,
         open val enableLogging: Boolean,
         open val productUsage: Set<String>,
-        open val includePaymentSheetAuthenticators: Boolean,
+        open val includePaymentSheetNextHandlers: Boolean,
         @ColorInt open var statusBarColor: Int? = null,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
@@ -45,7 +45,7 @@ class PaymentLauncherContract :
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            override val includePaymentSheetAuthenticators: Boolean,
+            override val includePaymentSheetNextHandlers: Boolean,
             val confirmStripeIntentParams: ConfirmStripeIntentParams,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
@@ -53,7 +53,7 @@ class PaymentLauncherContract :
             stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
-            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
             statusBarColor = statusBarColor,
         )
 
@@ -64,7 +64,7 @@ class PaymentLauncherContract :
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            override val includePaymentSheetAuthenticators: Boolean,
+            override val includePaymentSheetNextHandlers: Boolean,
             val paymentIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
@@ -72,7 +72,7 @@ class PaymentLauncherContract :
             stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
-            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
             statusBarColor = statusBarColor,
         )
 
@@ -83,7 +83,7 @@ class PaymentLauncherContract :
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            override val includePaymentSheetAuthenticators: Boolean,
+            override val includePaymentSheetNextHandlers: Boolean,
             val setupIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
@@ -91,7 +91,7 @@ class PaymentLauncherContract :
             stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
-            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
             statusBarColor = statusBarColor,
         )
 

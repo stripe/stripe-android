@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -18,12 +19,14 @@ import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -86,10 +89,22 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
     }
 
-    fun onSkipClicked() {
+    fun onSecondaryButtonClicked() {
+        if (stateFlow.value.isInstantDebits) {
+            // In Instant Debits, the consumer can't skip networking. We simply close the
+            // sheet and await the consumer's next action.
+            navigationManager.tryNavigateBack()
+        } else {
+            skipNetworking()
+        }
+    }
+
+    private fun skipNetworking() {
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
-            disableNetworking().also {
+            disableNetworking(
+                clientSuggestedNextPaneOnDisableNetworking = stateFlow.value.nextPaneOnDisableNetworking
+            ).also {
                 val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
                     route = it.nextPane.destination(referrer = PANE),
@@ -130,8 +145,9 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             arguments: Bundle?
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
+                val parentState = parentComponent.viewModel.stateFlow.value
                 parentComponent.networkingLinkLoginWarmupViewModelFactory.create(
-                    NetworkingLinkLoginWarmupState(arguments)
+                    NetworkingLinkLoginWarmupState(arguments, parentState)
                 )
             }
         }
@@ -140,14 +156,28 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
 internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
+    val nextPaneOnDisableNetworking: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
+    val isInstantDebits: Boolean = false,
 ) {
 
-    constructor(args: Bundle?) : this(
+    val secondaryButtonLabel: Int
+        get() = if (isInstantDebits) {
+            R.string.stripe_networking_link_login_warmup_cta_cancel
+        } else {
+            R.string.stripe_networking_link_login_warmup_cta_skip
+        }
+
+    constructor(
+        args: Bundle?,
+        state: FinancialConnectionsSheetNativeState,
+    ) : this(
         referrer = Destination.referrer(args),
+        nextPaneOnDisableNetworking = args?.getString(KEY_NEXT_PANE_ON_DISABLE_NETWORKING),
         payload = Uninitialized,
         disableNetworkingAsync = Uninitialized,
+        isInstantDebits = state.isLinkWithStripe,
     )
 
     data class Payload(

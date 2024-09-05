@@ -70,6 +70,8 @@
   <string name="stripe_address_state_required">Zadejte stát</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Platit průběžně pomocí &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Splácejte v průběhu času pomocí služby Affirm.</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Jméno na účtu</string>
   <!-- Placeholder for AU BECS BSB number -->
@@ -147,6 +149,8 @@
   <string name="stripe_invalid_shipping_information">Neplatná dodací adresa</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Vaše poštovní směrovací číslo je neúplné.</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Jednoduché a bezpečné platby jedním kliknutím</string>
   <string name="stripe_payment_method_add_new_card">Přidat novou kartu...</string>
   <string name="stripe_payment_method_add_new_fpx">Vyberte bankovní účet (FPX)</string>
   <!-- Label for free shipping method -->
@@ -170,6 +174,8 @@
   <string name="stripe_title_select_shipping_method">Vyberte způsob dopravy</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Aktualizovat kartu</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Aktualizovat</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Ověřte platbu</string>
 </resources>

@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.text.TextWatcher
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.test.core.app.ApplicationProvider
@@ -1072,8 +1071,7 @@ internal class CardNumberEditTextTest {
         val cardWidgetViewModel = CardWidgetViewModel(
             paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
             stripeRepository = repository,
-            dispatcher = dispatcher,
-            handle = SavedStateHandle()
+            dispatcher = dispatcher
         )
 
         val store = ViewModelStore().apply {

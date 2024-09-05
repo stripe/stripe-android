@@ -3,7 +3,6 @@ package com.stripe.android.identity.ml
 import android.graphics.Bitmap
 import android.graphics.Rect
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.identity.states.MBDetector
 
 /**
  * Result category of IDDetector
@@ -51,22 +50,10 @@ internal sealed class IDDetectorOutput(
         override val blurScore: Float
     ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
 
-    data class Modern(
-        override val boundingBox: BoundingBox,
-        override val category: Category,
-        override val resultScore: Float,
-        override val allScores: List<Float>,
-        override val blurScore: Float,
-        val mbOutput: MBDetector.DetectorResult
-    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
-
-    fun blurScore(): Float? =
+    fun blurScore(): Float =
         when (this) {
             is Legacy -> {
                 this.blurScore
-            }
-            is Modern -> {
-                null
             }
         }
 }

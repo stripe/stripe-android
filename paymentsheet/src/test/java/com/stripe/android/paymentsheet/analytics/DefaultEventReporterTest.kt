@@ -7,8 +7,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -125,12 +127,12 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
+    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
+            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
-        completeEventReporter.onShowNewPaymentOptionForm()
+        completeEventReporter.onShowNewPaymentOptions()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -489,7 +491,7 @@ class DefaultEventReporterTest {
 
         customEventReporter.onPressConfirmButton(
             PaymentSelection.New.GenericPaymentMethod(
-                labelResource = "Cash App Pay",
+                label = "Cash App Pay".resolvableString,
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
@@ -569,6 +571,40 @@ class DefaultEventReporterTest {
 
         val errorType = argumentCaptor.firstValue.params["error_message"] as String
         assertThat(errorType).isEqualTo("invalidRequestError")
+    }
+
+    @Test
+    fun `Send correct link_mode for payment method mode on load succeeded event`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkMode = LinkMode.PaymentMethod
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_enabled"] == true &&
+                    req.params["link_mode"] == "payment_method_mode"
+            }
+        )
+    }
+
+    @Test
+    fun `Send correct link_mode for passthrough mode on load succeeded event`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkMode = LinkMode.Passthrough
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_enabled"] == true &&
+                    req.params["link_mode"] == "passthrough"
+            }
+        )
     }
 
     @Test
@@ -679,17 +715,22 @@ class DefaultEventReporterTest {
 
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
-        linkEnabled: Boolean = true,
+        linkMode: LinkMode? = LinkMode.PaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
+        initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            clientSecret = "cs_example"
+        ),
     ) {
         onInit(configuration, isDeferred = false)
-        onLoadStarted()
+        onLoadStarted(initializedViaCompose = false)
         onLoadSucceeded(
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,
-            linkEnabled = linkEnabled,
-            currency = currency
+            linkMode = linkMode,
+            currency = currency,
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "klarna"),
         )
     }
 
@@ -714,7 +755,7 @@ class DefaultEventReporterTest {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue",
+                primaryButtonText = "Continue".resolvableString,
                 mandateText = null,
             ),
         )

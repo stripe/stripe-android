@@ -1,19 +1,24 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -22,6 +27,8 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.paymentsheet.R as PaymentSheetR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 internal object CardDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Card
@@ -40,10 +47,22 @@ internal object CardDefinition : PaymentMethodDefinition {
 private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
-        displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+        displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
+        iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
         iconRequiresTinting = true,
     )
+
+    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+        val displayName = if (customerHasSavedPaymentMethods) {
+            PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card
+        } else {
+            PaymentsUiCoreR.string.stripe_paymentsheet_add_card
+        }
+        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+            displayName = displayName.resolvableString,
+            shouldShowIcon = false,
+        )
+    }
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
@@ -82,20 +101,64 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
-            if (
-                isSaveForFutureUseValueChangeable(
-                    code = PaymentMethod.Type.Card.code,
-                    metadata = metadata,
-                )
-            ) {
+
+            val canChangeSaveForFutureUsage = saveForFutureUsageIsChangeable(metadata)
+
+            if (canChangeSaveForFutureUsage) {
                 add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            }
+
+            val signupMode = if (
+                metadata.linkInlineConfiguration != null && arguments.linkConfigurationCoordinator != null
+            ) {
+                add(
+                    LinkFormElement(
+                        configuration = metadata.linkInlineConfiguration,
+                        linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                    )
+                )
+
+                metadata.linkInlineConfiguration.signupMode
+            } else {
+                null
+            }
+
+            if (metadata.hasIntentToSetup()) {
+                add(createCardMandateElement(metadata.merchantName, signupMode, canChangeSaveForFutureUsage))
             }
         }
     }
+
+    private fun createCardMandateElement(
+        merchantName: String,
+        signupMode: LinkSignupMode?,
+        canChangeSaveForFutureUse: Boolean,
+    ): MandateTextElement {
+        return MandateTextElement(
+            identifier = IdentifierSpec.Generic("card_mandate"),
+            stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+            topPadding = when {
+                signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+                canChangeSaveForFutureUse -> 6.dp
+                else -> 2.dp
+            },
+            args = listOf(merchantName),
+        )
+    }
+
+    private fun saveForFutureUsageIsChangeable(metadata: PaymentMethodMetadata): Boolean {
+        return isSaveForFutureUseValueChangeable(
+            code = PaymentMethod.Type.Card.code,
+            intent = metadata.stripeIntent,
+            paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+            hasCustomerConfiguration = metadata.hasCustomerConfiguration,
+        )
+    }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
@@ -139,7 +202,7 @@ private fun cardBillingElement(
             addressElement,
             sameAsShippingElement
         ),
-        R.string.stripe_billing_details
+        PaymentsUiCoreR.string.stripe_billing_details
     )
 }
 
@@ -163,7 +226,7 @@ private fun contactInformationElement(
     if (elements.isEmpty()) return null
 
     return SectionElement.wrap(
-        label = R.string.stripe_contact_information,
+        label = PaymentsUiCoreR.string.stripe_contact_information,
         sectionFieldElements = elements,
     )
 }

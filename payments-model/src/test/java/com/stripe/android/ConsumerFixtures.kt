@@ -18,6 +18,7 @@ object ConsumerFixtures {
         """
             {
               "auth_session_client_secret": null,
+              "publishable_key": "asdfg123",
               "consumer_session": {
                 "client_secret": "secret",
                 "email_address": "email@example.com",
@@ -99,6 +100,42 @@ object ConsumerFixtures {
                     "type": "SIGNUP"
                   }
                 ]
+              }
+            }
+        """.trimIndent()
+    )
+
+    val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "VISA",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "exp_month": 12,
+                    "exp_year": 2050,
+                    "last4": "4242"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
               }
             }
         """.trimIndent()

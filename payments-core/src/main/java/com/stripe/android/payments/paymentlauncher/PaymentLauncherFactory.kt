@@ -51,7 +51,7 @@ class PaymentLauncherFactory(
             statusBarColor = statusBarColor,
             enableLogging = BuildConfig.DEBUG,
             productUsage = productUsage,
-            includePaymentSheetAuthenticators = false,
+            includePaymentSheetNextHandlers = false,
         )
     }
 }

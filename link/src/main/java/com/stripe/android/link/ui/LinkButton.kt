@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,7 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.utils.InlineContentTemplateBuilder
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
@@ -51,13 +53,14 @@ private val LinkButtonShape: RoundedCornerShape
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
 
+private const val LINK_BRAND_NAME = "Link"
 private const val LINK_ICON_ID = "LinkIcon"
 private const val LINK_DIVIDER_SPACER_ID = "LinkDividerSpacer"
 private const val LINK_DIVIDER_ID = "LinkDivider"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_PAY_WITH_FONT_SIZE = 21
-private const val LINK_EMAIL_FONT_SIZE = 18
+private const val LINK_EMAIL_FONT_SIZE = 16
 
 private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
 
@@ -74,7 +77,7 @@ private fun LinkEmailButton() {
     )
 }
 
-@Preview
+@Preview(locale = "ru", fontScale = 1.5f)
 @Composable
 private fun LinkNoEmailButton() {
     LinkButton(
@@ -156,21 +159,26 @@ private fun RowScope.SignedInButtonContent(email: String) {
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun RowScope.SignedOutButtonContent() {
+    val text = stringResource(id = R.string.stripe_pay_with_link)
+
     val iconizedText = buildAnnotatedString {
-        append("Pay with") // TODO(jaynewstrom) Link: Add localization
-        append(" ")
+        append(text.substringBefore(LINK_BRAND_NAME))
         appendInlineContent(
             id = LINK_ICON_ID,
             alternateText = "[icon]"
         )
+        append(text.substringAfter(LINK_BRAND_NAME))
     }
 
     Text(
         text = iconizedText,
+        textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
             add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkIcon() }
         }.build(),
-        modifier = Modifier.padding(start = 6.dp),
+        modifier = Modifier
+            .padding(start = 6.dp)
+            .fillMaxWidth(),
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
@@ -217,7 +225,7 @@ private fun LinkIconAndDivider() {
 @Composable
 private fun LinkIcon() {
     Icon(
-        painter = painterResource(R.drawable.stripe_link_logo_bw),
+        painter = painterResource(StripeUiCoreR.drawable.stripe_link_logo_bw),
         contentDescription = stringResource(StripeR.string.stripe_link),
         modifier = Modifier
             .aspectRatio(LINK_ICON_ASPECT_RATIO)
