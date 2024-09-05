@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -417,11 +418,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun launchInstantDebits() {
         val metadata = paymentMethodMetadata.value ?: return
+        val selection = selection.value as? PaymentSelection.New ?: return
+        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
 
-        val configuration = CollectBankAccountConfiguration.InstantDebits(
-            email = "email@email.com",
-        )
-
+        val configuration = CollectBankAccountConfiguration.InstantDebits(email)
         val paymentConfig = lazyPaymentConfig.get()
         val clientSecret = metadata.stripeIntent.clientSecret
 
@@ -444,12 +444,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun launchAchFlow() {
         val metadata = paymentMethodMetadata.value ?: return
+        val selection = selection.value as? PaymentSelection.New ?: return
 
-        val configuration = CollectBankAccountConfiguration.USBankAccount(
-            name = "Some name",
-            email = "email@email.com",
-        )
+        val name = PaymentMethodCreateParams.getNameFromParams(selection.paymentMethodCreateParams) ?: return
+        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
 
+        val configuration = CollectBankAccountConfiguration.USBankAccount(name, email)
         val paymentConfig = lazyPaymentConfig.get()
         val clientSecret = metadata.stripeIntent.clientSecret
 
