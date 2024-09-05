@@ -54,7 +54,17 @@ internal data class BuyButtonState(
 internal sealed interface PaymentSheetScreen {
 
     enum class AnimationStyle {
+        /**
+         * Does not animate the PrimaryButton (it's either shown or displayed without animation).
+         * The primary button is not part of an animation block, so it helps with visual anchoring between screens.
+         */
         PrimaryButtonAnchored,
+
+        /**
+         * The full page is animated, including the primary button.
+         * Helps make it so that pages that aren't expected to have an visual anchor around the primary button to
+         * animate more smoothly.
+         */
         FullPage,
     }
 
@@ -64,6 +74,7 @@ internal sealed interface PaymentSheetScreen {
     val bottomContentPadding: Dp
     val walletsDividerSpacing: Dp
     val animationStyle: AnimationStyle
+        get() = AnimationStyle.FullPage
 
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
@@ -83,7 +94,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(null)
@@ -228,7 +238,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = horizontalModeBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -281,7 +290,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -320,7 +328,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -366,7 +373,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -404,7 +410,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -456,7 +461,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
@@ -495,7 +499,6 @@ internal sealed interface PaymentSheetScreen {
         override val topContentPadding: Dp = 0.dp
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val animationStyle: AnimationStyle = AnimationStyle.FullPage
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.cvcCompletionState.mapAsStateFlow { complete ->
