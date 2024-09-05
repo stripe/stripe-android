@@ -112,6 +112,7 @@ interface CollectBankAccountLauncher {
         // However, CollectBankAccountResult currently does not support nullable intents, a requirement
         // for deferred payment flows. Updating that implies a breaking change.
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Deprecated("This will be removed once USBankAccountViewModel is gone.")
         fun createForPaymentSheet(
             hostedSurface: String,
             activityResultRegistryOwner: ActivityResultRegistryOwner,

@@ -84,6 +84,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         private const val LAUNCHER_KEY = "CollectBankAccountForInstantDebitsLauncher"
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Deprecated("This will be removed once USBankAccountViewModel is gone.")
         fun createForPaymentSheet(
             hostedSurface: String,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
@@ -91,7 +92,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         ): CollectBankAccountLauncher {
             return CollectBankAccountForInstantDebitsLauncher(
                 // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
-                // use a separate method and ensure the correct hostedSurface is set.
+                //  use a separate method and ensure the correct hostedSurface is set.
                 hostedSurface = hostedSurface,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
@@ -109,8 +110,6 @@ class CollectBankAccountForInstantDebitsLauncher(
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForInstantDebitsLauncher(
-                // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
-                // use a separate method and ensure the correct hostedSurface is set.
                 hostedSurface = hostedSurface,
                 hostActivityLauncher = activityResultCaller.registerForActivityResult(
                     CollectBankAccountContract(),

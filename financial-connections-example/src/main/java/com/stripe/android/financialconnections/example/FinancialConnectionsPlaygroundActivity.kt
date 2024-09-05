@@ -86,7 +86,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
             // Pretending this is PaymentSheet for now…
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            activityResultRegistryOwner = this,
+            activityResultCaller = this,
             callback = viewModel::onCollectBankAccountForInstantDebitsLauncherResult,
         )
 
