@@ -318,7 +318,7 @@ private fun PaymentSheetContent(
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true) {
+        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -343,7 +343,7 @@ private fun PaymentSheetContent(
     PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false) {
+        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier

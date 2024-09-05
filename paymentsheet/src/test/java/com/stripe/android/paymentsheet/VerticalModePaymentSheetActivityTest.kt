@@ -50,7 +50,8 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
-    private val usBankAccount = UsBankPaymentMethodDetails("pm_54321")
+    private val usBankAccount1 = UsBankPaymentMethodDetails("pm_54321")
+    private val usBankAccount2 = UsBankPaymentMethodDetails("pm_09876")
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -312,7 +313,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            setupV1PaymentMethodsResponse(usBankAccount)
+            setupV1PaymentMethodsResponse(usBankAccount1)
             setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
@@ -338,12 +339,39 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            setupV1PaymentMethodsResponse(usBankAccount)
+            setupV1PaymentMethodsResponse(usBankAccount1)
             setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
+    }
+
+    @Test
+    fun `Manage screen should not display mandates`() = runTest(
+        primaryButtonLabel = "Gimme money!",
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
+            setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
+            setupV1PaymentMethodsResponse(type = "card")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertMandateDoesNotExists()
+        managePage.selectPaymentMethod("pm_09876")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_09876")
         verticalModePage.assertPrimaryButton(isEnabled())
         verticalModePage.assertMandateExists()
     }
