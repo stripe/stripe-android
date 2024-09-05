@@ -249,9 +249,46 @@ private fun PaymentSheetContent(
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
 ) {
+    @Composable
+    fun Content(modifier: Modifier) {
+        PaymentSheetContent(
+            viewModel = viewModel,
+            headerText = headerText,
+            walletsState = walletsState,
+            walletsProcessingState = walletsProcessingState,
+            error = error,
+            currentScreen = currentScreen,
+            mandateText = mandateText,
+            modifier = modifier
+        )
+    }
+
+    when (currentScreen.animationStyle) {
+        PaymentSheetScreen.AnimationStyle.PrimaryButtonAnchored -> {
+            Content(modifier = Modifier.animateContentSize())
+        }
+        PaymentSheetScreen.AnimationStyle.FullPage -> {
+            Column(modifier = Modifier.animateContentSize()) {
+                Content(modifier = Modifier)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaymentSheetContent(
+    viewModel: BaseSheetViewModel,
+    headerText: ResolvableString?,
+    walletsState: WalletsState?,
+    walletsProcessingState: WalletsProcessingState?,
+    error: ResolvableString?,
+    currentScreen: PaymentSheetScreen,
+    mandateText: MandateText?,
+    modifier: Modifier,
+) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = Modifier.animateContentSize()) {
+    Column(modifier = modifier) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -284,7 +321,9 @@ private fun PaymentSheetContent(
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
-                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 8.dp),
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding)
+                    .padding(bottom = 8.dp),
             )
         }
 
@@ -302,7 +341,7 @@ private fun PaymentSheetContent(
 
     PrimaryButton(viewModel)
 
-    Box(modifier = Modifier.animateContentSize()) {
+    Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
