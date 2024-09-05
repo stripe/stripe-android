@@ -533,7 +533,7 @@ internal fun PaymentSelection?.linkContext(): String? {
     return when (this) {
         is PaymentSelection.Link -> "wallet"
         is PaymentSelection.New.USBankAccount -> {
-            "instant_debits".takeIf { instantDebits != null }
+            "instant_debits".takeIf { code == "link" }
         }
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,

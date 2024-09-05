@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
@@ -63,7 +62,6 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
-    private val application: Application,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -83,7 +81,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
 
     private val defaultName: String? = if (args.savedPaymentMethod != null) {
-        args.savedPaymentMethod.input.name
+        args.savedPaymentMethod.input?.name
     } else if (collectingName || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.name
     } else {
@@ -99,7 +97,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultEmail: String? = if (args.savedPaymentMethod != null) {
-        args.savedPaymentMethod.input.email
+        args.savedPaymentMethod.input?.email
     } else if (collectingEmail || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.email
     } else {
@@ -115,7 +113,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultPhoneCountry = if (args.savedPaymentMethod != null) {
-        args.savedPaymentMethod.input.address?.country
+        args.savedPaymentMethod.input?.address?.country
     } else if (collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.address?.country
     } else {
@@ -123,7 +121,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultPhone: String? = if (args.savedPaymentMethod != null) {
-        args.savedPaymentMethod.input.phone
+        args.savedPaymentMethod.input?.phone
     } else if (collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.phone
     } else {
@@ -140,7 +138,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultAddress: Address? = if (args.savedPaymentMethod != null) {
-        args.savedPaymentMethod.input.address
+        args.savedPaymentMethod.input?.address
     } else if (collectingAddress || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.address?.asAddressModel()
     } else {
@@ -447,7 +445,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun determineInitialState(): USBankAccountFormScreenState {
-        return if (args.savedPaymentMethod != null) {
+        return if (args.savedPaymentMethod?.screenState != null) {
             args.savedPaymentMethod.screenState
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(

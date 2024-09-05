@@ -165,9 +165,12 @@ internal sealed class PaymentSelection : Parcelable {
             val code: String,
             val labelResource: ResolvableString,
             @DrawableRes val iconResource: Int,
-            val input: Input,
-            val screenState: USBankAccountFormScreenState,
-            val instantDebits: InstantDebitsInfo?,
+            @Deprecated("This field will be removed.")
+            val input: Input? = null,
+            @Deprecated("This field will be removed.")
+            val screenState: USBankAccountFormScreenState? = null,
+            @Deprecated("This field will be removed.")
+            val instantDebits: InstantDebitsInfo? = null,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -178,7 +181,7 @@ internal sealed class PaymentSelection : Parcelable {
                 merchantName: String,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
-                return screenState.mandateText
+                return screenState?.mandateText
             }
 
             @Parcelize

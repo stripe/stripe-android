@@ -27,19 +27,6 @@ internal fun FormFieldValues.createBankAccountPaymentSelection(
             setupFutureUsage = userRequestedReuse.setupFutureUsage
         ),
         customerRequestedSave = userRequestedReuse,
-        screenState = USBankAccountFormScreenState.BillingDetailsCollection(
-            error = null,
-            primaryButtonText = "".resolvableString,
-            isProcessing = false,
-        ),
-        instantDebits = null,
-        input = PaymentSelection.New.USBankAccount.Input(
-            name = "",
-            email = null,
-            phone = null,
-            address = null,
-            saveForFutureUse = false,
-        ),
     )
 }
 
@@ -59,20 +46,5 @@ internal fun FormFieldValues.createInstantDebitsPaymentSelection(
         paymentMethodCreateParams = createParams,
         paymentMethodOptionsParams = null,
         customerRequestedSave = userRequestedReuse,
-        screenState = USBankAccountFormScreenState.BillingDetailsCollection(
-            error = null,
-            primaryButtonText = "".resolvableString,
-            isProcessing = false,
-        ),
-        instantDebits = createParams.instantDebitsPaymentMethodId()?.let {
-            PaymentSelection.New.USBankAccount.InstantDebitsInfo(paymentMethodId = it)
-        },
-        input = PaymentSelection.New.USBankAccount.Input(
-            name = "",
-            email = null,
-            phone = null,
-            address = null,
-            saveForFutureUse = false,
-        ),
     )
 }
