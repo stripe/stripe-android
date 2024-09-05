@@ -2,13 +2,17 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.BankAccountElement
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -66,9 +70,48 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
             EmailElement(initialValue = defaultEmail)
         )
 
-        return FormElementsBuilder(arguments)
+        val builder = FormElementsBuilder(arguments)
             .header(headerElement)
             .element(emailElement)
-            .build()
+
+        if (result is CollectBankAccountForInstantDebitsResult.Completed) {
+            builder.element(
+                BankAccountElement(
+                    state = result.toBankAccountElementState(
+                        onRemoveAccount = { arguments.onRemoveBankAccount() },
+                    ),
+                )
+            )
+
+            val showCheckbox = isSaveForFutureUseValueChangeable(
+                code = PaymentMethod.Type.USBankAccount.code,
+                intent = metadata.stripeIntent,
+                paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+                hasCustomerConfiguration = metadata.hasCustomerConfiguration,
+            )
+
+            if (showCheckbox) {
+                builder.element(
+                    SaveForFutureUseElement(
+                        initialValue = arguments.saveForFutureUseInitialValue,
+                        merchantName = metadata.merchantName,
+                    )
+                )
+            }
+        } else if (result is CollectBankAccountForInstantDebitsResult.Failed) {
+            // TODO: Render error
+        }
+
+        return builder.build()
     }
+}
+
+private fun CollectBankAccountForInstantDebitsResult.Completed.toBankAccountElementState(
+    onRemoveAccount: () -> Unit,
+): BankAccountElement.State {
+    return BankAccountElement.State(
+        bankName = bankName,
+        last4 = last4,
+        onRemoveAccount = onRemoveAccount,
+    )
 }

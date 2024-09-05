@@ -407,6 +407,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             confirmAch()
             return
         }
+        if (shouldLaunchInstantDebitsFlow()) {
+            launchInstantDebits()
+            return
+        }
+        if (shouldConfirmInstantDebits()) {
+            confirmInstantDebits()
+            return
+        }
         checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
     }
 
@@ -415,8 +423,41 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmAch() {
         val screen = navigationHandler.currentScreen.value
-        val result = screen.intermediateResult as? CollectBankAccountResultInternal
+        val result = screen.intermediateResult as? CollectBankAccountResultInternal.Completed
         Log.d("TILL123", result.toString())
+    }
+
+    private fun confirmInstantDebits() {
+        val screen = navigationHandler.currentScreen.value
+        val result = screen.intermediateResult as? CollectBankAccountResultInternal.Completed
+        Log.d("TILL123", result.toString())
+    }
+
+    private fun launchInstantDebits() {
+        val metadata = paymentMethodMetadata.value ?: return
+
+        val configuration = CollectBankAccountConfiguration.InstantDebits(
+            email = "email@email.com",
+        )
+
+        val paymentConfig = lazyPaymentConfig.get()
+        val clientSecret = metadata.stripeIntent.clientSecret
+
+        if (metadata.hasIntentToSetup()) {
+            collectBankAccountForInstantDebitsLauncher?.presentWithSetupIntent(
+                publishableKey = paymentConfig.publishableKey,
+                stripeAccountId = paymentConfig.stripeAccountId,
+                clientSecret = clientSecret!!,
+                configuration = configuration,
+            )
+        } else {
+            collectBankAccountForInstantDebitsLauncher?.presentWithPaymentIntent(
+                publishableKey = paymentConfig.publishableKey,
+                stripeAccountId = paymentConfig.stripeAccountId,
+                clientSecret = clientSecret!!,
+                configuration = configuration,
+            )
+        }
     }
 
     private fun launchAchFlow() {
@@ -474,15 +515,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleCollectBankAccountResult(
         result: CollectBankAccountResultInternal,
     ) {
-        // TODO
-        val screen = navigationHandler.currentScreen.value
-        screen.invalidate(result)
+        if (result is CollectBankAccountResultInternal.Completed) {
+            val screen = navigationHandler.currentScreen.value
+            screen.updateWithResult(result)
+        }
     }
 
     private fun handleCollectBankAccountForInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult,
     ) {
-        // TODO
+        if (result is CollectBankAccountForInstantDebitsResult.Completed) {
+            val screen = navigationHandler.currentScreen.value
+            screen.updateWithResult(result)
+        }
     }
 
     private fun shouldLaunchAchFlow(): Boolean {
@@ -494,6 +539,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             !screen.hasIntermediateResult
     }
 
+    private fun shouldLaunchInstantDebitsFlow(): Boolean {
+        val selection = selection.value
+        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
+        val screen = navigationHandler.currentScreen.value
+
+        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "link" && !screen.hasIntermediateResult
+    }
+
     private fun shouldConfirmAch(): Boolean {
         val selection = selection.value
         val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
@@ -501,6 +554,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account" &&
             screen.hasIntermediateResult
+    }
+
+    private fun shouldConfirmInstantDebits(): Boolean {
+        val selection = selection.value
+        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
+        val screen = navigationHandler.currentScreen.value
+
+        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "link" && screen.hasIntermediateResult
     }
 
     fun checkoutWithGooglePay() {

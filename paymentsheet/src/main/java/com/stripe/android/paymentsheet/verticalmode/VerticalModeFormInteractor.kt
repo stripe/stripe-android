@@ -29,7 +29,7 @@ internal interface VerticalModeFormInteractor {
 
     fun canGoBack(): Boolean
 
-    fun invalidate(result: Any?)
+    fun updateWithResult(result: Any?)
 
     fun close()
 
@@ -96,7 +96,7 @@ internal class DefaultVerticalModeFormInteractor(
         return canGoBackDelegate()
     }
 
-    override fun invalidate(result: Any?) {
+    override fun updateWithResult(result: Any?) {
         val elements = formElements(result)
         _state.update { state ->
             state.copy(

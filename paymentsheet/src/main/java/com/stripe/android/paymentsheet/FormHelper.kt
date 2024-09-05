@@ -41,7 +41,7 @@ internal class FormHelper(
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 onRemoveBankAccount = {
                     val screen = viewModel.navigationHandler.currentScreen.value
-                    screen.invalidate(result = null)
+                    screen.updateWithResult(result = null)
                 },
                 selectionUpdater = {
                     viewModel.updateSelection(it)

@@ -89,7 +89,7 @@ internal sealed interface PaymentSheetScreen {
 
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
-    fun invalidate(result: Any?) {
+    fun updateWithResult(result: Any?) {
         // Most don't need this
     }
 
@@ -326,7 +326,7 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(true)
         }
 
-        override fun invalidate(result: Any?) {
+        override fun updateWithResult(result: Any?) {
             interactor.invalidate(result)
         }
 
@@ -480,8 +480,8 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(showsWalletHeader)
         }
 
-        override fun invalidate(result: Any?) {
-            interactor.invalidate(result)
+        override fun updateWithResult(result: Any?) {
+            interactor.updateWithResult(result)
         }
 
         @Composable
