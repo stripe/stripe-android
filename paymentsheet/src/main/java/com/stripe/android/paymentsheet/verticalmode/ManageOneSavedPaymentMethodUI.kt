@@ -17,7 +17,7 @@ internal fun ManageOneSavedPaymentMethodUI(interactor: ManageOneSavedPaymentMeth
     SavedPaymentMethodRowButton(
         displayableSavedPaymentMethod = paymentMethod,
         isEnabled = true,
-        isSelected = true,
+        isSelected = false,
         trailingContent = {
             DeleteIcon(
                 paymentMethod = paymentMethod,

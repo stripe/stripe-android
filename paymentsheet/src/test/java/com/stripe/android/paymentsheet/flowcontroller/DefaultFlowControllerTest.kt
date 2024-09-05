@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -66,6 +67,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -311,6 +313,44 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = isA<PaymentSelection.New>(),
                 error = eq(PaymentSheetConfirmationError.Stripe(error)),
             )
+    }
+
+    @Test
+    fun `On fail due to invalid deferred intent usage, should report with expected integration error`() = runTest {
+        fakeIntentConfirmationInterceptor.apply {
+            enqueueFailureStep(
+                cause = InvalidDeferredIntentUsageException(),
+                message = "An error occurred!",
+            )
+        }
+
+        val eventReporter = FakeEventReporter()
+        val flowController = createFlowController(
+            eventReporter = eventReporter,
+        ).apply {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                    ),
+                ),
+                callback = { _, _ -> }
+            )
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            )
+        )
+
+        flowController.confirm()
+
+        val error = eventReporter.paymentFailureCalls.awaitItem().error
+
+        assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
+        assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
     }
 
     @Test
@@ -1077,6 +1117,30 @@ internal class DefaultFlowControllerTest {
         verify(paymentResultCallback).onPaymentSheetResult(
             PaymentSheetResult.Canceled
         )
+    }
+
+    @Test
+    fun `On payment error, should report stripe failure`() = runTest {
+        fakeIntentConfirmationInterceptor.enqueueFailureStep(
+            cause = IllegalStateException("Failed!"),
+            message = "Failed!"
+        )
+
+        val eventReporter = FakeEventReporter()
+        val flowController = createFlowController(
+            eventReporter = eventReporter,
+        ).apply {
+            configureExpectingSuccess()
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(paymentSelection = GENERIC_PAYMENT_SELECTION)
+        )
+        flowController.confirm()
+
+        val failureCall = eventReporter.paymentFailureCalls.awaitItem()
+
+        assertThat(failureCall.error).isInstanceOf(PaymentSheetConfirmationError.Stripe::class.java)
     }
 
     @Test
@@ -1968,6 +2032,27 @@ internal class DefaultFlowControllerTest {
         assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
     }
 
+    @Test
+    fun `On external payment error, should report external payment method failure`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+
+        val eventReporter = FakeEventReporter()
+        val flowController = createFlowController(
+            eventReporter = eventReporter,
+        ).apply {
+            configureExpectingSuccess()
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(paymentSelection = EXTERNAL_PAYMENT_SELECTION)
+        )
+        flowController.confirm()
+
+        val failureCall = eventReporter.paymentFailureCalls.awaitItem()
+
+        assertThat(failureCall.error).isEqualTo(PaymentSheetConfirmationError.ExternalPaymentMethod)
+    }
+
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Clears out isCvcRecollectionEnabledCallback when lifecycle owner is destroyed`() {
@@ -2195,6 +2280,7 @@ internal class DefaultFlowControllerTest {
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: EventReporter = this.eventReporter,
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -2206,7 +2292,8 @@ internal class DefaultFlowControllerTest {
             viewModel,
             bacsMandateConfirmationLauncherFactory,
             cvcRecollectionLauncherFactory,
-            errorReporter
+            errorReporter,
+            eventReporter
         )
     }
 
@@ -2216,6 +2303,7 @@ internal class DefaultFlowControllerTest {
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: EventReporter = this.eventReporter,
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
@@ -2294,6 +2382,14 @@ internal class DefaultFlowControllerTest {
             label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+        private val EXTERNAL_PAYMENT_SELECTION = PaymentSelection.ExternalPaymentMethod(
+            type = "paypal",
+            billingDetails = null,
+            iconResource = 0,
+            label = "Paypal".resolvableString,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
         )

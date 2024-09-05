@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -250,7 +251,7 @@ private fun PaymentSheetContent(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = Modifier.animateContentSize().padding(bottom = currentScreen.bottomContentPadding)) {
+    Column(modifier = Modifier.animateContentSize()) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -273,10 +274,7 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            CompositionLocalProvider(
-                LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
-                LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
-            ) {
+            EventReporterProvider(viewModel) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -289,6 +287,8 @@ private fun PaymentSheetContent(
                 modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 8.dp),
             )
         }
+
+        Spacer(modifier = Modifier.height(currentScreen.bottomContentPadding))
 
         error?.let {
             ErrorMessage(
@@ -363,6 +363,19 @@ internal fun Wallet(
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)
+    }
+}
+
+@Composable
+private fun EventReporterProvider(
+    viewModel: BaseSheetViewModel,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
+        LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
+    ) {
+        content()
     }
 }
 

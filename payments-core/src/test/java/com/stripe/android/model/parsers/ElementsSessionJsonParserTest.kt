@@ -508,7 +508,7 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             isPaymentMethodRemoveEnabled = true,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
@@ -604,7 +604,7 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true
                         ),
@@ -681,9 +681,10 @@ class ElementsSessionJsonParserTest {
         val intent = createPaymentIntentWithCustomerSession(allowRedisplay = rawAllowRedisplayValue)
         val elementsSession = parser.parse(intent)
 
-        val paymentSheetComponent = elementsSession?.customer?.session?.components?.paymentSheet
+        val mobilePaymentElementComponent = elementsSession?.customer?.session?.components?.mobilePaymentElement
 
-        val enabledComponent = paymentSheetComponent as? ElementsSession.Customer.Components.PaymentSheet.Enabled
+        val enabledComponent = mobilePaymentElementComponent as?
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 
         assertThat(enabledComponent?.allowRedisplayOverride).isEqualTo(allowRedisplay)
     }

@@ -8,7 +8,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.NoOpEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.mockito.Mockito.mock
 
 private fun linkHandler(savedStateHandle: SavedStateHandle): LinkHandler {
@@ -40,7 +41,7 @@ internal class FakeBaseSheetViewModel private constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
 ) : BaseSheetViewModel(
     config = PaymentSheet.Configuration.Builder("Example, Inc.").build(),
-    eventReporter = NoOpEventReporter(),
+    eventReporter = FakeEventReporter(),
     customerRepository = FakeCustomerRepository(),
     workContext = Dispatchers.IO,
     savedStateHandle = savedStateHandle,
@@ -60,6 +61,17 @@ internal class FakeBaseSheetViewModel private constructor(
                 navigationHandler.transitionTo(
                     initialScreen
                 )
+            }.also {
+                if (initialScreen.buyButtonState.value.visible) {
+                    it.primaryButtonUiStateSource.update {
+                        PrimaryButton.UIState(
+                            label = "Gimme money!".resolvableString,
+                            onClick = {},
+                            enabled = false,
+                            lockVisible = true,
+                        )
+                    }
+                }
             }
         }
     }
@@ -74,14 +86,7 @@ internal class FakeBaseSheetViewModel private constructor(
     val walletsProcessingStateSource = MutableStateFlow<WalletsProcessingState?>(null)
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = walletsProcessingStateSource.asStateFlow()
 
-    val primaryButtonUiStateSource = MutableStateFlow<PrimaryButton.UIState?>(
-        PrimaryButton.UIState(
-            label = "Gimme money!".resolvableString,
-            onClick = {},
-            enabled = false,
-            lockVisible = true,
-        )
-    )
+    val primaryButtonUiStateSource = MutableStateFlow<PrimaryButton.UIState?>(null)
     override val primaryButtonUiState: StateFlow<PrimaryButton.UIState?> = primaryButtonUiStateSource.asStateFlow()
 
     private val errorSource = MutableStateFlow<ResolvableString?>(null)

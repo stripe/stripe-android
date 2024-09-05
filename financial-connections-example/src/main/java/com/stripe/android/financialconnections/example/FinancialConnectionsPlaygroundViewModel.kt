@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -88,6 +89,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
             Experience.InstantDebits -> {
                 startWithPaymentIntent(this)
             }
+            Experience.PaymentElement -> {
+                startWithPaymentIntent(this)
+            }
         }
     }
 
@@ -116,6 +120,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
+                            ephemeralKey = it.ephemeralKey,
+                            customerId = it.customerId,
                             experience = settings.get<ExperienceSetting>().selectedOption,
                         )
                     )
@@ -163,8 +169,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
                             )
                         )
                     )
@@ -317,6 +323,31 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
+    fun onPaymentSheetResult(result: PaymentSheetResult) {
+        when (result) {
+            is PaymentSheetResult.Canceled -> {
+                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+            }
+            is PaymentSheetResult.Completed -> {
+                _state.update {
+                    it.copy(
+                        status = it.status + listOf(
+                            "Elements Session Completed"
+                        )
+                    )
+                }
+            }
+            is PaymentSheetResult.Failed -> {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Failed! ${result.error}"
+                    )
+                }
+            }
+        }
+    }
+
     private suspend fun confirmIntentIfNeeded(
         intent: StripeIntent,
     ) {
@@ -414,6 +445,7 @@ enum class Experience(
 ) {
     FinancialConnections("Financial Connections"),
     InstantDebits("Instant Debits"),
+    PaymentElement("Payment Element")
 }
 
 enum class NativeOverride(val apiValue: String) {
@@ -435,6 +467,8 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
     data class OpenForPaymentIntent(
         val paymentIntentSecret: String,
+        val ephemeralKey: String?,
+        val customerId: String?,
         val publishableKey: String,
         val experience: Experience,
     ) : FinancialConnectionsPlaygroundViewEffect()

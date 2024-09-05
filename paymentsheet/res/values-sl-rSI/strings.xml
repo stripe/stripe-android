@@ -4,8 +4,6 @@
   <string name="stripe_add_new_payment_method">Dodaj nov način plačila</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Afterpay</string>
-  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji banke %s, da zaključite nakup.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -105,6 +103,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Izberite način plačila</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Prišlo je do neznane napake</string>
   <!-- Button text on a screen asking the user to approve a payment -->

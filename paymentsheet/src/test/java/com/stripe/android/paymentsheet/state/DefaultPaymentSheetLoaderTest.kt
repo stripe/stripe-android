@@ -1277,7 +1277,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                             customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
@@ -1322,7 +1322,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1362,7 +1362,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1402,7 +1402,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1603,7 +1603,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     apiKey = "ek_123",
                     apiKeyExpiry = 555555555,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                     ),
                 ),
@@ -1694,7 +1694,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                             customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
@@ -1959,7 +1959,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     private fun createElementsSessionCustomerSession(
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet,
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement,
     ): ElementsSession.Customer.Session {
         return ElementsSession.Customer.Session(
             id = "cuss_1",
@@ -1968,7 +1968,7 @@ internal class DefaultPaymentSheetLoaderTest {
             apiKey = "ek_123",
             apiKeyExpiry = 555555555,
             components = ElementsSession.Customer.Components(
-                paymentSheet = paymentSheetComponent,
+                mobilePaymentElement = mobilePaymentElementComponent,
                 customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
             ),
         )
@@ -1977,13 +1977,14 @@ internal class DefaultPaymentSheetLoaderTest {
     private fun createElementsSessionCustomer(
         paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
         isPaymentMethodSaveEnabled: Boolean? = null,
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet = isPaymentMethodSaveEnabled?.let {
-            ElementsSession.Customer.Components.PaymentSheet.Enabled(
-                isPaymentMethodSaveEnabled = it,
-                isPaymentMethodRemoveEnabled = true,
-                allowRedisplayOverride = null,
-            )
-        } ?: ElementsSession.Customer.Components.PaymentSheet.Disabled
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
+            isPaymentMethodSaveEnabled?.let {
+                ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                    isPaymentMethodSaveEnabled = it,
+                    isPaymentMethodRemoveEnabled = true,
+                    allowRedisplayOverride = null,
+                )
+            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
@@ -1994,7 +1995,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 apiKey = "ek_123",
                 apiKeyExpiry = 555555555,
                 components = ElementsSession.Customer.Components(
-                    paymentSheet = paymentSheetComponent,
+                    mobilePaymentElement = mobilePaymentElementComponent,
                     customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                 ),
             ),

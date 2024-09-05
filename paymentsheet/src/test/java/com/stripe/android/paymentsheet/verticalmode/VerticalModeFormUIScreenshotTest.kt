@@ -2,12 +2,8 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -20,11 +16,11 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMod
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,7 +33,7 @@ internal class VerticalModeFormUIScreenshotTest {
     )
 
     @get:Rule
-    val coroutineRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val coroutineRule = CoroutineTestRule()
 
     @Test
     fun cardFormIsDisplayed() {
@@ -180,17 +176,6 @@ internal class VerticalModeFormUIScreenshotTest {
                 )
             )
             CreateTestScenario(paymentMethodCode = "cashapp", metadata = metadata)
-        }
-    }
-
-    @Composable
-    private fun ViewModelStoreOwnerContext(content: @Composable () -> Unit) {
-        CompositionLocalProvider(
-            LocalViewModelStoreOwner provides object : ViewModelStoreOwner {
-                override val viewModelStore: ViewModelStore = ViewModelStore()
-            }
-        ) {
-            content()
         }
     }
 

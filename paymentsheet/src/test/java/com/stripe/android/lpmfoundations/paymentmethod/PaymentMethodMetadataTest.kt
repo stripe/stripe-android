@@ -854,7 +854,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `consent behavior should be Always for Payment Sheet is customer session save is enabled`() {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
                 isPaymentMethodRemoveEnabled = true,
                 allowRedisplayOverride = null,
@@ -867,7 +867,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `consent behavior should be Disabled for Payment Sheet is customer session save is disabled`() {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
                 allowRedisplayOverride = null,
@@ -885,7 +885,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `consent behavior should be Legacy for Payment Sheet if payment sheet component is disabled`() {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
         )
 
         assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
@@ -894,18 +894,18 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `consent behavior should be Legacy for Payment Sheet if no customer session provided`() {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
-            paymentSheetComponent = null,
+            mobilePaymentElementComponent = null,
         )
 
         assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
     }
 
     private fun createPaymentMethodMetadataForPaymentSheet(
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet?,
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement?,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
-                paymentSheetComponent = paymentSheetComponent
+                mobilePaymentElementComponent = mobilePaymentElementComponent
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
             sharedDataSpecs = listOf(),
@@ -918,14 +918,14 @@ internal class PaymentMethodMetadataTest {
     private fun createElementsSession(
         intent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         isEligibleForCardBrandChoice: Boolean = true,
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet? = null
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
             isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
             merchantCountry = null,
             isGooglePayEnabled = false,
-            customer = paymentSheetComponent?.let { component ->
+            customer = mobilePaymentElementComponent?.let { component ->
                 ElementsSession.Customer(
                     paymentMethods = listOf(),
                     session = ElementsSession.Customer.Session(
@@ -935,7 +935,7 @@ internal class PaymentMethodMetadataTest {
                         apiKey = "123",
                         apiKeyExpiry = 999999999,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = component,
+                            mobilePaymentElement = component,
                             customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         )
                     ),

@@ -281,7 +281,7 @@ internal class IntentConfirmationHandler(
                     PaymentConfirmationResult.Failed(
                         cause = nextStep.cause,
                         message = nextStep.message,
-                        type = PaymentConfirmationErrorType.Internal,
+                        type = PaymentConfirmationErrorType.Payment,
                     )
                 )
             }

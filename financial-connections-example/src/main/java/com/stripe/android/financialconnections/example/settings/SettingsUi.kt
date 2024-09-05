@@ -214,7 +214,7 @@ private fun TextSetting(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
@@ -231,7 +231,7 @@ private fun <T> RadioButtonSetting(
             )
         }
 
-        Row {
+        FlowRow {
             val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
             options.forEach { option ->
                 Row(
