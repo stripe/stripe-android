@@ -1,0 +1,2 @@
+-if class com.stripe.android.paymentsheet.PaymentSheet$FlowController
+-keep class com.stripe.android.paymentsheet.PaymentOptionContract
