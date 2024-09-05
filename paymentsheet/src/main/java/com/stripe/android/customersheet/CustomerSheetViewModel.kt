@@ -17,7 +17,6 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -35,6 +34,7 @@ import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelCo
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -955,32 +955,16 @@ internal class CustomerSheetViewModel(
 
     private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-            // TODO: Compute this better!
+            val isCompleted = bankAccountResult is CollectBankAccountResultInternal.Completed
 
-            val merchantName = configuration.merchantDisplayName
-
-            val mandateText = if (bankAccountResult != null) {
-                USBankAccountTextBuilder.getContinueMandateText(
-                    merchantName = merchantName,
-                    isSaveForFutureUseSelected = true,
-                    isInstantDebits = false,
-                    isSetupFlow = true,
-                )
-            } else {
-                null
-            }
-
-            val microdepositsText = if (bankAccountResult is CollectBankAccountResultInternal.Completed && bankAccountResult.response.usBankAccountData?.financialConnectionsSession?.paymentAccount is com.stripe.android.financialconnections.model.BankAccount) {
-                resolvableString(R.string.stripe_paymentsheet_microdeposit, merchantName)
-            } else {
-                null
-            }
-
-            val fullMandate = if (mandateText != null && microdepositsText != null) {
-                mandateText + "\n".resolvableString + microdepositsText
-            } else {
-                mandateText
-            }
+            val mandateText = USBankAccountTextBuilder.getMandateAndMicrodepositsText(
+                code = USBankAccount.code,
+                merchantName = configuration.merchantDisplayName,
+                hasResult = isCompleted,
+                isSaveForFutureUseSelected = true,
+                usesMicrodeposits = bankAccountResult?.usesMicrodeposits ?: false,
+                isSetupFlow = true,
+            )
 
             it.copy(
                 bankAccountResult = bankAccountResult,
@@ -988,15 +972,22 @@ internal class CustomerSheetViewModel(
                     paymentMethodCode = USBankAccount.code,
                     intermediateResult = bankAccountResult,
                 ),
-                primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
+                primaryButtonLabel = if (isCompleted) {
                     R.string.stripe_paymentsheet_save.resolvableString
                 } else {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
-                mandateText = fullMandate,
+                mandateText = mandateText,
             )
         }
     }
+
+    private val CollectBankAccountResultInternal.usesMicrodeposits: Boolean
+        get() {
+            val completedResult = this as? CollectBankAccountResultInternal.Completed
+            val session = completedResult?.response?.usBankAccountData?.financialConnectionsSession
+            return session?.paymentAccount is BankAccount
+        }
 
     private fun onConfirmUSBankAccount(usBankAccount: PaymentSelection.New.USBankAccount) {
         createAndAttach(usBankAccount.paymentMethodCreateParams)

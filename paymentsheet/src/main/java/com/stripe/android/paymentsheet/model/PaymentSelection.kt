@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
@@ -187,28 +186,14 @@ internal sealed class PaymentSelection : Parcelable {
             ): ResolvableString? {
                 val isSaveForFutureUseSelected = customerRequestedSave == RequestReuse
 
-                val mandateText = if (hasResult) {
-                    USBankAccountTextBuilder.getContinueMandateText(
-                        merchantName = merchantName,
-                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                        isInstantDebits = code == PaymentMethod.Type.Link.code,
-                        isSetupFlow = isSetupFlow,
-                    )
-                } else {
-                    null
-                }
-
-                val microdepositsText = if (usesMicrodeposits) {
-                    resolvableString(R.string.stripe_paymentsheet_microdeposit, merchantName)
-                } else {
-                    null
-                }
-
-                return if (mandateText != null && microdepositsText != null) {
-                    mandateText + "\n".resolvableString + microdepositsText
-                } else {
-                    mandateText
-                }
+                return USBankAccountTextBuilder.getMandateAndMicrodepositsText(
+                    code = code,
+                    merchantName = merchantName,
+                    hasResult = hasResult,
+                    isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                    isSetupFlow = isSetupFlow,
+                    usesMicrodeposits = usesMicrodeposits,
+                )
             }
 
             @Parcelize
