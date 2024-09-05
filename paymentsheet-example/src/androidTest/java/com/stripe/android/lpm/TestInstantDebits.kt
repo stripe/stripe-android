@@ -1,9 +1,8 @@
 package com.stripe.android.lpm
 
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
@@ -18,9 +17,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsD
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -42,20 +41,25 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
-    @Ignore
     fun testInstantDebitsSuccess() {
+        val params = testParameters.copyPlaygroundSettings {
+            it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
+        }
+
         testDriver.confirmInstantDebits(
-            testParameters = testParameters.copy(authorizationAction = null),
+            testParameters = params,
             afterAuthorization = {
-                rules.compose
-                    .onNodeWithText("STRIPE TEST BANK", substring = true)
-                    .assertIsDisplayed()
+                rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+                    rules.compose
+                        .onAllNodesWithText("STRIPE TEST BANK •••• 6789")
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                        .isNotEmpty()
+                }
             }
         )
     }
 
     @Test
-    @Ignore
     fun testInstantDebitsCancelAllowsUserToContinue() {
         testDriver.confirmInstantDebits(
             testParameters = testParameters.copy(
@@ -69,7 +73,6 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
-    @Ignore
     fun testInstantDebitsCancelAllowsUserToContinueInCustomFlow() {
         testDriver.confirmInstantDebitsInCustomFlow(
             testParameters = testParameters.copy(

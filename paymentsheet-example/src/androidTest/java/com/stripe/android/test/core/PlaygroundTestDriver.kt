@@ -52,7 +52,6 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
-import com.stripe.android.test.core.ui.clickTextInWebView
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -1232,16 +1231,16 @@ internal class PlaygroundTestDriver(
     }
 
     private fun executeEntireInstantDebitsFlow() = with(device) {
-        clickTextInWebView(label = "Agree and continue")
-        clickTextInWebView(
-            label = "Continue with Link",
-            delay = true,
-            selectAmongOccurrences = { it.last() },
-        )
-        clickTextInWebView(label = "Use test code")
-        clickTextInWebView(label = "Success")
-        clickTextInWebView(label = "Connect account")
-        clickTextInWebView(label = "Done")
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        clickButton("Agree and continue")
+        clickButtonWithTag("existing_email-button")
+        clickButton("Use test code")
+        clickButton("Success")
+        clickButton("Connect account")
+        clickButtonWithTag("done_button")
     }
 
     private fun doUSBankAccountAuthorization() {
@@ -1270,6 +1269,17 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNodeWithText(text).performClick()
+    }
+
+    private fun clickButtonWithTag(tag: String, composeCanDetach: Boolean = false) {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithTag(tag)
+                .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(tag).performClick()
     }
 
     internal fun setup(testParameters: TestParameters) {
