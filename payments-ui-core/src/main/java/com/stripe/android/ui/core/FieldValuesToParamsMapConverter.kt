@@ -32,22 +32,20 @@ class FieldValuesToParamsMapConverter {
             }.filterNot { entry ->
                 entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
             }
-            return transformToParamsMap(
+
+            val params = transformToParamsMap(
                 fieldValuePairsForCreateParams,
                 code
+            ).filterOutNullValues()
+
+            return PaymentMethodCreateParams.createWithOverride(
+                code = code,
+                requiresMandate = requiresMandate,
+                billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
+                overrideParamMap = params,
+                productUsage = setOf("PaymentSheet"),
+                allowRedisplay = allowRedisplay,
             )
-                .filterOutNullValues()
-                .toMap()
-                .run {
-                    PaymentMethodCreateParams.createWithOverride(
-                        code,
-                        requiresMandate = requiresMandate,
-                        billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
-                        overrideParamMap = this,
-                        productUsage = setOf("PaymentSheet"),
-                        allowRedisplay = allowRedisplay,
-                    )
-                }
         }
 
         private fun createBillingDetails(

@@ -99,6 +99,7 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
                     state = result.toBankAccountElementState(
                         onRemoveAccount = { arguments.onRemoveBankAccount() },
                     ),
+                    isInstantDebits = false,
                 )
             )
 
@@ -128,19 +129,22 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
 private fun CollectBankAccountResultInternal.Completed.toBankAccountElementState(
     onRemoveAccount: () -> Unit,
 ): BankAccountElement.State {
-    val bankName = when (val paymentAccount = response.usBankAccountData?.financialConnectionsSession?.paymentAccount) {
+    val usBankAccountData = requireNotNull(response.usBankAccountData)
+
+    val bankName = when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
         is BankAccount -> paymentAccount.bankName
         is FinancialConnectionsAccount -> paymentAccount.institutionName
         null -> null
     }
 
-    val last4 = when (val paymentAccount = response.usBankAccountData?.financialConnectionsSession?.paymentAccount) {
+    val last4 = when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
         is BankAccount -> paymentAccount.last4
         is FinancialConnectionsAccount -> paymentAccount.last4
         null -> null
     }
 
     return BankAccountElement.State(
+        id = usBankAccountData.financialConnectionsSession.id,
         bankName = bankName,
         last4 = last4,
         onRemoveAccount = onRemoveAccount,

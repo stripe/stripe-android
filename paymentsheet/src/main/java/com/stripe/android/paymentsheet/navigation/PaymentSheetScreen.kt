@@ -200,9 +200,7 @@ internal sealed interface PaymentSheetScreen {
     ) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
-            val code = state.selectedPaymentMethodCode
-
-            val buyButtonOverride = if (code == "us_bank_account" && state.intermediateResult == null) {
+            val buyButtonOverride = if (state.continueBeforeConfirmation) {
                 BuyButtonState.BuyButtonOverride(
                     label = resolvableString("Continue"),
                     lockEnabled = false,
@@ -270,9 +268,7 @@ internal sealed interface PaymentSheetScreen {
     ) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
-            val code = state.selectedPaymentMethodCode
-
-            val buyButtonOverride = if (code == "us_bank_account" && state.intermediateResult == null) {
+            val buyButtonOverride = if (state.continueBeforeConfirmation) {
                 BuyButtonState.BuyButtonOverride(
                     label = resolvableString("Continue"),
                     lockEnabled = false,
@@ -436,9 +432,7 @@ internal sealed interface PaymentSheetScreen {
     ) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
-            val code = state.selectedPaymentMethodCode
-
-            val buyButtonOverride = if (code == "us_bank_account" && state.intermediateResult == null) {
+            val buyButtonOverride = if (state.continueBeforeConfirmation) {
                 BuyButtonState.BuyButtonOverride(
                     label = resolvableString("Continue"),
                     lockEnabled = false,

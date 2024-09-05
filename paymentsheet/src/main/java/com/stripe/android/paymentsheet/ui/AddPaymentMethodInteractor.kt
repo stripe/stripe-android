@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod.Type.Link
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
@@ -39,7 +41,11 @@ internal interface AddPaymentMethodInteractor {
         val processing: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val intermediateResult: Any? = null,
-    )
+    ) {
+
+        val continueBeforeConfirmation: Boolean
+            get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) && intermediateResult == null
+    }
 
     sealed class ViewAction {
         data class OnPaymentMethodSelected(val code: PaymentMethodCode) : ViewAction()

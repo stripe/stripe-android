@@ -16,6 +16,8 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.createBankAccountPaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.createInstantDebitsPaymentSelection
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.collectAsState
@@ -97,6 +99,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod.code)
     val extras = transformToExtraParams(paymentMethod.code)
+
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
@@ -106,6 +109,10 @@ internal fun FormFieldValues.transformToPaymentSelection(
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
+    } else if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
+        createBankAccountPaymentSelection(createParams = params)
+    } else if (paymentMethod.code == PaymentMethod.Type.Link.code) {
+        createInstantDebitsPaymentSelection(createParams = params)
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,

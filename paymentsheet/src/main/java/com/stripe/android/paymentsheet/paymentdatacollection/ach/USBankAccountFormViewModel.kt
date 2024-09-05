@@ -597,7 +597,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
 
         return PaymentSelection.New.USBankAccount(
-            labelResource = application.getString(
+            code = when (resultIdentifier) {
+                is ResultIdentifier.PaymentMethod -> PaymentMethod.Type.Link.code
+                is ResultIdentifier.Session -> PaymentMethod.Type.USBankAccount.code
+            },
+            labelResource = resolvableString(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
                 last4
             ),

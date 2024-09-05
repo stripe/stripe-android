@@ -80,6 +80,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
                     state = result.toBankAccountElementState(
                         onRemoveAccount = { arguments.onRemoveBankAccount() },
                     ),
+                    isInstantDebits = true,
                 )
             )
 
@@ -110,6 +111,7 @@ private fun CollectBankAccountForInstantDebitsResult.Completed.toBankAccountElem
     onRemoveAccount: () -> Unit,
 ): BankAccountElement.State {
     return BankAccountElement.State(
+        id = paymentMethodId,
         bankName = bankName,
         last4 = last4,
         onRemoveAccount = onRemoveAccount,

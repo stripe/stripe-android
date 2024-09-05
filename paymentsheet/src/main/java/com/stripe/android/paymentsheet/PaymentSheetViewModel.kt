@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -24,6 +23,8 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod.Type.Link
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -403,16 +404,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             launchAchFlow()
             return
         }
-        if (shouldConfirmAch()) {
-            confirmAch()
-            return
-        }
         if (shouldLaunchInstantDebitsFlow()) {
             launchInstantDebits()
-            return
-        }
-        if (shouldConfirmInstantDebits()) {
-            confirmInstantDebits()
             return
         }
         checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
@@ -420,18 +413,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
     private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
-
-    private fun confirmAch() {
-        val screen = navigationHandler.currentScreen.value
-        val result = screen.intermediateResult as? CollectBankAccountResultInternal.Completed
-        Log.d("TILL123", result.toString())
-    }
-
-    private fun confirmInstantDebits() {
-        val screen = navigationHandler.currentScreen.value
-        val result = screen.intermediateResult as? CollectBankAccountResultInternal.Completed
-        Log.d("TILL123", result.toString())
-    }
 
     private fun launchInstantDebits() {
         val metadata = paymentMethodMetadata.value ?: return
@@ -532,36 +513,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun shouldLaunchAchFlow(): Boolean {
         val selection = selection.value
-        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
         val screen = navigationHandler.currentScreen.value
-
-        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account" &&
-            !screen.hasIntermediateResult
+        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
+        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult
     }
 
     private fun shouldLaunchInstantDebitsFlow(): Boolean {
         val selection = selection.value
-        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
         val screen = navigationHandler.currentScreen.value
-
-        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "link" && !screen.hasIntermediateResult
-    }
-
-    private fun shouldConfirmAch(): Boolean {
-        val selection = selection.value
-        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
-        val screen = navigationHandler.currentScreen.value
-
-        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "us_bank_account" &&
-            screen.hasIntermediateResult
-    }
-
-    private fun shouldConfirmInstantDebits(): Boolean {
-        val selection = selection.value
-        val genericPaymentMethod = selection as? PaymentSelection.New.GenericPaymentMethod
-        val screen = navigationHandler.currentScreen.value
-
-        return genericPaymentMethod?.paymentMethodCreateParams?.typeCode == "link" && screen.hasIntermediateResult
+        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
+        return bankAccountSelection?.code == Link.code && !screen.hasIntermediateResult
     }
 
     fun checkoutWithGooglePay() {
