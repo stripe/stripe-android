@@ -78,14 +78,14 @@ data class ElementsSession(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Components(
-            val paymentSheet: PaymentSheet,
+            val mobilePaymentElement: MobilePaymentElement,
             val customerSheet: CustomerSheet,
         ) : StripeModel {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            sealed interface PaymentSheet : StripeModel {
+            sealed interface MobilePaymentElement : StripeModel {
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
-                data object Disabled : PaymentSheet
+                data object Disabled : MobilePaymentElement
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
@@ -93,7 +93,7 @@ data class ElementsSession(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
-                ) : PaymentSheet
+                ) : MobilePaymentElement
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

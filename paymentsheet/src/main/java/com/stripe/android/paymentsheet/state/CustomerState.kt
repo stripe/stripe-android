@@ -32,11 +32,11 @@ internal data class CustomerState(
             supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
         ): CustomerState {
             val canRemovePaymentMethods = when (
-                val paymentSheetComponent = customer.session.components.paymentSheet
+                val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
             ) {
-                is ElementsSession.Customer.Components.PaymentSheet.Enabled ->
-                    paymentSheetComponent.isPaymentMethodRemoveEnabled
-                is ElementsSession.Customer.Components.PaymentSheet.Disabled -> false
+                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
+                    mobilePaymentElementComponent.isPaymentMethodRemoveEnabled
+                is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
             }
 
             return CustomerState(

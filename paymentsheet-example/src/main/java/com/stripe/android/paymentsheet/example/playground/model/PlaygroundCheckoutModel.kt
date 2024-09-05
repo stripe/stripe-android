@@ -32,6 +32,8 @@ class CheckoutRequest private constructor(
     val paymentMethodConfigurationId: String?,
     @SerialName("require_cvc_recollection")
     val requireCvcRecollection: Boolean?,
+    @SerialName("customer_session_component_name")
+    val customerSessionComponentName: String,
     @SerialName("customer_session_payment_method_save")
     val paymentMethodSaveFeature: FeatureState?,
     @SerialName("customer_session_payment_method_remove")
@@ -157,6 +159,7 @@ class CheckoutRequest private constructor(
                 supportedPaymentMethods = supportedPaymentMethods,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
                 requireCvcRecollection = requireCvcRecollection,
+                customerSessionComponentName = "mobile_payment_element",
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
