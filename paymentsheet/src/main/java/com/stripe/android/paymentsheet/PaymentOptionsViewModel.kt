@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
@@ -14,7 +16,12 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -44,6 +51,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
@@ -55,7 +63,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
 ) : BaseSheetViewModel(
     config = args.state.config,
     eventReporter = eventReporter,
@@ -283,12 +292,107 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun processNewOrExternalPaymentMethod(paymentSelection: PaymentSelection) {
+        if (shouldLaunchAchFlow()) {
+            launchAchFlow()
+            return
+        }
+
+        // TODO: Instant Debits
+
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
                 paymentMethods = customerStateHolder.paymentMethods.value
             )
         )
+    }
+
+    fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+    ) {
+        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::handleCollectBankAccountResult,
+        )
+    }
+
+    // TODO: This is duplicate code
+    private fun handleCollectBankAccountResult(
+        result: CollectBankAccountResultInternal,
+    ) {
+        if (result is CollectBankAccountResultInternal.Completed) {
+            val screen = navigationHandler.currentScreen.value
+            screen.updateWithResult(result)
+        }
+    }
+
+    // TODO: this is duplicate code
+    private fun shouldLaunchAchFlow(): Boolean {
+        val selection = selection.value
+        val screen = navigationHandler.currentScreen.value
+        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
+        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult
+    }
+
+    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+
+    // TODO: this is duplicate code
+    private fun launchAchFlow() {
+        val metadata = paymentMethodMetadata.value ?: return
+        val selection = selection.value as? PaymentSelection.New ?: return
+
+        val name = PaymentMethodCreateParams.getNameFromParams(selection.paymentMethodCreateParams) ?: return
+        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
+
+        val configuration = CollectBankAccountConfiguration.USBankAccount(name, email)
+        val paymentConfig = lazyPaymentConfig.get()
+        val clientSecret = metadata.stripeIntent.clientSecret
+
+//        val onBehalfOf = (args.initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+//            ?.intentConfiguration
+//            ?.onBehalfOf
+        val onBehalfOf: String? = null
+
+        if (metadata.stripeIntent is PaymentIntent) {
+            if (clientSecret != null) {
+                collectBankAccountLauncher?.presentWithPaymentIntent(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            } else {
+                collectBankAccountLauncher?.presentWithDeferredPayment(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    elementsSessionId = metadata.stripeIntent.id!!,
+                    configuration = configuration,
+                    amount = metadata.amount()!!.value.toInt(),
+                    currency = metadata.amount()!!.currencyCode,
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
+                )
+            }
+        } else {
+            if (clientSecret != null) {
+                collectBankAccountLauncher?.presentWithSetupIntent(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            } else {
+                collectBankAccountLauncher?.presentWithDeferredSetup(
+                    publishableKey = paymentConfig.publishableKey,
+                    stripeAccountId = paymentConfig.stripeAccountId,
+                    elementsSessionId = metadata.stripeIntent.id!!,
+                    configuration = configuration,
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
+                )
+            }
+        }
     }
 
     private fun determineInitialBackStack(

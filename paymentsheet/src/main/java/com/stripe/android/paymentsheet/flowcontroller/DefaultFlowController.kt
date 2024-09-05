@@ -24,6 +24,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
