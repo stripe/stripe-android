@@ -348,7 +348,8 @@ private fun PaymentSheetContent(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontal = horizontalPadding)
+                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
     }

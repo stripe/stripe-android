@@ -309,7 +309,6 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Saved payment method mandates work correctly`() = runTest(
-        primaryButtonLabel = "Gimme money!",
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
@@ -331,11 +330,20 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
         verticalModePage.assertPrimaryButton(isEnabled())
         verticalModePage.assertMandateExists()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        managePage.selectPaymentMethod("pm_12345")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateDoesNotExists()
     }
 
     @Test
     fun `Default saved payment method is loaded with mandate`() = runTest(
-        primaryButtonLabel = "Gimme money!",
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
@@ -351,7 +359,6 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Manage screen should not display mandates`() = runTest(
-        primaryButtonLabel = "Gimme money!",
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
