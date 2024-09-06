@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -205,7 +206,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     init {
         coroutineScope.launch {
-            isCurrentScreen.collect { isCurrentScreen ->
+            // The first screen change is navigating to us! We don't want to clear in that case.
+            isCurrentScreen.drop(1).collect { isCurrentScreen ->
                 if (!isCurrentScreen) {
                     return@collect
                 }
