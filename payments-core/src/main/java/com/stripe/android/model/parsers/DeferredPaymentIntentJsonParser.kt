@@ -43,7 +43,7 @@ class DeferredPaymentIntentJsonParser(
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
-            isLiveMode = apiKey.contains("live"),
+            isLiveMode = !apiKey.contains("test"),
             created = timeProvider(),
             setupFutureUsage = paymentMode.setupFutureUsage,
             amount = paymentMode.amount,
