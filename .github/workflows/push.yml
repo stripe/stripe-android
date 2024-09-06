@@ -17,6 +17,7 @@ jobs:
         run: ./gradlew :identity-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: push
   upload-financial-connections:
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +27,7 @@ jobs:
         run: ./gradlew :financial-connections-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: push
   upload-payment-sheet:
     runs-on: ubuntu-latest
     steps:
@@ -35,3 +37,4 @@ jobs:
         run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: push

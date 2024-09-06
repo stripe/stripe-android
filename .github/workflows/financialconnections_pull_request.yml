@@ -12,4 +12,5 @@ jobs:
         run: ./gradlew :financial-connections-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: release
 

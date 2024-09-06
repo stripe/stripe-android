@@ -6,12 +6,16 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 assemble.dependsOn('lint')
 
 emerge {
-    apiToken.set(System.getenv("EMERGE_API_KEY"))
+    apiToken = System.getenv("EMERGE_API_KEY")
+
+    size {
+        tag.set(System.getenv("EMERGE_TAG"))
+    }
 
     vcs {
         gitHub {
-            repoOwner.set("EmergeTools")
-            repoName.set("stripe-android")
+            repoOwner = "EmergeTools"
+            repoName = "stripe-android"
         }
     }
 }

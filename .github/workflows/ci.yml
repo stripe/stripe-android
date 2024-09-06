@@ -52,6 +52,7 @@ jobs:
         run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
         env:
           EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: pull_request
 
   check-for-untranslated-strings:
     name: Check for untranslated strings
