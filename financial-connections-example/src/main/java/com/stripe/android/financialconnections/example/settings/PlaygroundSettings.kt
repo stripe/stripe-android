@@ -167,6 +167,7 @@ internal data class PlaygroundSettings(
         }
 
         private val allSettings: List<Setting<*>> = listOfNotNull(
+            IntegrationTypeSetting(),
             ExperienceSetting(),
             MerchantSetting(),
             PublicKeySetting(),
