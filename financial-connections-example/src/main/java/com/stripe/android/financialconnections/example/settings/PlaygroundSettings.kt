@@ -39,6 +39,10 @@ internal data class PlaygroundSettings(
         return settings.find { it is T } as T
     }
 
+    inline fun <reified T : Setting<*>> getOrNull(): T? {
+        return settings.find { it is T } as T?
+    }
+
     fun lasRequest(): LinkAccountSessionBody = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, setting: Setting<*> -> setting.lasRequest(acc) }
@@ -154,7 +158,7 @@ internal data class PlaygroundSettings(
             return settings
         }
 
-        private val allSettings: List<Setting<*>> = listOf(
+        private val allSettings: List<Setting<*>> = listOfNotNull(
             ExperienceSetting(),
             MerchantSetting(),
             PublicKeySetting(),
@@ -165,7 +169,7 @@ internal data class PlaygroundSettings(
             NativeSetting(),
             PermissionsSetting(),
             EmailSetting(),
-            StripeAccountIdSetting(),
+            StripeAccountIdSetting().takeIf { BuildConfig.TEST_ENVIRONMENT != "edge" },
         )
     }
 }

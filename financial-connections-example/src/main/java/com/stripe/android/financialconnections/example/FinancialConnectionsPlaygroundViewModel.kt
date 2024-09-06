@@ -490,6 +490,6 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
-    val stripeAccountId: String? = settings.get<StripeAccountIdSetting>().selectedOption
-        .takeIf { it.isNotEmpty() }
+    val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+        ?.takeIf { it.isNotEmpty() }
 }
