@@ -36,9 +36,9 @@ class CustomerSheet @Inject internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
-    private val configuration: Configuration,
     private val statusBarColor: () -> Int?,
 ) {
+    private var configureRequest: ConfigureRequest? = null
 
     private val customerSheetActivityLauncher =
         activityResultRegistryOwner.activityResultRegistry.register(
@@ -59,12 +59,36 @@ class CustomerSheet @Inject internal constructor(
     }
 
     /**
+     * Configures [CustomerSheet] with to use a given [CustomerSheet.Configuration] instance. Can be called multiple
+     * times to re-configure [CustomerSheet].
+     */
+    fun configure(
+        configuration: Configuration,
+    ) {
+        this.configureRequest = ConfigureRequest(
+            configuration = configuration,
+        )
+    }
+
+    /**
      * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
+        val request = configureRequest ?: run {
+            callback.onCustomerSheetResult(
+                CustomerSheetResult.Failed(
+                    IllegalStateException(
+                        "Must call `configure` first before attempting to present `CustomerSheet`!"
+                    )
+                )
+            )
+
+            return
+        }
+
         val args = CustomerSheetContract.Args(
-            configuration = configuration,
+            configuration = request.configuration,
             statusBarColor = statusBarColor(),
         )
 
@@ -92,6 +116,13 @@ class CustomerSheet @Inject internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
+        val request = configureRequest
+            ?: return@coroutineScope CustomerSheetResult.Failed(
+                IllegalStateException(
+                    "Must call `configure` first before attempting to fetch the saved payment option!"
+                )
+            )
+
         val adapter = CustomerSheetHacks.adapter.await()
 
         val selectedPaymentOptionDeferred = async {
@@ -108,7 +139,7 @@ class CustomerSheet @Inject internal constructor(
                 paymentMethods.getOrNull()?.find {
                     it.id == paymentOption.id
                 }
-            }?.toPaymentOptionSelection(paymentOptionFactory)
+            }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
         }
 
         selection.fold(
@@ -293,6 +324,10 @@ class CustomerSheet @Inject internal constructor(
         }
     }
 
+    private data class ConfigureRequest(
+        val configuration: Configuration,
+    )
+
     @ExperimentalCustomerSheetApi
     companion object {
 
@@ -307,7 +342,6 @@ class CustomerSheet @Inject internal constructor(
         @JvmStatic
         fun create(
             activity: ComponentActivity,
-            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
@@ -316,7 +350,6 @@ class CustomerSheet @Inject internal constructor(
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             )
@@ -333,7 +366,6 @@ class CustomerSheet @Inject internal constructor(
         @JvmStatic
         fun create(
             fragment: Fragment,
-            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
@@ -343,7 +375,6 @@ class CustomerSheet @Inject internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             )
@@ -354,14 +385,12 @@ class CustomerSheet @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
-            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
                 lifecycleOwner = lifecycleOwner,
                 adapter = customerAdapter,
-                configuration = configuration,
             )
 
             return CustomerSheet(
@@ -375,18 +404,20 @@ class CustomerSheet @Inject internal constructor(
                 ),
                 callback = callback,
                 statusBarColor = statusBarColor,
-                configuration = configuration,
             )
         }
 
         internal fun PaymentSelection?.toPaymentOptionSelection(
-            paymentOptionFactory: PaymentOptionFactory
+            paymentOptionFactory: PaymentOptionFactory,
+            canUseGooglePay: Boolean,
         ): PaymentOptionSelection? {
             return when (this) {
                 is PaymentSelection.GooglePay -> {
                     PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this)
-                    )
+                        paymentOption = paymentOptionFactory.create(this),
+                    ).takeIf {
+                        canUseGooglePay
+                    }
                 }
                 is PaymentSelection.Saved -> {
                     PaymentOptionSelection.PaymentMethod(

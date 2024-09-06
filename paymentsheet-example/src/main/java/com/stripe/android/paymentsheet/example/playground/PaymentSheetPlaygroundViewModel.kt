@@ -65,7 +65,17 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-    val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
+    val customerAdapter = MutableStateFlow(
+        CustomerAdapter.create(
+            context = getApplication(),
+            customerEphemeralKeyProvider = {
+                throw NotImplementedError("Nope!")
+            },
+            setupIntentClientSecretProvider = {
+                throw NotImplementedError("Nope!")
+            }
+        )
+    )
 
     private val baseUrl: String
         get() {
@@ -87,7 +97,15 @@ internal class PaymentSheetPlaygroundViewModel(
         state.value = null
         flowControllerState.value = null
         customerSheetState.value = null
-        customerAdapter.value = null
+        customerAdapter.value = CustomerAdapter.create(
+            context = getApplication(),
+            customerEphemeralKeyProvider = {
+                throw NotImplementedError("Nope!")
+            },
+            setupIntentClientSecretProvider = {
+                throw NotImplementedError("Nope!")
+            }
+        )
 
         if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
             prepareCheckout(playgroundSettings)

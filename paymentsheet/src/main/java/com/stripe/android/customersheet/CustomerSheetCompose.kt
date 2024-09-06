@@ -11,14 +11,12 @@ import com.stripe.android.utils.rememberActivity
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
- * @param configuration An optional [CustomerSheet.Configuration]
  * @param customerAdapter The [CustomerAdapter] to fetch customer-related information
  * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
  */
 @ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
-    configuration: CustomerSheet.Configuration,
     customerAdapter: CustomerAdapter,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
@@ -32,7 +30,6 @@ fun rememberCustomerSheet(
     }
 
     return remember(
-        configuration,
         customerAdapter,
         callback,
     ) {
@@ -40,7 +37,6 @@ fun rememberCustomerSheet(
             application = activity.application,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
-            configuration = configuration,
             customerAdapter = customerAdapter,
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },

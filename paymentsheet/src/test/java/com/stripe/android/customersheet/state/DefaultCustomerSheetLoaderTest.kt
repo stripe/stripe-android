@@ -581,7 +581,6 @@ class DefaultCustomerSheetLoaderTest {
         CustomerSheetHacks.initialize(
             lifecycleOwner = TestLifecycleOwner(),
             adapter = FakeCustomerAdapter(),
-            configuration = configuration,
         )
 
         withTimeout(100.milliseconds) {

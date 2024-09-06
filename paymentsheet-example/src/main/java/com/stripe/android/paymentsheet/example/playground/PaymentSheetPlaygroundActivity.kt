@@ -114,15 +114,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
-            val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
-                customerAdapter?.let { adapter ->
-                    rememberCustomerSheet(
-                        configuration = customerPlaygroundState.customerSheetConfiguration(),
-                        customerAdapter = adapter,
-                        callback = viewModel::onCustomerSheetCallback
-                    )
-                }
-            }
+            val customerSheet = rememberCustomerSheet(
+                customerAdapter = customerAdapter,
+                callback = viewModel::onCustomerSheetCallback
+            )
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
@@ -260,7 +255,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
-        customerSheet: CustomerSheet?,
+        customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
@@ -291,9 +286,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                     else -> Unit
                 }
             }
-            is PlaygroundState.Customer -> customerSheet?.run {
-                CustomerSheetUi(customerSheet = this)
-            }
+            is PlaygroundState.Customer -> CustomerSheetUi(
+                customerSheet = customerSheet,
+                playgroundState = playgroundState,
+            )
         }
     }
 
@@ -360,29 +356,34 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     fun CustomerSheetUi(
         customerSheet: CustomerSheet,
+        playgroundState: PlaygroundState.Customer,
     ) {
         val customerSheetState by viewModel.customerSheetState.collectAsState()
 
-        customerSheetState?.let { state ->
-            LaunchedEffect(state) {
-                if (state.shouldFetchPaymentOption) {
-                    fetchOption(customerSheet).onSuccess { option ->
-                        viewModel.customerSheetState.emit(
-                            CustomerSheetState(
-                                selectedPaymentOption = option,
-                                shouldFetchPaymentOption = false
-                            )
+        LaunchedEffect(playgroundState, customerSheetState) {
+            customerSheet.configure(
+                configuration = playgroundState.customerSheetConfiguration(),
+            )
+
+            if (customerSheetState?.shouldFetchPaymentOption == true) {
+                fetchOption(customerSheet).onSuccess { option ->
+                    viewModel.customerSheetState.emit(
+                        CustomerSheetState(
+                            selectedPaymentOption = option,
+                            shouldFetchPaymentOption = false
                         )
-                    }.onFailure { exception ->
-                        viewModel.status.emit(
-                            StatusMessage(
-                                message = "Failed to retrieve payment options:\n${exception.message}"
-                            )
+                    )
+                }.onFailure { exception ->
+                    viewModel.status.emit(
+                        StatusMessage(
+                            message = "Failed to retrieve payment options:\n${exception.message}"
                         )
-                    }
+                    )
                 }
             }
+        }
 
+        customerSheetState?.let { state ->
             if (state.shouldFetchPaymentOption) {
                 return
             }

@@ -83,8 +83,13 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 val customerSheet = customerAdapter?.let {
                     rememberCustomerSheet(
                         customerAdapter = it,
-                        configuration = config,
                         callback = viewModel::onCustomerSheetResult,
+                    )
+                }
+
+                LaunchedEffect(customerSheet, config) {
+                    customerSheet?.configure(
+                        configuration = config,
                     )
                 }
 
