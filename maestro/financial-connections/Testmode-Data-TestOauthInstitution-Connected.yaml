@@ -1,7 +1,6 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - edge
   - testmode-data
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
