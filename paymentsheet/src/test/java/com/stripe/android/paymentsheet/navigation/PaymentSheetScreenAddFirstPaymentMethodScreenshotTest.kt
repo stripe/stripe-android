@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor.Companion.createState
@@ -30,7 +32,24 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     @Test
     fun displaysCard() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun displaysCheckbox() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
         val initialScreen = AddFirstPaymentMethod(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
@@ -44,7 +63,58 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     @Test
     fun displaysError() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.onError("An error occurred.".resolvableString)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun displaysCardWithMandate() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        )
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun displaysCheckboxWithMandate() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            hasCustomerConfiguration = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun displaysErrorWithMandate() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+        )
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
         val initialScreen = AddFirstPaymentMethod(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
         viewModel.onError("An error occurred.".resolvableString)

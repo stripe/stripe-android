@@ -37,7 +37,7 @@ import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
 internal val verticalModeBottomContentPadding = 20.dp
-internal val horizontalModeBottomContentPadding = 8.dp
+internal val horizontalModeBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
 
@@ -223,7 +223,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(interactor = interactor, modifier)
+            AddPaymentMethod(interactor = interactor)
         }
 
         override fun close() {
@@ -276,7 +276,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(interactor = interactor, modifier)
+            AddPaymentMethod(interactor = interactor)
         }
 
         override fun close() {

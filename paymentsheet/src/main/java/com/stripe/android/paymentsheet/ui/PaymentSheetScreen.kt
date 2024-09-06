@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -288,7 +287,7 @@ private fun PaymentSheetContent(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -328,13 +327,11 @@ private fun PaymentSheetContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(currentScreen.bottomContentPadding))
-
         error?.let {
             ErrorMessage(
                 error = it.resolve(),
                 modifier = Modifier
-                    .padding(vertical = 2.dp, horizontal = horizontalPadding)
+                    .padding(vertical = 6.dp, horizontal = horizontalPadding)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
         }
