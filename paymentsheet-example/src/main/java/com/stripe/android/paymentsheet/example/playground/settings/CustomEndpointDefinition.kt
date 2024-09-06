@@ -8,5 +8,5 @@ internal object CustomEndpointDefinition :
     override val defaultValue: String? = null
 
     override fun convertToValue(value: String): String? = value.takeUnless { it.isBlank() }
-    override fun convertToString(value: String?): String = ""
+    override fun convertToString(value: String?): String = value.orEmpty()
 }

@@ -128,7 +128,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
-                    endpoint.orEmpty(),
+                    currentUrl = endpoint,
                     onConfirm = { backendUrl ->
                         viewModel.onCustomUrlUpdated(backendUrl)
                         showCustomEndpointDialog = false
