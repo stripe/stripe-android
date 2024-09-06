@@ -92,15 +92,21 @@ internal class FinancialConnectionsPlaygroundViewModel(
             Experience.PaymentElement -> {
                 startWithPaymentIntent(this)
             }
+            Experience.PaymentElementWithInstantDebits -> {
+                startWithPaymentIntent(this, forceInstantDebits = true)
+            }
         }
     }
 
-    private fun startWithPaymentIntent(settings: PlaygroundSettings) {
+    private fun startWithPaymentIntent(
+        settings: PlaygroundSettings,
+        forceInstantDebits: Boolean = false,
+    ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    settings.paymentIntentRequest()
+                    settings.paymentIntentRequest(forceInstantDebits = forceInstantDebits)
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -445,7 +451,8 @@ enum class Experience(
 ) {
     FinancialConnections("Financial Connections"),
     InstantDebits("Instant Debits"),
-    PaymentElement("Payment Element")
+    PaymentElement("Payment Element"),
+    PaymentElementWithInstantDebits("Payment Element w/ Instant Debits"),
 }
 
 enum class NativeOverride(val apiValue: String) {

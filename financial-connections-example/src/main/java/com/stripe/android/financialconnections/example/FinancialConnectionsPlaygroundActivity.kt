@@ -49,6 +49,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
 import com.stripe.android.financialconnections.example.Experience.PaymentElement
+import com.stripe.android.financialconnections.example.Experience.PaymentElementWithInstantDebits
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
@@ -166,7 +167,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            PaymentElement -> {
+            PaymentElement,
+            PaymentElementWithInstantDebits -> {
                 PaymentConfiguration.init(
                     context = this@FinancialConnectionsPlaygroundActivity,
                     publishableKey = publishableKey
