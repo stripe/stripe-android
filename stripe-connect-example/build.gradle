@@ -1,10 +1,12 @@
-apply from: configs.androidLibrary
+apply from: configs.androidApplication
 
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 dependencies {
+    implementation project(":stripe-connect")
+
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
@@ -25,6 +27,7 @@ dependencies {
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
@@ -75,7 +78,7 @@ dependencies {
 
 android {
     defaultConfig {
-        testApplicationId "com.stripe.android.connectsdk.test"
+        testApplicationId "com.stripe.android.connectsdk.example.test"
     }
 
     buildFeatures {
@@ -121,11 +124,3 @@ android {
         }
     }
 }
-
-ext {
-    artifactId = "connectsdk"
-    artifactName = "connectsdk"
-    artifactDescrption = "The Connect Embedded Components SDK module of the Stripe Android SDK"
-}
-
-apply from: "${rootDir}/deploy/deploy.gradle"
