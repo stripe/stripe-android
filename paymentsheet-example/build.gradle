@@ -14,12 +14,12 @@ def getGooglePlacesApiKey() {
 }
 
 emerge {
-    apiToken = System.getenv("EMERGE_API_KEY")
+    apiToken.set(System.getenv("EMERGE_API_KEY"))
 
     vcs {
         gitHub {
-            repoOwner = "EmergeTools"
-            repoName = "stripe-android"
+            repoOwner.set("EmergeTools")
+            repoName.set("stripe-android")
         }
     }
 }
