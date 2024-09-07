@@ -1,11 +1,13 @@
 package com.stripe.android.connectsdk
 
+import androidx.annotation.RestrictTo
+
 /**
  * Marks an API for Private Beta usage, meaning it can be changed or removed at any time (use at your own risk).
- * If you are interested in using a feature marked for private beta, send an email to
- * [private-beta-element@stripe.com](mailto:private-beta-element@stripe.com).
+ * The Stripe Connect SDK is in private beta and may be changed in the future without notice.
  */
-@RequiresOptIn(message = "This API is under construction. If you're interested in using it, email private-beta-element@stripe.com.")
+@RequiresOptIn(message = "The Stripe Connect SDK is in private beta. It may be changed in the future without notice.")
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 annotation class PrivateBetaConnectSDK
