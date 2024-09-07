@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name=".ConnectEmbeddedComponentActivity"
+            android:name=".EmbeddedComponentActivity"
             android:exported="false" />
     </application>
 </manifest>
