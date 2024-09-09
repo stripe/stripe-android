@@ -34,10 +34,9 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.DataAccessText
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -161,7 +160,7 @@ private fun AccountPickerLoaded(
         footer = {
             displayablePayload?.let {
                 Footer(
-                    merchantDataAccessModel = it.merchantDataAccess,
+                    dataAccess = it.dataAccess,
                     onClickableTextClick = onClickableTextClick,
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
@@ -234,7 +233,7 @@ private fun LazyListScope.accountPickerContent(
 
 @Composable
 private fun Footer(
-    merchantDataAccessModel: MerchantDataAccessModel?,
+    dataAccess: AccountPickerState.DataAccess,
     onClickableTextClick: (String) -> Unit,
     submitEnabled: Boolean,
     submitLoading: Boolean,
@@ -242,12 +241,10 @@ private fun Footer(
     selectedIds: Set<String>
 ) {
     Column {
-        merchantDataAccessModel?.let {
-            MerchantDataAccessText(
-                model = it,
-                onLearnMoreClick = { onClickableTextClick(DATA.value) }
-            )
-        }
+        DataAccessText(
+            dataAccess = dataAccess,
+            onLearnMoreClick = { onClickableTextClick(DATA.value) },
+        )
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             enabled = submitEnabled,

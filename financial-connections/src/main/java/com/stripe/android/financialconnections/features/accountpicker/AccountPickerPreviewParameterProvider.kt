@@ -74,7 +74,7 @@ internal class AccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 dataAccessNotice = dataAccessNotice(),
                 selectionMode = SelectionMode.Multiple,
-                merchantDataAccess = accessibleCallout(),
+                dataAccess = accessibleCallout(),
                 singleAccount = false,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -103,7 +103,7 @@ internal class AccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 dataAccessNotice = dataAccessNotice(),
                 selectionMode = SelectionMode.Single,
-                merchantDataAccess = accessibleCallout(),
+                dataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -203,14 +203,16 @@ internal class AccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun accessibleCallout() = MerchantDataAccessModel(
-        businessName = "My business",
-        permissions = listOf(
-            FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-            FinancialConnectionsAccount.Permissions.BALANCES,
-            FinancialConnectionsAccount.Permissions.OWNERSHIP,
-            FinancialConnectionsAccount.Permissions.TRANSACTIONS
+    private fun accessibleCallout() = AccountPickerState.DataAccess.FinancialConnections(
+        model = MerchantDataAccessModel(
+            businessName = "My business",
+            permissions = listOf(
+                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                FinancialConnectionsAccount.Permissions.BALANCES,
+                FinancialConnectionsAccount.Permissions.OWNERSHIP,
+                FinancialConnectionsAccount.Permissions.TRANSACTIONS,
+            ),
+            isStripeDirect = false,
         ),
-        isStripeDirect = false
     )
 }

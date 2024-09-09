@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -20,7 +21,52 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
-internal fun MerchantDataAccessText(
+internal fun DataAccessText(
+    dataAccess: AccountPickerState.DataAccess,
+    onLearnMoreClick: () -> Unit,
+) {
+    when (dataAccess) {
+        is AccountPickerState.DataAccess.FinancialConnections -> {
+            MerchantDataAccessText(
+                model = dataAccess.model,
+                onLearnMoreClick = onLearnMoreClick,
+            )
+        }
+        is AccountPickerState.DataAccess.InstantDebits -> {
+            MerchantDataAccessText(
+                businessName = dataAccess.businessName,
+                onLearnMoreClick = onLearnMoreClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MerchantDataAccessText(
+    businessName: String?,
+    onLearnMoreClick: () -> Unit
+) {
+    AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
+        text = TextResource.StringId(
+            value = when (businessName) {
+                null -> R.string.stripe_data_sharing_callout_link_no_business
+                else -> R.string.stripe_data_sharing_callout_link_business
+            },
+            args = listOfNotNull(businessName),
+        ),
+        onClickableTextClick = {
+            onLearnMoreClick()
+        },
+        defaultStyle = FinancialConnectionsTheme.typography.labelSmall.copy(
+            color = FinancialConnectionsTheme.colors.textDefault,
+            textAlign = TextAlign.Center,
+        ),
+    )
+}
+
+@Composable
+private fun MerchantDataAccessText(
     model: MerchantDataAccessModel,
     onLearnMoreClick: () -> Unit
 ) {
@@ -92,7 +138,9 @@ internal fun MerchantDataAccessTextPreview() {
             topBar = { /*TODO*/ }
         ) {
             Column(
-                Modifier.fillMaxWidth().padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // all permissions

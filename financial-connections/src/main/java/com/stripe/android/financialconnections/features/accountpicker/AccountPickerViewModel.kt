@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -68,6 +69,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
     private val presentSheet: PresentSheet,
+    private val isLinkWithStripe: IsLinkWithStripe,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -117,7 +119,22 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     )
                 )
             }
+
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
+
+            val dataAccess = if (isLinkWithStripe()) {
+                AccountPickerState.DataAccess.InstantDebits(
+                    businessName = manifest.businessName,
+                )
+            } else {
+                AccountPickerState.DataAccess.FinancialConnections(
+                    model = MerchantDataAccessModel(
+                        businessName = manifest.businessName,
+                        permissions = manifest.permissions,
+                        isStripeDirect = manifest.isStripeDirect ?: false
+                    )
+                )
+            }
 
             AccountPickerState.Payload(
                 // note that this uses ?? instead of ||, we do NOT want to skip account selection
@@ -130,11 +147,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
                 dataAccessNotice = dataAccessNotice,
-                merchantDataAccess = MerchantDataAccessModel(
-                    businessName = manifest.businessName,
-                    permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false
-                ),
+                dataAccess = dataAccess,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -350,10 +363,20 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             },
             knownDeeplinkActions = mapOf(
                 DATA.value to {
-                    presentDataAccessBottomSheet()
+                    presentDataAccessNotice()
                 }
             )
         )
+    }
+
+    private fun presentDataAccessNotice() {
+        if (isLinkWithStripe()) {
+            val date = Date()
+            val url = "https://support.link.com/questions/connecting-your-bank-account"
+            setState { copy(viewEffect = ViewEffect.OpenUrl(url, date.time)) }
+        } else {
+            presentDataAccessBottomSheet()
+        }
     }
 
     private fun presentDataAccessBottomSheet() {
@@ -407,7 +430,7 @@ internal data class AccountPickerState(
         val accounts: List<PartnerAccount>,
         val dataAccessNotice: DataAccessNotice?,
         val selectionMode: SelectionMode,
-        val merchantDataAccess: MerchantDataAccessModel,
+        val dataAccess: DataAccess,
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
@@ -419,6 +442,17 @@ internal data class AccountPickerState(
 
         val shouldSkipPane: Boolean
             get() = skipAccountSelection || userSelectedSingleAccountInInstitution
+    }
+
+    sealed interface DataAccess {
+
+        data class InstantDebits(
+            val businessName: String?,
+        ) : DataAccess
+
+        data class FinancialConnections(
+            val model: MerchantDataAccessModel,
+        ) : DataAccess
     }
 
     enum class SelectionMode {
