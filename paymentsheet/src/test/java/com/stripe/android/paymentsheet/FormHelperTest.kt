@@ -158,6 +158,57 @@ internal class FormHelperTest {
         assertThat(hasCalledSelectionUpdater).isTrue()
     }
 
+    @Test
+    fun `requiresFormScreen returns false for an LPM with no fields`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                )
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("cashapp")).isFalse()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for an LPM with no fields, but requires name`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("cashapp")).isTrue()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for an LPM with fields`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("klarna")).isTrue()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for non form field based LPM us_bank_account`() {
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("us_bank_account")).isTrue()
+        assertThat(formHelper.requiresFormScreen("link")).isTrue()
+    }
+
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection? = { throw AssertionError("Not implemented") },
