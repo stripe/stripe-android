@@ -228,7 +228,6 @@ internal class FlowControllerTest {
         }
     }
 
-
     @Test
     fun testFailedElementsSessionCall(
         @TestParameter integrationType: IntegrationType,
