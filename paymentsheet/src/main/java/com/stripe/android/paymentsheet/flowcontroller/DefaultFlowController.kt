@@ -22,7 +22,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -47,13 +46,13 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
@@ -109,6 +108,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @IOContext workContext: CoroutineContext,
     logger: UserFacingLogger,
+    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -359,25 +359,23 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else if (
-            isCvcRecollectionEnabled(state) &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+            cvcRecollectionHandler.requiresCVCRecollection(
+                stripeIntent = state.stripeIntent,
+                paymentSelection = paymentSelection,
+                initializationMode = initializationMode
+            )
         ) {
-            CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
+            cvcRecollectionHandler.launch(paymentSelection) { cvcRecollectionData ->
                 cvcRecollectionLauncher.launch(
-                    data = it,
+                    data = cvcRecollectionData,
                     appearance = getPaymentAppearance(),
-                    state.stripeIntent.isLiveMode
+                    isLiveMode = state.stripeIntent.isLiveMode
                 )
+
             }
         } else {
             confirmPaymentSelection(paymentSelection, state)
         }
-    }
-
-    private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
-        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
-            (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration?.requireCvcRecollection == true
     }
 
     @VisibleForTesting
