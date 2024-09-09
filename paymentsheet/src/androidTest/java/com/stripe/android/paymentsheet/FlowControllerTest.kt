@@ -25,6 +25,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalPaymentMethodLayoutApi::class)
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
     @get:Rule
@@ -76,6 +77,157 @@ internal class FlowControllerTest {
 
         page.clickPrimaryButton()
     }
+
+    @Test
+    fun testSuccessfulCardPaymentWithVerticalMode(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        paymentOptionCallback = { paymentOption ->
+            assertThat(paymentOption?.label).endsWith("4242")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        page.clickOnLpm("card", forVerticalMode = true)
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testCardRelaunchesIntoFormPage(
+        @TestParameter integrationType: IntegrationType,
+    ) {
+        val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
+        runFlowControllerTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            callConfirmOnPaymentOptionCallback = false,
+            paymentOptionCallback = { paymentOption ->
+                assertThat(paymentOption?.label).endsWith("4242")
+                paymentOptionCallbackCountDownLatch.countDown()
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+            }
+
+            testContext.configureFlowController {
+                configureWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
+                    callback = { success, error ->
+                        assertThat(success).isTrue()
+                        assertThat(error).isNull()
+                        presentPaymentOptions()
+                    }
+                )
+            }
+
+            page.clickOnLpm("card", forVerticalMode = true)
+            page.fillOutCardDetails()
+
+            page.clickPrimaryButton()
+            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+            composeTestRule.waitForIdle()
+
+            testContext.flowController.presentPaymentOptions()
+
+            page.assertIsOnFormPage()
+
+            testContext.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testCashappRelaunchesIntoListPageWithCashappSelected(
+        @TestParameter integrationType: IntegrationType,
+    ) {
+        var paymentOptionCallbackCountDownLatch = CountDownLatch(1)
+        runFlowControllerTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            callConfirmOnPaymentOptionCallback = false,
+            paymentOptionCallback = { paymentOption ->
+                assertThat(paymentOption?.label).isEqualTo("Cash App Pay")
+                paymentOptionCallbackCountDownLatch.countDown()
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+            }
+
+            testContext.configureFlowController {
+                configureWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
+                    callback = { success, error ->
+                        assertThat(success).isTrue()
+                        assertThat(error).isNull()
+                        presentPaymentOptions()
+                    }
+                )
+            }
+
+            page.clickOnLpm("cashapp", forVerticalMode = true)
+            page.assertLpmSelected("cashapp")
+
+            page.clickPrimaryButton()
+            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+            composeTestRule.waitForIdle()
+
+            testContext.flowController.presentPaymentOptions()
+
+            page.assertLpmSelected("cashapp")
+            paymentOptionCallbackCountDownLatch = CountDownLatch(1)
+            page.clickPrimaryButton()
+            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+
+            testContext.markTestSucceeded()
+        }
+    }
+
 
     @Test
     fun testFailedElementsSessionCall(
