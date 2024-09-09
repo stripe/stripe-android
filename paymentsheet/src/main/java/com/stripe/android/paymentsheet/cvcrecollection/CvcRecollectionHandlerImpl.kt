@@ -20,7 +20,7 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         initializationMode: PaymentSheet.InitializationMode?
     ): Boolean {
         return deferredIntentRequiresCVCRecollection(initializationMode) ||
-            paymentIntentRequiresCVCRecollection(stripeIntent)
+            paymentIntentRequiresCVCRecollection(stripeIntent, initializationMode)
     }
 
     override fun requiresCVCRecollection(
@@ -35,11 +35,16 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
     private fun deferredIntentRequiresCVCRecollection(initializationMode: PaymentSheet.InitializationMode?): Boolean {
         return (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-            ?.intentConfiguration?.requireCvcRecollection == true
+            ?.intentConfiguration?.requireCvcRecollection == true &&
+            initializationMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
     }
 
-    private fun paymentIntentRequiresCVCRecollection(stripeIntent: StripeIntent?): Boolean {
-        return (stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
+    private fun paymentIntentRequiresCVCRecollection(
+        stripeIntent: StripeIntent?,
+        initializationMode: PaymentSheet.InitializationMode?
+    ): Boolean {
+        return (stripeIntent as? PaymentIntent)?.requireCvcRecollection == true &&
+            initializationMode is PaymentSheet.InitializationMode.PaymentIntent
     }
 
     private fun paymentSelectionIsSavedCard(paymentSelection: PaymentSelection?): Boolean {
