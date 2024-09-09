@@ -296,13 +296,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(
-                VerticalModeInitialScreenFactory.create(
-                    viewModel = this,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerStateHolder = customerStateHolder,
-                    savedPaymentMethodMutator = savedPaymentMethodMutator,
-                )
+            return VerticalModeInitialScreenFactory.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {

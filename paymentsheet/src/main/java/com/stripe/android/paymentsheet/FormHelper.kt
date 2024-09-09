@@ -6,6 +6,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -74,6 +75,13 @@ internal class FormHelper(
             paymentMethodMetadata = paymentMethodMetadata,
         )
         selectionUpdater(newSelection)
+    }
+
+    fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
+        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
+        return userInteractionAllowed ||
+            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
     }
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
