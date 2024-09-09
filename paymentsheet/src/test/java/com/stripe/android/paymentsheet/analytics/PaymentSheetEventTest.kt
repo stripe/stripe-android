@@ -328,7 +328,8 @@ class PaymentSheetEventTest {
                 "duration" to 5f,
                 "selected_lpm" to "none",
                 "intent_type" to "payment_intent",
-                "ordered_lpms" to "card,klarna"
+                "ordered_lpms" to "card,klarna",
+                "require_cvc_recollection" to false
             )
         )
     }
