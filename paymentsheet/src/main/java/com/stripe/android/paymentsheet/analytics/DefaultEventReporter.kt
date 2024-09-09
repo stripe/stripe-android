@@ -59,6 +59,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
+        requireCvcRecollection: Boolean
     ) {
         this.currency = currency
         this.linkEnabled = linkMode != null
@@ -77,6 +78,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,
+                requireCvcRecollection = requireCvcRecollection
             )
         )
     }
@@ -384,6 +386,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
+        if (event is PaymentSheetEvent.LoadSucceeded) {
+            println("YEET event.params: ${event.params}")
+        }
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(

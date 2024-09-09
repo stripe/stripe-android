@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -579,6 +580,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                requireCvcRecollection = isCvcRecollectionRequired(
+                    initializationMode,
+                    state.paymentMethodMetadata.stripeIntent
+                )
             )
         }
     }
@@ -612,6 +617,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
         }
     }
+
+    private fun isCvcRecollectionRequired(
+        initializationMode: PaymentSheet.InitializationMode,
+        intent: StripeIntent
+    ) = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+        ?.intentConfiguration?.requireCvcRecollection == true ||
+            ((intent as? PaymentIntent)?.requireCvcRecollection == true &&
+                (initializationMode !is PaymentSheet.InitializationMode.DeferredIntent))
 
     private sealed interface CustomerInfo {
         val id: String

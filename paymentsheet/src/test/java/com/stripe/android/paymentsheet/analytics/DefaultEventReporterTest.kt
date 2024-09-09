@@ -83,6 +83,21 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `on completed loading operation, should fire analytics with cvc recollection value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            requireCvcRecollection = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["require_cvc_recollection"] == true
+            }
+        )
+    }
+
+    @Test
     fun `on completed loading operation, should reset checkout timer`() {
         val durationProvider = FakeDurationProvider()
 
@@ -721,6 +736,7 @@ class DefaultEventReporterTest {
         initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
             clientSecret = "cs_example"
         ),
+        requireCvcRecollection: Boolean = false
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
@@ -731,6 +747,7 @@ class DefaultEventReporterTest {
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
+            requireCvcRecollection = requireCvcRecollection
         )
     }
 
