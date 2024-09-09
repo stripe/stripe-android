@@ -621,12 +621,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun isCvcRecollectionRequired(
         initializationMode: PaymentSheet.InitializationMode,
         intent: StripeIntent
-    ) = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-        ?.intentConfiguration?.requireCvcRecollection == true ||
-        (
-            (intent as? PaymentIntent)?.requireCvcRecollection == true &&
-                (initializationMode !is PaymentSheet.InitializationMode.DeferredIntent)
-            )
+    ): Boolean {
+        val deferredIntentMode = initializationMode as? PaymentSheet.InitializationMode.DeferredIntent
+        val deferredIntentRequiresCvcRecollection =
+            deferredIntentMode?.intentConfiguration?.requireCvcRecollection == true &&
+            deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+
+        val paymentIntentRequiresCvcRecollection = (intent as? PaymentIntent)?.requireCvcRecollection == true &&
+            initializationMode !is PaymentSheet.InitializationMode.DeferredIntent
+
+        return paymentIntentRequiresCvcRecollection || deferredIntentRequiresCvcRecollection
+    }
 
     private sealed interface CustomerInfo {
         val id: String
