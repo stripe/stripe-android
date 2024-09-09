@@ -2270,6 +2270,8 @@ internal class DefaultFlowControllerTest {
                 eq(PaymentSheet.Appearance()),
                 eq(false)
             )
+        } else {
+            verify(launcher, never()).launch(any(), any(), any())
         }
 
         verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
