@@ -59,7 +59,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
     ) {
         this.currency = currency
         this.linkEnabled = linkMode != null
@@ -78,7 +77,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,
-                requireCvcRecollection = requireCvcRecollection
             )
         )
     }

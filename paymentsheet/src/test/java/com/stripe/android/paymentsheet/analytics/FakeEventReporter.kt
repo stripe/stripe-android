@@ -26,8 +26,7 @@ internal class FakeEventReporter : EventReporter {
         googlePaySupported: Boolean,
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
+        orderedLpms: List<String>
     ) {
     }
 

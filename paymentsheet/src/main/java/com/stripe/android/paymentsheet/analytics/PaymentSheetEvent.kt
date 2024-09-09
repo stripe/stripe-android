@@ -43,7 +43,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkMode: LinkMode?,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
-        requireCvcRecollection: Boolean = false
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val linkEnabled: Boolean = linkMode != null
@@ -51,8 +50,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_DURATION to duration?.asSeconds,
             FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
             FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
-            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
-            FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
+            FIELD_ORDERED_LPMS to orderedLpms.joinToString(",")
         ).plus(
             linkMode?.let { mode ->
                 mapOf(FIELD_LINK_MODE to mode.value)
@@ -498,7 +496,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_INTENT_TYPE = "intent_type"
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
-        const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
