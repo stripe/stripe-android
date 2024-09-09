@@ -31,8 +31,8 @@ internal fun MerchantDataAccessText(
             value = when {
                 model.isStripeDirect -> R.string.stripe_data_accessible_callout_stripe
                 else -> when (model.businessName) {
-                    null -> R.string.stripe_data_accessible_callout_business
-                    else -> R.string.stripe_data_accessible_callout_no_business
+                    null -> R.string.stripe_data_accessible_callout_no_business
+                    else -> R.string.stripe_data_accessible_callout_business
                 }
             },
             args = listOfNotNull(
@@ -124,7 +124,7 @@ internal fun MerchantDataAccessTextPreview() {
                 // two permissions
                 MerchantDataAccessText(
                     MerchantDataAccessModel(
-                        businessName = "My business",
+                        businessName = null,
                         permissions = listOf(
                             Permissions.TRANSACTIONS,
                             Permissions.OWNERSHIP,

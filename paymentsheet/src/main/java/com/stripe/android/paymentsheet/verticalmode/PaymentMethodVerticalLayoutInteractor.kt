@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -68,6 +67,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
     private val formElementsForCode: (code: String) -> List<FormElement>,
+    private val requiresFormScreen: (code: String) -> Boolean,
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val manageScreenFactory: () -> PaymentSheetScreen,
@@ -94,7 +94,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
-            savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): PaymentMethodVerticalLayoutInteractor {
             val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
             val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
@@ -103,6 +102,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 processing = viewModel.processing,
                 selection = viewModel.selection,
                 formElementsForCode = formHelper::formElementsForCode,
+                requiresFormScreen = formHelper::requiresFormScreen,
                 transitionTo = viewModel.navigationHandler::transitionToWithDelay,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 manageScreenFactory = {
@@ -110,7 +110,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
-                        savedPaymentMethodMutator = savedPaymentMethodMutator,
+                        savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
                     )
                     PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
                 },
@@ -119,7 +119,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
-                        savedPaymentMethodMutator = savedPaymentMethodMutator,
+                        savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
                     )
                     PaymentSheetScreen.ManageOneSavedPaymentMethod(interactor = interactor)
                 },
@@ -134,9 +134,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 paymentMethods = customerStateHolder.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
-                providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
+                providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 canRemove = viewModel.savedPaymentMethodMutator.canRemove,
-                onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
+                onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
@@ -206,8 +206,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     init {
         coroutineScope.launch {
-            // The first screen change is navigating to us! We don't want to clear in that case.
-            isCurrentScreen.drop(1).collect { isCurrentScreen ->
+            // We expect this to be false, true, then whatever changes actually happen.
+            // The first screen is likely loading (before it gets to us), then the navigation happens to us.
+            // We're dropping the initial 2, so we don't get events until after we're on the vertical mode screen.
+            isCurrentScreen.drop(2).collect { isCurrentScreen ->
                 if (!isCurrentScreen) {
                     return@collect
                 }
@@ -350,13 +352,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onEditPaymentMethod(viewAction.savedPaymentMethod)
             }
         }
-    }
-
-    private fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
-        return userInteractionAllowed ||
-            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
     }
 
     private fun updateSelectedPaymentMethod(selectedPaymentMethodCode: String) {

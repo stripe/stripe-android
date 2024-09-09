@@ -608,6 +608,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formElementsForCode = {
                 formFieldsWhichRequireUserInteraction
             },
+            requiresFormScreen = { true },
             formScreenFactory = {
                 calledFormScreenFactory = true
                 mock()
@@ -634,6 +635,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formElementsForCode = {
                 listOf()
             },
+            requiresFormScreen = { true },
             formScreenFactory = {
                 calledFormScreenFactory = true
                 mock()
@@ -658,6 +660,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formElementsForCode = {
                 listOf()
             },
+            requiresFormScreen = { true },
             formScreenFactory = {
                 calledFormScreenFactory = true
                 mock()
@@ -720,6 +723,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
                 paymentMethodMetadata.formElementsForCode(it, uiDefinitionFactoryArgumentsFactory)!!
             },
+
             onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
                 fieldValues.run {
                     assertThat(fieldValuePairs).isEmpty()
@@ -836,6 +840,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             updateSelection = { verticalModeSelection = it },
         ) {
             interactor.state.test {
+                isCurrentScreenSource.value = true
                 assertThat(awaitItem().selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
                 assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
                 isCurrentScreenSource.value = false
@@ -975,8 +980,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,
-        initialIsCurrentScreen: Boolean = true,
+        initialIsCurrentScreen: Boolean = false,
         formElementsForCode: (code: String) -> List<FormElement> = { notImplemented() },
+        requiresFormScreen: (String) -> Boolean = { false },
         transitionTo: (screen: PaymentSheetScreen) -> Unit = { notImplemented() },
         onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit = { _, _ ->
             notImplemented()
@@ -1009,6 +1015,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             processing = processing,
             selection = selection,
             formElementsForCode = formElementsForCode,
+            requiresFormScreen = requiresFormScreen,
             transitionTo = transitionTo,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             manageScreenFactory = manageScreenFactory,
