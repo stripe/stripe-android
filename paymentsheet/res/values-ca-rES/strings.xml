@@ -4,6 +4,8 @@
   <string name="stripe_add_new_payment_method">Afegir un mètode de pagament nou</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Compra ara o paga més endavant amb Afterpay</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Compte bancari que acaba en %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirmeu el pagament a l\'aplicació del vostre banc en un termini de %s per completar la compra.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
