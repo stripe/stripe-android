@@ -88,9 +88,13 @@ com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.injection
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 com.stripe.android.paymentsheet.ui
+com.stripe.android.paymentsheet.verticalmode
 module:screenshot-testing
 com.stripe.android.screenshottesting
+module:stripe-connect
+com.stripe.android.connectsdk
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
