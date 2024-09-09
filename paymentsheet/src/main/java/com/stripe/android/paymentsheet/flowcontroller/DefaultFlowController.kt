@@ -376,12 +376,15 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun isCvcRecollectionEnabled(state: PaymentSheetState.Full): Boolean {
         val deferredIntentMode = initializationMode as? PaymentSheet.InitializationMode.DeferredIntent
+        val deferredIntentRequiresCvcRecollection =
+            deferredIntentMode?.intentConfiguration?.requireCvcRecollection == true &&
+                deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
 
-        return (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true ||
-            (
-                deferredIntentMode?.intentConfiguration?.requireCvcRecollection == true &&
-                    deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-                )
+        val paymentIntentRequiresCvcRecollection =
+            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true &&
+            initializationMode !is PaymentSheet.InitializationMode.DeferredIntent
+
+        return paymentIntentRequiresCvcRecollection || deferredIntentRequiresCvcRecollection
     }
 
     @VisibleForTesting
