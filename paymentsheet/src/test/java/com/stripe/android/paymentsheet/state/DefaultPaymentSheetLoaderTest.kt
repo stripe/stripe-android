@@ -1957,6 +1957,40 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+        )
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "usd"
+                ),
+                requireCvcRecollection = false
+            )
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
+        )
+    }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
