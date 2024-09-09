@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import android.content.Intent
 import android.os.Build
 import android.os.Parcelable
+import androidx.core.os.BundleCompat
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -22,13 +23,9 @@ internal sealed interface CvcRecollectionResult : Parcelable {
         }
 
         fun fromIntent(intent: Intent?): CvcRecollectionResult {
-            val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent?.getParcelableExtra(EXTRA_RESULT, CvcRecollectionResult::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent?.getParcelableExtra(EXTRA_RESULT)
+            val result = intent?.extras?.let { bundle ->
+                BundleCompat.getParcelable(bundle, EXTRA_RESULT, CvcRecollectionResult::class.java)
             }
-
             return result ?: Cancelled
         }
     }

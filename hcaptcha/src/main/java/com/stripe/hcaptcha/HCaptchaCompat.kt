@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import androidx.core.os.BundleCompat
 import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 import java.io.Serializable
@@ -62,12 +63,8 @@ object HCaptchaCompat {
         }
     }
 
-    @Suppress("deprecation", "UNCHECKED_CAST", "SameParameterValue")
+    @Suppress("SameParameterValue")
     private fun <T : Parcelable?> getParcelable(bundle: Bundle, key: String, clazz: Class<T>): T? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            bundle.getParcelable(key, clazz)
-        } else {
-            bundle.getParcelable<Parcelable>(key) as T?
-        }
+        return BundleCompat.getParcelable(bundle, key, clazz)
     }
 }
