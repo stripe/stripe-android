@@ -623,8 +623,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         intent: StripeIntent
     ) = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
         ?.intentConfiguration?.requireCvcRecollection == true ||
-            ((intent as? PaymentIntent)?.requireCvcRecollection == true &&
-                (initializationMode !is PaymentSheet.InitializationMode.DeferredIntent))
+        (
+            (intent as? PaymentIntent)?.requireCvcRecollection == true &&
+                (initializationMode !is PaymentSheet.InitializationMode.DeferredIntent)
+            )
 
     private sealed interface CustomerInfo {
         val id: String
