@@ -48,7 +48,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
-import com.stripe.android.financialconnections.example.Experience.PaymentElement
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
@@ -127,7 +126,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         FinancialConnectionsContent(
             state = state,
             onSettingsChanged = viewModel::onSettingsChanged,
-            onButtonClick = viewModel::startFinancialConnectionsSession
+            onButtonClick = viewModel::connectAccounts
         )
     }
 
@@ -147,7 +146,18 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         state: FinancialConnectionsPlaygroundState,
         paymentSheet: PaymentSheet
     ) {
-        val email = state.settings.get<EmailSetting>().selectedOption
+        when (integrationType) {
+            IntegrationType.Standalone -> {
+                val email = state.settings.get<EmailSetting>().selectedOption
+                launchStandaloneIntegration(email)
+            }
+            IntegrationType.PaymentElement -> {
+                launchPaymentSheet(paymentSheet)
+            }
+        }
+    }
+
+    private fun OpenForPaymentIntent.launchStandaloneIntegration(email: String) {
         when (experience) {
             FinancialConnections -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
@@ -166,24 +176,27 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            PaymentElement -> {
-                PaymentConfiguration.init(
-                    context = this@FinancialConnectionsPlaygroundActivity,
-                    publishableKey = publishableKey
-                )
-                paymentSheet.presentWithPaymentIntent(
-                    paymentIntentClientSecret = paymentIntentSecret,
-                    configuration = PaymentSheet.Configuration(
-                        allowsDelayedPaymentMethods = true,
-                        merchantDisplayName = "Example, Inc.",
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = requireNotNull(customerId),
-                            ephemeralKeySecret = requireNotNull(ephemeralKey)
-                        )
-                    )
-                )
-            }
         }
+    }
+
+    private fun OpenForPaymentIntent.launchPaymentSheet(
+        paymentSheet: PaymentSheet,
+    ) {
+        PaymentConfiguration.init(
+            context = this@FinancialConnectionsPlaygroundActivity,
+            publishableKey = publishableKey
+        )
+        paymentSheet.presentWithPaymentIntent(
+            paymentIntentClientSecret = paymentIntentSecret,
+            configuration = PaymentSheet.Configuration(
+                allowsDelayedPaymentMethods = true,
+                merchantDisplayName = "Example, Inc.",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = requireNotNull(customerId),
+                    ephemeralKeySecret = requireNotNull(ephemeralKey),
+                )
+            )
+        )
     }
 
     @Composable

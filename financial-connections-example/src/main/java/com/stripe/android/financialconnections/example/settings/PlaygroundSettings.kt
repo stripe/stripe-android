@@ -47,9 +47,17 @@ internal data class PlaygroundSettings(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, setting: Setting<*> -> setting.lasRequest(acc) }
 
-    fun paymentIntentRequest(): PaymentIntentBody = settings.toList().fold(
-        PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, setting: Setting<*> -> setting.paymentIntentRequest(acc) }
+    fun paymentIntentRequest(
+        forceInstantDebits: Boolean = false,
+    ): PaymentIntentBody {
+        return settings.toList().fold(
+            PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
+        ) { acc, setting: Setting<*> ->
+            setting.paymentIntentRequest(acc)
+        }.copy(
+            forceInstantDebits = forceInstantDebits,
+        )
+    }
 
     fun asJsonString(): String {
         val json = settings
@@ -159,6 +167,7 @@ internal data class PlaygroundSettings(
         }
 
         private val allSettings: List<Setting<*>> = listOfNotNull(
+            IntegrationTypeSetting(),
             ExperienceSetting(),
             MerchantSetting(),
             PublicKeySetting(),

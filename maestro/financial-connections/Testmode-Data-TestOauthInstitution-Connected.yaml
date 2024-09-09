@@ -6,7 +6,8 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
 - clearState
 - openLink: "stripeconnectionsexample://playground\
-    ?experience=FinancialConnections\
+    ?integration_type=Standalone\
+    &experience=FinancialConnections\
     &flow=Data\
     &financial_connections_override_native=native\
     &merchant=networking\
