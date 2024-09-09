@@ -280,10 +280,6 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : 
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public abstract interface class com/stripe/android/paymentsheet/CvcRecollectionEnabledCallback {
-	public abstract fun isCvcRecollectionRequired ()Z
-}
-
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
 }
 
@@ -656,7 +652,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
-	public final fun cvcRecollectionEnabledCallback (Lcom/stripe/android/paymentsheet/CvcRecollectionEnabledCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 }
 
@@ -866,7 +861,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$B
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
-	public final fun cvcRecollectionEnabledCallback (Lcom/stripe/android/paymentsheet/CvcRecollectionEnabledCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 }
 
@@ -1000,6 +994,11 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigurat
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;)V
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Ljava/lang/String;Z)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Ljava/util/List;Z)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;Z)V
 	public fun describeContents ()I
 	public final fun getMode ()Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode;
 	public final fun getOnBehalfOf ()Ljava/lang/String;

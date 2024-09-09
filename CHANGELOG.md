@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+* [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.
+
 ## 20.48.6 - 2024-08-26
 * Stability and efficiency improvements.
 
