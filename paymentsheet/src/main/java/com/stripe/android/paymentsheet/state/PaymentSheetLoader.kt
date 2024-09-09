@@ -625,7 +625,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val deferredIntentMode = initializationMode as? PaymentSheet.InitializationMode.DeferredIntent
         val deferredIntentRequiresCvcRecollection =
             deferredIntentMode?.intentConfiguration?.requireCvcRecollection == true &&
-            deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+                deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
 
         val paymentIntentRequiresCvcRecollection = (intent as? PaymentIntent)?.requireCvcRecollection == true &&
             initializationMode !is PaymentSheet.InitializationMode.DeferredIntent
