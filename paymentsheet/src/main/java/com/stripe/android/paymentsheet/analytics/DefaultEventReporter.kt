@@ -386,9 +386,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
-        if (event is PaymentSheetEvent.LoadSucceeded) {
-            println("YEET event.params: ${event.params}")
-        }
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
