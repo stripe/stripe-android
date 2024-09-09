@@ -4,6 +4,8 @@
   <string name="stripe_add_new_payment_method">Adăugați o nouă metodă de plată</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Cumpărați acum sau plătiți mai târziu folosind Afterpay</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Cont bancar care se termină în %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirmați plata în aplicația băncii dvs. în termen de %s pentru a finaliza achiziția.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->

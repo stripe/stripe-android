@@ -4,6 +4,8 @@
   <string name="stripe_add_new_payment_method">Tambahkan metode pembayaran baru</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Beli sekarang atau bayar nanti dengan Afterpay</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Rekening bank yang berakhiran %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Konfirmasikan pembayaran di aplikasi bank Anda dalam %s untuk menyelesaikan pembelian.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->

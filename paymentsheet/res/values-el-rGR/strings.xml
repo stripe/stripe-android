@@ -4,6 +4,8 @@
   <string name="stripe_add_new_payment_method">Προσθέστε νέα μέθοδο πληρωμής</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Afterpay</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Τραπεζικός λογαριασμός που λήγει σε %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή της τράπεζάς σας μέσα σε %s για την ολοκλήρωση της αγοράς.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
