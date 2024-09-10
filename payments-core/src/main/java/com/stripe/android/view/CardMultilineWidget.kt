@@ -29,9 +29,11 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.properties.Delegates
@@ -262,7 +264,14 @@ class CardMultilineWidget @JvmOverloads constructor(
                 cvc = cvcValue,
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
-                    .build()
+                    .build(),
+                networks = cardBrandView.merchantPreferredNetworks.firstOrNull()
+                    ?.takeIf { it != Unknown }?.code
+                    ?.let { network ->
+                        Networks(
+                            preferred = network
+                        )
+                    }
             )
         }
 

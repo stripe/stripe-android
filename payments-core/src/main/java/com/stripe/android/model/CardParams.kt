@@ -69,6 +69,16 @@ data class CardParams internal constructor(
     var currency: String? = null,
 
     /**
+     * Contains information about card networks used to process the payment.
+     *
+     * [card.networks](https://docs.stripe.com/api/tokens/create_card#create_card_token-card-networks)
+     *
+     * Optional
+     *
+     */
+    val networks: Networks? = null,
+
+    /**
      * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
      *
      * Optional

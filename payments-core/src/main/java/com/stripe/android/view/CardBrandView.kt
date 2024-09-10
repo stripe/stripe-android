@@ -114,8 +114,19 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     fun createNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
+        val defaultNetworkParam = createBrandNetworksParam()
+        if (defaultNetworkParam != null) return defaultNetworkParam
+        return merchantPreferredNetworks.firstOrNull()?.code?.let {
+            PaymentMethodCreateParams.Card.Networks(
+                preferred = it,
+            )
+        }
+    }
+
+    private fun createBrandNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
+        if (brand == Unknown) return null
         return PaymentMethodCreateParams.Card.Networks(
-            preferred = brand.takeIf { it != Unknown }?.code,
+            preferred = brand.code,
         ).takeIf {
             isCbcEligible && possibleBrands.size > 1
         }

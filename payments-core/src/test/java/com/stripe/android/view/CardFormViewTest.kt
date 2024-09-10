@@ -15,6 +15,8 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_NO_SPACES
+import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -23,6 +25,7 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.Networks
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -102,6 +105,36 @@ internal class CardFormViewTest {
                 assertThat(it.errors.text).isEqualTo("")
                 assertThat(it.errors.isVisible).isFalse()
             }
+        }
+    }
+
+    @Test
+    fun `when preferred network is set then cardParams should return contain preferred network`() {
+        runCardFormViewTest {
+            binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+            assertThat(cardFormView.cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Unknown,
+                        loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
+                        number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = VALID_CVC,
+                        address = Address.Builder()
+                            .setCountryCode(CountryCode.US)
+                            .setPostalCode(VALID_US_ZIP)
+                            .build(),
+                        networks = Networks(
+                            preferred = CardBrand.CartesBancaires.code
+                        )
+                    )
+                )
+
+            idleLooper()
         }
     }
 
@@ -355,6 +388,18 @@ internal class CardFormViewTest {
 
             val cardParams = cardFormView.paymentMethodCreateParams?.card
             assertThat(cardParams?.networks?.preferred).isNull()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects preferred network`() {
+        runCardFormViewTest(isCbcEligible = true) {
+            binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+            val cardParams = cardFormView.paymentMethodCreateParams?.card
+            assertThat(cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
         }
     }
 
