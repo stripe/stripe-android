@@ -435,7 +435,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             )
             viewModelScope.launch {
-                interactor.cvcCompletionState.collectLatest(::handleCvcCompletionState)
+//                interactor.cvcCompletionState.collectLatest(::handleCvcCompletionState)
             }
             navigationHandler.transitionTo(PaymentSheetScreen.CvcRecollection(interactor))
         }
