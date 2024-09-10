@@ -45,7 +45,7 @@ internal class FlowControllerTestRunnerContext(
 
 internal fun runFlowControllerTest(
     networkRule: NetworkRule,
-    integrationType: IntegrationType,
+    integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
