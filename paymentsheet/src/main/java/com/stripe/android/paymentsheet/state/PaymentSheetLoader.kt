@@ -427,6 +427,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             billingCountryCode = config.defaultBillingDetails?.address?.country,
         )
 
+        val cardBrandChoice = elementsSession.cardBrandChoice?.let { cardBrandChoice ->
+            LinkConfiguration.CardBrandChoice(
+                eligible = cardBrandChoice.eligible,
+                preferredNetworks = cardBrandChoice.preferredNetworks,
+            )
+        }
+
         return LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = merchantName,
@@ -434,6 +441,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerInfo = customerInfo,
             shippingValues = shippingAddress,
             passthroughModeEnabled = passthroughModeEnabled,
+            cardBrandChoice = cardBrandChoice,
             flags = flags,
         )
     }

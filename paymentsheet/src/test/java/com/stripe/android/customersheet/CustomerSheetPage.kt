@@ -11,6 +11,12 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 internal class CustomerSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
+    fun clickOnText(text: String) {
+        waitForText(text)
+
+        composeTestRule.onNode(hasText(text, ignoreCase = true)).performClick()
+    }
+
     fun clickPaymentOptionItem(text: String) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule

@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class FlowControllerTestFactory(
+    private val callConfirmOnPaymentOptionCallback: Boolean,
     private val integrationType: IntegrationType,
     private val createIntentCallback: CreateIntentCallback? = null,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -29,7 +30,9 @@ internal class FlowControllerTestFactory(
                 activity = activity,
                 paymentOptionCallback = { paymentOption ->
                     paymentOptionCallback.onPaymentOption(paymentOption)
-                    flowController.confirm()
+                    if (callConfirmOnPaymentOptionCallback) {
+                        flowController.confirm()
+                    }
                 },
                 createIntentCallback = createIntentCallback,
                 paymentResultCallback = resultCallback,
@@ -39,7 +42,9 @@ internal class FlowControllerTestFactory(
                 activity = activity,
                 paymentOptionCallback = { paymentOption ->
                     paymentOptionCallback.onPaymentOption(paymentOption)
-                    flowController.confirm()
+                    if (callConfirmOnPaymentOptionCallback) {
+                        flowController.confirm()
+                    }
                 },
                 paymentResultCallback = resultCallback,
             )
@@ -55,7 +60,9 @@ internal class FlowControllerTestFactory(
                     createIntentCallback = createIntentCallback,
                     paymentOptionCallback = { paymentOption ->
                         paymentOptionCallback.onPaymentOption(paymentOption)
-                        flowController.confirm()
+                        if (callConfirmOnPaymentOptionCallback) {
+                            flowController.confirm()
+                        }
                     },
                     paymentResultCallback = resultCallback,
                 )
@@ -63,7 +70,9 @@ internal class FlowControllerTestFactory(
                 rememberPaymentSheetFlowController(
                     paymentOptionCallback = { paymentOption ->
                         paymentOptionCallback.onPaymentOption(paymentOption)
-                        flowController.confirm()
+                        if (callConfirmOnPaymentOptionCallback) {
+                            flowController.confirm()
+                        }
                     },
                     paymentResultCallback = resultCallback,
                 )

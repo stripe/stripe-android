@@ -19,7 +19,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.customersheet.CustomerSheetLoader
-import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
@@ -199,15 +198,6 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideLocale() =
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
-
-        @Provides
-        fun backstack(
-            @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean
-        ): List<CustomerSheetViewState> = listOf(
-            CustomerSheetViewState.Loading(
-                isLiveMode = isLiveModeProvider()
-            )
-        )
 
         @Provides
         @Named(IS_FLOW_CONTROLLER)

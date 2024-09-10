@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -172,7 +173,8 @@ private fun EditButton(onClick: () -> Unit) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
-        style = MaterialTheme.typography.button,
+        style = MaterialTheme.typography.subtitle1,
+        fontWeight = FontWeight.Medium,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
@@ -194,7 +196,8 @@ private fun ViewMoreButton(
         Text(
             stringResource(id = R.string.stripe_view_more),
             color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.button,
+            style = MaterialTheme.typography.subtitle1,
+            fontWeight = FontWeight.Medium,
         )
         Icon(
             imageVector = Icons.Filled.KeyboardArrowRight,

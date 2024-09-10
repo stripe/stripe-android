@@ -569,6 +569,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             flags = emptyMap(),
         )
 
@@ -656,6 +657,48 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
+    }
+
+    @Test
+    fun `Populates Link configuration correctly with eligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isTrue()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
+    }
+
+    @Test
+    fun `Populates Link configuration correctly with ineligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = false,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isFalse()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
@@ -1075,7 +1118,12 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEligible = true)
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -2110,7 +2158,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
-        isCbcEligible: Boolean = false,
+        cardBrandChoice: ElementsSession.CardBrandChoice? = null,
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
@@ -2122,7 +2170,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = linkSettings,
             sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
-            isCbcEligible = isCbcEligible,
+            cardBrandChoice = cardBrandChoice,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),

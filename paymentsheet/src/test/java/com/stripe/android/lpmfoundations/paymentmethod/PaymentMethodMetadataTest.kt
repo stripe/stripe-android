@@ -747,7 +747,10 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                isEligibleForCardBrandChoice = true,
+                cardBrandChoice = ElementsSession.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires"),
+                ),
             ),
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant Inc.",
@@ -755,10 +758,7 @@ internal class PaymentMethodMetadataTest {
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_1"
-                ),
+                customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
@@ -817,7 +817,10 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                isEligibleForCardBrandChoice = true,
+                cardBrandChoice = ElementsSession.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires")
+                ),
             ),
             configuration = configuration,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
@@ -917,12 +920,15 @@ internal class PaymentMethodMetadataTest {
 
     private fun createElementsSession(
         intent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        isEligibleForCardBrandChoice: Boolean = true,
+        cardBrandChoice: ElementsSession.CardBrandChoice = ElementsSession.CardBrandChoice(
+            eligible = true,
+            preferredNetworks = listOf("cartes_bancaires")
+        ),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
-            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            cardBrandChoice = cardBrandChoice,
             merchantCountry = null,
             isGooglePayEnabled = false,
             customer = mobilePaymentElementComponent?.let { component ->
@@ -1262,6 +1268,10 @@ internal class PaymentMethodMetadataTest {
                 merchantCountryCode = "CA",
                 shippingValues = mapOf(),
                 flags = mapOf(),
+                cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires")
+                ),
                 passthroughModeEnabled = false,
             ),
         )

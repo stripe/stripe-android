@@ -93,7 +93,8 @@ class InlineSignupViewStateTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
-            flags = emptyMap()
+            flags = emptyMap(),
+            cardBrandChoice = null,
         )
     }
 }

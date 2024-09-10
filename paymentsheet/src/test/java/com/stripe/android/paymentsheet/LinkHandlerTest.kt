@@ -623,6 +623,7 @@ private fun defaultLinkConfiguration(
         ),
         shippingValues = null,
         passthroughModeEnabled = false,
+        cardBrandChoice = null,
         flags = emptyMap(),
     )
 }
