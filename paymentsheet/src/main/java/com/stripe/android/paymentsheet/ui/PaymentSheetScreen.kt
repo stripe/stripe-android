@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -91,6 +92,16 @@ internal fun PaymentSheetScreen(
 ) {
     PaymentSheetScreen(viewModel) {
         PaymentSheetScreenContent(viewModel, type = Custom)
+    }
+}
+
+@Composable
+internal fun PaymentSheetScreen(
+    viewModel: BaseSheetViewModel,
+    type: PaymentSheetFlowType,
+) {
+    PaymentSheetScreen(viewModel) {
+        PaymentSheetScreenContent(viewModel, type = type)
     }
 }
 
@@ -238,9 +249,46 @@ private fun PaymentSheetContent(
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
 ) {
+    @Composable
+    fun Content(modifier: Modifier) {
+        PaymentSheetContent(
+            viewModel = viewModel,
+            headerText = headerText,
+            walletsState = walletsState,
+            walletsProcessingState = walletsProcessingState,
+            error = error,
+            currentScreen = currentScreen,
+            mandateText = mandateText,
+            modifier = modifier
+        )
+    }
+
+    when (currentScreen.animationStyle) {
+        PaymentSheetScreen.AnimationStyle.PrimaryButtonAnchored -> {
+            Content(modifier = Modifier.animateContentSize())
+        }
+        PaymentSheetScreen.AnimationStyle.FullPage -> {
+            Column(modifier = Modifier.animateContentSize()) {
+                Content(modifier = Modifier)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaymentSheetContent(
+    viewModel: BaseSheetViewModel,
+    headerText: ResolvableString?,
+    walletsState: WalletsState?,
+    walletsProcessingState: WalletsProcessingState?,
+    error: ResolvableString?,
+    currentScreen: PaymentSheetScreen,
+    mandateText: MandateText?,
+    modifier: Modifier,
+) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(modifier = Modifier.animateContentSize().padding(bottom = currentScreen.bottomContentPadding)) {
+    Column(modifier = modifier) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -263,22 +311,24 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            CompositionLocalProvider(
-                LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
-                LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
-            ) {
+            EventReporterProvider(viewModel) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true) {
+        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
-                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 8.dp),
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding)
+                    .padding(bottom = 8.dp)
+                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
+
+        Spacer(modifier = Modifier.height(currentScreen.bottomContentPadding))
 
         error?.let {
             ErrorMessage(
@@ -292,13 +342,14 @@ private fun PaymentSheetContent(
 
     PrimaryButton(viewModel)
 
-    Box(modifier = Modifier.animateContentSize()) {
-        if (mandateText?.showAbovePrimaryButton == false) {
+    Box(modifier = modifier) {
+        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontal = horizontalPadding)
+                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
     }
@@ -353,6 +404,19 @@ internal fun Wallet(
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)
+    }
+}
+
+@Composable
+private fun EventReporterProvider(
+    viewModel: BaseSheetViewModel,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
+        LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
+    ) {
+        content()
     }
 }
 
@@ -426,4 +490,5 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
 const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
+internal const val PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG = "PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

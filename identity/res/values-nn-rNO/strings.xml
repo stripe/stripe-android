@@ -179,6 +179,8 @@
   <string name="stripe_reduce_glare_2">Prøv å redusera gjenskinn og gjera ID-en synleg</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Ta bilete på nytt</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">Hald ID-en på rett line</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Skanna</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

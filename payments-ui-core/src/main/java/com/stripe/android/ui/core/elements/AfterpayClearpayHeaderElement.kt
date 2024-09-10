@@ -4,12 +4,10 @@ import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AfterpayClearpayHeaderElement(
     override val identifier: IdentifierSpec,
-    private val amount: Amount,
     override val controller: Controller? = null
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
@@ -33,20 +30,9 @@ data class AfterpayClearpayHeaderElement(
         locale.language.lowercase() + "_" + locale.region.uppercase()
 
     fun getLabel(resources: Resources): String {
-        val numInstallments = when (amount.currencyCode.lowercase()) {
-            "eur" -> 3
-            else -> 4
-        }
         return resources.getString(
-            R.string.stripe_afterpay_clearpay_message
-        ).replace("<num_installments/>", numInstallments.toString())
-            .replace(
-                "<installment_price/>",
-                CurrencyFormatter.format(
-                    amount.value / numInstallments,
-                    amount.currencyCode
-                )
-            )
+            R.string.stripe_afterpay_clearpay_marketing
+        )
             // The no break space will keep the afterpay logo and (i) on the same line.
             .replace(
                 "<img/>",

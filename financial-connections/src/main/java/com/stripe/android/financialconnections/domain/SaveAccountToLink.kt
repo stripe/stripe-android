@@ -120,7 +120,9 @@ internal class SaveAccountToLink @Inject constructor(
         selectedAccounts: Int,
     ) {
         successContentRepository.set(
-            customSuccessMessage = manifest.displayText?.successPane?.subCaption
+            heading = manifest.displayText?.successPane?.caption
+                ?.let { TextResource.Text(it) },
+            message = manifest.displayText?.successPane?.subCaption
                 // If backend returns a custom success message, use it
                 ?.let { TextResource.Text(it) }
                 // If not, build a Link success message locally
@@ -134,7 +136,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     private fun storeFailedToSaveToLinkMessage(selectedAccounts: Int) {
         successContentRepository.set(
-            customSuccessMessage = TextResource.PluralId(
+            message = TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_desc_link_error,
                 // No selected accounts means a manually entered account was already attached.
                 count = max(1, selectedAccounts),

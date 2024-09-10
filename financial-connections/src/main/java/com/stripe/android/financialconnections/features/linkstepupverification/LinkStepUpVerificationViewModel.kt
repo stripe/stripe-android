@@ -23,9 +23,9 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
@@ -168,13 +168,14 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
             .getOrThrow()
 
         // Mark networked account as selected.
-        selectNetworkedAccounts(
+        val response = selectNetworkedAccounts(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             selectedAccountIds = selectedAccounts.map { it.id }.toSet(),
             consentAcquired = null
         )
-
-        navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
+        navigationManager.tryNavigateTo(
+            (response.nextPane ?: Pane.SUCCESS).destination(referrer = PANE)
+        )
     }.execute { copy(confirmVerification = it) }
 
     fun onClickableTextClick(text: String) {

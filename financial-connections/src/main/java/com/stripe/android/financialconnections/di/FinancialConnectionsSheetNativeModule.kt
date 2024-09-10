@@ -8,9 +8,11 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
@@ -66,6 +68,11 @@ internal interface FinancialConnectionsSheetNativeModule {
         impl: RealAttachConsumerToLinkAccountSession,
     ): AttachConsumerToLinkAccountSession
 
+    @Binds
+    fun bindsCreateInstantDebitsPaymentMethod(
+        impl: RealCreateInstantDebitsResult,
+    ): CreateInstantDebitsResult
+
     companion object {
         @Provides
         @Singleton
@@ -115,6 +122,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumerSessionRepository: ConsumerSessionRepository,
             locale: Locale?,
             logger: Logger,
+            isLinkWithStripe: IsLinkWithStripe,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -122,6 +130,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             consumerSessionRepository = consumerSessionRepository,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
+            isLinkWithStripe = isLinkWithStripe,
         )
 
         @Singleton

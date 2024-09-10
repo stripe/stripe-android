@@ -115,10 +115,7 @@ internal fun SavedPaymentMethodTab(
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
-                            // This makes the screen reader read out numbers digit by digit
-                            // one one one one vs one thousand one hundred eleven
-                            this.contentDescription =
-                                description.replace("\\d".toRegex(), "$0 ")
+                            contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
             }

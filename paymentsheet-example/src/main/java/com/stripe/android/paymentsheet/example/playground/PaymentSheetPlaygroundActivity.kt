@@ -84,7 +84,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCvcRecollectionApi::class)
+    @OptIn(ExperimentalCustomerSheetApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +93,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
                 viewModel::onPaymentSheetResult,
@@ -101,7 +100,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             )
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
 
             val addressLauncher = rememberAddressLauncher(
@@ -128,7 +126,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
-                    endpoint.orEmpty(),
+                    currentUrl = endpoint,
                     onConfirm = { backendUrl ->
                         viewModel.onCustomUrlUpdated(backendUrl)
                         showCustomEndpointDialog = false
@@ -418,6 +416,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
+    @OptIn(ExperimentalCvcRecollectionApi::class)
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
@@ -436,13 +435,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
+                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
         }
     }
 
+    @OptIn(ExperimentalCvcRecollectionApi::class)
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState.Payment,
@@ -466,7 +467,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
+                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,

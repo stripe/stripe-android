@@ -360,6 +360,50 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Test deferred livemode=true when publishable key does not have test or live`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_foobar",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            PaymentIntent(
+                id = "elements_session_1t6ejApXCS5",
+                clientSecret = null,
+                amount = 2000L,
+                currency = "usd",
+                captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = true,
+                setupFutureUsage = null,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
+    }
+
+    @Test
     fun `Test deferred SetupIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
@@ -417,7 +461,8 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isTrue()
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
@@ -433,11 +478,12 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice?.eligible).isFalse()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
-    fun `Is not eligible for CBC if no info in the response`() {
+    fun `Is card brand choice is null if no info in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -449,7 +495,24 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice).isNull()
+    }
+
+    @Test
+    fun `Preferred networks is empty if not passed through response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.SetupIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS
+        val session = parser.parse(intent)
+
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEmpty()
     }
 
     @Test
@@ -508,7 +571,7 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             isPaymentMethodRemoveEnabled = true,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
@@ -604,7 +667,7 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true
                         ),
@@ -681,9 +744,10 @@ class ElementsSessionJsonParserTest {
         val intent = createPaymentIntentWithCustomerSession(allowRedisplay = rawAllowRedisplayValue)
         val elementsSession = parser.parse(intent)
 
-        val paymentSheetComponent = elementsSession?.customer?.session?.components?.paymentSheet
+        val mobilePaymentElementComponent = elementsSession?.customer?.session?.components?.mobilePaymentElement
 
-        val enabledComponent = paymentSheetComponent as? ElementsSession.Customer.Components.PaymentSheet.Enabled
+        val enabledComponent = mobilePaymentElementComponent as?
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 
         assertThat(enabledComponent?.allowRedisplayOverride).isEqualTo(allowRedisplay)
     }

@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
@@ -23,7 +22,6 @@ internal sealed interface UiDefinitionFactory {
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
         val shippingValues: Map<IdentifierSpec, String?>?,
-        val amount: Amount?,
         val saveForFutureUseInitialValue: Boolean,
         val merchantName: String,
         val cbcEligibility: CardBrandChoiceEligibility,
@@ -51,7 +49,6 @@ internal sealed interface UiDefinitionFactory {
                     return Arguments(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         linkConfigurationCoordinator = linkConfigurationCoordinator,
-                        amount = metadata.amount(),
                         merchantName = metadata.merchantName,
                         cbcEligibility = metadata.cbcEligibility,
                         initialValues = InitialValuesFactory.create(

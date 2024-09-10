@@ -20,12 +20,15 @@ import com.stripe.android.financialconnections.example.settings.ConfirmIntentSet
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
+import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
+import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -63,7 +66,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    fun startFinancialConnectionsSession() = with(state.value.settings) {
+    fun connectAccounts() = with(state.value.settings) {
         _state.update {
             it.copy(
                 status = emptyList(),
@@ -81,21 +84,24 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 when (state.value.flow) {
                     Flow.Data -> startForData(this)
                     Flow.Token -> startForToken(this)
-                    Flow.PaymentIntent -> startWithPaymentIntent(this)
+                    Flow.PaymentIntent -> startWithPaymentIntent(this, experience = Experience.FinancialConnections)
                 }
             }
             Experience.InstantDebits -> {
-                startWithPaymentIntent(this)
+                startWithPaymentIntent(this, experience = Experience.InstantDebits)
             }
         }
     }
 
-    private fun startWithPaymentIntent(settings: PlaygroundSettings) {
+    private fun startWithPaymentIntent(
+        settings: PlaygroundSettings,
+        experience: Experience,
+    ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    settings.paymentIntentRequest()
+                    settings.paymentIntentRequest(forceInstantDebits = experience == Experience.InstantDebits)
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -115,7 +121,10 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
+                            ephemeralKey = it.ephemeralKey,
+                            customerId = it.customerId,
                             experience = settings.get<ExperienceSetting>().selectedOption,
+                            integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
                         )
                     )
                 }
@@ -137,8 +146,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = _state.value.stripeAccountId
                             )
                         )
                     )
@@ -161,8 +171,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
                             )
                         )
                     )
@@ -315,6 +325,31 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
+    fun onPaymentSheetResult(result: PaymentSheetResult) {
+        when (result) {
+            is PaymentSheetResult.Canceled -> {
+                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+            }
+            is PaymentSheetResult.Completed -> {
+                _state.update {
+                    it.copy(
+                        status = it.status + listOf(
+                            "Elements Session Completed"
+                        )
+                    )
+                }
+            }
+            is PaymentSheetResult.Failed -> {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Failed! ${result.error}"
+                    )
+                }
+            }
+        }
+    }
+
     private suspend fun confirmIntentIfNeeded(
         intent: StripeIntent,
     ) {
@@ -407,6 +442,13 @@ enum class Flow(val apiValue: String) {
     }
 }
 
+enum class IntegrationType(
+    val displayName: String,
+) {
+    Standalone("Standalone"),
+    PaymentElement("Payment Element"),
+}
+
 enum class Experience(
     val displayName: String,
 ) {
@@ -433,8 +475,11 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
     data class OpenForPaymentIntent(
         val paymentIntentSecret: String,
+        val ephemeralKey: String?,
+        val customerId: String?,
         val publishableKey: String,
         val experience: Experience,
+        val integrationType: IntegrationType,
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 
@@ -454,4 +499,6 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
+    val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+        ?.takeIf { it.isNotEmpty() }
 }

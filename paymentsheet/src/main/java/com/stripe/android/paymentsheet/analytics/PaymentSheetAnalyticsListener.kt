@@ -68,7 +68,8 @@ internal class PaymentSheetAnalyticsListener(
             is PaymentSheetScreen.Loading,
             is PaymentSheetScreen.VerticalModeForm,
             is PaymentSheetScreen.ManageOneSavedPaymentMethod,
-            is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+            is PaymentSheetScreen.ManageSavedPaymentMethods,
+            is PaymentSheetScreen.CvcRecollection -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.EditPaymentMethod -> {
@@ -79,9 +80,12 @@ internal class PaymentSheetAnalyticsListener(
                 previouslyShownForm = null
                 previouslyInteractedForm = null
             }
-            is AddFirstPaymentMethod, is AddAnotherPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
+            is PaymentSheetScreen.VerticalMode -> {
+                eventReporter.onShowNewPaymentOptions()
+            }
+            is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
                 reportFormShown(currentPaymentMethodTypeProvider())
-                eventReporter.onShowNewPaymentOptionForm()
+                eventReporter.onShowNewPaymentOptions()
             }
         }
     }

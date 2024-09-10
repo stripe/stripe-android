@@ -22,6 +22,7 @@ internal data class TestParameters(
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
+    val resetCustomer: Boolean = false,
     val authorizationAction: AuthorizeAction? = null,
     val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),

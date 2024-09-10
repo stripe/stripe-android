@@ -19,7 +19,8 @@ data class FlowSetting(
     override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body
 
     override fun shouldDisplay(merchant: Merchant, flow: Flow, experience: Experience): Boolean {
-        return experience != Experience.InstantDebits
+        // flows are just available on direct integrations.
+        return experience == Experience.FinancialConnections
     }
 
     override fun convertToString(value: Flow): String {

@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -567,6 +568,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             flags = emptyMap(),
         )
 
@@ -654,6 +656,48 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
+    }
+
+    @Test
+    fun `Populates Link configuration correctly with eligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isTrue()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
+    }
+
+    @Test
+    fun `Populates Link configuration correctly with ineligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = false,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isFalse()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
@@ -928,7 +972,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -980,7 +1024,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -1071,7 +1115,12 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEligible = true)
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -1276,7 +1325,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                             customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
@@ -1321,7 +1370,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1361,7 +1410,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1401,7 +1450,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -1602,7 +1651,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     apiKey = "ek_123",
                     apiKeyExpiry = 555555555,
                     components = ElementsSession.Customer.Components(
-                        paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                     ),
                 ),
@@ -1693,7 +1742,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         apiKey = "ek_123",
                         apiKeyExpiry = 555555555,
                         components = ElementsSession.Customer.Components(
-                            paymentSheet = ElementsSession.Customer.Components.PaymentSheet.Disabled,
+                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                             customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                         ),
                     ),
@@ -1819,6 +1868,80 @@ internal class DefaultPaymentSheetLoaderTest {
             assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
         }
 
+    @Test
+    fun `Emits correct loaded event when Link is unavailable`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = null,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card"),
+        )
+    }
+
+    @Test
+    fun `Emits correct event when Link is in payment method mode`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            ),
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+        )
+    }
+
+    @Test
+    fun `Emits correct event when Link is in passthrough mode`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            ),
+            linkSettings = createLinkSettings(passthroughModeEnabled = true),
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.Passthrough,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+        )
+    }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
@@ -1866,7 +1989,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
-            linkEnabled = true,
+            linkMode = LinkMode.PaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -1874,8 +1997,17 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
+    private fun createLinkSettings(passthroughModeEnabled: Boolean): ElementsSession.LinkSettings {
+        return ElementsSession.LinkSettings(
+            linkFundingSources = listOf("card", "bank"),
+            linkFlags = mapOf(),
+            linkPassthroughModeEnabled = passthroughModeEnabled,
+            disableLinkSignup = false,
+        )
+    }
+
     private fun createElementsSessionCustomerSession(
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet,
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement,
     ): ElementsSession.Customer.Session {
         return ElementsSession.Customer.Session(
             id = "cuss_1",
@@ -1884,7 +2016,7 @@ internal class DefaultPaymentSheetLoaderTest {
             apiKey = "ek_123",
             apiKeyExpiry = 555555555,
             components = ElementsSession.Customer.Components(
-                paymentSheet = paymentSheetComponent,
+                mobilePaymentElement = mobilePaymentElementComponent,
                 customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
             ),
         )
@@ -1893,13 +2025,14 @@ internal class DefaultPaymentSheetLoaderTest {
     private fun createElementsSessionCustomer(
         paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
         isPaymentMethodSaveEnabled: Boolean? = null,
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet = isPaymentMethodSaveEnabled?.let {
-            ElementsSession.Customer.Components.PaymentSheet.Enabled(
-                isPaymentMethodSaveEnabled = it,
-                isPaymentMethodRemoveEnabled = true,
-                allowRedisplayOverride = null,
-            )
-        } ?: ElementsSession.Customer.Components.PaymentSheet.Disabled
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
+            isPaymentMethodSaveEnabled?.let {
+                ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                    isPaymentMethodSaveEnabled = it,
+                    isPaymentMethodRemoveEnabled = true,
+                    allowRedisplayOverride = null,
+                )
+            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
@@ -1910,7 +2043,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 apiKey = "ek_123",
                 apiKeyExpiry = 555555555,
                 components = ElementsSession.Customer.Components(
-                    paymentSheet = paymentSheetComponent,
+                    mobilePaymentElement = mobilePaymentElementComponent,
                     customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                 ),
             ),
@@ -1927,7 +2060,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
-        isCbcEligible: Boolean = false,
+        cardBrandChoice: ElementsSession.CardBrandChoice? = null,
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
@@ -1939,7 +2072,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = linkSettings,
             sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
-            isCbcEligible = isCbcEligible,
+            cardBrandChoice = cardBrandChoice,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),

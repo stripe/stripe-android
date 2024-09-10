@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 
 internal class FormHelper(
-    private val context: Context,
+    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
@@ -31,12 +31,12 @@ internal class FormHelper(
             paymentMethodMetadata: PaymentMethodMetadata
         ): FormHelper {
             return FormHelper(
-                context = viewModel.getApplication(),
+                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
                 },
-                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
+                linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)
@@ -44,8 +44,6 @@ internal class FormHelper(
             )
         }
     }
-
-    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
 
     fun formElementsForCode(code: String): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
@@ -77,6 +75,13 @@ internal class FormHelper(
             paymentMethodMetadata = paymentMethodMetadata,
         )
         selectionUpdater(newSelection)
+    }
+
+    fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
+        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
+        return userInteractionAllowed ||
+            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
     }
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {

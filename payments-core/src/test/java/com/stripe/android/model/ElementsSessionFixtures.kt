@@ -117,7 +117,7 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE = JSONObject(
+    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS = JSONObject(
         """
         {
           "business_name": "Mybusiness",
@@ -246,7 +246,7 @@ internal object ElementsSessionFixtures {
                       "enabled": false,
                       "features": null
                     },
-                    "payment_sheet": {
+                    "mobile_payment_element": {
                       "enabled": true,
                       "features": {
                         "payment_method_remove": "enabled",
@@ -377,7 +377,7 @@ internal object ElementsSessionFixtures {
                   "enabled": false,
                   "features": null
                 },
-                "payment_sheet": {
+                "mobile_payment_element": {
                   "enabled": false,
                   "features": null
                 },
@@ -433,7 +433,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": true
+            "eligible": true,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,
@@ -503,7 +504,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": false
+            "eligible": false,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,

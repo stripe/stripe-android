@@ -46,7 +46,7 @@ internal interface ManageScreenInteractor {
 }
 
 internal class DefaultManageScreenInteractor(
-    private val paymentMethods: StateFlow<List<PaymentMethod>?>,
+    private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
@@ -57,7 +57,7 @@ internal class DefaultManageScreenInteractor(
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val navigateBack: () -> Unit,
+    private val navigateBack: (withDelay: Boolean) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
@@ -68,9 +68,9 @@ internal class DefaultManageScreenInteractor(
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
         paymentMethods.mapAsStateFlow { paymentMethods ->
-            paymentMethods?.map {
+            paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
-            } ?: emptyList()
+            }
         }
 
     override val state = combineAsStateFlow(
@@ -100,7 +100,14 @@ internal class DefaultManageScreenInteractor(
             state.collect { state ->
                 if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
-                    safeNavigateBack()
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            paymentMethods.collect { paymentMethods ->
+                if (paymentMethods.isEmpty()) {
+                    safeNavigateBack(false)
                 }
             }
         }
@@ -122,12 +129,12 @@ internal class DefaultManageScreenInteractor(
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
         onSelectPaymentMethod(paymentMethod)
-        safeNavigateBack()
+        safeNavigateBack(true)
     }
 
-    private fun safeNavigateBack() {
+    private fun safeNavigateBack(withDelay: Boolean) {
         if (!hasNavigatedBack.getAndSet(true)) {
-            navigateBack()
+            navigateBack(withDelay)
         }
     }
 
@@ -148,11 +155,19 @@ internal class DefaultManageScreenInteractor(
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
-                    viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it.paymentMethod))
+                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                    viewModel.handlePaymentMethodSelected(savedPmSelection)
+                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                 },
                 onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
-                navigateBack = viewModel::handleBackPressed,
+                navigateBack = { withDelay ->
+                    if (withDelay) {
+                        viewModel.navigationHandler.popWithDelay()
+                    } else {
+                        viewModel.navigationHandler.pop()
+                    }
+                },
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }

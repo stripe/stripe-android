@@ -6,12 +6,12 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
@@ -64,7 +64,7 @@ internal interface FinancialConnectionsAccountsRepository {
         consumerSessionClientSecret: String,
         selectedAccountIds: Set<String>,
         consentAcquired: Boolean?
-    ): InstitutionResponse
+    ): ShareNetworkedAccountsResponse
 
     suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
 
@@ -111,7 +111,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -152,7 +152,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         consumerSessionClientSecret: String,
         selectedAccountIds: Set<String>,
         consentAcquired: Boolean?
-    ): InstitutionResponse {
+    ): ShareNetworkedAccountsResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = true),
@@ -166,7 +166,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         )
         return requestExecutor.execute(
             request,
-            InstitutionResponse.serializer()
+            ShareNetworkedAccountsResponse.serializer()
         )
     }
 
@@ -177,7 +177,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): LinkAccountSessionPaymentAccount {
         val request = apiRequestFactory.createPost(
             url = attachPaymentAccountUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 PARAMS_CLIENT_SECRET to clientSecret
@@ -197,7 +197,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,

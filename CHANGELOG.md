@@ -2,6 +2,18 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.49.0 - 2024-09-09
+
+* [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.
+
+## 20.48.6 - 2024-08-26
+* Stability and efficiency improvements.
+
+## 20.48.5 - 2024-08-21
+
+### PaymentSheet
+* [FIXED][9111](https://github.com/stripe/stripe-android/pull/9111) Fixed an issue where Google Pay was displaying an error.
+
 ## 20.48.4 - 2024-08-09
 
 ### Payments

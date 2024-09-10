@@ -90,7 +90,9 @@ internal fun EditPaymentMethodUi(
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
-        modifier = modifier.padding(horizontal = padding)
+        modifier = modifier
+            .padding(horizontal = padding)
+            .testTag(TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN)
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -129,6 +131,7 @@ internal fun EditPaymentMethodUi(
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
             isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
+            modifier = Modifier.testTag(TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON)
         )
 
         if (viewState.canRemove) {
@@ -331,3 +334,5 @@ private fun EditPaymentMethodPreview() {
 }
 
 internal const val PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON = "PaymentSheetEditScreenRemoveButton"
+internal const val TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN = "TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN"
+internal const val TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON = "TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON"

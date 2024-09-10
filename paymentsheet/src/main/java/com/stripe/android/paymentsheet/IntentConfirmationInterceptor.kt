@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -86,6 +87,15 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
     Client("client"),
     Server("server"),
     None("none")
+}
+
+internal class InvalidDeferredIntentUsageException : StripeException() {
+    override fun analyticsValue(): String = "invalidDeferredIntentUsage"
+
+    override val message: String = """
+        It appears you are reusing an intent on every `createIntentCallback` call. You should either create a brand
+        new intent in `createIntentCallback` or update the existing intent with the new payment method ID.
+    """.trimIndent()
 }
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
@@ -300,7 +310,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             if (intent.isConfirmed) {
                 NextStep.Complete(isForceSuccess = false)
             } else if (intent.requiresAction()) {
-                NextStep.HandleNextAction(clientSecret)
+                val attachedPaymentMethodId = intent.paymentMethodId
+
+                if (attachedPaymentMethodId != null && attachedPaymentMethodId != paymentMethod.id) {
+                    NextStep.Fail(
+                        cause = InvalidDeferredIntentUsageException(),
+                        message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                    )
+                } else {
+                    NextStep.HandleNextAction(clientSecret)
+                }
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
                 createConfirmStep(

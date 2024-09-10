@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.LinkLoginPane
@@ -28,6 +29,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,6 +53,7 @@ class NetworkingLinkSignupViewModelTest {
     private val navigationManager = NavigationManagerImpl()
     private val lookupAccount = mock<LookupAccount>()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val handleError = TestHandleError()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState,
@@ -370,7 +373,7 @@ class NetworkingLinkSignupViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(
-                    route = Destination.LinkAccountPicker(referrer = LINK_LOGIN),
+                    route = Destination.InstitutionPicker(referrer = LINK_LOGIN),
                     popUpTo = null,
                     isSingleTop = true,
                 )
@@ -486,7 +489,8 @@ class NetworkingLinkSignupViewModelTest {
     ): LinkSignupHandler {
         val manifest = sessionManifest().copy(
             businessName = "Business",
-            accountholderCustomerEmailAddress = "test@test.com"
+            accountholderCustomerEmailAddress = "test@test.com",
+            nextPane = Pane.INSTITUTION_PICKER,
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
@@ -515,9 +519,8 @@ class NetworkingLinkSignupViewModelTest {
             attachConsumerToLinkAccountSession = {
                 // Mock a successful attach
             },
-            eventTracker = eventTracker,
             navigationManager = navigationManager,
-            logger = Logger.noop(),
+            handleError = handleError,
         )
     }
 

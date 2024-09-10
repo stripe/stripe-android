@@ -113,7 +113,9 @@ internal class DefaultVerticalModeFormInteractor(
                 ),
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,
-                    customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty(),
+                    customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                        it.type?.code == selectedPaymentMethodCode
+                    },
                 ),
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 canGoBackDelegate = { viewModel.navigationHandler.canGoBack },

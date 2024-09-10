@@ -14,6 +14,8 @@ import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
@@ -37,14 +39,16 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
             cvcCompleteFlow
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
-            customPrimaryButton ?: PrimaryButton.UIState(
-                label = buyButtonLabel(amount),
-                onClick = onClick,
-                enabled = buttonsEnabled && selection != null &&
-                    cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                lockVisible = true,
-            ).takeIf { screen.showsBuyButton }
-        }
+            screen.buyButtonState.map { buyButtonState ->
+                customPrimaryButton ?: PrimaryButton.UIState(
+                    label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(amount),
+                    onClick = onClick,
+                    enabled = buttonsEnabled && selection != null &&
+                        cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
+                    lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+                ).takeIf { buyButtonState.visible }
+            }
+        }.flatMapLatest { it }
     }
 
     fun forCustomFlow(): Flow<PrimaryButton.UIState?> {

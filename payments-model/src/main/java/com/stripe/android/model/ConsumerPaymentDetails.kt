@@ -39,7 +39,8 @@ data class ConsumerPaymentDetails(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class BankAccount(
         override val id: String,
-        override val last4: String
+        override val last4: String,
+        val bankName: String?,
     ) : PaymentDetails(id, type = "bank_account")
 
     @Parcelize

@@ -141,4 +141,6 @@ data class FinancialConnectionsSession internal constructor(
 }
 
 @Serializable(with = PaymentAccountSerializer::class)
-sealed class PaymentAccount : Parcelable
+sealed class PaymentAccount : Parcelable {
+    abstract val id: String
+}

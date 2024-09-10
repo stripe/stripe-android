@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -185,13 +186,10 @@ class PaymentSheet internal constructor(
      *
      * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     class Builder(internal val resultCallback: PaymentSheetResultCallback) {
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
         internal var createIntentCallback: CreateIntentCallback? = null
-            private set
-        internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
             private set
 
         /**
@@ -208,16 +206,6 @@ class PaymentSheet internal constructor(
          */
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
             createIntentCallback = callback
-        }
-
-        /**
-         * @param callback Called when presenting [PaymentSheet] to determine whether to display a
-         * CVC recollection field.
-         *
-         */
-        @ExperimentalCvcRecollectionApi
-        fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
-            cvcRecollectionEnabledCallback = callback
         }
 
         /**
@@ -255,9 +243,6 @@ class PaymentSheet internal constructor(
             }
             externalPaymentMethodConfirmHandler?.let {
                 ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-            }
-            cvcRecollectionEnabledCallback?.let {
-                CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
             }
         }
     }
@@ -370,12 +355,30 @@ class PaymentSheet internal constructor(
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
     @Parcelize
-    class IntentConfiguration @JvmOverloads constructor(
+    class IntentConfiguration
+    @JvmOverloads @ExperimentalCvcRecollectionApi
+    constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
+        internal val requireCvcRecollection: Boolean,
     ) : Parcelable {
+
+        @OptIn(ExperimentalCvcRecollectionApi::class)
+        @JvmOverloads
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+        ) : this(
+            mode = mode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = false
+        )
 
         /**
          * Contains information about the desired payment or setup flow.
@@ -1511,11 +1514,19 @@ class PaymentSheet internal constructor(
     }
 
     internal sealed interface CustomerAccessType : Parcelable {
-        @Parcelize
-        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType
+        val analyticsValue: String
 
         @Parcelize
-        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType
+        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType {
+            @IgnoredOnParcel
+            override val analyticsValue: String = "legacy"
+        }
+
+        @Parcelize
+        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType {
+            @IgnoredOnParcel
+            override val analyticsValue: String = "customer_session"
+        }
     }
 
     @Parcelize
@@ -1542,10 +1553,8 @@ class PaymentSheet internal constructor(
             accessType = CustomerAccessType.LegacyCustomerEphemeralKey(ephemeralKeySecret)
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             @ExperimentalCustomerSessionApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createWithCustomerSession(
                 id: String,
                 clientSecret: String
@@ -1710,7 +1719,6 @@ class PaymentSheet internal constructor(
          * @param resultCallback Called when a [PaymentSheetResult] is available.
          * @param paymentOptionCallback Called when the customer's desired payment method changes.
          */
-        @OptIn(ExperimentalCvcRecollectionApi::class)
         class Builder(
             internal val resultCallback: PaymentSheetResultCallback,
             internal val paymentOptionCallback: PaymentOptionCallback
@@ -1718,8 +1726,6 @@ class PaymentSheet internal constructor(
             internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
                 private set
             internal var createIntentCallback: CreateIntentCallback? = null
-                private set
-            internal var cvcRecollectionEnabledCallback: CvcRecollectionEnabledCallback? = null
                 private set
 
             /**
@@ -1734,16 +1740,6 @@ class PaymentSheet internal constructor(
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
                 createIntentCallback = callback
-            }
-
-            /**
-             * @param callback Invoked when when [confirm] is called to determine whether to display a
-             * CVC recollection field.
-             *
-             */
-            @ExperimentalCvcRecollectionApi
-            fun cvcRecollectionEnabledCallback(callback: CvcRecollectionEnabledCallback) = apply {
-                cvcRecollectionEnabledCallback = callback
             }
 
             /**
@@ -1781,9 +1777,6 @@ class PaymentSheet internal constructor(
                 }
                 externalPaymentMethodConfirmHandler?.let {
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-                }
-                cvcRecollectionEnabledCallback?.let {
-                    CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback = it
                 }
             }
         }

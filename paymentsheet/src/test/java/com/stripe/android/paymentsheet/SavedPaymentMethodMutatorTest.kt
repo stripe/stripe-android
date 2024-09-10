@@ -13,11 +13,14 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -419,6 +422,38 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
+    fun `Exiting the manage saved PMs screen resets editing to false`() {
+        runScenario {
+            currentScreen.value = PaymentSheetScreen.ManageSavedPaymentMethods(
+                interactor = FakeManageScreenInteractor()
+            )
+
+            savedPaymentMethodMutator.toggleEditing()
+            savedPaymentMethodMutator.editing.test {
+                assertThat(awaitItem()).isTrue()
+            }
+
+            currentScreen.value = PaymentSheetScreen.VerticalMode(
+                interactor = FakePaymentMethodVerticalLayoutInteractor
+            )
+
+            savedPaymentMethodMutator.editing.test {
+                assertThat(awaitItem()).isFalse()
+            }
+        }
+    }
+
+    private object FakePaymentMethodVerticalLayoutInteractor : PaymentMethodVerticalLayoutInteractor {
+        override val isLiveMode: Boolean = false
+        override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = mock()
+        override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(false)
+
+        override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
+            // Do nothing.
+        }
+    }
+
+    @Test
     fun `On detach without remove duplicate permissions, should not attempt to remove duplicates in repository`() {
         removeDuplicatesTest(shouldRemoveDuplicates = false)
     }
@@ -484,6 +519,7 @@ class SavedPaymentMethodMutatorTest {
     ) {
         runTest {
             val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+            val currentScreen: MutableStateFlow<PaymentSheetScreen> = MutableStateFlow(PaymentSheetScreen.Loading)
 
             val customerStateHolder = CustomerStateHolder(
                 savedStateHandle = SavedStateHandle(),
@@ -510,12 +546,14 @@ class SavedPaymentMethodMutatorTest {
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
                 isLiveModeProvider = { true },
+                currentScreen = currentScreen,
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
                 customerStateHolder = customerStateHolder,
                 selectionSource = selection,
                 editPaymentMethodInteractorFactory = editPaymentMethodInteractorFactory,
+                currentScreen = currentScreen,
             ).apply {
                 block()
             }
@@ -527,5 +565,6 @@ class SavedPaymentMethodMutatorTest {
         val customerStateHolder: CustomerStateHolder,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val editPaymentMethodInteractorFactory: FakeEditPaymentMethodInteractor.Factory,
+        val currentScreen: MutableStateFlow<PaymentSheetScreen>,
     )
 }

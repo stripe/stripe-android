@@ -85,7 +85,7 @@ class PaymentSheetAnalyticsListenerTest {
             testScheduler.advanceUntilIdle()
         }
 
-        verify(eventReporter, times(screenTypes.size)).onShowNewPaymentOptionForm()
+        verify(eventReporter, times(screenTypes.size)).onShowNewPaymentOptions()
         // Only once since it didn't change.
         verify(eventReporter).onPaymentMethodFormShown(eq("card"))
     }
@@ -94,7 +94,7 @@ class PaymentSheetAnalyticsListenerTest {
     fun `debounced analytics are re-emitted after navigating to SelectSavedPaymentMethods`() = runScenario {
         currentScreen.value = mock<PaymentSheetScreen.AddAnotherPaymentMethod>()
         testScheduler.advanceUntilIdle()
-        verify(eventReporter).onShowNewPaymentOptionForm()
+        verify(eventReporter).onShowNewPaymentOptions()
         verify(eventReporter).onPaymentMethodFormShown(eq("card"))
         analyticsListener.reportFieldInteraction("card")
         verify(eventReporter).onPaymentMethodFormInteraction(eq("card"))
@@ -109,7 +109,7 @@ class PaymentSheetAnalyticsListenerTest {
 
         currentScreen.value = mock<PaymentSheetScreen.AddAnotherPaymentMethod>()
         testScheduler.advanceUntilIdle()
-        verify(eventReporter).onShowNewPaymentOptionForm()
+        verify(eventReporter).onShowNewPaymentOptions()
         verify(eventReporter).onPaymentMethodFormShown(eq("card"))
         analyticsListener.reportFieldInteraction("card")
         verify(eventReporter).onPaymentMethodFormInteraction(eq("card"))

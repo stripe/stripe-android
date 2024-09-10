@@ -17,9 +17,6 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
-import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,7 +114,7 @@ internal class PaymentMethodVerticalLayoutUITest {
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = listOf(
                     CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
-                        .asDisplayablePaymentMethod { onClickCalled = true },
+                        .asDisplayablePaymentMethod(emptyList()) { onClickCalled = true },
                 ),
                 isProcessing = false,
                 selection = null,
@@ -165,7 +162,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod(emptyList()) { } },
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -194,7 +191,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod { } },
+            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod(emptyList()) { } },
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -234,7 +231,9 @@ internal class PaymentMethodVerticalLayoutUITest {
         )
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
-                displayablePaymentMethods = supportedPaymentMethods.map { it.asDisplayablePaymentMethod { } },
+                displayablePaymentMethods = supportedPaymentMethods.map {
+                    it.asDisplayablePaymentMethod(emptyList()) { }
+                },
                 isProcessing = false,
                 selection = selection,
                 displayedSavedPaymentMethod = null,
@@ -263,30 +262,17 @@ internal class PaymentMethodVerticalLayoutUITest {
         initialState: PaymentMethodVerticalLayoutInteractor.State,
         block: Scenario.() -> Unit
     ) {
-        val stateFlow = MutableStateFlow(initialState)
         val viewActionRecorder = ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>()
-        val interactor = createInteractor(stateFlow, viewActionRecorder)
+        val interactor = FakePaymentMethodVerticalLayoutInteractor(
+            initialState = initialState,
+            viewActionRecorder = viewActionRecorder,
+        )
 
         composeRule.setContent {
             PaymentMethodVerticalLayoutUI(interactor)
         }
 
         Scenario(viewActionRecorder).apply(block)
-    }
-
-    private fun createInteractor(
-        stateFlow: StateFlow<PaymentMethodVerticalLayoutInteractor.State>,
-        viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
-    ): PaymentMethodVerticalLayoutInteractor {
-        return object : PaymentMethodVerticalLayoutInteractor {
-            override val isLiveMode: Boolean = true
-            override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlow
-            override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(false)
-
-            override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
-                viewActionRecorder.record(viewAction)
-            }
-        }
     }
 
     private data class Scenario(

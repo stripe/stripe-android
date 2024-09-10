@@ -34,7 +34,7 @@ import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     private val linkStore: LinkStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,

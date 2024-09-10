@@ -317,6 +317,19 @@ internal class AccountPickerViewModelTest {
         )
     }
 
+    @Test
+    fun `onEnterDetailsManually - navigates to manual entry`() = runTest {
+        val viewModel = buildViewModel(AccountPickerState())
+
+        viewModel.onEnterDetailsManually()
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.MANUAL_ENTRY.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
         whenever(getSync()).thenReturn(syncResponse(manifest))
     }

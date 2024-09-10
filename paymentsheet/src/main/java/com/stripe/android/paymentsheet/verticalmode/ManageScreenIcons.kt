@@ -18,9 +18,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.RemovePaymentMethodDialogUI
+import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
+import com.stripe.android.uicore.strings.resolve
 
 @Composable
 internal fun DeleteIcon(
@@ -37,6 +41,10 @@ internal fun DeleteIcon(
         onClick = {
             openRemoveDialog.value = true
         },
+        contentDescription = paymentMethod
+            .getRemoveDescription()
+            .resolve()
+            .readNumbersAsIndividualDigits()
     )
 
     if (openRemoveDialog.value) {
@@ -60,12 +68,22 @@ internal fun EditIcon(
         backgroundColor = Color.Gray,
         icon = Icons.Filled.Edit,
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
-        onClick = { editPaymentMethod(paymentMethod) }
+        onClick = { editPaymentMethod(paymentMethod) },
+        contentDescription = paymentMethod
+            .getModifyDescription()
+            .resolve()
+            .readNumbersAsIndividualDigits(),
     )
 }
 
 @Composable
-private fun TrailingIcon(backgroundColor: Color, icon: ImageVector, onClick: () -> Unit, modifier: Modifier) {
+private fun TrailingIcon(
+    backgroundColor: Color,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    contentDescription: String,
+    modifier: Modifier,
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -78,7 +96,11 @@ private fun TrailingIcon(backgroundColor: Color, icon: ImageVector, onClick: () 
             imageVector = icon,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .semantics {
+                    this.contentDescription = contentDescription
+                },
         )
     }
 }

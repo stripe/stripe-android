@@ -72,6 +72,22 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 }
         }
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class BankAccount(
+        private val bankAccountId: String,
+    ) : ConsumerPaymentDetailsCreateParams {
+
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                "type" to "bank_account",
+                "bank_account" to mapOf(
+                    "account" to bankAccountId,
+                ),
+            )
+        }
+    }
 }
 
 /**
