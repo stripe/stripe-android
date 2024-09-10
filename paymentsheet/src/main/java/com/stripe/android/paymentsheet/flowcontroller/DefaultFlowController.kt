@@ -441,21 +441,13 @@ internal class DefaultFlowController @Inject internal constructor(
                                 )
                             )
                             confirmPaymentSelection(selection, state)
-                        } ?: paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(
-                                CvcRecollectionException(
-                                    type = CvcRecollectionException.Type.IncorrectSelection
-                                )
-                            )
-                        )
+                        }
+
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
                         )
                     },
                     onFailure = { error ->
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(error)
-                        )
                     }
                 )
             }
