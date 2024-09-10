@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.os.BundleCompat
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -20,9 +19,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 class BacsMandateConfirmationContractTest {
-
-    @Mock
-    private lateinit var context: Context
 
     private lateinit var contract: BacsMandateConfirmationContract
 
@@ -42,7 +38,7 @@ class BacsMandateConfirmationContractTest {
             sortCode = ""
         )
 
-        val intent = contract.createIntent(context, input)
+        val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), input)
 
         assertThat(intent).isNotNull()
         assertThat(input).isEqualTo(

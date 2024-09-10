@@ -302,7 +302,7 @@
 |    |    |    +--- androidx.savedstate:savedstate:1.2.0 -> 1.2.1 (*)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.9.24 (*)
 |    |    |    \--- androidx.appcompat:appcompat-resources:1.6.1 (c)
-|    |    +--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
+|    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.24 (*)
 |    +--- androidx.databinding:viewbinding:8.5.2
@@ -344,7 +344,7 @@
 |    |    |    +--- androidx.activity:activity:1.8.2 (c)
 |    |    |    \--- androidx.activity:activity-compose:1.8.2 (c)
 |    |    +--- androidx.annotation:annotation:1.7.1 (*)
-|    |    +--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
+|    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- androidx.compose.foundation:foundation:1.5.4
 |    |    |    \--- androidx.compose.foundation:foundation-android:1.5.4
 |    |    |         +--- androidx.annotation:annotation:1.1.0 -> 1.7.1 (*)
@@ -730,5 +730,5 @@
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.24 (*)
 +--- androidx.appcompat:appcompat:1.6.1 (*)
-+--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
++--- androidx.core:core-ktx:1.13.1 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.24 (*)
