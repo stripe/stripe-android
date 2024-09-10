@@ -447,7 +447,7 @@ internal class DefaultFlowController @Inject internal constructor(
                             ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
                         )
                     },
-                    onFailure = { error ->
+                    onFailure = {
                     }
                 )
             }
