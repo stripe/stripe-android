@@ -16,7 +16,7 @@ internal sealed interface CvcRecollectionResult : Parcelable {
     object Cancelled : CvcRecollectionResult
 
     companion object {
-        private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
+        internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
         fun toIntent(intent: Intent, result: CvcRecollectionResult): Intent {
             return intent.putExtra(EXTRA_RESULT, result)
