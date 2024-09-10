@@ -62,7 +62,7 @@ internal class ElementsSessionJsonParser(
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
 
-        val isEligibleForCardBrandChoice = parseCardBrandChoiceEligibility(json)
+        val cardBrandChoice = parseCardBrandChoice(json)
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
 
         return if (stripeIntent != null) {
@@ -77,7 +77,7 @@ internal class ElementsSessionJsonParser(
                 stripeIntent = stripeIntent,
                 customer = customer,
                 merchantCountry = merchantCountry,
-                isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
             )
@@ -260,9 +260,22 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
-        val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return false
-        return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
+    private fun parseCardBrandChoice(json: JSONObject): ElementsSession.CardBrandChoice? {
+        val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return null
+        val preferredNetworks = mutableListOf<String>()
+
+        cardBrandChoice.optJSONArray(FIELD_PREFERRED_NETWORKS)?.let { jsonArray ->
+            for (index in 0 until jsonArray.length()) {
+                jsonArray.optString(index)?.let {
+                    preferredNetworks.add(it)
+                }
+            }
+        }
+
+        return ElementsSession.CardBrandChoice(
+            eligible = cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false),
+            preferredNetworks = preferredNetworks.toList()
+        )
     }
 
     private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
@@ -295,6 +308,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
         private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
         private const val FIELD_ELIGIBLE = "eligible"
+        private const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
         private const val FIELD_EXTERNAL_PAYMENT_METHOD_DATA = "external_payment_method_data"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_PAYMENT_METHODS = "payment_methods"

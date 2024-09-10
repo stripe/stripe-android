@@ -261,7 +261,7 @@ internal data class PaymentMethodMetadata(
                     .allowsPaymentMethodsRequiringShippingAddress,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
-                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
@@ -291,7 +291,7 @@ internal data class PaymentMethodMetadata(
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
-                    isEligible = elementsSession.isEligibleForCardBrandChoice,
+                    isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
