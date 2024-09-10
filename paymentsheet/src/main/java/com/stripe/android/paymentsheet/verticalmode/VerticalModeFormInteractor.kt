@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
@@ -42,11 +43,12 @@ internal interface VerticalModeFormInteractor {
         val formArguments: FormArguments,
         val formElements: List<FormElement>,
         val headerInformation: FormHeaderInformation?,
-        val intermediateResult: Any? = null,
+        val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap(),
     ) {
 
         val continueBeforeConfirmation: Boolean
-            get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) && intermediateResult == null
+            get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) &&
+                intermediateResults.containsKey(selectedPaymentMethodCode)
     }
 
     sealed interface ViewAction {
@@ -107,7 +109,11 @@ internal class DefaultVerticalModeFormInteractor(
         _state.update { state ->
             state.copy(
                 formElements = elements,
-                intermediateResult = result,
+                intermediateResults = if (result != null) {
+                    state.intermediateResults + (selectedPaymentMethodCode to result)
+                } else {
+                    state.intermediateResults - selectedPaymentMethodCode
+                },
             )
         }
     }

@@ -40,11 +40,12 @@ internal interface AddPaymentMethodInteractor {
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-        val intermediateResult: Any? = null,
+        val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap(),
     ) {
 
         val continueBeforeConfirmation: Boolean
-            get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) && intermediateResult == null
+            get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) &&
+                intermediateResults.containsKey(selectedPaymentMethodCode)
     }
 
     sealed class ViewAction {
@@ -145,7 +146,10 @@ internal class DefaultAddPaymentMethodInteractor(
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
                 val currentState = state.value
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
-                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode, currentState.intermediateResult)
+                val newFormElements = formElementsForCode(
+                    newSelectedPaymentMethodCode,
+                    currentState.intermediateResults[newSelectedPaymentMethodCode],
+                )
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
 
                 _state.value = currentState.copy(
@@ -193,11 +197,17 @@ internal class DefaultAddPaymentMethodInteractor(
     }
 
     override fun invalidate(result: Any?) {
-        val elements = formElementsForCode(selectedPaymentMethodCode.value, result)
+        val code = selectedPaymentMethodCode.value
+        val elements = formElementsForCode(code, result)
+
         _state.update { state ->
             state.copy(
                 formElements = elements,
-                intermediateResult = result,
+                intermediateResults = if (result != null) {
+                    state.intermediateResults + mapOf(code to result)
+                } else {
+                    state.intermediateResults - code
+                },
             )
         }
     }

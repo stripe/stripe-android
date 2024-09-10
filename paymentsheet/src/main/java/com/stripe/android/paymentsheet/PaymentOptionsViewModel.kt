@@ -332,7 +332,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val selection = selection.value
         val screen = navigationHandler.currentScreen.value
         val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
-        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult
+        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult(USBankAccount.code)
     }
 
     private var collectBankAccountLauncher: CollectBankAccountLauncher? = null

@@ -520,14 +520,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val selection = selection.value
         val screen = navigationHandler.currentScreen.value
         val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
-        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult
+        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult(USBankAccount.code)
     }
 
     private fun shouldLaunchInstantDebitsFlow(): Boolean {
         val selection = selection.value
         val screen = navigationHandler.currentScreen.value
         val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
-        return bankAccountSelection?.code == Link.code && !screen.hasIntermediateResult
+        return bankAccountSelection?.code == Link.code && !screen.hasIntermediateResult(USBankAccount.code)
     }
 
     fun checkoutWithGooglePay() {
