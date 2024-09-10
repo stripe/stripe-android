@@ -63,6 +63,8 @@ internal abstract class BaseSheetViewModel(
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
+    protected val intermediateResults = mutableMapOf<PaymentMethodCode, Any>()
+
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 

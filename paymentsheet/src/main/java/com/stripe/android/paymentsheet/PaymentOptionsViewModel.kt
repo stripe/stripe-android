@@ -30,6 +30,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.navigation.hasIntermediateResult
+import com.stripe.android.paymentsheet.navigation.updateWithResult
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -329,9 +331,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // TODO: this is duplicate code
     private fun shouldLaunchAchFlow(): Boolean {
-        val selection = selection.value
+        val bankAccountSelection = selection.value as? PaymentSelection.New.USBankAccount
         val screen = navigationHandler.currentScreen.value
-        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
         return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult(USBankAccount.code)
     }
 
@@ -404,6 +405,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                intermediateResults = { intermediateResults },
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {

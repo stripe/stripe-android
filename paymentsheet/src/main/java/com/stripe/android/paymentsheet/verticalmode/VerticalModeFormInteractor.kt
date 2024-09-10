@@ -48,7 +48,7 @@ internal interface VerticalModeFormInteractor {
 
         val continueBeforeConfirmation: Boolean
             get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) &&
-                intermediateResults.containsKey(selectedPaymentMethodCode)
+                selectedPaymentMethodCode !in intermediateResults
     }
 
     sealed interface ViewAction {
@@ -69,6 +69,7 @@ internal class DefaultVerticalModeFormInteractor(
     override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
     private val coroutineScope: CoroutineScope,
+    private val intermediateResults: Map<PaymentMethodCode, Any>,
 ) : VerticalModeFormInteractor {
 
     private val _state = MutableStateFlow(
@@ -77,8 +78,9 @@ internal class DefaultVerticalModeFormInteractor(
             isProcessing = false,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
-            formElements = formElements(null),
+            formElements = formElements(intermediateResults[selectedPaymentMethodCode]),
             headerInformation = headerInformation,
+            intermediateResults = intermediateResults,
         )
     )
 
@@ -128,6 +130,7 @@ internal class DefaultVerticalModeFormInteractor(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
+            intermediateResults: Map<PaymentMethodCode, Any>,
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(
@@ -138,7 +141,7 @@ internal class DefaultVerticalModeFormInteractor(
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
-                formElements = { result -> formHelper.formElementsForCode(selectedPaymentMethodCode, result) },
+                formElements = { formHelper.formElementsForCode(selectedPaymentMethodCode, it) },
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 usBankAccountArguments = USBankAccountFormArguments.create(
                     viewModel = viewModel,
@@ -157,6 +160,7 @@ internal class DefaultVerticalModeFormInteractor(
                 processing = viewModel.processing,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 coroutineScope = coroutineScope,
+                intermediateResults = intermediateResults,
             )
         }
     }

@@ -47,6 +47,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.hasIntermediateResult
+import com.stripe.android.paymentsheet.navigation.updateWithResult
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -504,6 +506,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (result is CollectBankAccountResultInternal.Completed) {
             val screen = navigationHandler.currentScreen.value
             screen.updateWithResult(result)
+            intermediateResults += USBankAccount.code to result
         }
     }
 
@@ -513,6 +516,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (result is CollectBankAccountForInstantDebitsResult.Completed) {
             val screen = navigationHandler.currentScreen.value
             screen.updateWithResult(result)
+            intermediateResults += Link.code to result
         }
     }
 
@@ -834,6 +838,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                intermediateResults = { intermediateResults },
             )
         }
         val hasPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()

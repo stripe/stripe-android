@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
@@ -14,6 +15,7 @@ internal object VerticalModeInitialScreenFactory {
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
+        intermediateResults: () -> Map<PaymentMethodCode, Any>,
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
 
@@ -25,6 +27,7 @@ internal object VerticalModeInitialScreenFactory {
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
+                        intermediateResults = intermediateResults(),
                     ),
                     showsWalletHeader = true,
                 )
@@ -36,6 +39,7 @@ internal object VerticalModeInitialScreenFactory {
                 viewModel = viewModel,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                intermediateResults = intermediateResults,
             )
             val verticalModeScreen = PaymentSheetScreen.VerticalMode(interactor = interactor)
             add(verticalModeScreen)
@@ -54,6 +58,7 @@ internal object VerticalModeInitialScreenFactory {
                                 viewModel = viewModel,
                                 paymentMethodMetadata = paymentMethodMetadata,
                                 customerStateHolder = customerStateHolder,
+                                intermediateResults = intermediateResults(),
                             ),
                         )
                     )

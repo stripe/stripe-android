@@ -45,7 +45,7 @@ internal interface AddPaymentMethodInteractor {
 
         val continueBeforeConfirmation: Boolean
             get() = selectedPaymentMethodCode in setOf(USBankAccount.code, Link.code) &&
-                intermediateResults.containsKey(selectedPaymentMethodCode)
+                selectedPaymentMethodCode !in intermediateResults
     }
 
     sealed class ViewAction {

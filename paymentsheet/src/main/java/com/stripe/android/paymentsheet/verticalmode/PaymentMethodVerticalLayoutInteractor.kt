@@ -91,14 +91,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
+
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
+            intermediateResults: () -> Map<PaymentMethodCode, Any>,
         ): PaymentMethodVerticalLayoutInteractor {
             val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
             val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
+
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
@@ -131,6 +134,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
+                        intermediateResults = intermediateResults(),
                     )
                     PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                 },
@@ -381,10 +385,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode, null).any { it.allowsUserInteraction }
-        return userInteractionAllowed ||
-            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+        return formElementsForCode(selectedPaymentMethodCode, null).any { it.allowsUserInteraction }
     }
 
     private fun updateSelectedPaymentMethod(selectedPaymentMethodCode: String) {

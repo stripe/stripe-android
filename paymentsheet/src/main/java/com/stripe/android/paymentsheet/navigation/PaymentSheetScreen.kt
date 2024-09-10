@@ -61,6 +61,14 @@ internal fun StoresIntermediateResults.hasIntermediateResult(code: PaymentMethod
     return code in intermediateResults
 }
 
+internal fun PaymentSheetScreen.updateWithResult(result: Any?) {
+    (this as? StoresIntermediateResults)?.updateWithResult(result)
+}
+
+internal fun PaymentSheetScreen.hasIntermediateResult(code: PaymentMethodCode): Boolean {
+    return (this as? StoresIntermediateResults)?.hasIntermediateResult(code) ?: false
+}
+
 internal sealed interface PaymentSheetScreen {
 
     enum class AnimationStyle {
@@ -87,22 +95,11 @@ internal sealed interface PaymentSheetScreen {
         get() = AnimationStyle.FullPage
     val showsMandates: Boolean
 
-    // TODO: Not great
-    val intermediateResults: Map<PaymentMethodCode, Any>
-
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
     fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?>
 
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
-
-    fun hasIntermediateResult(code: PaymentMethodCode): Boolean {
-        return intermediateResults.containsKey(code)
-    }
-
-    fun updateWithResult(result: Any?) {
-        // Most don't need this
-    }
 
     @Composable
     fun Content(modifier: Modifier)
@@ -117,8 +114,6 @@ internal sealed interface PaymentSheetScreen {
         override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
-
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(null)
@@ -157,8 +152,6 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val animationStyle: AnimationStyle = AnimationStyle.PrimaryButtonAnchored
         override val showsMandates: Boolean = true
-
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
@@ -206,7 +199,7 @@ internal sealed interface PaymentSheetScreen {
 
     class AddAnotherPaymentMethod(
         private val interactor: AddPaymentMethodInteractor,
-    ) : PaymentSheetScreen, Closeable {
+    ) : PaymentSheetScreen, StoresIntermediateResults, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
             val buyButtonOverride = if (state.continueBeforeConfirmation) {
@@ -278,7 +271,7 @@ internal sealed interface PaymentSheetScreen {
 
     class AddFirstPaymentMethod(
         private val interactor: AddPaymentMethodInteractor,
-    ) : PaymentSheetScreen, Closeable {
+    ) : PaymentSheetScreen, StoresIntermediateResults, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
             val buyButtonOverride = if (state.continueBeforeConfirmation) {
@@ -362,8 +355,6 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
-
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -403,8 +394,6 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
-
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -440,7 +429,7 @@ internal sealed interface PaymentSheetScreen {
     class VerticalModeForm(
         private val interactor: VerticalModeFormInteractor,
         private val showsWalletHeader: Boolean = false,
-    ) : PaymentSheetScreen, Closeable {
+    ) : PaymentSheetScreen, StoresIntermediateResults, Closeable {
 
         override val buyButtonState = interactor.state.mapAsStateFlow { state ->
             val buyButtonOverride = if (state.continueBeforeConfirmation) {
@@ -509,8 +498,6 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
-
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
                 PaymentSheetTopBarStateFactory.create(
@@ -563,8 +550,6 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
-
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -603,8 +588,6 @@ internal sealed interface PaymentSheetScreen {
         override val bottomContentPadding: Dp = verticalModeBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
-
-        override val intermediateResults: Map<PaymentMethodCode, Any> = emptyMap()
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.cvcCompletionState.mapAsStateFlow { complete ->
