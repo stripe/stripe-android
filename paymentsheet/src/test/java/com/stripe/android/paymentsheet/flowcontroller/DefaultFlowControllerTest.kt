@@ -67,6 +67,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -2374,6 +2375,7 @@ internal class DefaultFlowControllerTest {
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
         logger = FakeUserFacingLogger(),
+        cvcRecollectionHandler = CvcRecollectionHandlerImpl()
     )
 
     private fun createViewModel(): FlowControllerViewModel {

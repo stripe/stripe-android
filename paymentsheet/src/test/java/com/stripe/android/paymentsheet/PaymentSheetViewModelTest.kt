@@ -915,6 +915,7 @@ internal class PaymentSheetViewModelTest {
             merchantName = "Test merchant inc.",
             merchantCountryCode = "US",
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             shippingValues = mapOf(),
         )
 
@@ -3140,6 +3141,7 @@ internal class PaymentSheetViewModelTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             flags = emptyMap()
         )
     }

@@ -18,7 +18,8 @@ import java.util.concurrent.TimeUnit
 
 internal class FlowControllerTestRunnerContext(
     private val scenario: ActivityScenario<MainActivity>,
-    private val flowController: PaymentSheet.FlowController,
+    val flowController: PaymentSheet.FlowController,
+    private val countDownLatch: CountDownLatch,
 ) {
 
     fun configureFlowController(
@@ -31,11 +32,21 @@ internal class FlowControllerTestRunnerContext(
         }
         activityLaunchObserver.awaitLaunch()
     }
+
+    /**
+     * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
+     * succeed based on other criteria. In these cases, call this method to manually mark a test as
+     * succeeded.
+     */
+    fun markTestSucceeded() {
+        countDownLatch.countDown()
+    }
 }
 
 internal fun runFlowControllerTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType,
+    callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
@@ -44,6 +55,7 @@ internal fun runFlowControllerTest(
     val countDownLatch = CountDownLatch(1)
 
     val factory = FlowControllerTestFactory(
+        callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
         integrationType = integrationType,
         createIntentCallback = createIntentCallback,
         paymentOptionCallback = paymentOptionCallback,
@@ -87,7 +99,8 @@ private fun runFlowControllerTest(
             scenario = scenario,
             flowController = flowController ?: throw IllegalStateException(
                 "FlowController should have been created!"
-            )
+            ),
+            countDownLatch = countDownLatch,
         )
         block(testContext)
 
