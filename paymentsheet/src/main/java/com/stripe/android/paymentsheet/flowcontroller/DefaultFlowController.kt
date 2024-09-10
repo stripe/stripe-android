@@ -437,7 +437,7 @@ internal class DefaultFlowController @Inject internal constructor(
                                 paymentMethod = it.paymentMethod,
                                 walletType = it.walletType,
                                 paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                                    cvc = result.cvc,
+//                                    cvc = result.cvc,
                                 )
                             )
                             confirmPaymentSelection(selection, state)

@@ -496,7 +496,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?: PaymentMethodOptionsParams.Card()
             paymentSelection.copy(
                 paymentMethodOptionsParams = paymentMethodOptionsParams.copy(
-                    cvc = cvcControllerFlow.value.fieldValue.value
+//                    cvc = cvcControllerFlow.value.fieldValue.value
                 )
             )
         } else {
