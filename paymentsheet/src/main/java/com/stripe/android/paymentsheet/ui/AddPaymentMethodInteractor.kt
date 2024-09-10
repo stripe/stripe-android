@@ -143,11 +143,12 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
+                val currentState = state.value
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
-                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode, null)
+                val newFormElements = formElementsForCode(newSelectedPaymentMethodCode, currentState.intermediateResult)
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
 
-                _state.value = _state.value.copy(
+                _state.value = currentState.copy(
                     selectedPaymentMethodCode = newSelectedPaymentMethodCode,
                     arguments = newFormArguments,
                     formElements = newFormElements,
