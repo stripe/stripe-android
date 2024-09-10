@@ -16,6 +16,12 @@ dependencies {
     testImplementation testLibs.kotlin.test
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.androidx.coreKtx
+    testImplementation testLibs.robolectric
 }
 
 android {
