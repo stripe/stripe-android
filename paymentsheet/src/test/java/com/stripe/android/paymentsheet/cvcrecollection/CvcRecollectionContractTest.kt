@@ -16,7 +16,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class CvcRecollectionContractTest {
@@ -44,7 +43,7 @@ class CvcRecollectionContractTest {
         val intent = contract.createIntent(context, input)
 
         assertThat(intent).isNotNull()
-        assertEquals(input, BundleCompat.getParcelable(intent.extras!!, EXTRA_ARGS, Args::class.java))
+        assertThat(input).isEqualTo(intent.extras?.let { BundleCompat.getParcelable(it, EXTRA_ARGS, Args::class.java) })
     }
 
     @Test

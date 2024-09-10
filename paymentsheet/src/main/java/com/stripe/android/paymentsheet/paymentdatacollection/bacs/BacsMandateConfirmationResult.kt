@@ -18,7 +18,7 @@ internal sealed interface BacsMandateConfirmationResult : Parcelable {
     object Cancelled : BacsMandateConfirmationResult
 
     companion object {
-        private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
+        internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
         fun toIntent(intent: Intent, result: BacsMandateConfirmationResult): Intent {
             return intent.putExtra(EXTRA_RESULT, result)
