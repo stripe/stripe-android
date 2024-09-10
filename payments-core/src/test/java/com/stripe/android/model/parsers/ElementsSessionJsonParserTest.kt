@@ -499,6 +499,23 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Preferred networks is empty if not passed through response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.SetupIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS
+        val session = parser.parse(intent)
+
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEmpty()
+    }
+
+    @Test
     fun `ElementsSesssion has no external payment methods when they are not included in response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(

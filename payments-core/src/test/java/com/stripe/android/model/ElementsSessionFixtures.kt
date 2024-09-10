@@ -117,7 +117,7 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE = JSONObject(
+    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS = JSONObject(
         """
         {
           "business_name": "Mybusiness",
