@@ -197,7 +197,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `cvcRecEnabled - cvc rec payment intent, cvc rec callback enabled, and deferred intent returned true`() {
+    fun `cvcRecEnabled - cvc rec payment intent, cvc rec config enabled, and deferred intent returned true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
 
         val response = handler.cvcRecollectionEnabled(
@@ -207,7 +207,8 @@ class CvcRecollectionHandlerTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
-                    )
+                    ),
+                    requireCvcRecollection = true
                 )
             )
         )
@@ -215,7 +216,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `cvcRecEnabled - cvc rec payment intent, cvc rec callback disabled, and payment intent returned true`() {
+    fun `cvcRecEnabled - cvc rec payment intent, cvc rec config disabled, and payment intent returned true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
 
         val response = handler.cvcRecollectionEnabled(
@@ -226,7 +227,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec callback enabled, and deferred intent returned true`() {
+    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec config enabled, and deferred intent returned true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val response = handler.cvcRecollectionEnabled(
@@ -245,7 +246,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec callback disabled, and deferred intent returned true`() {
+    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec config disabled, and deferred intent returned true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val response = handler.cvcRecollectionEnabled(
@@ -264,7 +265,23 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec callback disabled, and payment intent returned false`() {
+    fun `cvcRecEnabled - cvc rec config enabled, initialization mode as Setup returns false`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val response = handler.cvcRecollectionEnabled(
+            stripeIntent = paymentIntent,
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                    requireCvcRecollection = true
+                )
+            )
+        )
+        assertThat(response).isFalse()
+    }
+
+    @Test
+    fun `cvcRecEnabled - no cvc rec payment intent, cvc rec config disabled, and payment intent returned false`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val response = handler.cvcRecollectionEnabled(

@@ -1749,7 +1749,8 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `Launches CVC Recollection & succeeds payment`() {
         cvcRecollectionTest(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            shouldRecollectCvc = true
         ) { flowController ->
             flowController.configureExpectingSuccess(
                 clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
@@ -1760,13 +1761,32 @@ internal class DefaultFlowControllerTest {
     @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Launches CVC Recollection & succeeds payment for deferred`() {
-        cvcRecollectionTest(stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD) { flowController ->
+        cvcRecollectionTest(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            shouldRecollectCvc = true
+        ) { flowController ->
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD"
                     ),
+                    requireCvcRecollection = true
+                )
+            ) { _, _ -> }
+        }
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Does not launch CVC Recollection for deferred setup intent`() {
+        cvcRecollectionTest(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            shouldRecollectCvc = false
+        ) { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                     requireCvcRecollection = true
                 )
             ) { _, _ -> }
@@ -2200,6 +2220,7 @@ internal class DefaultFlowControllerTest {
 
     private fun cvcRecollectionTest(
         stripeIntent: StripeIntent,
+        shouldRecollectCvc: Boolean,
         configureFlowController: suspend (PaymentSheet.FlowController) -> Unit
     ) = runTest {
         fakeIntentConfirmationInterceptor.enqueueCompleteStep()
@@ -2239,16 +2260,20 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(launcher).launch(
-            eq(
-                CvcRecollectionData(
-                    lastFour = "4242",
-                    brand = CardBrand.Visa
-                )
-            ),
-            eq(PaymentSheet.Appearance()),
-            eq(false)
-        )
+        if (shouldRecollectCvc) {
+            verify(launcher).launch(
+                eq(
+                    CvcRecollectionData(
+                        lastFour = "4242",
+                        brand = CardBrand.Visa
+                    )
+                ),
+                eq(PaymentSheet.Appearance()),
+                eq(false)
+            )
+        } else {
+            verify(launcher, never()).launch(any(), any(), any())
+        }
 
         verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
     }
