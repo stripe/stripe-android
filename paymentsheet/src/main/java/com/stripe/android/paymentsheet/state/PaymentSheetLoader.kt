@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
@@ -77,6 +78,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
+    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheetLoader {
 
     @Suppress("LongMethod")
@@ -588,9 +590,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
-                requireCvcRecollection = isCvcRecollectionRequired(
-                    initializationMode,
-                    state.paymentMethodMetadata.stripeIntent
+                requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
+                    state.paymentMethodMetadata.stripeIntent,
+                    initializationMode
                 )
             )
         }
@@ -624,21 +626,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun isCvcRecollectionRequired(
-        initializationMode: PaymentSheet.InitializationMode,
-        intent: StripeIntent
-    ): Boolean {
-        val deferredIntentMode = initializationMode as? PaymentSheet.InitializationMode.DeferredIntent
-        val deferredIntentRequiresCvcRecollection =
-            deferredIntentMode?.intentConfiguration?.requireCvcRecollection == true &&
-                deferredIntentMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-
-        val paymentIntentRequiresCvcRecollection = (intent as? PaymentIntent)?.requireCvcRecollection == true &&
-            initializationMode !is PaymentSheet.InitializationMode.DeferredIntent
-
-        return paymentIntentRequiresCvcRecollection || deferredIntentRequiresCvcRecollection
     }
 
     private sealed interface CustomerInfo {
