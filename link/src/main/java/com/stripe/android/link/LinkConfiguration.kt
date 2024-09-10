@@ -16,6 +16,7 @@ data class LinkConfiguration(
     val shippingValues: Map<IdentifierSpec, String?>?,
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
+    val cardBrandChoice: CardBrandChoice?,
 ) : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -24,5 +25,12 @@ data class LinkConfiguration(
         val email: String?,
         val phone: String?,
         val billingCountryCode: String?,
+    ) : Parcelable
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class CardBrandChoice(
+        val eligible: Boolean,
+        val preferredNetworks: List<String>,
     ) : Parcelable
 }

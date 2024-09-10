@@ -461,7 +461,8 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isTrue()
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
@@ -477,11 +478,12 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice?.eligible).isFalse()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
-    fun `Is not eligible for CBC if no info in the response`() {
+    fun `Is card brand choice is null if no info in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -493,7 +495,7 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice).isNull()
     }
 
     @Test

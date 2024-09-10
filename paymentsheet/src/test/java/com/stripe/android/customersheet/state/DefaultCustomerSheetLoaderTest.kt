@@ -14,6 +14,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -208,7 +209,6 @@ class DefaultCustomerSheetLoaderTest {
             stripeIntent = STRIPE_INTENT,
             error = null,
             linkSettings = null,
-            isCbcEligible = false,
         )
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -241,7 +241,6 @@ class DefaultCustomerSheetLoaderTest {
             stripeIntent = STRIPE_INTENT,
             error = null,
             linkSettings = null,
-            isCbcEligible = false,
         )
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -563,7 +562,6 @@ class DefaultCustomerSheetLoaderTest {
                 stripeIntent = STRIPE_INTENT,
                 error = null,
                 linkSettings = null,
-                isCbcEligible = false,
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
@@ -601,7 +599,6 @@ class DefaultCustomerSheetLoaderTest {
                 stripeIntent = STRIPE_INTENT,
                 error = null,
                 linkSettings = null,
-                isCbcEligible = false,
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
@@ -623,7 +620,6 @@ class DefaultCustomerSheetLoaderTest {
                 stripeIntent = STRIPE_INTENT,
                 error = APIConnectionException("Connection failure!"),
                 linkSettings = null,
-                isCbcEligible = false,
             ),
             errorReporter = errorReporter,
         )
@@ -688,13 +684,13 @@ class DefaultCustomerSheetLoaderTest {
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
-        isCbcEligible: Boolean = false,
+        isCbcEligible: Boolean? = null,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
             linkSettings = null,
-            isCbcEligible = isCbcEligible,
+            cardBrandChoice = createCardBrandChoice(isCbcEligible),
         ),
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
@@ -704,7 +700,6 @@ class DefaultCustomerSheetLoaderTest {
             customerAdapterProvider = CompletableDeferred(customerAdapter),
             isGooglePayReady = isGooglePayReady,
             isLiveModeProvider = isLiveModeProvider,
-            isCbcEligible = isCbcEligible,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             elementsSessionRepository = elementsSessionRepository,
             lpmRepository = lpmRepository,
@@ -716,13 +711,13 @@ class DefaultCustomerSheetLoaderTest {
         customerAdapterProvider: Deferred<CustomerAdapter>,
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
-        isCbcEligible: Boolean = false,
+        isCbcEligible: Boolean? = null,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
             linkSettings = null,
-            isCbcEligible = isCbcEligible,
+            cardBrandChoice = createCardBrandChoice(isCbcEligible),
         ),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -740,6 +735,15 @@ class DefaultCustomerSheetLoaderTest {
             errorReporter = errorReporter,
             workContext = workContext,
         )
+    }
+
+    private fun createCardBrandChoice(isCbcEligible: Boolean?): ElementsSession.CardBrandChoice? {
+        return isCbcEligible?.let {
+            ElementsSession.CardBrandChoice(
+                eligible = it,
+                preferredNetworks = listOf("cartes_bancaires")
+            )
+        }
     }
 
     private companion object {

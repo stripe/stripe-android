@@ -433,7 +433,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": true
+            "eligible": true,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,
@@ -503,7 +504,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": false
+            "eligible": false,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,

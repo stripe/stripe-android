@@ -45,6 +45,7 @@ class LinkActivityContractTest {
             shippingValues = null,
             passthroughModeEnabled = false,
             flags = emptyMap(),
+            cardBrandChoice = null,
         )
 
         val args = LinkActivityContract.Args(

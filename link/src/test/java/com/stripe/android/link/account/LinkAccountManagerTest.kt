@@ -491,6 +491,7 @@ class LinkAccountManagerTest {
             shippingValues = null,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = emptyMap(),
+            cardBrandChoice = null,
         ),
         linkRepository,
         linkEventsReporter,

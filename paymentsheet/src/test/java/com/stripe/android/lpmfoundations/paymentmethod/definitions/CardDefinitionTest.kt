@@ -172,6 +172,7 @@ class CardDefinitionTest {
             ),
             flags = mapOf(),
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             shippingValues = mapOf()
         )
     }

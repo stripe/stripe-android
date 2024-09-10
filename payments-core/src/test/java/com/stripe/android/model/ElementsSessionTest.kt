@@ -75,7 +75,7 @@ class ElementsSessionTest {
             customer = null,
             paymentMethodSpecs = null,
             isGooglePayEnabled = true,
-            isEligibleForCardBrandChoice = false,
+            cardBrandChoice = null,
             externalPaymentMethodData = null,
             merchantCountry = null,
         )
