@@ -371,7 +371,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     appearance = getPaymentAppearance(),
                     isLiveMode = state.stripeIntent.isLiveMode
                 )
-
             }
         } else {
             confirmPaymentSelection(paymentSelection, state)
