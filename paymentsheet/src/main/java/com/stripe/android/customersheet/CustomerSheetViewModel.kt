@@ -76,7 +76,6 @@ import com.stripe.android.ui.core.R as UiCoreR
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel(
     application: Application, // TODO (jameswoo) remove application
-    initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
@@ -96,7 +95,6 @@ internal class CustomerSheetViewModel(
 
     @Inject constructor(
         application: Application,
-        initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         resources: Resources,
@@ -113,7 +111,6 @@ internal class CustomerSheetViewModel(
         errorReporter: ErrorReporter,
     ) : this(
         application = application,
-        initialBackStack = initialBackStack,
         originalPaymentSelection = originalPaymentSelection,
         paymentConfigurationProvider = paymentConfigurationProvider,
         customerAdapterProvider = CustomerSheetHacks.adapter,
@@ -133,7 +130,13 @@ internal class CustomerSheetViewModel(
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
-    private val backStack = MutableStateFlow(initialBackStack)
+    private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
+        listOf(
+            CustomerSheetViewState.Loading(
+                isLiveMode = isLiveModeProvider()
+            )
+        )
+    )
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)

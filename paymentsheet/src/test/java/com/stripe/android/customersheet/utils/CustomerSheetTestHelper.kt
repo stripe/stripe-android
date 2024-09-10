@@ -13,7 +13,6 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
-import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
@@ -23,22 +22,16 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -47,7 +40,6 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.CompletableDeferred
@@ -61,79 +53,10 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
-    internal val usBankAccountFormArguments = USBankAccountFormArguments(
-        showCheckbox = false,
-        instantDebits = false,
-        onBehalfOf = null,
-        isCompleteFlow = false,
-        isPaymentFlow = false,
-        stripeIntentId = null,
-        clientSecret = null,
-        shippingDetails = null,
-        draftPaymentSelection = null,
-        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-        onMandateTextChanged = { _, _ -> },
-        onCollectBankAccountResult = { },
-        onConfirmUSBankAccount = { },
-        onUpdatePrimaryButtonState = { },
-        onUpdatePrimaryButtonUIState = { },
-        onError = { },
-    )
-
-    internal val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
-        title = null,
-        savedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
-        paymentSelection = null,
-        isLiveMode = false,
-        isProcessing = false,
-        isEditing = false,
-        isGooglePayEnabled = false,
-        primaryButtonVisible = false,
-        primaryButtonLabel = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        allowsRemovalOfLastSavedPaymentMethod = true,
-        canRemovePaymentMethods = true,
-    )
-
-    internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
-        paymentMethodCode = PaymentMethod.Type.Card.code,
-        formFieldValues = FormFieldValues(
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-        ),
-        formElements = emptyList(),
-        formArguments = FormArguments(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            merchantName = ""
-        ),
-        usBankAccountFormArguments = usBankAccountFormArguments,
-        supportedPaymentMethods = listOf(
-            LpmRepositoryTestHelpers.card,
-            LpmRepositoryTestHelpers.usBankAccount,
-        ),
-        enabled = true,
-        isLiveMode = false,
-        isProcessing = false,
-        errorMessage = null,
-        isFirstPaymentMethod = false,
-        primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
-        primaryButtonEnabled = false,
-        customPrimaryButtonUiState = null,
-        bankAccountResult = null,
-        draftPaymentSelection = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        errorReporter = FakeErrorReporter(),
-    )
-
     internal fun createViewModel(
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
-        initialBackStack: List<CustomerSheetViewState> = listOf(
-            CustomerSheetViewState.Loading(
-                isLiveMode
-            )
-        ),
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
@@ -168,7 +91,6 @@ internal object CustomerSheetTestHelper {
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
-            initialBackStack = initialBackStack,
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
@@ -216,10 +138,6 @@ internal object CustomerSheetTestHelper {
             errorReporter = FakeErrorReporter(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
-
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                isGooglePayReady = isGooglePayAvailable,
-            )
         }
     }
 
