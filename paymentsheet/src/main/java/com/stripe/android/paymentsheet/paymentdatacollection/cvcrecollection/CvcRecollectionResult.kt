@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
 import android.content.Intent
-import android.os.Build
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.view.ActivityStarter

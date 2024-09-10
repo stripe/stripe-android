@@ -2,7 +2,6 @@ package com.stripe.hcaptcha
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
 import com.stripe.hcaptcha.config.HCaptchaConfig
@@ -51,7 +50,7 @@ object HCaptchaCompat {
     }
 
     fun getStateListener(bundle: Bundle): HCaptchaStateListener? {
-        return getParcelable(bundle, KEY_LISTENER, HCaptchaStateListener::class.java)
+        return BundleCompat.getParcelable(bundle, KEY_LISTENER, HCaptchaStateListener::class.java)
     }
 
     @Suppress("deprecation", "UNCHECKED_CAST")
@@ -61,10 +60,5 @@ object HCaptchaCompat {
         } else {
             bundle.getSerializable(key) as T?
         }
-    }
-
-    @Suppress("SameParameterValue")
-    private fun <T : Parcelable?> getParcelable(bundle: Bundle, key: String, clazz: Class<T>): T? {
-        return BundleCompat.getParcelable(bundle, key, clazz)
     }
 }
