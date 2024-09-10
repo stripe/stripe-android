@@ -51,7 +51,7 @@ object HCaptchaCompat {
     }
 
     fun getStateListener(bundle: Bundle): HCaptchaStateListener? {
-        return BundleCompat.getParcelable(bundle, KEY_LISTENER, HCaptchaStateListener::class.java)
+        return getParcelable(bundle, KEY_LISTENER, HCaptchaStateListener::class.java)
     }
 
     @Suppress("deprecation", "UNCHECKED_CAST")
