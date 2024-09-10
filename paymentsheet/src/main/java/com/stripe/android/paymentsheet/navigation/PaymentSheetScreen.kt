@@ -253,6 +253,10 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(isCompleteFlow)
         }
 
+        override fun updateWithResult(result: Any?) {
+            interactor.invalidate(result)
+        }
+
         @Composable
         override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
