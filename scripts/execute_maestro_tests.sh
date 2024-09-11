@@ -22,6 +22,9 @@ then
   exit 1
 fi
 
+# Just run tests marked as edge if on edge test_environment.
+[ "$test_environment" == "edge" ] && MAESTRO_TAGS="$MAESTRO_TAGS edge"
+
 export MAESTRO_VERSION=1.36.0
 
 # Retry mechanism for Maestro installation
