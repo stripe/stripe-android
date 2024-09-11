@@ -110,12 +110,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
-            val customerAdapter by viewModel.customerAdapter.collectAsState()
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
+            val adapter = remember(playgroundState) {
+                viewModel.createCustomerAdapter(playgroundState)
+            }
+
             val customerSheet = rememberCustomerSheet(
-                customerAdapter = customerAdapter,
+                customerAdapter = adapter,
                 callback = viewModel::onCustomerSheetCallback
             )
 

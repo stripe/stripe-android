@@ -5,24 +5,29 @@ import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
+import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetTest {
+    @get:Rule
+    val intentsTestRule = IntentsRule()
+
     @Before
     fun setup() {
         val appContext = ApplicationProvider.getApplicationContext<Application>()
@@ -37,7 +42,7 @@ class CustomerSheetTest {
     }
 
     @Test
-    fun `When presenting without configuring, should return error`() = runTestActivityTest { activity, complete ->
+    fun `When presenting without configuring, should return error`() = runTestActivityTest {
         val customerSheet = CustomerSheet.create(
             activity = activity,
             customerAdapter = FakeCustomerAdapter(),
@@ -49,7 +54,7 @@ class CustomerSheetTest {
                     "Must call `configure` first before attempting to present `CustomerSheet`!"
                 )
 
-                complete()
+                completeTest()
             },
         )
 
@@ -57,9 +62,7 @@ class CustomerSheetTest {
     }
 
     @Test
-    fun `When presenting, should launch 'CustomerSheetActivity'`() = runTestActivityTest { activity, complete ->
-        Intents.init()
-
+    fun `When presenting, should launch 'CustomerSheetActivity'`() = runTestActivityTest {
         val customerSheet = CustomerSheet.create(
             activity = activity,
             customerAdapter = FakeCustomerAdapter(),
@@ -88,9 +91,7 @@ class CustomerSheetTest {
             )
         )
 
-        Intents.release()
-
-        complete()
+        completeTest()
     }
 
     @Test
@@ -146,7 +147,7 @@ class CustomerSheetTest {
         paymentOption: CustomerAdapter.PaymentOption? = null,
         test: (result: CustomerSheetResult) -> Unit,
     ) {
-        runTestActivityTest { activity, complete ->
+        runTestActivityTest {
             val customerSheet = CustomerSheet.create(
                 activity = activity,
                 customerAdapter = FakeCustomerAdapter(
@@ -162,24 +163,25 @@ class CustomerSheetTest {
             runBlocking {
                 test(customerSheet.retrievePaymentOptionSelection())
 
-                complete()
+                completeTest()
             }
         }
     }
 
     private fun runTestActivityTest(
-        test: (TestActivity, () -> Unit) -> Unit,
+        test: Scenario.() -> Unit,
     ) {
         ActivityScenario.launch(TestActivity::class.java).use { scenario ->
             val countDownLatch = CountDownLatch(1)
 
             scenario.onActivity {
-                test(it) {
-                    countDownLatch.countDown()
-                }
+                Scenario(
+                    activity = it,
+                    completeTest = countDownLatch::countDown,
+                ).test()
             }
 
-            countDownLatch.await()
+            assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
         }
     }
 
@@ -190,6 +192,11 @@ class CustomerSheetTest {
     private fun CustomerSheetResult.asFailed(): CustomerSheetResult.Failed {
         return this as CustomerSheetResult.Failed
     }
+
+    private class Scenario(
+        val activity: TestActivity,
+        val completeTest: () -> Unit,
+    )
 
     private class TestActivity : AppCompatActivity()
 }

@@ -65,7 +65,7 @@ class CustomerSheet @Inject internal constructor(
     fun configure(
         configuration: Configuration,
     ) {
-        this.configureRequest = ConfigureRequest(
+        configureRequest = ConfigureRequest(
             configuration = configuration,
         )
     }
@@ -115,41 +115,43 @@ class CustomerSheet @Inject internal constructor(
      * Retrieves the customer's saved payment option selection or null if the customer does not have
      * a persisted payment option selection.
      */
-    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
+    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
         val request = configureRequest
-            ?: return@coroutineScope CustomerSheetResult.Failed(
+            ?: return CustomerSheetResult.Failed(
                 IllegalStateException(
                     "Must call `configure` first before attempting to fetch the saved payment option!"
                 )
             )
 
-        val adapter = CustomerSheetHacks.adapter.await()
+        return coroutineScope {
+            val adapter = CustomerSheetHacks.adapter.await()
 
-        val selectedPaymentOptionDeferred = async {
-            adapter.retrieveSelectedPaymentOption()
-        }
-        val paymentMethodsDeferred = async {
-            adapter.retrievePaymentMethods()
-        }
-        val selectedPaymentOption = selectedPaymentOptionDeferred.await()
-        val paymentMethods = paymentMethodsDeferred.await()
-
-        val selection = selectedPaymentOption.mapCatching { paymentOption ->
-            paymentOption?.toPaymentSelection {
-                paymentMethods.getOrNull()?.find {
-                    it.id == paymentOption.id
-                }
-            }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
-        }
-
-        selection.fold(
-            onSuccess = {
-                CustomerSheetResult.Selected(it)
-            },
-            onFailure = { cause, _ ->
-                CustomerSheetResult.Failed(cause)
+            val selectedPaymentOptionDeferred = async {
+                adapter.retrieveSelectedPaymentOption()
             }
-        )
+            val paymentMethodsDeferred = async {
+                adapter.retrievePaymentMethods()
+            }
+            val selectedPaymentOption = selectedPaymentOptionDeferred.await()
+            val paymentMethods = paymentMethodsDeferred.await()
+
+            val selection = selectedPaymentOption.mapCatching { paymentOption ->
+                paymentOption?.toPaymentSelection {
+                    paymentMethods.getOrNull()?.find {
+                        it.id == paymentOption.id
+                    }
+                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+            }
+
+            selection.fold(
+                onSuccess = {
+                    CustomerSheetResult.Selected(it)
+                },
+                onFailure = { cause, _ ->
+                    CustomerSheetResult.Failed(cause)
+                }
+            )
+        }
     }
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
