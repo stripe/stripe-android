@@ -44,9 +44,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download APKs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: apk
+          path: apk
+          pattern: identity-example-release-*.apk
       - name: diffuse
         id: diffuse
         uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
