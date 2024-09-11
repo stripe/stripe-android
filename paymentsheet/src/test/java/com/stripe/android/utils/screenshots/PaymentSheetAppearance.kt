@@ -4,6 +4,7 @@ import android.graphics.Color
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
+import com.stripe.android.paymentsheet.R
 
 enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
@@ -56,6 +57,15 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 borderStrokeWidthDp = 4.0f
             ),
         ),
+    ),
+
+    CustomFontAppearance(
+        appearance = PaymentSheet.Appearance(
+            typography = PaymentSheet.Typography(
+                sizeScaleFactor = 1.75F,
+                fontResId = R.font.cursive,
+            )
+        )
     );
 
     override fun initialize() {
