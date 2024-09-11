@@ -85,6 +85,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -2755,7 +2758,7 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
                 )
-            )
+            ),
         )
 
         cvcRecollectionHandler.requiresCVCRecollection = true
@@ -2765,6 +2768,33 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             val screen = awaitItem()
             assertThat(screen).isInstanceOf<PaymentSheetScreen.CvcRecollection>()
+        }
+    }
+
+    @Test
+    fun `CvcRecollection state update should update payment selection`() = runTest {
+        val cvcRecollectionInteractor = FakeCvcRecollectionInteractor()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
+                )
+            ),
+            cvcRecollectionInteractor = cvcRecollectionInteractor
+        )
+
+        cvcRecollectionHandler.requiresCVCRecollection = true
+        cvcRecollectionHandler.cvcRecollectionEnabled = true
+        viewModel.checkout()
+
+        viewModel.selection.test {
+            awaitItem()
+
+            cvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Completed("444"))
+            assertThat(selectionCvc(awaitItem())).isEqualTo("444")
+
+            cvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Incomplete)
+            assertThat(selectionCvc(awaitItem())).isEqualTo("")
         }
     }
 
@@ -2932,6 +2962,7 @@ internal class PaymentSheetViewModelTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
+        cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -2963,7 +2994,10 @@ internal class PaymentSheetViewModelTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
                 errorReporter = errorReporter,
-                cvcRecollectionHandler = cvcRecollectionHandler
+                cvcRecollectionHandler = cvcRecollectionHandler,
+                cvcRecollectionInteractorFactory = object : CvcRecollectionInteractorFactory {
+                    override fun create(args: Args) = cvcRecollectionInteractor
+                }
             ).apply {
                 if (shouldRegister) {
                     val activityResultCaller = mock<ActivityResultCaller> {
@@ -3061,6 +3095,12 @@ internal class PaymentSheetViewModelTest {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
         )
+    }
+
+    private fun selectionCvc(selection: PaymentSelection?): String? {
+        val saved = (selection as? PaymentSelection.Saved) ?: return null
+        val card = (saved.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card) ?: return null
+        return card.cvc
     }
 
     private fun PaymentSheetViewModel.capturePaymentResultListener(): ActivityResultCallback<InternalPaymentResult> {

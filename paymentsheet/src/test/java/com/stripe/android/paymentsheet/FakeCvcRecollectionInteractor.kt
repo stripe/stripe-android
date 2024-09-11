@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal object FakeCvcRecollectionInteractor : CvcRecollectionInteractor {
+internal class FakeCvcRecollectionInteractor : CvcRecollectionInteractor {
     private val _viewState = MutableStateFlow(
         value = CvcRecollectionViewState(
             lastFour = "4242",

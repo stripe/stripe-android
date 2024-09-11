@@ -44,4 +44,10 @@ internal class DefaultCvcRecollectionInteractor(
             )
         }
     }
+
+    internal class Factory : CvcRecollectionInteractorFactory {
+        override fun create(args: Args): CvcRecollectionInteractor {
+            return DefaultCvcRecollectionInteractor(args)
+        }
+    }
 }

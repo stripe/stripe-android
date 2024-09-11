@@ -27,8 +27,7 @@ internal class PaymentSheetScreenCvcRecollectionScreenshotTest {
     @Test
     fun displaysCvcRecollectionScreen() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeCvcRecollectionInteractor
-        val initialScreen = CvcRecollection(interactor)
+        val initialScreen = CvcRecollection(FakeCvcRecollectionInteractor())
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
         paparazziRule.snapshot {
