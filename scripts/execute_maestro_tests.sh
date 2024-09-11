@@ -65,16 +65,15 @@ RETRY_COUNT=0
 mkdir -p $TEST_RESULTS_PATH
 
 for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
-  # Default to run the test unless `test_environment` is "edge" AND the file does not contain the "edge" tag
-  if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
-    # Check if MAESTRO_TAGS are present in the test file
-    if contains_tag "$TEST_FILE_PATH" "$MAESTRO_TAGS"; then
+  # Check if MAESTRO_TAGS are present in the test file
+  if contains_tag "$TEST_FILE_PATH" "$MAESTRO_TAGS"; then
+    # Just run the test if it's tagged as edge, if on an edge environment
+    if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
       # Execute Maestro test flow and retry if failed
       while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
         maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output $TEST_RESULTS_PATH/$(basename "$TEST_FILE_PATH").xml "$TEST_FILE_PATH" && break
         let RETRY_COUNT=RETRY_COUNT+1
         echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
-        sleep 5
       done
       if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
         echo "Maestro tests failed after $MAX_RETRIES attempts."
@@ -82,8 +81,8 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
       else
         RETRY_COUNT=0
       fi
+    else
+      echo "Skipping test file without 'edge' tag: $TEST_FILE_PATH"
     fi
-  else
-    echo "Skipping test file without 'edge' tag: $TEST_FILE_PATH"
   fi
 done
