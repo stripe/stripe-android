@@ -895,19 +895,17 @@ internal class CustomerSheetViewModel(
                     ),
                 ).getOrThrow()
 
-                handleStripeIntent(intent, clientSecret, paymentMethod).getOrThrow()
-
-                eventReporter.onAttachPaymentMethodSucceeded(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-                )
+                handleStripeIntent(intent, clientSecret, paymentMethod)
             }.onFailure { cause, displayMessage ->
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
                 )
+
                 logger.error(
                     msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
                     t = cause,
                 )
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
@@ -916,8 +914,6 @@ internal class CustomerSheetViewModel(
                         isProcessing = false,
                     )
                 }
-            }.onSuccess {
-                refreshAndUpdatePaymentMethods(paymentMethod)
             }
     }
 
@@ -925,7 +921,7 @@ internal class CustomerSheetViewModel(
         stripeIntent: StripeIntent,
         clientSecret: String,
         paymentMethod: PaymentMethod
-    ): Result<Unit> {
+    ) {
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
                 intent = stripeIntent,
@@ -940,11 +936,24 @@ internal class CustomerSheetViewModel(
             )
         )
 
-        return when (val result = intentConfirmationHandler.awaitIntentResult()) {
+        when (val result = intentConfirmationHandler.awaitIntentResult()) {
             is PaymentConfirmationResult.Succeeded -> {
-                Result.success(Unit)
+                eventReporter.onAttachPaymentMethodSucceeded(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
+
+                refreshAndUpdatePaymentMethods(paymentMethod)
             }
             is PaymentConfirmationResult.Failed -> {
+                eventReporter.onAttachPaymentMethodFailed(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
+
+                logger.error(
+                    msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
+                    t = result.cause,
+                )
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
@@ -952,9 +961,9 @@ internal class CustomerSheetViewModel(
                         errorMessage = result.message,
                     )
                 }
-                Result.failure(result.cause)
             }
-            is PaymentConfirmationResult.Canceled -> {
+            is PaymentConfirmationResult.Canceled,
+            null -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         enabled = true,
@@ -962,9 +971,7 @@ internal class CustomerSheetViewModel(
                         primaryButtonEnabled = it.formFieldValues != null,
                     )
                 }
-                Result.success(Unit)
             }
-            null -> Result.success(Unit)
         }
     }
 
@@ -997,6 +1004,10 @@ internal class CustomerSheetViewModel(
         newPaymentMethod: PaymentMethod
     ) {
         awaitCustomerAdapter().retrievePaymentMethods().onSuccess { paymentMethods ->
+            errorReporter.report(
+                ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
+            )
+
             val selection = PaymentSelection.Saved(newPaymentMethod)
 
             safeUpdateSelectPaymentMethodState {

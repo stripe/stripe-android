@@ -750,15 +750,11 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `After attaching payment method with setup intent, methods are refreshed`() = runTest(testDispatcher) {
+        val errorReporter = FakeErrorReporter()
         val viewModel = retrieveViewModelForAttaching(
             attachWithSetupIntent = true,
             shouldFailRefresh = false,
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
+            errorReporter = errorReporter,
         )
 
         viewModel.viewState.test {
@@ -773,6 +769,9 @@ class CustomerSheetViewModelTest {
             assertThat(newViewState.isProcessing).isFalse()
             assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
         }
+
+        assertThat(errorReporter.getLoggedErrors())
+            .contains(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS.eventName)
     }
 
     @Test
@@ -803,9 +802,11 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `After attaching payment method without setup intent, methods are refreshed`() = runTest(testDispatcher) {
+        val errorReporter = FakeErrorReporter()
         val viewModel = retrieveViewModelForAttaching(
             attachWithSetupIntent = false,
             shouldFailRefresh = false,
+            errorReporter = errorReporter,
         )
 
         viewModel.viewState.test {
@@ -820,6 +821,9 @@ class CustomerSheetViewModelTest {
             assertThat(newViewState.isProcessing).isFalse()
             assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
         }
+
+        assertThat(errorReporter.getLoggedErrors())
+            .contains(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS.eventName)
     }
 
     @Test
@@ -830,12 +834,6 @@ class CustomerSheetViewModelTest {
                 attachWithSetupIntent = false,
                 errorReporter = errorReporter,
                 shouldFailRefresh = true,
-            )
-
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                    formFieldValues = TEST_FORM_VALUES,
-                )
             )
 
             viewModel.viewState.test {
