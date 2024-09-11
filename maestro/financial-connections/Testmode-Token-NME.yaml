@@ -59,7 +59,7 @@ tags:
     id: "OTP-0"
 - inputText: "111111"
 ## SELECT NETWORKED ACCOUNT
-- tapOn: "Test Institution"
+# First institution should be auto selected.
 - tapOn: "Connect account"
 # CONFIRM AND COMPLETE
 - tapOn:
