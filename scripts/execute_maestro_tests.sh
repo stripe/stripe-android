@@ -65,8 +65,8 @@ RETRY_COUNT=0
 mkdir -p $TEST_RESULTS_PATH
 
 for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
-  # Exclude tests that have an "edge" tag
-  if ! contains_tag "$TEST_FILE_PATH" "edge"; then
+  # Default to run the test unless `test_environment` is "edge" AND the file does not contain the "edge" tag
+  if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
     # Check if MAESTRO_TAGS are present in the test file
     if contains_tag "$TEST_FILE_PATH" "$MAESTRO_TAGS"; then
       # Execute Maestro test flow and retry if failed
@@ -84,6 +84,6 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
       fi
     fi
   else
-    echo "Skipping test file with 'edge' tag: $TEST_FILE_PATH"
+    echo "Skipping test file without 'edge' tag: $TEST_FILE_PATH"
   fi
 done
