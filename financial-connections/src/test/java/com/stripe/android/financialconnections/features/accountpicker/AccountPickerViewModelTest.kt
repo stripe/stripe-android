@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -17,7 +16,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.DataAccess.InstantDebits
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -53,8 +51,7 @@ internal class AccountPickerViewModelTest {
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
 
     private fun buildViewModel(
-        state: AccountPickerState,
-        isInstantDebits: Boolean = false,
+        state: AccountPickerState
     ) = AccountPickerViewModel(
         initialState = state,
         eventTracker = eventTracker,
@@ -68,7 +65,6 @@ internal class AccountPickerViewModelTest {
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
         presentSheet = mock(),
-        isLinkWithStripe = { isInstantDebits },
     )
 
     @Test
@@ -210,36 +206,6 @@ internal class AccountPickerViewModelTest {
                 "is_single_account" to "false",
             )
         )
-    }
-
-    @Test
-    fun `init - shows correct data access callout for Instant Debits`() = runTest {
-        givenManifestReturns(
-            sessionManifest().copy(
-                singleAccount = false,
-                activeAuthSession = authorizationSession()
-            )
-        )
-
-        givenPollAccountsReturns(
-            partnerAccountList().copy(
-                data = listOf(
-                    partnerAccount().copy(id = "unelectable", _allowSelection = false),
-                    partnerAccount().copy(id = "selectable_1"),
-                    partnerAccount().copy(id = "selectable_2")
-                )
-            )
-        )
-
-        val viewModel = buildViewModel(
-            state = AccountPickerState(),
-            isInstantDebits = true,
-        )
-
-        viewModel.stateFlow.test {
-            val payload = awaitItem().payload()
-            assertThat(payload!!.dataAccess).isInstanceOf(InstantDebits::class.java)
-        }
     }
 
     @Test

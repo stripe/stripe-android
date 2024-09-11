@@ -40,15 +40,6 @@
     </plurals>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="stripe_data_accessible_callout_stripe">Stripe can access %1$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_business">%1$s can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_no_business">This business can access %1$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_type_accountdetails">account details</string>
-    <string name="stripe_data_accessible_type_balances">balances</string>
-    <string name="stripe_data_accessible_type_transactions">transactions</string>
-    <string name="stripe_data_accessible_type_ownership">account ownership details</string>
-    <string name="stripe_data_sharing_callout_link_business">Your login and financial details are never shared with %1$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_sharing_callout_link_no_business">Your login and financial details are never shared with this business. <annotation clickable="learn_more">Learn more</annotation></string>
     <string name="stripe_success_pane_title">Success</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
     <string name="stripe_success_pane_desc_microdeposits_no_account">You can expect micro-deposits to your account in 1–2 days and an email with further instructions.</string>

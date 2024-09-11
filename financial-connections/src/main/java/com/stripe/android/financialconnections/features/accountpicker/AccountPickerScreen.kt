@@ -24,17 +24,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.DataAccessText
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
@@ -50,7 +49,10 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.uicore.utils.collectAsState
@@ -160,7 +162,7 @@ private fun AccountPickerLoaded(
         footer = {
             displayablePayload?.let {
                 Footer(
-                    dataAccess = it.dataAccess,
+                    dataAccessDisclaimer = it.dataAccessDisclaimer,
                     onClickableTextClick = onClickableTextClick,
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
@@ -233,7 +235,7 @@ private fun LazyListScope.accountPickerContent(
 
 @Composable
 private fun Footer(
-    dataAccess: AccountPickerState.DataAccess,
+    dataAccessDisclaimer: String?,
     onClickableTextClick: (String) -> Unit,
     submitEnabled: Boolean,
     submitLoading: Boolean,
@@ -241,11 +243,13 @@ private fun Footer(
     selectedIds: Set<String>
 ) {
     Column {
-        DataAccessText(
-            dataAccess = dataAccess,
-            onLearnMoreClick = { onClickableTextClick(DATA.value) },
-        )
-        Spacer(modifier = Modifier.size(12.dp))
+        if (dataAccessDisclaimer != null) {
+            DataAccessDisclaimerText(
+                text = dataAccessDisclaimer,
+                onLearnMoreClick = onClickableTextClick,
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+        }
         FinancialConnectionsButton(
             enabled = submitEnabled,
             loading = submitLoading,
@@ -262,6 +266,22 @@ private fun Footer(
             )
         }
     }
+}
+
+@Composable
+private fun DataAccessDisclaimerText(
+    text: String,
+    onLearnMoreClick: (String) -> Unit
+) {
+    AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
+        text = TextResource.Text(fromHtml(text)),
+        onClickableTextClick = onLearnMoreClick,
+        defaultStyle = FinancialConnectionsTheme.typography.labelSmall.copy(
+            color = FinancialConnectionsTheme.colors.textDefault,
+            textAlign = TextAlign.Center,
+        ),
+    )
 }
 
 @Preview(
