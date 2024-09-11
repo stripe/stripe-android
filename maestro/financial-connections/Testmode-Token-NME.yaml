@@ -5,7 +5,6 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - edge
   - testmode-token
 ---
 - startRecording: ${'/tmp/test_results/testmode-nme-' + new Date().getTime()}
