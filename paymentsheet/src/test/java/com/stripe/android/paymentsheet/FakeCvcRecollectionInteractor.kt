@@ -30,4 +30,6 @@ internal object FakeCvcRecollectionInteractor : CvcRecollectionInteractor {
     fun updateCompletionState(state: CvcCompletionState) {
         _cvcCompletionState.value = state
     }
+
+    fun subscriptionCount(): StateFlow<Int> = _cvcCompletionState.subscriptionCount
 }

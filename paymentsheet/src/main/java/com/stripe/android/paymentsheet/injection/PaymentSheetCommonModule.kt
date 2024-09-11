@@ -35,7 +35,10 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpd
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -193,5 +196,11 @@ internal abstract class PaymentSheetCommonModule {
             publishableKeyProvider = { paymentConfiguration.get().publishableKey },
             networkTypeProvider = NetworkTypeDetector(context)::invoke,
         )
+
+        @Provides
+        @Singleton
+        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractorFactory {
+            return DefaultCvcRecollectionInteractor.Factory()
+        }
     }
 }

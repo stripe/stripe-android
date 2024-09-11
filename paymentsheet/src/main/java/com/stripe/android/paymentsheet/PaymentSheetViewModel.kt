@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -84,7 +85,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
-    internal val cvcRecollectionHandler: CvcRecollectionHandler
+    internal val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractorFactory
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -427,7 +429,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         cvcRecollectionHandler.launch(
             paymentSelection = selection.value
         ) { cvcRecollectionData ->
-            val interactor = DefaultCvcRecollectionInteractor(
+            val interactor = cvcRecollectionInteractorFactory.create(
                 args = Args(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,

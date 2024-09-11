@@ -44,4 +44,12 @@ internal class DefaultCvcRecollectionInteractor(
             )
         }
     }
+
+    internal class Factory : CvcRecollectionInteractorFactory {
+        override fun create(args: Any): CvcRecollectionInteractor {
+            val interactorArgs = (args as? Args)
+                ?: throw IllegalArgumentException("could not create DefaultCvcRecollectionInteractor args")
+            return DefaultCvcRecollectionInteractor(interactorArgs)
+        }
+    }
 }
