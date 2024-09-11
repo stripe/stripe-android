@@ -440,6 +440,7 @@ internal class DefaultFlowController @Inject internal constructor(
                                     cvc = result.cvc,
                                 )
                             )
+                            viewModel.paymentSelection = selection
                             confirmPaymentSelection(selection, state)
                         } ?: paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(

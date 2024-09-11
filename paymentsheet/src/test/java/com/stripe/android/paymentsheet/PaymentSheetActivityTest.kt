@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -19,6 +20,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -47,6 +49,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -783,6 +786,38 @@ internal class PaymentSheetActivityTest {
             composeTestRule
                 .onNodeWithText(errorMessage)
                 .assertExists()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun `CVC recollection adds CVC to PaymentMethodOptionsParams`() {
+        cvcRecollectionHandler.cvcRecollectionEnabled = true
+        cvcRecollectionHandler.requiresCVCRecollection = true
+        val viewModel = createViewModel(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            paymentMethods = PAYMENT_METHODS.take(1)
+        )
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity {
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
+
+            composeTestRule.waitUntilAtLeastOneExists(
+                hasText("Confirm your CVC")
+            )
+
+            composeTestRule.onNodeWithText("CVC").performTextInput("123")
+
+            viewModel.checkout()
+
+            (viewModel.selection.value as PaymentSelection.Saved).let {
+                (it.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card).let { card ->
+                    assertThat(card.cvc).isEqualTo("123")
+                }
+            }
         }
     }
 

@@ -2223,12 +2223,11 @@ internal class DefaultFlowControllerTest {
         shouldRecollectCvc: Boolean,
         configureFlowController: suspend (PaymentSheet.FlowController) -> Unit
     ) = runTest {
-        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
-
         val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
+        val cvc = "123"
         val launcher = mock<CvcRecollectionLauncher> {
             on { launch(any(), any(), any()) } doAnswer {
-                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
+                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed(cvc = cvc))
             }
         }
         val launcherFactory = mock<CvcRecollectionLauncherFactory> {
@@ -2242,13 +2241,14 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
+        val viewModel = createViewModel()
         val flowController = createFlowController(
             cvcRecollectionLauncherFactory = launcherFactory,
-            stripeIntent = stripeIntent
+            stripeIntent = stripeIntent,
+            viewModel = viewModel
         )
 
         verify(launcherFactory).create(any())
-
         configureFlowController(flowController)
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -2271,11 +2271,34 @@ internal class DefaultFlowControllerTest {
                 eq(PaymentSheet.Appearance()),
                 eq(false)
             )
+
+            enqueueConfirmAndVerifyPaymentSelection(cvc, viewModel)
         } else {
             verify(launcher, never()).launch(any(), any(), any())
         }
 
+        flowController.onPaymentResult(PaymentResult.Completed)
         verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+    }
+
+    private fun enqueueConfirmAndVerifyPaymentSelection(
+        cvc: String,
+        viewModel: FlowControllerViewModel
+    ) {
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(cvc = cvc)
+            )
+        )
+
+        verifyPaymentSelection(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedPaymentMethodOptions = (viewModel.paymentSelection as? PaymentSelection.Saved)
+                ?.paymentMethodOptionsParams
+        )
     }
 
     private fun createAndConfigureFlowControllerForDeferredIntent(
