@@ -1752,10 +1752,8 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append("123")
 
-            val expectedNetworks = PaymentMethodCreateParams.Card.Networks(preferred = null)
-
             val createCardParams = paymentMethodCreateParams?.card
-            assertThat(createCardParams?.networks).isEqualTo(expectedNetworks)
+            assertThat(createCardParams?.networks).isEqualTo(null)
         }
     }
 
