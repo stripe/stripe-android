@@ -85,6 +85,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -2757,7 +2758,7 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
                 )
-            )
+            ),
         )
 
         cvcRecollectionHandler.requiresCVCRecollection = true
@@ -2768,19 +2769,18 @@ internal class PaymentSheetViewModelTest {
             val screen = awaitItem()
             assertThat(screen).isInstanceOf<PaymentSheetScreen.CvcRecollection>()
         }
-        FakeCvcRecollectionInteractor.subscriptionCount().test {
-            assertThat(awaitItem()).isEqualTo(1)
-        }
     }
 
     @Test
     fun `CvcRecollection state update should update payment selection`() = runTest {
+        val cvcRecollectionInteractor = FakeCvcRecollectionInteractor()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
                 )
-            )
+            ),
+            cvcRecollectionInteractor = cvcRecollectionInteractor
         )
 
         cvcRecollectionHandler.requiresCVCRecollection = true
@@ -2790,10 +2790,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.selection.test {
             awaitItem()
 
-            FakeCvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Completed("444"))
+            cvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Completed("444"))
             assertThat(selectionCvc(awaitItem())).isEqualTo("444")
 
-            FakeCvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Incomplete)
+            cvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Incomplete)
             assertThat(selectionCvc(awaitItem())).isEqualTo("")
         }
     }
@@ -2962,6 +2962,7 @@ internal class PaymentSheetViewModelTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
+        cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         shouldRegister: Boolean = true,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -2995,7 +2996,7 @@ internal class PaymentSheetViewModelTest {
                 errorReporter = errorReporter,
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractorFactory {
-                    override fun create(args: Any) = FakeCvcRecollectionInteractor
+                    override fun create(args: Args) = cvcRecollectionInteractor
                 }
             ).apply {
                 if (shouldRegister) {

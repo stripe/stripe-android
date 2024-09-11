@@ -30,14 +30,14 @@ internal class PaymentSheetCvcRecollectionTest {
 
     @Test
     fun `top bar returns correct state`() = runTest {
-        val interactor = FakeCvcRecollectionInteractor
+        val interactor = FakeCvcRecollectionInteractor()
         PaymentSheetScreen.CvcRecollection(interactor)
             .topBarState().test {
                 val itemOne = awaitItem()
                 assertThat(itemOne?.showTestModeLabel).isEqualTo(interactor.viewState.value.isTestMode)
                 assertThat(itemOne?.isEditing).isTrue()
 
-                FakeCvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Completed("555"))
+                interactor.updateCompletionState(CvcCompletionState.Completed("555"))
 
                 val itemTwo = awaitItem()
                 assertThat(itemTwo?.showTestModeLabel).isEqualTo(interactor.viewState.value.isTestMode)

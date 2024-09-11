@@ -397,7 +397,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor)
+                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
@@ -457,7 +457,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor)
+                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
