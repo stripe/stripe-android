@@ -11,10 +11,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract.Companion.EXTRA_ARGS
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -22,13 +20,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 class CvcRecollectionContractTest {
 
-    private lateinit var contract: CvcRecollectionContract
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        contract = CvcRecollectionContract()
-    }
+    private val contract = CvcRecollectionContract()
 
     @Test
     fun testCreateIntent() {

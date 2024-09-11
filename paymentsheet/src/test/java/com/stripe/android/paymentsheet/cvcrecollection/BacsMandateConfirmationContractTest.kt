@@ -9,10 +9,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -20,13 +18,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 class BacsMandateConfirmationContractTest {
 
-    private lateinit var contract: BacsMandateConfirmationContract
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        contract = BacsMandateConfirmationContract()
-    }
+    private val contract = BacsMandateConfirmationContract()
 
     @Test
     fun testCreateIntent() {
