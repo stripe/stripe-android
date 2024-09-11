@@ -34,11 +34,10 @@ fun rememberCustomerSheet(
     }
 
     val rememberedCustomerAdapter by rememberUpdatedState(customerAdapter)
+    val rememberedCallback by rememberUpdatedState(callback)
 
     return remember(
         configuration,
-        customerAdapter,
-        callback,
     ) {
         CustomerSheet.getInstance(
             application = activity.application,
@@ -46,7 +45,7 @@ fun rememberCustomerSheet(
             activityResultRegistryOwner = activityResultRegistryOwner,
             configuration = configuration,
             customerAdapter = rememberedCustomerAdapter,
-            callback = callback,
+            callback = rememberedCallback,
             statusBarColor = { activity.window?.statusBarColor },
         )
     }
