@@ -34,6 +34,7 @@ internal interface EventReporter {
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
+        requireCvcRecollection: Boolean
     )
 
     /**

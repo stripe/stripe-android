@@ -25,11 +25,13 @@ import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -977,6 +979,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1029,6 +1032,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1889,6 +1893,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1914,6 +1919,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1939,6 +1945,98 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
+        )
+    }
+
+    @Test
+    fun `Emits correct event when CVC recollection is required`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = true
+        )
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "usd"
+                ),
+                requireCvcRecollection = true
+            )
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = true
+        )
+    }
+
+    @OptIn(ExperimentalCvcRecollectionApi::class)
+    @Test
+    fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
+        )
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "usd"
+                ),
+                requireCvcRecollection = false
+            )
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.PaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1994,6 +2092,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -2093,6 +2192,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkStore = linkStore,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
+            cvcRecollectionHandler = CvcRecollectionHandlerImpl()
         )
     }
 

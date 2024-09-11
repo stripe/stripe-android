@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
@@ -76,6 +77,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
+    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheetLoader {
 
     @Suppress("LongMethod")
@@ -587,6 +589,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
+                    state.paymentMethodMetadata.stripeIntent,
+                    initializationMode
+                )
             )
         }
     }
