@@ -1381,7 +1381,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_south_korea_market_underlying_pms": false,
                     "elements_enable_use_last_used_payment_method": false,
                     "elements_enable_write_allow_redisplay": false,
-                    "elements_luxe_qr_ui_on_web_enabled": false,
                     "elements_saved_payment_methods": true,
                     "elements_stop_move_focus_to_first_errored_field": true,
                     "elements_web_lpm_server_driven_ui": true,
