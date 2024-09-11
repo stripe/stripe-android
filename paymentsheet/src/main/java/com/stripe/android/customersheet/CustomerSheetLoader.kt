@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -178,23 +179,12 @@ internal class DefaultCustomerSheetLoader(
             Pair(paymentMethods, selection)
         }.fold(
             onSuccess = { result ->
-                var paymentMethods = result.first
                 val paymentSelection = result.second
 
-                paymentSelection?.apply {
-                    val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
-                    // The order of the payment methods should be selected PM and then any additional PMs
-                    // The carousel always starts with Add and Google Pay (if enabled)
-                    paymentMethods = paymentMethods.sortedWith { left, right ->
-                        // We only care to move the selected payment method, all others stay in the
-                        // order they were before
-                        when {
-                            left.id == selectedPaymentMethod?.id -> -1
-                            right.id == selectedPaymentMethod?.id -> 1
-                            else -> 0
-                        }
-                    }
-                }
+                val sortedPaymentMethods = sortPaymentMethods(
+                    paymentMethods = result.first,
+                    selection = paymentSelection as? PaymentSelection.Saved
+                )
 
                 val elementsSession = elementsSessionWithMetadata.elementsSession
                 val metadata = elementsSessionWithMetadata.metadata
@@ -208,7 +198,7 @@ internal class DefaultCustomerSheetLoader(
                         config = configuration,
                         paymentMethodMetadata = metadata,
                         supportedPaymentMethods = validSupportedPaymentMethods,
-                        customerPaymentMethods = paymentMethods,
+                        customerPaymentMethods = sortedPaymentMethods,
                         paymentSelection = paymentSelection,
                         validationError = elementsSession.stripeIntent.validate(),
                     )

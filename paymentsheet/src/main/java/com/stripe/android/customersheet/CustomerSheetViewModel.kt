@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
@@ -25,6 +26,7 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelComponent
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
+import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -914,6 +916,8 @@ internal class CustomerSheetViewModel(
                         isProcessing = false,
                     )
                 }
+            }.onSuccess {
+                refreshAndUpdatePaymentMethods(paymentMethod)
             }
     }
 
@@ -938,17 +942,6 @@ internal class CustomerSheetViewModel(
 
         return when (val result = intentConfirmationHandler.awaitIntentResult()) {
             is PaymentConfirmationResult.Succeeded -> {
-                safeUpdateSelectPaymentMethodState { viewState ->
-                    viewState.copy(
-                        savedPaymentMethods = listOf(paymentMethod) + viewState.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(paymentMethod),
-                        primaryButtonVisible = true,
-                        primaryButtonLabel = resources.getString(
-                            R.string.stripe_paymentsheet_confirm
-                        ),
-                    )
-                }
-                onBackPressed()
                 Result.success(Unit)
             }
             is PaymentConfirmationResult.Failed -> {
@@ -981,17 +974,7 @@ internal class CustomerSheetViewModel(
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
                 )
-                safeUpdateSelectPaymentMethodState {
-                    it.copy(
-                        savedPaymentMethods = listOf(attachedPaymentMethod) + it.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(attachedPaymentMethod),
-                        primaryButtonVisible = true,
-                        primaryButtonLabel = resources.getString(
-                            R.string.stripe_paymentsheet_confirm
-                        ),
-                    )
-                }
-                onBackPressed()
+                refreshAndUpdatePaymentMethods(attachedPaymentMethod)
             }.onFailure { cause, displayMessage ->
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
@@ -1008,6 +991,34 @@ internal class CustomerSheetViewModel(
                     )
                 }
             }
+    }
+
+    private suspend fun refreshAndUpdatePaymentMethods(
+        newPaymentMethod: PaymentMethod
+    ) {
+        awaitCustomerAdapter().retrievePaymentMethods().onSuccess { paymentMethods ->
+            val selection = PaymentSelection.Saved(newPaymentMethod)
+
+            safeUpdateSelectPaymentMethodState {
+                it.copy(
+                    savedPaymentMethods = sortPaymentMethods(paymentMethods, selection),
+                    paymentSelection = PaymentSelection.Saved(newPaymentMethod),
+                    primaryButtonVisible = true,
+                    primaryButtonLabel = resources.getString(
+                        R.string.stripe_paymentsheet_confirm
+                    ),
+                )
+            }
+
+            onBackPressed()
+        }.onFailure { exception, _ ->
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE,
+                StripeException.create(exception),
+            )
+
+            onDismissed()
+        }
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {

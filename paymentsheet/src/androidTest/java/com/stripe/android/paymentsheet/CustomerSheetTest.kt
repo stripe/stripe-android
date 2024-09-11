@@ -61,19 +61,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = false)
 
         context.presentCustomerSheet()
 
@@ -87,6 +75,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
+        networkRule.enqueueFetchRequests(withCards = true)
         networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
@@ -123,19 +112,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = true)
 
         context.presentCustomerSheet()
 
@@ -173,19 +150,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = true)
 
         context.presentCustomerSheet()
 
@@ -232,19 +197,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = false)
 
         context.presentCustomerSheet()
 
@@ -262,6 +215,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
+        networkRule.enqueueFetchRequests(withCards = true)
         networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
@@ -286,19 +240,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = false)
 
         context.presentCustomerSheet()
 
@@ -320,6 +262,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
+        networkRule.enqueueFetchRequests(withCards = true)
         networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
@@ -341,19 +284,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            cardPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            retrievePaymentMethodsRequest(),
-            usBankAccountPaymentMethodsParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.enqueueFetchRequests(withCards = false)
 
         context.presentCustomerSheet()
 
@@ -387,6 +318,28 @@ internal class CustomerSheetTest {
         page.waitForText("Your card's security code is incorrect.")
 
         context.markTestSucceeded()
+    }
+
+    private fun NetworkRule.enqueueFetchRequests(withCards: Boolean) {
+        enqueue(
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
+        ) { response ->
+            val file = if (withCards) {
+                "payment-methods-get-success.json"
+            } else {
+                "payment-methods-get-success-empty.json"
+            }
+
+            response.testBodyFromFile(file)
+        }
+
+        enqueue(
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
     }
 
     private fun NetworkRule.enqueueAttachRequests(customerSheetTestType: CustomerSheetTestType) {

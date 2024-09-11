@@ -96,6 +96,9 @@ interface ErrorReporter {
         CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
             eventName = "elements.customer_sheet.payment_methods.load_failure"
         ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE(
+            eventName = "elements.customer_sheet.payment_methods.refresh_failure"
+        ),
         CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
             eventName = "elements.customer_sheet.customer_adapter.not_found"
         ),

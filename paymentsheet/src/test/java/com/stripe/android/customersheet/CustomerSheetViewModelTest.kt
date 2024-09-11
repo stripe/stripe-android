@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -43,6 +44,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePr
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -747,21 +749,10 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `Payment method is attached to customer with setup intent`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
-            isGooglePayAvailable = false,
-            customerAdapter = FakeCustomerAdapter(
-                canCreateSetupIntents = true,
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
+    fun `After attaching payment method with setup intent, methods are refreshed`() = runTest(testDispatcher) {
+        val viewModel = retrieveViewModelForAttaching(
+            attachWithSetupIntent = true,
+            shouldFailRefresh = false,
         )
 
         viewModel.handleViewAction(
@@ -785,27 +776,36 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `Payment method is attached to customer without setup intent`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
-            isGooglePayAvailable = false,
-            customerAdapter = FakeCustomerAdapter(
-                canCreateSetupIntents = false,
-                onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
-                },
-                onSetupIntentClientSecretForCustomerAttach = null,
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            ),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
+    fun `if methods fail to refresh after attaching with setup intent, should dismiss and report event`() =
+        runTest(testDispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                errorReporter = errorReporter,
+                shouldFailRefresh = true,
             )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+            }
+
+            viewModel.result.test {
+                assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
+            }
+
+            assertThat(errorReporter.getLoggedErrors())
+                .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
+        }
+
+    @Test
+    fun `After attaching payment method without setup intent, methods are refreshed`() = runTest(testDispatcher) {
+        val viewModel = retrieveViewModelForAttaching(
+            attachWithSetupIntent = false,
+            shouldFailRefresh = false,
         )
 
         viewModel.viewState.test {
@@ -821,6 +821,38 @@ class CustomerSheetViewModelTest {
             assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
         }
     }
+
+    @Test
+    fun `if methods fail to refresh after attaching without setup intent, should dismiss and report event`() =
+        runTest(testDispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = false,
+                errorReporter = errorReporter,
+                shouldFailRefresh = true,
+            )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+            }
+
+            viewModel.result.test {
+                assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
+            }
+
+            assertThat(errorReporter.getLoggedErrors())
+                .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
+        }
 
     @Test
     fun `When payment method cannot be attached with setup intent, error message is visible`() = runTest(testDispatcher) {
@@ -3212,6 +3244,46 @@ class CustomerSheetViewModelTest {
         )
     }
 
+    private fun retrieveViewModelForAttaching(
+        attachWithSetupIntent: Boolean,
+        shouldFailRefresh: Boolean,
+        errorReporter: ErrorReporter = FakeErrorReporter()
+    ): CustomerSheetViewModel {
+        return createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            errorReporter = errorReporter,
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = attachWithSetupIntent,
+                paymentMethods = if (shouldFailRefresh) {
+                    CustomerAdapter.Result.failure(
+                        cause = IllegalStateException("An error occurred!"),
+                        displayMessage = null
+                    )
+                } else {
+                    CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
+                },
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                },
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+        ).apply {
+            handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+        }
+    }
+
     private suspend fun retrieveViewModelForUpdating(
         savedPaymentMethods: List<PaymentMethod>,
         originalSelection: PaymentSelection.Saved,
@@ -3252,7 +3324,7 @@ class CustomerSheetViewModelTest {
                 paymentMethods = CustomerAdapter.Result.Success(savedPaymentMethods),
                 onDetachPaymentMethod = { _ ->
                     CustomerAdapter.Result.Success(paymentMethodToRemove)
-                }
+                },
             ),
             editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
                 workContext = testDispatcher
