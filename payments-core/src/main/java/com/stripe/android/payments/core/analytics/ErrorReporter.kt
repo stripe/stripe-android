@@ -96,6 +96,9 @@ interface ErrorReporter {
         CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
             eventName = "elements.customer_sheet.payment_methods.load_failure"
         ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE(
+            eventName = "elements.customer_sheet.payment_methods.refresh_failure"
+        ),
         CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
             eventName = "elements.customer_sheet.customer_adapter.not_found"
         ),
@@ -223,6 +226,9 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_SUCCESS(
             eventName = "link.log_out.success"
+        ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS(
+            eventName = "elements.customer_sheet.payment_methods.refresh_success"
         ),
         EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
             eventName = "paymentsheet.external_payment_method.launch_success"

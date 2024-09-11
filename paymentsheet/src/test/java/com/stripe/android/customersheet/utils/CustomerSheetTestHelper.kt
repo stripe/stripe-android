@@ -25,6 +25,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -88,6 +89,7 @@ internal object CustomerSheetTestHelper {
         ),
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory =
             createModifiableEditPaymentMethodViewInteractorFactory(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
@@ -135,7 +137,7 @@ internal object CustomerSheetTestHelper {
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
-            errorReporter = FakeErrorReporter(),
+            errorReporter = errorReporter,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
