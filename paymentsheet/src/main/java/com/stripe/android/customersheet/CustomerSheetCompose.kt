@@ -33,8 +33,8 @@ fun rememberCustomerSheet(
         "CustomerSheet must be created in the context of an Activity"
     }
 
-    val rememberedCustomerAdapter by rememberUpdatedState(customerAdapter)
-    val rememberedCallback by rememberUpdatedState(callback)
+    val currentCustomerAdapter by rememberUpdatedState(customerAdapter)
+    val currentCallback by rememberUpdatedState(callback)
 
     return remember(
         configuration,
@@ -44,8 +44,8 @@ fun rememberCustomerSheet(
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             configuration = configuration,
-            customerAdapter = rememberedCustomerAdapter,
-            callback = rememberedCallback,
+            customerAdapter = currentCustomerAdapter,
+            callback = currentCallback,
             statusBarColor = { activity.window?.statusBarColor },
         )
     }
