@@ -2779,6 +2779,31 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `CvcRecollection state update should update payment selection`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
+                )
+            )
+        )
+
+        cvcRecollectionHandler.requiresCVCRecollection = true
+        cvcRecollectionHandler.cvcRecollectionEnabled = true
+        viewModel.checkout()
+
+        viewModel.selection.test {
+            awaitItem()
+
+            FakeCvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Completed("444"))
+            assertThat(selectionCvc(awaitItem())).isEqualTo("444")
+
+            FakeCvcRecollectionInteractor.updateCompletionState(CvcCompletionState.Incomplete)
+            assertThat(selectionCvc(awaitItem())).isEqualTo("")
+        }
+    }
+
+    @Test
     fun `CvcRecollection screen should not be displayed on checkout when required but in horizontal mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -3074,6 +3099,12 @@ internal class PaymentSheetViewModelTest {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
         )
+    }
+
+    private fun selectionCvc(selection: PaymentSelection?): String? {
+        val saved = (selection as? PaymentSelection.Saved) ?: return null
+        val card = (saved.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card) ?: return null
+        return card.cvc
     }
 
     private fun PaymentSheetViewModel.capturePaymentResultListener(): ActivityResultCallback<InternalPaymentResult> {
