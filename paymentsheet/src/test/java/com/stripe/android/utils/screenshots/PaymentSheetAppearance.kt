@@ -10,20 +10,6 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
 
     DefaultAppearance(appearance = PaymentSheet.Appearance()),
 
-    CustomAppearance(
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(
-                primary = Color.RED,
-            ),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(
-                primary = Color.RED,
-            ),
-            shapes = PaymentSheet.Shapes.default.copy(
-                cornerRadiusDp = 8f,
-            ),
-        ),
-    ),
-
     CrazyAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors(
