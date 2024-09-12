@@ -14,8 +14,8 @@ emerge {
 
     vcs {
         gitHub {
-            repoOwner.set("EmergeTools")
-            repoName.set"stripe-android")
+            repoOwner.set("stripe")
+            repoName.set("stripe-android")
         }
     }
 }
