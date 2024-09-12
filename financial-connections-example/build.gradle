@@ -8,7 +8,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 def testEnvironment = System.getenv("test_environment") ?: "production"
 
 emerge {
-    apiToken.set(System.getenv("EMERGE_API_KEY"))
+    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
 
     size {
         tag.set(System.getenv("EMERGE_TAG"))

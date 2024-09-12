@@ -91,5 +91,5 @@ jobs:
       - name: Upload release bundle to Emerge
         run: ./gradlew :identity-example:emergeUploadTheme1ReleaseAab
         env:
-          EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
           EMERGE_TAG: pull_request

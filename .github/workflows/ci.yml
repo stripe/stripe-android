@@ -51,7 +51,7 @@ jobs:
       - name: Upload release bundle to Emerge
         run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
         env:
-          EMERGE_API_KEY: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
           EMERGE_TAG: pull_request
 
   check-for-untranslated-strings:
