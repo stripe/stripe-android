@@ -38,7 +38,7 @@ class DeferredSetupIntentJsonParser(
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
-            isLiveMode = apiKey.contains("live"),
+            isLiveMode = !apiKey.contains("test"),
             nextActionData = null,
             paymentMethodId = null,
             created = timeProvider(),
