@@ -2,9 +2,7 @@ package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.stripe.android.utils.rememberActivity
 
@@ -33,19 +31,18 @@ fun rememberCustomerSheet(
         "CustomerSheet must be created in the context of an Activity"
     }
 
-    val currentCustomerAdapter by rememberUpdatedState(customerAdapter)
-    val currentCallback by rememberUpdatedState(callback)
-
     return remember(
         configuration,
+        customerAdapter,
+        callback,
     ) {
         CustomerSheet.getInstance(
             application = activity.application,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             configuration = configuration,
-            customerAdapter = currentCustomerAdapter,
-            callback = currentCallback,
+            customerAdapter = customerAdapter,
+            callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
         )
     }
