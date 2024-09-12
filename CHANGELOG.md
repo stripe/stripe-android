@@ -2,9 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-### CustomerSheet
-* [BREAKING][9170](https://github.com/stripe/stripe-android/pull/9170) Updated the experimental `CustomerSheet` API for better process death handling.
-
 ## 20.49.0 - 2024-09-09
 
 * [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.

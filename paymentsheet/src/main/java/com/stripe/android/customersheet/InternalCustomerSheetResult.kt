@@ -27,7 +27,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
             paymentOptionFactory: PaymentOptionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Selected(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory)
             )
         }
     }
@@ -43,7 +43,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
             paymentOptionFactory: PaymentOptionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Canceled(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory)
             )
         }
     }
