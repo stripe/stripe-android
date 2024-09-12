@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.50.0 - 2024-09-12
+
+### PaymentSheet
+* [FIXED][9236](https://github.com/stripe/stripe-android/pull/9236 - Fixed an issue where merchant-preferred networks configured for CardInput views were ignored.
+
 ### CustomerSheet
 * [BREAKING][9170](https://github.com/stripe/stripe-android/pull/9170) Updated the experimental `CustomerSheet` API for better process death handling.
 
