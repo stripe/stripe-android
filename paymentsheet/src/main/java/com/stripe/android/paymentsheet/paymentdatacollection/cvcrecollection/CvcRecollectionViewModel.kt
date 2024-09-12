@@ -22,7 +22,7 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
             lastFour = args.lastFour,
             isTestMode = args.isTestMode,
             cvcState = CvcState(
-                cvc = args.cvc ?: "",
+                cvc = args.cvc,
                 cardBrand = args.cardBrand
             ),
             isEnabled = true,
