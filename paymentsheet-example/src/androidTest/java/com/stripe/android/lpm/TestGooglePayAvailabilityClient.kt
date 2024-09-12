@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
     "Only testable on devices with a Google Play account & payment methods " +
         "available. Run these before releasing or making changes to Google Pay flow"
 )
-internal class TestGooglePay : BasePlaygroundTest() {
+internal class TestGooglePayAvailabilityClient : BasePlaygroundTest() {
     @Test
     fun testUnitedStates() {
         testDriver.confirmWithGooglePay(Country.US)

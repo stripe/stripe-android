@@ -49,6 +49,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         )
     )
 
+    fun markTestSucceeded()
+
     class WithPaymentSheet(
         private val context: PaymentSheetTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
@@ -59,6 +61,10 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                     configuration = configuration,
                 )
             }
+        }
+
+        override fun markTestSucceeded() {
+            context.markTestSucceeded()
         }
     }
 
@@ -77,6 +83,10 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                     },
                 )
             }
+        }
+
+        override fun markTestSucceeded() {
+            context.markTestSucceeded()
         }
     }
 }
