@@ -404,6 +404,51 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Test deferred livemode=true when publishable key does not have test or live for setup mode`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Setup(
+                        currency = "usd",
+                        setupFutureUsage = StripeIntent.Usage.OffSession,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_foobar",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            SetupIntent(
+                id = "elements_session_1t6ejApXCS5",
+                clientSecret = null,
+                cancellationReason = null,
+                description = null,
+                nextActionData = null,
+                paymentMethodId = null,
+                paymentMethod = null,
+                status = null,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = true,
+                usage = StripeIntent.Usage.OffSession,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
+    }
+
+    @Test
     fun `Test deferred SetupIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
