@@ -120,7 +120,7 @@ internal class CardBrandViewTest {
             assertThat(cardBrandView.cardParamsNetworks()?.preferred)
                 .isEqualTo(CardBrand.MasterCard.code)
         }
-    
+
     private fun runCardBrandViewTest(
         locale: Locale = Locale.US,
         block: TestContext.() -> Unit,
