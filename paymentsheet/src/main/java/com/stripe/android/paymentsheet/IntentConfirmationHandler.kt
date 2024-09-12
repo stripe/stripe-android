@@ -472,7 +472,7 @@ internal class IntentConfirmationHandler(
             PaymentConfirmationResult.Failed(
                 cause = cause,
                 message = cause.stripeErrorMessage(),
-                type = PaymentConfirmationErrorType.ExternalPaymentMethod,
+                type = PaymentConfirmationErrorType.Internal,
             )
         }
 

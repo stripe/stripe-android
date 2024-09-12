@@ -795,6 +795,30 @@ class IntentConfirmationHandlerTest {
     }
 
     @Test
+    fun `On init with 'SavedStateHandle' with incorrect option, error should be internal`() = runTest {
+        val savedStateHandle = SavedStateHandle().apply {
+            set("AwaitingPaymentResult", true)
+            set("IntentConfirmationArguments", DEFAULT_ARGUMENTS.copy(confirmationOption = EXTERNAL_PAYMENT_METHOD))
+        }
+
+        val intentConfirmationHandler = createIntentConfirmationHandler(
+            savedStateHandle = savedStateHandle,
+        )
+
+        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+
+        intentConfirmationHandler.registerWithCallbacks(
+            paymentResultCallbackHandler = paymentResultCallbackHandler
+        )
+
+        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+
+        val failedResult = intentConfirmationHandler.awaitIntentResult().asFailed()
+
+        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+    }
+
+    @Test
     fun `On init with 'SavedStateHandle', should receive result through 'awaitIntentResult'`() = runTest {
         val savedStateHandle = SavedStateHandle().apply {
             set("AwaitingPaymentResult", true)
