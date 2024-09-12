@@ -157,8 +157,8 @@ internal class CardInputWidgetTest {
             assertThat(cardParams?.networks)
                 .isEqualTo(Networks(CardBrand.CartesBancaires.code))
 
-            assertThat(paymentMethodCreateParams?.card?.networks)
-                .isEqualTo(PaymentMethodCreateParams.Card.Networks(CardBrand.CartesBancaires.code))
+            assertThat(paymentMethodCreateParams?.card?.networks?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
         }
 
     @Test

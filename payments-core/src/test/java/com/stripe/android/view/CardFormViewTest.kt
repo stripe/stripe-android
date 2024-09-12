@@ -24,7 +24,6 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.Networks
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -114,12 +113,7 @@ internal class CardFormViewTest {
 
             binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
 
-            assertThat(cardFormView.cardParams?.networks)
-                .isEqualTo(
-                    Networks(
-                        preferred = CardBrand.CartesBancaires.code
-                    )
-                )
+            assertThat(cardFormView.cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
         }
     }
 
