@@ -1,8 +1,24 @@
 apply from: configs.androidApplication
 
+apply plugin: 'com.emergetools.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 assemble.dependsOn('lint')
+
+emerge {
+    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
+
+    size {
+        tag.set(System.getenv("EMERGE_TAG"))
+    }
+
+    vcs {
+        gitHub {
+            repoOwner.set("stripe")
+            repoName.set("stripe-android")
+        }
+    }
+}
 
 android {
     defaultConfig {
