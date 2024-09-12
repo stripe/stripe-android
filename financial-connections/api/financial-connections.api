@@ -481,17 +481,6 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public final fun getLambda-9$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$MerchantDataAccessTextKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$MerchantDataAccessTextKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function3;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -789,6 +778,14 @@ public final class com/stripe/android/financialconnections/model/AccountHolder$T
 
 public final class com/stripe/android/financialconnections/model/AccountHolder$Type$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/financialconnections/model/AccountPickerPane$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/AccountPickerPane;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/AccountPickerPane;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/financialconnections/model/AddNewAccount$Creator : android/os/Parcelable$Creator {

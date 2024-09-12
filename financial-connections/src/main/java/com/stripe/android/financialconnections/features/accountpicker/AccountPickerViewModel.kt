@@ -27,7 +27,6 @@ import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -117,7 +116,9 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     )
                 )
             }
+
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
+            val dataAccessDisclaimer = sync.text?.accountPicker?.dataAccessNotice
 
             AccountPickerState.Payload(
                 // note that this uses ?? instead of ||, we do NOT want to skip account selection
@@ -130,11 +131,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
                 dataAccessNotice = dataAccessNotice,
-                merchantDataAccess = MerchantDataAccessModel(
-                    businessName = manifest.businessName,
-                    permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false
-                ),
+                dataAccessDisclaimer = dataAccessDisclaimer,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -405,9 +402,9 @@ internal data class AccountPickerState(
     data class Payload(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
+        val dataAccessDisclaimer: String?,
         val dataAccessNotice: DataAccessNotice?,
         val selectionMode: SelectionMode,
-        val merchantDataAccess: MerchantDataAccessModel,
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
