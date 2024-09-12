@@ -191,7 +191,8 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            assertThat(selectState.primaryButtonLabel).isEqualTo("Confirm")
+            assertThat(selectState.primaryButtonLabel)
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
         }
     }
 
@@ -324,7 +325,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonEnabled)
                 .isTrue()
             assertThat(viewState.primaryButtonVisible)
@@ -340,7 +341,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonVisible)
                 .isFalse()
 
@@ -352,7 +353,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonEnabled)
                 .isTrue()
             assertThat(viewState.primaryButtonVisible)
@@ -579,6 +580,8 @@ class CustomerSheetViewModelTest {
                 )
             )
 
+            // Briefly show the payment method removed then transition
+            awaitViewState<SelectPaymentMethod>()
             val addPaymentMethodViewState = awaitViewState<AddPaymentMethod>()
 
             assertThat(addPaymentMethodViewState.isFirstPaymentMethod).isTrue()
@@ -2823,12 +2826,7 @@ class CustomerSheetViewModelTest {
 
                 val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
 
-                assertThat(selectPaymentMethodState.cbcEligibility)
-                    .isEqualTo(
-                        CardBrandChoiceEligibility.Eligible(
-                            preferredNetworks = listOf(CardBrand.CartesBancaires)
-                        )
-                    )
+                assertThat(selectPaymentMethodState.isCbcEligible).isTrue()
             }
         }
 
