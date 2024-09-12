@@ -25,15 +25,10 @@ internal class MandateHandler(
     init {
         coroutineScope.launch {
             selection.collect { selection ->
-                val mandateText = if (selection is PaymentSelection.New.USBankAccount) {
-                    // Keep whatever we already show
-                    _mandateText.value?.text
-                } else {
-                    selection?.mandateText(
-                        merchantName = merchantDisplayName,
-                        isSetupFlow = isSetupFlowProvider(),
-                    )
-                }
+                val mandateText = selection?.mandateText(
+                    merchantName = merchantDisplayName,
+                    isSetupFlow = isSetupFlowProvider(),
+                )
 
                 val showAbove = (selection as? PaymentSelection.Saved?)?.showMandateAbovePrimaryButton == true
                 updateMandateText(mandateText = mandateText, showAbove = showAbove)

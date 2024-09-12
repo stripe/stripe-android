@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.strings.transformations.Replace
 import com.stripe.android.paymentsheet.R
@@ -10,7 +11,34 @@ import com.stripe.android.paymentsheet.R
  */
 internal object USBankAccountTextBuilder {
 
-    fun getContinueMandateText(
+    fun mandateText(
+        merchantName: String,
+        isVerifyingMicrodeposits: Boolean,
+        isSaveForFutureUseSelected: Boolean,
+        isInstantDebits: Boolean,
+        isSetupFlow: Boolean,
+    ): ResolvableString {
+        val mandateText = getContinueMandateText(
+            merchantName = merchantName,
+            isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+            isInstantDebits = isInstantDebits,
+            isSetupFlow = isSetupFlow,
+        )
+
+        val microdepositsText = if (isVerifyingMicrodeposits) {
+            resolvableString(R.string.stripe_paymentsheet_microdeposit, merchantName)
+        } else {
+            null
+        }
+
+        return if (microdepositsText != null) {
+            mandateText + " ".resolvableString + microdepositsText
+        } else {
+            mandateText
+        }
+    }
+
+    private fun getContinueMandateText(
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
