@@ -287,6 +287,9 @@ public abstract interface annotation class com/stripe/android/paymentsheet/Delic
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalCvcRecollectionApi : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentMethodLayoutApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
 }
 
@@ -1079,6 +1082,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigurat
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout : java/lang/Enum {
+	public static final field Horizontal Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
+	public static final field Vertical Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButton : android/os/Parcelable {
