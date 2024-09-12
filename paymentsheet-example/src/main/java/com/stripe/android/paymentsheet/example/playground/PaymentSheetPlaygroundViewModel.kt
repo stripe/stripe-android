@@ -31,13 +31,11 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
@@ -65,7 +63,6 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-    val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
 
     private val baseUrl: String
         get() {
@@ -87,7 +84,6 @@ internal class PaymentSheetPlaygroundViewModel(
         state.value = null
         flowControllerState.value = null
         customerSheetState.value = null
-        customerAdapter.value = null
 
         if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
             prepareCheckout(playgroundSettings)
@@ -153,7 +149,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private fun prepareCustomer(
         playgroundSettings: PlaygroundSettings
     ) {
@@ -162,22 +157,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
             snapshot.saveToSharedPreferences(getApplication())
 
-            val adapter = CustomerAdapter.create(
-                context = getApplication(),
-                customerEphemeralKeyProvider = {
-                    fetchEphemeralKey(snapshot)
-                },
-                setupIntentClientSecretProvider = if (
-                    snapshot[CustomerSheetPaymentMethodModeDefinition] == PaymentMethodMode.SetupIntent
-                ) {
-                    { customerId -> createSetupIntentClientSecret(snapshot, customerId) }
-                } else {
-                    null
-                }
-            )
-
             customerSheetState.value = CustomerSheetState()
-            customerAdapter.value = adapter
             state.value = PlaygroundState.Customer(
                 snapshot = snapshot,
                 endpoint = settings.playgroundBackendUrl,
@@ -185,14 +165,33 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    fun createCustomerAdapter(
+        playgroundState: PlaygroundState?,
+    ): CustomerAdapter {
+        val customerState = playgroundState?.asCustomerState()
+
+        return CustomerAdapter.create(
+            context = getApplication(),
+            customerEphemeralKeyProvider = {
+                customerState?.let { state ->
+                    fetchEphemeralKey(state.customerEphemeralKeyRequest(), state.isNewCustomer)
+                } ?: throw IllegalStateException("Cannot fetch an ephemeral key!")
+            },
+            setupIntentClientSecretProvider = if (customerState?.inSetupMode == true) {
+                { customerId -> createSetupIntentClientSecret(customerId, customerState.countryCode) }
+            } else {
+                null
+            }
+        )
+    }
+
     @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchEphemeralKey(
-        snapshot: PlaygroundSettings.Snapshot
+        request: CustomerEphemeralKeyRequest,
+        isNewCustomer: Boolean,
     ): CustomerAdapter.Result<CustomerEphemeralKey> {
-        val requestBody = snapshot.customerEphemeralKeyRequest()
-
         val apiResponse = Fuel.post(baseUrl + "customer_ephemeral_key")
-            .jsonBody(Json.encodeToString(CustomerEphemeralKeyRequest.serializer(), requestBody))
+            .jsonBody(Json.encodeToString(CustomerEphemeralKeyRequest.serializer(), request))
             .suspendable()
             .awaitModel(CustomerEphemeralKeyResponse.serializer())
 
@@ -215,7 +214,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     response.publishableKey
                 )
 
-                if (snapshot[CustomerSettingsDefinition] == CustomerType.NEW) {
+                if (isNewCustomer) {
                     playgroundSettingsFlow.value?.let { settings ->
                         updateSettingsWithExistingCustomerId(settings, response.customerId)
                     }
@@ -243,12 +242,12 @@ internal class PaymentSheetPlaygroundViewModel(
 
     @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun createSetupIntentClientSecret(
-        snapshot: PlaygroundSettings.Snapshot,
-        customerId: String
+        customerId: String,
+        country: Country,
     ): CustomerAdapter.Result<String> {
         val request = CreateSetupIntentRequest(
             customerId = customerId,
-            merchantCountryCode = snapshot[CountrySettingsDefinition].value,
+            merchantCountryCode = country.value,
         )
 
         val apiResponse = Fuel.post(baseUrl + "create_setup_intent")

@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -25,17 +24,11 @@ internal object CustomerSheetHacks {
     val adapter: Deferred<CustomerAdapter>
         get() = _adapter.asDeferred()
 
-    private val _configuration = MutableStateFlow<CustomerSheet.Configuration?>(null)
-    val configuration: Deferred<CustomerSheet.Configuration>
-        get() = _configuration.asDeferred()
-
     fun initialize(
         lifecycleOwner: LifecycleOwner,
         adapter: CustomerAdapter,
-        configuration: CustomerSheet.Configuration,
     ) {
         _adapter.value = adapter
-        _configuration.value = configuration
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -58,7 +51,6 @@ internal object CustomerSheetHacks {
 
     fun clear() {
         _adapter.value = null
-        _configuration.value = null
     }
 }
 

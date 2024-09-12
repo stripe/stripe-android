@@ -78,6 +78,7 @@ dependencies {
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
+    testImplementation testLibs.espresso.intents
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core

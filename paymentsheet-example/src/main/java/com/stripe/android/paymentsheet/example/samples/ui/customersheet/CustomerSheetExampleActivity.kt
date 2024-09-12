@@ -46,13 +46,13 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
             PaymentSheetExampleTheme {
                 val customerSheet = rememberCustomerSheet(
                     customerAdapter = viewModel.customerAdapter,
-                    configuration = buildConfig(),
                     callback = viewModel::onCustomerSheetResult,
                 )
 
                 val viewState by viewModel.state.collectAsState()
 
                 LaunchedEffect(Unit) {
+                    customerSheet.configure(buildConfig())
                     val result = customerSheet.retrievePaymentOptionSelection()
                     viewModel.onCustomerSheetResult(result)
                 }

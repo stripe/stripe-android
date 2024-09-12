@@ -21,6 +21,8 @@ internal class CustomerSheetTestFactory(
         return when (integrationType) {
             IntegrationType.Activity -> forActivity(activity)
             IntegrationType.Compose -> forCompose(activity)
+        }.apply {
+            configure(configuration = configuration)
         }
     }
 
@@ -29,7 +31,6 @@ internal class CustomerSheetTestFactory(
     ): CustomerSheet {
         return CustomerSheet.create(
             activity = activity,
-            configuration = configuration,
             customerAdapter = createCustomerAdapter(customerSheetTestType, activity),
             callback = resultCallback,
         )
@@ -42,7 +43,6 @@ internal class CustomerSheetTestFactory(
 
         activity.setContent {
             customerSheet = rememberCustomerSheet(
-                configuration = configuration,
                 customerAdapter = createCustomerAdapter(customerSheetTestType, activity),
                 callback = resultCallback,
             )
