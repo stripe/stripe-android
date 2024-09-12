@@ -156,7 +156,7 @@ class CardFormView @JvmOverloads constructor(
                     .setCountryCode(countryLayout.selectedCountryCode)
                     .setPostalCode(postalCodeView.text?.toString())
                     .build(),
-                networks = cardMultilineWidget.cardBrandView.merchantPreferredNetworkParams()
+                networks = cardMultilineWidget.cardBrandView.cardParamsNetworks()
             )
         }
 
@@ -174,7 +174,7 @@ class CardFormView @JvmOverloads constructor(
                     expiryMonth = it.expMonth,
                     expiryYear = it.expYear,
                     attribution = it.attribution,
-                    networks = cardMultilineWidget.cardBrandView.createNetworksParam(),
+                    networks = cardMultilineWidget.cardBrandView.paymentMethodCreateParamsNetworks(),
                 )
             }
         }

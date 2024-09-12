@@ -29,7 +29,6 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
@@ -176,7 +175,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                     expiryMonth = it.expMonth,
                     expiryYear = it.expYear,
                     attribution = it.attribution,
-                    networks = cardBrandView.createNetworksParam(),
+                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
                 )
             }
         }
@@ -264,7 +263,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
                     .build(),
-                networks = cardBrandView.merchantPreferredNetworkParams()
+                networks = cardBrandView.cardParamsNetworks()
             )
         }
 

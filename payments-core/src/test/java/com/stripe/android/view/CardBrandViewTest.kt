@@ -34,9 +34,23 @@ internal class CardBrandViewTest {
             merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
         }
 
-        assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
-        assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+            .isEqualTo(CardBrand.CartesBancaires.code)
+        assertThat(cardBrandView.cardParamsNetworks()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
     }
+
+    @Test
+    fun `networkParams should be present, cbc ineligible, brand is unknown and preferred networks is set`() =
+        runCardBrandViewTest {
+            cardBrandView.apply {
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
+                merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
+            }
+
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        }
 
     @Test
     fun `networkParams should be present when brand is known, possible cards empty and preferred networks is set`() =
@@ -47,8 +61,24 @@ internal class CardBrandViewTest {
                 merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
             }
 
-            assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
-            assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred)
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+        }
+
+    @Suppress("MaxLineLength")
+    @Test
+    fun `networkParams should be present when brand known, cbc ineligible, possible cards empty and preferred networks set`() =
+        runCardBrandViewTest {
+            cardBrandView.apply {
+                brand = CardBrand.MasterCard
+                merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
+            }
+
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred)
                 .isEqualTo(CardBrand.CartesBancaires.code)
         }
 
@@ -60,8 +90,50 @@ internal class CardBrandViewTest {
                 possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
             }
 
-            assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(null)
-            assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred).isEqualTo(null)
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred).isEqualTo(null)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred).isEqualTo(null)
+        }
+
+    @Test
+    fun `networkParams shouldn't be present when brand is unknown, cbc ineligible and preferred networks is not set`() =
+        runCardBrandViewTest {
+            cardBrandView.apply {
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
+            }
+
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred).isEqualTo(null)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred).isEqualTo(null)
+        }
+
+    @Test
+    fun `networkParams should be present when user selects brand and preferred networks is set`() =
+        runCardBrandViewTest {
+            cardBrandView.apply {
+                isCbcEligible = true
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
+                handleBrandSelected(CardBrand.MasterCard)
+                merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
+            }
+
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.MasterCard.code)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.MasterCard.code)
+        }
+
+    @Test
+    fun `networkParams should be present when user selects brand, cbc ineligible and preferred networks is set`() =
+        runCardBrandViewTest {
+            cardBrandView.apply {
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
+                handleBrandSelected(CardBrand.MasterCard)
+                merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
+            }
+
+            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+            assertThat(cardBrandView.cardParamsNetworks()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
         }
 
     private fun runCardBrandViewTest(
