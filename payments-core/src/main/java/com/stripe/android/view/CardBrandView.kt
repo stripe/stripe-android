@@ -14,10 +14,12 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ListPopupWindow
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -113,15 +115,51 @@ internal class CardBrandView @JvmOverloads constructor(
         updateBrandSpinner()
     }
 
-    fun createNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
+    fun paymentMethodCreateParamsNetworks(): PaymentMethodCreateParams.Card.Networks? {
+        val defaultNetworkParam = brandPaymentMethodCreateParamsNetworks()
+        if (defaultNetworkParam != null) return defaultNetworkParam
+        return merchantPreferredNetworks.firstOrNull()?.code?.let {
+            PaymentMethodCreateParams.Card.Networks(
+                preferred = it,
+            )
+        }
+    }
+
+    private fun brandPaymentMethodCreateParamsNetworks(): PaymentMethodCreateParams.Card.Networks? {
+        if (brand == Unknown) return null
         return PaymentMethodCreateParams.Card.Networks(
-            preferred = brand.takeIf { it != Unknown }?.code,
+            preferred = brand.code,
         ).takeIf {
             isCbcEligible && possibleBrands.size > 1
         }
     }
 
-    private fun handleBrandSelected(brand: CardBrand?) {
+    fun cardParamsNetworks(): Networks? {
+        val brandPreferredNetwork = brandCardParamsNetworks()
+        if (brandPreferredNetwork != null) return brandPreferredNetwork
+        return merchantPreferredNetworks.firstOrNull()
+            ?.takeIf { it != Unknown }?.code
+            ?.let { network ->
+                Networks(
+                    preferred = network
+                )
+            }
+    }
+
+    private fun brandCardParamsNetworks(): Networks? {
+        return brand
+            .takeIf { it != Unknown }?.code
+            ?.let { network ->
+                Networks(
+                    preferred = network
+                )
+            }.takeIf {
+                isCbcEligible && possibleBrands.size > 1
+            }
+    }
+
+    @VisibleForTesting
+    internal fun handleBrandSelected(brand: CardBrand?) {
         brand?.let {
             stateFlow.update { it.copy(userSelectedBrand = brand) }
             determineCardBrandToDisplay()

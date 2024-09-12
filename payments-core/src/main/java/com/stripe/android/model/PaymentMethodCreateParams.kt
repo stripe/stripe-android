@@ -716,7 +716,12 @@ data class PaymentMethodCreateParams internal constructor(
                     expiryMonth = cardParams.expMonth,
                     expiryYear = cardParams.expYear,
                     cvc = cardParams.cvc,
-                    attribution = cardParams.attribution
+                    attribution = cardParams.attribution,
+                    networks = cardParams.networks?.preferred?.let {
+                        Card.Networks(
+                            preferred = it
+                        )
+                    }
                 ),
                 billingDetails = PaymentMethod.BillingDetails(
                     name = cardParams.name,

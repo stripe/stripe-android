@@ -5,10 +5,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
@@ -33,12 +37,47 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
+        viewBinding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                viewBinding.cardInputWidget.isVisible = position == 0
+                viewBinding.cardMultilineWidget.isVisible = position == 1
+                viewBinding.cardFormView.isVisible = position == 2
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+        }
+
+        viewBinding.spinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            arrayListOf("CardInputWidget", "CardMultilineWidget", "CardFormView")
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        viewBinding.preferredNetworkSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val networks = if (isChecked) {
+                listOf(CardBrand.CartesBancaires)
+            } else {
+                emptyList()
+            }
+
+            viewBinding.cardInputWidget.setPreferredNetworks(networks)
+            viewBinding.cardMultilineWidget.setPreferredNetworks(networks)
+            viewBinding.cardFormView.setPreferredNetworks(networks)
+
+            if (isChecked) {
+                viewBinding.cardInputWidget.setCardNumber("5555552500001001")
+                viewBinding.cardMultilineWidget.setCardNumber("5555552500001001")
+                viewBinding.cardInputWidget.setCardNumber("5555552500001001")
+            }
+        }
+
         viewBinding.paymentMethods.setHasFixedSize(false)
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
         viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
-            viewBinding.createButton.isEnabled = isValid
             Log.d(
                 CARD_VALID_CALLBACK_TAG,
                 "Card information is " + (if (isValid) " valid" else " invalid")
@@ -51,20 +90,14 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
 
-            viewBinding.cardFormView.cardParams?.let {
-                createPaymentMethod(PaymentMethodCreateParams.createCard(it))
+            val params = when (viewBinding.spinner.selectedItemPosition) {
+                0 -> viewBinding.cardInputWidget.cardParams
+                1 -> viewBinding.cardMultilineWidget.cardParams
+                2 -> viewBinding.cardFormView.cardParams
+                else -> error("no widget in this position")
             }
-        }
 
-        viewBinding.toggleCardFormView.setOnClickListener {
-            viewBinding.cardFormView.isEnabled = !viewBinding.cardFormView.isEnabled
-            showSnackbar(
-                if (viewBinding.cardFormView.isEnabled) {
-                    "CardFormView Enabled"
-                } else {
-                    "CardFormView Disabled"
-                }
-            )
+            createPaymentMethod(PaymentMethodCreateParams.createCard(params!!))
         }
     }
 
@@ -142,6 +175,10 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
                 viewBinding.paymentMethodId.text = paymentMethod.id
                 viewBinding.brand.text = card?.brand?.displayName.orEmpty()
                 viewBinding.last4.text = card?.last4.orEmpty()
+                card?.networks?.preferred?.let {
+                    viewBinding.prefNetworks.text = it
+                    viewBinding.prefNetworks.visibility = View.VISIBLE
+                }
             }
         }
     }
