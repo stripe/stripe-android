@@ -73,7 +73,7 @@ internal class AccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 dataAccessNotice = dataAccessNotice(),
                 selectionMode = SelectionMode.Multiple,
-                dataAccessDisclaimer = "This business can access account details, balances, " +
+                dataAccessDisclaimer = "My business can access account details, balances, " +
                     "account ownership details and transactions. <a href=\"https://stripe.com\">Learn more</a>",
                 singleAccount = false,
                 stripeDirect = false,
