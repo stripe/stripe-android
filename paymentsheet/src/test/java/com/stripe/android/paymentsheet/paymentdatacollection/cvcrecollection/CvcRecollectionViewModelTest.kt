@@ -3,28 +3,17 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class CvcRecollectionViewModelTest {
 
-    @Before
-    fun setup() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
-    private fun createViewModel(cvc: String? = null): CvcRecollectionViewModel {
+    private fun createViewModel(cvc: String = ""): CvcRecollectionViewModel {
         return CvcRecollectionViewModel(
             args = Args(
                 lastFour = "4242",

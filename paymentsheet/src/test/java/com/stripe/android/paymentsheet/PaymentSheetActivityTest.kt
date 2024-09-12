@@ -62,7 +62,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
@@ -88,6 +88,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1127,8 +1128,14 @@ internal class PaymentSheetActivityTest {
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler,
-                cvcRecollectionInteractorFactory = object : CvcRecollectionInteractorFactory {
-                    override fun create(args: Args) = FakeCvcRecollectionInteractor()
+                cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {
+                    override fun create(
+                        args: Args,
+                        processing: StateFlow<Boolean>,
+                        coroutineScope: CoroutineScope,
+                    ): CvcRecollectionInteractor {
+                        return FakeCvcRecollectionInteractor()
+                    }
                 }
             )
         }

@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -85,7 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
-    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractorFactory
+    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -432,8 +432,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 args = Args(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,
+                    cvc = "",
                     isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
-                )
+                ),
+                processing = processing,
+                coroutineScope = viewModelScope,
             )
             viewModelScope.launch {
                 interactor.cvcCompletionState.collectLatest(::handleCvcCompletionState)
