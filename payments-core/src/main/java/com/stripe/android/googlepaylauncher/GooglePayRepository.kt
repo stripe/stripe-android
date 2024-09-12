@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayJsonFactory
@@ -8,7 +9,6 @@ import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +17,18 @@ fun interface GooglePayRepository {
 
     object Disabled : GooglePayRepository {
         override fun isReady(): Flow<Boolean> = flowOf(false)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        private val defaultFactory = DefaultGooglePayAvailabilityClient.Factory()
+
+        @Volatile
+        var googlePayAvailabilityClientFactory: GooglePayAvailabilityClient.Factory = defaultFactory
+
+        fun resetFactory() {
+            googlePayAvailabilityClientFactory = defaultFactory
+        }
     }
 }
 
@@ -52,8 +64,10 @@ internal class DefaultGooglePayRepository(
 
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
-    private val paymentsClient: PaymentsClient by lazy {
-        paymentsClientFactory.create(environment)
+    private val googlePayAvailabilityClient: GooglePayAvailabilityClient by lazy {
+        GooglePayRepository.googlePayAvailabilityClientFactory.create(
+            paymentsClient = paymentsClientFactory.create(environment)
+        )
     }
 
     /**
@@ -83,7 +97,7 @@ internal class DefaultGooglePayRepository(
         }
 
         val isReady = runCatching {
-            paymentsClient.isReadyToPay(request).await()
+            googlePayAvailabilityClient.isReady(request)
         }.onFailure {
             // TODO (samer-stripe): Add error event here
             logger.error("Google Pay check failed.", it)
