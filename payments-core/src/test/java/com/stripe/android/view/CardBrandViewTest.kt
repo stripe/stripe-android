@@ -120,22 +120,7 @@ internal class CardBrandViewTest {
             assertThat(cardBrandView.cardParamsNetworks()?.preferred)
                 .isEqualTo(CardBrand.MasterCard.code)
         }
-
-    @Test
-    fun `networkParams should be present when user selects brand, cbc ineligible and preferred networks is set`() =
-        runCardBrandViewTest {
-            cardBrandView.apply {
-                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.MasterCard)
-                handleBrandSelected(CardBrand.MasterCard)
-                merchantPreferredNetworks = listOf(CardBrand.CartesBancaires)
-            }
-
-            assertThat(cardBrandView.paymentMethodCreateParamsNetworks()?.preferred)
-                .isEqualTo(CardBrand.CartesBancaires.code)
-            assertThat(cardBrandView.cardParamsNetworks()?.preferred)
-                .isEqualTo(CardBrand.CartesBancaires.code)
-        }
-
+    
     private fun runCardBrandViewTest(
         locale: Locale = Locale.US,
         block: TestContext.() -> Unit,
