@@ -18,6 +18,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -121,6 +122,16 @@ internal class CardBrandView @JvmOverloads constructor(
                 preferred = it,
             )
         }
+    }
+
+    fun merchantPreferredNetworkParams(): Networks? {
+        return merchantPreferredNetworks.firstOrNull()
+            ?.takeIf { it != Unknown }?.code
+            ?.let { network ->
+                Networks(
+                    preferred = network
+                )
+            }
     }
 
     private fun createBrandNetworksParam(): PaymentMethodCreateParams.Card.Networks? {

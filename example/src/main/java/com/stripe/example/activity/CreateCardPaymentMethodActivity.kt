@@ -63,11 +63,14 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             }
 
             viewBinding.cardInputWidget.setPreferredNetworks(networks)
-            viewBinding.cardInputWidget.setCardNumber("5555552500001001")
             viewBinding.cardMultilineWidget.setPreferredNetworks(networks)
-            viewBinding.cardMultilineWidget.setCardNumber("5555552500001001")
             viewBinding.cardFormView.setPreferredNetworks(networks)
-            viewBinding.cardInputWidget.setCardNumber("5555552500001001")
+
+            if (isChecked) {
+                viewBinding.cardInputWidget.setCardNumber("5555552500001001")
+                viewBinding.cardMultilineWidget.setCardNumber("5555552500001001")
+                viewBinding.cardInputWidget.setCardNumber("5555552500001001")
+            }
         }
 
         viewBinding.paymentMethods.setHasFixedSize(false)

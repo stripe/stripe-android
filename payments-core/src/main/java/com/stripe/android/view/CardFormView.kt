@@ -27,10 +27,8 @@ import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.DelicateCardDetailsApi
-import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
@@ -158,13 +156,7 @@ class CardFormView @JvmOverloads constructor(
                     .setCountryCode(countryLayout.selectedCountryCode)
                     .setPostalCode(postalCodeView.text?.toString())
                     .build(),
-                networks = cardMultilineWidget.cardBrandView.merchantPreferredNetworks.firstOrNull()
-                    ?.takeIf { it != Unknown }?.code
-                    ?.let { network ->
-                        Networks(
-                            preferred = network
-                        )
-                    }
+                networks = cardMultilineWidget.cardBrandView.merchantPreferredNetworkParams()
             )
         }
 

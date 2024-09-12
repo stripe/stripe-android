@@ -35,6 +35,7 @@ internal class CardBrandViewTest {
         }
 
         assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
     }
 
     @Test
@@ -47,6 +48,8 @@ internal class CardBrandViewTest {
             }
 
             assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+            assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
         }
 
     @Test
@@ -58,6 +61,7 @@ internal class CardBrandViewTest {
             }
 
             assertThat(cardBrandView.createNetworksParam()?.preferred).isEqualTo(null)
+            assertThat(cardBrandView.merchantPreferredNetworkParams()?.preferred).isEqualTo(null)
         }
 
     private fun runCardBrandViewTest(

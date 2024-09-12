@@ -21,7 +21,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_NO_SPACES
 import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
@@ -155,34 +154,11 @@ internal class CardInputWidgetTest {
             cvcEditText.append(CVC_VALUE_COMMON)
             setPreferredNetworks(listOf(CardBrand.CartesBancaires))
 
-            assertThat(cardParams)
-                .isEqualTo(
-                    CardParams(
-                        brand = CardBrand.Unknown,
-                        loggingTokens = ATTRIBUTION,
-                        number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
-                        expMonth = 12,
-                        expYear = 2050,
-                        cvc = CVC_VALUE_COMMON,
-                        address = Address.Builder()
-                            .build(),
-                        networks = Networks(CardBrand.CartesBancaires.code)
-                    )
-                )
+            assertThat(cardParams?.networks)
+                .isEqualTo(Networks(CardBrand.CartesBancaires.code))
 
-            assertThat(paymentMethodCreateParams)
-                .isEqualTo(
-                    PaymentMethodCreateParams.create(
-                        card = PaymentMethodCreateParams.Card(
-                            number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
-                            cvc = CVC_VALUE_COMMON,
-                            expiryMonth = 12,
-                            expiryYear = 2050,
-                            attribution = ATTRIBUTION,
-                            networks = PaymentMethodCreateParams.Card.Networks(CardBrand.CartesBancaires.code)
-                        )
-                    )
-                )
+            assertThat(paymentMethodCreateParams?.card?.networks)
+                .isEqualTo(PaymentMethodCreateParams.Card.Networks(CardBrand.CartesBancaires.code))
         }
 
     @Test

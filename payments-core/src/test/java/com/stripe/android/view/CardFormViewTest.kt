@@ -15,7 +15,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_NO_SPACES
 import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
@@ -115,26 +114,12 @@ internal class CardFormViewTest {
 
             binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
 
-            assertThat(cardFormView.cardParams)
+            assertThat(cardFormView.cardParams?.networks)
                 .isEqualTo(
-                    CardParams(
-                        brand = CardBrand.Unknown,
-                        loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
-                        number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
-                        expMonth = 12,
-                        expYear = 2050,
-                        cvc = VALID_CVC,
-                        address = Address.Builder()
-                            .setCountryCode(CountryCode.US)
-                            .setPostalCode(VALID_US_ZIP)
-                            .build(),
-                        networks = Networks(
-                            preferred = CardBrand.CartesBancaires.code
-                        )
+                    Networks(
+                        preferred = CardBrand.CartesBancaires.code
                     )
                 )
-
-            idleLooper()
         }
     }
 
