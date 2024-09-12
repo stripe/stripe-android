@@ -7,26 +7,26 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
-internal fun runLinkTest(
+internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
-    integrationType: LinkIntegrationType,
+    integrationType: ProductIntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
-    block: (LinkTestRunnerContext) -> Unit,
+    block: (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
     when (integrationType) {
-        LinkIntegrationType.PaymentSheet -> {
+        ProductIntegrationType.PaymentSheet -> {
             runPaymentSheetTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.WithPaymentSheet(context))
+                    block(ProductIntegrationTestRunnerContext.WithPaymentSheet(context))
                 },
             )
         }
-        LinkIntegrationType.FlowController -> {
+        ProductIntegrationType.FlowController -> {
             runFlowControllerTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
@@ -34,14 +34,14 @@ internal fun runLinkTest(
                 paymentOptionCallback = paymentOptionCallback,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.WithFlowController(context))
+                    block(ProductIntegrationTestRunnerContext.WithFlowController(context))
                 }
             )
         }
     }
 }
 
-internal sealed interface LinkTestRunnerContext {
+internal sealed interface ProductIntegrationTestRunnerContext {
 
     fun launch(
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
@@ -51,7 +51,7 @@ internal sealed interface LinkTestRunnerContext {
 
     class WithPaymentSheet(
         private val context: PaymentSheetTestRunnerContext
-    ) : LinkTestRunnerContext {
+    ) : ProductIntegrationTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration) {
             context.presentPaymentSheet {
                 presentWithPaymentIntent(
@@ -64,7 +64,7 @@ internal sealed interface LinkTestRunnerContext {
 
     class WithFlowController(
         private val context: FlowControllerTestRunnerContext
-    ) : LinkTestRunnerContext {
+    ) : ProductIntegrationTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration) {
             context.configureFlowController {
                 configureWithPaymentIntent(
