@@ -2,6 +2,7 @@ package com.stripe.android.utils.screenshots
 
 import android.graphics.Color
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 
@@ -20,6 +21,10 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
             shapes = PaymentSheet.Shapes.default.copy(
                 cornerRadiusDp = 8f,
             ),
+            typography = PaymentSheet.Typography(
+                fontResId = R.font.cursive,
+                sizeScaleFactor = 1.75F,
+            )
         ),
     ),
 
