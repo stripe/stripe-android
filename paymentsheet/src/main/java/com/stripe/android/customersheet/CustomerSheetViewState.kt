@@ -164,7 +164,7 @@ internal fun canEdit(
     }
 }
 
-private fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
+internal fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
     val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
         available.size > 1
     } ?: false
