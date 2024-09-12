@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +37,11 @@ internal class GooglePayTest {
     val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
+
+    @After
+    fun teardown() {
+        GooglePayRepository.resetFactory()
+    }
 
     @Test
     fun googlePayIsShownWhenFullyEnabled() = runGooglePayTest(

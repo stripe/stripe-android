@@ -21,9 +21,14 @@ fun interface GooglePayRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        private val defaultFactory = DefaultGooglePayAvailabilityClient.Factory()
+
         @Volatile
-        var googlePayAvailabilityClientFactory: GooglePayAvailabilityClient.Factory =
-            DefaultGooglePayAvailabilityClient.Factory()
+        var googlePayAvailabilityClientFactory: GooglePayAvailabilityClient.Factory = defaultFactory
+
+        fun resetFactory() {
+            googlePayAvailabilityClientFactory = defaultFactory
+        }
     }
 }
 
