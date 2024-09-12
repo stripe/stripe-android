@@ -75,6 +75,7 @@ internal fun CvcRecollectionScreen(
             CvcRecollectionTitle()
             CvcRecollectionField(
                 lastFour = lastFour,
+                enabled = true,
                 cvcState = cvcState,
                 onValueChanged = {
                     viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
@@ -102,8 +103,9 @@ internal fun CvcRecollectionPaymentSheetScreen(
             CvcRecollectionTitle()
             CvcRecollectionField(
                 lastFour = state.lastFour,
+                enabled = state.isEnabled,
                 cvcState = state.cvcState,
-                onValueChanged = interactor::onCvcChanged
+                onValueChanged = interactor::onCvcChanged,
             )
         }
     }
@@ -114,6 +116,7 @@ internal fun CvcRecollectionPaymentSheetScreen(
 @Composable
 internal fun CvcRecollectionField(
     lastFour: String,
+    enabled: Boolean,
     cvcState: CvcState,
     onValueChanged: (String) -> Unit
 ) {
@@ -182,6 +185,7 @@ internal fun CvcRecollectionField(
                     .fillMaxWidth()
                     .weight(.5f, true)
                     .focusRequester(focusRequester),
+                enabled = enabled,
                 value = cvcState.cvc,
                 onValueChange = onValueChanged,
                 shape = MaterialTheme.shapes.large,

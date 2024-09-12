@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpd
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractorFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
@@ -197,9 +197,8 @@ internal abstract class PaymentSheetCommonModule {
         )
 
         @Provides
-        @Singleton
-        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractorFactory {
-            return DefaultCvcRecollectionInteractor.Factory()
+        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
+            return DefaultCvcRecollectionInteractor.Factory
         }
     }
 }

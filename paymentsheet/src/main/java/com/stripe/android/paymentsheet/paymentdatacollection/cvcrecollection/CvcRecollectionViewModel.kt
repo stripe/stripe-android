@@ -24,7 +24,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
             cvcState = CvcState(
                 cvc = args.cvc ?: "",
                 cardBrand = args.cardBrand
-            )
+            ),
+            isEnabled = true,
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState>
@@ -70,8 +71,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                 args = Args(
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
-                    cvc = null,
-                    isTestMode = args.isTestMode
+                    cvc = "",
+                    isTestMode = args.isTestMode,
                 )
             ) as T
         }

@@ -21,11 +21,12 @@ class CvcRecollectionFieldScreenshotTest {
         paparazziRule.snapshot {
             CvcRecollectionField(
                 lastFour = "4242",
+                enabled = true,
                 cvcState = CvcState(
                     cardBrand = CardBrand.Visa,
                     cvc = ""
                 ),
-                onValueChanged = {}
+                onValueChanged = {},
             )
         }
     }
@@ -35,6 +36,7 @@ class CvcRecollectionFieldScreenshotTest {
         paparazziRule.snapshot {
             CvcRecollectionField(
                 lastFour = "4242",
+                enabled = true,
                 cvcState = CvcState(
                     cardBrand = CardBrand.Visa,
                     cvc = "424"

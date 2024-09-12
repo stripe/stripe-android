@@ -16,7 +16,8 @@ internal class FakeCvcRecollectionInteractor : CvcRecollectionInteractor {
             cvcState = CvcState(
                 cvc = "",
                 cardBrand = CardBrand.Visa
-            )
+            ),
+            isEnabled = true,
         )
     )
     override val viewState: StateFlow<CvcRecollectionViewState> = _viewState

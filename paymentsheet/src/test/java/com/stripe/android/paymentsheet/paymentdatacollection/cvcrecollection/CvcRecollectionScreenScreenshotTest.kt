@@ -4,7 +4,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,14 +19,14 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
-    private fun interactor(cvc: String? = null, isTestMode: Boolean = true): CvcRecollectionInteractor {
+    private fun interactor(cvc: String = "", isTestMode: Boolean = true): CvcRecollectionInteractor {
         return DefaultCvcRecollectionInteractor(
-            args = Args(
-                lastFour = "4242",
-                cardBrand = CardBrand.Visa,
-                cvc = cvc,
-                isTestMode = isTestMode
-            ),
+            lastFour = "4242",
+            cardBrand = CardBrand.Visa,
+            cvc = cvc,
+            isTestMode = isTestMode,
+            processing = stateFlowOf(false),
+            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )
     }
 
