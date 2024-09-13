@@ -632,21 +632,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
                 isSaveForFutureUseSelected = saveForFutureUse,
             )
-
-            when (state) {
-                is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                    state
-                }
-                is USBankAccountFormScreenState.MandateCollection -> {
-                    state.copy(mandateText = mandateText)
-                }
-                is USBankAccountFormScreenState.SavedAccount -> {
-                    state.copy(mandateText = mandateText)
-                }
-                is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                    state.copy(mandateText = mandateText)
-                }
-            }
+            state.updateWithMandate(mandateText)
         }
     }
 

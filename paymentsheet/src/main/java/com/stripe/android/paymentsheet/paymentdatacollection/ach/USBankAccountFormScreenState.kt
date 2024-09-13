@@ -60,3 +60,22 @@ internal sealed class USBankAccountFormScreenState(
         data class PaymentMethod(val id: String) : ResultIdentifier
     }
 }
+
+internal fun USBankAccountFormScreenState.updateWithMandate(
+    mandate: ResolvableString?,
+): USBankAccountFormScreenState {
+    return when (this) {
+        is USBankAccountFormScreenState.BillingDetailsCollection -> {
+            this
+        }
+        is USBankAccountFormScreenState.MandateCollection -> {
+            this.copy(mandateText = mandate)
+        }
+        is USBankAccountFormScreenState.SavedAccount -> {
+            this.copy(mandateText = mandate)
+        }
+        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
+            this.copy(mandateText = mandate)
+        }
+    }
+}
