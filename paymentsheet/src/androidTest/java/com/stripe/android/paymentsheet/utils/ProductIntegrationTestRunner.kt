@@ -88,5 +88,9 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         override fun markTestSucceeded() {
             context.markTestSucceeded()
         }
+
+        fun confirm() {
+            context.flowController.confirm()
+        }
     }
 }
