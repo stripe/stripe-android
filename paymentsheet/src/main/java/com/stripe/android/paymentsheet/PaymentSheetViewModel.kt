@@ -498,11 +498,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val paymentMethodOptionsParams =
                 (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
                     ?: PaymentMethodOptionsParams.Card()
-            paymentSelection.copy(
+            val newSelection = paymentSelection.copy(
                 paymentMethodOptionsParams = paymentMethodOptionsParams.copy(
                     cvc = cvcControllerFlow.value.fieldValue.value
                 )
             )
+            updateSelection(newSelection)
+            newSelection
         } else {
             paymentSelection
         }
