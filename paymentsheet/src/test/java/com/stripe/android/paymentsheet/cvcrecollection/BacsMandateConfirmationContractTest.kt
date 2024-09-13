@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
 import android.content.Intent
-import android.os.Build
 import androidx.core.os.BundleCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -12,10 +11,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 class BacsMandateConfirmationContractTest {
 
     private val contract = BacsMandateConfirmationContract()
