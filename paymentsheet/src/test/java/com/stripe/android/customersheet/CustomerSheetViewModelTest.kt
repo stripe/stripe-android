@@ -579,6 +579,8 @@ class CustomerSheetViewModelTest {
                 )
             )
 
+            // Briefly show the payment method removed then transition
+            awaitViewState<SelectPaymentMethod>()
             val addPaymentMethodViewState = awaitViewState<AddPaymentMethod>()
 
             assertThat(addPaymentMethodViewState.isFirstPaymentMethod).isTrue()
