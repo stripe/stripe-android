@@ -389,6 +389,21 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Restores screen state when re-opening screen`() = runTest {
+        val continueMandate = USBankAccountTextBuilder.buildMandateText(
+            merchantName = MERCHANT_NAME,
+            isSaveForFutureUseSelected = true,
+            isInstantDebits = false,
+            isSetupFlow = false,
+        )
+
+        val continueWithMicrodepositsMandate = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = true,
+            isSaveForFutureUseSelected = true,
+            isInstantDebits = false,
+            isSetupFlow = false,
+        )
+
         val screenStates = listOf(
             USBankAccountFormScreenState.BillingDetailsCollection(
                 primaryButtonText = "Continue".resolvableString,
@@ -400,7 +415,7 @@ class USBankAccountFormViewModelTest {
                 bankName = "Stripe Bank",
                 last4 = null,
                 primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
+                mandateText = continueMandate,
             ),
             USBankAccountFormScreenState.VerifyWithMicrodeposits(
                 financialConnectionsSessionId = "session_1234",
@@ -410,7 +425,7 @@ class USBankAccountFormViewModelTest {
                     last4 = "6789",
                 ),
                 primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
+                mandateText = continueWithMicrodepositsMandate,
             ),
             USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
@@ -418,7 +433,7 @@ class USBankAccountFormViewModelTest {
                 bankName = "Stripe Bank",
                 last4 = "6789",
                 primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
+                mandateText = continueMandate,
             ),
         )
 
@@ -957,7 +972,7 @@ class USBankAccountFormViewModelTest {
             viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
             viewModel.reset()
 
-            assertThat(awaitItem())
+            assertThat(expectMostRecentItem())
                 .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
         }
     }
@@ -1060,6 +1075,51 @@ class USBankAccountFormViewModelTest {
                 )
             ),
         )
+    }
+
+    @Test
+    fun `Produces correct mandate text when not using microdeposits verification`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateText(
+            merchantName = MERCHANT_NAME,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem()).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
+
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(verifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `Produces correct mandate text when using microdeposits verification`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = true,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem()).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
+
+            val unverifiedAccount = mockUnverifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.mandateText).isEqualTo(expectedResult)
+        }
     }
 
     private fun createViewModel(

@@ -107,7 +107,7 @@ internal sealed class PaymentSelection : Parcelable {
         ): ResolvableString? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
-                    USBankAccountTextBuilder.mandateText(
+                    USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
                         merchantName = merchantName,
                         isVerifyingMicrodeposits = false,
                         isSaveForFutureUseSelected = false,

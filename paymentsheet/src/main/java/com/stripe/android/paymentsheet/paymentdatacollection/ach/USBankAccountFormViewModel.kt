@@ -654,7 +654,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         isVerifyWithMicrodeposits: Boolean,
         isSaveForFutureUseSelected: Boolean = saveForFutureUse.value,
     ): ResolvableString {
-        return USBankAccountTextBuilder.mandateText(
+        return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
