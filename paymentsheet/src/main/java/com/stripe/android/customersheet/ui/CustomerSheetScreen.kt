@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -122,7 +121,7 @@ internal fun SelectPaymentMethod(
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
             canRemovePaymentMethods = viewState.canRemovePaymentMethods,
-            isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+            isCbcEligible = viewState.isCbcEligible,
         )
 
         SavedPaymentMethodTabLayoutUI(
@@ -147,20 +146,18 @@ internal fun SelectPaymentMethod(
         }
 
         if (viewState.primaryButtonVisible) {
-            viewState.primaryButtonLabel?.let {
-                PrimaryButton(
-                    label = it,
-                    isEnabled = viewState.primaryButtonEnabled,
-                    isLoading = viewState.isProcessing,
-                    onButtonClick = {
-                        viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
-                    },
-                    modifier = Modifier
-                        .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
-                        .padding(top = 20.dp)
-                        .padding(horizontal = horizontalPadding),
-                )
-            }
+            PrimaryButton(
+                label = viewState.primaryButtonLabel.resolve(),
+                isEnabled = viewState.primaryButtonEnabled,
+                isLoading = viewState.isProcessing,
+                onButtonClick = {
+                    viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+                },
+                modifier = Modifier
+                    .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+                    .padding(top = 20.dp)
+                    .padding(horizontal = horizontalPadding),
+            )
         }
 
         Mandate(
