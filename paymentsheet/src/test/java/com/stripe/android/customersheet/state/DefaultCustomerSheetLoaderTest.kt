@@ -108,6 +108,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
+        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -166,6 +167,7 @@ class DefaultCustomerSheetLoaderTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             )
         )
+        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
 
@@ -198,6 +200,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
+        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
@@ -296,6 +299,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         )
+        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -332,6 +336,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         )
+        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)

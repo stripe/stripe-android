@@ -13,6 +13,7 @@ internal sealed interface CustomerSheetState {
         val config: CustomerSheet.Configuration,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val customerPaymentMethods: List<PaymentMethod>,
+        val customerPermissions: CustomerPermissions,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val paymentSelection: PaymentSelection?,
         val validationError: Throwable?,

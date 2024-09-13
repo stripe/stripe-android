@@ -201,6 +201,10 @@ internal class DefaultCustomerSheetLoader(
                         customerPaymentMethods = sortedPaymentMethods,
                         paymentSelection = paymentSelection,
                         validationError = elementsSession.stripeIntent.validate(),
+                        customerPermissions = CustomerPermissions(
+                            // Should always be true for `legacy` case
+                            canRemovePaymentMethods = true,
+                        )
                     )
                 )
             },

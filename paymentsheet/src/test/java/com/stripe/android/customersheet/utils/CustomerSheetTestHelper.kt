@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
@@ -41,6 +42,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.CompletableDeferred
@@ -60,6 +62,10 @@ internal object CustomerSheetTestHelper {
         workContext: CoroutineContext = EmptyCoroutineContext,
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
+        customerPermissions: CustomerPermissions = CustomerPermissions(
+            canRemovePaymentMethods = true,
+        ),
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
             LpmRepositoryTestHelpers.card,
             LpmRepositoryTestHelpers.usBankAccount,
@@ -86,6 +92,8 @@ internal object CustomerSheetTestHelper {
             supportedPaymentMethods = supportedPaymentMethods,
             paymentSelection = savedPaymentSelection,
             isGooglePayAvailable = isGooglePayAvailable,
+            cbcEligibility = cbcEligibility,
+            permissions = customerPermissions,
         ),
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory =
             createModifiableEditPaymentMethodViewInteractorFactory(),

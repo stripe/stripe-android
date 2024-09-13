@@ -158,6 +158,9 @@ internal class CustomerSheetViewModel(
             paymentMethods = listOf(),
             configuration = configuration,
             currentSelection = originalPaymentSelection,
+            permissions = CustomerPermissions(
+                canRemovePaymentMethods = false,
+            ),
             metadata = null,
         )
     )
@@ -337,6 +340,7 @@ internal class CustomerSheetViewModel(
                         configuration = configuration,
                         currentSelection = state.paymentSelection,
                         metadata = state.paymentMethodMetadata,
+                        permissions = state.customerPermissions,
                     )
 
                     transitionToInitialScreen()
@@ -1201,12 +1205,13 @@ internal class CustomerSheetViewModel(
         val paymentMethods: List<PaymentMethod>,
         val currentSelection: PaymentSelection?,
         val metadata: PaymentMethodMetadata?,
+        val permissions: CustomerPermissions,
         val configuration: CustomerSheet.Configuration,
     ) {
         val canRemove = when (paymentMethods.size) {
             0 -> false
-            1 -> configuration.allowsRemovalOfLastSavedPaymentMethod
-            else -> true
+            1 -> configuration.allowsRemovalOfLastSavedPaymentMethod && permissions.canRemovePaymentMethods
+            else -> permissions.canRemovePaymentMethods
         }
 
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
