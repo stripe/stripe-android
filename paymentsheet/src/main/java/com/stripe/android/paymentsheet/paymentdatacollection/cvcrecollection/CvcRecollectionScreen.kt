@@ -164,7 +164,8 @@ internal fun CvcRecollectionField(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
                             " $lastFour"
                         ),
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.testTag(TEST_TAG_CVC_LAST_FOUR)
                     )
                 }
             }
@@ -184,7 +185,8 @@ internal fun CvcRecollectionField(
                     )
                     .fillMaxWidth()
                     .weight(.5f, true)
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .testTag(TEST_TAG_CVC_FIELD),
                 enabled = enabled,
                 value = cvcState.cvc,
                 onValueChange = onValueChanged,
@@ -195,7 +197,10 @@ internal fun CvcRecollectionField(
                 ),
                 singleLine = true,
                 label = {
-                    Placeholder(text = stringResource(id = cvcState.label))
+                    Placeholder(
+                        text = stringResource(id = cvcState.label),
+                        modifier = Modifier.testTag(TEST_TAG_CVC_LABEL)
+                    )
                 },
                 trailingIcon = {
                     TrailingIcon(
@@ -235,7 +240,9 @@ private fun CvcRecollectionTopBar(
 private fun CvcRecollectionTitle() {
     H4Text(
         text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-        modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
+        modifier = Modifier
+            .padding(0.dp, 0.dp, 0.dp, 16.dp)
+            .testTag(TEST_TAG_CONFIRM_CVC)
     )
 }
 
@@ -279,3 +286,8 @@ private fun CvcRecollectionFieldPreview() {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CVC_RECOLLECTION_SCREEN_CONFIRM = "CVC_CONFIRM"
+
+internal const val TEST_TAG_CONFIRM_CVC = "TEST_TAG_CONFIRM_CVC"
+internal const val TEST_TAG_CVC_FIELD = "TEST_TAG_CVC_FIELD"
+internal const val TEST_TAG_CVC_LAST_FOUR = "TEST_TAG_CVC_LAST_FOUR"
+internal const val TEST_TAG_CVC_LABEL = "TEST_TAG_CVC_LABEL"
