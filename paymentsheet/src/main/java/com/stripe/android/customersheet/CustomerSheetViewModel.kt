@@ -222,10 +222,10 @@ internal class CustomerSheetViewModel(
         }
 
         viewModelScope.launch {
-            viewState.collectLatest { viewState ->
+            customerState.collectLatest { state ->
                 if (
-                    viewState is CustomerSheetViewState.SelectPaymentMethod &&
-                    !customerState.value.canShowSavedPaymentMethods
+                    !state.canShowSavedPaymentMethods &&
+                    viewState.value is CustomerSheetViewState.SelectPaymentMethod
                 ) {
                     delay(REMOVAL_TRANSITION_DELAY)
 
