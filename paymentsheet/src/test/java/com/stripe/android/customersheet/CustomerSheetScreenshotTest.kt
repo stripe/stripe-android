@@ -65,10 +65,9 @@ internal class CustomerSheetScreenshotTest {
         isEditing = false,
         isGooglePayEnabled = false,
         primaryButtonVisible = false,
-        primaryButtonLabel = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        allowsRemovalOfLastSavedPaymentMethod = true,
+        canEdit = true,
         canRemovePaymentMethods = true,
+        isCbcEligible = false,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -97,7 +96,6 @@ internal class CustomerSheetScreenshotTest {
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         errorReporter = FakeErrorReporter(),
     )
 
@@ -135,7 +133,6 @@ internal class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -172,7 +169,6 @@ internal class CustomerSheetScreenshotTest {
                     ),
                     isEditing = true,
                     isGooglePayEnabled = true,
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -191,7 +187,6 @@ internal class CustomerSheetScreenshotTest {
                     title = "Screenshot testing",
                     paymentSelection = PaymentSelection.GooglePay,
                     isGooglePayEnabled = true,
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
@@ -213,7 +208,6 @@ internal class CustomerSheetScreenshotTest {
                         PaymentMethodFixtures.US_BANK_ACCOUNT
                     ),
                     isGooglePayEnabled = false,
-                    primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text.".resolvableString
                 ),
@@ -292,10 +286,6 @@ internal class CustomerSheetScreenshotTest {
                 isLiveMode = true,
             ),
             isLiveMode = true,
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
-            savedPaymentMethods = emptyList(),
-            allowsRemovalOfLastSavedPaymentMethod = true,
-            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
@@ -328,10 +318,6 @@ internal class CustomerSheetScreenshotTest {
                 isLiveMode = true,
             ),
             isLiveMode = true,
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
-            savedPaymentMethods = emptyList(),
-            allowsRemovalOfLastSavedPaymentMethod = false,
-            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {

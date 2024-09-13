@@ -116,7 +116,10 @@ class CustomerSheetViewModelTest {
             ),
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<AddPaymentMethod>()
+            assertThat(state.topBarState {}.showEditMenu).isFalse()
         }
     }
 
@@ -191,7 +194,8 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            assertThat(selectState.primaryButtonLabel).isEqualTo("Confirm")
+            assertThat(selectState.primaryButtonLabel)
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
         }
     }
 
@@ -324,7 +328,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonEnabled)
                 .isTrue()
             assertThat(viewState.primaryButtonVisible)
@@ -340,7 +344,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonVisible)
                 .isFalse()
 
@@ -352,7 +356,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Confirm")
+                .isEqualTo(R.string.stripe_paymentsheet_confirm.resolvableString)
             assertThat(viewState.primaryButtonEnabled)
                 .isTrue()
             assertThat(viewState.primaryButtonVisible)
@@ -1348,17 +1352,25 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When edit payment screen is presented, event is reported`() {
+    fun `When edit payment screen is presented, no edit menu & event is reported`() = runTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             eventReporter = eventReporter,
         )
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD)
         )
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<CustomerSheetViewState.EditPaymentMethod>()
+            assertThat(state.topBarState {}.showEditMenu).isFalse()
+        }
 
         verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
     }
@@ -2825,12 +2837,7 @@ class CustomerSheetViewModelTest {
 
                 val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
 
-                assertThat(selectPaymentMethodState.cbcEligibility)
-                    .isEqualTo(
-                        CardBrandChoiceEligibility.Eligible(
-                            preferredNetworks = listOf(CardBrand.CartesBancaires)
-                        )
-                    )
+                assertThat(selectPaymentMethodState.isCbcEligible).isTrue()
             }
         }
 

@@ -97,7 +97,6 @@ internal object CustomerSheetTestHelper {
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
             customerAdapterProvider = CompletableDeferred(customerAdapter),
-            resources = application.resources,
             stripeRepository = stripeRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },

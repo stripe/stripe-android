@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
-import android.content.res.Resources
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -83,7 +82,6 @@ internal class CustomerSheetViewModel(
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
-    private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
@@ -101,7 +99,6 @@ internal class CustomerSheetViewModel(
         application: Application,
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
-        resources: Resources,
         configuration: CustomerSheet.Configuration,
         logger: Logger,
         stripeRepository: StripeRepository,
@@ -118,7 +115,6 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection = originalPaymentSelection,
         paymentConfigurationProvider = paymentConfigurationProvider,
         customerAdapterProvider = CustomerSheetHacks.adapter,
-        resources = resources,
         configuration = configuration,
         logger = logger,
         stripeRepository = stripeRepository,
@@ -184,14 +180,13 @@ internal class CustomerSheetViewModel(
             paymentSelection = paymentSelection,
             isLiveMode = isLiveModeProvider(),
             canRemovePaymentMethods = customerState.canRemove,
-            cbcEligibility = customerState.cbcEligibility,
             primaryButtonVisible = primaryButtonVisible,
             isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
             isEditing = userCanEditAndIsEditing,
             isProcessing = selectionConfirmationState.isConfirming,
             errorMessage = selectionConfirmationState.error,
-            allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-            primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
+            isCbcEligible = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+            canEdit = customerState.canEdit,
             mandateText = paymentSelection?.mandateText(
                 merchantName = configuration.merchantDisplayName,
                 isSetupFlow = false,
@@ -593,10 +588,6 @@ internal class CustomerSheetViewModel(
                     isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
                 ),
                 isLiveMode = isLiveModeProvider(),
-                cbcEligibility = customerState.cbcEligibility,
-                savedPaymentMethods = emptyList(),
-                allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                canRemovePaymentMethods = customerState.canRemove,
             )
         )
     }
@@ -819,7 +810,6 @@ internal class CustomerSheetViewModel(
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
                 errorReporter = errorReporter,
-                cbcEligibility = customerState.cbcEligibility
             ),
             reset = isFirstPaymentMethod
         )
