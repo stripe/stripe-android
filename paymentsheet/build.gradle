@@ -102,6 +102,7 @@ dependencies {
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.espresso.intents
     androidTestImplementation libs.leakCanary
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.testParameterInjector
