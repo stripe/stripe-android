@@ -33,7 +33,7 @@ internal object USBankAccountTextBuilder {
         }
 
         return if (microdepositsText != null) {
-            mandateText + " ".resolvableString + microdepositsText
+            microdepositsText + " ".resolvableString + mandateText
         } else {
             mandateText
         }
