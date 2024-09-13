@@ -90,6 +90,9 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        GOOGLE_PAY_IS_READY_API_CALL(
+            eventName = "elements.google_pay_repository.is_ready_request_api_call_failure"
+        ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
             eventName = "elements.customer_sheet.elements_session.load_failure"
         ),
@@ -156,6 +159,9 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
+        ),
+        GOOGLE_PAY_JSON_REQUEST_PARSING(
+            partialEventName = "google_pay_repository.is_ready_request_json_parsing_failure"
         ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
