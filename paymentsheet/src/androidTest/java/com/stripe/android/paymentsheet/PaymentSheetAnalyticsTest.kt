@@ -1,10 +1,14 @@
 package com.stripe.android.paymentsheet
 
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -46,11 +50,13 @@ internal class PaymentSheetAnalyticsTest {
     @Before
     fun setup() {
         Stripe.advancedFraudSignalsEnabled = false
+        GooglePayRepository.googlePayAvailabilityClientFactory = createFakeGooglePayAvailabilityClient()
     }
 
     @After
     fun teardown() {
         Stripe.advancedFraudSignalsEnabled = true
+        GooglePayRepository.resetFactory()
     }
 
     @Test
@@ -318,6 +324,18 @@ internal class PaymentSheetAnalyticsTest {
             *requestMatchers,
         ) { response ->
             response.status = "HTTP/1.1 200 OK"
+        }
+    }
+
+    private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {
+        return object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
         }
     }
 }
