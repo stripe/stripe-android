@@ -24,6 +24,7 @@ dependencies {
 
     // Compose
     implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
@@ -31,7 +32,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
-    implementation 'androidx.compose.ui:ui-tooling-preview-android:1.7.1'
+    debugImplementation libs.compose.uiTooling
 
     // Test
     testImplementation testLibs.androidx.archCore
@@ -75,7 +76,6 @@ dependencies {
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.7.1'
 }
 
 android {
