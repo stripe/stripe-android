@@ -31,6 +31,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
+    implementation 'androidx.compose.ui:ui-tooling-preview-android:1.7.1'
 
     // Test
     testImplementation testLibs.androidx.archCore
@@ -74,6 +75,7 @@ dependencies {
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.7.1'
 }
 
 android {

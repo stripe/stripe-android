@@ -1,7 +1,7 @@
 package com.stripe.android.connectsdk
 
 @PrivateBetaConnectSDK
-interface FetchClientSecretCallback {
+fun interface FetchClientSecretCallback {
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback)
 
     interface ClientSecretResultCallback {
