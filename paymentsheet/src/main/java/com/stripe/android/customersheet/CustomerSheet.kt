@@ -8,6 +8,8 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.util.CustomerSheetHacks
@@ -21,7 +23,6 @@ import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.parcelize.Parcelize
-import javax.inject.Inject
 
 /**
  * 🏗 This feature is in private beta and could change 🏗
@@ -30,22 +31,26 @@ import javax.inject.Inject
  * [CustomerAdapter].
  */
 @ExperimentalCustomerSheetApi
-class CustomerSheet @Inject internal constructor(
+class CustomerSheet internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
+    viewModelStoreOwner: ViewModelStoreOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
 ) {
-    private var configureRequest: ConfigureRequest? = null
-
     private val customerSheetActivityLauncher =
         activityResultRegistryOwner.activityResultRegistry.register(
             "CustomerSheet",
             CustomerSheetContract(),
             ::onCustomerSheetResult,
         )
+
+    private val viewModel = ViewModelProvider(
+        owner = viewModelStoreOwner,
+        factory = CustomerSheetConfigViewModel.Factory,
+    )[CustomerSheetConfigViewModel::class.java]
 
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -65,7 +70,7 @@ class CustomerSheet @Inject internal constructor(
     fun configure(
         configuration: Configuration,
     ) {
-        configureRequest = ConfigureRequest(
+        viewModel.configureRequest = CustomerSheetConfigureRequest(
             configuration = configuration,
         )
     }
@@ -75,7 +80,7 @@ class CustomerSheet @Inject internal constructor(
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        val request = configureRequest ?: run {
+        val request = viewModel.configureRequest ?: run {
             callback.onCustomerSheetResult(
                 CustomerSheetResult.Failed(
                     IllegalStateException(
@@ -108,6 +113,7 @@ class CustomerSheet @Inject internal constructor(
      * of the box and clearing manually is not required.
      */
     fun resetCustomer() {
+        viewModel.configureRequest = null
         CustomerSheetHacks.clear()
     }
 
@@ -116,7 +122,7 @@ class CustomerSheet @Inject internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
-        val request = configureRequest
+        val request = viewModel.configureRequest
             ?: return CustomerSheetResult.Failed(
                 IllegalStateException(
                     "Must call `configure` first before attempting to fetch the saved payment option!"
@@ -326,18 +332,13 @@ class CustomerSheet @Inject internal constructor(
         }
     }
 
-    private data class ConfigureRequest(
-        val configuration: Configuration,
-    )
-
     @ExperimentalCustomerSheetApi
     companion object {
 
         /**
          * Create a [CustomerSheet]
          *
-         * @param activity The [Activity] that is presenting [CustomerSheet].
-         * @param configuration The [Configuration] options used to render the [CustomerSheet].
+         * @param activity The [ComponentActivity] that is presenting [CustomerSheet].
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
@@ -350,6 +351,7 @@ class CustomerSheet @Inject internal constructor(
             return getInstance(
                 application = activity.application,
                 lifecycleOwner = activity,
+                viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
                 customerAdapter = customerAdapter,
@@ -361,7 +363,6 @@ class CustomerSheet @Inject internal constructor(
          * Create a [CustomerSheet]
          *
          * @param fragment The [Fragment] that is presenting [CustomerSheet].
-         * @param configuration The [Configuration] options used to render the [CustomerSheet].
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
@@ -374,6 +375,7 @@ class CustomerSheet @Inject internal constructor(
             return getInstance(
                 application = fragment.requireActivity().application,
                 lifecycleOwner = fragment,
+                viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
@@ -384,6 +386,7 @@ class CustomerSheet @Inject internal constructor(
 
         internal fun getInstance(
             application: Application,
+            viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
@@ -397,6 +400,7 @@ class CustomerSheet @Inject internal constructor(
 
             return CustomerSheet(
                 application = application,
+                viewModelStoreOwner = viewModelStoreOwner,
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 paymentOptionFactory = PaymentOptionFactory(

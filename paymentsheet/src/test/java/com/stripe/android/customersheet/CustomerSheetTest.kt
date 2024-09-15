@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.times
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
@@ -142,6 +143,37 @@ class CustomerSheetTest {
             assertThat(selectedResult.selection).isNull()
         }
 
+    @Test
+    fun `On configure, should persist on config changes & process death`() = runTestActivityTest {
+        val customerSheet = CustomerSheet.create(
+            activity = activity,
+            customerAdapter = FakeCustomerAdapter(),
+            callback = {},
+        )
+
+        customerSheet.configure(
+            configuration = CustomerSheet.Configuration
+                .builder(merchantDisplayName = "Merchant, Inc.")
+                .build()
+        )
+
+        customerSheet.present()
+
+        activityScenario.recreate()
+
+        val recreatedCustomerSheet = CustomerSheet.create(
+            activity = activity,
+            customerAdapter = FakeCustomerAdapter(),
+            callback = {},
+        )
+
+        recreatedCustomerSheet.present()
+
+        intended(hasComponent(CustomerSheetActivity::class.java.name), times(2))
+
+        completeTest()
+    }
+
     private fun runPaymentOptionTest(
         configuration: CustomerSheet.Configuration?,
         paymentOption: CustomerAdapter.PaymentOption? = null,
@@ -176,6 +208,7 @@ class CustomerSheetTest {
 
             scenario.onActivity {
                 Scenario(
+                    activityScenario = scenario,
                     activity = it,
                     completeTest = countDownLatch::countDown,
                 ).test()
@@ -194,6 +227,7 @@ class CustomerSheetTest {
     }
 
     private class Scenario(
+        val activityScenario: ActivityScenario<TestActivity>,
         val activity: TestActivity,
         val completeTest: () -> Unit,
     )
