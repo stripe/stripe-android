@@ -30,6 +30,10 @@ tags:
 - tapOn:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
+# SKIP NETWORKING
+- tapOn:
+    id: "skip_cta"
+    optional: true # Networking might not be enabled
 - tapOn:
     text: "Submit"
     retryTapIfNoChange: false
