@@ -1,11 +1,3 @@
-package com.stripe.android.connectsdk.example.ui.accountonboarding
-
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.connectsdk.FetchClientSecretCallback.ClientSecretResultCallback
-import com.stripe.android.connectsdk.PrivateBetaConnectSDK
-import com.stripe.android.connectsdk.example.networking.EmbeddedComponentService
-import kotlinx.coroutines.launch
 
 class AccountOnboardingExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
