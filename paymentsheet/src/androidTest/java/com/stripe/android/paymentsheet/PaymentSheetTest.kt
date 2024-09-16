@@ -349,7 +349,8 @@ internal class PaymentSheetTest {
 
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_intents/pi_example/confirm")
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
