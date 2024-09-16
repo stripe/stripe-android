@@ -33,6 +33,10 @@ tags:
 - tapOn:
     text: "Submit"
     retryTapIfNoChange: false
+# SKIP NETWORKING
+- tapOn:
+    id: "skip_cta"
+    optional: true # Networking might not be enabled
 # CONFIRM AND COMPLETE
 - tapOn:
     id: "done_button"
