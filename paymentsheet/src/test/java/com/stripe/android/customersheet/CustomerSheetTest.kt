@@ -144,7 +144,7 @@ class CustomerSheetTest {
         }
 
     @Test
-    fun `On configure, should persist on config changes & process death`() = runTestActivityTest {
+    fun `On configure, should persist on config changes`() = runTestActivityTest {
         val customerSheet = CustomerSheet.create(
             activity = activity,
             customerAdapter = FakeCustomerAdapter(),
