@@ -16,6 +16,22 @@ import org.json.JSONObject
 import org.junit.Test
 
 class ElementsSessionJsonParserTest {
+
+    @Test
+    fun showUnactivatedPaymentMethodsBug() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        ).parse(
+            ElementsSessionFixtures.TEST
+        )
+
+        assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("card")
+    }
+
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
