@@ -12,10 +12,12 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
@@ -149,6 +151,13 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
+    }
+
+    fun fillCvcRecollection(cvc: String) {
+        waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performTextInput(cvc)
     }
 
     fun clickViewWithText(text: String) {
