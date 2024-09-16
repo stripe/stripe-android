@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][9253](https://github.com/stripe/stripe-android/pull/9253) Fixed an issue where the US Bank Account mandate would reset when confirming the intent.
+
 ## 20.50.0 - 2024-09-12
 
 ### PaymentSheet
