@@ -12,6 +12,8 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -107,8 +109,71 @@ class CustomerSheetTest {
     }
 
     @Test
+    fun `When retrieving a payment option, should return expected payment option from adapter`() =
+        runPaymentOptionTest(
+            paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.fromId("pm_1")),
+            paymentMethods = CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD.copy("pm_1"))),
+            configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
+                .build(),
+        ) { result ->
+            val selectedResult = result.asSelected()
+
+            val paymentMethodSelection = selectedResult.selection.asPaymentMethodSelection()
+
+            assertThat(paymentMethodSelection.paymentMethod)
+                .isEqualTo(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
+            assertThat(paymentMethodSelection.paymentOption.label)
+                .isEqualTo("····4242")
+        }
+
+    @Test
+    fun `When retrieving a payment option, should fail if payment option retrieval fails`() =
+        runPaymentOptionTest(
+            paymentOption = CustomerAdapter.Result.failure(
+                cause = IllegalStateException("Failed to retrieve!"),
+                displayMessage = null,
+            ),
+            configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
+                .build(),
+        ) { result ->
+            val failedResult = result.asFailed()
+
+            assertThat(failedResult.exception).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failedResult.exception.message).isEqualTo("Failed to retrieve!")
+        }
+
+    @Test
+    fun `When retrieving a payment option, should null selection if payment methods retrieval fails`() =
+        runPaymentOptionTest(
+            paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.fromId("pm_1")),
+            paymentMethods = CustomerAdapter.Result.failure(
+                cause = IllegalStateException("Failed to retrieve!"),
+                displayMessage = null,
+            ),
+            configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
+                .build(),
+        ) { result ->
+            val selectedResult = result.asSelected()
+
+            assertThat(selectedResult.selection).isNull()
+        }
+
+    @Test
+    fun `When retrieving a payment option, should return null selection if option no longer in payment methods`() =
+        runPaymentOptionTest(
+            paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.fromId("pm_1")),
+            paymentMethods = CustomerAdapter.Result.success(listOf()),
+            configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
+                .build(),
+        ) { result ->
+            val selectedResult = result.asSelected()
+
+            assertThat(selectedResult.selection).isNull()
+        }
+
+    @Test
     fun `When Google payment option, should return option is config enables Google Pay`() = runPaymentOptionTest(
-        paymentOption = CustomerAdapter.PaymentOption.GooglePay,
+        paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
             .googlePayEnabled(googlePayConfiguration = true)
             .build(),
@@ -120,7 +185,7 @@ class CustomerSheetTest {
 
     @Test
     fun `When Google payment option, should not return option is config disables Google Pay`() = runPaymentOptionTest(
-        paymentOption = CustomerAdapter.PaymentOption.GooglePay,
+        paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
             .googlePayEnabled(googlePayConfiguration = false)
             .build(),
@@ -133,7 +198,7 @@ class CustomerSheetTest {
     @Test
     fun `When Google payment option, should not return option is config has not Google Pay config`() =
         runPaymentOptionTest(
-            paymentOption = CustomerAdapter.PaymentOption.GooglePay,
+            paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
             configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
                 .build(),
         ) { result ->
@@ -144,14 +209,18 @@ class CustomerSheetTest {
 
     private fun runPaymentOptionTest(
         configuration: CustomerSheet.Configuration?,
-        paymentOption: CustomerAdapter.PaymentOption? = null,
+        paymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =
+            CustomerAdapter.Result.success(null),
+        paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
+            CustomerAdapter.Result.success(listOf()),
         test: (result: CustomerSheetResult) -> Unit,
     ) {
         runTestActivityTest {
             val customerSheet = CustomerSheet.create(
                 activity = activity,
                 customerAdapter = FakeCustomerAdapter(
-                    selectedPaymentOption = CustomerAdapter.Result.success(paymentOption),
+                    selectedPaymentOption = paymentOption,
+                    paymentMethods = paymentMethods,
                 ),
                 callback = {},
             )
@@ -183,6 +252,10 @@ class CustomerSheetTest {
 
             assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
         }
+    }
+
+    private fun PaymentOptionSelection?.asPaymentMethodSelection(): PaymentOptionSelection.PaymentMethod {
+        return this as PaymentOptionSelection.PaymentMethod
     }
 
     private fun CustomerSheetResult.asSelected(): CustomerSheetResult.Selected {
