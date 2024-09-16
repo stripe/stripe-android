@@ -3227,6 +3227,61 @@ class CustomerSheetViewModelTest {
             intentConfirmationInterceptor.calls.ensureAllEventsConsumed()
         }
 
+    @Test
+    fun `If has remove permissions, can remove should be true in state`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            customerPermissions = CustomerPermissions(
+                canRemovePaymentMethods = true,
+            ),
+        )
+
+        val selectState = viewModel.viewState.value.asSelectState()
+
+        assertThat(selectState.canRemovePaymentMethods).isTrue()
+        assertThat(selectState.canEdit).isTrue()
+        assertThat(selectState.topBarState {}.showEditMenu).isTrue()
+    }
+
+    @Test
+    fun `If has no remove permissions, can remove should be false in state`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            customerPermissions = CustomerPermissions(
+                canRemovePaymentMethods = false,
+            ),
+        )
+
+        val selectState = viewModel.viewState.value.asSelectState()
+
+        assertThat(selectState.canRemovePaymentMethods).isFalse()
+        assertThat(selectState.canEdit).isFalse()
+        assertThat(selectState.topBarState {}.showEditMenu).isFalse()
+    }
+
+    @Test
+    fun `If has no remove permissions but is CBC eligible, can remove is false but can edit is true`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires),
+                ),
+                customerPermissions = CustomerPermissions(
+                    canRemovePaymentMethods = false,
+                ),
+            )
+
+            val selectState = viewModel.viewState.value.asSelectState()
+
+            assertThat(selectState.canRemovePaymentMethods).isFalse()
+            assertThat(selectState.canEdit).isTrue()
+            assertThat(selectState.topBarState {}.showEditMenu).isTrue()
+        }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {

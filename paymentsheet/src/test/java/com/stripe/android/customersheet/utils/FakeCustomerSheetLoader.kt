@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.utils
 
+import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
@@ -29,6 +30,9 @@ internal class FakeCustomerSheetLoader(
     private val delay: Duration = Duration.ZERO,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val financialConnectionsAvailable: Boolean = false,
+    private val permissions: CustomerPermissions = CustomerPermissions(
+        canRemovePaymentMethods = true,
+    ),
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -48,6 +52,7 @@ internal class FakeCustomerSheetLoader(
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
+                    customerPermissions = permissions,
                     paymentSelection = paymentSelection,
                     validationError = null,
                 )
