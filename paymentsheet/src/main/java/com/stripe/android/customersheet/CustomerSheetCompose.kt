@@ -4,6 +4,7 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -29,6 +30,10 @@ fun rememberCustomerSheet(
         "CustomerSheet must be created in the context of an Activity"
     }
 
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
+        "CustomerSheet must be created with access to a ViewModelStoreOwner"
+    }
+
     return remember(
         customerAdapter,
         callback,
@@ -37,6 +42,7 @@ fun rememberCustomerSheet(
             application = activity.application,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
+            viewModelStoreOwner = viewModelStoreOwner,
             customerAdapter = customerAdapter,
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
