@@ -34,8 +34,8 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.connectsdk.example.ui.accountonboarding.AccountOnboardingExampleActivity
-import com.stripe.android.connectsdk.example.ui.payouts.PayoutsExampleActivity
+import com.stripe.android.connectsdk.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
+import com.stripe.android.connectsdk.example.ui.features.payouts.PayoutsExampleActivity
 
 class MainActivity : ComponentActivity() {
 
