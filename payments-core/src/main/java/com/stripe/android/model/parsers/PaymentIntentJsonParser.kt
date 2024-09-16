@@ -70,7 +70,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
-        )
+        ).map { it.lowercase() }
 
         val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
             .map { it.lowercase() }

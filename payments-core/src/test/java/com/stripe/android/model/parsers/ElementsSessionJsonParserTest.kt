@@ -18,21 +18,6 @@ import org.junit.Test
 class ElementsSessionJsonParserTest {
 
     @Test
-    fun showUnactivatedPaymentMethodsBug() {
-        val elementsSession = ElementsSessionJsonParser(
-            ElementsSessionParams.PaymentIntentType(
-                clientSecret = "secret",
-                externalPaymentMethods = emptyList(),
-            ),
-            apiKey = "test",
-        ).parse(
-            ElementsSessionFixtures.TEST
-        )
-
-        assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("card")
-    }
-
-    @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -787,6 +772,23 @@ class ElementsSessionJsonParserTest {
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
         assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+    }
+
+    @Test
+    fun parsePaymentIntent_excludesUnactivatedPaymentMethodTypesInLiveMode() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_live_abc123",
+        ).parse(
+            JSONObject(
+                ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
+            )
+        )
+
+        assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("au_becs_debit")
     }
 
     private fun allowRedisplayTest(
