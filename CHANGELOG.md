@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.50.1 - 2024-09-16
+
 ### PaymentSheet
 * [FIXED][9253](https://github.com/stripe/stripe-android/pull/9253) Fixed an issue where the US Bank Account mandate would reset when confirming the intent.
 
