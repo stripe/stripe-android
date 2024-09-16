@@ -23,8 +23,11 @@ internal interface PaymentMethodDefinition {
     fun uiDefinitionFactory(): UiDefinitionFactory
 }
 
-internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {
-    if (type.code !in metadata.stripeIntent.paymentMethodTypes) {
+internal fun PaymentMethodDefinition.isSupported(
+    metadata: PaymentMethodMetadata,
+    requireToBeIncludedInIntentPaymentMethodTypes: Boolean = true,
+): Boolean {
+    if (requireToBeIncludedInIntentPaymentMethodTypes && type.code !in metadata.stripeIntent.paymentMethodTypes) {
         return false
     }
     return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->

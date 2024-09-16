@@ -788,6 +788,7 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 isGooglePayReady = false,
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkMode = null,
             )
         )
     }
@@ -850,6 +851,7 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 financialConnectionsAvailable = false,
                 linkInlineConfiguration = null,
+                linkMode = null,
             )
         )
     }

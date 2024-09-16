@@ -6,8 +6,10 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -45,6 +47,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val linkMode: LinkMode?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -138,11 +141,28 @@ internal data class PaymentMethodMetadata(
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)
-        }.filterNot {
+        }.withDefinitionIfSupported(
+            definition = LinkCardBrandDefinition,
+        ).filterNot {
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
             paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
+        }
+    }
+
+    private fun List<PaymentMethodDefinition>.withDefinitionIfSupported(
+        definition: PaymentMethodDefinition,
+    ): List<PaymentMethodDefinition> {
+        val isSupported = definition.isSupported(
+            metadata = this@PaymentMethodMetadata,
+            requireToBeIncludedInIntentPaymentMethodTypes = false,
+        )
+
+        return if (isSupported) {
+            this + definition
+        } else {
+            this
         }
     }
 
@@ -272,6 +292,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 isGooglePayReady = isGooglePayReady,
             )
         }
@@ -303,6 +324,7 @@ internal data class PaymentMethodMetadata(
                 linkInlineConfiguration = null,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 externalPaymentMethodSpecs = emptyList(),
             )
         }
