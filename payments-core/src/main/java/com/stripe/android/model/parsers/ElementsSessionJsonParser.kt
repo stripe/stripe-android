@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONArray
@@ -35,21 +36,15 @@ internal class ElementsSessionJsonParser(
                 .map { it.lowercase() }
         val paymentMethodSpecs = json.optJSONArray(FIELD_PAYMENT_METHOD_SPECS)?.toString()
         val externalPaymentMethodData = json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_DATA)?.toString()
-        val linkFundingSources = json.optJSONObject(FIELD_LINK_SETTINGS)?.optJSONArray(
-            FIELD_LINK_FUNDING_SOURCES
-        )
-        val linkPassthroughModeEnabled = json.optJSONObject(FIELD_LINK_SETTINGS)
-            ?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
-        val disableLinkSignup = json.optJSONObject(FIELD_LINK_SETTINGS)
-            ?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
-        val linkFlags = json.optJSONObject(FIELD_LINK_SETTINGS)?.let { linkSettingsJson ->
-            parseLinkFlags(linkSettingsJson)
-        } ?: emptyMap()
+
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
+
+        val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
+        val linkFundingSources = linkSettings?.optJSONArray(FIELD_LINK_FUNDING_SOURCES)
 
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
@@ -67,12 +62,7 @@ internal class ElementsSessionJsonParser(
 
         return if (stripeIntent != null) {
             ElementsSession(
-                linkSettings = ElementsSession.LinkSettings(
-                    linkFundingSources = jsonArrayToList(linkFundingSources),
-                    linkPassthroughModeEnabled = linkPassthroughModeEnabled,
-                    linkFlags = linkFlags,
-                    disableLinkSignup = disableLinkSignup,
-                ),
+                linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
                 customer = customer,
@@ -143,6 +133,30 @@ internal class ElementsSessionJsonParser(
                 }
             }
         }
+    }
+
+    private fun parseLinkSettings(
+        json: JSONObject?,
+        linkFundingSources: JSONArray?,
+    ): ElementsSession.LinkSettings {
+        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
+        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
+
+        val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
+            LinkMode.entries.firstOrNull { it.value == mode }
+        }
+
+        val linkFlags = json?.let { linkSettingsJson ->
+            parseLinkFlags(linkSettingsJson)
+        } ?: emptyMap()
+
+        return ElementsSession.LinkSettings(
+            linkFundingSources = jsonArrayToList(linkFundingSources),
+            linkPassthroughModeEnabled = linkPassthroughModeEnabled,
+            linkMode = linkMode,
+            linkFlags = linkFlags,
+            disableLinkSignup = disableLinkSignup,
+        )
     }
 
     private fun parseCustomer(json: JSONObject?): ElementsSession.Customer? {
@@ -301,6 +315,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

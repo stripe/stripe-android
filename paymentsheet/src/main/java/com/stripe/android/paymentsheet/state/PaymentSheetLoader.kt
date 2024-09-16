@@ -583,7 +583,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
-                linkMode = elementsSession.linkMode,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
