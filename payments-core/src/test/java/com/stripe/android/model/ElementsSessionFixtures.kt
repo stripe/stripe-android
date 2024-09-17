@@ -916,7 +916,7 @@ internal object ElementsSessionFixtures {
                   "currency": "aud",
                   "description": null,
                   "last_payment_error": null,
-                  "livemode": false,
+                  "livemode": true,
                   "next_action": null,
                   "payment_method": null,
                   "payment_method_types": [

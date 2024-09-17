@@ -30,9 +30,7 @@ internal class ElementsSessionJsonParser(
         }
 
         val countryCode = paymentMethodPreference.optString(FIELD_COUNTRY_CODE)
-        val unactivatedPaymentMethodTypes =
-            jsonArrayToList(json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES))
-                .map { it.lowercase() }
+        val unactivatedPaymentMethodTypes = json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         val paymentMethodSpecs = json.optJSONArray(FIELD_PAYMENT_METHOD_SPECS)?.toString()
         val externalPaymentMethodData = json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_DATA)?.toString()
         val linkFundingSources = json.optJSONObject(FIELD_LINK_SETTINGS)?.optJSONArray(
@@ -90,7 +88,7 @@ internal class ElementsSessionJsonParser(
         elementsSessionId: String?,
         paymentMethodPreference: JSONObject?,
         orderedPaymentMethodTypes: JSONArray?,
-        unactivatedPaymentMethodTypes: List<String>,
+        unactivatedPaymentMethodTypes: JSONArray?,
         linkFundingSources: JSONArray?,
         countryCode: String
     ): StripeIntent? {
