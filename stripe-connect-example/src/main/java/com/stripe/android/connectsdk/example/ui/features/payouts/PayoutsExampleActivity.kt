@@ -49,8 +49,14 @@ class PayoutsExampleActivity : ComponentActivity() {
                             LaunchEmbeddedComponentsScreen(
                                 embeddedComponentName = "Payouts",
                                 selectedAccount = payoutsExampleState.selectedAccount,
+                                selectedAppearance = payoutsExampleState.selectedAppearance,
+                                appearances = payoutsExampleState.appearances,
                                 connectSDKAccounts = accounts,
                                 onConnectSDKAccountSelected = viewModel::onAccountSelected,
+                                onAppearanceChanged = {
+                                    viewModel.onAppearanceChanged(it)
+                                    embeddedComponentManager.update(it?.first ?: EmbeddedComponentManager.AppearanceVariables())
+                                },
                                 onEmbeddedComponentLaunched = embeddedComponentManager::presentPayouts,
                             )
                         } else {

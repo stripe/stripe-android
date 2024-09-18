@@ -5,15 +5,22 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import com.stripe.android.connectsdk.EmbeddedComponentActivity.EmbeddedComponent
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager private constructor(
     private val activity: ComponentActivity,
     private val configuration: Configuration,
+    initialAppearance: AppearanceVariables = AppearanceVariables(),
     internal val fetchClientSecret: FetchClientSecretCallback,
 ) {
+
+    private var _appearance = MutableStateFlow(initialAppearance)
+    internal var appearance: StateFlow<AppearanceVariables> = _appearance
 
     @PrivateBetaConnectSDK
     fun presentAccountOnboarding() {
@@ -36,13 +43,19 @@ class EmbeddedComponentManager private constructor(
     }
 
     @PrivateBetaConnectSDK
-    fun update(appearance: Appearance) {
-        throw NotImplementedError("Not yet implemented")
+    fun update(appearance: AppearanceVariables) {
+        _appearance.value = appearance
     }
 
     @PrivateBetaConnectSDK
     fun logout() {
         throw NotImplementedError("Not yet implemented")
+    }
+
+    internal fun buildInitParams(): StripeConnectParams {
+        return StripeConnectParams(
+            locale = null
+        )
     }
 
     companion object {
@@ -71,100 +84,96 @@ class EmbeddedComponentManager private constructor(
 
     // Appearance classes
 
+    @Serializable
+    data class AppearanceOptions(
+        val variables: AppearanceVariables? = null
+    )
+
     @Parcelize
-    data class Appearance(
-        val typography: Typography,
-        val colors: Colors,
-        val spacingUnit: Float? = null,
-        val buttonPrimary: Button,
-        val buttonSecondary: Button,
-        val badgeNeutral: Badge,
-        val badgeSuccess: Badge,
-        val badgeWarning: Badge,
-        val badgeDanger: Badge,
-        val cornerRadius: CornerRadius
-    ): Parcelable {
-        companion object {
-            val default = Appearance(
-                typography = Typography(),
-                colors = Colors(),
-                spacingUnit = null,
-                buttonPrimary = Button(),
-                buttonSecondary = Button(),
-                badgeNeutral = Badge(),
-                badgeSuccess = Badge(),
-                badgeWarning = Badge(),
-                badgeDanger = Badge(),
-                cornerRadius = CornerRadius()
-            )
-        }
+    @Serializable
+    data class AppearanceVariables(
+        val fontFamily: String? = null,
+        val fontSizeBase: String? = null,
+        val spacingUnit: String? = null,
+        val borderRadius: String? = null,
+        val colorPrimary: String? = null,
+        val colorBackground: String? = null,
+        val colorText: String? = null,
+        val colorDanger: String? = null,
+        val buttonPrimaryColorBackground: String? = null,
+        val buttonPrimaryColorBorder: String? = null,
+        val buttonPrimaryColorText: String? = null,
+        val buttonSecondaryColorBackground: String? = null,
+        val buttonSecondaryColorBorder: String? = null,
+        val buttonSecondaryColorText: String? = null,
+        val colorSecondaryText: String? = null,
+        val actionPrimaryColorText: String? = null,
+        val actionSecondaryColorText: String? = null,
+        val badgeNeutralColorBackground: String? = null,
+        val badgeNeutralColorText: String? = null,
+        val badgeNeutralColorBorder: String? = null,
+        val badgeSuccessColorBackground: String? = null,
+        val badgeSuccessColorText: String? = null,
+        val badgeSuccessColorBorder: String? = null,
+        val badgeWarningColorBackground: String? = null,
+        val badgeWarningColorText: String? = null,
+        val badgeWarningColorBorder: String? = null,
+        val badgeDangerColorBackground: String? = null,
+        val badgeDangerColorText: String? = null,
+        val badgeDangerColorBorder: String? = null,
+        val offsetBackgroundColor: String? = null,
+        val formBackgroundColor: String? = null,
+        val colorBorder: String? = null,
+        val formHighlightColorBorder: String? = null,
+        val formAccentColor: String? = null,
+        val buttonBorderRadius: String? = null,
+        val formBorderRadius: String? = null,
+        val badgeBorderRadius: String? = null,
+        val overlayBorderRadius: String? = null,
+        val overlayZIndex: Int? = null,
+        val bodyMdFontSize: String? = null,
+        val bodyMdFontWeight: String? = null,
+        val bodySmFontSize: String? = null,
+        val bodySmFontWeight: String? = null,
+        val headingXlFontSize: String? = null,
+        val headingXlFontWeight: String? = null,
+        val headingXlTextTransform: String? = null,
+        val headingLgFontSize: String? = null,
+        val headingLgFontWeight: String? = null,
+        val headingLgTextTransform: String? = null,
+        val headingMdFontSize: String? = null,
+        val headingMdFontWeight: String? = null,
+        val headingMdTextTransform: String? = null,
+        val headingSmFontSize: String? = null,
+        val headingSmFontWeight: String? = null,
+        val headingSmTextTransform: String? = null,
+        val headingXsFontSize: String? = null,
+        val headingXsFontWeight: String? = null,
+        val headingXsTextTransform: String? = null,
+        val labelMdFontSize: String? = null,
+        val labelMdFontWeight: String? = null,
+        val labelMdTextTransform: String? = null,
+        val labelSmFontSize: String? = null,
+        val labelSmFontWeight: String? = null,
+        val labelSmTextTransform: String? = null
+    ) : Parcelable
 
-        @Parcelize
-        data class Typography(
-            val font: String? = null,
-            val fontSizeBase: Float? = null,
-            val bodyMd: Style = Style(),
-            val bodySm: Style = Style(),
-            val headingXl: Style = Style(),
-            val headingLg: Style = Style(),
-            val headingMd: Style = Style(),
-            val headingSm: Style = Style(),
-            val headingXs: Style = Style(),
-            val labelMd: Style = Style(),
-            val labelSm: Style = Style()
-        ): Parcelable {
-            @Parcelize
-            data class Style(
-                val fontSize: Float? = null,
-                val weight: String? = null,
-                val textTransform: TextTransform? = null
-            ): Parcelable
-        }
+    @Serializable
+    data class StripeConnectParams(
+        /**
+         * Appearance options for the Connect instance.
+         * @see https://stripe.com/docs/connect/customize-connect-embedded-components
+         */
+        val appearance: AppearanceOptions? = null,
 
-        enum class TextTransform {
-            NONE,
-            UPPERCASE,
-            LOWERCASE,
-            CAPITALIZE
-        }
+        /**
+         * The locale to use for the Connect instance.
+         */
+        val locale: String? = null,
 
-        @Parcelize
-        data class Colors(
-            @ColorInt val primary: Int? = null,
-            @ColorInt val text: Int? = null,
-            @ColorInt val danger: Int? = null,
-            @ColorInt val background: Int? = null,
-            @ColorInt val secondaryText: Int? = null,
-            @ColorInt val border: Int? = null,
-            @ColorInt val actionPrimaryText: Int? = null,
-            @ColorInt val actionSecondaryText: Int? = null,
-            @ColorInt val offsetBackground: Int? = null,
-            @ColorInt val formBackground: Int? = null,
-            @ColorInt val formHighlightBorder: Int? = null,
-            @ColorInt val formAccent: Int? = null
-        ): Parcelable
-
-        @Parcelize
-        data class Button(
-            @ColorInt val colorBackground: Int? = null,
-            @ColorInt val colorBorder: Int? = null,
-            @ColorInt val colorText: Int? = null
-        ): Parcelable
-
-        @Parcelize
-        data class Badge(
-            @ColorInt val colorBackground: Int? = null,
-            @ColorInt val colorText: Int? = null,
-            @ColorInt val colorBorder: Int? = null
-        ): Parcelable
-
-        @Parcelize
-        data class CornerRadius(
-            val base: Float? = null,
-            val form: Float? = null,
-            val button: Float? = null,
-            val badge: Float? = null,
-            val overlay: Float? = null
-        ): Parcelable
-    }
+//        /**
+//         * An array of custom fonts, which embedded components created from a ConnectInstance can use.
+//         */
+//        val fonts: List<Any?>? = null ,
+    )
 }

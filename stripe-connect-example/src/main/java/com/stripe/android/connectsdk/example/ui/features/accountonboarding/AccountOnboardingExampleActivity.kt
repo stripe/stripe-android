@@ -18,6 +18,9 @@ import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.ConnectSdkExampleTheme
 import com.stripe.android.connectsdk.example.MainContent
 import com.stripe.android.connectsdk.example.ui.common.LaunchEmbeddedComponentsScreen
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class AccountOnboardingExampleActivity : ComponentActivity() {
 
@@ -49,8 +52,19 @@ class AccountOnboardingExampleActivity : ComponentActivity() {
                             LaunchEmbeddedComponentsScreen(
                                 embeddedComponentName = "Account Onboarding",
                                 selectedAccount = accountOnboardingExampleState.selectedAccount,
+                                selectedAppearance = accountOnboardingExampleState.selectedAppearance,
                                 connectSDKAccounts = accounts,
+                                appearances = accountOnboardingExampleState.appearances,
                                 onConnectSDKAccountSelected = viewModel::onAccountSelected,
+                                onAppearanceChanged = {
+                                    viewModel.onAppearanceChanged(it)
+                                    MainScope().launch {
+                                        delay(5000)
+                                        embeddedComponentManager.update(
+                                            it?.first ?: EmbeddedComponentManager.AppearanceVariables()
+                                        )
+                                    }
+                                },
                                 onEmbeddedComponentLaunched = embeddedComponentManager::presentAccountOnboarding,
                             )
                         } else {

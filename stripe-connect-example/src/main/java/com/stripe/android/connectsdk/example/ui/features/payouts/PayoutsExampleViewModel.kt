@@ -2,10 +2,16 @@ package com.stripe.android.connectsdk.example.ui.features.payouts
 
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
+import com.stripe.android.connectsdk.EmbeddedComponentManager
 import com.stripe.android.connectsdk.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.networking.EmbeddedComponentService
 import com.stripe.android.connectsdk.example.networking.Merchant
+import com.stripe.android.connectsdk.example.ui.common.hotDogAppearance
+import com.stripe.android.connectsdk.example.ui.common.oceanBreezeAppearance
+import com.stripe.android.connectsdk.example.ui.common.ogreAppearance
+import com.stripe.android.connectsdk.example.ui.common.protanopiaAppearance
+import com.stripe.android.connectsdk.example.ui.common.purpleHazeAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@OptIn(PrivateBetaConnectSDK::class)
 class PayoutsExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
@@ -29,7 +36,6 @@ class PayoutsExampleViewModel(
         getAccounts()
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
         val account = _state.value.selectedAccount ?: return
         networkingScope.launch {
@@ -46,6 +52,12 @@ class PayoutsExampleViewModel(
     fun onAccountSelected(account: Merchant) {
         _state.update {
             it.copy(selectedAccount = account)
+        }
+    }
+
+    fun onAppearanceChanged(appearance: Pair<EmbeddedComponentManager.AppearanceVariables, String>?) {
+        _state.update {
+            it.copy(selectedAppearance = appearance)
         }
     }
 
@@ -66,6 +78,14 @@ class PayoutsExampleViewModel(
     }
 
     data class PayoutsExampleState(
+        val selectedAppearance: Pair<EmbeddedComponentManager.AppearanceVariables, String>? = null,
+        val appearances: List<Pair<EmbeddedComponentManager.AppearanceVariables, String>> = listOf(
+            purpleHazeAppearance to "Purple Haze",
+            ogreAppearance to "Ogre",
+            protanopiaAppearance to "Protanopia",
+            oceanBreezeAppearance to "Ocean Breeze",
+            hotDogAppearance to "Hot Dog",
+        ),
         val selectedAccount: Merchant? = null,
         val accounts: List<Merchant>? = null,
         val publishableKey: String? = null,

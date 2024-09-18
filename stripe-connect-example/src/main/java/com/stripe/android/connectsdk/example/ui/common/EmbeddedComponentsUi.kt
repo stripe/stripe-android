@@ -22,14 +22,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.connectsdk.EmbeddedComponentManager
+import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.networking.Merchant
 
+@OptIn(PrivateBetaConnectSDK::class)
 @Composable
 fun LaunchEmbeddedComponentsScreen(
     embeddedComponentName: String,
     selectedAccount: Merchant?,
+    selectedAppearance: Pair<EmbeddedComponentManager.AppearanceVariables, String>?,
     connectSDKAccounts: List<Merchant>,
+    appearances: List<Pair<EmbeddedComponentManager.AppearanceVariables, String>>,
     onConnectSDKAccountSelected: (Merchant) -> Unit,
+    onAppearanceChanged: (Pair<EmbeddedComponentManager.AppearanceVariables, String>?) -> Unit,
     onEmbeddedComponentLaunched: () -> Unit,
 ) {
     Box(
@@ -41,6 +47,11 @@ fun LaunchEmbeddedComponentsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            AppearanceSelector(
+                selectedAppearance = selectedAppearance,
+                appearances = appearances,
+                onAppearanceSelected = onAppearanceChanged,
+            )
             AccountSelector(
                 selectedAccount = selectedAccount,
                 accounts = connectSDKAccounts,
@@ -94,46 +105,122 @@ fun AccountSelector(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class, PrivateBetaConnectSDK::class)
+@Composable
+fun AppearanceSelector(
+    selectedAppearance: Pair<EmbeddedComponentManager.AppearanceVariables, String>? = null,
+    appearances: List<Pair<EmbeddedComponentManager.AppearanceVariables, String>>,
+    onAppearanceSelected: (Pair<EmbeddedComponentManager.AppearanceVariables, String>?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+    ) {
+        TextField(
+            readOnly = true,
+            value = selectedAppearance?.second ?: "Default", // display name
+            onValueChange = {},
+            label = { Text("Appearance") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    onAppearanceSelected(null)
+                    expanded = false
+                }
+            ) {
+                Text(text = "Default")
+            }
+            for (appearance in appearances) {
+                DropdownMenuItem(
+                    onClick = {
+                        onAppearanceSelected(appearance)
+                        expanded = false
+                    }
+                ) {
+                    Text(text = appearance.second) // display name
+                }
+            }
+        }
+    }
+}
+
+@OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
 fun LaunchEmbeddedComponentsScreenPreviewWithSelectedAccount() {
     LaunchEmbeddedComponentsScreen(
         embeddedComponentName = "Payouts",
+        selectedAppearance = null,
         selectedAccount = Merchant(merchantId = "1", displayName = "Selected Merchant"),
         connectSDKAccounts = listOf(
             Merchant(merchantId = "2", displayName = "Merchant 1"),
             Merchant(merchantId = "3", displayName = "Merchant 2"),
             Merchant(merchantId = "4", displayName = "Merchant 3")
         ),
+        appearances = listOf(
+            purpleHazeAppearance to "Purple Haze",
+            ogreAppearance to "Ogre",
+            protanopiaAppearance to "Protanopia",
+            oceanBreezeAppearance to "Ocean Breeze",
+            hotDogAppearance to "Hot Dog",
+        ),
         onConnectSDKAccountSelected = {},
+        onAppearanceChanged = {},
         onEmbeddedComponentLaunched = {}
     )
 }
 
+@OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
 fun LaunchEmbeddedComponentsScreenPreviewWithNoSelectedAccount() {
     LaunchEmbeddedComponentsScreen(
         embeddedComponentName = "Payouts",
         selectedAccount = null,
+        selectedAppearance = null,
         connectSDKAccounts = listOf(
             Merchant(merchantId = "2", displayName = "Merchant 1"),
             Merchant(merchantId = "3", displayName = "Merchant 2"),
             Merchant(merchantId = "4", displayName = "Merchant 3")
         ),
+        appearances = listOf(
+            purpleHazeAppearance to "Purple Haze",
+            ogreAppearance to "Ogre",
+            protanopiaAppearance to "Protanopia",
+            oceanBreezeAppearance to "Ocean Breeze",
+            hotDogAppearance to "Hot Dog",
+        ),
         onConnectSDKAccountSelected = {},
+        onAppearanceChanged = {},
         onEmbeddedComponentLaunched = {}
     )
 }
 
+@OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
 fun LaunchEmbeddedComponentsScreenPreviewWithEmptyAccounts() {
     LaunchEmbeddedComponentsScreen(
         embeddedComponentName = "Payouts",
+        selectedAppearance = null,
         selectedAccount = Merchant(merchantId = "1", displayName = "Selected Merchant"),
         connectSDKAccounts = emptyList(),
+        appearances = listOf(
+            purpleHazeAppearance to "Purple Haze",
+            ogreAppearance to "Ogre",
+            protanopiaAppearance to "Protanopia",
+            oceanBreezeAppearance to "Ocean Breeze",
+            hotDogAppearance to "Hot Dog",
+        ),
         onConnectSDKAccountSelected = {},
+        onAppearanceChanged = {},
         onEmbeddedComponentLaunched = {}
     )
 }

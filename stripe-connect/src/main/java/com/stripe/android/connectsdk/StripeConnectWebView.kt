@@ -3,8 +3,13 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.stripe.android.connectsdk.EmbeddedComponentManager
+import com.stripe.android.connectsdk.EmbeddedComponentManager.StripeConnectParams
 import com.stripe.android.connectsdk.FetchClientSecretCallback
 import com.stripe.android.connectsdk.PrivateBetaConnectSDK
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.runBlocking
@@ -14,6 +19,11 @@ import kotlinx.serialization.json.Json
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewClient: WebViewClient() {
+
+    private val json = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         initJavascriptBridge(view!!)
@@ -25,7 +35,7 @@ internal class StripeConnectWebViewClient: WebViewClient() {
                 Android.accountSessionClaimed = (message) => {
                     AndroidInternal.accountSessionClaimed(JSON.stringify(message));
                 };
-                
+
                 Android.pageDidLoad = (message) => {
                     AndroidInternal.pageDidLoad(JSON.stringify(message));
                 };
@@ -40,6 +50,10 @@ internal class StripeConnectWebViewClient: WebViewClient() {
                     });
                 };
 
+                Android.fetchInitParams = () => {
+                    return JSON.parse(AndroidInternal.fetchInitParams());
+                };
+
                 Android.onSetterFunctionCalled = (message) => {
                     AndroidInternal.onSetterFunctionCalled(JSON.stringify(message));
                 };
@@ -50,6 +64,22 @@ internal class StripeConnectWebViewClient: WebViewClient() {
             """.trimIndent(),
             null
         )
+
+        MainScope().launch {
+            delay(1000)
+            EmbeddedComponentManager.instance!!.appearance.collectLatest { appearance ->
+                if (appearance == EmbeddedComponentManager.AppearanceVariables()) return@collectLatest
+                val updatedParams = StripeConnectParams(
+                    appearance = EmbeddedComponentManager.AppearanceOptions(appearance)
+                )
+                val appearanceJson = Json.encodeToString(StripeConnectParams.serializer(), updatedParams)
+                println("TODO updating: `Android.updateConnectInstance(${appearanceJson});`")
+                webView.evaluateJavascript(
+                    "Android.updateConnectInstance(${appearanceJson});",
+                    null
+                )
+            }
+        }
     }
 
     inner class WebLoginJsInterface {
@@ -57,14 +87,15 @@ internal class StripeConnectWebViewClient: WebViewClient() {
         fun debug(message: String) {
             println("Debug log from JS: $message")
         }
-
-        @JavascriptInterface
-        fun fetchInitParams() {
-            println("InitParams fetched")
-        }
     }
 
     inner class WebLoginJsInterfaceInternal {
+        @JavascriptInterface
+        fun fetchInitParams(): String {
+            val initParams = EmbeddedComponentManager.instance!!.buildInitParams()
+            return json.encodeToString(StripeConnectParams.serializer(), initParams)
+        }
+
         @JavascriptInterface
         fun log(message: String) {
             println("Log from JS: $message")
@@ -72,25 +103,25 @@ internal class StripeConnectWebViewClient: WebViewClient() {
 
         @JavascriptInterface
         fun onSetterFunctionCalled(message: String) {
-            val setterMessage = Json.decodeFromString<SetterMessage>(message)
+            val setterMessage = json.decodeFromString<SetterMessage>(message)
             println("Setter function called: $setterMessage")
         }
 
         @JavascriptInterface
         fun openSecureWebView(message: String) {
-            val secureWebViewData = Json.decodeFromString<SecureWebViewMessage>(message)
+            val secureWebViewData = json.decodeFromString<SecureWebViewMessage>(message)
             println("Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
         fun pageDidLoad(message: String) {
-            val pageLoadMessage = Json.decodeFromString<PageLoadMessage>(message)
+            val pageLoadMessage = json.decodeFromString<PageLoadMessage>(message)
             println("Page did load: $pageLoadMessage")
         }
 
         @JavascriptInterface
         fun accountSessionClaimed(message: String) {
-            val accountSessionClaimedMessage = Json.decodeFromString<AccountSessionClaimedMessage>(message)
+            val accountSessionClaimedMessage = json.decodeFromString<AccountSessionClaimedMessage>(message)
             println("Account session claimed: $accountSessionClaimedMessage")
         }
 
@@ -116,23 +147,29 @@ internal class StripeConnectWebViewClient: WebViewClient() {
 
     @Serializable
     data class AccountSessionClaimedMessage(
-        val merchantId: String
+        val merchantId: String,
+        val elementTagName: String,
     )
 
     @Serializable
     data class PageLoadMessage(
-        val pageViewId: String
+        val pageViewId: String,
     )
 
     @Serializable
     data class SetterMessage(
         val setter: String,
-        val value: String,
+        val value: SetterValue,
+    )
+
+    @Serializable
+    data class SetterValue(
+        val elementTagName: String,
     )
 
     @Serializable
     data class SecureWebViewMessage(
         val id: String,
-        val url: String
+        val url: String,
     )
 }
