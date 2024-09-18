@@ -593,7 +593,7 @@ class DefaultEventReporterTest {
         val eventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         eventReporter.simulateSuccessfulSetup(
-            linkMode = LinkMode.PaymentMethod
+            linkMode = LinkMode.LinkPaymentMethod
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -730,7 +730,7 @@ class DefaultEventReporterTest {
 
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
-        linkMode: LinkMode? = LinkMode.PaymentMethod,
+        linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(

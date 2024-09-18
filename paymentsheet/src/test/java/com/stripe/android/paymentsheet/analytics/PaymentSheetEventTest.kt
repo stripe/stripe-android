@@ -394,7 +394,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain payment method mode for Link if provided`() {
         val event = createLoadSucceededEvent(
-            linkMode = LinkMode.PaymentMethod,
+            linkMode = LinkMode.LinkPaymentMethod,
         )
 
         assertThat(event.params).containsEntry("link_enabled", true)
