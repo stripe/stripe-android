@@ -3,9 +3,12 @@ package com.stripe.android.paymentsheet.example.playground
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -51,6 +54,7 @@ import java.io.IOException
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
+    private val savedStateHandle: SavedStateHandle,
     launchUri: Uri?,
 ) : AndroidViewModel(application) {
 
@@ -60,7 +64,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     val playgroundSettingsFlow = MutableStateFlow<PlaygroundSettings?>(null)
     val status = MutableStateFlow<StatusMessage?>(null)
-    val state = MutableStateFlow<PlaygroundState?>(null)
+    val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
 
@@ -81,7 +85,7 @@ internal class PaymentSheetPlaygroundViewModel(
     fun prepare(
         playgroundSettings: PlaygroundSettings,
     ) {
-        state.value = null
+        setPlaygroundState(null)
         flowControllerState.value = null
         customerSheetState.value = null
 
@@ -143,7 +147,7 @@ internal class PaymentSheetPlaygroundViewModel(
                         snapshot = updatedSettings.snapshot(),
                         defaultEndpoint = settings.playgroundBackendUrl
                     )
-                    state.value = updatedState
+                    setPlaygroundState(updatedState)
                 }
             }
         }
@@ -158,9 +162,12 @@ internal class PaymentSheetPlaygroundViewModel(
             snapshot.saveToSharedPreferences(getApplication())
 
             customerSheetState.value = CustomerSheetState()
-            state.value = PlaygroundState.Customer(
-                snapshot = snapshot,
-                endpoint = settings.playgroundBackendUrl,
+
+            setPlaygroundState(
+                PlaygroundState.Customer(
+                    snapshot = snapshot,
+                    endpoint = settings.playgroundBackendUrl,
+                )
             )
         }
     }
@@ -289,10 +296,10 @@ internal class PaymentSheetPlaygroundViewModel(
             ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
         if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
             if (paymentResult is PaymentSheetResult.Completed) {
-                state.value = null
+                setPlaygroundState(null)
             }
         } else if (paymentResult !is PaymentSheetResult.Canceled) {
-            state.value = null
+            setPlaygroundState(null)
         }
 
         val statusMessage = when (paymentResult) {
@@ -467,27 +474,31 @@ internal class PaymentSheetPlaygroundViewModel(
 
         playgroundSettingsFlow.value = settings
 
-        state.value = state.value?.let { state ->
-            val updatedSnapshot = settings.snapshot()
+        setPlaygroundState(
+            state.value?.let { state ->
+                val updatedSnapshot = settings.snapshot()
 
-            when (state) {
-                is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
-                is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                when (state) {
+                    is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                    is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                }
             }
-        }
+        )
     }
 
     fun onCustomUrlUpdated(backendUrl: String?) {
         playgroundSettingsFlow.value?.let { settings ->
             settings[CustomEndpointDefinition] = backendUrl
             playgroundSettingsFlow.value = settings
-            state.value = state.value?.let { state ->
-                val updatedSnapshot = settings.snapshot()
-                when (state) {
-                    is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
-                    is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
                 }
-            }
+            )
         }
     }
 
@@ -500,14 +511,26 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    private fun setPlaygroundState(state: PlaygroundState?) {
+        savedStateHandle[PLAYGROUND_STATE_KEY] = state
+    }
+
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val uriSupplier: () -> Uri?,
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             @Suppress("UNCHECKED_CAST")
-            return PaymentSheetPlaygroundViewModel(applicationSupplier(), uriSupplier()) as T
+            return PaymentSheetPlaygroundViewModel(
+                applicationSupplier(),
+                extras.createSavedStateHandle(),
+                uriSupplier()
+            ) as T
         }
+    }
+
+    private companion object {
+        const val PLAYGROUND_STATE_KEY = "PaymentSheetPlaygroundState"
     }
 }
 

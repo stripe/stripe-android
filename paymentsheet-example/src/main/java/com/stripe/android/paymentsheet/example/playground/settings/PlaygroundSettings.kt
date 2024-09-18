@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -100,7 +104,18 @@ internal class PlaygroundSettings private constructor(
     class Snapshot private constructor(
         val configurationData: PlaygroundConfigurationData,
         private val settings: Map<PlaygroundSettingDefinition<*>, Any?>
-    ) {
+    ) : Parcelable {
+        constructor(parcel: Parcel) : this(
+            configurationData = parcel.readParcelable<PlaygroundConfigurationData>(
+                PlaygroundConfigurationData::class.java.classLoader
+            ) ?: throw IllegalStateException("Playground Configuration Data couldn't be un-parceled!"),
+            settings = Json.decodeFromString(
+                deserializer = MapSerializer(String.serializer(), String.serializer()),
+                string = parcel.readString()
+                    ?: throw IllegalStateException("Playground Settings couldn't be un-parceled!"),
+            ).toPlaygroundSettingsSnapshot()
+        )
+
         constructor(playgroundSettings: PlaygroundSettings) : this(
             playgroundSettings.configurationData.value,
             playgroundSettings.settings.map { it.key to it.value.value }.toMap()
@@ -215,14 +230,7 @@ internal class PlaygroundSettings private constructor(
         }
 
         private fun asJsonString(filter: (PlaygroundSettingDefinition<*>) -> Boolean): String {
-            val settingsMap = settings.filterKeys(filter).map {
-                val saveable = it.key.saveable()
-                if (saveable != null) {
-                    saveable.key to saveable.convertToString(it.value)
-                } else {
-                    null
-                }
-            }.filterNotNull().toMap()
+            val settingsMap = settings.filterKeys(filter).mapToStringMap()
             return Json.encodeToString(
                 SerializableSettings(
                     configurationData = configurationData,
@@ -254,6 +262,36 @@ internal class PlaygroundSettings private constructor(
         ): String {
             @Suppress("UNCHECKED_CAST")
             return convertToString(value as T)
+        }
+
+        private fun Map<PlaygroundSettingDefinition<*>, Any?>.mapToStringMap(): Map<String, String> {
+            return map {
+                val saveable = it.key.saveable()
+                if (saveable != null) {
+                    saveable.key to saveable.convertToString(it.value)
+                } else {
+                    null
+                }
+            }.filterNotNull().toMap()
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeParcelable(configurationData, flags)
+            parcel.writeString(Json.encodeToString(settings.mapToStringMap()))
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<Snapshot> {
+            override fun createFromParcel(parcel: Parcel): Snapshot {
+                return Snapshot(parcel)
+            }
+
+            override fun newArray(size: Int): Array<Snapshot?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 
@@ -311,6 +349,24 @@ internal class PlaygroundSettings private constructor(
                 ?: return createFromDefaults()
 
             return createFromJsonString(jsonString)
+        }
+
+        private fun Map<String, String>.toPlaygroundSettingsSnapshot(): Map<PlaygroundSettingDefinition<*>, Any?> {
+            val settings = mutableMapOf<PlaygroundSettingDefinition<*>, Any?>()
+
+            for (settingDefinition in allSettingDefinitions) {
+                settingDefinition.saveable()?.let { saveable ->
+                    val value = this[saveable.key]?.let { stringValue ->
+                        saveable.convertToValue(stringValue)
+                    } ?: saveable.defaultValue
+
+                    settings[settingDefinition] = value
+                } ?: run {
+                    settings[settingDefinition] = settingDefinition.defaultValue
+                }
+            }
+
+            return settings
         }
 
         private val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
