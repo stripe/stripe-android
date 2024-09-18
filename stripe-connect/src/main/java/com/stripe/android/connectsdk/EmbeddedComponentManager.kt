@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
-import com.stripe.android.connectsdk.EmbeddedComponentActivity.EmbeddedComponent
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK

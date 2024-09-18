@@ -22,8 +22,8 @@ class AccountOnboardingExampleViewModel(
 
     private val timber get() = Timber.tag("AccountOnboardingExampleViewModel")
 
-    private val _state = MutableStateFlow(PayoutsExampleState())
-    val state: StateFlow<PayoutsExampleState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(AccountOnboardingExampleState())
+    val state: StateFlow<AccountOnboardingExampleState> = _state.asStateFlow()
 
     init {
         getAccounts()
@@ -31,7 +31,7 @@ class AccountOnboardingExampleViewModel(
 
     @OptIn(PrivateBetaConnectSDK::class)
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
-        val account = _state.value.selectedAccount ?: return
+        val account = _state.value.selectedAccount ?: _state.value.accounts?.firstOrNull() ?: return
         networkingScope.launch {
             try {
                 val clientSecret = embeddedComponentService.fetchClientSecret(account.merchantId)
@@ -65,7 +65,7 @@ class AccountOnboardingExampleViewModel(
         }
     }
 
-    data class PayoutsExampleState(
+    data class AccountOnboardingExampleState(
         val selectedAccount: Merchant? = null,
         val accounts: List<Merchant>? = null,
         val publishableKey: String? = null,

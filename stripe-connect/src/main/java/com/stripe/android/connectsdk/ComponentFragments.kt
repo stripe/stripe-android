@@ -1,0 +1,4 @@
+package com.stripe.android.connectsdk
+
+class PayoutComponentFragment: EmbeddedComponentFragment(EmbeddedComponent.Payouts)
+class AccountOnboardingComponentFragment: EmbeddedComponentFragment(EmbeddedComponent.AccountOnboarding)
