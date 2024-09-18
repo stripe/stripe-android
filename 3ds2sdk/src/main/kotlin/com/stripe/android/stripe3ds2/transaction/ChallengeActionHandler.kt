@@ -49,17 +49,18 @@ internal interface ChallengeActionHandler {
                 threeDsServerTransId = creqData.threeDsServerTransId,
                 acsTransId = creqData.acsTransId,
                 sdkTransId = creqData.sdkTransId,
-                messageExtensions = creqData.messageExtensions
+                messageExtensions = creqData.messageExtensions,
+                threeDSRequestorAppURL = creqData.threeDSRequestorAppURL
             ).let {
                 when (action) {
                     is ChallengeAction.NativeForm -> {
-                        it.copy(challengeDataEntry = action.userEntry)
+                        it.copy(challengeDataEntry = action.userEntry, whitelistingDataEntry = action.whitelistingValue)
                     }
                     is ChallengeAction.HtmlForm -> {
                         it.copy(challengeHtmlDataEntry = action.userEntry)
                     }
                     is ChallengeAction.Oob -> {
-                        it.copy(oobContinue = true)
+                        it.copy(oobContinue = true, whitelistingDataEntry = action.whitelistingValue)
                     }
                     is ChallengeAction.Resend -> {
                         it.copy(shouldResendChallenge = true)

@@ -6,7 +6,8 @@ import kotlinx.parcelize.Parcelize
 internal sealed class ChallengeAction : Parcelable {
     @Parcelize
     data class NativeForm(
-        internal val userEntry: String
+        internal val userEntry: String,
+        internal val whitelistingValue: Boolean
     ) : ChallengeAction()
 
     @Parcelize
@@ -15,7 +16,9 @@ internal sealed class ChallengeAction : Parcelable {
     ) : ChallengeAction()
 
     @Parcelize
-    object Oob : ChallengeAction()
+    data class Oob(
+        internal val whitelistingValue: Boolean
+    ) : ChallengeAction()
 
     @Parcelize
     object Resend : ChallengeAction()

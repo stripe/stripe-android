@@ -136,7 +136,8 @@ internal class DefaultInitChallengeRepository internal constructor(
         acsTransId = requireNotNull(challengeParameters.acsTransactionId),
         threeDsServerTransId = requireNotNull(challengeParameters.threeDsServerTransactionId),
         sdkTransId = sdkTransactionId,
-        messageVersion = messageVersionRegistry.current
+        messageVersion = messageVersionRegistry.current,
+        threeDSRequestorAppURL = challengeParameters.threeDSRequestorAppURL
     )
 }
 

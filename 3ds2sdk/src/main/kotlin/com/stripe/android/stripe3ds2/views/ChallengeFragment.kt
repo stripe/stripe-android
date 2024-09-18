@@ -110,9 +110,9 @@ internal class ChallengeFragment(
     private val challengeAction: ChallengeAction
         get() {
             return when (cresData.uiType) {
-                UiType.OutOfBand -> ChallengeAction.Oob
+                UiType.OutOfBand -> ChallengeAction.Oob(challengeZoneView.whitelistingSelection)
                 UiType.Html -> ChallengeAction.HtmlForm(userEntry)
-                else -> ChallengeAction.NativeForm(userEntry)
+                else -> ChallengeAction.NativeForm(userEntry, challengeZoneView.whitelistingSelection)
             }
         }
 

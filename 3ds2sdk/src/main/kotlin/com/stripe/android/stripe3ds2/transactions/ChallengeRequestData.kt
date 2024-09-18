@@ -20,12 +20,14 @@ data class ChallengeRequestData constructor(
     val threeDsServerTransId: String,
     val acsTransId: String,
     val sdkTransId: SdkTransactionId,
+    val threeDSRequestorAppURL: String?,
     val challengeDataEntry: String? = null,
     val cancelReason: CancelReason? = null,
     val challengeHtmlDataEntry: String? = null,
     val messageExtensions: List<MessageExtension>? = null,
     val oobContinue: Boolean? = null,
-    val shouldResendChallenge: Boolean? = null
+    val shouldResendChallenge: Boolean? = null,
+    val whitelistingDataEntry: Boolean? = null
 ) : Serializable, Parcelable {
 
     internal fun toJson(): JSONObject {
@@ -41,18 +43,24 @@ data class ChallengeRequestData constructor(
                 json.put(FIELD_CHALLENGE_CANCEL, cancelReason.code)
             }
 
+            if (!threeDSRequestorAppURL.isNullOrEmpty()) {
+                json.put(FIELD_THREE_DS_REQUESTOR_APP_URL, threeDSRequestorAppURL)
+            }
+
             // [Req 40] ...if the cardholder has submitted the response without entering any data in the UI,
             // the Challenge Data Entry field shall not be present in the CReq message.
             // [Req 71] If the Cardholder does not enter any data in the UI, the Challenge No Entry field
             // shall be sent in the CReq message with the value ”Y.”
-            if (challengeDataEntry.isNullOrEmpty()) {
-                json.put(FIELD_CHALLENGE_NO_ENTRY, YES_VALUE)
-            } else {
+            if (!challengeDataEntry.isNullOrEmpty()) {
                 json.put(FIELD_CHALLENGE_DATA_ENTRY, challengeDataEntry)
             }
 
-            if (challengeHtmlDataEntry != null) {
+            if (!challengeHtmlDataEntry.isNullOrEmpty()) {
                 json.put(FIELD_CHALLENGE_HTML_DATA_ENTRY, challengeHtmlDataEntry)
+            }
+
+            if (challengeDataEntry.isNullOrEmpty() && challengeHtmlDataEntry.isNullOrEmpty() && cancelReason == null) {
+                json.put(FIELD_CHALLENGE_NO_ENTRY, YES_VALUE)
             }
 
             MessageExtension.toJsonArray(messageExtensions)?.let {
@@ -65,6 +73,10 @@ data class ChallengeRequestData constructor(
 
             if (shouldResendChallenge != null) {
                 json.put(FIELD_RESEND_CHALLENGE, if (shouldResendChallenge) "Y" else "N")
+            }
+
+            if (whitelistingDataEntry != null) {
+                json.put(FIELD_WHITELISTING_DATA_ENTRY, if (whitelistingDataEntry) "Y" else "N")
             }
 
             return json
@@ -104,6 +116,8 @@ data class ChallengeRequestData constructor(
         internal const val FIELD_OOB_CONTINUE: String = "oobContinue"
         internal const val FIELD_RESEND_CHALLENGE: String = "resendChallenge"
         internal const val FIELD_SDK_TRANS_ID: String = "sdkTransID"
+        internal const val FIELD_WHITELISTING_DATA_ENTRY = "whitelistingDataEntry"
+        internal const val FIELD_THREE_DS_REQUESTOR_APP_URL = "threeDSRequestorAppURL"
 
         internal const val MESSAGE_TYPE: String = "CReq"
         internal const val YES_VALUE: String = "Y"

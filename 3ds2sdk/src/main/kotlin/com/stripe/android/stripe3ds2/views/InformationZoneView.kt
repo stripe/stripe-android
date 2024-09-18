@@ -71,6 +71,15 @@ internal class InformationZoneView @JvmOverloads constructor(
         expandContainer.setOnClickListener { toggleView(expandArrow, expandLabel, expandText) }
     }
 
+    fun expandWhyContainer() {
+        toggleView(whyArrow, whyLabel, whyText)
+    }
+
+    fun expandExpandContainer() {
+        toggleView(expandArrow, expandLabel, expandText)
+    }
+
+
     /**
      * Set the why info section label and text to display when the why info section is expanded
      *

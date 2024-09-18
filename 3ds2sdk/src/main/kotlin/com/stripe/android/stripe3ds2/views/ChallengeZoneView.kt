@@ -187,6 +187,11 @@ internal class ChallengeZoneView @JvmOverloads constructor(
         }
     }
 
+    fun setWhitelistChecked(checked: Boolean) {
+        whitelistYesRadioButton.isChecked = checked
+        whitelistNoRadioButton.isChecked = !checked
+    }
+
     /**
      * Set the challenge entry view below the challenge info text and above the buttons
      *

@@ -60,19 +60,17 @@ data class ChallengeResponseData constructor(
                 return !acsHtml.isNullOrBlank()
             }
 
-            // required fields for text, single-select, multi-select, and OOB
-            if (
-                setOf(
+            // required fields for text, single-select, multi-select, oob
+            if ((uiType == UiType.Text || uiType == UiType.SingleSelect || uiType == UiType.MultiSelect || uiType == UiType.OutOfBand) && setOf(
                     challengeInfoHeader,
                     challengeInfoLabel,
-                    challengeInfoText,
-                    whyInfoLabel,
-                    whyInfoText,
-                    expandInfoLabel,
-                    expandInfoText,
-                    resendInformationLabel
-                ).all { it.isNullOrBlank() }
+                    challengeInfoText
+                ).any { it.isNullOrBlank() }
             ) {
+                return false
+            }
+
+            if (!oobContinueLabel.isNullOrEmpty() && (challengeInfoHeader.isNullOrEmpty() && challengeInfoText.isNullOrEmpty())) {
                 return false
             }
 
@@ -87,7 +85,7 @@ data class ChallengeResponseData constructor(
             }
 
             if (uiType == UiType.SingleSelect || uiType == UiType.MultiSelect) {
-                if (challengeSelectOptions == null || challengeSelectOptions.isEmpty()) {
+                if (challengeSelectOptions.isNullOrEmpty()) {
                     return false
                 }
             }
@@ -399,6 +397,11 @@ data class ChallengeResponseData constructor(
                     .createRequiredDataElementMissing("UI fields missing")
             }
 
+            if (cresData.whitelistingInfoText != null && cresData.whitelistingInfoText.length > 64) {
+                throw ChallengeResponseParseException
+                    .createInvalidDataElementFormat("Whitelisting info text exceeds length.")
+            }
+
             return cresData
         }
 
@@ -554,6 +557,16 @@ data class ChallengeResponseData constructor(
             if (encodedHtml.isNullOrBlank() && uiType == UiType.Html) {
                 throw ChallengeResponseParseException
                     .createRequiredDataElementMissing(FIELD_ACS_HTML)
+            }
+
+            if (uiType == UiType.Html && (encodedHtml == null || encodedHtml.contains("\n") || encodedHtml.contains(" ") || encodedHtml.contains("+") || encodedHtml.contains("/"))) {
+                throw ChallengeResponseParseException
+                    .createInvalidDataElementFormat(FIELD_ACS_HTML)
+            }
+
+            if (uiType == UiType.Html && encodedHtml != null && encodedHtml.endsWith("=")) {
+                throw ChallengeResponseParseException
+                    .createInvalidDataElementFormat(FIELD_ACS_HTML)
             }
 
             return decodeHtml(encodedHtml)

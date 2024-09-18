@@ -106,9 +106,9 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
     @VisibleForTesting
     @Throws(ChallengeResponseParseException::class, JSONException::class)
     internal fun validateAcsToSdkCounter(cres: JSONObject) {
-        if (!isLiveMode) {
-            return
-        }
+//        if (!isLiveMode) {
+//            return
+//        }
 
         if (!cres.has(FIELD_ACS_COUNTER_ACS_TO_SDK)) {
             throw ChallengeResponseParseException
@@ -137,7 +137,22 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
 
         val key = getDecryptionKey(secretKey, jweObject.header.encryptionMethod)
         jweObject.decrypt(DirectDecrypter(key))
-        return JSONObject(jweObject.payload.toString())
+
+        val stringPayload = jweObject?.payload?.toString()
+        if (stringPayload != null && (
+                    stringPayload.endsWith("=") ||
+                            stringPayload.contains(" ") ||
+                            stringPayload.contains("+") ||
+                            stringPayload.contains("\n") ||
+                            stringPayload.contains("/")
+                    ))
+        {
+            throw ChallengeResponseParseException(ProtocolError.DataDecryptionFailure, "Invalid encryption.")
+        }
+
+        val updatedPayload = jweObject.payload.toString()
+
+        return JSONObject(updatedPayload)
     }
 
     @VisibleForTesting

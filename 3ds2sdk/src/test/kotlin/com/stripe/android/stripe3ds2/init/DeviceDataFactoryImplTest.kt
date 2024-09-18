@@ -1,8 +1,10 @@
 package com.stripe.android.stripe3ds2.init
 
+import android.bluetooth.BluetoothClass.Device
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
@@ -42,20 +44,14 @@ class DeviceDataFactoryImplTest {
         assertThat(timezone)
             .isNotEmpty()
 
-        assertThat(data[DeviceParam.PARAM_HARDWARE_ID.toString()])
-            .isEqualTo(HARDWARE_ID_VALUE)
-
         assertThat(data[DeviceParam.PARAM_SCREEN_RESOLUTION.toString()])
             .isEqualTo("470x320")
     }
 
-    private fun createFactory(
-        hardwareIdValue: String
-    ): DeviceDataFactory {
+    private fun createFactory(): DeviceDataFactory {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        return DeviceDataFactoryImpl(
-            context = context
-        ) { HardwareId(hardwareIdValue) }
+
+        return DeviceDataFactoryImpl(context = context, FakeAppInfoRepository(), MessageVersionRegistry())
     }
 
     private companion object {
