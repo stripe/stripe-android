@@ -102,7 +102,8 @@ internal object CustomerSheetTestHelper {
     ): CustomerSheetViewModel {
         val dataSourceProvider = CompletableDeferred(
             CustomerAdapterDataSource(
-                customerAdapter = customerAdapter
+                customerAdapter = customerAdapter,
+                workContext = workContext,
             )
         )
 

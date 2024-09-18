@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -192,11 +193,12 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
     }
 
-    private fun createCustomerAdapterDataSource(
+    private suspend fun createCustomerAdapterDataSource(
         adapter: CustomerAdapter = FakeCustomerAdapter(),
     ): CustomerAdapterDataSource {
         return CustomerAdapterDataSource(
             customerAdapter = adapter,
+            workContext = coroutineContext,
         )
     }
 
