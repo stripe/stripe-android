@@ -6,6 +6,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.data.CustomerAdapterDataSource
+import com.stripe.android.customersheet.data.CustomerSheetCombinedDataSource
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
@@ -24,11 +26,16 @@ internal object CustomerSheetHacks {
     val adapter: Deferred<CustomerAdapter>
         get() = _adapter.asDeferred()
 
+    private val _dataSource = MutableStateFlow<CustomerSheetCombinedDataSource?>(null)
+    val dataSource: Deferred<CustomerSheetCombinedDataSource>
+        get() = _dataSource.asDeferred()
+
     fun initialize(
         lifecycleOwner: LifecycleOwner,
         adapter: CustomerAdapter,
     ) {
         _adapter.value = adapter
+        _dataSource.value = CustomerAdapterDataSource(adapter)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -51,6 +58,7 @@ internal object CustomerSheetHacks {
 
     fun clear() {
         _adapter.value = null
+        _dataSource.value = null
     }
 }
 
