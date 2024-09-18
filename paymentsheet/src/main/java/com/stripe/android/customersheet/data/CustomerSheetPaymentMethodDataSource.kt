@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 
 /**
  * [CustomerSheetPaymentMethodDataSource] defines a set of operations for managing saved payment methods within a
@@ -11,4 +12,13 @@ internal interface CustomerSheetPaymentMethodDataSource {
      * Retrieves a list of payment methods
      */
     suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>>
+
+    suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams,
+    ): CustomerSheetDataResult<PaymentMethod>
+
+    suspend fun attachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod>
+
+    suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod>
 }

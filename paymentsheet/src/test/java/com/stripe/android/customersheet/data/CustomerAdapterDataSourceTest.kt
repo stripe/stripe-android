@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
@@ -71,6 +72,120 @@ class CustomerAdapterDataSourceTest {
         )
 
         val failedResult = dataSource.retrieveSavedSelection().asFailure()
+
+        assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
+        assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on attach payment method, should complete successfully from adapter`() = runTest {
+        val paymentMethod = PaymentMethodFactory.card(id = "pm_1")
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(paymentMethod)
+                }
+            ),
+        )
+
+        val successResult = dataSource.attachPaymentMethod(paymentMethodId = "pm_1").asSuccess()
+
+        assertThat(successResult.value).isEqualTo(paymentMethod)
+    }
+
+    @Test
+    fun `on attach payment method, should fail from adapter`() = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = IllegalStateException("Failed to retrieve!"),
+                        displayMessage = "Something went wrong!",
+                    )
+                }
+            )
+        )
+
+        val failedResult = dataSource.attachPaymentMethod(paymentMethodId = "pm_1").asFailure()
+
+        assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
+        assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on detach payment method, should complete successfully from adapter`() = runTest {
+        val paymentMethod = PaymentMethodFactory.card(id = "pm_1")
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.success(paymentMethod)
+                },
+            ),
+        )
+
+        val successResult = dataSource.detachPaymentMethod(paymentMethodId = "pm_1").asSuccess()
+
+        assertThat(successResult.value).isEqualTo(paymentMethod)
+    }
+
+    @Test
+    fun `on detach payment method, should fail from adapter`() = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = IllegalStateException("Failed to retrieve!"),
+                        displayMessage = "Something went wrong!",
+                    )
+                }
+            )
+        )
+
+        val failedResult = dataSource.detachPaymentMethod(paymentMethodId = "pm_1").asFailure()
+
+        assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
+        assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on update payment method, should complete successfully from adapter`() = runTest {
+        val paymentMethod = PaymentMethodFactory.card(id = "pm_1")
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onUpdatePaymentMethod = { _, _ ->
+                    CustomerAdapter.Result.success(paymentMethod)
+                },
+            ),
+        )
+
+        val successResult = dataSource.updatePaymentMethod(
+            paymentMethodId = "pm_1",
+            params = PaymentMethodUpdateParams.createCard(expiryYear = 2028, expiryMonth = 7),
+        ).asSuccess()
+
+        assertThat(successResult.value).isEqualTo(paymentMethod)
+    }
+
+    @Test
+    fun `on update payment method, should fail from adapter`() = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onUpdatePaymentMethod = { _, _ ->
+                    CustomerAdapter.Result.failure(
+                        cause = IllegalStateException("Failed to retrieve!"),
+                        displayMessage = "Something went wrong!",
+                    )
+                }
+            )
+        )
+
+        val failedResult = dataSource.updatePaymentMethod(
+            paymentMethodId = "pm_1",
+            params = PaymentMethodUpdateParams.createCard(expiryYear = 2028, expiryMonth = 7),
+        ).asFailure()
 
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")

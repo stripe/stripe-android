@@ -18,6 +18,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -99,12 +100,20 @@ internal object CustomerSheetTestHelper {
             createModifiableEditPaymentMethodViewInteractorFactory(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetViewModel {
+        val dataSourceProvider = CompletableDeferred(
+            CustomerAdapterDataSource(
+                customerAdapter = customerAdapter
+            )
+        )
+
         return CustomerSheetViewModel(
             application = application,
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            customerAdapterProvider = CompletableDeferred(customerAdapter),
+            paymentMethodDataSourceProvider = dataSourceProvider,
+            intentDataSourceProvider = dataSourceProvider,
+            savedSelectionDataSourceProvider = dataSourceProvider,
             stripeRepository = stripeRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
