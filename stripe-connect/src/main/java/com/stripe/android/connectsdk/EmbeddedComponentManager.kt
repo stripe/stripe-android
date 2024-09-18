@@ -4,27 +4,35 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
+import com.stripe.android.connectsdk.EmbeddedComponentActivity.EmbeddedComponent
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager internal constructor() {
-    constructor(
-        activity: ComponentActivity,
-        configuration: Configuration,
-        fetchClientSecret: FetchClientSecretCallback,
-    ) : this() {
-        throw NotImplementedError("Not yet implemented")
-    }
+class EmbeddedComponentManager private constructor(
+    private val activity: ComponentActivity,
+    private val configuration: Configuration,
+    internal val fetchClientSecret: FetchClientSecretCallback,
+) {
 
     @PrivateBetaConnectSDK
     fun presentAccountOnboarding() {
-        throw NotImplementedError("Not yet implemented")
+        val intent = EmbeddedComponentActivity.newIntent(
+            activity,
+            EmbeddedComponent.AccountOnboarding,
+            configuration,
+        )
+        activity.startActivity(intent)
     }
 
     @PrivateBetaConnectSDK
     fun presentPayouts() {
-        throw NotImplementedError("Not yet implemented")
+        val intent = EmbeddedComponentActivity.newIntent(
+            activity,
+            EmbeddedComponent.Payouts,
+            configuration,
+        )
+        activity.startActivity(intent)
     }
 
     @PrivateBetaConnectSDK
@@ -35,6 +43,23 @@ class EmbeddedComponentManager internal constructor() {
     @PrivateBetaConnectSDK
     fun logout() {
         throw NotImplementedError("Not yet implemented")
+    }
+
+    companion object {
+        var instance: EmbeddedComponentManager? = null
+
+        fun init(
+            activity: ComponentActivity,
+            configuration: Configuration,
+            fetchClientSecret: FetchClientSecretCallback,
+        ): EmbeddedComponentManager {
+            instance = EmbeddedComponentManager(
+                activity = activity,
+                configuration = configuration,
+                fetchClientSecret = fetchClientSecret
+            )
+            return instance!!
+        }
     }
 
     // Configuration

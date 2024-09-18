@@ -39,7 +39,7 @@ class PayoutsExampleActivity : ComponentActivity() {
                     ) {
                         if (sdkPublishableKey != null && accounts != null) {
                             val embeddedComponentManager = remember(sdkPublishableKey) {
-                                EmbeddedComponentManager(
+                                EmbeddedComponentManager.init(
                                     activity = this@PayoutsExampleActivity,
                                     configuration = Configuration(sdkPublishableKey),
                                     fetchClientSecret = viewModel::fetchClientSecret,
