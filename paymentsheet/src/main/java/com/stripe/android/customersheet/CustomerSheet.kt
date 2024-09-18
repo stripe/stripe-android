@@ -131,13 +131,11 @@ class CustomerSheet internal constructor(
             )
 
         return coroutineScope {
-            val dataSource = CustomerSheetHacks.dataSource.await()
-
             val savedSelectionDeferred = async {
-                dataSource.retrieveSavedSelection().toResult()
+                CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection().toResult()
             }
             val paymentMethodsDeferred = async {
-                dataSource.retrievePaymentMethods().toResult()
+                CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
             }
             val savedSelection = savedSelectionDeferred.await()
             val paymentMethods = paymentMethodsDeferred.await()

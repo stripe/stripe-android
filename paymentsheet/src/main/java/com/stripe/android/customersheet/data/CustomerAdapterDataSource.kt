@@ -10,7 +10,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerAdapterDataSource @Inject constructor(
     private val customerAdapter: CustomerAdapter,
-) : CustomerSheetCombinedDataSource {
+) : CustomerSheetSavedSelectionDataSource, CustomerSheetPaymentMethodDataSource {
     override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
         return customerAdapter.retrievePaymentMethods().toCustomerSheetDataResult()
     }
