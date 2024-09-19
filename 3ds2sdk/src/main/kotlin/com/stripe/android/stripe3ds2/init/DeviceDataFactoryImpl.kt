@@ -117,12 +117,9 @@ internal class DeviceDataFactoryImpl internal constructor(
 
             try {
                 fieldValue = field.getInt(Any())
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            } catch (e: NullPointerException) {
-                e.printStackTrace()
+            } catch (_: IllegalArgumentException) {
+            } catch (_: IllegalAccessException) {
+            } catch (_: NullPointerException) {
             }
 
             if (fieldValue == Build.VERSION.SDK_INT) {

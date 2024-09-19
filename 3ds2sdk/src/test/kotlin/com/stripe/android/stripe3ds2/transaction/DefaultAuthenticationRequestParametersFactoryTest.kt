@@ -82,7 +82,7 @@ class DefaultAuthenticationRequestParametersFactoryTest {
         val unavailableDeviceParamsJson = rootJson.getJSONObject(
             DefaultAuthenticationRequestParametersFactory.KEY_DEVICE_PARAM_NOT_AVAILABLE
         )
-        assertEquals("RE02", unavailableDeviceParamsJson.getString("C010"))
+        assertEquals("RE01", unavailableDeviceParamsJson.getString("C010"))
         assertEquals("RE03", unavailableDeviceParamsJson.getString("C011"))
 
         val securityWarnings =
