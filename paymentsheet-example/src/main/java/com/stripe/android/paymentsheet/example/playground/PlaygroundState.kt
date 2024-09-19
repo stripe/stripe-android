@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -21,14 +22,16 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import kotlinx.parcelize.Parcelize
 
 @Stable
-internal sealed interface PlaygroundState {
+internal sealed interface PlaygroundState : Parcelable {
     val integrationType: PlaygroundConfigurationData.IntegrationType
     val countryCode: Country
     val endpoint: String
 
     @Stable
+    @Parcelize
     data class Payment(
         private val snapshot: PlaygroundSettings.Snapshot,
         val amount: Long,
@@ -37,19 +40,29 @@ internal sealed interface PlaygroundState {
         val clientSecret: String,
         private val defaultEndpoint: String,
     ) : PlaygroundState {
-        override val integrationType = snapshot.configurationData.integrationType
-        override val countryCode = snapshot[CountrySettingsDefinition]
+        override val integrationType
+            get() = snapshot.configurationData.integrationType
 
-        val initializationType = snapshot[InitializationTypeSettingsDefinition]
-        val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
-        val currencyCode = snapshot[CurrencySettingsDefinition]
-        val paymentMethodConfigurationId: String? =
-            snapshot[PaymentMethodConfigurationSettingsDefinition].ifEmpty { null }
+        override val countryCode
+            get() = snapshot[CountrySettingsDefinition]
+
+        val initializationType
+            get() = snapshot[InitializationTypeSettingsDefinition]
+
+        val checkoutMode
+            get() = snapshot[CheckoutModeSettingsDefinition]
+
+        val currencyCode
+            get() = snapshot[CurrencySettingsDefinition]
+
+        val paymentMethodConfigurationId: String?
+            get() = snapshot[PaymentMethodConfigurationSettingsDefinition].ifEmpty { null }
 
         val stripeIntentId: String
             get() = clientSecret.substringBefore("_secret_")
 
-        val requireCvcRecollectionForDeferred = snapshot[RequireCvcRecollectionDefinition]
+        val requireCvcRecollectionForDeferred
+            get() = snapshot[RequireCvcRecollectionDefinition]
 
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
@@ -61,15 +74,23 @@ internal sealed interface PlaygroundState {
 
     @Stable
     @OptIn(ExperimentalCustomerSheetApi::class)
+    @Parcelize
     data class Customer(
         private val snapshot: PlaygroundSettings.Snapshot,
         override val endpoint: String,
     ) : PlaygroundState {
-        override val integrationType = snapshot.configurationData.integrationType
-        override val countryCode = snapshot[CountrySettingsDefinition]
+        override val integrationType
+            get() = snapshot.configurationData.integrationType
 
-        val isNewCustomer = snapshot[CustomerSettingsDefinition] == CustomerType.NEW
-        val inSetupMode = snapshot[CustomerSheetPaymentMethodModeDefinition] == PaymentMethodMode.SetupIntent
+        override val countryCode
+            get() = snapshot[CountrySettingsDefinition]
+
+        val isNewCustomer
+            get() = snapshot[CustomerSettingsDefinition] == CustomerType.NEW
+
+        val inSetupMode
+            get() = snapshot[CustomerSheetPaymentMethodModeDefinition] ==
+                PaymentMethodMode.SetupIntent
 
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)
