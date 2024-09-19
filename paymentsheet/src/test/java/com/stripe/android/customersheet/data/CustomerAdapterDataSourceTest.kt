@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
@@ -12,7 +14,7 @@ import kotlin.test.Test
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterDataSourceTest {
     @Test
-    fun `on retrieve payment methods, should completely successfully from adapter`() = runTest {
+    fun `on retrieve payment methods, should complete successfully from adapter`() = runTest {
         val paymentMethods = PaymentMethodFactory.cards(size = 6)
         val dataSource = createCustomerAdapterDataSource(
             adapter = FakeCustomerAdapter(
@@ -20,7 +22,11 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val successResult = dataSource.retrievePaymentMethods().asSuccess()
+        val result = dataSource.retrievePaymentMethods()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<List<PaymentMethod>>>()
+
+        val successResult = result.asSuccess()
 
         assertThat(successResult.value).containsExactlyElementsIn(paymentMethods)
     }
@@ -36,7 +42,11 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val failedResult = dataSource.retrievePaymentMethods().asFailure()
+        val result = dataSource.retrievePaymentMethods()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<List<PaymentMethod>>>()
+
+        val failedResult = result.asFailure()
 
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
@@ -44,7 +54,7 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
-    fun `on retrieve payment option, should completely successfully from adapter`() = runTest {
+    fun `on retrieve payment option, should complete successfully from adapter`() = runTest {
         val paymentOptionId = "pm_1"
         val dataSource = createCustomerAdapterDataSource(
             adapter = FakeCustomerAdapter(
@@ -54,7 +64,11 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val successResult = dataSource.retrieveSavedSelection().asSuccess()
+        val result = dataSource.retrieveSavedSelection()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
+
+        val successResult = result.asSuccess()
 
         assertThat(successResult.value).isEqualTo(SavedSelection.PaymentMethod(paymentOptionId))
     }
@@ -70,7 +84,11 @@ class CustomerAdapterDataSourceTest {
             )
         )
 
-        val failedResult = dataSource.retrieveSavedSelection().asFailure()
+        val result = dataSource.retrieveSavedSelection()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
+
+        val failedResult = result.asFailure()
 
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
