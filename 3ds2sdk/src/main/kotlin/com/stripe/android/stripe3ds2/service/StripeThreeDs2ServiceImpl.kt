@@ -123,9 +123,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
                     appInfoRepository = appInfoRepository,
                     messageVersionRegistry = messageVersionRegistry
                 ),
-                DeviceParamNotAvailableFactoryImpl(
-                    hardwareIdSupplier
-                ),
+                DeviceParamNotAvailableFactoryImpl(),
                 securityChecker,
                 ephemeralKeyPairGenerator,
                 appInfoRepository,
