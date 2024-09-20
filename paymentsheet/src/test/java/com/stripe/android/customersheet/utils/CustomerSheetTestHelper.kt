@@ -9,16 +9,20 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
-import com.stripe.android.customersheet.data.CustomerAdapterDataSource
+import com.stripe.android.customersheet.data.CustomerSheetDataResult
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
+import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
+import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -85,9 +89,11 @@ internal object CustomerSheetTestHelper {
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
             enqueueCompleteStep(true)
         },
-        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
-            paymentMethods = CustomerAdapter.Result.success(customerPaymentMethods)
+        paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+            paymentMethods = CustomerSheetDataResult.success(customerPaymentMethods)
         ),
+        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
+        savedSelectionDataSource: CustomerSheetSavedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(),
         customerSheetLoader: CustomerSheetLoader = FakeCustomerSheetLoader(
             customerPaymentMethods = customerPaymentMethods,
             supportedPaymentMethods = supportedPaymentMethods,
@@ -100,20 +106,14 @@ internal object CustomerSheetTestHelper {
             createModifiableEditPaymentMethodViewInteractorFactory(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetViewModel {
-        val dataSourceProvider = CompletableDeferred(
-            CustomerAdapterDataSource(
-                customerAdapter = customerAdapter
-            )
-        )
-
         return CustomerSheetViewModel(
             application = application,
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            paymentMethodDataSourceProvider = dataSourceProvider,
-            intentDataSourceProvider = dataSourceProvider,
-            savedSelectionDataSourceProvider = dataSourceProvider,
+            paymentMethodDataSourceProvider = CompletableDeferred(paymentMethodDataSource),
+            intentDataSourceProvider = CompletableDeferred(intentDataSource),
+            savedSelectionDataSourceProvider = CompletableDeferred(savedSelectionDataSource),
             stripeRepository = stripeRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },

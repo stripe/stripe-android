@@ -12,6 +12,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.customersheet.data.CustomerSheetDataResult
+import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createModifiableEditPaymentMethodViewInteractorFactory
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
@@ -35,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
@@ -595,9 +600,9 @@ class CustomerSheetViewModelTest {
     fun `When removing a payment method fails, error message is displayed`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onDetachPaymentMethod = {
-                    CustomerAdapter.Result.failure(
+                    CustomerSheetDataResult.failure(
                         cause = APIException(
                             stripeError = StripeError(
                                 message = "Cannot remove this payment method."
@@ -652,9 +657,9 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
-            customerAdapter = FakeCustomerAdapter(
-                onSetSelectedPaymentOption = {
-                    CustomerAdapter.Result.failure(
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                onSetSavedSelection = {
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to set payment option"),
                         displayMessage = "Something went wrong"
                     )
@@ -679,10 +684,8 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = true,
             savedPaymentSelection = PaymentSelection.GooglePay,
-            customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = CustomerAdapter.Result.success(
-                    CustomerAdapter.PaymentOption.GooglePay
-                )
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                savedSelection = CustomerSheetDataResult.success(SavedSelection.GooglePay),
             )
         )
         viewModel.result.test {
@@ -700,10 +703,12 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 }
             ),
             stripeRepository = FakeStripeRepository(
@@ -864,10 +869,10 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = true,
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("invalid setup intent")
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("invalid setup intent")
                 },
             ),
             stripeRepository = FakeStripeRepository(
@@ -900,14 +905,19 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When setup intent provider is not provided, error message is visible`() = runTest(testDispatcher) {
+    fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = true,
-                onSetupIntentClientSecretForCustomerAttach = null,
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.failure(
+                        displayMessage = "Merchant provided error message",
+                        cause = Exception("Some error"),
+                    )
+                },
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
@@ -940,11 +950,12 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = false,
-                onSetupIntentClientSecretForCustomerAttach = null,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.failure(
+                    CustomerSheetDataResult.failure(
                         cause = APIException(
                             stripeError = StripeError(
                                 message = "Cannot attach payment method."
@@ -1056,9 +1067,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
                 }
             )
         )
@@ -1089,15 +1100,15 @@ class CustomerSheetViewModelTest {
             savedPaymentSelection = PaymentSelection.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             ),
-            customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.success(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(
                     listOf(
                         CARD_PAYMENT_METHOD.copy(id = "pm_1"),
                         CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                     )
                 ),
                 onDetachPaymentMethod = {
-                    CustomerAdapter.Result.success(
+                    CustomerSheetDataResult.success(
                         CARD_PAYMENT_METHOD.copy(id = "pm_2")
                     )
                 }
@@ -1151,13 +1162,15 @@ class CustomerSheetViewModelTest {
                 CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD.copy(id = "pm_1")),
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onDetachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
                 },
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
-                }
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
+                },
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"),),
@@ -1417,9 +1430,9 @@ class CustomerSheetViewModelTest {
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onDetachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 }
             ),
             eventReporter = eventReporter,
@@ -1442,9 +1455,9 @@ class CustomerSheetViewModelTest {
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onDetachPaymentMethod = {
-                    CustomerAdapter.Result.failure(
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to detach payment option"),
                         displayMessage = "Something went wrong"
                     )
@@ -1489,9 +1502,9 @@ class CustomerSheetViewModelTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = true,
-            customerAdapter = FakeCustomerAdapter(
-                onSetSelectedPaymentOption = {
-                    CustomerAdapter.Result.failure(
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                onSetSavedSelection = {
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to set payment option"),
                         displayMessage = "Something went wrong"
                     )
@@ -1537,9 +1550,9 @@ class CustomerSheetViewModelTest {
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            customerAdapter = FakeCustomerAdapter(
-                onSetSelectedPaymentOption = {
-                    CustomerAdapter.Result.failure(
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                onSetSavedSelection = {
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to set payment option"),
                         displayMessage = "Something went wrong"
                     )
@@ -1572,10 +1585,12 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 },
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = false,
             ),
             customerPaymentMethods = listOf(),
@@ -1608,13 +1623,15 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.failure(
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to attach payment option"),
                         displayMessage = "Something went wrong"
                     )
                 },
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = false,
             ),
             customerPaymentMethods = listOf(),
@@ -1647,9 +1664,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
                 },
                 canCreateSetupIntents = true,
             ),
@@ -1685,9 +1702,9 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.failure(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.failure(
                         cause = Exception("Unable to retrieve setup intent"),
                         displayMessage = "Something went wrong"
                     )
@@ -1722,9 +1739,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
                 },
                 canCreateSetupIntents = true,
             ),
@@ -2021,9 +2038,9 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
                 },
                 canCreateSetupIntents = true,
             ),
@@ -2567,10 +2584,12 @@ class CustomerSheetViewModelTest {
     fun `When confirming a card, the card form should be reset when trying to add another card`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 }
             ),
             stripeRepository = FakeStripeRepository(
@@ -2638,9 +2657,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            customerAdapter = FakeCustomerAdapter(
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
                 },
                 canCreateSetupIntents = true,
             ),
@@ -2745,10 +2764,10 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            val customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
+            val paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.Success(paymentMethods),
                 onUpdatePaymentMethod = { _, _ ->
-                    CustomerAdapter.Result.Success(updatedMethod)
+                    CustomerSheetDataResult.Success(updatedMethod)
                 }
             )
 
@@ -2756,7 +2775,7 @@ class CustomerSheetViewModelTest {
                 workContext = testDispatcher,
                 eventReporter = eventReporter,
                 customerPaymentMethods = paymentMethods,
-                customerAdapter = customerAdapter,
+                paymentMethodDataSource = paymentMethodDataSource,
                 editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
                     workContext = testDispatcher
                 ),
@@ -2804,10 +2823,12 @@ class CustomerSheetViewModelTest {
                         preferredNetworks = listOf(CardBrand.CartesBancaires)
                     ),
                 ),
-                customerAdapter = FakeCustomerAdapter(
+                intentDataSource = FakeCustomerSheetIntentDataSource(
                     canCreateSetupIntents = false,
+                ),
+                paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                     onAttachPaymentMethod = {
-                        CustomerAdapter.Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+                        CustomerSheetDataResult.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
                     }
                 )
             )
@@ -2926,10 +2947,10 @@ class CustomerSheetViewModelTest {
 
         val firstMethod = paymentMethods.single()
 
-        val customerAdapter = FakeCustomerAdapter(
-            paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
+        val paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+            paymentMethods = CustomerSheetDataResult.Success(paymentMethods),
             onUpdatePaymentMethod = { _, _ ->
-                CustomerAdapter.Result.failure(
+                CustomerSheetDataResult.failure(
                     Exception("No network found!"),
                     "No network found!"
                 )
@@ -2940,7 +2961,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             eventReporter = eventReporter,
             customerPaymentMethods = paymentMethods,
-            customerAdapter = customerAdapter,
+            paymentMethodDataSource = paymentMethodDataSource,
             editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
                 workContext = testDispatcher
             ),
@@ -3194,9 +3215,9 @@ class CustomerSheetViewModelTest {
                     createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                     retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
                 ),
-                customerAdapter = FakeCustomerAdapter(
-                    onSetupIntentClientSecretForCustomerAttach = {
-                        CustomerAdapter.Result.success("seti_123")
+                intentDataSource = FakeCustomerSheetIntentDataSource(
+                    onRetrieveSetupIntentClientSecret = {
+                        CustomerSheetDataResult.success("seti_123")
                     },
                     canCreateSetupIntents = true,
                 ),
@@ -3316,21 +3337,23 @@ class CustomerSheetViewModelTest {
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
-            customerAdapter = FakeCustomerAdapter(
+            intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = attachWithSetupIntent,
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
+                }
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = if (shouldFailRefresh) {
-                    CustomerAdapter.Result.failure(
+                    CustomerSheetDataResult.failure(
                         cause = IllegalStateException("An error occurred!"),
                         displayMessage = null
                     )
                 } else {
-                    CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
-                },
-                onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+                    CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD))
                 },
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 },
             ),
             stripeRepository = FakeStripeRepository(
@@ -3355,10 +3378,10 @@ class CustomerSheetViewModelTest {
             workContext = coroutineContext,
             savedPaymentSelection = originalSelection,
             customerPaymentMethods = savedPaymentMethods,
-            customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.Success(savedPaymentMethods),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(savedPaymentMethods),
                 onUpdatePaymentMethod = { _, _ ->
-                    CustomerAdapter.Result.Success(updatedPaymentMethod)
+                    CustomerSheetDataResult.success(updatedPaymentMethod)
                 }
             ),
             editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
@@ -3382,10 +3405,10 @@ class CustomerSheetViewModelTest {
             ),
             savedPaymentSelection = originalSelection,
             customerPaymentMethods = savedPaymentMethods,
-            customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.Success(savedPaymentMethods),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(savedPaymentMethods),
                 onDetachPaymentMethod = { _ ->
-                    CustomerAdapter.Result.Success(paymentMethodToRemove)
+                    CustomerSheetDataResult.success(paymentMethodToRemove)
                 },
             ),
             editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
