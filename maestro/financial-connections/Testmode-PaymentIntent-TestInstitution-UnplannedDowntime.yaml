@@ -21,7 +21,7 @@ tags:
 # Selecting another bank resets the flow
 - tapOn: "Select another bank"
 # Assert flow correctly returns to institution picker
-- tapOn: "Down bank (Unscheduled)"
+- tapOn: "Down Bank (Unscheduled)"
 # Close flow from error page
 - tapOn: "Close icon"
 - scrollUntilVisible:
