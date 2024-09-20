@@ -9,11 +9,19 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.RealGetCachedAccounts
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.domain.RealLookupAccount
+import com.stripe.android.financialconnections.domain.RealSaveAccountToLink
+import com.stripe.android.financialconnections.domain.RealSignUpToLink
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.SignUpToLink
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForNetworking
@@ -72,6 +80,18 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsCreateInstantDebitsPaymentMethod(
         impl: RealCreateInstantDebitsResult,
     ): CreateInstantDebitsResult
+
+    @Binds
+    fun bindsGetCachedAccounts(impl: RealGetCachedAccounts): GetCachedAccounts
+
+    @Binds
+    fun bindsLookupAccount(impl: RealLookupAccount): LookupAccount
+
+    @Binds
+    fun bindsSaveAccountToLink(impl: RealSaveAccountToLink): SaveAccountToLink
+
+    @Binds
+    fun bindsSignUpToLink(impl: RealSignUpToLink): SignUpToLink
 
     companion object {
         @Provides

@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 
 internal object ApiKeyFixtures {
@@ -159,5 +160,18 @@ internal object ApiKeyFixtures {
                 )
             ),
         ),
+    )
+
+    fun consumerSessionLookup(exists: Boolean) = ConsumerSessionLookup(
+        publishableKey = "pk_123",
+        exists = exists,
+        consumerSession = consumerSession().copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Sms,
+                    state = ConsumerSession.VerificationSession.SessionState.Started,
+                )
+            ),
+        ).takeIf { exists },
     )
 }

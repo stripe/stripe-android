@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.repository.AccountUpdateRequiredC
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import javax.inject.Inject
 
-internal interface PresentSheet {
+internal fun interface PresentSheet {
     operator fun invoke(content: NoticeSheetContent, referrer: Pane)
 }
 

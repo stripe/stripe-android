@@ -17,16 +17,33 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 
-internal class SaveAccountToLink @Inject constructor(
+internal interface SaveAccountToLink {
+
+    suspend fun new(
+        email: String,
+        phoneNumber: String,
+        selectedAccounts: List<CachedPartnerAccount>,
+        country: String,
+        shouldPollAccountNumbers: Boolean,
+    ): FinancialConnectionsSessionManifest
+
+    suspend fun existing(
+        consumerSessionClientSecret: String,
+        selectedAccounts: List<CachedPartnerAccount>?,
+        shouldPollAccountNumbers: Boolean,
+    ): FinancialConnectionsSessionManifest
+}
+
+internal class RealSaveAccountToLink @Inject constructor(
     private val locale: Locale?,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,
     private val accountsRepository: FinancialConnectionsAccountsRepository,
-) {
+) : SaveAccountToLink {
 
-    suspend fun new(
+    override suspend fun new(
         email: String,
         phoneNumber: String,
         selectedAccounts: List<CachedPartnerAccount>,
@@ -46,7 +63,7 @@ internal class SaveAccountToLink @Inject constructor(
         }
     }
 
-    suspend fun existing(
+    override suspend fun existing(
         consumerSessionClientSecret: String,
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,

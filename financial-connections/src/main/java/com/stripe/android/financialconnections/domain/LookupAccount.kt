@@ -5,12 +5,16 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.model.ConsumerSessionLookup
 import javax.inject.Inject
 
-internal class LookupAccount @Inject constructor(
+internal fun interface LookupAccount {
+    suspend operator fun invoke(email: String): ConsumerSessionLookup
+}
+
+internal class RealLookupAccount @Inject constructor(
     private val consumerSessionRepository: FinancialConnectionsConsumerSessionRepository,
     val configuration: FinancialConnectionsSheet.Configuration,
-) {
+) : LookupAccount {
 
-    suspend operator fun invoke(
+    override suspend operator fun invoke(
         email: String
     ): ConsumerSessionLookup = requireNotNull(
         consumerSessionRepository.lookupConsumerSession(

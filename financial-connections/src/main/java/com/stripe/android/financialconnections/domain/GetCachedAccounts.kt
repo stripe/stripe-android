@@ -10,12 +10,16 @@ import javax.inject.Inject
 /**
  * Gets cached partner accounts.
  */
-internal class GetCachedAccounts @Inject constructor(
+internal fun interface GetCachedAccounts {
+    suspend operator fun invoke(): List<CachedPartnerAccount>
+}
+
+internal class RealGetCachedAccounts @Inject constructor(
     val repository: FinancialConnectionsAccountsRepository,
     val configuration: FinancialConnectionsSheet.Configuration
-) {
+) : GetCachedAccounts {
 
-    suspend operator fun invoke(): List<CachedPartnerAccount> {
+    override suspend operator fun invoke(): List<CachedPartnerAccount> {
         return repository.getCachedAccounts() ?: emptyList()
     }
 }

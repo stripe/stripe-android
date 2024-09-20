@@ -29,8 +29,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.model.LinkLoginPane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
@@ -55,7 +53,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
-import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
 internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkSignupState,
@@ -64,7 +61,6 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val uriUtils: UriUtils,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
-    private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
     private val linkSignupHandler: LinkSignupHandler,
@@ -148,10 +144,6 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private fun observeSaveAccountResult() {
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = { nextPane ->
-                val destination = nextPane.destination(referrer = pane)
-                navigationManager.tryNavigateTo(destination)
-            },
             onFail = linkSignupHandler::handleSignupFailure,
         )
     }
@@ -211,9 +203,9 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private fun getLookupDelayMs(validEmail: String) =
         if (validEmail.endsWith(".com")) SEARCH_DEBOUNCE_FINISHED_EMAIL_MS else SEARCH_DEBOUNCE_MS
 
-    fun onSkipClick() = viewModelScope.launch {
+    fun onSkipClick() {
         eventTracker.track(Click(eventName = "click.not_now", pane = pane))
-        navigationManager.tryNavigateTo(SuccessDestination(referrer = pane))
+        linkSignupHandler.skipSignup()
     }
 
     fun onSaveAccount() {
@@ -308,7 +300,7 @@ internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
     val validEmail: String? = null,
     val validPhone: String? = null,
-    val saveAccountToLink: Async<Pane> = Uninitialized,
+    val saveAccountToLink: Async<Unit> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val isInstantDebits: Boolean = false,
