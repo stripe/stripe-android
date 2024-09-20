@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import kotlinx.coroutines.CompletableDeferred
@@ -33,6 +34,9 @@ internal object CustomerSheetHacks {
         get() = _dataSource.asDeferred()
 
     val savedSelectionDataSource: Deferred<CustomerSheetSavedSelectionDataSource>
+        get() = _dataSource.asDeferred()
+
+    val intentDataSource: Deferred<CustomerSheetIntentDataSource>
         get() = _dataSource.asDeferred()
 
     fun initialize(
@@ -63,9 +67,11 @@ internal object CustomerSheetHacks {
 
     private class CombinedDataSource<T>(dataSource: T) :
         CustomerSheetSavedSelectionDataSource by dataSource,
-        CustomerSheetPaymentMethodDataSource by dataSource
+        CustomerSheetPaymentMethodDataSource by dataSource,
+        CustomerSheetIntentDataSource by dataSource
         where T : CustomerSheetSavedSelectionDataSource,
-              T : CustomerSheetPaymentMethodDataSource
+              T : CustomerSheetPaymentMethodDataSource,
+              T : CustomerSheetIntentDataSource
 
     fun clear() {
         _adapter.value = null

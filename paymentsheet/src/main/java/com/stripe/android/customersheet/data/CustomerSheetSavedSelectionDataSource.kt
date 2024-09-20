@@ -13,4 +13,6 @@ internal interface CustomerSheetSavedSelectionDataSource {
      * @return a result containing the saved selection if operation was successful
      */
     suspend fun retrieveSavedSelection(): CustomerSheetDataResult<SavedSelection?>
+
+    suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit>
 }
