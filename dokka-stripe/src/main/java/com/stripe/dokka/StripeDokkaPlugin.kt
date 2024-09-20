@@ -61,6 +61,7 @@ private class FilterInternalApis(context: DokkaContext) : SuppressedByConditionD
 private fun <T> T.isInternalSdk() where T : WithExtraProperties<out Documentable> =
     internalAnnotation != null
 
+@Suppress("TYPE_MISMATCH_WARNING_FOR_INCORRECT_CAPTURE_APPROXIMATION")
 private val <T> T.internalAnnotation where T : WithExtraProperties<out Documentable>
     get() = extra[Annotations]?.let { annotations ->
         annotations.directAnnotations.values.flatten().firstOrNull {
