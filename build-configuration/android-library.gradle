@@ -84,3 +84,9 @@ android {
         }
     }
 }
+
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+    dependencies {
+        dokkaPlugin(project(":dokka-stripe"))
+    }
+}
