@@ -5,13 +5,14 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.MockPaymentMethodsFactory
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
 internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
 
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
         MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod(emptyList()) { } }
