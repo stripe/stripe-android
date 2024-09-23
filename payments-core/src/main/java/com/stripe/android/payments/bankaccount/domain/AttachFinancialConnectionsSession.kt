@@ -20,7 +20,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        expand: List<String>
     ): Result<PaymentIntent> {
         val paymentIntentClientSecretResult = runCatching {
             PaymentIntent.ClientSecret(clientSecret)
@@ -35,7 +36,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 ),
-                expandFields = EXPAND_PAYMENT_METHOD
+                expandFields = expand.withDefaults()
             ).getOrThrow()
         }
     }
@@ -50,7 +51,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        expand: List<String>
     ): Result<SetupIntent> {
         val setupIntentClientSecretResult = runCatching {
             SetupIntent.ClientSecret(clientSecret)
@@ -65,10 +67,17 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 ),
-                expandFields = EXPAND_PAYMENT_METHOD
+                expandFields = expand.withDefaults()
             ).getOrThrow()
         }
     }
+
+    /**
+     * Before adding expand support, mobile auto-expanded payment_method. To keep the shape for
+     * existing integrations, add
+     */
+    private fun List<String>.withDefaults() =
+        toSet().plus(EXPAND_PAYMENT_METHOD).toList()
 
     private companion object {
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")

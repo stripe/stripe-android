@@ -39,7 +39,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey = publishableKey,
                 linkedAccountSessionId = linkedAccountSessionId,
                 clientSecret = clientSecret,
-                stripeAccountId = stripeAccountId
+                stripeAccountId = stripeAccountId,
+                expand = emptyList()
             )
 
             // Then
@@ -67,7 +68,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey = publishableKey,
                 linkedAccountSessionId = linkedAccountSessionId,
                 clientSecret = clientSecret,
-                stripeAccountId = stripeAccountId
+                stripeAccountId = stripeAccountId,
+                expand = emptyList()
             )
 
             // Then
@@ -95,7 +97,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
+                stripeAccountId,
+                emptyList()
             )
 
             // Then
@@ -118,7 +121,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
+                stripeAccountId,
+                emptyList()
             )
 
             // Then
@@ -146,7 +150,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
+                stripeAccountId,
+                emptyList()
             )
 
             // Then
@@ -176,7 +181,8 @@ class AttachFinancialConnectionsSessionTest {
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
+                stripeAccountId,
+                emptyList()
             )
 
             // Then

@@ -166,6 +166,7 @@ class CollectBankAccountViewModelTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         }
@@ -188,6 +189,7 @@ class CollectBankAccountViewModelTest {
             // Then
             cancelAndConsumeRemainingEvents()
             verify(attachFinancialConnectionsSession, never()).forSetupIntent(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -390,7 +392,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    expand = emptyList()
                 )
             }.doReturn(result)
         }
@@ -405,7 +408,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    expand = emptyList()
                 )
             }.doReturn(result)
         }

@@ -98,7 +98,8 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                         clientSecret = it.getString("secret"),
                         configuration = CollectBankAccountConfiguration.USBankAccount(
                             name = viewBinding.name.text?.toString() ?: "",
-                            email = viewBinding.email.text?.toString()
+                            email = viewBinding.email.text?.toString(),
+                            expand = listOf("payment_method")
                         )
                     )
                 }

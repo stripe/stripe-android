@@ -217,6 +217,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
                         clientSecret = args.clientSecret,
+                        expand = args.configuration.expand,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
 
@@ -225,6 +226,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
                         clientSecret = args.clientSecret,
+                        expand = args.configuration.expand,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
             }

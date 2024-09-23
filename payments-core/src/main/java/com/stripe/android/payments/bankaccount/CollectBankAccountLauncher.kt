@@ -127,16 +127,20 @@ interface CollectBankAccountLauncher {
     }
 }
 
-sealed interface CollectBankAccountConfiguration : Parcelable {
+sealed class CollectBankAccountConfiguration(
+    open val expand: List<String>
+) : Parcelable {
     @Parcelize
     data class USBankAccount(
         val name: String,
-        val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration
+        val email: String?,
+        override val expand: List<String> = emptyList(),
+    ) : Parcelable, CollectBankAccountConfiguration(expand)
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebits(
-        val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration
+        val email: String?,
+        override val expand: List<String> = emptyList(),
+    ) : Parcelable, CollectBankAccountConfiguration(expand)
 }
