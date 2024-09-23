@@ -606,6 +606,13 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
+         /**
+         By default, PaymentSheet will accept all supported cards by Stripe.
+         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+         Note: This is only a client-side solution.
+         */
+        val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
@@ -758,6 +765,7 @@ class PaymentSheet internal constructor(
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
+            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
@@ -815,6 +823,12 @@ class PaymentSheet internal constructor(
                 preferredNetworks: List<CardBrand>
             ) = apply {
                 this.preferredNetworks = preferredNetworks
+            }
+
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
             }
 
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
@@ -878,6 +892,7 @@ class PaymentSheet internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
+                cardBrandAcceptance = cardBrandAcceptance,
             )
         }
 
@@ -1526,6 +1541,60 @@ class PaymentSheet internal constructor(
              */
             Full,
         }
+    }
+
+    /**
+     * Options to block certain card brands on the client
+     */
+    sealed class CardBrandAcceptance : Parcelable {
+
+        /**
+         * Card brand categories that can be allowed or disallowed
+         */
+        @Parcelize
+        enum class BrandCategory : Parcelable {
+            /**
+             * Visa branded cards
+             */
+            Visa,
+
+            /**
+             * Mastercard branded cards
+             */
+            Mastercard,
+
+            /**
+             * Amex branded cards
+             */
+            Amex,
+
+            /**
+             * Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo)
+             */
+            DiscoverGlobalNetwork
+        }
+
+        /**
+         * Accept all card brands supported by Stripe
+         */
+        @Parcelize
+        object All : CardBrandAcceptance()
+
+        /**
+         * Accept only the card brands specified in the associated value
+         */
+        @Parcelize
+        data class Allowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
+
+        /**
+         * Accept all card brands supported by Stripe except for those specified in the associated value
+         */
+        @Parcelize
+        data class Disallowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
     }
 
     internal sealed interface CustomerAccessType : Parcelable {
