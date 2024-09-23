@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.51.0 - 2024-09-23
+
 ### PaymentSheet
 * [BREAKING][9295](https://github.com/stripe/stripe-android/pull/9295) Remove `ExperimentalCvcRecollectionApi` annotation. This is a breaking change for merchants using `@OptIn(ExperimentalCvcRecollectionApi::class)`.
 
