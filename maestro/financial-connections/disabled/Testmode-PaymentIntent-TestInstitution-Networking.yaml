@@ -1,3 +1,4 @@
+# TEST DISABLED UNTIL BANKCON-14726 IS IMPLEMENTED.
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
