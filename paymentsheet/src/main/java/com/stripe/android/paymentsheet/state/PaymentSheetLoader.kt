@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -14,8 +15,10 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -32,6 +35,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.ui.core.elements.CardBrandFilter
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
@@ -80,6 +84,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheetLoader {
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
@@ -135,6 +140,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
+                cardBrandFilter = PaymentSheetCardBrandFilter(paymentSheetConfiguration.cardBrandAcceptance)
             )
         }
 
@@ -261,6 +267,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
+        cardBrandFilter: CardBrandFilter
     ): CustomerState? {
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -285,7 +292,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return customerState?.let { state ->
             state.copy(
                 paymentMethods = state.paymentMethods
-                    .withLastUsedPaymentMethodFirst(savedSelection.await())
+                    .withLastUsedPaymentMethodFirst(savedSelection.await()).filter { it.type != PaymentMethod.Type.Card || cardBrandFilter.isAccepted(it.card?.brand ?: CardBrand.Unknown) }
             )
         }
     }
