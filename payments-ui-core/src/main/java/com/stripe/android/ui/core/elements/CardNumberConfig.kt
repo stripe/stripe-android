@@ -16,12 +16,18 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
-    override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+    override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int, cardBrandFilter: CardBrandFilter): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
+        } else if (!cardBrandFilter.isAccepted(brand)) {
+            return TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_disallowed_card_brand,
+                formatArgs = arrayOf(brand.displayName),
+                preventMoreInput = false,
+            )
         } else if (brand == CardBrand.Unknown) {
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_invalid_card_number,

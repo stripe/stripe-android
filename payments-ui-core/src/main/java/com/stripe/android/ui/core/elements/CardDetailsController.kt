@@ -30,6 +30,7 @@ internal class CardDetailsController(
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -68,6 +69,7 @@ internal class CardDetailsController(
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
+            cardBrandFilter = cardBrandFilter
         )
     )
 

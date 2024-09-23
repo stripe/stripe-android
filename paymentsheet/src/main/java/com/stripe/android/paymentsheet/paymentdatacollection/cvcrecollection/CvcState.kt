@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.elements.CvcConfig
+import com.stripe.android.ui.core.elements.DefaultCardBrandFilter
 import com.stripe.android.uicore.elements.TextFieldIcon
 
 @Immutable
@@ -16,7 +17,8 @@ internal data class CvcState(
     val isValid: Boolean = cvcTextFieldConfig.determineState(
         brand = cardBrand,
         number = cvc,
-        numberAllowedDigits = cardBrand.maxCvcLength
+        numberAllowedDigits = cardBrand.maxCvcLength,
+        cardBrandFilter = DefaultCardBrandFilter()
     ).isValid()
 
     val label: Int = if (cardBrand == CardBrand.AmericanExpress) {

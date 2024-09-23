@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.CardBrandFilter
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -28,6 +29,7 @@ internal sealed interface UiDefinitionFactory {
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+        val cardBrandFilter: CardBrandFilter,
     ) {
         interface Factory {
             fun create(
@@ -61,6 +63,7 @@ internal sealed interface UiDefinitionFactory {
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
+                        cardBrandFilter = metadata.cardBrandFilter,
                     )
                 }
             }

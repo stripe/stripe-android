@@ -24,11 +24,13 @@ internal class CardDetailsElement(
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
         collectName,
         cbcEligibility,
+        cardBrandFilter = cardBrandFilter,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled

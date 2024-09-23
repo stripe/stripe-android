@@ -19,6 +19,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.CardBrandFilter
+import com.stripe.android.ui.core.elements.DefaultCardBrandFilter
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
@@ -46,6 +48,7 @@ internal data class PaymentMethodMetadata(
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -273,7 +276,8 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
                 isGooglePayReady = isGooglePayReady,
-            )
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                )
         }
 
         @OptIn(ExperimentalCustomerSheetApi::class)

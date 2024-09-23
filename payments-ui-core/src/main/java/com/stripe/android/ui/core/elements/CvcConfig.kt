@@ -20,7 +20,8 @@ class CvcConfig : CardDetailsTextFieldConfig {
     override fun determineState(
         brand: CardBrand,
         number: String,
-        numberAllowedDigits: Int
+        numberAllowedDigits: Int,
+        cardBrandFilter: CardBrandFilter,
     ): TextFieldState {
         val isDigitLimit = brand.maxCvcLength != -1
         return if (number.isEmpty()) {

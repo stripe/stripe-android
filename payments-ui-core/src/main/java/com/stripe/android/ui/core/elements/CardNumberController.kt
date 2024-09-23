@@ -71,6 +71,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -244,7 +245,8 @@ internal class DefaultCardNumberController(
             fieldValue,
             accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
                 fieldValue
-            )
+            ),
+            cardBrandFilter
         )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
