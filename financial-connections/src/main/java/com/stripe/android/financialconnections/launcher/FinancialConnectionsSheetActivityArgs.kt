@@ -32,7 +32,8 @@ sealed class FinancialConnectionsSheetActivityArgs(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForInstantDebits(
-        override val configuration: FinancialConnectionsSheet.Configuration
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        internal val elementsContext: FinancialConnectionsSheet.ElementsContext? = null,
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
     internal fun validate() {

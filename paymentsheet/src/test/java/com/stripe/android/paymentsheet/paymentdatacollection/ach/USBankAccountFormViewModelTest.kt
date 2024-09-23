@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -69,6 +70,7 @@ class USBankAccountFormViewModelTest {
         savedPaymentMethod = null,
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        linkMode = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -1072,6 +1074,9 @@ class USBankAccountFormViewModelTest {
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
+                    elementsContext = FinancialConnectionsSheet.ElementsContext(
+                        linkMode = null,
+                    ),
                 )
             ),
         )

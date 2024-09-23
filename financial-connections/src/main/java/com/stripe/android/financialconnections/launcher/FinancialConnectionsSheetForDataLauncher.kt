@@ -50,7 +50,10 @@ class FinancialConnectionsSheetForDataLauncher(
         }
     )
 
-    override fun present(configuration: FinancialConnectionsSheet.Configuration) {
+    override fun present(
+        configuration: FinancialConnectionsSheet.Configuration,
+        elementsContext: FinancialConnectionsSheet.ElementsContext?
+    ) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForData(
                 configuration

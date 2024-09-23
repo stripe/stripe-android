@@ -174,6 +174,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
+                    elementsContext = elementsContext,
                 )
             )
         }

@@ -48,7 +48,10 @@ internal class FinancialConnectionsSheetForTokenLauncher(
         }
     )
 
-    override fun present(configuration: FinancialConnectionsSheet.Configuration) {
+    override fun present(
+        configuration: FinancialConnectionsSheet.Configuration,
+        elementsContext: FinancialConnectionsSheet.ElementsContext?
+    ) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForToken(
                 configuration

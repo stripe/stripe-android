@@ -17,7 +17,8 @@ internal interface FinancialConnectionsPaymentsProxy {
     fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsContext: FinancialConnectionsSheet.ElementsContext?,
     )
 
     companion object {
@@ -70,14 +71,16 @@ internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLa
     override fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsContext: FinancialConnectionsSheet.ElementsContext?,
     ) {
         launcher.present(
-            FinancialConnectionsSheet.Configuration(
+            configuration = FinancialConnectionsSheet.Configuration(
                 financialConnectionsSessionClientSecret,
                 publishableKey,
-                stripeAccountId
-            )
+                stripeAccountId,
+            ),
+            elementsContext = elementsContext,
         )
     }
 }
@@ -86,7 +89,8 @@ internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectio
     override fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsContext: FinancialConnectionsSheet.ElementsContext?,
     ) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(
