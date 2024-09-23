@@ -11,6 +11,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -79,9 +81,10 @@ internal fun PaymentSheetScreen(
     viewModel: PaymentSheetViewModel,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
-    PaymentSheetScreen(viewModel) {
+    val scrollState = rememberScrollState()
+    PaymentSheetScreen(viewModel, scrollState) {
         AnimatedVisibility(visible = contentVisible) {
-            PaymentSheetScreenContent(viewModel, type = Complete)
+            PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
         }
     }
 }
@@ -90,8 +93,9 @@ internal fun PaymentSheetScreen(
 internal fun PaymentSheetScreen(
     viewModel: PaymentOptionsViewModel,
 ) {
-    PaymentSheetScreen(viewModel) {
-        PaymentSheetScreenContent(viewModel, type = Custom)
+    val scrollState = rememberScrollState()
+    PaymentSheetScreen(viewModel, scrollState) {
+        PaymentSheetScreenContent(viewModel, type = Custom, scrollState = scrollState)
     }
 }
 
@@ -100,14 +104,16 @@ internal fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     type: PaymentSheetFlowType,
 ) {
-    PaymentSheetScreen(viewModel) {
-        PaymentSheetScreenContent(viewModel, type = type)
+    val scrollState = rememberScrollState()
+    PaymentSheetScreen(viewModel, scrollState) {
+        PaymentSheetScreenContent(viewModel, type = type, scrollState = scrollState)
     }
 }
 
 @Composable
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
+    scrollState: ScrollState,
     contentVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -137,6 +143,7 @@ private fun PaymentSheetScreen(
         modifier = Modifier.onGloballyPositioned {
             contentHeight = with(density) { it.size.height.toDp() }
         },
+        scrollState = scrollState,
     )
 
     AnimatedVisibility(
@@ -175,12 +182,17 @@ internal fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState,
 ) {
     val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+
+    LaunchedEffect(currentScreen) {
+        scrollState.scrollTo(0)
+    }
 
     val showsWalletsHeader by remember(currentScreen, type) {
         currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
