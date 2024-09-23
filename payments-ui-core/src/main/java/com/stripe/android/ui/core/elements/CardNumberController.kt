@@ -224,7 +224,7 @@ internal class DefaultCardNumberController(
         } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
         } else {
-            val cardBrands = CardBrand.getCardBrands(number)
+            val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
 
             val staticIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)

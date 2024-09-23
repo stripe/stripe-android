@@ -3,9 +3,11 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
+@OptIn(ExperimentalCardBrandFilteringApi::class)
 class PaymentSheetCardBrandFilter(
     private val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
 ) : CardBrandFilter {
@@ -40,6 +42,7 @@ class PaymentSheetCardBrandFilter(
 }
 
 // Extension function to map CardBrand to BrandCategory
+@OptIn(ExperimentalCardBrandFilteringApi::class)
 fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
     return when (this) {
         CardBrand.Visa -> PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
@@ -49,7 +52,6 @@ fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory?
         CardBrand.DinersClub,
         CardBrand.JCB,
         CardBrand.UnionPay -> PaymentSheet.CardBrandAcceptance.BrandCategory.DiscoverGlobalNetwork
-        // Handle other brands as needed
         else -> null
     }
 }
