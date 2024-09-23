@@ -109,7 +109,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @IOContext workContext: CoroutineContext,
     logger: UserFacingLogger,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -130,6 +130,7 @@ internal class DefaultFlowController @Inject internal constructor(
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
         googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
         errorReporter = errorReporter,
+        lazyPaymentConfig = lazyPaymentConfiguration,
         logger = logger,
     ).create(viewModelScope.plus(workContext))
 

@@ -18,8 +18,14 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
@@ -41,7 +47,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Provider
-import kotlin.IllegalStateException
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -56,6 +61,7 @@ internal class IntentConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val logger: UserFacingLogger?,
 ) {
     private val intentConfirmationDefinition = IntentConfirmationDefinition(
@@ -68,6 +74,9 @@ internal class IntentConfirmationHandler(
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
+
+    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+    private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType?
         get() = savedStateHandle[DEFERRED_INTENT_CONFIRMATION_TYPE]
@@ -99,7 +108,7 @@ internal class IntentConfirmationHandler(
         } else if (hasReloadedWhileAwaitingConfirm) {
             State.Confirming
         } else {
-            State.Idle
+            State.Idle()
         }
     )
     val state: StateFlow<State> = _state.asStateFlow()
@@ -145,6 +154,18 @@ internal class IntentConfirmationHandler(
             ::onGooglePayResult
         )
 
+        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::handleCollectBankAccountResult,
+        )
+
+        collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+            hostedSurface = "payment_element",
+            activityResultCaller = activityResultCaller,
+            callback = ::handleCollectBankAccountForInstantDebitsResult,
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -152,11 +173,25 @@ internal class IntentConfirmationHandler(
                     externalPaymentMethodLauncher = null
                     bacsMandateConfirmationLauncher = null
                     googlePayPaymentMethodLauncher = null
+                    collectBankAccountLauncher = null
+                    collectBankAccountForInstantDebitsLauncher = null
                     bacsActivityResultLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
         )
+    }
+
+    private fun handleCollectBankAccountResult(
+        result: CollectBankAccountResultInternal,
+    ) {
+        _state.value = State.Idle(intermediateResult = result)
+    }
+
+    private fun handleCollectBankAccountForInstantDebitsResult(
+        result: CollectBankAccountForInstantDebitsResult,
+    ) {
+        _state.value = State.Idle(intermediateResult = result)
     }
 
     /**
@@ -211,15 +246,25 @@ internal class IntentConfirmationHandler(
     ) {
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is PaymentConfirmationOption.GooglePay) {
-            launchGooglePay(
-                googlePay = confirmationOption,
-                intent = arguments.intent,
-            )
-        } else if (confirmationOption is PaymentConfirmationOption.BacsPaymentMethod) {
-            launchBacsMandate(confirmationOption)
-        } else {
-            confirm(arguments)
+        when (confirmationOption) {
+            is PaymentConfirmationOption.GooglePay -> {
+                launchGooglePay(
+                    googlePay = confirmationOption,
+                    intent = arguments.intent,
+                )
+            }
+            is PaymentConfirmationOption.BacsPaymentMethod -> {
+                launchBacsMandate(confirmationOption)
+            }
+            is PaymentConfirmationOption.BankAccount -> {
+                launchBankAuthFlow(
+                    intent = arguments.intent,
+                    confirmationOption = confirmationOption,
+                )
+            }
+            else -> {
+                confirm(arguments)
+            }
         }
     }
 
@@ -453,6 +498,116 @@ internal class IntentConfirmationHandler(
         }
     }
 
+    private fun launchBankAuthFlow(
+        confirmationOption: PaymentConfirmationOption.BankAccount,
+        intent: StripeIntent,
+    ) {
+        val clientSecret = intent.clientSecret
+
+        if (clientSecret != null) {
+            collectBankAccountForIntent(
+                clientSecret = clientSecret,
+                intent = intent,
+                createParams = confirmationOption.createParams,
+                isInstantDebits = confirmationOption.isInstantDebits,
+            )
+        } else {
+            collectBankAccountForDeferredIntent(
+                intent = intent,
+                createParams = confirmationOption.createParams,
+                initializationMode = confirmationOption.initializationMode,
+            )
+        }
+    }
+
+    private fun collectBankAccountForIntent(
+        clientSecret: String,
+        intent: StripeIntent,
+        createParams: PaymentMethodCreateParams,
+        isInstantDebits: Boolean,
+    ) {
+        val name = PaymentMethodCreateParams.getNameFromParams(createParams) ?: return
+        val email = PaymentMethodCreateParams.getEmailFromParams(createParams)
+
+        val configuration = if (isInstantDebits) {
+            CollectBankAccountConfiguration.InstantDebits(
+                email = email,
+            )
+        } else {
+            CollectBankAccountConfiguration.USBankAccount(
+                name = name,
+                email = email,
+            )
+        }
+
+        val launcher = if (isInstantDebits) {
+            collectBankAccountForInstantDebitsLauncher
+        } else {
+            collectBankAccountLauncher
+        }
+
+        when (intent) {
+            is PaymentIntent -> {
+                launcher?.presentWithPaymentIntent(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            }
+            is SetupIntent -> {
+                launcher?.presentWithSetupIntent(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret,
+                    configuration = configuration,
+                )
+            }
+        }
+    }
+
+    private fun collectBankAccountForDeferredIntent(
+        initializationMode: PaymentSheet.InitializationMode,
+        intent: StripeIntent,
+        createParams: PaymentMethodCreateParams,
+    ) {
+        val elementsSessionId = intent.id ?: return
+        val name = PaymentMethodCreateParams.getNameFromParams(createParams) ?: return
+        val email = PaymentMethodCreateParams.getEmailFromParams(createParams)
+
+        val amount = intent.asPaymentIntent()?.amount
+        val currency = intent.asPaymentIntent()?.currency
+
+        val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            ?.intentConfiguration
+            ?.onBehalfOf
+
+        when (intent) {
+            is PaymentIntent -> {
+                collectBankAccountLauncher?.presentWithDeferredPayment(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(name, email),
+                    elementsSessionId = elementsSessionId,
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
+                    amount = amount?.toInt(),
+                    currency = currency
+                )
+            }
+            is SetupIntent -> {
+                collectBankAccountLauncher?.presentWithDeferredSetup(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(name, email),
+                    elementsSessionId = elementsSessionId,
+                    customerId = null,
+                    onBehalfOf = onBehalfOf,
+                )
+            }
+        }
+    }
+
     private fun onPaymentResult(result: InternalPaymentResult) {
         val intentResult = runCatching {
             val arguments = currentArguments ?: throw IllegalStateException(
@@ -552,6 +707,7 @@ internal class IntentConfirmationHandler(
 
                     paymentMethod?.let { option ->
                         val confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                            paymentMethodId = result.paymentMethod.id,
                             paymentMethod = result.paymentMethod,
                             initializationMode = option.initializationMode,
                             shippingDetails = option.shippingDetails,
@@ -671,7 +827,9 @@ internal class IntentConfirmationHandler(
          * Indicates that the handler is currently idle. This is normally the initial state of the handler unless the
          * handler is reloaded after being destroyed by process death while confirming an intent.
          */
-        data object Idle : State
+        data class Idle(
+            val intermediateResult: Any? = null,
+        ) : State
 
         /**
          * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation of
@@ -705,6 +863,7 @@ internal class IntentConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val errorReporter: ErrorReporter,
+        private val lazyPaymentConfig: Provider<PaymentConfiguration>,
         private val logger: UserFacingLogger?,
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
@@ -724,6 +883,7 @@ internal class IntentConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
+                lazyPaymentConfig = lazyPaymentConfig,
                 logger = logger,
             )
         }

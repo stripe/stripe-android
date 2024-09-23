@@ -36,6 +36,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
         errorReporter: ErrorReporter,
+        lazyPaymentConfiguration: Provider<PaymentConfiguration>,
         logger: UserFacingLogger,
     ): IntentConfirmationHandler.Factory {
         return IntentConfirmationHandler.Factory(
@@ -47,6 +48,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             statusBarColor = { starterArgs.statusBarColor },
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,
+            lazyPaymentConfig = lazyPaymentConfiguration,
             logger = logger,
         )
     }

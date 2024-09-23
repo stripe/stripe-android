@@ -146,6 +146,7 @@ internal interface CustomerSheetViewModelModule {
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
+            lazyPaymentConfig: Provider<PaymentConfiguration>,
             errorReporter: ErrorReporter,
         ): IntentConfirmationHandler.Factory {
             return IntentConfirmationHandler.Factory(
@@ -157,6 +158,7 @@ internal interface CustomerSheetViewModelModule {
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
+                lazyPaymentConfig = lazyPaymentConfig,
                 logger = null,
             )
         }

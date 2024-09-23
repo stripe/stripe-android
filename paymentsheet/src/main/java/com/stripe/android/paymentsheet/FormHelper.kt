@@ -86,7 +86,11 @@ internal class FormHelper(
     }
 
     fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
+        val userInteractionAllowed = formElementsForCode(
+            code = selectedPaymentMethodCode,
+            result = null,
+        ).any { it.allowsUserInteraction }
+        
         return userInteractionAllowed ||
             selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
             selectedPaymentMethodCode == PaymentMethod.Type.Link.code

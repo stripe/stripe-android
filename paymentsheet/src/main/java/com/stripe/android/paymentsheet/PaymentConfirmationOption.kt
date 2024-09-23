@@ -41,6 +41,13 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
         val appearance: PaymentSheet.Appearance,
     ) : PaymentConfirmationOption
 
+    @Parcelize
+    data class BankAccount(
+        val initializationMode: PaymentSheet.InitializationMode,
+        val createParams: PaymentMethodCreateParams,
+        val isInstantDebits: Boolean,
+    ) : PaymentConfirmationOption
+
     sealed interface PaymentMethod : PaymentConfirmationOption {
         val initializationMode: PaymentSheet.InitializationMode
         val shippingDetails: AddressDetails?
@@ -49,6 +56,7 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
         data class Saved(
             override val initializationMode: PaymentSheet.InitializationMode,
             override val shippingDetails: AddressDetails?,
+            val paymentMethodId: String?,
             val paymentMethod: PaymentMethodModel,
             val optionsParams: PaymentMethodOptionsParams?,
         ) : PaymentMethod

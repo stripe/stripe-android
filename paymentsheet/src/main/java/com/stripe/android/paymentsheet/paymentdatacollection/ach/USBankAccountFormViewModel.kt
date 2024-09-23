@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
@@ -36,6 +37,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.ach.TransformToBankIcon
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AddressElement
@@ -57,6 +59,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -690,6 +693,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
     )
+
+    @Parcelize
+    data class Args2(
+        val instantDebits: Boolean,
+        val showCheckbox: Boolean,
+        val isCompleteFlow: Boolean,
+        val isPaymentFlow: Boolean,
+        val stripeIntentId: String?,
+        val clientSecret: String?,
+        val onBehalfOf: String?,
+        val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
+        val shippingDetails: AddressDetails?,
+        val hostedSurface: String,
+        val amount: Amount?,
+    ) : Parcelable
 
     private companion object {
         private const val HAS_LAUNCHED_KEY = "has_launched"

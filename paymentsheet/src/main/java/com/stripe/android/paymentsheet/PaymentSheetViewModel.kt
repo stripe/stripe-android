@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -23,18 +22,9 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod.Type.Link
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
-import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -47,7 +37,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.hasIntermediateResult
 import com.stripe.android.paymentsheet.navigation.updateWithResult
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -79,7 +68,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel @Inject internal constructor(
@@ -99,7 +87,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+//    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -358,7 +346,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             intentConfirmationHandler.state.collectLatest { state ->
                 when (state) {
-                    is IntentConfirmationHandler.State.Idle -> Unit
+                    is IntentConfirmationHandler.State.Idle -> {
+                        if (state.intermediateResult != null) {
+                            val screen = navigationHandler.currentScreen.value
+                            screen.updateWithResult(state.intermediateResult)
+                            resetViewState(userErrorMessage = null)
+                        }
+                    }
                     is IntentConfirmationHandler.State.Preconfirming -> {
                         if (
                             state.inPreconfirmFlow &&
@@ -404,135 +398,135 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             launchCvcRecollection()
             return
         }
-        if (shouldLaunchAchFlow()) {
-            launchAchFlow()
-            return
-        }
-        if (shouldLaunchInstantDebitsFlow()) {
-            launchInstantDebits()
-            return
-        }
+//        if (shouldLaunchAchFlow()) {
+//            launchAchFlow()
+//            return
+//        }
+//        if (shouldLaunchInstantDebitsFlow()) {
+//            launchInstantDebits()
+//            return
+//        }
         checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
     }
 
-    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
-    private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
+//    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+//    private var collectBankAccountForInstantDebitsLauncher: CollectBankAccountLauncher? = null
 
-    private fun launchInstantDebits() {
-        val metadata = paymentMethodMetadata.value ?: return
-        val selection = selection.value as? PaymentSelection.New ?: return
-        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
+//    private fun launchInstantDebits() {
+//        val metadata = paymentMethodMetadata.value ?: return
+//        val selection = selection.value as? PaymentSelection.New ?: return
+//        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
+//
+//        val configuration = CollectBankAccountConfiguration.InstantDebits(email)
+//        val paymentConfig = lazyPaymentConfig.get()
+//        val clientSecret = metadata.stripeIntent.clientSecret
+//
+//        if (metadata.stripeIntent is PaymentIntent) {
+//            collectBankAccountForInstantDebitsLauncher?.presentWithPaymentIntent(
+//                publishableKey = paymentConfig.publishableKey,
+//                stripeAccountId = paymentConfig.stripeAccountId,
+//                clientSecret = clientSecret!!,
+//                configuration = configuration,
+//            )
+//        } else {
+//            collectBankAccountForInstantDebitsLauncher?.presentWithSetupIntent(
+//                publishableKey = paymentConfig.publishableKey,
+//                stripeAccountId = paymentConfig.stripeAccountId,
+//                clientSecret = clientSecret!!,
+//                configuration = configuration,
+//            )
+//        }
+//    }
 
-        val configuration = CollectBankAccountConfiguration.InstantDebits(email)
-        val paymentConfig = lazyPaymentConfig.get()
-        val clientSecret = metadata.stripeIntent.clientSecret
+//    private fun launchAchFlow() {
+//        val metadata = paymentMethodMetadata.value ?: return
+//        val selection = selection.value as? PaymentSelection.New ?: return
+//
+//        val name = PaymentMethodCreateParams.getNameFromParams(selection.paymentMethodCreateParams) ?: return
+//        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
+//
+//        val configuration = CollectBankAccountConfiguration.USBankAccount(name, email)
+//        val paymentConfig = lazyPaymentConfig.get()
+//        val clientSecret = metadata.stripeIntent.clientSecret
+//
+//        val onBehalfOf = (args.initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+//            ?.intentConfiguration
+//            ?.onBehalfOf
+//
+//        if (metadata.stripeIntent is PaymentIntent) {
+//            if (clientSecret != null) {
+//                collectBankAccountLauncher?.presentWithPaymentIntent(
+//                    publishableKey = paymentConfig.publishableKey,
+//                    stripeAccountId = paymentConfig.stripeAccountId,
+//                    clientSecret = clientSecret,
+//                    configuration = configuration,
+//                )
+//            } else {
+//                collectBankAccountLauncher?.presentWithDeferredPayment(
+//                    publishableKey = paymentConfig.publishableKey,
+//                    stripeAccountId = paymentConfig.stripeAccountId,
+//                    elementsSessionId = metadata.stripeIntent.id!!,
+//                    configuration = configuration,
+//                    amount = metadata.amount()!!.value.toInt(),
+//                    currency = metadata.amount()!!.currencyCode,
+//                    customerId = null,
+//                    onBehalfOf = onBehalfOf,
+//                )
+//            }
+//        } else {
+//            if (clientSecret != null) {
+//                collectBankAccountLauncher?.presentWithSetupIntent(
+//                    publishableKey = paymentConfig.publishableKey,
+//                    stripeAccountId = paymentConfig.stripeAccountId,
+//                    clientSecret = clientSecret,
+//                    configuration = configuration,
+//                )
+//            } else {
+//                collectBankAccountLauncher?.presentWithDeferredSetup(
+//                    publishableKey = paymentConfig.publishableKey,
+//                    stripeAccountId = paymentConfig.stripeAccountId,
+//                    elementsSessionId = metadata.stripeIntent.id!!,
+//                    configuration = configuration,
+//                    customerId = null,
+//                    onBehalfOf = onBehalfOf,
+//                )
+//            }
+//        }
+//    }
 
-        if (metadata.stripeIntent is PaymentIntent) {
-            collectBankAccountForInstantDebitsLauncher?.presentWithPaymentIntent(
-                publishableKey = paymentConfig.publishableKey,
-                stripeAccountId = paymentConfig.stripeAccountId,
-                clientSecret = clientSecret!!,
-                configuration = configuration,
-            )
-        } else {
-            collectBankAccountForInstantDebitsLauncher?.presentWithSetupIntent(
-                publishableKey = paymentConfig.publishableKey,
-                stripeAccountId = paymentConfig.stripeAccountId,
-                clientSecret = clientSecret!!,
-                configuration = configuration,
-            )
-        }
-    }
+//    private fun handleCollectBankAccountResult(
+//        result: CollectBankAccountResultInternal,
+//    ) {
+//        if (result is CollectBankAccountResultInternal.Completed) {
+//            val screen = navigationHandler.currentScreen.value
+//            screen.updateWithResult(result)
+//            intermediateResults += USBankAccount.code to result
+//        }
+//    }
 
-    private fun launchAchFlow() {
-        val metadata = paymentMethodMetadata.value ?: return
-        val selection = selection.value as? PaymentSelection.New ?: return
+//    private fun handleCollectBankAccountForInstantDebitsResult(
+//        result: CollectBankAccountForInstantDebitsResult,
+//    ) {
+//        if (result is CollectBankAccountForInstantDebitsResult.Completed) {
+//            val screen = navigationHandler.currentScreen.value
+//            screen.updateWithResult(result)
+//            intermediateResults += Link.code to result
+//        }
+//    }
 
-        val name = PaymentMethodCreateParams.getNameFromParams(selection.paymentMethodCreateParams) ?: return
-        val email = PaymentMethodCreateParams.getEmailFromParams(selection.paymentMethodCreateParams)
+//    private fun shouldLaunchAchFlow(): Boolean {
+//        val selection = selection.value
+//        val screen = navigationHandler.currentScreen.value
+//        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
+//        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult(USBankAccount.code)
+//    }
 
-        val configuration = CollectBankAccountConfiguration.USBankAccount(name, email)
-        val paymentConfig = lazyPaymentConfig.get()
-        val clientSecret = metadata.stripeIntent.clientSecret
-
-        val onBehalfOf = (args.initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-            ?.intentConfiguration
-            ?.onBehalfOf
-
-        if (metadata.stripeIntent is PaymentIntent) {
-            if (clientSecret != null) {
-                collectBankAccountLauncher?.presentWithPaymentIntent(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    clientSecret = clientSecret,
-                    configuration = configuration,
-                )
-            } else {
-                collectBankAccountLauncher?.presentWithDeferredPayment(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    elementsSessionId = metadata.stripeIntent.id!!,
-                    configuration = configuration,
-                    amount = metadata.amount()!!.value.toInt(),
-                    currency = metadata.amount()!!.currencyCode,
-                    customerId = null,
-                    onBehalfOf = onBehalfOf,
-                )
-            }
-        } else {
-            if (clientSecret != null) {
-                collectBankAccountLauncher?.presentWithSetupIntent(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    clientSecret = clientSecret,
-                    configuration = configuration,
-                )
-            } else {
-                collectBankAccountLauncher?.presentWithDeferredSetup(
-                    publishableKey = paymentConfig.publishableKey,
-                    stripeAccountId = paymentConfig.stripeAccountId,
-                    elementsSessionId = metadata.stripeIntent.id!!,
-                    configuration = configuration,
-                    customerId = null,
-                    onBehalfOf = onBehalfOf,
-                )
-            }
-        }
-    }
-
-    private fun handleCollectBankAccountResult(
-        result: CollectBankAccountResultInternal,
-    ) {
-        if (result is CollectBankAccountResultInternal.Completed) {
-            val screen = navigationHandler.currentScreen.value
-            screen.updateWithResult(result)
-            intermediateResults += USBankAccount.code to result
-        }
-    }
-
-    private fun handleCollectBankAccountForInstantDebitsResult(
-        result: CollectBankAccountForInstantDebitsResult,
-    ) {
-        if (result is CollectBankAccountForInstantDebitsResult.Completed) {
-            val screen = navigationHandler.currentScreen.value
-            screen.updateWithResult(result)
-            intermediateResults += Link.code to result
-        }
-    }
-
-    private fun shouldLaunchAchFlow(): Boolean {
-        val selection = selection.value
-        val screen = navigationHandler.currentScreen.value
-        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
-        return bankAccountSelection?.code == USBankAccount.code && !screen.hasIntermediateResult(USBankAccount.code)
-    }
-
-    private fun shouldLaunchInstantDebitsFlow(): Boolean {
-        val selection = selection.value
-        val screen = navigationHandler.currentScreen.value
-        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
-        return bankAccountSelection?.code == Link.code && !screen.hasIntermediateResult(USBankAccount.code)
-    }
+//    private fun shouldLaunchInstantDebitsFlow(): Boolean {
+//        val selection = selection.value
+//        val screen = navigationHandler.currentScreen.value
+//        val bankAccountSelection = selection as? PaymentSelection.New.USBankAccount
+//        return bankAccountSelection?.code == Link.code && !screen.hasIntermediateResult(USBankAccount.code)
+//    }
 
     fun checkoutWithGooglePay() {
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
@@ -622,17 +616,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
 
-        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
-            hostedSurface = "payment_element",
-            activityResultCaller = activityResultCaller,
-            callback = ::handleCollectBankAccountResult,
-        )
-
-        collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
-            hostedSurface = "payment_element",
-            activityResultCaller = activityResultCaller,
-            callback = ::handleCollectBankAccountForInstantDebitsResult,
-        )
+//        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
+//            hostedSurface = "payment_element",
+//            activityResultCaller = activityResultCaller,
+//            callback = ::handleCollectBankAccountResult,
+//        )
+//
+//        collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
+//            hostedSurface = "payment_element",
+//            activityResultCaller = activityResultCaller,
+//            callback = ::handleCollectBankAccountForInstantDebitsResult,
+//        )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {

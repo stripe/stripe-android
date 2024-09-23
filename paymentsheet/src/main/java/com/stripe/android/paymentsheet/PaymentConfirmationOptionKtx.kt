@@ -11,6 +11,7 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
         is PaymentSelection.Saved -> PaymentConfirmationOption.PaymentMethod.Saved(
             initializationMode = initializationMode,
             shippingDetails = configuration.shippingDetails,
+            paymentMethodId = paymentMethod.id,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
@@ -18,6 +19,23 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
             type = type,
             billingDetails = billingDetails,
         )
+        is PaymentSelection.New.USBankAccount -> {
+            if (hasResult) {
+                PaymentConfirmationOption.PaymentMethod.New(
+                    initializationMode = initializationMode,
+                    shippingDetails = configuration.shippingDetails,
+                    createParams = paymentMethodCreateParams,
+                    optionsParams = paymentMethodOptionsParams,
+                    shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                )
+            } else {
+                PaymentConfirmationOption.BankAccount(
+                    initializationMode = initializationMode,
+                    createParams = paymentMethodCreateParams,
+                    isInstantDebits = paymentMethodCreateParams.typeCode == PaymentMethod.Type.Link.code,
+                )
+            }
+        }
         is PaymentSelection.New -> {
             if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
                 PaymentConfirmationOption.BacsPaymentMethod(

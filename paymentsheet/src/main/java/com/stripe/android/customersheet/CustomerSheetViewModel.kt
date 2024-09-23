@@ -71,9 +71,9 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -957,13 +957,12 @@ internal class CustomerSheetViewModel(
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             val isCompleted = bankAccountResult is CollectBankAccountResultInternal.Completed
 
-            val mandateText = USBankAccountTextBuilder.getMandateAndMicrodepositsText(
-                code = USBankAccount.code,
+            val mandateText = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
                 merchantName = configuration.merchantDisplayName,
-                hasResult = isCompleted,
+                isVerifyingMicrodeposits = bankAccountResult?.usesMicrodeposits ?: false,
                 isSaveForFutureUseSelected = true,
-                usesMicrodeposits = bankAccountResult?.usesMicrodeposits ?: false,
                 isSetupFlow = true,
+                isInstantDebits = false,
             )
 
             it.copy(
@@ -1089,6 +1088,7 @@ internal class CustomerSheetViewModel(
                         clientSecret = clientSecret
                     ),
                     shippingDetails = null,
+                    paymentMethodId = paymentMethod.id,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
