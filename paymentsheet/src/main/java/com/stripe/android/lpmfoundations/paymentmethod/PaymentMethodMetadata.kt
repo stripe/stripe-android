@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -248,6 +249,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal fun create(
             elementsSession: ElementsSession,
             configuration: PaymentSheet.Configuration,
@@ -280,7 +282,7 @@ internal data class PaymentMethodMetadata(
                 )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
+        @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCardBrandFilteringApi::class)
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
@@ -308,6 +310,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 externalPaymentMethodSpecs = emptyList(),
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
     }

@@ -385,6 +385,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
     }
 
+    override fun onDisallowedCardBrandEntered(cardBrand: CardBrand) {
+        fireEvent(
+            PaymentSheetEvent.CardBrandDisallowed(
+                cardBrand = cardBrand,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

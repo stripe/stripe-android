@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -493,6 +494,7 @@ class PaymentSheet internal constructor(
     }
 
     /** Configuration for [PaymentSheet] **/
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Parcelize
     data class Configuration internal constructor(
         /**
@@ -1546,6 +1548,7 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
+    @ExperimentalCardBrandFilteringApi
     sealed class CardBrandAcceptance : Parcelable {
 
         /**

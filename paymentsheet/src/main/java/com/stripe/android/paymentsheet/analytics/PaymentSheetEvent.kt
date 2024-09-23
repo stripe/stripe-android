@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
@@ -124,6 +125,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 return formatEventName(mode, "init_$configValue")
             }
 
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
         override val additionalParams: Map<String, Any?>
             get() {
 
@@ -146,6 +148,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -413,6 +416,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardBrandDisallowed(
+        cardBrand: CardBrand,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_disallowed_card_brand"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            VALUE_CARD_BRAND to cardBrand.code
+        )
+    }
+
     class UpdatePaymentOptionFailed(
         selectedBrand: CardBrand,
         error: Throwable,
@@ -500,9 +516,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
+        const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+
+        const val VALUE_CARD_BRAND = "brand"
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }

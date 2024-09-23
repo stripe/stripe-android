@@ -182,6 +182,13 @@ internal interface EventReporter {
      */
     fun onCannotProperlyReturnFromLinkAndOtherLPMs()
 
+    /**
+     * The customer has entered a card with a brand blocked by the merchant
+     */
+    fun onDisallowedCardBrandEntered(
+        cardBrand: CardBrand,
+    )
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

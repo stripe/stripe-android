@@ -11,11 +11,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -170,6 +172,7 @@ class CustomerSheet internal constructor(
     /**
      * Configuration for [CustomerSheet]
      */
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @ExperimentalCustomerSheetApi
     @Parcelize
     @Poko
@@ -220,6 +223,13 @@ class CustomerSheet internal constructor(
          * applicable, Stripe will select the network.
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+
+        /**
+        By default, CustomerSheet will accept all supported cards by Stripe.
+        You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+        Note: This is only a client-side solution.
+         */
+        val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
