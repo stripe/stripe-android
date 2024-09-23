@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.analyticsValue
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -55,7 +56,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
         ).plus(
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.value)
+                mapOf(FIELD_LINK_MODE to mode.analyticsValue)
             }.orEmpty()
         )
 

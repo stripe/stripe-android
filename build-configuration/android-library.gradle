@@ -5,7 +5,7 @@
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
-if (!project.hasProperty("skip_dokka")) {
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
 
@@ -63,7 +63,7 @@ android {
         disable 'MissingTranslation'
     }
 
-    if (!project.hasProperty("skip_dokka")) {
+    if (project.hasProperty("enable_dokka") && project.enable_dokka) {
         dokkaHtml {
             outputDirectory = new File("${project.rootDir}/docs/$project.name")
         }
@@ -82,5 +82,11 @@ android {
         jvmToolchain {
             languageVersion.set(JavaLanguageVersion.of("11"))
         }
+    }
+}
+
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+    dependencies {
+        dokkaPlugin(project(":dokka-stripe"))
     }
 }

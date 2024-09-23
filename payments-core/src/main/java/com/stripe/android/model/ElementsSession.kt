@@ -37,22 +37,12 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
-    val linkMode: LinkMode?
-        get() = if (isLinkEnabled) {
-            if (linkPassthroughModeEnabled) {
-                LinkMode.Passthrough
-            } else {
-                LinkMode.PaymentMethod
-            }
-        } else {
-            null
-        }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
+        val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
     ) : StripeModel

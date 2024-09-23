@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -130,18 +131,18 @@ class CustomerSheet internal constructor(
             )
 
         return coroutineScope {
-            val adapter = CustomerSheetHacks.adapter.await()
-
-            val selectedPaymentOptionDeferred = async {
-                adapter.retrieveSelectedPaymentOption()
+            val savedSelectionDeferred = async {
+                CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection().toResult()
             }
             val paymentMethodsDeferred = async {
-                adapter.retrievePaymentMethods()
+                CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
             }
-            val selectedPaymentOption = selectedPaymentOptionDeferred.await()
+            val savedSelection = savedSelectionDeferred.await()
             val paymentMethods = paymentMethodsDeferred.await()
 
-            val selection = selectedPaymentOption.mapCatching { paymentOption ->
+            val selection = savedSelection.map { selection ->
+                selection?.toPaymentOption()
+            }.mapCatching { paymentOption ->
                 paymentOption?.toPaymentSelection {
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
@@ -153,7 +154,7 @@ class CustomerSheet internal constructor(
                 onSuccess = {
                     CustomerSheetResult.Selected(it)
                 },
-                onFailure = { cause, _ ->
+                onFailure = { cause ->
                     CustomerSheetResult.Failed(cause)
                 }
             )

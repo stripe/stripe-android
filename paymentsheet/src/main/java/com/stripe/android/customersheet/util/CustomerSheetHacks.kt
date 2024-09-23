@@ -6,6 +6,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.data.CustomerAdapterDataSource
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
+import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
+import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
@@ -24,11 +28,23 @@ internal object CustomerSheetHacks {
     val adapter: Deferred<CustomerAdapter>
         get() = _adapter.asDeferred()
 
+    private val _dataSource = MutableStateFlow<CombinedDataSource<*>?>(null)
+
+    val paymentMethodDataSource: Deferred<CustomerSheetPaymentMethodDataSource>
+        get() = _dataSource.asDeferred()
+
+    val savedSelectionDataSource: Deferred<CustomerSheetSavedSelectionDataSource>
+        get() = _dataSource.asDeferred()
+
+    val intentDataSource: Deferred<CustomerSheetIntentDataSource>
+        get() = _dataSource.asDeferred()
+
     fun initialize(
         lifecycleOwner: LifecycleOwner,
         adapter: CustomerAdapter,
     ) {
         _adapter.value = adapter
+        _dataSource.value = CombinedDataSource(CustomerAdapterDataSource(adapter))
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -49,8 +65,17 @@ internal object CustomerSheetHacks {
         )
     }
 
+    private class CombinedDataSource<T>(dataSource: T) :
+        CustomerSheetSavedSelectionDataSource by dataSource,
+        CustomerSheetPaymentMethodDataSource by dataSource,
+        CustomerSheetIntentDataSource by dataSource
+        where T : CustomerSheetSavedSelectionDataSource,
+              T : CustomerSheetPaymentMethodDataSource,
+              T : CustomerSheetIntentDataSource
+
     fun clear() {
         _adapter.value = null
+        _dataSource.value = null
     }
 }
 
