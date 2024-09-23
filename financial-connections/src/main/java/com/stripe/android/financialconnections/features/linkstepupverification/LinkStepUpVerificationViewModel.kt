@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -29,6 +28,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -47,7 +47,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val startVerification: StartVerification,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val confirmVerification: ConfirmVerification,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
     private val getCachedAccounts: GetCachedAccounts,
@@ -180,12 +180,13 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     private suspend fun startVerification(): ConsumerSession {
         val manifest = getOrFetchSync().manifest
         // Step up flows require an existing consumer session
-        val consumerSessionSecret = requireNotNull(getCachedConsumerSession()).clientSecret
-        val consumerSession = startVerification.email(
+        val consumerSessionSecret = requireNotNull(consumerSessionProvider.provideConsumerSession()).clientSecret
+        // Start verification with the existing consumer session
+        val updatedConsumerSession = startVerification.email(
             consumerSessionClientSecret = consumerSessionSecret,
             businessName = manifest.businessName
         )
-        return consumerSession
+        return updatedConsumerSession
     }
 
     @AssistedFactory

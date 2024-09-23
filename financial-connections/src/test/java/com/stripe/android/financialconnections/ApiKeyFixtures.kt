@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
+import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionSignup
 
@@ -160,5 +161,13 @@ internal object ApiKeyFixtures {
                 )
             ),
         ),
+    )
+
+    fun cachedConsumerSession() = CachedConsumerSession(
+        clientSecret = "clientSecret",
+        emailAddress = "test@test.com",
+        phoneNumber = "(***) *** **12",
+        publishableKey = null,
+        isVerified = true,
     )
 }

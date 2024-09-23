@@ -2,13 +2,13 @@ package com.stripe.android.financialconnections.features.linkstepupverification
 
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -19,7 +19,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -45,15 +44,8 @@ class LinkStepUpVerificationViewModelTest {
     private val startVerification = mock<StartVerification>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
-    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
 
-    private val cachedConsumerSession = CachedConsumerSession(
-        clientSecret = "clientSecret",
-        emailAddress = "test@test.com",
-        phoneNumber = "(***) *** **12",
-        isVerified = false,
-        publishableKey = null
-    )
+    private val cachedConsumerSession = cachedConsumerSession()
 
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
@@ -67,7 +59,7 @@ class LinkStepUpVerificationViewModelTest {
             getCachedAccounts = getCachedAccounts,
             selectNetworkedAccounts = selectNetworkedAccounts,
             startVerification = startVerification,
-            getCachedConsumerSession = getCachedConsumerSession,
+            consumerSessionProvider = { cachedConsumerSession },
             logger = Logger.noop(),
             initialState = state,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
@@ -78,7 +70,6 @@ class LinkStepUpVerificationViewModelTest {
     fun `init - starts EMAIL verification with existing consumer session secret`() = runTest {
         val syncResponse = syncResponse()
         givenGetSyncReturns(syncResponse)
-        givenGetCachedConsumerSessionReturns()
 
         buildViewModel()
 
@@ -97,7 +88,6 @@ class LinkStepUpVerificationViewModelTest {
 
         // verify succeeds
         givenGetSyncReturns(syncResponse)
-        givenGetCachedConsumerSessionReturns()
         whenever(startVerification.email(any(), any())).thenReturn(consumerSession)
 
         // cached accounts are available.
@@ -148,10 +138,6 @@ class LinkStepUpVerificationViewModelTest {
         syncResponse: SynchronizeSessionResponse = syncResponse()
     ) {
         whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-    }
-
-    private suspend fun givenGetCachedConsumerSessionReturns() {
-        whenever(getCachedConsumerSession()).thenReturn(cachedConsumerSession)
     }
 
     private suspend fun markLinkVerifiedReturns(
