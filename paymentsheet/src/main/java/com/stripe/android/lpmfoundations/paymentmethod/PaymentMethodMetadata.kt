@@ -137,32 +137,23 @@ internal data class PaymentMethodMetadata(
     }
 
     private fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
-        return stripeIntent.paymentMethodTypes.mapNotNull {
+        val supportedPaymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)
-        }.withDefinitionIfSupported(
-            definition = LinkCardBrandDefinition,
-        ).filterNot {
+        }
+
+        val syntheticPaymentMethodTypes = listOf(LinkCardBrandDefinition).filter {
+            it.isSupported(this, requireToBeIncludedInIntentPaymentMethodTypes = false)
+        }
+
+        val paymentMethodTypes = supportedPaymentMethodTypes + syntheticPaymentMethodTypes
+
+        return paymentMethodTypes.filterNot {
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
             paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
-        }
-    }
-
-    private fun List<PaymentMethodDefinition>.withDefinitionIfSupported(
-        definition: PaymentMethodDefinition,
-    ): List<PaymentMethodDefinition> {
-        val isSupported = definition.isSupported(
-            metadata = this@PaymentMethodMetadata,
-            requireToBeIncludedInIntentPaymentMethodTypes = false,
-        )
-
-        return if (isSupported) {
-            this + definition
-        } else {
-            this
         }
     }
 

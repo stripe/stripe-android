@@ -2,7 +2,9 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -200,6 +202,26 @@ internal class AddPaymentMethodRequirementTest {
         )
 
         assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfLinkCardBrand() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsTrueForCorrectLinkMode() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
     }
 
     private fun createValidInstantDebitsPaymentIntent(): PaymentIntent {
