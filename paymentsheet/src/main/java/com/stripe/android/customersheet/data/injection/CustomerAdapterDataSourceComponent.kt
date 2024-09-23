@@ -7,8 +7,10 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Singleton
 
 @OptIn(ExperimentalCustomerSheetApi::class)
+@Singleton
 @Component(
     modules = [
         CustomerAdapterDataSourceModule::class

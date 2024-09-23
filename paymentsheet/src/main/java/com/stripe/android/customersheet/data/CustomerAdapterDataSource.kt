@@ -8,8 +8,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.model.SavedSelection
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @OptIn(ExperimentalCustomerSheetApi::class)
+@Singleton
 internal class CustomerAdapterDataSource @Inject constructor(
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetSavedSelectionDataSource,
