@@ -3,13 +3,11 @@ package com.stripe.android.paymentsheet.cvcrecollection
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import org.junit.Test
 
-@OptIn(ExperimentalCvcRecollectionApi::class)
 class CvcRecollectionHandlerTest {
     private val handler = CvcRecollectionHandlerImpl()
 
