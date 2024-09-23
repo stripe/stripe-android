@@ -135,6 +135,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     sharedDataSpecs = emptyList(),
                     hasCustomerConfiguration = true,
                     isGooglePayReady = true,
+                    linkMode = null,
                 ),
             )
         )
