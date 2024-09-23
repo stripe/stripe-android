@@ -144,7 +144,7 @@ internal data class PaymentMethodMetadata(
         }
 
         val syntheticPaymentMethodTypes = listOf(LinkCardBrandDefinition).filter {
-            it.isSupported(this, requireToBeIncludedInIntentPaymentMethodTypes = false)
+            it.isSupported(this)
         }
 
         val paymentMethodTypes = supportedPaymentMethodTypes + syntheticPaymentMethodTypes
