@@ -59,6 +59,7 @@ internal object ApiKeyFixtures {
         instantVerificationDisabled = true,
         institutionSearchDisabled = true,
         livemode = true,
+        businessName = "businessName",
         manualEntryUsesMicrodeposits = true,
         mobileHandoffEnabled = true,
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,

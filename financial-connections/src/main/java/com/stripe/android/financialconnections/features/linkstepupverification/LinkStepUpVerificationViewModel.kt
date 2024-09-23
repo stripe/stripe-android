@@ -178,12 +178,12 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
     }
 
     private suspend fun startVerification(): ConsumerSession {
-        val emailAddress = getOrFetchSync().manifest
+        val manifest = getOrFetchSync().manifest
         // Step up flows require an existing consumer session
         val consumerSessionSecret = requireNotNull(getCachedConsumerSession()).clientSecret
         val consumerSession = startVerification.email(
             consumerSessionClientSecret = consumerSessionSecret,
-            businessName = emailAddress.businessName
+            businessName = manifest.businessName
         )
         return consumerSession
     }
