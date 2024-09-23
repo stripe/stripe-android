@@ -360,7 +360,7 @@ class PaymentSheet internal constructor(
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
-        val requireCvcRecollection: Boolean = false,
+        internal val requireCvcRecollection: Boolean = false,
     ) : Parcelable {
 
         /**
