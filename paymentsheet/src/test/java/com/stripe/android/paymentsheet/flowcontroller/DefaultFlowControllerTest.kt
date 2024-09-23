@@ -47,7 +47,6 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
@@ -1758,7 +1757,6 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Launches CVC Recollection & succeeds payment for deferred`() {
         cvcRecollectionTest(
@@ -1777,7 +1775,6 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Does not launch CVC Recollection for deferred setup intent`() {
         cvcRecollectionTest(

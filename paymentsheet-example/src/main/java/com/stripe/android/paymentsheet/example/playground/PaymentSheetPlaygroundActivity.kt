@@ -44,7 +44,6 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -420,7 +419,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
@@ -447,7 +445,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState.Payment,
