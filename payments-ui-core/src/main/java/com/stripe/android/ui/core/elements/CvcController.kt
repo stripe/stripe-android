@@ -5,6 +5,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError

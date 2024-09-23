@@ -19,6 +19,7 @@ import com.google.pay.button.PayButton
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.CardBrandFilter
 import org.json.JSONArray
 
 @Composable
@@ -28,6 +29,7 @@ internal fun GooglePayButton(
     buttonType: GooglePayButtonType,
     billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     isEnabled: Boolean,
+    cardBrandFilter: CardBrandFilter,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

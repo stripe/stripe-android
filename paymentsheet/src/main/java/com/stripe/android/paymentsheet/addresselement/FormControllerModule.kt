@@ -8,7 +8,7 @@ import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides

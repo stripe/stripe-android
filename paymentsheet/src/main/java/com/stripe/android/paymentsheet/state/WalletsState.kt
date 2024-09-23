@@ -7,11 +7,13 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Billi
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.CardBrandFilter
 
 internal data class WalletsState(
     val link: Link?,
     val googlePay: GooglePay?,
     val buttonsEnabled: Boolean,
+    val cardBrandFilter: CardBrandFilter,
     @StringRes val dividerTextResource: Int,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
@@ -37,6 +39,7 @@ internal data class WalletsState(
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
+            cardBrandFilter: CardBrandFilter,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
             isSetupIntent: Boolean
@@ -78,6 +81,7 @@ internal data class WalletsState(
                     },
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
+                    cardBrandFilter = cardBrandFilter
                 )
             } else {
                 null

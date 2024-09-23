@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
@@ -224,9 +225,10 @@ class GooglePayJsonFactory constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createCardPaymentMethod(
         billingAddressParameters: BillingAddressParameters?,
-        allowCreditCards: Boolean?
+        allowCreditCards: Boolean?,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter()
     ): JSONObject {
-        val cardPaymentMethodParams = createBaseCardPaymentMethodParams()
+        val cardPaymentMethodParams = createBaseCardPaymentMethodParams(cardBrandFilter)
             .apply {
                 if (billingAddressParameters?.isRequired == true) {
                     put("billingAddressRequired", true)
@@ -251,7 +253,16 @@ class GooglePayJsonFactory constructor(
             .put("tokenizationSpecification", googlePayConfig.tokenizationSpecification)
     }
 
-    private fun createBaseCardPaymentMethodParams(): JSONObject {
+    private fun createBaseCardPaymentMethodParams(cardBrandFilter: CardBrandFilter): JSONObject {
+        // Mapping from Google Pay string networks to CardBrands.
+        val networkStringToCardBrandMap = mapOf(
+            "AMEX" to CardBrand.AmericanExpress,
+            "DISCOVER" to CardBrand.Discover,
+            "MASTERCARD" to CardBrand.MasterCard,
+            "VISA" to CardBrand.Visa,
+            "JCB" to CardBrand.JCB
+        )
+
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
             .put(
@@ -259,7 +270,7 @@ class GooglePayJsonFactory constructor(
                 JSONArray(
                     DEFAULT_CARD_NETWORKS.plus(
                         listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
-                    )
+                    ).filter {cardBrandFilter.isAccepted(networkStringToCardBrandMap[it] ?: CardBrand.Unknown)}
                 )
             )
     }

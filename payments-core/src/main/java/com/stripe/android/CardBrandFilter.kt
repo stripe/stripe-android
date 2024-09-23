@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android
 
 import com.stripe.android.model.CardBrand
 import android.os.Parcelable

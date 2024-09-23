@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.elements.CvcConfig
-import com.stripe.android.ui.core.elements.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.uicore.elements.TextFieldIcon
 
 @Immutable

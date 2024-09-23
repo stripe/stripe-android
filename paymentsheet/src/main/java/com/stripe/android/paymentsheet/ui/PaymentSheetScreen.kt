@@ -375,6 +375,7 @@ internal fun Wallet(
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,
                 onPressed = onGooglePayPressed,
+                cardBrandFilter = state.cardBrandFilter
             )
         }
 

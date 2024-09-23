@@ -113,7 +113,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link)
                 onUserSelection()
             },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+            cardBrandFilter = paymentMethodMetadata.cardBrandFilter
         )
     }
 

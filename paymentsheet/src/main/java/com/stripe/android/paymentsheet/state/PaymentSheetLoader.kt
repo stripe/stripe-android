@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.elements.CardBrandFilter
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred

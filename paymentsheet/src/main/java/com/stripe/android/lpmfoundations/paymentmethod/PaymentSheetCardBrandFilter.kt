@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.CardBrandFilter
+import com.stripe.android.CardBrandFilter
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

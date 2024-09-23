@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -195,7 +196,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayButtonType = googlePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
-            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
+            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter()
         )
     }
 
