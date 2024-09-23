@@ -11,14 +11,10 @@ import java.util.HashMap
  */
 internal class DeviceParamNotAvailableFactoryImpl internal constructor(
     private val apiVersion: Int,
-    private val hardwareIdSupplier: Supplier<HardwareId>
 ) : DeviceParamNotAvailableFactory {
 
-    internal constructor(
-        hardwareIdSupplier: Supplier<HardwareId>
-    ) : this(
+    internal constructor() : this(
         Build.VERSION.SDK_INT,
-        hardwareIdSupplier
     )
 
     override fun create(): Map<String, String> {

@@ -4,7 +4,10 @@ import android.bluetooth.BluetoothClass.Device
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.stripe3ds2.ChallengeMessageFixtures.SDK_TRANS_ID
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
+import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
@@ -13,28 +16,29 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class DeviceDataFactoryImplTest {
     @Test
-    fun create_shouldHaveExpectedNumberOfEntries() {
-        assertThat(createFactory(HARDWARE_ID_VALUE).create())
-            .hasSize(8)
+    fun create_shouldHaveExpectedNumberOfEntries() = runTest {
+
+        assertThat(createFactory().create("1", SDK_TRANS_ID))
+            .hasSize(15)
     }
 
     @Test
-    fun create_withEmptyHardwareId_shouldHaveExpectedNumberOfEntries() {
-        assertThat(createFactory("").create())
-            .hasSize(7)
+    fun create_withEmptyHardwareId_shouldHaveExpectedNumberOfEntries() = runTest {
+        assertThat(createFactory().create("1", SDK_TRANS_ID))
+            .hasSize(15)
     }
 
     @Test
-    fun create_includesTheCorrectValues() {
-        val data = createFactory(HARDWARE_ID_VALUE).create()
+    fun create_includesTheCorrectValues() = runTest {
+        val data = createFactory().create("1", SDK_TRANS_ID)
 
         // Only 8 allowed
         assertThat(data[DeviceParam.PARAM_PLATFORM.toString()])
             .isEqualTo("Android")
         assertThat(data[DeviceParam.PARAM_DEVICE_MODEL.toString()])
-            .isEqualTo("robolectric")
+            .isEqualTo("unknown||robolectric")
         assertThat(data[DeviceParam.PARAM_OS_NAME.toString()])
-            .isEqualTo("REL")
+            .isEqualTo("Android P 9 API 28")
         assertThat(data[DeviceParam.PARAM_OS_VERSION.toString()])
             .isEqualTo("9")
         assertThat(data[DeviceParam.PARAM_LOCALE.toString()])
