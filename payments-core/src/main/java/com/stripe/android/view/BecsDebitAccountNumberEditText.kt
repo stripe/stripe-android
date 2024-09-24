@@ -8,7 +8,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
 import androidx.appcompat.R as AppCompatR
 
-internal class BecsDebitAccountNumberEditText @JvmOverloads constructor(
+open class BecsDebitAccountNumberEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle
