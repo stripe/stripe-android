@@ -28,6 +28,7 @@ class PayoutsExampleActivity : ComponentActivity() {
                 val embeddedComponentManager = remember {
                     EmbeddedComponentManager(
                         activity = this@PayoutsExampleActivity,
+                        // TODO MXMOBILE-2511 - pass publishable key from backend to SDK
                         configuration = EmbeddedComponentManager.Configuration(""),
                         fetchClientSecret = viewModel::fetchClientSecret,
                     )
