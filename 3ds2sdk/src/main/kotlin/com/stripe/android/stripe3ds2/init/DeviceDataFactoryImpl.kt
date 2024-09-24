@@ -7,7 +7,6 @@ import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
-import android.util.Log
 import android.webkit.WebSettings
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
