@@ -139,7 +139,8 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
         jweObject.decrypt(DirectDecrypter(key))
 
         if (!isValidPayloadPart(jweObject.header.toString()) || !isValidPayloadPart(jweObject.iv.toString()) ||
-            !isValidPayloadPart(jweObject.cipherText.toString()) || !isValidPayloadPart(jweObject.authTag.toString())) {
+            !isValidPayloadPart(jweObject.cipherText.toString()) || !isValidPayloadPart(jweObject.authTag.toString())
+        ) {
             throw ChallengeResponseParseException(ProtocolError.DataDecryptionFailure, "Invalid encryption.")
         }
 
@@ -154,11 +155,13 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
     }
 
     internal fun isValidPayloadPart(part: String): Boolean {
-        return !(part.endsWith("=") ||
+        return !(
+            part.endsWith("=") ||
                 part.contains(" ") ||
                 part.contains("+") ||
                 part.contains("\n") ||
-                part.contains("/"))
+                part.contains("/")
+            )
     }
 
     /**

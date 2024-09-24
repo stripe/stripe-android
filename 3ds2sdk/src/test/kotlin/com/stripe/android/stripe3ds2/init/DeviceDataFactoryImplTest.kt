@@ -1,6 +1,5 @@
 package com.stripe.android.stripe3ds2.init
 
-import android.bluetooth.BluetoothClass.Device
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
