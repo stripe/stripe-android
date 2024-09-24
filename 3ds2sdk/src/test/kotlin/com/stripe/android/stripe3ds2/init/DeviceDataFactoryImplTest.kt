@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripe3ds2.ChallengeMessageFixtures.SDK_TRANS_ID
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
-import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -17,7 +16,6 @@ import kotlin.test.Test
 class DeviceDataFactoryImplTest {
     @Test
     fun create_shouldHaveExpectedNumberOfEntries() = runTest {
-
         assertThat(createFactory().create("1", SDK_TRANS_ID))
             .hasSize(15)
     }
