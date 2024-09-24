@@ -6,6 +6,7 @@
 
 ### PaymentSheet
 * [BREAKING][9295](https://github.com/stripe/stripe-android/pull/9295) Remove `ExperimentalCvcRecollectionApi` annotation. This is a breaking change for merchants using `@OptIn(ExperimentalCvcRecollectionApi::class)`.
+* [ADDED] CVC Recollection is now in GA. For more information see our docs [here](https://docs.stripe.com/payments/accept-a-payment?platform=android#android-cvc-recollection) for intent first integrations or [here](https://docs.stripe.com/payments/accept-a-payment-deferred?platform=android&type=payment#android-cvc-recollection) for deferred intent integrations.
 
 ## 20.50.1 - 2024-09-16
 
