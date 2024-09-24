@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -190,9 +191,7 @@ internal fun PaymentSheetScreenContent(
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
 
-    LaunchedEffect(currentScreen) {
-        scrollState.scrollTo(0)
-    }
+    ResetScroll(scrollState = scrollState, currentScreen = currentScreen)
 
     val showsWalletsHeader by remember(currentScreen, type) {
         currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
@@ -216,6 +215,20 @@ internal fun PaymentSheetScreenContent(
         )
 
         PaymentSheetContentPadding()
+    }
+}
+
+@Composable
+private fun ResetScroll(scrollState: ScrollState, currentScreen: PaymentSheetScreen) {
+    var lastScreenClassName by rememberSaveable {
+        mutableStateOf("")
+    }
+    val currentScreenClassName = currentScreen.javaClass.name
+    if (currentScreenClassName != lastScreenClassName) {
+        lastScreenClassName = currentScreenClassName
+        LaunchedEffect(currentScreen) {
+            scrollState.scrollTo(0)
+        }
     }
 }
 
