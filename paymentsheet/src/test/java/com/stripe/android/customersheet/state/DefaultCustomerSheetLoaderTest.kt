@@ -659,8 +659,9 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         assertThat(
-            errorReporter.getLoggedErrors().first()
-        ).isEqualTo(
+            errorReporter.getLoggedErrors()
+        ).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
             ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE.eventName
         )
     }

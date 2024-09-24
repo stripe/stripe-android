@@ -82,7 +82,7 @@ internal class DefaultCustomerSheetLoader(
         return initializationDataSourceProvider.awaitAsResult(
             timeout = 5.seconds,
             error = {
-                "Couldn't find an instance of CustomerAdapter. " +
+                "Couldn't find an instance of InitializationDataSource. " +
                     "Are you instantiating CustomerSheet unconditionally in your app?"
             },
         ).onFailure {
