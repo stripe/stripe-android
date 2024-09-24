@@ -5,11 +5,20 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -338,12 +347,195 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
     }
 
-    private fun createCustomerAdapterDataSource(
+    @Test
+    fun `on load customer sheet session, should load properly`() = runTest {
+        val intent = SetupIntentFactory.create()
+        val elementsSessionRepository = createElementsSessionRepository(intent)
+
+        val paymentMethods = PaymentMethodFactory.cards(size = 4)
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(paymentMethods),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId(id = "pm_1")
+                ),
+            ),
+            elementsSessionRepository = elementsSessionRepository
+        )
+
+        val result = dataSource.loadCustomerSheetSession()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.elementsSession.stripeIntent).isEqualTo(intent)
+        assertThat(customerSheetSession.paymentMethods).containsExactlyElementsIn(paymentMethods)
+        assertThat(customerSheetSession.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = "pm_1"))
+        assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerSheetSession.paymentMethodSaveConsentBehavior).isEqualTo(
+            PaymentMethodSaveConsentBehavior.Legacy
+        )
+    }
+
+    @Test
+    fun `on load with failed elements session load result, should fail to load & report properly`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val elementsSessionRepository = createElementsSessionRepository(
+            error = IllegalStateException("Failed to load!")
+        )
+        val dataSource = createCustomerAdapterDataSource(
+            elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
+        )
+
+        val result = dataSource.loadCustomerSheetSession()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
+
+        val failureResult = result.asFailure()
+
+        assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE.eventName
+        )
+    }
+
+    @Test
+    fun `on load with failed PMs load result, should fail to load & report properly`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.failure(
+                    cause = IllegalStateException("Failed to load!"),
+                    displayMessage = null,
+                ),
+            ),
+            errorReporter = errorReporter,
+        )
+
+        val result = dataSource.loadCustomerSheetSession()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
+
+        val failureResult = result.asFailure()
+
+        assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE.eventName
+        )
+    }
+
+    @Test
+    fun `on load with failed saved selection result, should fail to load`() = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                selectedPaymentOption = CustomerAdapter.Result.failure(
+                    cause = IllegalStateException("Failed to load!"),
+                    displayMessage = null,
+                )
+            ),
+        )
+
+        val result = dataSource.loadCustomerSheetSession()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
+
+        val failureResult = result.asFailure()
+
+        assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
+    }
+
+    @Test
+    fun `when SI can be created, elements session repo should be called with paymentMethodTypes`() =
+        runPaymentMethodTypesTest(
+            canCreateSetupIntents = true,
+            providedPaymentMethodTypes = listOf("card", "us_bank_account", "sepa_debit"),
+            expectedPaymentMethodTypes = listOf("card", "us_bank_account", "sepa_debit"),
+        )
+
+    @Test
+    fun `when SI can be created and no paymentMethods, elements session repo should be called empty types list`() =
+        runPaymentMethodTypesTest(
+            canCreateSetupIntents = true,
+            providedPaymentMethodTypes = null,
+            expectedPaymentMethodTypes = listOf(),
+        )
+
+    @Test
+    fun `when SI cannot be created, elements session repo should be called with card PM only`() =
+        runPaymentMethodTypesTest(
+            canCreateSetupIntents = false,
+            providedPaymentMethodTypes = null,
+            expectedPaymentMethodTypes = listOf("card")
+        )
+
+    @Test
+    fun `when SI cannot be created, elements sessions is called with card only when paymentMethodTypes is set`() =
+        runPaymentMethodTypesTest(
+            canCreateSetupIntents = false,
+            providedPaymentMethodTypes = listOf("card", "us_bank_account"),
+            expectedPaymentMethodTypes = listOf("card")
+        )
+
+    private fun runPaymentMethodTypesTest(
+        canCreateSetupIntents: Boolean,
+        providedPaymentMethodTypes: List<String>?,
+        expectedPaymentMethodTypes: List<String>,
+    ) = runTest {
+        val elementsSessionRepository = createElementsSessionRepository()
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                canCreateSetupIntents = canCreateSetupIntents,
+                paymentMethodTypes = providedPaymentMethodTypes
+            ),
+            elementsSessionRepository = elementsSessionRepository
+        )
+
+        dataSource.loadCustomerSheetSession()
+
+        val initializationMode = elementsSessionRepository.lastParams?.initializationMode
+
+        assertThat(initializationMode).isInstanceOf<PaymentSheet.InitializationMode.DeferredIntent>()
+
+        val deferredInitializationMode = initializationMode.asDeferred()
+
+        assertThat(deferredInitializationMode.intentConfiguration.paymentMethodTypes)
+            .containsExactlyElementsIn(expectedPaymentMethodTypes)
+    }
+
+    private suspend fun createCustomerAdapterDataSource(
         adapter: CustomerAdapter = FakeCustomerAdapter(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        elementsSessionRepository: ElementsSessionRepository = createElementsSessionRepository(),
     ): CustomerAdapterDataSource {
         return CustomerAdapterDataSource(
             customerAdapter = adapter,
+            elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
+            workContext = coroutineContext,
         )
+    }
+
+    private fun createElementsSessionRepository(
+        intent: StripeIntent = SetupIntentFactory.create(),
+        error: Throwable? = null,
+    ): FakeElementsSessionRepository {
+        return FakeElementsSessionRepository(
+            error = error,
+            linkSettings = null,
+            stripeIntent = intent,
+        )
+    }
+
+    private fun PaymentSheet.InitializationMode?.asDeferred(): PaymentSheet.InitializationMode.DeferredIntent {
+        return this as PaymentSheet.InitializationMode.DeferredIntent
     }
 
     private fun <T> CustomerSheetDataResult<T>.asSuccess(): CustomerSheetDataResult.Success<T> {
