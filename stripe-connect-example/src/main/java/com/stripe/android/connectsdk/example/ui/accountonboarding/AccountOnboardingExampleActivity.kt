@@ -28,6 +28,7 @@ class AccountOnboardingExampleActivity : ComponentActivity() {
                 val embeddedComponentManager = remember {
                     EmbeddedComponentManager(
                         activity = this@AccountOnboardingExampleActivity,
+                        // TODO MXMOBILE-2511 - pass publishable key from backend to SDK
                         configuration = EmbeddedComponentManager.Configuration(""),
                         fetchClientSecret = viewModel::fetchClientSecret,
                     )
