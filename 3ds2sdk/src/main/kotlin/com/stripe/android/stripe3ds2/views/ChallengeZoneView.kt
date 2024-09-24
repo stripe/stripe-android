@@ -25,6 +25,7 @@ internal class ChallengeZoneView @JvmOverloads constructor(
 
     internal val infoHeader: ThreeDS2HeaderTextView
     internal val infoTextView: ThreeDS2TextView
+    internal val infoLabelView: ThreeDS2TextView
     internal val submitButton: ThreeDS2Button
     internal val resendButton: ThreeDS2Button
     internal val whitelistingLabel: ThreeDS2TextView
@@ -49,6 +50,7 @@ internal class ChallengeZoneView @JvmOverloads constructor(
         )
         infoHeader = viewBinding.czvHeader
         infoTextView = viewBinding.czvInfo
+        infoLabelView = viewBinding.czvInfoLabel
         submitButton = viewBinding.czvSubmitButton
         resendButton = viewBinding.czvResendButton
         whitelistingLabel = viewBinding.czvWhitelistingLabel
@@ -91,6 +93,17 @@ internal class ChallengeZoneView @JvmOverloads constructor(
             this.infoTextView.visibility = View.GONE
         } else {
             this.infoTextView.setText(infoText, labelCustomization)
+        }
+    }
+
+    fun setInfoLabel(
+        infoLabel: String?,
+        labelCustomization: LabelCustomization? = null
+    ) {
+        if (infoLabel.isNullOrBlank()) {
+            this.infoLabelView.visibility = View.GONE
+        } else {
+            this.infoLabelView.setText(infoLabel, labelCustomization)
         }
     }
 

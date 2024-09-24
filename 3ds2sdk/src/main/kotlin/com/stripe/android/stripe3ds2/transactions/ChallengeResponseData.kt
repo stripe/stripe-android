@@ -60,10 +60,19 @@ data class ChallengeResponseData constructor(
                 return !acsHtml.isNullOrBlank()
             }
 
-            // required fields for text, single-select, multi-select, oob
-            if ((uiType == UiType.Text || uiType == UiType.SingleSelect || uiType == UiType.MultiSelect || uiType == UiType.OutOfBand) && setOf(
+            // required fields for text, single-select, multi-select
+            if ((uiType == UiType.Text || uiType == UiType.SingleSelect || uiType == UiType.MultiSelect) && setOf(
                     challengeInfoHeader,
                     challengeInfoLabel,
+                    challengeInfoText
+                ).any { it.isNullOrBlank() }
+            ) {
+                return false
+            }
+
+            // required fields for oob
+            if (uiType == UiType.OutOfBand && setOf(
+                    challengeInfoHeader,
                     challengeInfoText
                 ).any { it.isNullOrBlank() }
             ) {

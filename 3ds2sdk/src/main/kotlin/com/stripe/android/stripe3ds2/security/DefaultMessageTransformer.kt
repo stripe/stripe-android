@@ -138,21 +138,12 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
         val key = getDecryptionKey(secretKey, jweObject.header.encryptionMethod)
         jweObject.decrypt(DirectDecrypter(key))
 
-        val stringPayload = jweObject?.payload?.toString()
-        if (stringPayload != null && (
-                    stringPayload.endsWith("=") ||
-                            stringPayload.contains(" ") ||
-                            stringPayload.contains("+") ||
-                            stringPayload.contains("\n") ||
-                            stringPayload.contains("/")
-                    ))
-        {
+        if (!isValidPayloadPart(jweObject.header.toString()) || !isValidPayloadPart(jweObject.iv.toString()) ||
+            !isValidPayloadPart(jweObject.cipherText.toString()) || !isValidPayloadPart(jweObject.authTag.toString())) {
             throw ChallengeResponseParseException(ProtocolError.DataDecryptionFailure, "Invalid encryption.")
         }
 
-        val updatedPayload = jweObject.payload.toString()
-
-        return JSONObject(updatedPayload)
+        return JSONObject(jweObject.payload.toString())
     }
 
     @VisibleForTesting
@@ -160,6 +151,14 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
         return JWEHeader.Builder(JWEAlgorithm.DIR, ENCRYPTION_METHOD)
             .keyID(keyId)
             .build()
+    }
+
+    internal fun isValidPayloadPart(part: String): Boolean {
+        return !(part.endsWith("=") ||
+                part.contains(" ") ||
+                part.contains("+") ||
+                part.contains("\n") ||
+                part.contains("/"))
     }
 
     /**
