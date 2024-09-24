@@ -113,7 +113,11 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customer = null,
             externalPaymentMethods = emptyList(),
             defaultPaymentMethodId = null,
-        ).onFailure {
+        ).onSuccess {
+            errorReporter.report(
+                errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,
+            )
+        }.onFailure {
             errorReporter.report(
                 errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
                 stripeException = StripeException.create(it)
@@ -122,12 +126,19 @@ internal class CustomerAdapterDataSource @Inject constructor(
     }
 
     private suspend fun fetchInitialPaymentMethods(): Result<List<PaymentMethod>> {
-        return retrievePaymentMethods().toResult().onFailure {
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
-                stripeException = StripeException.create(it)
-            )
-        }
+        return retrievePaymentMethods()
+            .onSuccess {
+                errorReporter.report(
+                    errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS,
+                )
+            }
+            .onFailure { cause, _ ->
+                errorReporter.report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
+                    stripeException = StripeException.create(cause)
+                )
+            }
+            .toResult()
     }
 
     private fun createPaymentMethodTypes(): List<String> {

@@ -348,10 +348,11 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
-    fun `on load customer sheet session, should load properly`() = runTest {
+    fun `on load customer sheet session, should load properly & report success events`() = runTest {
         val intent = SetupIntentFactory.create()
         val elementsSessionRepository = createElementsSessionRepository(intent)
 
+        val errorReporter = FakeErrorReporter()
         val paymentMethods = PaymentMethodFactory.cards(size = 4)
         val dataSource = createCustomerAdapterDataSource(
             adapter = FakeCustomerAdapter(
@@ -360,7 +361,8 @@ class CustomerAdapterDataSourceTest {
                     CustomerAdapter.PaymentOption.fromId(id = "pm_1")
                 ),
             ),
-            elementsSessionRepository = elementsSessionRepository
+            elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
         )
 
         val result = dataSource.loadCustomerSheetSession()
@@ -375,6 +377,11 @@ class CustomerAdapterDataSourceTest {
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
         assertThat(customerSheetSession.paymentMethodSaveConsentBehavior).isEqualTo(
             PaymentMethodSaveConsentBehavior.Legacy
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS.eventName,
         )
     }
 
@@ -399,7 +406,8 @@ class CustomerAdapterDataSourceTest {
         assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
         assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE.eventName
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE.eventName,
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS.eventName,
         )
     }
 
@@ -426,6 +434,7 @@ class CustomerAdapterDataSourceTest {
         assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
         assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
             ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE.eventName
         )
     }
