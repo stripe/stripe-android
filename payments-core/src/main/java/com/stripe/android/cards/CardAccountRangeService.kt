@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ class CardAccountRangeService(
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val accountRangeResultListener: AccountRangeResultListener,
     private val isCbcEligible: () -> Boolean,
+    private val cardBrandFilter: CardBrandFilter
 ) {
 
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
@@ -101,8 +103,8 @@ class CardAccountRangeService(
     }
 
     fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
-        this.accountRanges = accountRanges
-        accountRangeResultListener.onAccountRangesResult(accountRanges)
+        this.accountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
+        accountRangeResultListener.onAccountRangesResult(this.accountRanges)
     }
 
     private fun shouldQueryRepository(

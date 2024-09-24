@@ -174,6 +174,7 @@ internal class DefaultCardNumberController(
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
+        cardBrandFilter = cardBrandFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
@@ -248,6 +249,7 @@ internal class DefaultCardNumberController(
             accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
                 fieldValue
             ),
+            isEligibleForCardBrandChoice,
             cardBrandFilter
         )
     }

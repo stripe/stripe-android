@@ -22,6 +22,7 @@ class CvcConfig : CardDetailsTextFieldConfig {
         brand: CardBrand,
         number: String,
         numberAllowedDigits: Int,
+        isCBCEligible: Boolean,
         cardBrandFilter: CardBrandFilter,
     ): TextFieldState {
         val isDigitLimit = brand.maxCvcLength != -1

@@ -18,6 +18,7 @@ internal data class CvcState(
         brand = cardBrand,
         number = cvc,
         numberAllowedDigits = cardBrand.maxCvcLength,
+        isCBCEligible = false,
         cardBrandFilter = DefaultCardBrandFilter()
     ).isValid()
 
