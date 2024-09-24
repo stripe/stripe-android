@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -1057,7 +1058,10 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
         val viewModel = createViewModel(
-            args = defaultArgs.copy(instantDebits = true),
+            args = defaultArgs.copy(
+                instantDebits = true,
+                linkMode = LinkMode.LinkCardBrand,
+            ),
         ).apply {
             this.collectBankAccountLauncher = mockCollectBankAccountLauncher
         }
@@ -1075,7 +1079,7 @@ class USBankAccountFormViewModelTest {
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
                     elementsContext = FinancialConnectionsSheet.ElementsContext(
-                        linkMode = null,
+                        linkMode = LinkMode.LinkCardBrand,
                     ),
                 )
             ),
