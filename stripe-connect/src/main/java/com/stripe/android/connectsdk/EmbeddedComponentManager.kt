@@ -63,7 +63,7 @@ class EmbeddedComponentManager internal constructor() {
         val badgeWarning: Badge,
         val badgeDanger: Badge,
         val cornerRadius: CornerRadius
-    ): Parcelable {
+    ) : Parcelable {
         companion object {
             val default = Appearance(
                 typography = Typography(),
@@ -92,13 +92,13 @@ class EmbeddedComponentManager internal constructor() {
             val headingXs: Style = Style(),
             val labelMd: Style = Style(),
             val labelSm: Style = Style()
-        ): Parcelable {
+        ) : Parcelable {
             @Parcelize
             data class Style(
                 val fontSize: Float? = null,
                 val weight: String? = null,
                 val textTransform: TextTransform? = null
-            ): Parcelable
+            ) : Parcelable
         }
 
         enum class TextTransform {
@@ -122,21 +122,21 @@ class EmbeddedComponentManager internal constructor() {
             @ColorInt val formBackground: Int? = null,
             @ColorInt val formHighlightBorder: Int? = null,
             @ColorInt val formAccent: Int? = null
-        ): Parcelable
+        ) : Parcelable
 
         @Parcelize
         data class Button(
             @ColorInt val colorBackground: Int? = null,
             @ColorInt val colorBorder: Int? = null,
             @ColorInt val colorText: Int? = null
-        ): Parcelable
+        ) : Parcelable
 
         @Parcelize
         data class Badge(
             @ColorInt val colorBackground: Int? = null,
             @ColorInt val colorText: Int? = null,
             @ColorInt val colorBorder: Int? = null
-        ): Parcelable
+        ) : Parcelable
 
         @Parcelize
         data class CornerRadius(
@@ -145,6 +145,6 @@ class EmbeddedComponentManager internal constructor() {
             val button: Float? = null,
             val badge: Float? = null,
             val overlay: Float? = null
-        ): Parcelable
+        ) : Parcelable
     }
 }
