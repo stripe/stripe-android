@@ -30,7 +30,10 @@ class EmbeddedComponentManager internal constructor() {
     }
 
     @PrivateBetaConnectSDK
-    fun update(appearance: Appearance) {
+    fun update(
+        // TODO MXMOBILE-2507 - replace with actual implementation and remove the @Suppress annotations
+        @Suppress("UNUSED_PARAMETER") appearance: Appearance,
+    ) {
         throw NotImplementedError("Not yet implemented")
     }
 
