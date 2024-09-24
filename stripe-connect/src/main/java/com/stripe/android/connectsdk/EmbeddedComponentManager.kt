@@ -44,6 +44,8 @@ class EmbeddedComponentManager internal constructor() {
 
     // Configuration
 
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Configuration(
         val publishableKey: String,
@@ -51,6 +53,8 @@ class EmbeddedComponentManager internal constructor() {
 
     // Appearance classes
 
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Appearance(
         val typography: Typography,
@@ -65,6 +69,7 @@ class EmbeddedComponentManager internal constructor() {
         val cornerRadius: CornerRadius
     ) : Parcelable {
         companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             val default = Appearance(
                 typography = Typography(),
                 colors = Colors(),
@@ -79,6 +84,8 @@ class EmbeddedComponentManager internal constructor() {
             )
         }
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Typography(
             val font: String? = null,
@@ -93,6 +100,9 @@ class EmbeddedComponentManager internal constructor() {
             val labelMd: Style = Style(),
             val labelSm: Style = Style()
         ) : Parcelable {
+
+            @PrivateBetaConnectSDK
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             data class Style(
                 val fontSize: Float? = null,
@@ -101,6 +111,8 @@ class EmbeddedComponentManager internal constructor() {
             ) : Parcelable
         }
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class TextTransform {
             NONE,
             UPPERCASE,
@@ -108,6 +120,8 @@ class EmbeddedComponentManager internal constructor() {
             CAPITALIZE
         }
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Colors(
             @ColorInt val primary: Int? = null,
@@ -124,6 +138,8 @@ class EmbeddedComponentManager internal constructor() {
             @ColorInt val formAccent: Int? = null
         ) : Parcelable
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Button(
             @ColorInt val colorBackground: Int? = null,
@@ -131,6 +147,8 @@ class EmbeddedComponentManager internal constructor() {
             @ColorInt val colorText: Int? = null
         ) : Parcelable
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Badge(
             @ColorInt val colorBackground: Int? = null,
@@ -138,6 +156,8 @@ class EmbeddedComponentManager internal constructor() {
             @ColorInt val colorBorder: Int? = null
         ) : Parcelable
 
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class CornerRadius(
             val base: Float? = null,
