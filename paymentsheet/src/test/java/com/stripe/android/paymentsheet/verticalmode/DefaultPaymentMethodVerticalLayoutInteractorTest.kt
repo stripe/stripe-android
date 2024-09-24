@@ -833,22 +833,34 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun verticalModeSelectionIsCleared_whenReturningFromForm() {
-        var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        runScenario(
-            initialSelection = verticalModeSelection,
-            updateSelection = { verticalModeSelection = it },
-        ) {
+    fun verticalModeScreenSelection_isNeverUpdatedToNull() {
+        val expectedPaymentSelection = PaymentSelection.Link
+        runScenario(initialSelection = expectedPaymentSelection, updateSelection = {}) {
+            selectionSource.value = null
+
             interactor.state.test {
-                isCurrentScreenSource.value = true
-                assertThat(awaitItem().selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                isCurrentScreenSource.value = false
-                ensureAllEventsConsumed()
-                assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                isCurrentScreenSource.value = true
-                assertThat(awaitItem().selection).isNull()
-                assertThat(verticalModeSelection).isNull()
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(expectedPaymentSelection)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
+        val initialPaymentSelection = PaymentSelection.Link
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            updateSelection = {},
+            formElementsForCode = { formFieldsWhichRequireUserInteraction },
+            requiresFormScreen = { it == "card" }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(initialPaymentSelection)
+                }
             }
         }
     }
@@ -963,6 +975,26 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(newSelection)
                 }
             }
+        }
+    }
+
+    @Test
+    fun whenVerticalModeScreen_becomesCurrentScreen_updateSelectionCalled() {
+        var updatedSelection: PaymentSelection? = null
+        fun onUpdateSelection(paymentSelection: PaymentSelection?) {
+            updatedSelection = paymentSelection
+        }
+        val verticalModeSelection = PaymentSelection.GooglePay
+
+        runScenario(
+            initialIsCurrentScreen = false,
+            initialSelection = verticalModeSelection,
+            updateSelection = ::onUpdateSelection,
+            formElementsForCode = { emptyList() },
+        ) {
+            isCurrentScreenSource.value = true
+
+            assertThat(updatedSelection).isEqualTo(verticalModeSelection)
         }
     }
 

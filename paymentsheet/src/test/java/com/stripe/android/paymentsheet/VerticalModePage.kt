@@ -43,6 +43,14 @@ internal class VerticalModePage(
             .performClick()
     }
 
+    fun assertLpmIsSelected(paymentMethodCode: PaymentMethodCode) {
+        composeTestRule.onNode(
+            hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(
+                hasAnyDescendant(isSelected())
+            )
+        ).assertExists()
+    }
+
     fun assertPrimaryButton(matcher: SemanticsMatcher) {
         composeTestRule
             .onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(matcher))
