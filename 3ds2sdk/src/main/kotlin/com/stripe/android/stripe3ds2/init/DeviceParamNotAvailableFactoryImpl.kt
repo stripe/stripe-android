@@ -2,7 +2,6 @@ package com.stripe.android.stripe3ds2.init
 
 import android.os.Build
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.stripe3ds2.utils.Supplier
 import java.util.HashMap
 
 /**

@@ -1,7 +1,5 @@
 package com.stripe.android.stripe3ds2.transaction
 
-import android.bluetooth.BluetoothClass.Device
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
@@ -10,7 +8,6 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
 import com.stripe.android.stripe3ds2.init.AppInfoRepository
 import com.stripe.android.stripe3ds2.init.DeviceDataFactory
-import com.stripe.android.stripe3ds2.init.DeviceParam
 import com.stripe.android.stripe3ds2.init.DeviceParamNotAvailableFactory
 import com.stripe.android.stripe3ds2.init.SecurityChecker
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
@@ -107,7 +104,6 @@ internal class DefaultAuthenticationRequestParametersFactory internal constructo
         sdkTransactionId: SdkTransactionId,
         sdkPublicKey: PublicKey
     ): AuthenticationRequestParameters = withContext(workContext) {
-
         val deviceData = runCatching {
             jweEncrypter.encrypt(
                 deviceDataJson(sdkTransactionId).toString(),

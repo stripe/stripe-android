@@ -9,7 +9,6 @@ import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.webkit.WebSettings
-import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
@@ -18,7 +17,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-
 
 /**
  * Creates a Map populated with device identification data as defined in
@@ -50,15 +48,15 @@ internal class DeviceDataFactoryImpl internal constructor(
             DeviceParam.PARAM_OS_NAME.toString() to osName,
             DeviceParam.PARAM_OS_VERSION.toString() to Build.VERSION.RELEASE,
             DeviceParam.PARAM_LOCALE.toString() to
-                    LocaleListCompat.create(Locale.getDefault()).toLanguageTags(),
+                LocaleListCompat.create(Locale.getDefault()).toLanguageTags(),
             DeviceParam.PARAM_TIME_ZONE.toString() to (TimeZone.getDefault().rawOffset / 1000 / 60).toString(),
             DeviceParam.PARAM_SCREEN_RESOLUTION.toString() to
-                    String.format(
-                        Locale.ROOT,
-                        "%sx%s",
-                        displayMetrics.heightPixels,
-                        displayMetrics.widthPixels
-                    ),
+                String.format(
+                    Locale.ROOT,
+                    "%sx%s",
+                    displayMetrics.heightPixels,
+                    displayMetrics.widthPixels
+                ),
             DeviceParam.PARAM_SDK_APP_ID.toString() to appInfoRepository.get().sdkAppId,
             DeviceParam.PARAM_SDK_VERSION.toString() to messageVersionRegistry.current,
             DeviceParam.PARAM_SDK_REF_NUMBER.toString() to sdkReferenceNumber,
