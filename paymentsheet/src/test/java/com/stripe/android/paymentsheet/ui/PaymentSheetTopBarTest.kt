@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
