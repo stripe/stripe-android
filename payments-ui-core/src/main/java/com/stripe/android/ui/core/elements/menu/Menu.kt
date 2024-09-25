@@ -40,7 +40,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -167,7 +167,7 @@ internal fun DropdownMenuItemContent(
                 enabled = enabled,
                 onClick = onClick,
                 interactionSource = interactionSource,
-                indication = rememberRipple(true)
+                indication = ripple(),
             )
             .fillMaxWidth()
             // Preferred min and max width used during the intrinsic measurement.
