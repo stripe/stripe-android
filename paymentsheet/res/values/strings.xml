@@ -6,6 +6,8 @@
   <string name="stripe_afterpay_subtitle">Buy now or pay later with Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Bank account ending in %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Bank account ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bank account ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
@@ -82,9 +84,9 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Remove bank account?</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title_question">Remove bank account?</string>
+  <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Title for confirmation alert to remove a card -->

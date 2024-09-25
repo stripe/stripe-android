@@ -34,7 +34,7 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (payment
     PaymentMethod.Type.Card -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
     PaymentMethod.Type.SepaDebit,
     PaymentMethod.Type.USBankAccount ->
-        resolvableString(R.string.stripe_paymentsheet_remove_bank_account_title_question)
+        resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
     else -> resolvableString("")
 }
 

@@ -80,9 +80,9 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Memproses...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title">Hapus rekening bank</string>
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Hapus rekening bank?</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title_question">Hapus rekening bank?</string>
+  <string name="stripe_paymentsheet_remove_bank_account_title">Hapus rekening bank</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Hapus kartu</string>
   <!-- Title for confirmation alert to remove a card -->

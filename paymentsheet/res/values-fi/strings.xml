@@ -80,9 +80,9 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Käsitellään...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title">Poista pankkitili</string>
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Poistetaanko pankkitili?</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title_question">Poistetaanko pankkitili?</string>
+  <string name="stripe_paymentsheet_remove_bank_account_title">Poista pankkitili</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Poista kortti</string>
   <!-- Title for confirmation alert to remove a card -->

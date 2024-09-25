@@ -80,9 +80,9 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Qed jiġi pproċessat...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title">Neħħi l-kont tal-bank</string>
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Tixtieq tneħħi l-kont tal-bank?</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
-  <string name="stripe_paymentsheet_remove_bank_account_title_question">Tixtieq tneħħi l-kont tal-bank?</string>
+  <string name="stripe_paymentsheet_remove_bank_account_title">Neħħi l-kont tal-bank</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Neħħi l-karta</string>
   <!-- Title for confirmation alert to remove a card -->
