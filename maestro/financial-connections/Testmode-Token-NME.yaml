@@ -61,6 +61,10 @@ tags:
 - inputText: "111111"
 ## SELECT NETWORKED ACCOUNT
 # First institution should be auto selected.
+- scrollUntilVisible:
+    element:
+      text: "Connect account"
+    timeout: 60000
 - tapOn: "Connect account"
 # CONFIRM AND COMPLETE
 - tapOn:

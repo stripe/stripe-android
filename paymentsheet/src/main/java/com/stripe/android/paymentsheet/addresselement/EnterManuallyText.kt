@@ -12,6 +12,7 @@ import com.stripe.android.uicore.StripeThemeDefaults
 internal fun EnterManuallyText(
     onClick: () -> Unit
 ) {
+    @Suppress("DEPRECATION")
     ClickableText(
         text = buildAnnotatedString {
             append(
