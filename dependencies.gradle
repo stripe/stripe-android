@@ -54,7 +54,7 @@ ext.versions = [
         mockitoKotlin               : '5.4.0',
         nimbusJwt                   : '9.40',
         okhttp                      : '4.12.0',
-        okio                        : '3.9.1',
+        okio                        : '3.7.0',
         paparazzi                   : '1.3.3',
         poko                        : '0.17.1',
         payButtonCompose            : '0.1.3',
