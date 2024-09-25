@@ -83,6 +83,8 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">Alih keluar akaun bank</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Alih keluar kad</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Alih keluar kad?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Alih keluar %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->

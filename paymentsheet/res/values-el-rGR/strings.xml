@@ -83,6 +83,8 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">Αφαίρεση τραπεζικού λογαριασμού</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Αφαίρεση κάρτας</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Αφαίρεση κάρτας;</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Αφαίρεση %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
