@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.HandleError
@@ -38,6 +37,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -63,7 +63,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val isLinkWithStripe: IsLinkWithStripe,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val handleError: HandleError,
 ) : FinancialConnectionsViewModel<NetworkingLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -90,7 +90,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
             // This pane can appear in two different places in the flow,
             // and it might not have the consumer session created when launched from the
             // Link warmup sheet. Therefore, we need to fall back to the customer email.
-            val consumerSession = getCachedConsumerSession()
+            val consumerSession = consumerSessionProvider.provideConsumerSession()
             consumerSession?.emailAddress ?: manifest.accountholderCustomerEmailAddress
         } else {
             manifest.accountholderCustomerEmailAddress
