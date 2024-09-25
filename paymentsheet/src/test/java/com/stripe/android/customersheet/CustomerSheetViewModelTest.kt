@@ -643,6 +643,7 @@ class CustomerSheetViewModelTest {
             val resultTurbine = viewModel.result.testIn(backgroundScope)
 
             assertThat(viewStateTurbine.awaitItem()).isInstanceOf<SelectPaymentMethod>()
+            viewStateTurbine.cancelAndIgnoreRemainingEvents()
             assertThat(resultTurbine.awaitItem()).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
