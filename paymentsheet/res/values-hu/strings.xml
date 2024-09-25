@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Feldolgozás...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bankszámla eltávolítása</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">Eltávolítja a bankszámlát?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Kártya törlése</string>
   <!-- Title for confirmation alert to remove a card -->

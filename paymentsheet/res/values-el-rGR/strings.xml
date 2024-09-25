@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Επεξεργασία…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Αφαίρεση τραπεζικού λογαριασμού</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">Αφαίρεση τραπεζικού λογαριασμού;</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Αφαίρεση κάρτας</string>
   <!-- Title for confirmation alert to remove a card -->

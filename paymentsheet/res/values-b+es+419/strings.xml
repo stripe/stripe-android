@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Procesando...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Eliminar cuenta bancaria</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">¿Deseas eliminar la cuenta bancaria?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Quitar tarjeta</string>
   <!-- Title for confirmation alert to remove a card -->

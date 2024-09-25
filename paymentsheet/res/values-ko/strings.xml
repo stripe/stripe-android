@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">처리 중...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">은행 계좌 삭제</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">은행 계좌를 삭제하시겠습니까?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">카드 제거</string>
   <!-- Title for confirmation alert to remove a card -->

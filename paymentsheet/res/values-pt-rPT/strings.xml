@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Remover conta bancária</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">Remover conta bancária?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Eliminar cartão</string>
   <!-- Title for confirmation alert to remove a card -->

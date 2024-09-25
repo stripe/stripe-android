@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Đang xử lý...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bỏ tài khoản ngân hàng</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">Bỏ tài khoản ngân hàng?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Xóa thẻ</string>
   <!-- Title for confirmation alert to remove a card -->

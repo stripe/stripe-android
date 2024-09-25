@@ -81,6 +81,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Apdorojama...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Pašalinti banko sąskaitą</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title_question">Pašalinti banko sąskaitą?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Pašalinti kortelę</string>
   <!-- Title for confirmation alert to remove a card -->
