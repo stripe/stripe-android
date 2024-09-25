@@ -1,13 +1,11 @@
 package com.stripe.android.customersheet.util
 
-import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
@@ -25,9 +23,10 @@ import kotlinx.coroutines.flow.first
  */
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetHacks {
-    private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
-    val initializationDataSource: Deferred<CustomerSheetInitializationDataSource>
-        get() = _initializationDataSource.asDeferred()
+
+    private val _adapter = MutableStateFlow<CustomerAdapter?>(null)
+    val adapter: Deferred<CustomerAdapter>
+        get() = _adapter.asDeferred()
 
     private val _paymentMethodDataSource = MutableStateFlow<CustomerSheetPaymentMethodDataSource?>(null)
     val paymentMethodDataSource: Deferred<CustomerSheetPaymentMethodDataSource>
@@ -42,17 +41,16 @@ internal object CustomerSheetHacks {
         get() = _intentDataSource.asDeferred()
 
     fun initialize(
-        application: Application,
         lifecycleOwner: LifecycleOwner,
         adapter: CustomerAdapter,
     ) {
+        _adapter.value = adapter
+
         val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
             .builder()
-            .application(application)
             .adapter(adapter)
             .build()
 
-        _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
         _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
         _intentDataSource.value = adapterDataSourceComponent.customerSheetIntentDataSource
         _savedSelectionDataSource.value = adapterDataSourceComponent.customerSheetSavedSelectionDataSource
@@ -77,7 +75,7 @@ internal object CustomerSheetHacks {
     }
 
     fun clear() {
-        _initializationDataSource.value = null
+        _adapter.value = null
         _paymentMethodDataSource.value = null
         _savedSelectionDataSource.value = null
         _intentDataSource.value = null

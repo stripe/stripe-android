@@ -826,12 +826,11 @@ internal class PaymentMethodMetadataTest {
                 ),
             ),
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-            ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false }
+            isFinancialConnectionsAvailable = {
+                false
+            }
         )
 
         assertThat(metadata).isEqualTo(
@@ -851,9 +850,7 @@ internal class PaymentMethodMetadataTest {
                 externalPaymentMethodSpecs = listOf(),
                 hasCustomerConfiguration = true,
                 isGooglePayReady = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-                ),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 financialConnectionsAvailable = false,
                 linkInlineConfiguration = null,
                 linkMode = null,

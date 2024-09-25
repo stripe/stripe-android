@@ -395,7 +395,6 @@ class CustomerSheet internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
-                application = application,
                 lifecycleOwner = lifecycleOwner,
                 adapter = customerAdapter,
             )
