@@ -119,6 +119,7 @@ ext.libs = [
                 fragment          : "androidx.fragment:fragment-ktx:${versions.androidxFragment}",
                 legacySupport     : "androidx.legacy:legacy-support-v4:${versions.androidxLegacySupport}",
                 lifecycle         : "androidx.lifecycle:lifecycle-runtime-ktx:${versions.androidxLifecycle}",
+                lifecycleCompose  : "androidx.lifecycle:lifecycle-runtime-compose:${versions.androidxLifecycle}",
                 viewModel         : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.androidxLifecycle}",
                 savedState        : "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.androidxLifecycle}",
                 liveDataKtx       : "androidx.lifecycle:lifecycle-livedata-ktx:${versions.androidxLifecycle}",

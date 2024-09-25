@@ -1,7 +1,7 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MediatorLiveData
