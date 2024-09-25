@@ -292,6 +292,7 @@ internal data class PaymentMethodMetadata(
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
+            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
@@ -314,7 +315,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 externalPaymentMethodSpecs = emptyList(),
             )
