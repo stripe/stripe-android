@@ -608,12 +608,12 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
-         /**
+        /**
          By default, PaymentSheet will accept all supported cards by Stripe.
          You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
          Note: This is only a client-side solution.
          */
-        val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+        @property:ExperimentalCardBrandFilteringApi val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
