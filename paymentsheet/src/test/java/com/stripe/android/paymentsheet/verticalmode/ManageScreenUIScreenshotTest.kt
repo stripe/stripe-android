@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -15,6 +16,7 @@ internal class ManageScreenUIScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
+        PaymentSheetAppearance.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
