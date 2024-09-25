@@ -15,6 +15,17 @@ internal fun <T> CustomerAdapter.Result<T>.toCustomerSheetDataResult(): Customer
     }
 }
 
+internal fun <T> Result<T>.toCustomerSheetDataResult(): CustomerSheetDataResult<T> {
+    return fold(
+        onSuccess = {
+            CustomerSheetDataResult.success(it)
+        },
+        onFailure = {
+            CustomerSheetDataResult.failure(cause = it, displayMessage = null)
+        },
+    )
+}
+
 internal inline fun <R, T> CustomerSheetDataResult<T>.map(
     transform: (value: T) -> R
 ): CustomerSheetDataResult<R> {
