@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,12 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.RemovePaymentMethodDialogUI
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.uicore.strings.resolve
@@ -35,8 +35,8 @@ internal fun DeleteIcon(
     val paymentMethodId = paymentMethod.paymentMethod.id
 
     TrailingIcon(
-        backgroundColor = Color.Red,
-        icon = Icons.Filled.Close,
+        backgroundColor = MaterialTheme.colors.error,
+        icon = painterResource(id = R.drawable.stripe_ic_remove_symbol),
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_DELETE_ICON}_$paymentMethodId"),
         onClick = {
             openRemoveDialog.value = true
@@ -65,8 +65,8 @@ internal fun EditIcon(
     val paymentMethodId = paymentMethod.paymentMethod.id
 
     TrailingIcon(
+        icon = painterResource(id = R.drawable.stripe_ic_edit_symbol),
         backgroundColor = Color.Gray,
-        icon = Icons.Filled.Edit,
         modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId"),
         onClick = { editPaymentMethod(paymentMethod) },
         contentDescription = paymentMethod
@@ -79,7 +79,7 @@ internal fun EditIcon(
 @Composable
 private fun TrailingIcon(
     backgroundColor: Color,
-    icon: ImageVector,
+    icon: Painter,
     onClick: () -> Unit,
     contentDescription: String,
     modifier: Modifier,
@@ -93,11 +93,11 @@ private fun TrailingIcon(
             .clickable(onClick = onClick),
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier
-                .size(12.dp)
+                .size(10.dp)
                 .semantics {
                     this.contentDescription = contentDescription
                 },
