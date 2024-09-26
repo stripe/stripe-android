@@ -29,5 +29,4 @@ class DisplayableSavedPaymentMethodTest {
 
         assertThat(description).isEqualTo("Cartes Bancaires ending in 4242")
     }
-
 }
