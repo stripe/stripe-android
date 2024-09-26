@@ -1,10 +1,10 @@
 package com.stripe.android.link.ui.signup
 
-import com.stripe.android.link.LinkViewModel
+import com.stripe.android.link.StateAndEffectsVM
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-internal class SignUpViewModel : LinkViewModel<SignUpViewState, SignUpAction, SignUpResult, SignUpEffect>(
+internal class SignUpViewModel : StateAndEffectsVM<SignUpViewState, SignUpAction, SignUpResult, SignUpEffect>(
     initialState = SignUpViewState()
 ) {
     override fun actionToResult(action: SignUpAction): Flow<SignUpResult> {

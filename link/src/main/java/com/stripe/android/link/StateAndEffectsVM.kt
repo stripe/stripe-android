@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal abstract class LinkViewModel<State, Action, Result, Effect>(
+internal abstract class StateAndEffectsVM<State, Action, Result, Effect>(
     initialState: State,
 ) : ViewModel() {
     private val actionChannel = Channel<Action>(Channel.UNLIMITED)

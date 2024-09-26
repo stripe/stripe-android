@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-internal class LinkActivityViewModel : LinkViewModel<LinkState, LinkAction, LinkResult, LinkEffect>(
+internal class LinkActivityViewModel : StateAndEffectsVM<LinkState, LinkAction, LinkResult, LinkEffect>(
     initialState = LinkState,
 ) {
     override fun actionToResult(action: LinkAction): Flow<LinkResult> {
