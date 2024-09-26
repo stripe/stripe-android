@@ -538,6 +538,7 @@
 |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.21 -> 1.9.24 (*)
 |    |    |         +--- androidx.compose.material:material-icons-core:1.5.4 (c)
 |    |    |         \--- androidx.compose.material:material-ripple:1.5.4 (c)
+|    |    +--- androidx.compose.material:material-icons-core:1.5.4 (*)
 |    |    +--- androidx.compose.ui:ui:1.5.4 (*)
 |    |    +--- androidx.compose.ui:ui-tooling-preview:1.5.4
 |    |    |    \--- androidx.compose.ui:ui-tooling-preview-android:1.5.4
