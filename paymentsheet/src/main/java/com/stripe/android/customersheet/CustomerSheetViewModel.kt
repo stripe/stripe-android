@@ -1081,12 +1081,16 @@ internal class CustomerSheetViewModel(
                 ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
             )
 
-            val selection = PaymentSelection.Saved(newPaymentMethod)
-
             setCustomerState { state ->
+                val selection = paymentMethods.find { paymentMethod ->
+                    newPaymentMethod.id == paymentMethod.id
+                }?.let {
+                    PaymentSelection.Saved(it)
+                } ?: state.currentSelection as? PaymentSelection.Saved
+
                 state.copy(
                     paymentMethods = sortPaymentMethods(paymentMethods, selection),
-                    currentSelection = PaymentSelection.Saved(newPaymentMethod),
+                    currentSelection = selection,
                 )
             }
 

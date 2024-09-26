@@ -1,10 +1,12 @@
 package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -43,7 +45,46 @@ fun rememberCustomerSheet(
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             viewModelStoreOwner = viewModelStoreOwner,
-            customerAdapter = customerAdapter,
+            integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+            callback = callback,
+            statusBarColor = { activity.window?.statusBarColor },
+        )
+    }
+}
+
+@ExperimentalCustomerSheetApi
+@ExperimentalCustomerSessionApi
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun rememberCustomerSheet(
+    customerSessionProvider: CustomerSheet.CustomerSessionProvider,
+    callback: CustomerSheetResultCallback,
+): CustomerSheet {
+    val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
+        "CustomerSheet must be created with access to an ActivityResultRegistryOwner"
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val activity = rememberActivity {
+        "CustomerSheet must be created in the context of an Activity"
+    }
+
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
+        "CustomerSheet must be created with access to a ViewModelStoreOwner"
+    }
+
+    return remember(
+        customerSessionProvider,
+        callback,
+    ) {
+        CustomerSheet.getInstance(
+            application = activity.application,
+            lifecycleOwner = lifecycleOwner,
+            activityResultRegistryOwner = activityResultRegistryOwner,
+            viewModelStoreOwner = viewModelStoreOwner,
+            integrationType = CustomerSheetIntegrationType.CustomerSession(
+                customerSessionProvider = customerSessionProvider,
+            ),
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
         )

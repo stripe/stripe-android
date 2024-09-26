@@ -44,6 +44,7 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -83,7 +84,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,14 +113,27 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
-            val adapter = remember(playgroundState) {
-                viewModel.createCustomerAdapter(playgroundState)
-            }
+            val customerState = playgroundState?.asCustomerState()
 
-            val customerSheet = rememberCustomerSheet(
-                customerAdapter = adapter,
-                callback = viewModel::onCustomerSheetCallback
-            )
+            val customerSheet = if (customerState?.isUsingCustomerSession == true) {
+                val customerSessionProvider = remember(customerState) {
+                    viewModel.createCustomerSessionProvider(customerState)
+                }
+
+                rememberCustomerSheet(
+                    customerSessionProvider = customerSessionProvider,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            } else {
+                val adapter = remember(playgroundState) {
+                    viewModel.createCustomerAdapter(playgroundState)
+                }
+
+                rememberCustomerSheet(
+                    customerAdapter = adapter,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            }
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(

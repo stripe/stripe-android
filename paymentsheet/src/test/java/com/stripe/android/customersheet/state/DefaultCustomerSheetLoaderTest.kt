@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegrationType
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -589,7 +590,7 @@ class DefaultCustomerSheetLoaderTest {
         CustomerSheetHacks.initialize(
             application = ApplicationProvider.getApplicationContext(),
             lifecycleOwner = TestLifecycleOwner(),
-            adapter = FakeCustomerAdapter(),
+            integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter()),
         )
 
         withContext(Dispatchers.Default.limitedParallelism(1)) {

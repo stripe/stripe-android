@@ -64,15 +64,7 @@ internal interface StripeCustomerAdapterComponent {
 @Module
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
-    @Binds
-    fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
-
     companion object {
-        @Provides
-        fun provideTimeProvider(): () -> Long = {
-            Calendar.getInstance().timeInMillis
-        }
-
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
