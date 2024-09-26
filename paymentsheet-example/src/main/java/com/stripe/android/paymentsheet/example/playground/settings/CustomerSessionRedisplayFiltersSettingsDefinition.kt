@@ -14,10 +14,6 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType> {
     override val displayName: String = "Customer Session Allow Redisplay Filters"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
-    }
-
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = listOf(

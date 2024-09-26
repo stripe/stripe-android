@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -15,6 +16,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -333,6 +335,106 @@ class CustomerSheet internal constructor(
         }
     }
 
+    /**
+     * [IntentConfiguration] contains the details necessary for configuring and creating an intent
+     * to attach payment methods with.
+     */
+    @ExperimentalCustomerSessionApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class IntentConfiguration internal constructor(
+        internal val paymentMethodTypes: List<String>,
+    ) {
+        /**
+         * Builder for creating a [IntentConfiguration]
+         */
+        @ExperimentalCustomerSessionApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder {
+            private var paymentMethodTypes = listOf<String>()
+
+            /**
+             * The payment methods types to display. If empty, we dynamically determine the
+             * payment method types using your [Stripe Dashboard settings]
+             * (https://dashboard.stripe.com/settings/payment_methods).
+             */
+            fun paymentMethodTypes(paymentMethodTypes: List<String>) = apply {
+                this.paymentMethodTypes = paymentMethodTypes
+            }
+
+            /**
+             * Creates the [IntentConfiguration] instance.
+             */
+            fun build(): IntentConfiguration {
+                return IntentConfiguration(
+                    paymentMethodTypes = paymentMethodTypes,
+                )
+            }
+        }
+    }
+
+    /**
+     * A [CustomerSessionClientSecret] contains the parameters necessary for claiming a
+     * customer session. This will be used to securely access a customer's saved payment methods.
+     */
+    @Poko
+    @ExperimentalCustomerSessionApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class CustomerSessionClientSecret internal constructor(
+        internal val customerId: String,
+        internal val clientSecret: String
+    ) {
+        @ExperimentalCustomerSessionApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            /**
+             * Creates an instance of a [CustomerSessionClientSecret]
+             *
+             * @param customerId the Stripe identifier for a customer
+             * @param clientSecret the customer session client secret value
+             */
+            @JvmStatic
+            fun create(
+                customerId: String,
+                clientSecret: String
+            ): CustomerSessionClientSecret {
+                return CustomerSessionClientSecret(
+                    customerId = customerId,
+                    clientSecret = clientSecret,
+                )
+            }
+        }
+    }
+
+    /**
+     * [CustomerSessionProvider] provides the necessary functions
+     */
+    @ExperimentalCustomerSessionApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract class CustomerSessionProvider {
+        /**
+         * Creates an [IntentConfiguration] that is used when configuring the intent used when
+         * displaying saved payment methods to a customer.
+         */
+        open suspend fun intentConfiguration(): Result<IntentConfiguration> {
+            return Result.success(IntentConfiguration.Builder().build())
+        }
+
+        /**
+         * Provides the `SetupIntent` client secret that is used when attaching a payment method
+         * to a customer.
+         *
+         * @param customerId the Stripe identifier of the customer. This will be equivalent to
+         *    the customer identifier passed through with the [CustomerSessionClientSecret].
+         */
+        abstract suspend fun provideSetupIntentClientSecret(customerId: String): Result<String>
+
+        /**
+         * Provides the [CustomerSessionClientSecret] that will be claimed and used to access a
+         * customer's saved payment methods.
+         */
+        abstract suspend fun providesCustomerSessionClientSecret(): Result<CustomerSessionClientSecret>
+    }
+
     @ExperimentalCustomerSheetApi
     companion object {
 
@@ -355,7 +457,33 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                customerAdapter = customerAdapter,
+                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                callback = callback,
+            )
+        }
+
+        /**
+         * Create a [CustomerSheet] with `CustomerSession` support.
+         *
+         * @param activity The [ComponentActivity] that is presenting [CustomerSheet].
+         * @param customerSessionProvider provider for providing customer session elements
+         * @param callback called when a [CustomerSheetResult] is available.
+         */
+        @ExperimentalCustomerSessionApi
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            activity: ComponentActivity,
+            customerSessionProvider: CustomerSessionProvider,
+            callback: CustomerSheetResultCallback,
+        ): CustomerSheet {
+            return getInstance(
+                application = activity.application,
+                lifecycleOwner = activity,
+                viewModelStoreOwner = activity,
+                activityResultRegistryOwner = activity,
+                statusBarColor = { activity.window.statusBarColor },
+                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -380,7 +508,34 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                customerAdapter = customerAdapter,
+                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                callback = callback,
+            )
+        }
+
+        /**
+         * Create a [CustomerSheet] with `CustomerSession` support.
+         *
+         * @param fragment The [Fragment] that is presenting [CustomerSheet].
+         * @param customerSessionProvider provider for providing customer session elements
+         * @param callback called when a [CustomerSheetResult] is available.
+         */
+        @ExperimentalCustomerSessionApi
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            fragment: Fragment,
+            customerSessionProvider: CustomerSessionProvider,
+            callback: CustomerSheetResultCallback,
+        ): CustomerSheet {
+            return getInstance(
+                application = fragment.requireActivity().application,
+                lifecycleOwner = fragment,
+                viewModelStoreOwner = fragment,
+                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
+                    ?: fragment.requireActivity(),
+                statusBarColor = { fragment.activity?.window?.statusBarColor },
+                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -391,13 +546,13 @@ class CustomerSheet internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
-            customerAdapter: CustomerAdapter,
+            integrationType: CustomerSheetIntegrationType,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
                 application = application,
                 lifecycleOwner = lifecycleOwner,
-                adapter = customerAdapter,
+                integrationType = integrationType,
             )
 
             return CustomerSheet(

@@ -16,11 +16,13 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
@@ -51,7 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -190,6 +192,22 @@ internal class PaymentSheetPlaygroundViewModel(
                 null
             }
         )
+    }
+
+    fun createCustomerSessionProvider(): CustomerSheet.CustomerSessionProvider {
+        return object : CustomerSheet.CustomerSessionProvider() {
+            override suspend fun provideSetupIntentClientSecret(
+                customerId: String
+            ): kotlin.Result<String> {
+                throw NotImplementedError("Not implemented yet!")
+            }
+
+            override suspend fun providesCustomerSessionClientSecret(): kotlin.Result<
+                CustomerSheet.CustomerSessionClientSecret
+                > {
+                throw NotImplementedError("Not implemented yet!")
+            }
+        }
     }
 
     @OptIn(ExperimentalCustomerSheetApi::class)
