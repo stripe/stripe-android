@@ -28,19 +28,24 @@ internal class DeviceDataFactoryImpl internal constructor(
 ) : DeviceDataFactory {
     private val displayMetrics: DisplayMetrics = context.resources.displayMetrics
     private val defaultUserAgent = WebSettings.getDefaultUserAgent(context)
-    private val telephonyManager = (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
-    private val secureFRPMode = Settings.Secure.getInt(context.contentResolver, Settings.Global.SECURE_FRP_MODE, 0)
+    private val telephonyManager =
+        (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
+    private val secureFRPMode =
+        Settings.Secure.getInt(context.contentResolver, Settings.Global.SECURE_FRP_MODE, 0)
     private val audioManager = (context.getSystemService(Context.AUDIO_SERVICE) as AudioManager)
     private val packageManager = context.packageManager
+    private val apiVersion = Build.VERSION.SDK_INT
+    private val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
+    private val dateTime = dateFormat.format(Calendar.getInstance().time)
 
-    override suspend fun create(sdkReferenceNumber: String, sdkTransactionId: SdkTransactionId): Map<String, Any?> {
-        val apiVersion = Build.VERSION.SDK_INT
-        val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-        val dateTime = dateFormat.format(Calendar.getInstance().time)
+    private val codeName = buildCodeName() ?: "UNKNOWN"
+    private val osName = "Android " + codeName + " " + Build.VERSION.RELEASE + " API " + apiVersion
+    private val timeZone = TimeZone.getDefault().rawOffset / MILLIS_IN_SECOND / SECONDS_IN_MINUTE
 
-        val codeName = buildCodeName() ?: "UNKNOWN"
-        val osName = "Android " + codeName + " " + Build.VERSION.RELEASE + " API " + apiVersion
-
+    override suspend fun create(
+        sdkReferenceNumber: String,
+        sdkTransactionId: SdkTransactionId
+    ): Map<String, Any?> {
         val map = hashMapOf(
             DeviceParam.PARAM_PLATFORM.toString() to "Android",
             DeviceParam.PARAM_DEVICE_MODEL.toString() to Build.MANUFACTURER + "||" + Build.MODEL,
@@ -48,7 +53,7 @@ internal class DeviceDataFactoryImpl internal constructor(
             DeviceParam.PARAM_OS_VERSION.toString() to Build.VERSION.RELEASE,
             DeviceParam.PARAM_LOCALE.toString() to
                 LocaleListCompat.create(Locale.getDefault()).toLanguageTags(),
-            DeviceParam.PARAM_TIME_ZONE.toString() to (TimeZone.getDefault().rawOffset / 1000 / 60).toString(),
+            DeviceParam.PARAM_TIME_ZONE.toString() to timeZone.toString(),
             DeviceParam.PARAM_SCREEN_RESOLUTION.toString() to
                 String.format(
                     Locale.ROOT,
@@ -125,5 +130,10 @@ internal class DeviceDataFactoryImpl internal constructor(
         }
 
         return null
+    }
+
+    companion object {
+        private const val MILLIS_IN_SECOND = 1000
+        private const val SECONDS_IN_MINUTE = 60
     }
 }

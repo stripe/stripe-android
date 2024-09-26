@@ -2,15 +2,12 @@ package com.stripe.android.stripe3ds2.init
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.stripe3ds2.utils.Supplier
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DeviceParamNotAvailableFactoryTest {
-
-    private val hardwareIdSupplier = Supplier { HardwareId("ad_id") }
 
     @Test
     fun create_withDefaults_shouldHaveTheCorrectNumberOfEntries() {
