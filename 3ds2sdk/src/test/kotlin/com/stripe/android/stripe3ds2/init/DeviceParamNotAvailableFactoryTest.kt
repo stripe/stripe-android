@@ -49,7 +49,7 @@ class DeviceParamNotAvailableFactoryTest {
             DeviceParamNotAvailableFactoryImpl(
                 Build.VERSION_CODES.P
             ).permissionParams
-        ).hasSize(32)
+        ).hasSize(33)
     }
 
     @Test

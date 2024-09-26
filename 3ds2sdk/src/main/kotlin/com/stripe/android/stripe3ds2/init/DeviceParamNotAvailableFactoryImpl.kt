@@ -216,6 +216,8 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
             params[DeviceParam.PARAM_SECURE_INSTALL_NON_MARKET_APPS.toString()] =
                 Reason.PERMISSION.toString()
 
+            params[DeviceParam.PARAM_MULTI_SIM_SUPPORTED.toString()] =
+                Reason.PERMISSION.toString()
             params[DeviceParam.PARAM_6GHZ_BAND_SUPPORTED.toString()] =
                 Reason.PERMISSION.toString()
             params[DeviceParam.PARAM_PASSPOINT_FQDN.toString()] =

@@ -1,5 +1,6 @@
 package com.stripe.android.stripe3ds2.init
 
+import android.annotation.TargetApi
 import android.content.Context
 import android.content.pm.PackageManager.FEATURE_TELEPHONY_IMS
 import android.media.AudioManager
@@ -42,6 +43,7 @@ internal class DeviceDataFactoryImpl internal constructor(
     private val osName = "Android " + codeName + " " + Build.VERSION.RELEASE + " API " + apiVersion
     private val timeZone = TimeZone.getDefault().rawOffset / MILLIS_IN_SECOND / SECONDS_IN_MINUTE
 
+    @TargetApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun create(
         sdkReferenceNumber: String,
         sdkTransactionId: SdkTransactionId
@@ -74,11 +76,6 @@ internal class DeviceDataFactoryImpl internal constructor(
                 telephonyManager.simCarrierId.toString()
             map[DeviceParam.PARAM_SIM_CARRIER_ID_NAME.toString()] =
                 telephonyManager.simCarrierIdName.toString()
-
-            if (packageManager.hasSystemFeature(FEATURE_TELEPHONY_IMS)) {
-                map[DeviceParam.PARAM_RTT_CALLING_MODE.toString()] =
-                    telephonyManager.isRttSupported.toString()
-            }
         }
 
         if (apiVersion >= Build.VERSION_CODES.Q) {
@@ -86,10 +83,11 @@ internal class DeviceDataFactoryImpl internal constructor(
                 telephonyManager.simSpecificCarrierId.toString()
             map[DeviceParam.PARAM_SIM_SPECIFIC_CARRIER_ID_NAME.toString()] =
                 telephonyManager.simSpecificCarrierIdName.toString()
-            map[DeviceParam.PARAM_MULTI_SIM_SUPPORTED.toString()] =
-                telephonyManager.isMultiSimSupported.toString()
-            map[DeviceParam.PARAM_APPLY_RAMPING_RINGER.toString()] =
-                audioManager.isRampingRingerEnabled.toString()
+
+            if (packageManager.hasSystemFeature(FEATURE_TELEPHONY_IMS)) {
+                map[DeviceParam.PARAM_RTT_CALLING_MODE.toString()] =
+                    telephonyManager.isRttSupported.toString()
+            }
         }
 
         if (apiVersion >= Build.VERSION_CODES.R) {
@@ -106,6 +104,11 @@ internal class DeviceDataFactoryImpl internal constructor(
                 Build.SOC_MANUFACTURER
             map[DeviceParam.PARAM_SOC_MODEL.toString()] =
                 Build.SOC_MODEL
+        }
+
+        if (apiVersion >= Build.VERSION_CODES.TIRAMISU) {
+            map[DeviceParam.PARAM_APPLY_RAMPING_RINGER.toString()] =
+                audioManager.isRampingRingerEnabled.toString()
         }
 
         return map
