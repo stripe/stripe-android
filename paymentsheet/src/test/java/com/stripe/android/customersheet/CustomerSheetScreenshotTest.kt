@@ -40,6 +40,7 @@ internal class CustomerSheetScreenshotTest {
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
         instantDebits = false,
+        linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
@@ -47,7 +48,7 @@ internal class CustomerSheetScreenshotTest {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
-        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
         onMandateTextChanged = { _, _ -> },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },

@@ -144,7 +144,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     copy(
                         manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.NONE,
-                        viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
+                        viewEffect = OpenNativeAuthFlow(
+                            configuration = initialArgs.configuration,
+                            initialSyncResponse = sync,
+                            elementsSessionContext = initialArgs.elementsSessionContext,
+                        )
                     )
                 }
             } else {
