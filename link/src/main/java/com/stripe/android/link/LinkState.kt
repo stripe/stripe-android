@@ -4,7 +4,6 @@ internal object LinkState
 
 internal sealed interface LinkAction {
     data object BackPressed : LinkAction
-    data object WalletClicked : LinkAction
 }
 
 internal sealed interface LinkResult {
@@ -13,5 +12,5 @@ internal sealed interface LinkResult {
 
 internal sealed interface LinkEffect {
     data object GoBack : LinkEffect
-    data class NavigateTo(val screen: LinkScreen) : LinkEffect
+    data class SendResult(val result: LinkActivityResult) : LinkEffect
 }

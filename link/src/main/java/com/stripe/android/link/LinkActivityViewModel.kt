@@ -9,25 +9,13 @@ internal class LinkActivityViewModel : LinkViewModel<LinkState, LinkAction, Link
     initialState = LinkState,
 ) {
     override fun actionToResult(action: LinkAction): Flow<LinkResult> {
-        // These are placeholder actions, they may be removed
         return when (action) {
             LinkAction.BackPressed -> handleBackPressed()
-            LinkAction.WalletClicked -> handleWalletClicked()
         }
     }
 
     private fun handleBackPressed(): Flow<LinkResult> {
         return flowOf(LinkResult.SendEffect(LinkEffect.GoBack))
-    }
-
-    private fun handleWalletClicked(): Flow<LinkResult> {
-        return flowOf(
-            value = LinkResult.SendEffect(
-                effect = LinkEffect.NavigateTo(
-                    screen = LinkScreen.Wallet
-                )
-            )
-        )
     }
 
     override fun resultToState(currentState: LinkState, result: LinkResult) = currentState

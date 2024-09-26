@@ -53,19 +53,6 @@ internal class LinkActivityTest {
         }
     }
 
-    @Test
-    fun `test that navigator navigates to wallet on wallet clicked`() {
-        val vm = LinkActivityViewModel()
-        val scenario = activityScenario(viewModel = vm)
-        scenario.launchTest {
-            vm.handleAction(LinkAction.WalletClicked)
-
-            composeTestRule.waitForIdle()
-
-            verify(navHostController).navigate(LinkScreen.Wallet.route)
-        }
-    }
-
     private fun InjectableActivityScenario<LinkActivity>.launchTest(
         startIntent: Intent = Intent(context, LinkActivity::class.java),
         block: (LinkActivity) -> Unit

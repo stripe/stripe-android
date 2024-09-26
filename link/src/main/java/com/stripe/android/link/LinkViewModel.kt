@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// This will be used as a base for all Link screen viewmodels to create a consistent architecture
-// There should be no more logic here besides updating state and sending effects
 internal abstract class LinkViewModel<State, Action, Result, Effect>(
     initialState: State,
 ) : ViewModel() {
