@@ -20,10 +20,11 @@ internal data class DisplayableSavedPaymentMethod(
 
     fun getDescription() = when (paymentMethod.type) {
         PaymentMethod.Type.Card -> {
-            val brand = CardBrand.fromCode(paymentMethod.card?.displayBrand).displayName
+            val brand = paymentMethod.card?.displayBrand?.let { CardBrand.fromCode(it) }
+                ?: paymentMethod.card?.brand
             resolvableString(
                 com.stripe.android.R.string.stripe_card_ending_in,
-                brand,
+                brand?.displayName,
                 paymentMethod.card?.last4
             )
         }

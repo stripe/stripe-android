@@ -29,4 +29,19 @@ class DisplayableSavedPaymentMethodTest {
 
         assertThat(description).isEqualTo("Cartes Bancaires ending in 4242")
     }
+
+    @Test
+    fun getDescription_usesBrandIfDisplayBrandIsUnknown() {
+        val cardWithoutDisplayBrand = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(displayBrand = null)
+        )
+        val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+            displayName = "unused".resolvableString,
+            paymentMethod = cardWithoutDisplayBrand
+        )
+
+        val description = displayableSavedPaymentMethod.getDescription().resolve(context)
+
+        assertThat(description).isEqualTo("Visa ending in 4242")
+    }
 }
