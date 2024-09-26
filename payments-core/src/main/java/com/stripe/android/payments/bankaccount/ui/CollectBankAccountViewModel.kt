@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -109,13 +109,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
                 hasLaunched = true
 
-                val elementsContext = args.configuration.retrieveElementsContext()
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 _viewEffect.emit(
                     OpenConnectionsFlow(
                         financialConnectionsSessionSecret = financialConnectionsSessionSecret,
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
-                        elementsContext = elementsContext,
+                        elementsSessionContext = elementsSessionContext,
                     )
                 )
             }
@@ -279,6 +279,6 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 }
 
-private fun CollectBankAccountConfiguration.retrieveElementsContext(): ElementsContext? {
-    return (this as? InstantDebits)?.elementsContext
+private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
+    return (this as? InstantDebits)?.elementsSessionContext
 }

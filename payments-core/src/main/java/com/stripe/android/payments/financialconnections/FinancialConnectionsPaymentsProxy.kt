@@ -3,6 +3,7 @@ package com.stripe.android.payments.financialconnections
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
@@ -18,7 +19,7 @@ internal interface FinancialConnectionsPaymentsProxy {
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
         stripeAccountId: String?,
-        elementsContext: FinancialConnectionsSheet.ElementsContext?,
+        elementsSessionContext: ElementsSessionContext?,
     )
 
     companion object {
@@ -72,7 +73,7 @@ internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLa
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
         stripeAccountId: String?,
-        elementsContext: FinancialConnectionsSheet.ElementsContext?,
+        elementsSessionContext: ElementsSessionContext?,
     ) {
         launcher.present(
             configuration = FinancialConnectionsSheet.Configuration(
@@ -80,7 +81,7 @@ internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLa
                 publishableKey,
                 stripeAccountId,
             ),
-            elementsContext = elementsContext,
+            elementsSessionContext = elementsSessionContext,
         )
     }
 }
@@ -90,7 +91,7 @@ internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectio
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
         stripeAccountId: String?,
-        elementsContext: FinancialConnectionsSheet.ElementsContext?,
+        elementsSessionContext: ElementsSessionContext?,
     ) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(

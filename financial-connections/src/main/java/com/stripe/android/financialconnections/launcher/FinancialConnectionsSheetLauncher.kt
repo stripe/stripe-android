@@ -7,6 +7,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 interface FinancialConnectionsSheetLauncher {
     fun present(
         configuration: FinancialConnectionsSheet.Configuration,
-        elementsContext: FinancialConnectionsSheet.ElementsContext? = null,
+        elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
     )
 }

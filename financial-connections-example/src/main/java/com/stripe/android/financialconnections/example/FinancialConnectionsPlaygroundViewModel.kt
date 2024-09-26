@@ -11,7 +11,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
@@ -125,7 +125,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             publishableKey = it.publishableKey,
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
-                            elementsContext = ElementsContext(
+                            elementsSessionContext = ElementsSessionContext(
                                 linkMode = LinkMode.LinkPaymentMethod,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
@@ -485,7 +485,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
         val publishableKey: String,
         val experience: Experience,
         val integrationType: IntegrationType,
-        val elementsContext: ElementsContext,
+        val elementsSessionContext: ElementsSessionContext,
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 

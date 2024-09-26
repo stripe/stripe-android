@@ -13,7 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
@@ -472,7 +472,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val configuration = if (args.instantDebits) {
             CollectBankAccountConfiguration.InstantDebits(
                 email = email.value,
-                elementsContext = ElementsContext(
+                elementsSessionContext = ElementsSessionContext(
                     linkMode = args.linkMode,
                 ),
             )

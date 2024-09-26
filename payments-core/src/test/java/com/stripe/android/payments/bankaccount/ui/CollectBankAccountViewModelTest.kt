@@ -74,7 +74,7 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
-                    elementsContext = null,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -96,7 +96,7 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
-                    elementsContext = null,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -120,7 +120,7 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
-                    elementsContext = null,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -144,7 +144,7 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
-                    elementsContext = null,
+                    elementsSessionContext = null,
                 )
             )
         }

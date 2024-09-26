@@ -313,7 +313,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
-            elementsContext = null,
+            elementsSessionContext = null,
         )
 
         val viewModel = createViewModel(
@@ -367,7 +367,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
-            elementsContext = null,
+            elementsSessionContext = null,
         )
 
         val viewModel = createViewModel(
@@ -419,7 +419,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
-            elementsContext = null,
+            elementsSessionContext = null,
         )
 
         val viewModel = createViewModel(

@@ -41,7 +41,7 @@ class FinancialConnectionsSheet internal constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class ElementsContext(
+    data class ElementsSessionContext(
         val linkMode: LinkMode?,
     ) : Parcelable
 
@@ -55,7 +55,7 @@ class FinancialConnectionsSheet internal constructor(
     ) {
         financialConnectionsSheetLauncher.present(
             configuration = configuration,
-            elementsContext = null,
+            elementsSessionContext = null,
         )
     }
 

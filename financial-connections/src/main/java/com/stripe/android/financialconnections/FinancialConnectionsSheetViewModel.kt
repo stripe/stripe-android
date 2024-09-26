@@ -14,7 +14,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
@@ -148,7 +147,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                         viewEffect = OpenNativeAuthFlow(
                             configuration = initialArgs.configuration,
                             initialSyncResponse = sync,
-                            elementsContext = initialArgs.retrieveElementsContext(),
+                            elementsSessionContext = initialArgs.elementsSessionContext,
                         )
                     )
                 }
@@ -544,8 +543,4 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
         return null
     }
-}
-
-private fun FinancialConnectionsSheetActivityArgs.retrieveElementsContext(): ElementsContext? {
-    return (this as? ForInstantDebits)?.elementsContext
 }

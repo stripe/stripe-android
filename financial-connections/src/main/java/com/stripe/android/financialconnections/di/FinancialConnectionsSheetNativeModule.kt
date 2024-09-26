@@ -188,10 +188,10 @@ internal interface FinancialConnectionsSheetNativeModule {
         }
 
         @Provides
-        internal fun provideElementsContext(
+        internal fun provideElementsSessionContext(
             initialState: FinancialConnectionsSheetNativeState,
-        ): FinancialConnectionsSheet.ElementsContext? {
-            return initialState.elementsContext
+        ): FinancialConnectionsSheet.ElementsSessionContext? {
+            return initialState.elementsSessionContext
         }
     }
 }

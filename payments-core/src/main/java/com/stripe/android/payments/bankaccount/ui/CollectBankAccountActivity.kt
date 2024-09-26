@@ -69,7 +69,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
             financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
-            elementsContext = elementsContext,
+            elementsSessionContext = elementsSessionContext,
         )
     }
 

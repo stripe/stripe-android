@@ -1078,7 +1078,7 @@ class USBankAccountFormViewModelTest {
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
-                    elementsContext = FinancialConnectionsSheet.ElementsContext(
+                    elementsSessionContext = FinancialConnectionsSheet.ElementsSessionContext(
                         linkMode = LinkMode.LinkCardBrand,
                     ),
                 )
