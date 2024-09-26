@@ -11,11 +11,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@Ignore("Currently flaky. Let's investigate why.")
 @RunWith(AndroidJUnit4::class)
 internal class TestWeChatPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
