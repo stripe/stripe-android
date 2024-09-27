@@ -19,7 +19,6 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import java.util.Calendar
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -68,11 +67,6 @@ internal interface StripeCustomerAdapterModule {
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     companion object {
-        @Provides
-        fun provideTimeProvider(): () -> Long = {
-            Calendar.getInstance().timeInMillis
-        }
-
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
