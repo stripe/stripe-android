@@ -41,7 +41,7 @@ class LinkActivityContract @Inject internal constructor(
     )
 
     companion object {
-        const val EXTRA_RESULT =
+        internal const val EXTRA_RESULT =
             "com.stripe.android.link.LinkActivityContract.extra_result"
     }
 }
