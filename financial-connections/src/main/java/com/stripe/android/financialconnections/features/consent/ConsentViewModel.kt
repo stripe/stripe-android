@@ -5,11 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
@@ -26,7 +23,6 @@ import com.stripe.android.financialconnections.navigation.Destination.Companion.
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -34,6 +30,7 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
+import com.stripe.attestation.IntegrityStandardRequestManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -48,6 +45,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
+    private val standardRequestManager: IntegrityStandardRequestManager,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
@@ -95,13 +93,24 @@ internal class ConsentViewModel @AssistedInject constructor(
     }
 
     fun onContinueClick() {
-        suspend {
-            eventTracker.track(ConsentAgree)
-            val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
-            updatedManifest
-        }.execute { copy(acceptConsent = it) }
+        viewModelScope.launch {
+            val token: Result<String> = standardRequestManager.requestToken("random_token")
+            runCatching {
+                verifyIntegrity(token.getOrThrow(), "com.random")
+            }.onFailure {
+                logger.error("Error verifying integrity", it)
+            }.onSuccess {
+                logger.info("Integrity verified successfully")
+            }
+        }
+
+//        suspend {
+//            eventTracker.track(ConsentAgree)
+//            val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
+//            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
+//            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+//            updatedManifest
+//        }.execute { copy(acceptConsent = it) }
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
