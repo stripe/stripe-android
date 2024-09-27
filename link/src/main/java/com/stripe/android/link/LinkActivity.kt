@@ -76,4 +76,9 @@ internal class LinkActivity : AppCompatActivity() {
         )
         this@LinkActivity.finish()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterActivity()
+    }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import androidx.navigation.NavHostController
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -38,5 +39,13 @@ internal class LinkActivityViewModelTest {
         vm.handleViewAction(LinkAction.BackPressed)
 
         verify(dismissWithResult).invoke(LinkActivityResult.Canceled())
+    }
+
+    @Test
+    fun `test that activity unregister removes dismissWithResult and nav controller`() = runTest(dispatcher) {
+        vm.unregisterActivity()
+
+        assertThat(vm.dismissWithResult).isEqualTo(null)
+        assertThat(vm.navController).isEqualTo(null)
     }
 }
