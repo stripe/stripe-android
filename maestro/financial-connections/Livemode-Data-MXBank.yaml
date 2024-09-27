@@ -35,6 +35,10 @@ tags:
     timeout: 60000
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*MX Bank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*MX Bank.*"
 - stopRecording
