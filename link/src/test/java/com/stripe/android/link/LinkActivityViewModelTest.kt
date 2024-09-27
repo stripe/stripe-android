@@ -12,7 +12,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -35,10 +37,23 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
+    fun `test that cancel result is called on back pressed with empty stack`() = runTest(dispatcher) {
+        whenever(navController.popBackStack()).thenReturn(false)
+
         vm.handleViewAction(LinkAction.BackPressed)
 
+        verify(navController).popBackStack()
         verify(dismissWithResult).invoke(LinkActivityResult.Canceled())
+    }
+
+    @Test
+    fun `test that cancel result is called on back pressed with non-empty stack`() = runTest(dispatcher) {
+        whenever(navController.popBackStack()).thenReturn(true)
+
+        vm.handleViewAction(LinkAction.BackPressed)
+
+        verify(navController).popBackStack()
+        verify(dismissWithResult, times(0)).invoke(LinkActivityResult.Canceled())
     }
 
     @Test

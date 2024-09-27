@@ -15,7 +15,11 @@ internal class LinkActivityViewModel : ViewModel() {
     }
 
     private fun handleBackPressed() {
-        dismissWithResult?.invoke(LinkActivityResult.Canceled())
+        navController?.let { navController ->
+            if (!navController.popBackStack()) {
+                dismissWithResult?.invoke(LinkActivityResult.Canceled())
+            }
+        }
     }
 
     fun unregisterActivity() {
