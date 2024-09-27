@@ -5,13 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerSheetIntegrationType
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.injection.DaggerCustomerAdapterDataSourceComponent
+import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionDataSourceComponent
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +25,7 @@ import kotlinx.coroutines.flow.first
  * This objects holds references to objects that need to be shared across Activity boundaries
  * but can't be serialized, or objects that can't be injected where they are used.
  */
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
 internal object CustomerSheetHacks {
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
     val initializationDataSource: Deferred<CustomerSheetInitializationDataSource>
@@ -44,18 +46,38 @@ internal object CustomerSheetHacks {
     fun initialize(
         application: Application,
         lifecycleOwner: LifecycleOwner,
-        adapter: CustomerAdapter,
+        integrationType: CustomerSheetIntegrationType,
     ) {
-        val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
-            .builder()
-            .application(application)
-            .adapter(adapter)
-            .build()
+        when (integrationType) {
+            is CustomerSheetIntegrationType.Adapter -> {
+                val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
+                    .builder()
+                    .application(application)
+                    .adapter(integrationType.adapter)
+                    .build()
 
-        _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
-        _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
-        _intentDataSource.value = adapterDataSourceComponent.customerSheetIntentDataSource
-        _savedSelectionDataSource.value = adapterDataSourceComponent.customerSheetSavedSelectionDataSource
+                _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
+                _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
+                _intentDataSource.value = adapterDataSourceComponent.customerSheetIntentDataSource
+                _savedSelectionDataSource.value = adapterDataSourceComponent.customerSheetSavedSelectionDataSource
+            }
+            is CustomerSheetIntegrationType.CustomerSession -> {
+                val customerSessionDataSourceComponent = DaggerCustomerSessionDataSourceComponent
+                    .builder()
+                    .application(application)
+                    .customerSessionProvider(integrationType.customerSessionProvider)
+                    .build()
+
+                _initializationDataSource.value =
+                    customerSessionDataSourceComponent.customerSheetInitializationDataSource
+                _paymentMethodDataSource.value =
+                    customerSessionDataSourceComponent.customerSheetPaymentMethodDataSource
+                _intentDataSource.value =
+                    customerSessionDataSourceComponent.customerSheetIntentDataSource
+                _savedSelectionDataSource.value =
+                    customerSessionDataSourceComponent.customerSheetSavedSelectionDataSource
+            }
+        }
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
