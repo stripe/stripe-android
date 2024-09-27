@@ -194,18 +194,77 @@ internal class PaymentSheetPlaygroundViewModel(
         )
     }
 
-    fun createCustomerSessionProvider(): CustomerSheet.CustomerSessionProvider {
+    fun createCustomerSessionProvider(
+        playgroundState: PlaygroundState.Customer,
+    ): CustomerSheet.CustomerSessionProvider {
         return object : CustomerSheet.CustomerSessionProvider() {
-            override suspend fun provideSetupIntentClientSecret(
-                customerId: String
-            ): kotlin.Result<String> {
-                throw NotImplementedError("Not implemented yet!")
-            }
-
             override suspend fun providesCustomerSessionClientSecret(): kotlin.Result<
                 CustomerSheet.CustomerSessionClientSecret
                 > {
-                throw NotImplementedError("Not implemented yet!")
+                val apiResponse = Fuel.post(baseUrl + "customer_ephemeral_key")
+                    .jsonBody(
+                        Json.encodeToString(
+                            CustomerEphemeralKeyRequest.serializer(),
+                            playgroundState.customerEphemeralKeyRequest()
+                        )
+                    )
+                    .suspendable()
+                    .awaitModel(CustomerEphemeralKeyResponse.serializer())
+
+                return when (apiResponse) {
+                    is Result.Failure -> {
+                        val exception = apiResponse.getException()
+
+                        kotlin.Result.failure(exception)
+                    }
+                    is Result.Success -> {
+                        val response = apiResponse.value
+
+                        // Init PaymentConfiguration with the publishable key returned from the backend,
+                        // which will be used on all Stripe API calls
+                        PaymentConfiguration.init(
+                            getApplication(),
+                            response.publishableKey
+                        )
+
+                        if (playgroundState.isNewCustomer) {
+                            playgroundSettingsFlow.value?.let { settings ->
+                                updateSettingsWithExistingCustomerId(settings, response.customerId)
+                            }
+                        }
+
+                        try {
+                            kotlin.Result.success(
+                                CustomerSheet.CustomerSessionClientSecret.create(
+                                    customerId = response.customerId,
+                                    clientSecret = response.customerSessionClientSecret
+                                        ?: throw IllegalStateException(
+                                            "No 'customerSessionClientSecret' was found in backend response!"
+                                        )
+                                )
+                            )
+                        } catch (exception: IllegalStateException) {
+                            kotlin.Result.failure(exception)
+                        }
+                    }
+                }
+            }
+
+            override suspend fun provideSetupIntentClientSecret(customerId: String): kotlin.Result<String> {
+                val request = CreateSetupIntentRequest(
+                    customerId = customerId,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                )
+
+                val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
+                    .jsonBody(Json.encodeToString(CreateSetupIntentRequest.serializer(), request))
+                    .suspendable()
+                    .awaitModel(CreateSetupIntentResponse.serializer())
+
+                return when (apiResponse) {
+                    is Result.Failure -> kotlin.Result.failure(apiResponse.getException())
+                    is Result.Success -> kotlin.Result.success(apiResponse.value.clientSecret)
+                }
             }
         }
     }

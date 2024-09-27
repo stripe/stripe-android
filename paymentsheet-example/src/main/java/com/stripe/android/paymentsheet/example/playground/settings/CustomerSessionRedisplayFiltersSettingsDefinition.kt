@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.AllowRedisplayFilter
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     PlaygroundSettingDefinition<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType>,
@@ -26,6 +27,13 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
 
     override fun configure(value: RedisplayFilterType, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.paymentMethodRedisplayFilters(value.filters)
+    }
+
+    override fun configure(
+        value: RedisplayFilterType,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.paymentMethodRedisplayFilters(value.filters)
     }
 
     enum class RedisplayFilterType(
