@@ -40,20 +40,20 @@ internal class CardElementActivityTests {
 
     @Test
     fun `displays CardFormView on Activity`() {
-        runCardFormViewTest(CardElementTestActivity.CardElementView.CardFormView)
+        runCardElementTest(CardElementTestActivity.CardElementView.CardFormView)
     }
 
     @Test
     fun `displays CardInputWidget on Activity`() {
-        runCardFormViewTest(CardElementTestActivity.CardElementView.CardInputWidget)
+        runCardElementTest(CardElementTestActivity.CardElementView.CardInputWidget)
     }
 
     @Test
     fun `displays CardMultilineWidget on Activity`() {
-        runCardFormViewTest(CardElementTestActivity.CardElementView.CardMultilineWidget)
+        runCardElementTest(CardElementTestActivity.CardElementView.CardMultilineWidget)
     }
 
-    private fun runCardFormViewTest(
+    private fun runCardElementTest(
         viewType: CardElementTestActivity.CardElementView,
         locale: Locale = Locale.US
     ) {
