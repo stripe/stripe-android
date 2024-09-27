@@ -53,7 +53,7 @@ internal class MandateHandler(
                 coroutineScope = viewModel.viewModelScope,
                 selection = viewModel.selection,
                 merchantDisplayName = viewModel.config.merchantDisplayName,
-                isVerticalMode = viewModel.config.paymentMethodLayout == PaymentMethodLayout.Vertical,
+                isVerticalMode = viewModel.config.paymentMethodLayout != PaymentMethodLayout.Horizontal,
                 isSetupFlowProvider = { viewModel.paymentMethodMetadata.value?.stripeIntent is SetupIntent },
             )
         }
