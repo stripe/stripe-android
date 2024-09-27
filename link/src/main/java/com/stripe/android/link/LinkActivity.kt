@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,7 +17,6 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.ui.cardedit.CardEditScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.signup.SignUpScreen
-import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.wallet.WalletScreen
 
@@ -36,22 +34,9 @@ internal class LinkActivity : AppCompatActivity() {
         setContent {
             navController = rememberNavController()
 
-            LaunchedEffect("LinkEffects") {
-                viewModel.effect.collect { effect ->
-                    when (effect) {
-                        LinkEffect.GoBack -> navController.popBackStack()
-                        is LinkEffect.SendResult -> {
-                            val bundle = bundleOf(
-                                LinkActivityContract.EXTRA_RESULT to LinkActivityContract.Result(effect.result)
-                            )
-                            this@LinkActivity.setResult(
-                                Activity.RESULT_OK,
-                                Intent().putExtras(bundle)
-                            )
-                            this@LinkActivity.finish()
-                        }
-                    }
-                }
+            LaunchedEffect(Unit) {
+                viewModel.navController = navController
+                viewModel.dismissWithResult = ::dismissWithResult
             }
 
             NavHost(
@@ -59,11 +44,7 @@ internal class LinkActivity : AppCompatActivity() {
                 startDestination = LinkScreen.SignUp.route
             ) {
                 composable(LinkScreen.SignUp.route) {
-                    val vm = viewModel<SignUpViewModel>()
-                    SignUpScreen(
-                        viewModel = vm,
-                        navController = navController
-                    )
+                    SignUpScreen()
                 }
 
                 composable(LinkScreen.Verification.route) {
@@ -83,5 +64,16 @@ internal class LinkActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun dismissWithResult(result: LinkActivityResult) {
+        val bundle = bundleOf(
+            LinkActivityContract.EXTRA_RESULT to LinkActivityContract.Result(result)
+        )
+        this@LinkActivity.setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(bundle)
+        )
+        this@LinkActivity.finish()
     }
 }

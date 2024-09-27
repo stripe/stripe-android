@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
-import app.cash.turbine.test
-import com.google.common.truth.Truth
+import androidx.navigation.NavHostController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -11,16 +10,22 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val vm = LinkActivityViewModel()
+    private val navController: NavHostController = mock()
+    private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        vm.dismissWithResult = dismissWithResult
+        vm.navController = navController
     }
 
     @After
@@ -29,17 +34,9 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `test that viewmodel has correct initial state`() = runTest(dispatcher) {
-        vm.state.test {
-            Truth.assertThat(awaitItem()).isEqualTo(LinkState)
-        }
-    }
+    fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
+        vm.handleViewAction(LinkAction.BackPressed)
 
-    @Test
-    fun `test that correct effect is emitted on back pressed`() = runTest(dispatcher) {
-        vm.effect.test {
-            vm.handleAction(LinkAction.BackPressed)
-            Truth.assertThat(awaitItem()).isEqualTo(LinkEffect.GoBack)
-        }
+        verify(dismissWithResult).invoke(LinkActivityResult.Canceled())
     }
 }
