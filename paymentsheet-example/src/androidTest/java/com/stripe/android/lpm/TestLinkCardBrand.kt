@@ -5,7 +5,6 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -24,7 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestInstantDebits : BasePlaygroundTest() {
+internal class TestLinkCardBrand : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = "link",
@@ -34,14 +33,11 @@ internal class TestInstantDebits : BasePlaygroundTest() {
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         settings[LinkSettingsDefinition] = true
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
-            PaymentMethod.Type.Card,
-            PaymentMethod.Type.Link
-        ).joinToString(",")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card"
     }
 
     @Test
-    fun testInstantDebitsSuccess() {
+    fun testLinkCardBrandSuccess() {
         val params = testParameters.copyPlaygroundSettings {
             it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         }
@@ -60,7 +56,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
-    fun testInstantDebitsCancelAllowsUserToContinue() {
+    fun testLinkCardBrandCancelAllowsUserToContinue() {
         testDriver.confirmLinkBankPayment(
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
@@ -73,7 +69,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
-    fun testInstantDebitsCancelAllowsUserToContinueInCustomFlow() {
+    fun testLinkCardBrandCancelAllowsUserToContinueInCustomFlow() {
         testDriver.confirmInstantDebitsInCustomFlow(
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,

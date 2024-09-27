@@ -781,7 +781,7 @@ internal class PlaygroundTestDriver(
         )
     }
 
-    fun confirmInstantDebits(
+    fun confirmLinkBankPayment(
         testParameters: TestParameters,
         afterAuthorization: (Selectors) -> Unit = {},
     ): PlaygroundState? {
