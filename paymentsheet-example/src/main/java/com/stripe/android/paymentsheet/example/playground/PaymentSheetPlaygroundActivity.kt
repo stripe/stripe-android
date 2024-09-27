@@ -113,9 +113,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
-            val customerSheet = if (playgroundState?.asCustomerState()?.isUsingCustomerSession == true) {
-                val customerSessionProvider = remember(playgroundState) {
-                    viewModel.createCustomerSessionProvider()
+            val customerPlaygroundState = playgroundState?.asCustomerState()
+            val customerSheet = if (customerPlaygroundState?.isUsingCustomerSession == true) {
+                val customerSessionProvider = remember(customerPlaygroundState) {
+                    viewModel.createCustomerSessionProvider(customerPlaygroundState)
                 }
 
                 rememberCustomerSheet(
