@@ -15,7 +15,7 @@ import kotlin.test.Test
 @Config(sdk = [Build.VERSION_CODES.Q])
 class DisplayableSavedPaymentMethodTest {
 
-    val context: Context = getApplicationContext()
+    private val context: Context = getApplicationContext()
 
     @Test
     fun getDescription_usesDisplayedCardBrand() {
