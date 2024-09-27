@@ -8,7 +8,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetIntegrationType
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.data.CustomerAdapterDataSource
+import com.stripe.android.customersheet.data.CustomerSessionInitializationDataSource
+import com.stripe.android.customersheet.data.CustomerSessionIntentDataSource
+import com.stripe.android.customersheet.data.CustomerSessionPaymentMethodDataSource
+import com.stripe.android.customersheet.data.CustomerSessionSavedSelectionDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.test.runTest
@@ -36,10 +42,14 @@ class CustomerSheetHacksTest {
             integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter())
         )
 
-        assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.intentDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.paymentMethodDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.savedSelectionDataSource.awaitWithTimeout()).isNotNull()
+        assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerAdapterDataSource>()
+        assertThat(CustomerSheetHacks.intentDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerAdapterDataSource>()
+        assertThat(CustomerSheetHacks.paymentMethodDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerAdapterDataSource>()
+        assertThat(CustomerSheetHacks.savedSelectionDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerAdapterDataSource>()
     }
 
     @Test
@@ -50,10 +60,14 @@ class CustomerSheetHacksTest {
             integrationType = CustomerSheetIntegrationType.CustomerSession(FakeCustomerSessionProvider())
         )
 
-        assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.intentDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.paymentMethodDataSource.awaitWithTimeout()).isNotNull()
-        assertThat(CustomerSheetHacks.savedSelectionDataSource.awaitWithTimeout()).isNotNull()
+        assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerSessionInitializationDataSource>()
+        assertThat(CustomerSheetHacks.intentDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerSessionIntentDataSource>()
+        assertThat(CustomerSheetHacks.paymentMethodDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerSessionPaymentMethodDataSource>()
+        assertThat(CustomerSheetHacks.savedSelectionDataSource.awaitWithTimeout())
+            .isInstanceOf<CustomerSessionSavedSelectionDataSource>()
     }
 
     @Test
