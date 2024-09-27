@@ -40,5 +40,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*StripeBank.*"
 - stopRecording

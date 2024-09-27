@@ -29,6 +29,10 @@ tags:
 - tapOn: "Connect accounts" # select all accounts
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*StripeBank.*"
 - stopRecording
