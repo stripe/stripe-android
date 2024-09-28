@@ -836,6 +836,7 @@ internal class CustomerSheetViewModel(
     private fun createDefaultUsBankArguments(stripeIntent: StripeIntent?): USBankAccountFormArguments {
         return USBankAccountFormArguments(
             instantDebits = false,
+            linkMode = null,
             showCheckbox = false,
             onBehalfOf = null,
             isCompleteFlow = false,

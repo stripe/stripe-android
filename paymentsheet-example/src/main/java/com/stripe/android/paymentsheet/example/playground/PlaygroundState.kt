@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -87,6 +88,9 @@ internal sealed interface PlaygroundState : Parcelable {
 
         val isNewCustomer
             get() = snapshot[CustomerSettingsDefinition] == CustomerType.NEW
+
+        val isUsingCustomerSession
+            get() = snapshot[CustomerSessionSettingsDefinition]
 
         val inSetupMode
             get() = snapshot[CustomerSheetPaymentMethodModeDefinition] ==

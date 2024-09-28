@@ -218,6 +218,12 @@ interface ErrorReporter {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class SuccessEvent(override val eventName: String) : ErrorEvent {
+        CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS(
+            eventName = "elements.customer_sheet.elements_session.load_success"
+        ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS(
+            eventName = "elements.customer_sheet.payment_methods.load_success"
+        ),
         GET_SAVED_PAYMENT_METHODS_SUCCESS(
             eventName = "elements.customer_repository.get_saved_payment_methods_success"
         ),

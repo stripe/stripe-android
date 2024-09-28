@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -31,6 +30,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -46,7 +46,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     @Assisted initialState: NetworkingSaveToLinkVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val startVerification: StartVerification,
     private val getOrFetchSync: GetOrFetchSync,
     private val confirmVerification: ConfirmVerification,
@@ -61,7 +61,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     init {
         logErrors()
         suspend {
-            val consumerSession = requireNotNull(getCachedConsumerSession())
+            val consumerSession = requireNotNull(consumerSessionProvider.provideConsumerSession())
             // If we automatically moved to this pane due to prefilled email, we should show the "Not now" button.
             val showNotNowButton = getOrFetchSync().manifest.accountholderCustomerEmailAddress != null
             runCatching {

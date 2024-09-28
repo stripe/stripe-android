@@ -25,7 +25,6 @@ import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -136,6 +135,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     sharedDataSpecs = emptyList(),
                     hasCustomerConfiguration = true,
                     isGooglePayReady = true,
+                    linkMode = null,
                 ),
             )
         )
@@ -1981,7 +1981,6 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
         val loader = createPaymentSheetLoader(
@@ -2016,7 +2015,6 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
     @Test
     fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
         val loader = createPaymentSheetLoader(

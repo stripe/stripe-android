@@ -7,12 +7,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -69,6 +71,7 @@ class USBankAccountFormViewModelTest {
         savedPaymentMethod = null,
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        linkMode = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -1055,7 +1058,10 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
         val viewModel = createViewModel(
-            args = defaultArgs.copy(instantDebits = true),
+            args = defaultArgs.copy(
+                instantDebits = true,
+                linkMode = LinkMode.LinkCardBrand,
+            ),
         ).apply {
             this.collectBankAccountLauncher = mockCollectBankAccountLauncher
         }
@@ -1072,6 +1078,9 @@ class USBankAccountFormViewModelTest {
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
+                    elementsSessionContext = FinancialConnectionsSheet.ElementsSessionContext(
+                        linkMode = LinkMode.LinkCardBrand,
+                    ),
                 )
             ),
         )

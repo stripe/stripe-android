@@ -14,7 +14,7 @@ open class UiAutomatorText(
 ) {
     private val selector: UiSelector
         get() = className?.let {
-            UiSelector().textContains(label).className(className)
+            UiSelector().textContains(label).className(it)
         } ?: UiSelector().textContains(label)
 
     open fun click() {

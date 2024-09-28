@@ -18,7 +18,6 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
@@ -53,6 +52,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
@@ -66,7 +66,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     @Assisted initialState: LinkAccountPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val handleClickableUrl: HandleClickableUrl,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
@@ -83,7 +83,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val sync = getSync()
             val manifest = sync.manifest
-            val consumerSession = requireNotNull(getCachedConsumerSession())
+            val consumerSession = requireNotNull(consumerSessionProvider.provideConsumerSession())
             val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val display = requireNotNull(
                 accountsResponse

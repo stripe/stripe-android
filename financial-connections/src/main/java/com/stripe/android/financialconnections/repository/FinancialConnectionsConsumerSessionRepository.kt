@@ -12,6 +12,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
@@ -55,6 +56,12 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         bankAccountId: String,
         consumerSessionClientSecret: String,
     ): ConsumerPaymentDetails
+
+    suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        expectedPaymentMethodType: String,
+    ): SharePaymentDetails
 
     companion object {
         operator fun invoke(
@@ -186,6 +193,20 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+        ).getOrThrow()
+    }
+
+    override suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        expectedPaymentMethodType: String
+    ): SharePaymentDetails {
+        return consumersApiService.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = expectedPaymentMethodType,
+            requestSurface = requestSurface,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).getOrThrow()
     }
 

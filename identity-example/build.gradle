@@ -73,6 +73,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.liveData
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.ui
     implementation libs.compose.viewModels
     implementation libs.fuel

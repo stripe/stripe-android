@@ -362,6 +362,14 @@ public final class com/stripe/android/model/ConsumerSessionSignup$Creator : andr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/SharePaymentDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/SharePaymentDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/SharePaymentDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/model/StripeParamsModel : android/os/Parcelable {
 	public abstract fun toParamMap ()Ljava/util/Map;
 }

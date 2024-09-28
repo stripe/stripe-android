@@ -62,6 +62,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
+                linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,

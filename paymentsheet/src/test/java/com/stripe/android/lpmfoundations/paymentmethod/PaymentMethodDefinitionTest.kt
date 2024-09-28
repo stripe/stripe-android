@@ -3,15 +3,10 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.model.SetupIntentFixtures
 import org.junit.Test
 
 internal class PaymentMethodDefinitionTest {
-    @Test
-    fun `isSupported returns false for PaymentMethodDefinitions that are not in stripeIntent#paymentMethodTypes`() {
-        assertThat(KlarnaDefinition.isSupported(PaymentMethodMetadataFactory.create())).isFalse()
-    }
 
     @Test
     fun `isSupported returns false for PaymentMethodDefinitions that do not meet add requirements`() {

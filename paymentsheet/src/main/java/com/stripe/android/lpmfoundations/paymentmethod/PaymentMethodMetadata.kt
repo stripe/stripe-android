@@ -7,8 +7,10 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -48,6 +50,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val linkMode: LinkMode?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
     val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : Parcelable {
@@ -138,11 +141,19 @@ internal data class PaymentMethodMetadata(
     }
 
     private fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
-        return stripeIntent.paymentMethodTypes.mapNotNull {
+        val supportedPaymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)
-        }.filterNot {
+        }
+
+        val syntheticPaymentMethodTypes = listOf(LinkCardBrandDefinition).filter {
+            it.isSupported(this)
+        }
+
+        val paymentMethodTypes = supportedPaymentMethodTypes + syntheticPaymentMethodTypes
+
+        return paymentMethodTypes.filterNot {
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
@@ -277,6 +288,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 isGooglePayReady = isGooglePayReady,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
                 )
@@ -286,6 +298,7 @@ internal data class PaymentMethodMetadata(
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
+            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
@@ -308,7 +321,8 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 externalPaymentMethodSpecs = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )

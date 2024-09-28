@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.networkingsavetolinkver
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
@@ -9,7 +10,6 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
-import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -44,12 +43,12 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val startVerification = mock<StartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
-    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val attachedPaymentAccountRepository = mock<AttachedPaymentAccountRepository>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val cachedConsumerSession = cachedConsumerSession()
 
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()
@@ -61,7 +60,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         startVerification = startVerification,
         getCachedAccounts = getCachedAccounts,
         saveAccountToLink = saveAccountToLink,
-        getCachedConsumerSession = getCachedConsumerSession,
+        consumerSessionProvider = { cachedConsumerSession },
         getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
         initialState = state,
@@ -71,25 +70,21 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {
-        val consumerSession = consumerSession()
         whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession)
 
         val viewModel = buildViewModel()
 
         val state = viewModel.stateFlow.value
-        verify(startVerification).sms(consumerSession.clientSecret)
+        verify(startVerification).sms(cachedConsumerSession.clientSecret)
         assertThat(state.payload()!!.consumerSessionClientSecret)
-            .isEqualTo(consumerSession.clientSecret)
+            .isEqualTo(cachedConsumerSession.clientSecret)
     }
 
     @Test
     fun `otpEntered - on valid OTP confirms, saves accounts and navigates to success pane`() =
         runTest {
-            val consumerSession = consumerSession()
             val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
@@ -110,7 +105,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(true),
             )
             verify(confirmVerification).sms(
-                consumerSessionClientSecret = consumerSession.clientSecret,
+                consumerSessionClientSecret = cachedConsumerSession.clientSecret,
                 verificationCode = "111111"
             )
             eventTracker.assertContainsEvent(
@@ -126,9 +121,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @Test
     fun `otpEntered - on valid OTP confirms, no accounts but attached ME still saves navigates to success pane`() =
         runTest {
-            val consumerSession = consumerSession()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(emptyList())
@@ -157,7 +150,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(true),
             )
             verify(confirmVerification).sms(
-                consumerSessionClientSecret = consumerSession.clientSecret,
+                consumerSessionClientSecret = cachedConsumerSession.clientSecret,
                 verificationCode = "111111"
             )
             eventTracker.assertContainsEvent(
@@ -173,10 +166,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @Test
     fun `otpEntered - on valid OTP fails, sends event and navigates to terminal error`() =
         runTest {
-            val consumerSession = consumerSession()
             val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
@@ -198,7 +189,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(true),
             )
             verify(confirmVerification).sms(
-                consumerSessionClientSecret = consumerSession.clientSecret,
+                consumerSessionClientSecret = cachedConsumerSession.clientSecret,
                 verificationCode = "111111"
             )
             eventTracker.assertContainsEvent(
@@ -212,10 +203,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
     @Test
     fun `onSkipClick - navigates to success without networking accounts`() = runTest {
-        val consumerSession = consumerSession()
         val selectedAccount = cachedPartnerAccount()
         val linkVerifiedManifest = sessionManifest()
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession)
         whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
         whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
 
@@ -228,16 +217,6 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         navigationManager.assertNavigatedTo(
             destination = Destination.Success,
             pane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
-        )
-    }
-
-    private fun consumerSession(): CachedConsumerSession {
-        return CachedConsumerSession(
-            clientSecret = "clientSecret",
-            emailAddress = "test@test.com",
-            phoneNumber = "(***) *** **12",
-            isVerified = false,
-            publishableKey = null
         )
     }
 }
