@@ -16,6 +16,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
     selectedIndex: Int,
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
+    focusOnPrimaryButton: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -28,6 +29,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
                 isSelected = index == selectedIndex,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
+                focusOnPrimaryButton = focusOnPrimaryButton,
             )
         }
     }

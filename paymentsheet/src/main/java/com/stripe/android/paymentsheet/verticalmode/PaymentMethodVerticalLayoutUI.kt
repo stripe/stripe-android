@@ -40,6 +40,7 @@ internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
+    focusOnPrimaryButton: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -66,6 +67,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         onSelectSavedPaymentMethod = {
+            focusOnPrimaryButton()
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
             )
@@ -76,6 +78,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
+        focusOnPrimaryButton = focusOnPrimaryButton,
         modifier = modifier
             .padding(horizontal = 20.dp)
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
@@ -95,6 +98,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
+    focusOnPrimaryButton: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -139,7 +143,8 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
-            imageLoader = imageLoader
+            imageLoader = imageLoader,
+            focusOnPrimaryButton = focusOnPrimaryButton,
         )
     }
 }

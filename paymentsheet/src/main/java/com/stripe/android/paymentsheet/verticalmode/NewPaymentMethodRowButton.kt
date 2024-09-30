@@ -23,6 +23,7 @@ internal fun NewPaymentMethodRowButton(
     isSelected: Boolean,
     displayablePaymentMethod: DisplayablePaymentMethod,
     imageLoader: StripeImageLoader,
+    focusOnPrimaryButton: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
@@ -40,6 +41,7 @@ internal fun NewPaymentMethodRowButton(
         subtitle = displayablePaymentMethod.subtitle?.resolve(),
         iconRequiresTinting = displayablePaymentMethod.iconRequiresTinting,
         onClick = {
+            focusOnPrimaryButton()
             displayablePaymentMethod.onClick()
         },
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),

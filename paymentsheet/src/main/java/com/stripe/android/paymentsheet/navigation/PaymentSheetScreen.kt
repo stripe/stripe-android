@@ -84,7 +84,7 @@ internal sealed interface PaymentSheetScreen {
     fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
 
     @Composable
-    fun Content(modifier: Modifier)
+    fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit)
 
     object Loading : PaymentSheetScreen {
 
@@ -110,7 +110,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             BottomSheetLoadingIndicator(modifier)
         }
     }
@@ -166,7 +166,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             SavedPaymentMethodTabLayoutUI(
                 interactor = interactor,
                 cvcRecollectionState = cvcRecollectionState,
@@ -222,7 +222,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -275,7 +275,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             AddPaymentMethod(interactor = interactor, modifier)
         }
 
@@ -316,7 +316,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             EditPaymentMethod(interactor, modifier)
         }
 
@@ -363,8 +363,8 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor, modifier)
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
+            PaymentMethodVerticalLayoutUI(interactor, focusOnPrimaryButton, modifier)
         }
     }
 
@@ -401,7 +401,7 @@ internal sealed interface PaymentSheetScreen {
         }
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             VerticalModeFormUI(interactor)
         }
 
@@ -452,7 +452,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             ManageScreenUI(interactor = interactor)
         }
 
@@ -490,7 +490,7 @@ internal sealed interface PaymentSheetScreen {
             stateFlowOf(false)
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
     }
@@ -530,7 +530,7 @@ internal sealed interface PaymentSheetScreen {
         override fun showsWalletsHeader(isCompleteFlow: Boolean) = stateFlowOf(false)
 
         @Composable
-        override fun Content(modifier: Modifier) {
+        override fun Content(modifier: Modifier, focusOnPrimaryButton: () -> Unit) {
             CvcRecollectionPaymentSheetScreen(interactor)
         }
     }

@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -312,6 +315,7 @@ private fun PaymentSheetContent(
     modifier: Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val primaryButtonFocusRequester = remember { FocusRequester() }
 
     Column(modifier = modifier) {
         headerText?.let { text ->
@@ -339,6 +343,7 @@ private fun PaymentSheetContent(
             EventReporterProvider(viewModel) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
+                    focusOnPrimaryButton = { primaryButtonFocusRequester.requestFocus() }
                 )
             }
         }
@@ -365,7 +370,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+    PrimaryButton(viewModel, focusRequester = primaryButtonFocusRequester)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
@@ -446,11 +451,13 @@ private fun EventReporterProvider(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel, focusRequester: FocusRequester) {
     val uiState = viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+        .focusRequester(focusRequester)
+        .focusable()
         .semantics {
             role = Role.Button
 
