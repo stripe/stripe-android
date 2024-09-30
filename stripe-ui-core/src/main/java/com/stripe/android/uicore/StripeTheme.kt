@@ -62,7 +62,6 @@ data class StripeColors(
 data class StripeShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
-    val borderStrokeWidthSelected: Float
 ) {
 
     val roundedCornerShape: Shape
@@ -170,7 +169,6 @@ object StripeThemeDefaults {
     val shapes = StripeShapes(
         cornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
-        borderStrokeWidthSelected = 2.0f
     )
 
     val typography = StripeTypography(
@@ -216,7 +214,6 @@ object StripeThemeDefaults {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeComposeShapes(
     val borderStrokeWidth: Dp,
-    val borderStrokeWidthSelected: Dp,
     val material: Shapes
 )
 
@@ -226,7 +223,6 @@ data class StripeComposeShapes(
 fun StripeShapes.toComposeShapes(): StripeComposeShapes {
     return StripeComposeShapes(
         borderStrokeWidth = borderStrokeWidth.dp,
-        borderStrokeWidthSelected = borderStrokeWidthSelected.dp,
         material = MaterialTheme.shapes.copy(
             small = RoundedCornerShape(cornerRadius.dp),
             medium = RoundedCornerShape(cornerRadius.dp)
@@ -427,7 +423,7 @@ val MaterialTheme.stripeTypography: StripeTypography
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) stripeShapes.borderStrokeWidthSelected.dp else stripeShapes.borderStrokeWidth.dp
+    if (isSelected) max(stripeShapes.borderStrokeWidth, 2f).dp else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
