@@ -1,12 +1,17 @@
 package com.stripe.android.ui.core.elements
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -314,8 +319,12 @@ internal class DefaultCardNumberController(
         previousFocusDirection: FocusDirection
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
+        val focusRequester = remember { FocusRequester() }
+        Log.i("xkcd", "rendering card number")
 
         LaunchedEffect(Unit) {
+            Log.i("xkcd", "requesting focus on card number")
+            focusRequester.requestFocus()
             // Drop the set empty value & initial value
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
@@ -328,7 +337,7 @@ internal class DefaultCardNumberController(
         super.ComposeUI(
             enabled,
             field,
-            modifier,
+            modifier = modifier.focusRequester(focusRequester).focusable(),
             hiddenIdentifiers,
             lastTextFieldIdentifier,
             nextFocusDirection,
