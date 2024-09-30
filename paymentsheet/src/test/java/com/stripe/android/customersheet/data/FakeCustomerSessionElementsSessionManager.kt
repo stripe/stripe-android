@@ -4,7 +4,7 @@ import com.stripe.android.model.ElementsSession
 
 internal class FakeCustomerSessionElementsSessionManager(
     private val ephemeralKey: Result<CachedCustomerEphemeralKey> = Result.success(
-        CachedCustomerEphemeralKey(
+        CachedCustomerEphemeralKey.Available(
             customerId = "cus_1",
             ephemeralKey = "ek_123",
             expiresAt = 999999,

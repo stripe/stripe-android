@@ -42,8 +42,8 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     }
 
     private suspend fun createPrefsRepository(): CustomerSheetDataResult<PrefsRepository> {
-        return elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-            prefsRepositoryFactory(ephemeralKey.customerId)
+        return elementsSessionManager.fetchCustomerSessionEphemeralKey().mapWithEphemeralKeyCatching { customerId, _ ->
+            prefsRepositoryFactory(customerId)
         }.toCustomerSheetDataResult()
     }
 }

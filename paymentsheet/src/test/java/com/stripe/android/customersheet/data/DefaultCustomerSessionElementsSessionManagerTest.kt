@@ -126,7 +126,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(result).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey(
+                CachedCustomerEphemeralKey.Available(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -159,6 +159,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             apiKey = "ek_123",
             apiKeyExpiry = 999999,
             customerId = "cus_1",
+            currentTime = 10,
             onCustomerSessionClientSecret = {
                 amountOfCalls++
 
@@ -180,7 +181,81 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(amountOfCalls).isEqualTo(1)
         assertThat(lastResult).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey(
+                CachedCustomerEphemeralKey.Available(
+                    customerId = "cus_1",
+                    ephemeralKey = "ek_123",
+                    expiresAt = 999999,
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `on fetch ephemeral key, should re-fetch key if expired`() = runTest {
+        var amountOfCalls = 0
+
+        val manager = createElementsSessionManagerWithCustomer(
+            apiKey = "ek_123",
+            apiKeyExpiry = 200000,
+            customerId = "cus_1",
+            currentTime = 210000000,
+            onCustomerSessionClientSecret = {
+                amountOfCalls++
+
+                Result.success(
+                    CustomerSheet.CustomerSessionClientSecret.create(
+                        customerId = "cus_1",
+                        clientSecret = "cuss_123",
+                    )
+                )
+            }
+        )
+
+        manager.fetchCustomerSessionEphemeralKey()
+        manager.fetchCustomerSessionEphemeralKey()
+        manager.fetchCustomerSessionEphemeralKey()
+
+        val lastResult = manager.fetchCustomerSessionEphemeralKey()
+
+        assertThat(amountOfCalls).isEqualTo(4)
+        assertThat(lastResult).isEqualTo(
+            Result.success(
+                CachedCustomerEphemeralKey.Available(
+                    customerId = "cus_1",
+                    ephemeralKey = "ek_123",
+                    expiresAt = 200000,
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `on fetch elements session, should set ephemeral key & be re-used when fetching ephemeral key`() = runTest {
+        var amountOfCalls = 0
+
+        val manager = createElementsSessionManagerWithCustomer(
+            apiKeyExpiry = 999999,
+            currentTime = 10,
+            onCustomerSessionClientSecret = {
+                amountOfCalls++
+
+                Result.success(
+                    CustomerSheet.CustomerSessionClientSecret.create(
+                        customerId = "cus_1",
+                        clientSecret = "cuss_123",
+                    )
+                )
+            },
+        )
+
+        manager.fetchElementsSession()
+        val ephemeralKey = manager.fetchCustomerSessionEphemeralKey()
+
+        assertThat(amountOfCalls).isEqualTo(1)
+
+        assertThat(ephemeralKey).isEqualTo(
+            Result.success(
+                CachedCustomerEphemeralKey.Available(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,

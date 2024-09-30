@@ -30,23 +30,20 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSessionElementsSessionManager {
     @Volatile
-    private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
+    private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey = CachedCustomerEphemeralKey.None
 
     private var intentConfiguration: CustomerSheet.IntentConfiguration? = null
 
     override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey> {
         return withContext(workContext) {
             cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
-                cachedCustomerEphemeralKey == null || cachedCustomerEphemeralKey.shouldRefresh(
-                    timeProvider()
-                )
+                cachedCustomerEphemeralKey.shouldRefresh(timeProvider())
             }?.let {
                 Result.success(it)
-            } ?: run {
-                fetchElementsSession().mapCatching {
-                    cachedCustomerEphemeralKey
-                        ?: throw IllegalStateException("Should have been initialized from `elements/session`!")
-                }
+            } ?: kotlin.runCatching {
+                fetchElementsSession().getOrThrow()
+
+                cachedCustomerEphemeralKey
             }
         }
     }
@@ -85,7 +82,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     externalPaymentMethods = listOf(),
                 ).onSuccess { elementsSession ->
                     elementsSession.customer?.session?.run {
-                        cachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
+                        cachedCustomerEphemeralKey = CachedCustomerEphemeralKey.Available(
                             customerId = customerId,
                             ephemeralKey = apiKey,
                             expiresAt = apiKeyExpiry,
