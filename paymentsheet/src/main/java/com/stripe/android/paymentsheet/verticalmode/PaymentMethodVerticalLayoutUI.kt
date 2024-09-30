@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -97,6 +101,8 @@ internal fun PaymentMethodVerticalLayoutUI(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
@@ -122,6 +128,14 @@ internal fun PaymentMethodVerticalLayoutUI(
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+                modifier = if (selection?.isSaved == true) {
+                    Modifier.focusRequester(focusRequester).onGloballyPositioned {
+                        Log.i("xkcd", "requesting focus")
+                        focusRequester.requestFocus()
+                    }
+                } else {
+                    Modifier
+                }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
