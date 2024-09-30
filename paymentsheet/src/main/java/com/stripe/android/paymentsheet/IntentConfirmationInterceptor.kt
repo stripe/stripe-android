@@ -385,7 +385,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paramsFactory.create(
                 paymentMethodId = linkBankPaymentMethodId,
                 paymentMethodType = PaymentMethod.Type.Link,
-                expectedLinkPaymentMethodType = paymentMethodCreateParams.expectedPaymentMethodType(),
                 optionsParams = paymentMethodOptionsParams,
             )
         } else {

@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
@@ -46,12 +45,6 @@ data class ConfirmSetupIntentParams internal constructor(
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null,
-
-    /**
-     * Internal field to represent the expected payment method type when using the Link Card Brand.
-     */
-    @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    var expectedPaymentMethodType: String? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
