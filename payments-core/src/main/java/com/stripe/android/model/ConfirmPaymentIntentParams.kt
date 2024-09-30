@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
@@ -118,12 +117,6 @@ data class ConfirmPaymentIntentParams internal constructor(
      * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
      */
     var receiptEmail: String? = null,
-
-    /**
-     * Internal field to represent the expected payment method type when using the Link Card Brand.
-     */
-    @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    var expectedPaymentMethodType: String? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true

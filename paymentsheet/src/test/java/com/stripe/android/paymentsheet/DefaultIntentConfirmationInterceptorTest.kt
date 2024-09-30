@@ -578,7 +578,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodId = paymentMethodId,
             requiresMandate = false,
             productUsage = emptySet(),
-            expectedPaymentMethodType = null,
         )
 
         val nextStep = interceptor.intercept(
@@ -619,7 +618,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodId = paymentMethodId,
             requiresMandate = false,
             productUsage = emptySet(),
-            expectedPaymentMethodType = "card",
         )
 
         val nextStep = interceptor.intercept(
@@ -634,8 +632,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
-        ).copy(
-            expectedPaymentMethodType = "card",
         )
 
         assertThat(nextStep).isEqualTo(

@@ -20,7 +20,6 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     abstract fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        expectedLinkPaymentMethodType: String?,
         optionsParams: PaymentMethodOptionsParams?,
     ): T
 
@@ -36,7 +35,6 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = paymentMethod.type,
-            expectedLinkPaymentMethodType = null,
             optionsParams = optionsParams,
         )
     }
@@ -69,7 +67,6 @@ internal class ConfirmPaymentIntentParamsFactory(
     override fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        expectedLinkPaymentMethodType: String?,
         optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
@@ -79,8 +76,6 @@ internal class ConfirmPaymentIntentParamsFactory(
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                 .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
-        ).copy(
-            expectedPaymentMethodType = expectedLinkPaymentMethodType
         )
     }
 
@@ -104,7 +99,6 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
-        expectedLinkPaymentMethodType: String?,
         optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
@@ -113,8 +107,6 @@ internal class ConfirmSetupIntentParamsFactory(
             mandateData = paymentMethodType?.requiresMandate?.let {
                 MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
             }
-        ).copy(
-            expectedPaymentMethodType = expectedLinkPaymentMethodType
         )
     }
 
