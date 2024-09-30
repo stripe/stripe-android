@@ -563,6 +563,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             is ResultIdentifier.PaymentMethod -> {
                 PaymentMethodCreateParams.createInstantDebits(
                     paymentMethodId = resultIdentifier.id,
+                    expectedPaymentMethodType = args.linkMode?.expectedPaymentMethodType,
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
                 )
