@@ -23,14 +23,3 @@ internal sealed interface CachedCustomerEphemeralKey {
         }
     }
 }
-
-internal fun <T> Result<CachedCustomerEphemeralKey>.mapWithEphemeralKeyCatching(
-    mapper: (customerId: String, ephemeralKey: String) -> T
-): Result<T> {
-    return mapCatching { cachedKey ->
-        when (cachedKey) {
-            is CachedCustomerEphemeralKey.Available -> mapper(cachedKey.customerId, cachedKey.ephemeralKey)
-            is CachedCustomerEphemeralKey.None -> throw IllegalStateException("No ephemeral key was available!")
-        }
-    }
-}

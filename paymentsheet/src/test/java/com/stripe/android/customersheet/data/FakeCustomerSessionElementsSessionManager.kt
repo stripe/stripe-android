@@ -3,7 +3,7 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.model.ElementsSession
 
 internal class FakeCustomerSessionElementsSessionManager(
-    private val ephemeralKey: Result<CachedCustomerEphemeralKey> = Result.success(
+    private val ephemeralKey: Result<CachedCustomerEphemeralKey.Available> = Result.success(
         CachedCustomerEphemeralKey.Available(
             customerId = "cus_1",
             ephemeralKey = "ek_123",
@@ -11,7 +11,7 @@ internal class FakeCustomerSessionElementsSessionManager(
         )
     ),
 ) : CustomerSessionElementsSessionManager {
-    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey> {
+    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available> {
         return ephemeralKey
     }
 
