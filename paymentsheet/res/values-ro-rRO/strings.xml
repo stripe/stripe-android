@@ -80,9 +80,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Se procesează...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Eliminați contul bancar?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Eliminați contul bancar</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Eliminare card</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Eliminați cardul?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Eliminați %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
