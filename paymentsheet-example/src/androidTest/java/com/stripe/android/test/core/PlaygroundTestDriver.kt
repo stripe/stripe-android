@@ -1146,7 +1146,14 @@ internal class PlaygroundTestDriver(
                                 .text(testParameters.isSetupMode),
                             className = "android.widget.TextView",
                             device = device
-                        ) {}.click()
+                        ) {
+                            override fun click() {
+                                if (testParameters.paymentMethodCode == "wechat_pay") {
+                                    wait(5000)
+                                }
+                                super.click()
+                            }
+                        }.click()
                         Log.e("Stripe", "Fail authorization was a text view not a button this time")
                     }
                 }
