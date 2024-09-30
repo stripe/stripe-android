@@ -22,7 +22,6 @@ import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository

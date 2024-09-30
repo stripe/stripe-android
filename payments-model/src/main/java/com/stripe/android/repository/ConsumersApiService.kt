@@ -84,6 +84,7 @@ interface ConsumersApiService {
         expectedPaymentMethodType: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails>
 }
 
@@ -277,7 +278,8 @@ class ConsumersApiServiceImpl(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -292,7 +294,7 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                )
+                ) + extraParams,
             ),
             responseJsonParser = SharePaymentDetailsJsonParser,
         )
