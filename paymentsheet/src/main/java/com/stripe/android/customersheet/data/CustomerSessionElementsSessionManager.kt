@@ -15,7 +15,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal interface CustomerSessionElementsSessionManager {
-    suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey>
+    suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available>
 
     suspend fun fetchElementsSession(): Result<ElementsSession>
 }
@@ -34,16 +34,23 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
 
     private var intentConfiguration: CustomerSheet.IntentConfiguration? = null
 
-    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey> {
+    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available> {
         return withContext(workContext) {
-            cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
-                cachedCustomerEphemeralKey.shouldRefresh(timeProvider())
-            }?.let {
-                Result.success(it)
-            } ?: kotlin.runCatching {
-                fetchElementsSession().getOrThrow()
+            runCatching {
+                val ephemeralKey = cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
+                    cachedCustomerEphemeralKey.shouldRefresh(timeProvider())
+                } ?: run {
+                    fetchElementsSession().getOrThrow()
 
-                cachedCustomerEphemeralKey
+                    cachedCustomerEphemeralKey
+                }
+
+                when (ephemeralKey) {
+                    is CachedCustomerEphemeralKey.Available -> ephemeralKey
+                    is CachedCustomerEphemeralKey.None -> throw IllegalStateException(
+                        "No ephemeral key available!"
+                    )
+                }
             }
         }
     }
