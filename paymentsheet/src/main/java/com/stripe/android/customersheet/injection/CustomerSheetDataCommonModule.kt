@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.util.Calendar
 import javax.inject.Named
 import javax.inject.Provider
 
@@ -68,5 +69,10 @@ internal interface CustomerSheetDataCommonModule {
             publishableKeyProvider = { paymentConfiguration.get().publishableKey },
             networkTypeProvider = NetworkTypeDetector(context)::invoke,
         )
+
+        @Provides
+        fun provideTimeProvider(): () -> Long = {
+            Calendar.getInstance().timeInMillis
+        }
     }
 }
