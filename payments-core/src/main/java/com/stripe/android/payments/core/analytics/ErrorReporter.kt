@@ -205,6 +205,9 @@ interface ErrorReporter {
         CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
             partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
         ),
+        CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION(
+            partialEventName = "customersheet.customer_session.attach_called"
+        )
         ;
 
         override val eventName: String
