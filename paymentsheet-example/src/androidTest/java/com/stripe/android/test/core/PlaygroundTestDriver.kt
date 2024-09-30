@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
@@ -503,7 +504,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition]) {
+        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition] != Layout.HORIZONTAL) {
             selectLpmInVerticalMode(testParameters.paymentMethodCode)
         } else {
             clickPaymentSelection()
