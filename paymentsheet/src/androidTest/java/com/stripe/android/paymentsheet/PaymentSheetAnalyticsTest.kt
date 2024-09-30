@@ -120,9 +120,6 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -247,9 +244,6 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
         networkRule = networkRule,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(

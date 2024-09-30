@@ -2,17 +2,18 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import app.cash.turbine.Turbine
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class FlowControllerTestFactory(
     private val callConfirmOnPaymentOptionCallback: Boolean,
     private val integrationType: IntegrationType,
     private val createIntentCallback: CreateIntentCallback? = null,
-    private val paymentOptionCallback: PaymentOptionCallback,
+    private val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val resultCallback: PaymentSheetResultCallback,
 ) {
 
@@ -29,7 +30,7 @@ internal class FlowControllerTestFactory(
             PaymentSheet.FlowController.create(
                 activity = activity,
                 paymentOptionCallback = { paymentOption ->
-                    paymentOptionCallback.onPaymentOption(paymentOption)
+                    configureCallbackTurbine.add(paymentOption)
                     if (callConfirmOnPaymentOptionCallback) {
                         flowController.confirm()
                     }
@@ -41,7 +42,7 @@ internal class FlowControllerTestFactory(
             PaymentSheet.FlowController.create(
                 activity = activity,
                 paymentOptionCallback = { paymentOption ->
-                    paymentOptionCallback.onPaymentOption(paymentOption)
+                    configureCallbackTurbine.add(paymentOption)
                     if (callConfirmOnPaymentOptionCallback) {
                         flowController.confirm()
                     }
@@ -59,7 +60,7 @@ internal class FlowControllerTestFactory(
                 rememberPaymentSheetFlowController(
                     createIntentCallback = createIntentCallback,
                     paymentOptionCallback = { paymentOption ->
-                        paymentOptionCallback.onPaymentOption(paymentOption)
+                        configureCallbackTurbine.add(paymentOption)
                         if (callConfirmOnPaymentOptionCallback) {
                             flowController.confirm()
                         }
@@ -69,7 +70,7 @@ internal class FlowControllerTestFactory(
             } else {
                 rememberPaymentSheetFlowController(
                     paymentOptionCallback = { paymentOption ->
-                        paymentOptionCallback.onPaymentOption(paymentOption)
+                        configureCallbackTurbine.add(paymentOption)
                         if (callConfirmOnPaymentOptionCallback) {
                             flowController.confirm()
                         }
