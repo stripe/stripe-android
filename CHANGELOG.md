@@ -3,6 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ## 20.51.1 - 2024-09-30
+* Stability and efficiency improvements.
 
 ## 20.51.0 - 2024-09-23
 
