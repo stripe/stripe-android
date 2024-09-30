@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,10 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -727,6 +732,8 @@ internal class FlowControllerTest {
                 .and(hasText("4242", substring = true))
         ).performClick()
 
+        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+
         page.fillCvcRecollection("123")
 
         networkRule.enqueue(
@@ -740,7 +747,72 @@ internal class FlowControllerTest {
         composeTestRule
             .onNodeWithText("Confirm")
             .performClick()
+    }
 
+    @Test
+    fun testSavedCardsInVerticalMode(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        callConfirmOnPaymentOptionCallback = false,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "123",
+                        )
+                    )
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
+
+        testContext.configureCallbackTurbine.expectNoEvents()
+        page.clickPrimaryButton()
         assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        testContext.markTestSucceeded()
     }
 }
