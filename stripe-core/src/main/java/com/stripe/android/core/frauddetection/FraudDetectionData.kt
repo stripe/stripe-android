@@ -1,16 +1,18 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-internal data class FraudDetectionData(
-    internal val guid: String,
-    internal val muid: String,
-    internal val sid: String,
-    internal val timestamp: Long = 0L
+data class FraudDetectionData(
+    val guid: String,
+    val muid: String,
+    val sid: String,
+    val timestamp: Long = 0L
 ) : StripeModel {
     val params: Map<String, String>
         get() = mapOf(

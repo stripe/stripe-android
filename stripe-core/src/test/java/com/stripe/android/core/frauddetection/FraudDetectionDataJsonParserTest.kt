@@ -1,7 +1,6 @@
-package com.stripe.android.model.parsers
+package com.stripe.android.core.frauddetection
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.networking.FraudDetectionData
 import org.json.JSONObject
 import kotlin.test.Test
 

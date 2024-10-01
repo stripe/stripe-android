@@ -1,11 +1,8 @@
-package com.stripe.android
+package com.stripe.android.core.frauddetection
 
-import com.stripe.android.networking.FraudDetectionData
 import java.util.UUID
 
 internal object FraudDetectionDataFixtures {
-    val DEFAULT = create()
-
     fun create(timestamp: Long = -1): FraudDetectionData {
         return FraudDetectionData(
             guid = UUID.randomUUID().toString(),

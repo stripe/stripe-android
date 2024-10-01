@@ -1,17 +1,17 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
+import androidx.annotation.RestrictTo
 
 /**
  * Utility class for adding fraud detection data to API params
  */
-internal class FraudDetectionDataParamsUtils {
-    internal fun addFraudDetectionData(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FraudDetectionDataParamsUtils {
+    fun addFraudDetectionData(
         params: Map<String, *>,
         fraudDetectionData: FraudDetectionData?
     ): Map<String, *> {
-        return setOf(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA, PARAM_PAYMENT_METHOD_DATA)
+        return setOf("source_data", "payment_method_data")
             .firstOrNull { key ->
                 params.containsKey(key)
             }?.let { key ->

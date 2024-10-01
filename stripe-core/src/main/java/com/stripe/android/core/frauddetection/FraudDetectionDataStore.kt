@@ -1,20 +1,20 @@
-package com.stripe.android
+package com.stripe.android.core.frauddetection
 
 import android.content.Context
-import androidx.core.content.edit
-import com.stripe.android.model.parsers.FraudDetectionDataJsonParser
-import com.stripe.android.networking.FraudDetectionData
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
-internal interface FraudDetectionDataStore {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface FraudDetectionDataStore {
     suspend fun get(): FraudDetectionData?
     fun save(fraudDetectionData: FraudDetectionData)
 }
 
-internal class DefaultFraudDetectionDataStore(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultFraudDetectionDataStore(
     context: Context,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : FraudDetectionDataStore {
@@ -36,9 +36,9 @@ internal class DefaultFraudDetectionDataStore(
     }
 
     override fun save(fraudDetectionData: FraudDetectionData) {
-        prefs.edit {
-            putString(KEY_DATA, fraudDetectionData.toJson().toString())
-        }
+        prefs.edit()
+            .putString(KEY_DATA, fraudDetectionData.toJson().toString())
+            .apply()
     }
 
     private companion object {
