@@ -12,9 +12,6 @@ import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -63,9 +60,6 @@ internal interface StripeCustomerAdapterComponent {
 @Module
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
-    @Binds
-    fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
-
     companion object {
         @Provides
         fun providePrefsRepositoryFactory(

@@ -29,6 +29,9 @@ internal open class FakeCustomerRepository(
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
+    private val _updateRequests = Turbine<UpdateRequest>()
+    val updateRequests: ReceiveTurbine<UpdateRequest> = _updateRequests
+
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
@@ -66,11 +69,27 @@ internal open class FakeCustomerRepository(
         customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams
-    ): Result<PaymentMethod> = onUpdatePaymentMethod()
+    ): Result<PaymentMethod> {
+        _updateRequests.add(
+            UpdateRequest(
+                paymentMethodId = paymentMethodId,
+                customerInfo = customerInfo,
+                params = params,
+            )
+        )
+
+        return onUpdatePaymentMethod()
+    }
 
     data class DetachRequest(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,
         val canRemoveDuplicates: Boolean,
+    )
+
+    data class UpdateRequest(
+        val paymentMethodId: String,
+        val customerInfo: CustomerRepository.CustomerInfo,
+        val params: PaymentMethodUpdateParams,
     )
 }
