@@ -92,6 +92,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
             Experience.InstantDebits -> {
                 startWithPaymentIntent(this, experience = Experience.InstantDebits)
             }
+            Experience.LinkCardBrand -> {
+                startWithPaymentIntent(this, experience = Experience.LinkCardBrand)
+            }
         }
     }
 
@@ -103,7 +106,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    settings.paymentIntentRequest(forceInstantDebits = experience == Experience.InstantDebits)
+                    settings.paymentIntentRequest(
+                        linkMode = experience.linkMode,
+                    )
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -459,6 +464,14 @@ enum class Experience(
 ) {
     FinancialConnections("Financial Connections"),
     InstantDebits("Instant Debits"),
+    LinkCardBrand("Link Card Brand");
+
+    val linkMode: String?
+        get() = when (this) {
+            FinancialConnections -> null
+            InstantDebits -> "instant_debits"
+            LinkCardBrand -> "link_card_brand"
+        }
 }
 
 enum class NativeOverride(val apiValue: String) {
