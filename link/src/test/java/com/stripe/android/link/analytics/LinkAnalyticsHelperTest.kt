@@ -89,6 +89,10 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
+    override fun onSignupFlowPresented() {
+        throw NotImplementedError()
+    }
+
     override fun onSignupStarted(isInline: Boolean) {
         throw NotImplementedError()
     }
