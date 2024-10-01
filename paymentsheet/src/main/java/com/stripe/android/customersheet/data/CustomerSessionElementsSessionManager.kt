@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -17,14 +18,15 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal interface CustomerSessionElementsSessionManager {
-    suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available>
+    suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey>
 
-    suspend fun fetchElementsSession(): Result<ElementsSessionWithCustomer>
+    suspend fun fetchElementsSession(): Result<CustomerSessionElementsSession>
 }
 
-internal data class ElementsSessionWithCustomer(
+internal data class CustomerSessionElementsSession(
     val elementsSession: ElementsSession,
     val customer: ElementsSession.Customer,
+    val ephemeralKey: CachedCustomerEphemeralKey,
 )
 
 @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
@@ -38,32 +40,22 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSessionElementsSessionManager {
     @Volatile
-    private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey = CachedCustomerEphemeralKey.None
+    private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     private var intentConfiguration: CustomerSheet.IntentConfiguration? = null
 
-    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available> {
+    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey> {
         return withContext(workContext) {
             runCatching {
-                val ephemeralKey = cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
-                    cachedCustomerEphemeralKey.shouldRefresh(timeProvider())
-                } ?: run {
-                    fetchElementsSession().getOrThrow()
-
-                    cachedCustomerEphemeralKey
-                }
-
-                when (ephemeralKey) {
-                    is CachedCustomerEphemeralKey.Available -> ephemeralKey
-                    is CachedCustomerEphemeralKey.None -> throw IllegalStateException(
-                        "No ephemeral key available!"
-                    )
-                }
+                cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
+                    cachedCustomerEphemeralKey == null ||
+                        cachedCustomerEphemeralKey.shouldRefresh(timeProvider())
+                } ?: fetchElementsSession().getOrThrow().ephemeralKey
             }
         }
     }
 
-    override suspend fun fetchElementsSession(): Result<ElementsSessionWithCustomer> {
+    override suspend fun fetchElementsSession(): Result<CustomerSessionElementsSession> {
         return withContext(workContext) {
             runCatching {
                 val intentConfiguration = intentConfiguration
@@ -110,46 +102,45 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         )
                     }
 
-                    ElementsSessionWithCustomer(
-                        elementsSession = elementsSession,
-                        customer = customer
-                    )
-                }.onSuccess { elementsSessionWithCustomer ->
-                    val customerSession = elementsSessionWithCustomer.customer.session
+                    val customerSession = customer.session
 
-                    cachedCustomerEphemeralKey = CachedCustomerEphemeralKey.Available(
-                        customerId = customerSession.customerId,
-                        ephemeralKey = customerSession.apiKey,
-                        expiresAt = customerSession.apiKeyExpiry,
+                    CustomerSessionElementsSession(
+                        elementsSession = elementsSession,
+                        customer = customer,
+                        ephemeralKey = CachedCustomerEphemeralKey(
+                            customerId = customerSession.customerId,
+                            ephemeralKey = customerSession.apiKey,
+                            expiresAt = customerSession.apiKeyExpiry,
+                        )
                     )
+                }.onSuccess { customerSessionElementsSession ->
+                    cachedCustomerEphemeralKey = customerSessionElementsSession.ephemeralKey
                 }.getOrThrow()
             }
         }
     }
 
     private fun validateCustomerSessionClientSecret(customerSessionClientSecret: String) {
-        val error = when {
-            customerSessionClientSecret.isBlank() -> {
-                "The 'customerSessionClientSecret' cannot be an empty string."
+        val result = CustomerSessionClientSecretValidator
+            .validate(customerSessionClientSecret)
+
+        val error = when (result) {
+            is CustomerSessionClientSecretValidator.Result.Error.Empty -> {
+                "The provided 'customerSessionClientSecret' cannot be an empty string."
             }
-            customerSessionClientSecret.startsWith(EPHEMERAL_KEY_SECRET_PREFIX) -> {
+            is CustomerSessionClientSecretValidator.Result.Error.LegacyEphemeralKey -> {
                 "Provided secret looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
                     "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
             }
-            !customerSessionClientSecret.startsWith(CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX) -> {
+            is CustomerSessionClientSecretValidator.Result.Error.UnknownKey -> {
                 "Provided secret does not look like a CustomerSession client secret. " +
                     "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
             }
-            else -> null
+            is CustomerSessionClientSecretValidator.Result.Valid -> null
         }
 
         error?.let {
-            throw IllegalArgumentException(it)
+            throw IllegalArgumentException(error)
         }
-    }
-
-    private companion object {
-        const val EPHEMERAL_KEY_SECRET_PREFIX = "ek_"
-        const val CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX = "cuss_"
     }
 }

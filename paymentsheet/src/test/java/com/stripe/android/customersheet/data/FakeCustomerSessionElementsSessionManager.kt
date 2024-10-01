@@ -5,8 +5,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.SetupIntentFactory
 
 internal class FakeCustomerSessionElementsSessionManager(
-    private val ephemeralKey: Result<CachedCustomerEphemeralKey.Available> = Result.success(
-        CachedCustomerEphemeralKey.Available(
+    private val ephemeralKey: Result<CachedCustomerEphemeralKey> = Result.success(
+        CachedCustomerEphemeralKey(
             customerId = "cus_1",
             ephemeralKey = "ek_123",
             expiresAt = 999999,
@@ -32,8 +32,8 @@ internal class FakeCustomerSessionElementsSessionManager(
         defaultPaymentMethod = null,
         paymentMethods = paymentMethods,
     ),
-    private val elementsSession: Result<ElementsSessionWithCustomer> = Result.success(
-        ElementsSessionWithCustomer(
+    private val elementsSession: Result<CustomerSessionElementsSession> = Result.success(
+        CustomerSessionElementsSession(
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -46,14 +46,19 @@ internal class FakeCustomerSessionElementsSessionManager(
                 cardBrandChoice = null,
             ),
             customer = customer,
+            ephemeralKey = CachedCustomerEphemeralKey(
+                customerId = "cus_1",
+                ephemeralKey = "ek_123",
+                expiresAt = 999999,
+            ),
         )
     )
 ) : CustomerSessionElementsSessionManager {
-    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey.Available> {
+    override suspend fun fetchCustomerSessionEphemeralKey(): Result<CachedCustomerEphemeralKey> {
         return ephemeralKey
     }
 
-    override suspend fun fetchElementsSession(): Result<ElementsSessionWithCustomer> {
+    override suspend fun fetchElementsSession(): Result<CustomerSessionElementsSession> {
         return elementsSession
     }
 }

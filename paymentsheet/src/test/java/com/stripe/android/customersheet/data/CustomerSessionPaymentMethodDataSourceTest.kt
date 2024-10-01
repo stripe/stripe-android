@@ -86,7 +86,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
             customerRepository = customerRepository,
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 ephemeralKey = Result.success(
-                    CachedCustomerEphemeralKey.Available(
+                    CachedCustomerEphemeralKey(
                         customerId = "cus_1",
                         ephemeralKey = "ek_123",
                         expiresAt = 999999,
@@ -169,7 +169,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
             customerRepository = customerRepository,
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 ephemeralKey = Result.success(
-                    CachedCustomerEphemeralKey.Available(
+                    CachedCustomerEphemeralKey(
                         customerId = "cus_1",
                         ephemeralKey = "ek_123",
                         expiresAt = 999999,

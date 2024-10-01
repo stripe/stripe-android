@@ -129,7 +129,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(result).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -184,7 +184,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(amountOfCalls).isEqualTo(1)
         assertThat(lastResult).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -223,7 +223,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(amountOfCalls).isEqualTo(4)
         assertThat(lastResult).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 200000,
@@ -258,7 +258,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(ephemeralKey).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -298,7 +298,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
     @Test
     fun `on fetch elements session, should fail if client secret is empty`() = runClientValidationErrorTest(
         invalidClientSecret = "",
-        errorMessage = "The 'customerSessionClientSecret' cannot be an empty string."
+        errorMessage = "The provided 'customerSessionClientSecret' cannot be an empty string."
     )
 
     @Test
