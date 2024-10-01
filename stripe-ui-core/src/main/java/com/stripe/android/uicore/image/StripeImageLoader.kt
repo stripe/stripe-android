@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Image loader that fetches images from memory, disk or network and runs
@@ -32,31 +33,33 @@ class StripeImageLoader(
         context = context,
         cacheFolder = "stripe_image_cache"
     ),
+    private val coroutineContext: CoroutineContext = Dispatchers.IO
 ) {
-
     private val imageLoadMutexes = ConcurrentHashMap<String, Mutex>()
 
-    /**
-     * loads the given [url] with the associated [width]x[height].
-     *
-     * If the same [url] is being loaded concurrently, function will be suspended until
-     * the original load completes.
-     */
     suspend fun load(
         url: String,
         width: Int,
         height: Int
-    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+    ): Result<Bitmap?> = withContext(coroutineContext) {
         withMutexByUrlLock(url) {
-            loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url, width, height)
+            loadFromMemory(url) ?: runCatching {
+                loadFromDisk(url) ?: loadFromNetwork(url, width, height)
+            }.getOrElse { throwable ->
+                logger.error("$TAG: Failed to load image from disk or network", throwable)
+                Result.failure(throwable)
+            }
         }
     }
 
-    suspend fun load(
-        url: String
-    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+    suspend fun load(url: String): Result<Bitmap?> = withContext(coroutineContext) {
         withMutexByUrlLock(url) {
-            loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url)
+            loadFromMemory(url) ?: runCatching {
+                loadFromDisk(url) ?: loadFromNetwork(url)
+            }.getOrElse { throwable ->
+                logger.error("$TAG: Failed to load image from disk or network", throwable)
+                Result.failure(throwable)
+            }
         }
     }
 
@@ -64,29 +67,28 @@ class StripeImageLoader(
         return memoryCache?.getBitmap(url)
             .also {
                 if (it != null) {
-                    debug("Image loaded from memory cache")
+                    logger.debug("$TAG: Image loaded from memory cache for URL: $url")
                 } else {
-                    debug("Image not found on memory cache")
+                    logger.debug("$TAG: Image not found in memory cache for URL: $url")
                 }
             }
             ?.let {
-                diskCache?.put(url, it)
                 Result.success(it)
             }
     }
 
-    private fun loadFromDisk(url: String): Result<Bitmap>? = diskCache?.getBitmap(url)
-        .also {
-            if (it != null) {
-                debug("Image loaded from disk cache")
-            } else {
-                debug("Image not found on disk cache")
-            }
-        }
-        ?.let {
+    private fun loadFromDisk(url: String): Result<Bitmap>? = kotlin.runCatching {
+        diskCache?.getBitmap(url)
+    }.onSuccess {
+        if (it != null) {
+            logger.debug("$TAG: Image loaded from disk cache for URL: $url")
             memoryCache?.put(url, it)
-            Result.success(it)
+        } else {
+            logger.debug("$TAG: Image not found in disk cache for URL: $url")
         }
+    }.getOrNull()?.let {
+        Result.success(it)
+    }
 
     @WorkerThread
     private suspend fun loadFromNetwork(
@@ -94,39 +96,32 @@ class StripeImageLoader(
         width: Int,
         height: Int
     ): Result<Bitmap?> = kotlin.runCatching {
-        debug("Image $url loading from internet ($width x $height)")
-        networkImageDecoder.decode(url, width, height)?.let { bitmap ->
+        logger.debug("$TAG: Loading image from network URL: $url ($width x $height)")
+        networkImageDecoder.decode(url, width, height)?.also { bitmap ->
             diskCache?.put(url, bitmap)
             memoryCache?.put(url, bitmap)
-            bitmap
         }
-    }.onFailure { logger.error("$TAG: Could not load image from network", it) }
+    }.onFailure {
+        logger.error("$TAG: Failed to load image from network URL: $url", it)
+    }
 
     @WorkerThread
-    private suspend fun loadFromNetwork(
-        url: String
-    ): Result<Bitmap?> = kotlin.runCatching {
-        debug("Image $url loading from internet")
-        networkImageDecoder.decode(url)?.let { bitmap ->
+    private suspend fun loadFromNetwork(url: String): Result<Bitmap?> = kotlin.runCatching {
+        logger.debug("$TAG: Loading image from network URL: $url")
+        networkImageDecoder.decode(url)?.also { bitmap ->
             diskCache?.put(url, bitmap)
             memoryCache?.put(url, bitmap)
-            bitmap
         }
-    }.onFailure { logger.error("$TAG: Could not load image from network", it) }
+    }.onFailure {
+        logger.error("$TAG: Failed to load image from network URL: $url", it)
+    }
 
-    /**
-     * Runs the specified [action] within a locked mutex keyed by the passed url.
-     */
     private suspend fun <T> withMutexByUrlLock(url: String, action: suspend () -> T): T {
         return imageLoadMutexes.getOrPut(url) { Mutex() }.withLock {
             action()
         }.also {
             imageLoadMutexes.remove(url)
         }
-    }
-
-    private fun debug(message: String) {
-        logger.debug("$TAG: $message")
     }
 
     private companion object {
