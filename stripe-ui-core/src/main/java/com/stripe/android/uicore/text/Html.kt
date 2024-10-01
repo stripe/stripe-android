@@ -288,8 +288,6 @@ fun HtmlWithCustomOnClick(
     val remoteImagesLoaded = remember { mutableStateOf(false) }
     val stripeImageLoader = remember {
         StripeImageLoader(
-            context = context,
-            diskCache = null
         )
     }
 

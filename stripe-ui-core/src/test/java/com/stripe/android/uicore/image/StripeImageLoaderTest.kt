@@ -27,11 +27,6 @@ class StripeImageLoaderTest {
     private val mockBitmapNoSize = mock<Bitmap>()
 
     private val imageLoader = StripeImageLoader(
-        context,
-        logger,
-        memoryCache,
-        networkImageDecoder,
-        diskCache
     )
 
     @Test

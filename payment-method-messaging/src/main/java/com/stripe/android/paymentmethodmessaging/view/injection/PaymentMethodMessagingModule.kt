@@ -40,7 +40,7 @@ internal object PaymentMethodMessagingModule {
     @Provides
     fun providesStripeImageLoader(
         application: Application
-    ): StripeImageLoader = StripeImageLoader(application)
+    ): StripeImageLoader = StripeImageLoader()
 
     @Provides
     fun providesIsDarkTheme(

@@ -51,7 +51,7 @@ internal fun ConsentWelcomeHeader(
             if (merchantLogoUri.isRemote()) {
                 val localContext = LocalContext.current
                 val imageLoader = remember(merchantLogoUri) {
-                    StripeImageLoader(localContext)
+                    StripeImageLoader()
                 }
                 StripeImage(
                     url = merchantLogoUri.urlWithoutQuery(),

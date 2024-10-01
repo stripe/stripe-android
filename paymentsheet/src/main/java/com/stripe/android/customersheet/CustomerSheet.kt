@@ -562,7 +562,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 paymentOptionFactory = PaymentOptionFactory(
                     resources = application.resources,
-                    imageLoader = StripeImageLoader(application),
+                    imageLoader = StripeImageLoader(),
                     context = application,
                 ),
                 callback = callback,

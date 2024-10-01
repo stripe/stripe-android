@@ -37,7 +37,7 @@ class PaymentOptionFactoryTest {
 
     private val factory = PaymentOptionFactory(
         ApplicationProvider.getApplicationContext<Context>().resources,
-        StripeImageLoader(ApplicationProvider.getApplicationContext()),
+        StripeImageLoader(),
         ApplicationProvider.getApplicationContext(),
     )
 

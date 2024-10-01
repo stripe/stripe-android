@@ -93,9 +93,6 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesImageLoader(
             context: Application
         ) = StripeImageLoader(
-            context = context,
-            diskCache = null,
-            memoryCache = null
         )
 
         @Singleton

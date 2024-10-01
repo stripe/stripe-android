@@ -20,9 +20,6 @@ class StripeImageActivity : AppCompatActivity() {
 
     private val imageLoader by lazy {
         StripeImageLoader(
-            context = this,
-            memoryCache = null,
-            diskCache = null
         )
     }
 

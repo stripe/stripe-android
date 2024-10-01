@@ -42,7 +42,7 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     fun provideStripeImageLoader(context: Context): StripeImageLoader {
-        return StripeImageLoader(context)
+        return StripeImageLoader()
     }
 
     @Provides
