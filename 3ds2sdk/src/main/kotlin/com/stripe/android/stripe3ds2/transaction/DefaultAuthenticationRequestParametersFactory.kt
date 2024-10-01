@@ -49,23 +49,21 @@ internal class DefaultAuthenticationRequestParametersFactory internal constructo
      * "SW":["SW01","SW04"]
      * }
      */
-    internal val deviceDataJson: String
-        @VisibleForTesting
-        @Throws(JSONException::class)
-        get() {
-            return JSONObject()
-                .put(KEY_DATA_VERSION, DATA_VERSION)
-                .put(KEY_DEVICE_DATA, JSONObject(deviceDataFactory.create()))
-                .put(
-                    KEY_DEVICE_PARAM_NOT_AVAILABLE,
-                    JSONObject(deviceParamNotAvailableFactory.create())
-                )
-                .put(
-                    KEY_SECURITY_WARNINGS,
-                    JSONArray(securityChecker.getWarnings().map { it.id })
-                )
-                .toString()
-        }
+    @VisibleForTesting
+    @Throws(JSONException::class)
+    internal suspend fun deviceDataJson(sdkTransactionId: SdkTransactionId): JSONObject {
+        return JSONObject()
+            .put(KEY_DATA_VERSION, DATA_VERSION)
+            .put(KEY_DEVICE_DATA, JSONObject(deviceDataFactory.create(sdkReferenceNumber, sdkTransactionId)))
+            .put(
+                KEY_DEVICE_PARAM_NOT_AVAILABLE,
+                JSONObject(deviceParamNotAvailableFactory.create())
+            )
+            .put(
+                KEY_SECURITY_WARNINGS,
+                JSONArray(securityChecker.getWarnings().map { it.id })
+            )
+    }
 
     constructor(
         deviceDataFactory: DeviceDataFactory,
@@ -108,7 +106,7 @@ internal class DefaultAuthenticationRequestParametersFactory internal constructo
     ): AuthenticationRequestParameters = withContext(workContext) {
         val deviceData = runCatching {
             jweEncrypter.encrypt(
-                deviceDataJson,
+                deviceDataJson(sdkTransactionId).toString(),
                 directoryServerPublicKey,
                 directoryServerId,
                 keyId
@@ -168,7 +166,7 @@ internal class DefaultAuthenticationRequestParametersFactory internal constructo
         internal const val KEY_DEVICE_PARAM_NOT_AVAILABLE = "DPNA"
         internal const val KEY_SECURITY_WARNINGS = "SW"
 
-        private const val DATA_VERSION = "1.1"
+        private const val DATA_VERSION = "1.6"
 
         /**
          * Creates a public JSON Web Key (JWK) [0] from the given [KeyPair] using the
