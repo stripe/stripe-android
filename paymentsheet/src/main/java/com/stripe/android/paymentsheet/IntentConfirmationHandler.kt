@@ -13,10 +13,12 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -260,6 +262,7 @@ internal class IntentConfirmationHandler(
                 launchBankAuthFlow(
                     intent = arguments.intent,
                     confirmationOption = confirmationOption,
+                    linkMode = arguments.linkMode,
                 )
             }
             else -> {
@@ -501,6 +504,7 @@ internal class IntentConfirmationHandler(
     private fun launchBankAuthFlow(
         confirmationOption: PaymentConfirmationOption.BankAccount,
         intent: StripeIntent,
+        linkMode: LinkMode?,
     ) {
         val clientSecret = intent.clientSecret
 
@@ -510,6 +514,7 @@ internal class IntentConfirmationHandler(
                 intent = intent,
                 createParams = confirmationOption.createParams,
                 isInstantDebits = confirmationOption.isInstantDebits,
+                linkMode = linkMode,
             )
         } else {
             collectBankAccountForDeferredIntent(
@@ -525,6 +530,7 @@ internal class IntentConfirmationHandler(
         intent: StripeIntent,
         createParams: PaymentMethodCreateParams,
         isInstantDebits: Boolean,
+        linkMode: LinkMode?,
     ) {
         val name = PaymentMethodCreateParams.getNameFromParams(createParams) ?: return
         val email = PaymentMethodCreateParams.getEmailFromParams(createParams)
@@ -532,6 +538,9 @@ internal class IntentConfirmationHandler(
         val configuration = if (isInstantDebits) {
             CollectBankAccountConfiguration.InstantDebits(
                 email = email,
+                elementsSessionContext = ElementsSessionContext(
+                    linkMode = linkMode,
+                ),
             )
         } else {
             CollectBankAccountConfiguration.USBankAccount(
@@ -816,7 +825,8 @@ internal class IntentConfirmationHandler(
     @Parcelize
     internal data class Args(
         val intent: StripeIntent,
-        val confirmationOption: PaymentConfirmationOption
+        val confirmationOption: PaymentConfirmationOption,
+        val linkMode: LinkMode?,
     ) : Parcelable
 
     /**

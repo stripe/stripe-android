@@ -664,11 +664,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()
+                val paymentMethodMetadata = paymentMethodMetadata.value
 
                 intentConfirmationHandler.start(
                     arguments = IntentConfirmationHandler.Args(
                         intent = stripeIntent,
                         confirmationOption = option,
+                        linkMode = paymentMethodMetadata?.linkMode,
                     ),
                 )
             } ?: run {

@@ -1092,6 +1092,7 @@ internal class CustomerSheetViewModel(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
+                linkMode = null,
             )
         )
 
