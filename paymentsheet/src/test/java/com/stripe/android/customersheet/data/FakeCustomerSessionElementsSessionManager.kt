@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.SetupIntentFactory
 
 internal class FakeCustomerSessionElementsSessionManager(
@@ -12,6 +13,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             expiresAt = 999999,
         )
     ),
+    private val intent: StripeIntent = SetupIntentFactory.create(),
     private val paymentMethods: List<PaymentMethod> = listOf(),
     private val customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet =
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
@@ -37,7 +39,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
-                stripeIntent = SetupIntentFactory.create(),
+                stripeIntent = intent,
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,
