@@ -8,6 +8,7 @@ import com.stripe.android.stripe3ds2.observability.Stripe3ds2ErrorReporterConfig
 import com.stripe.android.stripe3ds2.security.DefaultMessageTransformer
 import com.stripe.android.stripe3ds2.security.MessageTransformer
 import com.stripe.android.stripe3ds2.transactions.ChallengeRequestData
+import com.stripe.android.stripe3ds2.transactions.ErrorData
 import com.stripe.android.stripe3ds2.views.ChallengeViewArgs
 import java.security.cert.X509Certificate
 import kotlin.coroutines.CoroutineContext
@@ -84,7 +85,9 @@ internal class DefaultInitChallengeRepository internal constructor(
                     )
                 }
                 is ChallengeRequestResult.ProtocolError -> {
-                    errorRequestExecutor.executeAsync(challengeRequestResult.data)
+                    if (challengeRequestResult.data.errorComponent == ErrorData.ErrorComponent.ThreeDsSdk) {
+                        errorRequestExecutor.executeAsync(challengeRequestResult.data)
+                    }
 
                     InitChallengeResult.End(
                         ChallengeResult.ProtocolError(
