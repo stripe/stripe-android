@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][9374](https://github.com/stripe/stripe-android/pull/9374) PaymentSheet now supports PayNow for PaymentIntents.
+
 ## 20.51.1 - 2024-09-30
 * Stability and efficiency improvements.
 

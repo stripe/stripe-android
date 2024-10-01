@@ -285,6 +285,14 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = true,
         ),
+        PayNow(
+            "paynow",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+            afterRedirectAction = AfterRedirectAction.Poll(retryCount = MAX_RETRIES),
+        ),
         Alipay(
             "alipay",
             isReusable = false,
