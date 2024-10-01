@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][9374](https://github.com/stripe/stripe-android/pull/9374) PaymentSheet now supports PayNow for PaymentIntents.
+
 Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345):
 * Bumped Accompanist from 0.32.0 to 0.34.0.
 * Bumped Compose from 1.5.4 to 1.6.8.

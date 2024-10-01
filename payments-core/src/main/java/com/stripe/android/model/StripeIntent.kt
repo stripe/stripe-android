@@ -90,6 +90,7 @@ sealed interface StripeIntent : StripeModel {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("oxxo_display_details"),
+        DisplayPayNowDetails("paynow_display_qr_code"),
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
@@ -192,6 +193,15 @@ sealed interface StripeIntent : StripeModel {
 
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
+             */
+            override val hostedVoucherUrl: String? = null
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPayNowDetails(
+            /**
+             * URL of a webpage containing the voucher for this PayNow payment.
              */
             override val hostedVoucherUrl: String? = null
         ) : NextActionData(), DisplayVoucherDetails

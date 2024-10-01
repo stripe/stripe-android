@@ -127,6 +127,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 StripeIntent.NextActionType.DisplayOxxoDetails
             }
+            is StripeIntent.NextActionData.DisplayPayNowDetails -> {
+                StripeIntent.NextActionType.DisplayPayNowDetails
+            }
             is StripeIntent.NextActionData.DisplayBoletoDetails -> {
                 StripeIntent.NextActionType.DisplayBoletoDetails
             }
