@@ -17,11 +17,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
 ) : CustomerSheetPaymentMethodDataSource {
     override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
         return withContext(workContext) {
-            elementsSessionManager.fetchElementsSession().mapCatching { elementsSession ->
-                elementsSession.customer?.paymentMethods
-                    ?: throw IllegalStateException(
-                        "`CustomerSession` should contain payment methods in `elements/session` response!"
-                    )
+            elementsSessionManager.fetchElementsSession().mapCatching { elementsSessionWithCustomer ->
+                elementsSessionWithCustomer.customer.paymentMethods
             }.toCustomerSheetDataResult()
         }
     }

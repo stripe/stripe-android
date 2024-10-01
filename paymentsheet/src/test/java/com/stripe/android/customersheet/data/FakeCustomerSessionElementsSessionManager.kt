@@ -17,31 +17,35 @@ internal class FakeCustomerSessionElementsSessionManager(
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
             isPaymentMethodRemoveEnabled = true,
         ),
-    private val elementsSession: Result<ElementsSession> = Result.success(
-        ElementsSession(
-            linkSettings = null,
-            paymentMethodSpecs = null,
-            stripeIntent = SetupIntentFactory.create(),
-            merchantCountry = null,
-            isGooglePayEnabled = true,
-            sessionsError = null,
-            externalPaymentMethodData = null,
-            customer = ElementsSession.Customer(
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_1",
-                    customerId = "cus_1",
-                    apiKey = "ek_123",
-                    apiKeyExpiry = 999999,
-                    components = ElementsSession.Customer.Components(
-                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                        customerSheet = customerSheetComponent,
-                    ),
-                    liveMode = false,
-                ),
-                defaultPaymentMethod = null,
-                paymentMethods = paymentMethods,
+    private val customer: ElementsSession.Customer = ElementsSession.Customer(
+        session = ElementsSession.Customer.Session(
+            id = "cuss_1",
+            customerId = "cus_1",
+            apiKey = "ek_123",
+            apiKeyExpiry = 999999,
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                customerSheet = customerSheetComponent,
             ),
-            cardBrandChoice = null,
+            liveMode = false,
+        ),
+        defaultPaymentMethod = null,
+        paymentMethods = paymentMethods,
+    ),
+    private val elementsSession: Result<ElementsSessionWithCustomer> = Result.success(
+        ElementsSessionWithCustomer(
+            elementsSession = ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = SetupIntentFactory.create(),
+                merchantCountry = null,
+                isGooglePayEnabled = true,
+                sessionsError = null,
+                externalPaymentMethodData = null,
+                customer = customer,
+                cardBrandChoice = null,
+            ),
+            customer = customer,
         )
     )
 ) : CustomerSessionElementsSessionManager {
@@ -49,7 +53,7 @@ internal class FakeCustomerSessionElementsSessionManager(
         return ephemeralKey
     }
 
-    override suspend fun fetchElementsSession(): Result<ElementsSession> {
+    override suspend fun fetchElementsSession(): Result<ElementsSessionWithCustomer> {
         return elementsSession
     }
 }

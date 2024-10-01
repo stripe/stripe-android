@@ -2,14 +2,12 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -32,38 +30,6 @@ class CustomerSessionPaymentMethodDataSourceTest {
         val returnedPaymentMethods = paymentMethodsResult.asSuccess().value
 
         assertThat(returnedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-    }
-
-    @Test
-    fun `on fetch payment methods, should fail if elements session does not have payment methods`() = runTest {
-        val paymentMethodDataSource = createPaymentMethodDataSource(
-            elementsSessionManager = FakeCustomerSessionElementsSessionManager(
-                elementsSession = Result.success(
-                    ElementsSession(
-                        linkSettings = null,
-                        paymentMethodSpecs = null,
-                        stripeIntent = SetupIntentFactory.create(),
-                        merchantCountry = null,
-                        isGooglePayEnabled = true,
-                        sessionsError = null,
-                        externalPaymentMethodData = null,
-                        customer = null,
-                        cardBrandChoice = null,
-                    )
-                )
-            ),
-        )
-
-        val paymentMethodsResult = paymentMethodDataSource.retrievePaymentMethods()
-
-        assertThat(paymentMethodsResult).isInstanceOf<CustomerSheetDataResult.Failure<List<PaymentMethod>>>()
-
-        val failedResult = paymentMethodsResult.asFailure()
-
-        assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failedResult.cause.message).isEqualTo(
-            "`CustomerSession` should contain payment methods in `elements/session` response!"
-        )
     }
 
     @Test

@@ -6,12 +6,15 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -264,6 +267,78 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         )
     }
 
+    @Test
+    fun `on fetch elements session, should fail & report if 'customer' field is empty`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val elementsSessionManager = createElementsSessionManager(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = SetupIntentFactory.create(),
+                error = null,
+                linkSettings = null,
+                sessionsCustomer = null,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        val elementsSessionResult = elementsSessionManager.fetchElementsSession()
+
+        assertThat(elementsSessionResult.isFailure).isTrue()
+        assertThat(elementsSessionResult.exceptionOrNull()?.message).isEqualTo(
+            "`customer` field should be available when using `CustomerSession` in elements/session!"
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter
+                .UnexpectedErrorEvent
+                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+                .eventName
+        )
+    }
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is empty`() = runClientValidationErrorTest(
+        invalidClientSecret = "",
+        errorMessage = "The 'customerSessionClientSecret' cannot be an empty string."
+    )
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is legacy ephemeral key`() =
+        runClientValidationErrorTest(
+            invalidClientSecret = "ek_123",
+            errorMessage = "Provided secret looks like an Ephemeral Key secret, but expecting a CustomerSession " +
+                "client secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        )
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is not in expected customer session format`() =
+        runClientValidationErrorTest(
+            invalidClientSecret = "cutt_123",
+            errorMessage = "Provided secret does not look like a CustomerSession client secret. " +
+                "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        )
+
+    private fun runClientValidationErrorTest(
+        invalidClientSecret: String,
+        errorMessage: String,
+    ) = runTest {
+        val manager = createElementsSessionManager(
+            customerSessionClientSecret = Result.success(
+                CustomerSheet.CustomerSessionClientSecret.create(
+                    customerId = "cus_1",
+                    clientSecret = invalidClientSecret
+                )
+            )
+        )
+
+        val result = manager.fetchElementsSession()
+
+        assertThat(result.isFailure).isTrue()
+
+        val exception = result.exceptionOrNull()
+
+        assertThat(exception?.message).isEqualTo(errorMessage)
+    }
+
     private suspend fun createElementsSessionManagerWithCustomer(
         customerId: String = "cus_1",
         apiKey: String = "ek_123",
@@ -311,6 +386,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
                 error = null,
                 linkSettings = null,
             ),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         intentConfiguration: Result<CustomerSheet.IntentConfiguration> =
             Result.success(CustomerSheet.IntentConfiguration.Builder().build()),
         onIntentConfiguration: () -> Result<CustomerSheet.IntentConfiguration> = { intentConfiguration },
@@ -331,6 +407,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
     ): CustomerSessionElementsSessionManager {
         return DefaultCustomerSessionElementsSessionManager(
             elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
             prefsRepositoryFactory = {
                 FakePrefsRepository().apply {
                     setSavedSelection(savedSelection = savedSelection)
