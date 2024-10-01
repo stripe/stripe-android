@@ -1068,6 +1068,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -1164,6 +1167,12 @@ class CustomerSheetViewModelTest {
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD.copy(id = "pm_1")),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    )
+                ),
                 onDetachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
                 },
@@ -2039,6 +2048,9 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(US_BANK_ACCOUNT_VERIFIED)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -3304,6 +3316,69 @@ class CustomerSheetViewModelTest {
             assertThat(selectState.topBarState {}.showEditMenu).isTrue()
         }
 
+    @Test
+    fun `If refreshed payment methods does not contain newly added payment method, keep original selection`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods,
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
+                assertThat(newViewState.paymentSelection).isEqualTo(originalSelection)
+            }
+        }
+
+    @Test
+    fun `If refreshed payment methods does contain newly added payment method, use new selection & sort PMs`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+            val newSelection = PaymentSelection.Saved(attachedPaymentMethod)
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods + listOf(attachedPaymentMethod),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(attachedPaymentMethod) + paymentMethods)
+                    .inOrder()
+                assertThat(newViewState.paymentSelection).isEqualTo(newSelection)
+            }
+        }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {
@@ -3331,13 +3406,18 @@ class CustomerSheetViewModelTest {
     private fun retrieveViewModelForAttaching(
         attachWithSetupIntent: Boolean,
         shouldFailRefresh: Boolean,
+        originalPaymentMethods: List<PaymentMethod> = listOf(),
+        originalSelection: PaymentSelection.Saved? = null,
+        attachedPaymentMethod: PaymentMethod = CARD_PAYMENT_METHOD,
+        refreshedPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): CustomerSheetViewModel {
         return createViewModel(
             workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
+            customerPaymentMethods = originalPaymentMethods,
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
+            savedPaymentSelection = originalSelection,
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = attachWithSetupIntent,
                 onRetrieveSetupIntentClientSecret = {
@@ -3351,17 +3431,21 @@ class CustomerSheetViewModelTest {
                         displayMessage = null
                     )
                 } else {
-                    CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD))
+                    CustomerSheetDataResult.success(refreshedPaymentMethods)
                 },
                 onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(attachedPaymentMethod)
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                createPaymentMethodResult = Result.success(attachedPaymentMethod),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         ).apply {
+            if (originalPaymentMethods.isNotEmpty()) {
+                handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            }
+
             handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = TEST_FORM_VALUES,
