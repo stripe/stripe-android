@@ -57,7 +57,7 @@ jobs:
           pattern: paymentsheet-example-release-*.apk
       - name: diffuse
         id: diffuse
-        uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
+        uses: usefulness/diffuse-action@v0.11.0
         with:
           old-file-path: apk/paymentsheet-example-release-master.apk
           new-file-path: apk/paymentsheet-example-release-pr.apk
