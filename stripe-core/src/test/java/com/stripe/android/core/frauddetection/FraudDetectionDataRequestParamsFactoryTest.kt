@@ -1,14 +1,15 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.FraudDetectionDataFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [30])
 class FraudDetectionDataRequestParamsFactoryTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()

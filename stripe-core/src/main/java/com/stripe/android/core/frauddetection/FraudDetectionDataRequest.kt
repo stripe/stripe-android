@@ -1,5 +1,6 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
@@ -11,7 +12,8 @@ import java.io.UnsupportedEncodingException
 /**
  * A class representing a [FraudDetectionData] request.
  */
-internal class FraudDetectionDataRequest(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FraudDetectionDataRequest(
     private val params: Map<String, Any>,
     guid: String
 ) : StripeRequest() {

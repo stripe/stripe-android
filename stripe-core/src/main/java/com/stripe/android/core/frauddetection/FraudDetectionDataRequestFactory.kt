@@ -1,17 +1,20 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 
-internal fun interface FraudDetectionDataRequestFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun interface FraudDetectionDataRequestFactory {
     fun create(arg: FraudDetectionData?): FraudDetectionDataRequest
 }
 
-internal class DefaultFraudDetectionDataRequestFactory @VisibleForTesting internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultFraudDetectionDataRequestFactory @VisibleForTesting internal constructor(
     private val fraudDetectionDataRequestParamsFactory: FraudDetectionDataRequestParamsFactory
 ) : FraudDetectionDataRequestFactory {
 
-    internal constructor(context: Context) : this(
+    constructor(context: Context) : this(
         fraudDetectionDataRequestParamsFactory = FraudDetectionDataRequestParamsFactory(context)
     )
 

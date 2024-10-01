@@ -1,4 +1,4 @@
-package com.stripe.android.networking
+package com.stripe.android.core.frauddetection
 
 import android.content.Context
 import android.os.Build

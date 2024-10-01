@@ -6,6 +6,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -25,13 +26,20 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ErrorReporter {
+interface ErrorReporter : FraudDetectionErrorReporter {
 
     fun report(
         errorEvent: ErrorEvent,
         stripeException: StripeException? = null,
         additionalNonPiiParams: Map<String, String> = emptyMap(),
     )
+
+    override fun reportFraudDetectionError(error: StripeException) {
+        report(
+            errorEvent = ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
+            stripeException = error,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
