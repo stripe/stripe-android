@@ -17,6 +17,7 @@ import com.stripe.android.stripe3ds2.databinding.StripeChallengeZoneViewBinding
 import com.stripe.android.stripe3ds2.init.ui.ButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.LabelCustomization
 
+@Suppress("TooManyFunctions")
 internal class ChallengeZoneView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

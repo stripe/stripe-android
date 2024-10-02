@@ -138,9 +138,12 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
         val key = getDecryptionKey(secretKey, jweObject.header.encryptionMethod)
         jweObject.decrypt(DirectDecrypter(key))
 
-        if (!isValidPayloadPart(jweObject.header.toString()) || !isValidPayloadPart(jweObject.iv.toString()) ||
-            !isValidPayloadPart(jweObject.cipherText.toString()) || !isValidPayloadPart(jweObject.authTag.toString())
-        ) {
+        val invalidPayload = !isValidPayloadPart(jweObject.header.toString()) ||
+            !isValidPayloadPart(jweObject.iv.toString()) ||
+            !isValidPayloadPart(jweObject.cipherText.toString()) ||
+            !isValidPayloadPart(jweObject.authTag.toString())
+
+        if (invalidPayload) {
             throw ChallengeResponseParseException(ProtocolError.DataDecryptionFailure, "Invalid encryption.")
         }
 

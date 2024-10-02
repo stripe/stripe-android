@@ -27,7 +27,7 @@ import com.stripe.android.stripe3ds2.transactions.ErrorData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import kotlin.coroutines.CoroutineContext
 
-class ChallengeFragment(
+internal class ChallengeFragment(
     private val uiCustomization: StripeUiCustomization,
     private val transactionTimer: TransactionTimer,
     private val errorRequestExecutor: ErrorRequestExecutor,

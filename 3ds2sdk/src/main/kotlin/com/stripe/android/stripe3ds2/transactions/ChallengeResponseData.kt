@@ -61,7 +61,12 @@ data class ChallengeResponseData constructor(
             }
 
             // required fields for text, single-select, multi-select
-            if ((uiType == UiType.Text || uiType == UiType.SingleSelect || uiType == UiType.MultiSelect) && setOf(
+            val isTextOrSelectType = uiType == UiType.Text ||
+                uiType == UiType.SingleSelect ||
+                uiType == UiType.MultiSelect
+
+            if (isTextOrSelectType &&
+                setOf(
                     challengeInfoHeader,
                     challengeInfoLabel,
                     challengeInfoText
@@ -79,7 +84,12 @@ data class ChallengeResponseData constructor(
                 return false
             }
 
-            if (!oobContinueLabel.isNullOrEmpty() && (challengeInfoHeader.isNullOrEmpty() && challengeInfoText.isNullOrEmpty())) {
+            if (!oobContinueLabel.isNullOrEmpty() &&
+                (
+                    challengeInfoHeader.isNullOrEmpty() &&
+                        challengeInfoText.isNullOrEmpty()
+                    )
+            ) {
                 return false
             }
 
@@ -305,6 +315,7 @@ data class ChallengeResponseData constructor(
 
         private const val YES_VALUE = "Y"
         private const val NO_VALUE = "N"
+        private const val WHITELIST_INFO_TEXT_MAX_LENGTH = 64
 
         private val YES_NO_VALUES = listOf(YES_VALUE, NO_VALUE)
 
@@ -406,7 +417,9 @@ data class ChallengeResponseData constructor(
                     .createRequiredDataElementMissing("UI fields missing")
             }
 
-            if (cresData.whitelistingInfoText != null && cresData.whitelistingInfoText.length > 64) {
+            if (cresData.whitelistingInfoText != null &&
+                cresData.whitelistingInfoText.length > WHITELIST_INFO_TEXT_MAX_LENGTH
+            ) {
                 throw ChallengeResponseParseException
                     .createInvalidDataElementFormat("Whitelisting info text exceeds length.")
             }
@@ -568,12 +581,14 @@ data class ChallengeResponseData constructor(
                     .createRequiredDataElementMissing(FIELD_ACS_HTML)
             }
 
-            if (uiType == UiType.Html && (encodedHtml == null || encodedHtml.contains("\n") || encodedHtml.contains(" ") || encodedHtml.contains("+") || encodedHtml.contains("/"))) {
-                throw ChallengeResponseParseException
-                    .createInvalidDataElementFormat(FIELD_ACS_HTML)
-            }
+            val containsBadHTML = encodedHtml == null ||
+                encodedHtml.contains("\n") ||
+                encodedHtml.contains(" ") ||
+                encodedHtml.contains("+") ||
+                encodedHtml.contains("/")
+            val endsWithBadSuffix = encodedHtml != null && encodedHtml.endsWith("=")
 
-            if (uiType == UiType.Html && encodedHtml != null && encodedHtml.endsWith("=")) {
+            if (uiType == UiType.Html && (containsBadHTML || endsWithBadSuffix)) {
                 throw ChallengeResponseParseException
                     .createInvalidDataElementFormat(FIELD_ACS_HTML)
             }
