@@ -1,5 +1,5 @@
 {
-  "id": "[PAYMENT_METHOD_ID_HERE]",
+  "id": "PAYMENT_METHOD_ID_HERE",
   "object": "payment_method",
   "billing_details": {
     "address": {

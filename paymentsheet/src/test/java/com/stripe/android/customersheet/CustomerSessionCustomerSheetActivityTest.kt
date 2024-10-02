@@ -426,7 +426,7 @@ class CustomerSessionCustomerSheetActivityTest {
             method("POST"),
             path("/v1/payment_methods/$id")
         ) { response ->
-            response.createPaymentMethodUpdateResponse()
+            response.createPaymentMethodUpdateResponse(id)
         }
     }
 
@@ -469,16 +469,22 @@ class CustomerSessionCustomerSheetActivityTest {
             filename = "payment-method-detach.json",
             replacements = listOf(
                 ResponseReplacement(
-                    original = "[PAYMENT_METHOD_ID_HERE]",
+                    original = "PAYMENT_METHOD_ID_HERE",
                     new = id
                 )
             )
         )
     }
 
-    private fun MockResponse.createPaymentMethodUpdateResponse(): MockResponse {
+    private fun MockResponse.createPaymentMethodUpdateResponse(id: String): MockResponse {
         return testBodyFromFile(
             filename = "payment-method-update.json",
+            replacements = listOf(
+                ResponseReplacement(
+                    original = "PAYMENT_METHOD_ID_HERE",
+                    new = id
+                )
+            )
         )
     }
 
@@ -504,7 +510,7 @@ class CustomerSessionCustomerSheetActivityTest {
             filename = "elements-sessions-customer_sheet_customer_session.json",
             replacements = listOf(
                 ResponseReplacement(
-                    original = "[PAYMENT_METHOD_REMOVE_FEATURE]",
+                    original = "PAYMENT_METHOD_REMOVE_FEATURE",
                     new = removeFeature,
                 ),
                 ResponseReplacement(
