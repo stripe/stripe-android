@@ -10,6 +10,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -17,6 +18,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.EditPage
@@ -384,6 +386,12 @@ class CustomerSessionCustomerSheetActivityTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
+            query("type", "deferred_intent"),
+            query(urlEncode("deferred_intent[setup_future_usage]"), "off_session"),
+            query(urlEncode("deferred_intent[mode]"), "setup"),
+            query(urlEncode("deferred_intent[payment_method_types][0]"), "card"),
+            query(urlEncode("deferred_intent[payment_method_types][1]"), "us_bank_account"),
+            query("customer_session_client_secret", "cuss_123"),
         ) { response ->
             response.createElementsSessionResponse(savedCards, isPaymentMethodRemoveEnabled)
         }
@@ -396,6 +404,9 @@ class CustomerSessionCustomerSheetActivityTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", "card"),
+            query("customer", "cus_12345"),
+            query("limit", "100")
         ) { response ->
             response.createPaymentMethodsResponse(cards)
         }
