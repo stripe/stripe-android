@@ -1,13 +1,15 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class GetFinancialConnectionsAcccountsParams(
+@Poko
+class GetFinancialConnectionsAccountsParams internal constructor(
     @SerialName("client_secret") private val clientSecret: String,
     @SerialName("starting_after") private val startingAfterAccountId: String?
 ) : Parcelable {

@@ -16,7 +16,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
-import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccountInternal
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -290,7 +289,6 @@ internal class CollectBankAccountViewModel @Inject constructor(
 private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
     return when (this) {
         is InstantDebits -> elementsSessionContext
-        is USBankAccountInternal -> elementsSessionContext
-        is USBankAccount -> null
+        is USBankAccount -> elementsSessionContext
     }
 }

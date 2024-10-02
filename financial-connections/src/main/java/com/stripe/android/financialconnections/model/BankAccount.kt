@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import androidx.annotation.RestrictTo
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
@@ -9,7 +10,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class BankAccount(
+@Poko
+class BankAccount internal constructor(
 
     @SerialName(value = "id") @Required
     override val id: String,

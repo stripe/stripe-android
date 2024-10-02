@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,7 +16,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 @Suppress("unused")
-data class OwnershipRefresh(
+@Poko
+class OwnershipRefresh internal constructor(
 
     /* The time at which the last refresh attempt was initiated. Measured in seconds since the Unix epoch. */
     @SerialName("last_attempted_at")
@@ -25,7 +26,7 @@ data class OwnershipRefresh(
     @SerialName("status")
     val status: Status = Status.UNKNOWN
 
-) : Parcelable, StripeModel {
+) : Parcelable {
 
     @Serializable
     enum class Status(val value: String) {

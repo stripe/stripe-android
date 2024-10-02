@@ -2,13 +2,15 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class ManualEntry(
+@Poko
+class ManualEntry internal constructor(
     val mode: ManualEntryMode
 ) : Parcelable
 

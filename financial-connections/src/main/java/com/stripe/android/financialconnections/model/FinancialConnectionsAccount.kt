@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,7 +35,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-data class FinancialConnectionsAccount(
+@Poko
+class FinancialConnectionsAccount internal constructor(
     @SerialName("category")
     val category: Category = Category.UNKNOWN,
     @SerialName("created")
@@ -66,7 +67,7 @@ data class FinancialConnectionsAccount(
     val ownershipRefresh: OwnershipRefresh? = null,
     @SerialName("permissions")
     val permissions: List<Permissions>? = null,
-) : StripeModel, Parcelable, PaymentAccount() {
+) : Parcelable, PaymentAccount() {
 
     /**
      * The category of the account.
@@ -194,8 +195,8 @@ data class FinancialConnectionsAccount(
         internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(entries.toTypedArray(), UNKNOWN)
     }
 
-    companion object {
-        internal const val OBJECT_OLD = "linked_account"
-        internal const val OBJECT_NEW = "financial_connections.account"
+    internal companion object {
+        const val OBJECT_OLD = "linked_account"
+        const val OBJECT_NEW = "financial_connections.account"
     }
 }

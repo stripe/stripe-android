@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import com.stripe.android.model.LinkMode
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -28,7 +29,8 @@ class FinancialConnectionsSheet internal constructor(
      * @param stripeAccountId (optional) connected account ID
      */
     @Parcelize
-    data class Configuration(
+    @Poko
+    class Configuration(
         val financialConnectionsSessionClientSecret: String,
         val publishableKey: String,
         val stripeAccountId: String? = null

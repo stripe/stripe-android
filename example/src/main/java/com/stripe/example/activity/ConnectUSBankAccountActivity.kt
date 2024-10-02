@@ -96,7 +96,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                         publishableKey = settings.publishableKey,
                         stripeAccountId = settings.stripeAccountId,
                         clientSecret = it.getString("secret"),
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                        configuration = CollectBankAccountConfiguration.usBankAccount(
                             name = viewBinding.name.text?.toString() ?: "",
                             email = viewBinding.email.text?.toString()
                         )
@@ -115,7 +115,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                     launcher.presentWithSetupIntent(
                         publishableKey = settings.publishableKey,
                         clientSecret = it.getString("secret"),
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                        configuration = CollectBankAccountConfiguration.usBankAccount(
                             name = viewBinding.name.text?.toString() ?: "",
                             email = viewBinding.email.text?.toString()
                         )

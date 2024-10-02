@@ -126,16 +126,6 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     customerName = name,
                     customerEmailAddress = email,
                     hostedSurface = hostedSurface,
-                    linkMode = null,
-                )
-            }
-
-            is CollectBankAccountConfiguration.USBankAccountInternal -> {
-                CreateFinancialConnectionsSessionParams.USBankAccount(
-                    clientSecret = clientSecret,
-                    customerName = name,
-                    customerEmailAddress = email,
-                    hostedSurface = hostedSurface,
                     linkMode = elementsSessionContext?.linkMode,
                 )
             }

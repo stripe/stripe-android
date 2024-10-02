@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,8 +17,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-data class CashBalance(
+@Poko
+class CashBalance internal constructor(
     @SerialName("available")
     val available: Map<String, Int>? = null
-
-) : StripeModel, Parcelable
+) : Parcelable

@@ -2,12 +2,12 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import com.stripe.android.financialconnections.model.serializer.JsonAsStringSerializer
 import com.stripe.android.financialconnections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.model.Token
 import com.stripe.android.model.parsers.TokenJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,7 +32,8 @@ import org.json.JSONObject
  */
 @Parcelize
 @Serializable
-data class FinancialConnectionsSession internal constructor(
+@Poko
+class FinancialConnectionsSession internal constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 
@@ -67,7 +68,7 @@ data class FinancialConnectionsSession internal constructor(
 
     @SerialName(value = "status_details")
     val statusDetails: StatusDetails? = null
-) : StripeModel, Parcelable {
+) : Parcelable {
 
     val accounts: FinancialConnectionsAccountList
         get() = accountsNew ?: accountsOld!!
@@ -107,8 +108,8 @@ data class FinancialConnectionsSession internal constructor(
 
     @Serializable
     @Parcelize
-    data class StatusDetails(
-
+    @Poko
+    class StatusDetails(
         @SerialName(value = "cancelled") val cancelled: Cancelled? = null
     ) : Parcelable {
         @Serializable

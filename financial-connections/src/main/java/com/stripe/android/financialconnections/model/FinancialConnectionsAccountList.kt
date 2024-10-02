@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,7 +17,8 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
-data class FinancialConnectionsAccountList(
+@Poko
+class FinancialConnectionsAccountList internal constructor(
     @SerialName("data")
     val data: List<FinancialConnectionsAccount>,
 
@@ -34,4 +35,4 @@ data class FinancialConnectionsAccountList(
 
     @SerialName("total_count")
     val totalCount: Int? = null
-) : StripeModel, Parcelable
+) : Parcelable

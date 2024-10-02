@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount.navigation
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeIntent
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -11,23 +12,25 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CollectBankAccountForInstantDebitsResult : Parcelable {
 
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Completed(
+    @Parcelize
+    @Poko
+    class Completed(
         val intent: StripeIntent,
         val paymentMethodId: String,
         val last4: String?,
         val bankName: String?
     ) : CollectBankAccountForInstantDebitsResult
 
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Failed(
+    @Parcelize
+    @Poko
+    class Failed(
         val error: Throwable
     ) : CollectBankAccountForInstantDebitsResult
 
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data object Cancelled : CollectBankAccountForInstantDebitsResult
 }
 

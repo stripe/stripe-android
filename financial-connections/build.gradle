@@ -6,6 +6,7 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'dev.drewhamilton.poko'
 
 android {
     defaultConfig {

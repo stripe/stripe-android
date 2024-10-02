@@ -6633,6 +6633,12 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated$Cre
 }
 
 public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration : android/os/Parcelable {
+	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$Companion;
+	public static fun usBankAccount (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$Companion {
+	public final fun usBankAccount (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;
 }
 
 public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$InstantDebits$Creator : android/os/Parcelable$Creator {
@@ -6643,36 +6649,11 @@ public final class com/stripe/android/payments/bankaccount/CollectBankAccountCon
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount : android/os/Parcelable, com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEmail ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccountInternal$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccountInternal;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccountInternal;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -6762,14 +6743,10 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)V
-	public final fun component1 ()Lcom/stripe/android/model/StripeIntent;
-	public final fun component2 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
@@ -6838,9 +6815,6 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;)V
-	public final fun component1 ()Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
-	public final fun copy (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Completed;Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Completed;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getResponse ()Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
@@ -6861,9 +6835,6 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Failed;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;

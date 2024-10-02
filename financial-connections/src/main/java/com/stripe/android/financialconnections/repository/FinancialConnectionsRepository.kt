@@ -9,7 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -27,7 +27,7 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun getFinancialConnectionsAccounts(
-        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAccountsParams
     ): FinancialConnectionsAccountList
 
     @Throws(
@@ -71,12 +71,12 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 ) : FinancialConnectionsRepository {
 
     override suspend fun getFinancialConnectionsAccounts(
-        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+        getFinancialConnectionsAccountsParams: GetFinancialConnectionsAccountsParams
     ): FinancialConnectionsAccountList {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = getFinancialConnectionsAcccountsParams.toParamMap()
+            params = getFinancialConnectionsAccountsParams.toParamMap()
         )
         return requestExecutor.execute(
             financialConnectionsRequest,

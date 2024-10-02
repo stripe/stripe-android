@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,10 +9,11 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Serializable
 @Suppress("unused")
-data class BalanceRefresh(
+@Poko
+class BalanceRefresh internal constructor(
     @SerialName("status") val status: BalanceRefreshStatus? = BalanceRefreshStatus.UNKNOWN,
     @SerialName("last_attempted_at") val lastAttemptedAt: Int
-) : StripeModel, Parcelable {
+) : Parcelable {
 
     @Serializable
     enum class BalanceRefreshStatus(internal val code: String) {

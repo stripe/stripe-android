@@ -505,8 +505,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccountInternal {
-        return CollectBankAccountConfiguration.USBankAccountInternal(
+    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccount {
+        return CollectBankAccountConfiguration.USBankAccount(
             name = name.value,
             email = email.value,
             elementsSessionContext = makeElementsSessionContext(),
@@ -576,7 +576,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             collectBankAccountLauncher?.presentWithDeferredPayment(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                configuration = CollectBankAccountConfiguration.USBankAccount(
                     name = name.value,
                     email = email.value,
                     elementsSessionContext = elementsSessionContext,
@@ -591,7 +591,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             collectBankAccountLauncher?.presentWithDeferredSetup(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                configuration = CollectBankAccountConfiguration.USBankAccount(
                     name = name.value,
                     email = email.value,
                     elementsSessionContext = elementsSessionContext,

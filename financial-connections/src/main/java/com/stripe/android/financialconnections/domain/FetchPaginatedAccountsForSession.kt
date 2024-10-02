@@ -4,7 +4,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewMode
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccountsParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
@@ -26,13 +26,13 @@ internal class FetchPaginatedAccountsForSession @Inject constructor(
             accounts.addAll(session.accounts.data)
 
             var nextAccountList = financialConnectionsRepository.getFinancialConnectionsAccounts(
-                GetFinancialConnectionsAcccountsParams(session.clientSecret, accounts.last().id)
+                GetFinancialConnectionsAccountsParams(session.clientSecret, accounts.last().id)
             )
             accounts.addAll(nextAccountList.data)
 
             while (nextAccountList.hasMore && accounts.size < FinancialConnectionsSheetViewModel.MAX_ACCOUNTS) {
                 nextAccountList = financialConnectionsRepository.getFinancialConnectionsAccounts(
-                    GetFinancialConnectionsAcccountsParams(session.clientSecret, accounts.last().id)
+                    GetFinancialConnectionsAccountsParams(session.clientSecret, accounts.last().id)
                 )
                 accounts.addAll(nextAccountList.data)
             }
