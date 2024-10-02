@@ -8,7 +8,6 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -53,9 +52,5 @@ class DeviceDataFactoryImplTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
 
         return DeviceDataFactoryImpl(context = context, FakeAppInfoRepository(), MessageVersionRegistry())
-    }
-
-    private companion object {
-        private val HARDWARE_ID_VALUE = UUID.randomUUID().toString()
     }
 }
