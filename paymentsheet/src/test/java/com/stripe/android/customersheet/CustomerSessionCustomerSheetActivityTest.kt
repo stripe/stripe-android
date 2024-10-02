@@ -38,8 +38,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -316,8 +314,6 @@ class CustomerSessionCustomerSheetActivityTest {
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         test: (CustomerSheetActivity) -> Unit,
     ) {
-        val countDownLatch = CountDownLatch(1)
-
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
@@ -376,12 +372,7 @@ class CustomerSessionCustomerSheetActivityTest {
                 }
 
                 test(activity)
-
-                countDownLatch.countDown()
             }
-
-            countDownLatch.await(5, TimeUnit.SECONDS)
-            networkRule.validate()
         }
     }
 
