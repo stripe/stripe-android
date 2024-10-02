@@ -1,0 +1,48 @@
+{
+  "id": "PAYMENT_METHOD_ID_HERE",
+  "object": "payment_method",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "AE",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": null,
+    "name": "CustomerSheet Testing",
+    "phone": null
+  },
+  "card": {
+    "brand": "visa",
+    "checks": {
+      "address_line1_check": null,
+      "address_postal_code_check": null,
+      "cvc_check": null
+    },
+    "country": "US",
+    "display_brand": "visa",
+    "exp_month": 12,
+    "exp_year": 2034,
+    "fingerprint": "LzD7yFi1Cp2DJQs7",
+    "funding": "credit",
+    "generated_from": null,
+    "last4": "1001",
+    "networks": {
+      "available": [
+        "visa",
+        "cartes_bancaires"
+      ],
+      "preferred": "visa"
+    },
+    "three_d_secure_usage": {
+      "supported": true
+    },
+    "wallet": null
+  },
+  "created": 1712554485,
+  "customer": null,
+  "livemode": false,
+  "type": "card"
+}
