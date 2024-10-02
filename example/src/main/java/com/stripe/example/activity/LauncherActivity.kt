@@ -57,10 +57,6 @@ class LauncherActivity : AppCompatActivity() {
                 CreateCardSourceActivity::class.java
             ),
             Item(
-                activity.getString(R.string.launch_customer_session),
-                CustomerSessionActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),
