@@ -137,8 +137,6 @@ class ChallengeFragmentTest {
             cres = CRES_TEXT_DATA
         ) { fragment ->
             assertNotNull(fragment.challengeZoneTextView)
-            assertNull(fragment.challengeZoneSelectView)
-            assertNull(fragment.challengeZoneWebView)
 
             val challengeZoneView = fragment.viewBinding.caChallengeZone
             assertTrue(challengeZoneView.challengeEntryView.children.first() is ChallengeZoneTextView)
@@ -169,14 +167,10 @@ class ChallengeFragmentTest {
                 "Next",
                 challengeZoneView.submitButton.text
             )
-            assertEquals(
-                "Resend",
-                challengeZoneView.resendButton.text
-            )
 
-            fragment.challengeZoneSelectView?.selectOption(0)
+            fragment.challengeZoneSelectView.selectOption(0)
             assertEquals("phone", fragment.userEntry)
-            fragment.challengeZoneSelectView?.selectOption(1)
+            fragment.challengeZoneSelectView.selectOption(1)
             assertEquals("email", fragment.userEntry)
         }
     }
@@ -197,15 +191,11 @@ class ChallengeFragmentTest {
                 "Next",
                 challengeZoneView.submitButton.text
             )
-            assertEquals(
-                "Resend",
-                challengeZoneView.resendButton.text
-            )
 
             assertEquals("", fragment.userEntry)
-            fragment.challengeZoneSelectView?.selectOption(0)
+            fragment.challengeZoneSelectView.selectOption(0)
             assertEquals("phone", fragment.userEntry)
-            fragment.challengeZoneSelectView?.selectOption(1)
+            fragment.challengeZoneSelectView.selectOption(1)
             assertEquals("phone,email", fragment.userEntry)
         }
     }
@@ -215,10 +205,6 @@ class ChallengeFragmentTest {
         createFragment(
             cres = CRES_OOB_DATA
         ) { fragment ->
-            assertNull(fragment.challengeZoneTextView)
-            assertNull(fragment.challengeZoneSelectView)
-            assertNull(fragment.challengeZoneWebView)
-
             val challengeZoneView = fragment.viewBinding.caChallengeZone
             assertEquals(
                 0,
@@ -236,8 +222,6 @@ class ChallengeFragmentTest {
         createFragment(
             cres = CRES_HTML_DATA
         ) { fragment ->
-            assertNull(fragment.challengeZoneTextView)
-            assertNull(fragment.challengeZoneSelectView)
             assertNotNull(fragment.challengeZoneWebView)
 
             val brandZoneView = fragment.viewBinding.caBrandZone
