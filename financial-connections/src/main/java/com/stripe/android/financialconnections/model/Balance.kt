@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,7 +24,8 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Serializable
 @Suppress("unused")
-data class Balance(
+@Poko
+class Balance(
 
     /* The time that the external institution calculated this balance.
      Measured in seconds since the Unix epoch. */
@@ -48,7 +50,7 @@ data class Balance(
     @SerialName("credit")
     val credit: CreditBalance? = null
 
-) : StripeModel, Parcelable {
+) : Parcelable {
 
     @Serializable
     enum class Type(val value: String) {
