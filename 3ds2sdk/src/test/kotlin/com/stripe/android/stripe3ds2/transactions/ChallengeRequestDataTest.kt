@@ -19,7 +19,8 @@ class ChallengeRequestDataTest {
             messageVersion = ChallengeMessageFixtures.MESSAGE_VERSION_210,
             cancelReason = ChallengeRequestData.CancelReason.UserSelected,
             messageExtensions = listOf(messageExtension, messageExtension),
-            shouldResendChallenge = false
+            shouldResendChallenge = false,
+            threeDSRequestorAppURL = ChallengeMessageFixtures.THREE_DS_APP_URL
         )
 
         val creqJson = creqData.toJson()

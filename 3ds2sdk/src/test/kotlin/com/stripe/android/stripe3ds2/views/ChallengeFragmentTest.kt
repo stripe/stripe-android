@@ -91,7 +91,7 @@ class ChallengeFragmentTest {
 
             assertThat(challengeActionHandler.actions)
                 .containsExactly(
-                    ChallengeAction.NativeForm("123456")
+                    ChallengeAction.NativeForm("123456", whitelistingValue = false)
                 )
         }
     }
