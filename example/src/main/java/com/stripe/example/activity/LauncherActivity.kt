@@ -81,15 +81,7 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
                 ConfirmSepaDebitActivity::class.java
             ),
-            Item(
-                activity.getString(R.string.netbanking_payment_example),
-                NetbankingListPaymentActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.fpx_payment_example),
-                FpxPaymentActivity::class.java
-            ),
-            Item(
+          Item(
                 activity.getString(R.string.klarna_source_example),
                 KlarnaSourceActivity::class.java
             ),
