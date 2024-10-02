@@ -3379,6 +3379,83 @@ class CustomerSheetViewModelTest {
             }
         }
 
+    @Test
+    fun `When removing an un-selected card, selection should be maintained & primary button should not visible`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+            val paymentMethodToRemove = paymentMethods.last()
+            val originalSelection = PaymentSelection.Saved(paymentMethods.first())
+
+            val viewModel = retrieveViewModelForRemoving(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                paymentMethodToRemove = paymentMethodToRemove
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(paymentMethodToRemove))
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods.dropLast(1))
+                assertThat(currentState.paymentSelection).isEqualTo(originalSelection)
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun `When updating the original selection, original selection should be updated even if current selection is not the original`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+
+            val paymentMethodToUpdate = paymentMethods.first()
+            val updatedPaymentMethod = paymentMethodToUpdate.copy(
+                card = paymentMethodToUpdate.card?.copy(
+                    expiryYear = 2030,
+                    expiryMonth = 4
+                )
+            )
+
+            val originalSelection = PaymentSelection.Saved(paymentMethodToUpdate)
+
+            val viewModel = retrieveViewModelForUpdating(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                updatedPaymentMethod = updatedPaymentMethod,
+            )
+
+            viewModel.updatePaymentMethod(
+                originalPaymentMethod = paymentMethodToUpdate,
+                updatedPaymentMethod = updatedPaymentMethod
+            )
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(updatedPaymentMethod) + paymentMethods.drop(1))
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed)
+
+            viewModel.result.test {
+                val result = awaitItem()
+
+                assertThat(result).isInstanceOf<InternalCustomerSheetResult.Canceled>()
+
+                val canceledResult = result.asCanceled()
+
+                assertThat(canceledResult.paymentSelection).isInstanceOf<PaymentSelection.Saved>()
+
+                val savedSelection = canceledResult.paymentSelection.asSaved()
+
+                assertThat(savedSelection.paymentMethod).isEqualTo(updatedPaymentMethod)
+            }
+        }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {
