@@ -2,9 +2,9 @@ package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.StripeIntent
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -13,12 +13,14 @@ import kotlinx.parcelize.Parcelize
 sealed class CollectBankAccountResult : Parcelable {
 
     @Parcelize
-    data class Completed(
+    @Poko
+    class Completed(
         val response: CollectBankAccountResponse
     ) : CollectBankAccountResult()
 
     @Parcelize
-    data class Failed(
+    @Poko
+    class Failed(
         val error: Throwable
     ) : CollectBankAccountResult()
 
@@ -27,10 +29,11 @@ sealed class CollectBankAccountResult : Parcelable {
 }
 
 @Parcelize
-data class CollectBankAccountResponse(
+@Poko
+class CollectBankAccountResponse(
     val intent: StripeIntent,
     val financialConnectionsSession: FinancialConnectionsSession
-) : StripeModel
+) : Parcelable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CollectBankAccountResultInternal.toUSBankAccountResult(): CollectBankAccountResult {
@@ -44,7 +47,6 @@ fun CollectBankAccountResultInternal.toUSBankAccountResult(): CollectBankAccount
                 )
             }
 
-            // TODO allow nullable intents on the exposed results (can be null on deferred payment flows).
             response.intent == null -> {
                 CollectBankAccountResult.Failed(
                     IllegalArgumentException("StripeIntent cannot be null")
