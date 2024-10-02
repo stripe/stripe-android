@@ -3,7 +3,6 @@ package com.stripe.example
 import android.app.Application
 import android.os.Build
 import android.os.StrictMode
-import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 
 class ExampleApplication : Application() {
