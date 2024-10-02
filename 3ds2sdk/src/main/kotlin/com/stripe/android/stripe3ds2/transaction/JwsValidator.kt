@@ -67,13 +67,17 @@ internal class DefaultJwsValidator(
         val jwsObject = JWSObject.parse(jws)
 
         if (!isLiveMode) {
-            val certificate = certificateFromString((jwsObject.header.x509CertChain.last() ?: "").toString())
+            if (!jwsObject.header.x509CertChain.isNullOrEmpty()) {
+                val certificates = jwsObject.header.x509CertChain.mapNotNull { certificateFromString(it.toString()) }
 
-            if (certificate != null && isValid(jwsObject, listOf(certificate))) {
+                if (certificates.isNotEmpty() && isValid(jwsObject, certificates)) {
+                    return JSONObject(jwsObject.payload.toString())
+                }
+
+                throw IllegalStateException("Could not validate JWS")
+            } else {
                 return JSONObject(jwsObject.payload.toString())
             }
-
-            throw IllegalStateException("Could not validate JWS")
         } else if (isValid(jwsObject, rootCerts)) {
             return JSONObject(jwsObject.payload.toString())
         }
