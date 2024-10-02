@@ -190,7 +190,8 @@ internal class PaymentSheetPlaygroundViewModel(
                 { customerId -> createSetupIntentClientSecret(customerId, customerState.countryCode) }
             } else {
                 null
-            }
+            },
+            paymentMethodTypes = customerState?.supportedPaymentMethodTypes,
         )
     }
 
@@ -198,6 +199,14 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundState: PlaygroundState.Customer,
     ): CustomerSheet.CustomerSessionProvider {
         return object : CustomerSheet.CustomerSessionProvider() {
+            override suspend fun intentConfiguration(): kotlin.Result<CustomerSheet.IntentConfiguration> {
+                return kotlin.Result.success(
+                    CustomerSheet.IntentConfiguration.Builder()
+                        .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
+                        .build()
+                )
+            }
+
             override suspend fun providesCustomerSessionClientSecret(): kotlin.Result<
                 CustomerSheet.CustomerSessionClientSecret
                 > {
