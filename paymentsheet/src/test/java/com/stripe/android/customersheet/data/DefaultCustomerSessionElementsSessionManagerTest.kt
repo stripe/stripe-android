@@ -23,15 +23,18 @@ import kotlin.coroutines.coroutineContext
 @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
 class DefaultCustomerSessionElementsSessionManagerTest {
     @Test
-    fun `on fetch elements session, should set parameters properly`() = runTest {
+    fun `on fetch elements session, should set parameters properly & report successful load`() = runTest {
+        val errorReporter = FakeErrorReporter()
         val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = PaymentIntentFactory.create(),
             error = null,
             linkSettings = null,
+            sessionsCustomer = createDefaultCustomer(),
         )
 
         val manager = createElementsSessionManager(
             elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
             savedSelection = SavedSelection.PaymentMethod(id = "pm_123"),
             intentConfiguration = Result.success(
                 CustomerSheet.IntentConfiguration.Builder()
@@ -68,6 +71,39 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(customer?.id).isEqualTo("cus_1")
         assertThat(customer?.accessType)
             .isEqualTo(PaymentSheet.CustomerAccessType.CustomerSession(customerSessionClientSecret = "cuss_123"))
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+        )
+    }
+
+    @Test
+    fun `on fetch elements session, should fail & report if elements session request failed`() = runTest {
+        val exception = IllegalStateException("Failed to load!")
+
+        val errorReporter = FakeErrorReporter()
+
+        val elementsSessionManager = createElementsSessionManager(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = SetupIntentFactory.create(),
+                error = exception,
+                linkSettings = null,
+                sessionsCustomer = null,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        val elementsSessionResult = elementsSessionManager.fetchElementsSession()
+
+        assertThat(elementsSessionResult.isFailure).isTrue()
+        assertThat(elementsSessionResult.exceptionOrNull()).isEqualTo(exception)
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter
+                .ExpectedErrorEvent
+                .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE
+                .eventName,
+        )
     }
 
     @Test
@@ -288,6 +324,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         )
 
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
             ErrorReporter
                 .UnexpectedErrorEvent
                 .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
@@ -353,24 +390,18 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             )
         },
     ): CustomerSessionElementsSessionManager {
+        val defaultCustomer = createDefaultCustomer()
+
         return createElementsSessionManager(
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = PaymentIntentFactory.create(),
                 error = null,
                 linkSettings = null,
-                sessionsCustomer = ElementsSession.Customer(
-                    paymentMethods = listOf(),
-                    defaultPaymentMethod = null,
-                    session = ElementsSession.Customer.Session(
-                        id = "cuss_123",
-                        liveMode = true,
+                sessionsCustomer = defaultCustomer.copy(
+                    session = defaultCustomer.session.copy(
                         apiKey = apiKey,
                         apiKeyExpiry = apiKeyExpiry,
                         customerId = customerId,
-                        components = ElementsSession.Customer.Components(
-                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                        )
                     )
                 ),
             ),
@@ -419,6 +450,24 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             ),
             timeProvider = timeProvider,
             workContext = coroutineContext,
+        )
+    }
+
+    private fun createDefaultCustomer(): ElementsSession.Customer {
+        return ElementsSession.Customer(
+            paymentMethods = listOf(),
+            defaultPaymentMethod = null,
+            session = ElementsSession.Customer.Session(
+                id = "cuss_1",
+                customerId = "cus_1",
+                apiKey = "ek_123",
+                apiKeyExpiry = 999999,
+                components = ElementsSession.Customer.Components(
+                    mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                ),
+                liveMode = false,
+            )
         )
     }
 
