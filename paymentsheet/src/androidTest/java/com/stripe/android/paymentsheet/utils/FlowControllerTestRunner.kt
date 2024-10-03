@@ -3,22 +3,25 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class FlowControllerTestRunnerContext(
     private val scenario: ActivityScenario<MainActivity>,
     val flowController: PaymentSheet.FlowController,
+    val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val countDownLatch: CountDownLatch,
 ) {
 
@@ -48,17 +51,17 @@ internal fun runFlowControllerTest(
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback? = null,
-    paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
-    block: (FlowControllerTestRunnerContext) -> Unit,
+    block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
+    val configureCallbackTurbine = Turbine<PaymentOption?>()
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
         integrationType = integrationType,
         createIntentCallback = createIntentCallback,
-        paymentOptionCallback = paymentOptionCallback,
+        configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
             resultCallback.onPaymentSheetResult(result)
             countDownLatch.countDown()
@@ -67,6 +70,7 @@ internal fun runFlowControllerTest(
 
     runFlowControllerTest(
         networkRule = networkRule,
+        configureCallbackTurbine = configureCallbackTurbine,
         countDownLatch = countDownLatch,
         makeFlowController = factory::make,
         block = block,
@@ -75,9 +79,10 @@ internal fun runFlowControllerTest(
 
 private fun runFlowControllerTest(
     networkRule: NetworkRule,
+    configureCallbackTurbine: Turbine<PaymentOption?>,
     countDownLatch: CountDownLatch,
     makeFlowController: (ComponentActivity) -> PaymentSheet.FlowController,
-    block: (FlowControllerTestRunnerContext) -> Unit,
+    block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -100,9 +105,14 @@ private fun runFlowControllerTest(
             flowController = flowController ?: throw IllegalStateException(
                 "FlowController should have been created!"
             ),
+            configureCallbackTurbine = configureCallbackTurbine,
             countDownLatch = countDownLatch,
         )
-        block(testContext)
+        runTest {
+            block(testContext)
+        }
+
+        testContext.configureCallbackTurbine.ensureAllEventsConsumed()
 
         val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
         networkRule.validate()

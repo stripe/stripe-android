@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -183,6 +184,7 @@ internal sealed class PaymentSelection : Parcelable {
             @Parcelize
             data class InstantDebitsInfo(
                 val paymentMethodId: String,
+                val linkMode: LinkMode?,
             ) : Parcelable
 
             @Parcelize

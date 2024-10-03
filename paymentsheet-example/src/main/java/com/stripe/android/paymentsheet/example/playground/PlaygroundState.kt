@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import kotlinx.parcelize.Parcelize
 
 @Stable
@@ -95,6 +96,13 @@ internal sealed interface PlaygroundState : Parcelable {
         val inSetupMode
             get() = snapshot[CustomerSheetPaymentMethodModeDefinition] ==
                 PaymentMethodMode.SetupIntent
+
+        val supportedPaymentMethodTypes: List<String>
+            get() = snapshot[SupportedPaymentMethodsSettingsDefinition]
+                .split(",")
+                .filterNot { value ->
+                    value.isBlank()
+                }
 
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)

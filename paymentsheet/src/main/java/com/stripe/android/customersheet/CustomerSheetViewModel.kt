@@ -620,9 +620,8 @@ internal class CustomerSheetViewModel(
         val didRemoveCurrentSelection = currentSelection is PaymentSelection.Saved &&
             currentSelection.paymentMethod.id == paymentMethod.id
 
-        val didRemoveOriginalSelection = currentSelection is PaymentSelection.Saved &&
-            originalSelection is PaymentSelection.Saved &&
-            currentSelection.paymentMethod.id == originalSelection.paymentMethod.id
+        val didRemoveOriginalSelection = originalSelection is PaymentSelection.Saved &&
+            originalSelection.paymentMethod.id == paymentMethod.id
 
         if (didRemoveOriginalSelection) {
             originalPaymentSelection = null
@@ -655,9 +654,8 @@ internal class CustomerSheetViewModel(
             val currentSelection = currentCustomerState.currentSelection
 
             originalPaymentSelection = if (
-                currentSelection is PaymentSelection.Saved &&
                 originalSelection is PaymentSelection.Saved &&
-                currentSelection.paymentMethod.id == updatedMethod.id
+                originalSelection.paymentMethod.id == updatedMethod.id
             ) {
                 originalSelection.copy(paymentMethod = updatedMethod)
             } else {
@@ -1082,12 +1080,16 @@ internal class CustomerSheetViewModel(
                 ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
             )
 
-            val selection = PaymentSelection.Saved(newPaymentMethod)
-
             setCustomerState { state ->
+                val selection = paymentMethods.find { paymentMethod ->
+                    newPaymentMethod.id == paymentMethod.id
+                }?.let {
+                    PaymentSelection.Saved(it)
+                } ?: state.currentSelection
+
                 state.copy(
-                    paymentMethods = sortPaymentMethods(paymentMethods, selection),
-                    currentSelection = PaymentSelection.Saved(newPaymentMethod),
+                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    currentSelection = selection,
                 )
             }
 

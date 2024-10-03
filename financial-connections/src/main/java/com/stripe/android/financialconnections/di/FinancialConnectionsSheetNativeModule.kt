@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -125,6 +126,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale: Locale?,
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
+            fraudDetectionDataRepository: FraudDetectionDataRepository,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -133,6 +135,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale = locale ?: Locale.getDefault(),
             logger = logger,
             isLinkWithStripe = isLinkWithStripe,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
         )
 
         @Singleton

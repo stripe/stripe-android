@@ -19,9 +19,9 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -42,13 +42,13 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class GooglePayTest {
@@ -208,15 +208,10 @@ internal class GooglePayTest {
         paymentResultCallback: (PaymentSheetResult) -> Unit,
         test: (GooglePayFlowScenario) -> Unit
     ) {
-        val paymentOptionCountDownLatch = CountDownLatch(1)
-
         runGooglePayTest(
             isGooglePayReady = true,
             isGooglePayEnabledInElementsSession = true,
             hasGooglePayConfig = true,
-            paymentOptionCallback = {
-                paymentOptionCountDownLatch.countDown()
-            },
             paymentResultCallback = paymentResultCallback,
         ) { context ->
             test(
@@ -227,7 +222,10 @@ internal class GooglePayTest {
                     composeTestRule.onGooglePayOption().performClick()
 
                     if (context is ProductIntegrationTestRunnerContext.WithFlowController) {
-                        assertThat(paymentOptionCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+                        runTest {
+                            val label = context.context.configureCallbackTurbine.awaitItem()?.label
+                            assertThat(label).isEqualTo("Google Pay")
+                        }
 
                         context.confirm()
                     }
@@ -245,7 +243,6 @@ internal class GooglePayTest {
         isGooglePayReady = isGooglePayReady,
         isGooglePayEnabledInElementsSession = isGooglePayEnabledInElementsSession,
         hasGooglePayConfig = hasGooglePayConfig,
-        paymentOptionCallback = {},
         paymentResultCallback = ::expectNoResult
     ) { context ->
         composeTestRule.onGooglePayOption().run {
@@ -263,7 +260,6 @@ internal class GooglePayTest {
         isGooglePayReady: Boolean,
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
-        paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: (PaymentSheetResult) -> Unit,
         test: (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
@@ -275,7 +271,6 @@ internal class GooglePayTest {
         runProductIntegrationTest(
             networkRule = testRules.networkRule,
             integrationType = integrationType,
-            paymentOptionCallback = paymentOptionCallback,
             resultCallback = paymentResultCallback,
         ) { context ->
             val configBuilder = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")

@@ -317,7 +317,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun instantDebitsPaymentMethodId(): String? {
+    fun linkBankPaymentMethodId(): String? {
         val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
         return linkParams["payment_method_id"] as? String
     }

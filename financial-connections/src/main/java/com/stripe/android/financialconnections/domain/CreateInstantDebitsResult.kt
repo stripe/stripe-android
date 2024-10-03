@@ -41,7 +41,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             consumerRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
-                expectedPaymentMethodType = "card",
+                expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
             ).paymentMethodId
         } else {
             repository.createPaymentMethod(

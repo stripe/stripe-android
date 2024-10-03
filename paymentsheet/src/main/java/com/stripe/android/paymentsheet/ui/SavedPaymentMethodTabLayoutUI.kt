@@ -106,7 +106,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
             )
         },
-        modifier = modifier.testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+        modifier = modifier,
     )
 
     if (
@@ -135,7 +135,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth().testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
