@@ -69,11 +69,7 @@ class CustomerEphemeralKeyRequest private constructor(
                 paymentMethodSaveFeature = FeatureState.Enabled,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodRedisplayFeature = FeatureState.Enabled,
-                paymentMethodRedisplayFilters = listOf(
-                    AllowRedisplayFilter.Unspecified,
-                    AllowRedisplayFilter.Limited,
-                    AllowRedisplayFilter.Always,
-                )
+                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
             )
         }
     }
