@@ -73,7 +73,7 @@ class CustomerSheetTest {
         )
 
         val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = true)
+            .googlePayEnabled(googlePayEnabled = true)
             .preferredNetworks(preferredNetworks = listOf(CardBrand.CartesBancaires))
             .build()
 
@@ -176,7 +176,7 @@ class CustomerSheetTest {
     fun `When Google payment option, should return option is config enables Google Pay`() = runPaymentOptionTest(
         paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = true)
+            .googlePayEnabled(googlePayEnabled = true)
             .build(),
     ) { result ->
         val selectedResult = result.asSelected()
@@ -188,7 +188,7 @@ class CustomerSheetTest {
     fun `When Google payment option, should not return option is config disables Google Pay`() = runPaymentOptionTest(
         paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = false)
+            .googlePayEnabled(googlePayEnabled = false)
             .build(),
     ) { result ->
         val selectedResult = result.asSelected()
