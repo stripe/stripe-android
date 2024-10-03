@@ -44,7 +44,7 @@ internal fun PaymentMethodVerticalLayoutUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader()
+        StripeImageLoader(context.applicationContext)
     }
 
     val state by interactor.state.collectAsState()

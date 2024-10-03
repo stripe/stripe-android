@@ -21,11 +21,11 @@ import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.ButtonElevation
-import androidx.compose.material.LocalRippleConfiguration
 import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.RippleConfiguration
-import androidx.compose.material.RippleDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -92,7 +92,7 @@ internal fun FinancialConnectionsButton(
         }
     }
 
-    CompositionLocalProvider(LocalRippleConfiguration provides type.rippleTheme()) {
+    CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
                 multipleEventsCutter.processEvent {
@@ -142,17 +142,19 @@ internal fun FinancialConnectionsButton(
     }
 }
 
-@Composable
-private fun Type.rippleTheme() = RippleConfiguration(
-    color = when (this@rippleTheme) {
+private fun Type.rippleTheme() = object : RippleTheme {
+    @Composable
+    override fun defaultColor() = when (this@rippleTheme) {
         Primary -> Neutral0
         Secondary -> colors.textDefault
-    },
-    rippleAlpha = RippleDefaults.rippleAlpha(
+    }
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha = RippleTheme.defaultRippleAlpha(
         buttonColors().contentColor(enabled = true).value,
         lightTheme = true
     )
-)
+}
 
 internal object FinancialConnectionsButton {
 

@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.InputStream
 import java.net.URL
+import java.net.URLConnection
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -21,38 +22,23 @@ class NetworkImageDecoder {
         width: Int,
         height: Int
     ): Bitmap? {
-        return kotlin.runCatching {
-            BitmapFactory.Options().run {
-                // First decode with inJustDecodeBounds=true to check dimensions
-                inJustDecodeBounds = true
-                decodeStream(url)
-                // Calculate inSampleSize
-                inSampleSize = calculateInSampleSize(this, width, height)
-                // Decode bitmap with inSampleSize set
-                inJustDecodeBounds = false
-                decodeStream(url)
-            }
-        }.getOrElse {
-            // Log the error
-            println("NetworkImageDecoder: Failed to decode image from url: $url with exception: ${it.message}")
-            null
+        return BitmapFactory.Options().run {
+            // First decode with inJustDecodeBounds=true to check dimensions
+            inJustDecodeBounds = true
+            decodeStream(url)
+            // Calculate inSampleSize
+            inSampleSize = calculateInSampleSize(this, width, height)
+            // Decode bitmap with inSampleSize set
+            inJustDecodeBounds = false
+            decodeStream(url)
         }
     }
 
-    /**
-     *  Fetches a [url] from network and decodes them to a [Bitmap] at its original size.
-     */
     suspend fun decode(
         url: String
     ): Bitmap? {
-        return kotlin.runCatching {
-            BitmapFactory.Options().run {
-                decodeStream(url)
-            }
-        }.getOrElse {
-            // Log the error
-            println("NetworkImageDecoder: Failed to decode image from url: $url with exception: ${it.message}")
-            null
+        return BitmapFactory.Options().run {
+            decodeStream(url)
         }
     }
 
@@ -70,24 +56,20 @@ class NetworkImageDecoder {
     }
 
     private fun URL.stream(): InputStream {
-        return openConnection().apply {
-            connectTimeout = IMAGE_STREAM_TIMEOUT
-            readTimeout = IMAGE_STREAM_TIMEOUT
-        }.getInputStream()
+        val con: URLConnection = openConnection()
+        con.connectTimeout = IMAGE_STREAM_TIMEOUT
+        con.readTimeout = IMAGE_STREAM_TIMEOUT
+        return con.getInputStream()
     }
 
-    /**
-     * Calculate the largest inSampleSize value that is a power of 2 and keeps both
-     * height and width larger than the requested height and width.
-     */
     private fun calculateInSampleSize(
         options: BitmapFactory.Options,
         reqWidth: Int,
         reqHeight: Int
     ): Int {
-        var inSampleSize = 1
+        // Raw height and width of image
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
-
+        var inSampleSize = 1
         if (height > reqHeight || width > reqWidth) {
             val halfHeight: Int = height / 2
             val halfWidth: Int = width / 2

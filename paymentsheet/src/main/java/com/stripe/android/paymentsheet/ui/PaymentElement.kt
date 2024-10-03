@@ -46,7 +46,7 @@ internal fun PaymentElement(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader()
+        StripeImageLoader(context.applicationContext)
     }
 
     val horizontalPadding = dimensionResource(

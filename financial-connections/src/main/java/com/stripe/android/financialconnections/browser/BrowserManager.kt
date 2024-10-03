@@ -29,7 +29,6 @@ internal class BrowserManager @Inject constructor(
      */
     fun createBrowserIntentForUrl(uri: Uri): Intent {
         val browserIntent = uri.toIntent()
-        return browserIntent
         val defaultPackage = getPackageToHandleIntent(browserIntent)
         return when {
             /**

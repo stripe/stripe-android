@@ -75,7 +75,7 @@ internal fun VerticalModeFormHeaderUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader()
+        StripeImageLoader(context)
     }
     val iconUrl = if (isSystemInDarkTheme() && formHeaderInformation.darkThemeIconUrl != null) {
         formHeaderInformation.darkThemeIconUrl
