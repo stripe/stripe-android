@@ -16,7 +16,7 @@ import com.stripe.android.stripe3ds2.init.ui.LabelCustomization
 /**
  * A view for 3DS2 information to be displayed and expanded
  */
-internal class InformationZoneView @JvmOverloads constructor(
+class InformationZoneView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0

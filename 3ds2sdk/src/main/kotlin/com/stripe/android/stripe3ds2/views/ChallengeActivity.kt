@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
+import androidx.lifecycle.LiveData
 import com.stripe.android.stripe3ds2.databinding.StripeChallengeActivityBinding
 import com.stripe.android.stripe3ds2.databinding.StripeChallengeFragmentBinding
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
@@ -26,7 +27,7 @@ import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import kotlinx.coroutines.Dispatchers
 
-class ChallengeActivity : AppCompatActivity() {
+open class ChallengeActivity : AppCompatActivity() {
 
     private val transactionTimer: TransactionTimer by lazy {
         DefaultTransactionTimer(
@@ -43,9 +44,12 @@ class ChallengeActivity : AppCompatActivity() {
         )
     }
 
-    internal val fragment: ChallengeFragment by lazy {
+    val fragment: ChallengeFragment by lazy {
         viewBinding.fragmentContainer.getFragment()
     }
+
+    val nextScreen: LiveData<ChallengeResponseData> get() { return viewModel.nextScreen }
+
     internal val fragmentViewBinding: StripeChallengeFragmentBinding by lazy {
         fragment.viewBinding
     }
@@ -246,6 +250,14 @@ class ChallengeActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         dismissDialog()
+    }
+
+    fun submit(action: ChallengeAction) {
+        viewModel.submit(action)
+    }
+
+    fun updateChallengeText(text: String) {
+        viewModel.updateChallengeText(text)
     }
 
     private fun dismissDialog() {

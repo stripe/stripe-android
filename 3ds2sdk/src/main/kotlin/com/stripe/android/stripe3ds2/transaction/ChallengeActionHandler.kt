@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
  * 2. Firing challenge request
  * 3. Handling challenge response
  */
-internal interface ChallengeActionHandler {
+interface ChallengeActionHandler {
     /**
      * Call when a user takes on action on the challenge screen.
      *
@@ -44,6 +44,7 @@ internal interface ChallengeActionHandler {
         override suspend fun submit(
             action: ChallengeAction
         ): ChallengeRequestResult = withContext(workContext) {
+
             val creqData = ChallengeRequestData(
                 messageVersion = creqData.messageVersion,
                 threeDsServerTransId = creqData.threeDsServerTransId,
@@ -70,6 +71,7 @@ internal interface ChallengeActionHandler {
                     }
                 }
             }
+
             executeChallengeRequest(creqData)
         }
 
