@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -62,7 +63,8 @@ internal interface FinancialConnectionsRepository {
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val provideApiRequestOptions: ProvideApiRequestOptions,
-    private val apiRequestFactory: ApiRequest.Factory
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
+    private val apiRequestFactory: ApiRequest.Factory,
 ) : FinancialConnectionsRepository {
 
     override suspend fun getFinancialConnectionsAccounts(
@@ -147,10 +149,12 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             ),
         )
 
+        val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+
         val request = apiRequestFactory.createPost(
             url = paymentMethodsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = params,
+            params = params + fraudDetectionParams,
         )
 
         return requestExecutor.execute(
