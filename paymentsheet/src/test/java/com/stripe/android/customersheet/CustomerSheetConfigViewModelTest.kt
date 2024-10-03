@@ -16,7 +16,7 @@ class CustomerSheetConfigViewModelTest {
             configuration = CustomerSheet.Configuration.builder(
                 merchantDisplayName = "Merchant, Inc.",
             )
-                .googlePayEnabled(googlePayConfiguration = true)
+                .googlePayEnabled(googlePayEnabled = true)
                 .build()
         )
 
@@ -36,7 +36,7 @@ class CustomerSheetConfigViewModelTest {
             configuration = CustomerSheet.Configuration.builder(
                 merchantDisplayName = "Merchant, Inc.",
             )
-                .googlePayEnabled(googlePayConfiguration = true)
+                .googlePayEnabled(googlePayEnabled = true)
                 .build()
         )
 
