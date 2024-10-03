@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.ui
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -229,6 +230,8 @@ internal fun AddPaymentMethod(
         }
     }
 
+    Spacer(modifier = Modifier.padding(top = 16.dp))
+
     viewState.errorMessage?.let { error ->
         ErrorMessage(
             error = error.resolve(),
@@ -241,7 +244,11 @@ internal fun AddPaymentMethod(
             mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp)
+                .padding(
+                    top = viewState.errorMessage?.let {
+                        8.dp
+                    } ?: 0.dp
+                )
                 .padding(horizontal = horizontalPadding),
         )
     }
