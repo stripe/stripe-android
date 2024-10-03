@@ -25,7 +25,7 @@ import com.stripe.android.stripe3ds2.init.ui.ButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.LabelCustomization
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 
-internal class ChallengeZoneSelectView @JvmOverloads constructor(
+class ChallengeZoneSelectView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
