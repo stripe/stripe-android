@@ -585,6 +585,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val instantDebitsInfo = (resultIdentifier as? ResultIdentifier.PaymentMethod)?.let {
             PaymentSelection.New.USBankAccount.InstantDebitsInfo(
                 paymentMethodId = it.id,
+                linkMode = args.linkMode,
             )
         }
 
