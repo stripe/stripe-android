@@ -12,6 +12,12 @@ internal class FakeCustomerAdapter(
         CustomerAdapter.Result.success(null),
     private val paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
         CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD)),
+    private val onPaymentMethods: (() -> CustomerAdapter.Result<List<PaymentMethod>>)? = {
+        paymentMethods
+    },
+    private val onGetPaymentOption: (() -> CustomerAdapter.Result<CustomerAdapter.PaymentOption?>)? = {
+        selectedPaymentOption
+    },
     private val onSetSelectedPaymentOption:
     ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
     private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
@@ -22,7 +28,7 @@ internal class FakeCustomerAdapter(
 ) : CustomerAdapter {
 
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
-        return paymentMethods
+        return onPaymentMethods?.invoke() ?: paymentMethods
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
@@ -57,7 +63,7 @@ internal class FakeCustomerAdapter(
     }
 
     override suspend fun retrieveSelectedPaymentOption(): CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
-        return selectedPaymentOption
+        return onGetPaymentOption?.invoke() ?: selectedPaymentOption
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): CustomerAdapter.Result<String> {

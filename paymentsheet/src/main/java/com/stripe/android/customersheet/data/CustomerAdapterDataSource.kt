@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -66,37 +67,51 @@ internal class CustomerAdapterDataSource @Inject constructor(
         }.toCustomerSheetDataResult()
     }
 
-    override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
-        return customerAdapter.retrievePaymentMethods().toCustomerSheetDataResult()
+    override suspend fun retrievePaymentMethods() = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.retrievePaymentMethods()
+        }.toCustomerSheetDataResult()
     }
 
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.updatePaymentMethod(paymentMethodId, params).toCustomerSheetDataResult()
-    }
-
-    override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.attachPaymentMethod(paymentMethodId).toCustomerSheetDataResult()
-    }
-
-    override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.detachPaymentMethod(paymentMethodId).toCustomerSheetDataResult()
-    }
-
-    override suspend fun retrieveSavedSelection(): CustomerSheetDataResult<SavedSelection?> {
-        return customerAdapter.retrieveSelectedPaymentOption().map { result ->
-            result?.toSavedSelection()
+    ) = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.updatePaymentMethod(paymentMethodId, params)
         }.toCustomerSheetDataResult()
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit> {
-        return customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption()).toCustomerSheetDataResult()
+    override suspend fun attachPaymentMethod(paymentMethodId: String) = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.attachPaymentMethod(paymentMethodId)
+        }.toCustomerSheetDataResult()
     }
 
-    override suspend fun retrieveSetupIntentClientSecret(): CustomerSheetDataResult<String> {
-        return customerAdapter.setupIntentClientSecretForCustomerAttach().toCustomerSheetDataResult()
+    override suspend fun detachPaymentMethod(paymentMethodId: String) = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.detachPaymentMethod(paymentMethodId)
+        }.toCustomerSheetDataResult()
+    }
+
+    override suspend fun retrieveSavedSelection() = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.retrieveSelectedPaymentOption().map { result ->
+                result?.toSavedSelection()
+            }
+        }.toCustomerSheetDataResult()
+    }
+
+    override suspend fun setSavedSelection(selection: SavedSelection?) = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption())
+        }.toCustomerSheetDataResult()
+    }
+
+    override suspend fun retrieveSetupIntentClientSecret() = withContext(workContext) {
+        runCatchingAdapterTask {
+            customerAdapter.setupIntentClientSecretForCustomerAttach()
+        }.toCustomerSheetDataResult()
     }
 
     private suspend fun fetchElementsSession(): Result<ElementsSession> {
@@ -148,5 +163,18 @@ internal class CustomerAdapterDataSource @Inject constructor(
             // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
             listOf("card")
         }
+    }
+
+    private suspend fun <T> runCatchingAdapterTask(
+        task: suspend () -> CustomerAdapter.Result<T>
+    ): CustomerAdapter.Result<T> {
+        return runCatching {
+            task()
+        }.fold(
+            onSuccess = { it },
+            onFailure = {
+                CustomerAdapter.Result.failure(cause = it, displayMessage = null)
+            }
+        )
     }
 }
