@@ -64,6 +64,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on retrieve payment methods, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to get payment methods!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onPaymentMethods = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrievePaymentMethods()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<List<PaymentMethod>>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on retrieve payment option, should complete successfully from adapter`() = runTest {
         val paymentOptionId = "pm_1"
         val dataSource = createCustomerAdapterDataSource(
@@ -106,6 +127,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on retrieve payment option, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to retrieve saved selection!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onGetPaymentOption = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrieveSavedSelection()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on set saved selection, should complete successfully from adapter`() = runTest {
         val dataSource = createCustomerAdapterDataSource(
             adapter = FakeCustomerAdapter(
@@ -117,7 +159,7 @@ class CustomerAdapterDataSourceTest {
 
         val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
 
-        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
     }
 
     @Test
@@ -135,13 +177,34 @@ class CustomerAdapterDataSourceTest {
 
         val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
 
-        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 
         val failedResult = result.asFailure()
 
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on set saved selection, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to set selection!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -189,6 +252,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on attach payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to attach!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.attachPaymentMethod(paymentMethodId = "pm_1")
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on detach payment method, should complete successfully from adapter`() = runTest {
         val paymentMethod = PaymentMethodFactory.card(id = "pm_1")
         val dataSource = createCustomerAdapterDataSource(
@@ -230,6 +314,27 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on detach payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to detach!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.detachPaymentMethod(paymentMethodId = "pm_1")
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -280,6 +385,30 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on update payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to update!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onUpdatePaymentMethod = { _, _ ->
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.updatePaymentMethod(
+            paymentMethodId = "pm_1",
+            params = PaymentMethodUpdateParams.createCard(expiryYear = 2028, expiryMonth = 7),
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -345,6 +474,27 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on fetch setup intent client secret, should catch & fail if exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to update!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrieveSetupIntentClientSecret()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<String>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
