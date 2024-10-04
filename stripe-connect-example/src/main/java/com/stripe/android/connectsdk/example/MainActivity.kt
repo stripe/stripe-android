@@ -26,8 +26,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -48,14 +49,14 @@ class MainActivity : ComponentActivity() {
 
     private val menuItems = listOf(
         MenuItem(
-            title = "Account Onboarding",
-            subtitle = "Show a localized onboarding form that validates data",
+            title = resources.getString(R.string.account_onboarding),
+            subtitle = resources.getString(R.string.account_onboarding_menu_subtitle),
             activity = AccountOnboardingExampleActivity::class.java,
             isBeta = true,
         ),
         MenuItem(
-            title = "Payouts",
-            subtitle = "Show payout information and allow your users to perform payouts",
+            title = resources.getString(R.string.payouts),
+            subtitle = resources.getString(R.string.payouts_menu_subtitle),
             activity = PayoutsExampleActivity::class.java,
             isBeta = true,
         ),
@@ -66,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ConnectSdkExampleTheme {
-                MainContent(title = "Connect SDK Example") {
+                MainContent(title = stringResource(R.string.connect_sdk_example)) {
                     ComponentList(menuItems)
                 }
             }
@@ -130,9 +131,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun BetaBadge() {
-        val borderColor = Color(DEFAULT_BORDER_COLOR)
-        val backgroundColor = Color(DEFAULT_BACKGROUND_COLOR)
-        val textColor = Color(DEFAULT_TEXT_COLOR)
         val shape = RoundedCornerShape(4.dp)
         val labelMediumEmphasized = TextStyle.Default.copy(
             fontSize = 14.sp,
@@ -145,13 +143,13 @@ class MainActivity : ComponentActivity() {
         )
         Text(
             modifier = Modifier
-                .border(1.dp, borderColor, shape)
+                .border(1.dp, colorResource(R.color.default_border_color), shape)
                 .background(
-                    color = backgroundColor,
+                    color = colorResource(R.color.default_background_color),
                     shape = shape
                 )
                 .padding(horizontal = 6.dp, vertical = 1.dp),
-            color = textColor,
+            color = colorResource(R.color.default_text_color),
             fontSize = 12.sp,
             lineHeight = 16.sp,
             style = labelMediumEmphasized,
@@ -173,11 +171,5 @@ class MainActivity : ComponentActivity() {
         ConnectSdkExampleTheme {
             BetaBadge()
         }
-    }
-
-    companion object {
-        private const val DEFAULT_BORDER_COLOR = 0xffa7e7fc
-        private const val DEFAULT_BACKGROUND_COLOR = 0xffcbf5fd
-        private const val DEFAULT_TEXT_COLOR = 0xffcbf5fd
     }
 }
