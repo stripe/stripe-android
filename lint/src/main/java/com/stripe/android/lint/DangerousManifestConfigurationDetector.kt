@@ -34,12 +34,14 @@ internal class DangerousManifestConfigurationDetector : Detector(), XmlScanner {
     }
 
     override fun getApplicableElements() = listOf(
+        "manifest",
         "application",
         "activity",
         "service",
         "receiver",
         "provider",
-        "uses-permission"
+        "uses-permission",
+        "permission"
     )
 
     override fun visitElement(context: XmlContext, element: Element) {
@@ -47,7 +49,7 @@ internal class DangerousManifestConfigurationDetector : Detector(), XmlScanner {
             "manifest" -> checkManifestElement(context, element)
             "application" -> checkApplicationElement(context, element)
             "activity", "service", "receiver", "provider" -> checkComponentElement(context, element)
-            "uses-permission" -> checkPermissionElement(context, element)
+            "uses-permission", "permission" -> checkPermissionElement(context, element)
         }
     }
 
