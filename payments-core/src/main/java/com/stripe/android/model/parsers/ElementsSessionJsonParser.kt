@@ -154,6 +154,7 @@ internal class ElementsSessionJsonParser(
             linkMode = linkMode,
             linkFlags = linkFlags,
             disableLinkSignup = disableLinkSignup,
+            consumerIncentive = json?.let { LinkConsumerIncentiveJsonParser.parse(it) },
         )
     }
 

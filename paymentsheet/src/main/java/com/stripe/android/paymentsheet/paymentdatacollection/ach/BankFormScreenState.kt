@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethodIncentive
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
@@ -10,6 +11,7 @@ internal data class BankFormScreenState(
     private val _isProcessing: Boolean = false,
     val linkedBankAccount: LinkedBankAccount? = null,
     val error: ResolvableString? = null,
+    val incentive: PaymentMethodIncentive?,
 ) : Parcelable {
 
     val isProcessing: Boolean
@@ -28,6 +30,7 @@ internal data class BankFormScreenState(
         val financialConnectionsSessionId: String?,
         val mandateText: ResolvableString,
         val isVerifyingWithMicrodeposits: Boolean,
+        val incentiveEligible: Boolean,
     ) : Parcelable
 
     sealed interface ResultIdentifier : Parcelable {

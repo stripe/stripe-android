@@ -29,11 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.Content
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -79,6 +81,7 @@ internal fun USBankAccountForm(
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,
+                incentive = usBankAccountFormArgs.incentive,
             )
         },
     )
@@ -147,6 +150,9 @@ internal fun BankAccountForm(
                 isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
+                incentive = state.incentive?.takeIf {
+                    linkedBankAccount.incentiveEligible
+                },
                 saveForFutureUseElement = saveForFutureUseElement,
                 onRemoveAccount = onRemoveAccount,
             )
@@ -340,6 +346,7 @@ private fun AccountDetailsForm(
     isProcessing: Boolean,
     bankName: String?,
     last4: String?,
+    incentive: PaymentMethodIncentive?,
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
@@ -382,6 +389,8 @@ private fun AccountDetailsForm(
                         modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
                         color = MaterialTheme.stripeColors.onComponent,
                     )
+
+                    incentive?.Content(tinyMode = true)
                 }
 
                 IconButton(

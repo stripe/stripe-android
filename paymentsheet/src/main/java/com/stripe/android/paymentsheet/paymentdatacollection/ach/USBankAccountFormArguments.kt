@@ -6,6 +6,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodIncentive
+import com.stripe.android.model.toPaymentMethodIncentive
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -41,6 +43,7 @@ import kotlinx.coroutines.flow.update
 internal class USBankAccountFormArguments(
     val instantDebits: Boolean,
     val linkMode: LinkMode?,
+    val incentive: PaymentMethodIncentive?,
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
@@ -96,7 +99,11 @@ internal class USBankAccountFormArguments(
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
-                onError = viewModel::onError
+                onError = viewModel::onError,
+                incentive = paymentMethodMetadata.consumerIncentive?.toPaymentMethodIncentive()?.takeIf {
+                    // TODO
+                    true
+                },
             )
         }
     }

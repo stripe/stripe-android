@@ -10,11 +10,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPayme
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.toPaymentMethodIncentive
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -49,6 +52,7 @@ internal data class PaymentMethodMetadata(
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
+    val consumerIncentive: LinkConsumerIncentive?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
     val cardBrandFilter: CardBrandFilter,
 ) : Parcelable {
@@ -94,7 +98,15 @@ internal data class PaymentMethodMetadata(
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+
+            val paymentMethodIncentive = consumerIncentive?.toPaymentMethodIncentive()
+            val incentive = paymentMethodIncentive?.takeIf { it.appliesTo(definition) }
+
+            definition.uiDefinitionFactory().supportedPaymentMethod(
+                definition = definition,
+                sharedDataSpecs = sharedDataSpecs,
+                incentive = incentive,
+            )
         }
     }
 
@@ -251,6 +263,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                consumerIncentive = elementsSession.linkSettings?.consumerIncentive,
                 isGooglePayReady = isGooglePayReady,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
@@ -284,9 +297,14 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                consumerIncentive = elementsSession.linkSettings?.consumerIncentive,
                 externalPaymentMethodSpecs = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
     }
+}
+
+internal fun PaymentMethodIncentive.appliesTo(definition: PaymentMethodDefinition): Boolean {
+    return definition.incentiveType == identifier
 }

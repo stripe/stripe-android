@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,11 +17,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
+import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -31,6 +38,36 @@ private object PaymentMethodsUISpacing {
 
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
+
+@Preview
+@Composable
+private fun NewPaymentMethodTabLayoutUIPreview() {
+    StripeTheme {
+        NewPaymentMethodTabLayoutUI(
+            paymentMethods = listOf(
+                SupportedPaymentMethod(
+                    paymentMethodDefinition = CardDefinition,
+                    displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                    iconRequiresTinting = true,
+                ),
+                SupportedPaymentMethod(
+                    code = InstantDebitsDefinition.type.code,
+                    displayNameResource = R.string.stripe_paymentsheet_payment_method_instant_debits,
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                    iconRequiresTinting = true,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    incentive = null,
+                )
+            ),
+            selectedIndex = 0,
+            isEnabled = true,
+            onItemSelectedListener = {},
+            imageLoader = StripeImageLoader(LocalContext.current),
+        )
+    }
+}
 
 @Composable
 internal fun NewPaymentMethodTabLayoutUI(
@@ -77,10 +114,10 @@ internal fun NewPaymentMethodTabLayoutUI(
                     item.lightThemeIconUrl
                 }
                 NewPaymentMethodTab(
-                    modifier = Modifier.testTag(
-                        TEST_TAG_LIST + item.code
-                    ),
-                    minViewWidth = viewWidth,
+                    modifier = Modifier
+                        .testTag(TEST_TAG_LIST + item.code)
+                        .fillMaxWidth(),
+                    minWidth = viewWidth,
                     iconRes = item.iconResource,
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
@@ -88,6 +125,7 @@ internal fun NewPaymentMethodTabLayoutUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     iconRequiresTinting = item.iconRequiresTinting,
+                    incentive = item.incentive,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }

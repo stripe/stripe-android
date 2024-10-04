@@ -19,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal interface AddPaymentMethodInteractor {
@@ -136,6 +137,20 @@ internal class DefaultAddPaymentMethodInteractor(
         coroutineScope.launch {
             selection.collect {
                 clearErrorMessages()
+
+                if (it is PaymentSelection.New.USBankAccount) {
+                    _state.update { state ->
+                        state.copy(
+                            supportedPaymentMethods = state.supportedPaymentMethods.map { pm ->
+                                pm.copy(
+                                    incentive = pm.incentive?.copy(
+                                        canShow = it.instantDebits?.incentiveEligible ?: true,
+                                    )
+                                )
+                            },
+                        )
+                    }
+                }
             }
         }
 

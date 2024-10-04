@@ -8,6 +8,9 @@ internal interface PaymentMethodDefinition {
      */
     val type: PaymentMethod.Type
 
+    val incentiveType: String?
+        get() = null
+
     val supportedAsSavedPaymentMethod: Boolean
 
     fun requiresMandate(metadata: PaymentMethodMetadata): Boolean

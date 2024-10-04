@@ -45,6 +45,7 @@ class FinancialConnectionsSheetForInstantDebitsContract :
                 encodedPaymentMethod = instantDebits.encodedPaymentMethod,
                 last4 = instantDebits.last4,
                 bankName = instantDebits.bankName,
+                incentiveEligible = instantDebits.incentiveEligible,
             )
         }
     }

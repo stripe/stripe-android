@@ -66,7 +66,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 }
 
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
     private val formElementsForCode: (code: String) -> List<FormElement>,
@@ -193,16 +193,25 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+    private val incentiveVisible = MutableStateFlow(true)
+
+    private val displayedPaymentMethods = combineAsStateFlow(
         paymentMethods,
+        walletsState,
+        incentiveVisible,
+    ) { paymentMethods, walletsState, incentiveVisible ->
+        getDisplayablePaymentMethods(paymentMethods, walletsState, incentiveVisible)
+    }
+
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+        displayedPaymentMethods,
         processing,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
-        walletsState,
         availableSavedPaymentMethodAction,
-    ) { paymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, walletsState, action ->
+    ) { displayedPaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action ->
         PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = getDisplayablePaymentMethods(paymentMethods, walletsState),
+            displayablePaymentMethods = displayedPaymentMethods,
             isProcessing = isProcessing,
             selection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
@@ -226,6 +235,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
                 if (!requiresFormScreen) {
                     _verticalModeScreenSelection.value = it
+                }
+
+                if (it is PaymentSelection.New.USBankAccount) {
+                    incentiveVisible.value = it.instantDebits?.incentiveEligible ?: true
                 }
             }
         }
@@ -256,9 +269,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getDisplayablePaymentMethods(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
+        incentiveVisible: Boolean,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods) {
+            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, incentiveVisible) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
@@ -277,6 +291,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     onClick = {
                         updateSelection(PaymentSelection.Link)
                     },
+                    incentive = null,
                 )
             }
 
@@ -292,6 +307,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     onClick = {
                         updateSelection(PaymentSelection.GooglePay)
                     },
+                    incentive = null,
                 )
             }
         }

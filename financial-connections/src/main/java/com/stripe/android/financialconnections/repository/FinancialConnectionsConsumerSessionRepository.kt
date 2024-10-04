@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.repository.api.FinancialConnectio
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.toConsumerBillingAddressParams
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
+import com.stripe.android.model.ConsumerFinancialIncentive
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
@@ -61,6 +62,12 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         consumerSessionClientSecret: String,
         billingDetails: BillingDetails?,
     ): ConsumerPaymentDetails
+
+    suspend fun updateIncentiveEligibility(
+        paymentDetailId: String,
+        paymentIntentId: String?,
+        setupIntentId: String?,
+    ): ConsumerFinancialIncentive
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
@@ -216,6 +223,20 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+        ).getOrThrow()
+    }
+
+    override suspend fun updateIncentiveEligibility(
+        paymentDetailId: String,
+        paymentIntentId: String?,
+        setupIntentId: String?,
+    ): ConsumerFinancialIncentive {
+        return consumersApiService.updateIncentiveEligibility(
+            paymentDetailId = paymentDetailId,
+            paymentIntentId = paymentIntentId,
+            setupIntentId = setupIntentId,
+            requestSurface = requestSurface,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).getOrThrow()
     }
 

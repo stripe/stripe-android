@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
+import com.stripe.android.model.ConsumerFinancialIncentive
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
@@ -19,6 +20,7 @@ import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerFinancialIncentiveJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
@@ -81,6 +83,14 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun updateIncentiveEligibility(
+        paymentDetailId: String,
+        paymentIntentId: String?,
+        setupIntentId: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerFinancialIncentive>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
@@ -292,6 +302,37 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun updateIncentiveEligibility(
+        paymentDetailId: String,
+        paymentIntentId: String?,
+        setupIntentId: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerFinancialIncentive> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateIncentiveEligibility,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "type" to "bank_account",
+                    "bank_account[payment_details]" to paymentDetailId,
+                ).plus(
+                    paymentIntentId?.let {
+                        mapOf("payment_intent" to it)
+                    }.orEmpty()
+                ).plus(
+                    setupIntentId?.let {
+                        mapOf("setup_intent" to it)
+                    }.orEmpty()
+                )
+            ),
+            responseJsonParser = ConsumerFinancialIncentiveJsonParser,
+        )
+    }
+
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
@@ -357,6 +398,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
         private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/experiments/financial_incentives`
+         */
+        private val updateIncentiveEligibility: String = getApiUrl("consumers/experiments/financial_incentives")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`

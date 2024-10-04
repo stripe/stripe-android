@@ -20,7 +20,8 @@ sealed class FinancialConnectionsSheetInstantDebitsResult : Parcelable {
     data class Completed(
         val encodedPaymentMethod: String,
         val last4: String?,
-        val bankName: String?
+        val bankName: String?,
+        val incentiveEligible: Boolean,
     ) : FinancialConnectionsSheetInstantDebitsResult()
 
     /**

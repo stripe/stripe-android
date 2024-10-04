@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.ConfirmInstantDebitsIncentiveRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import javax.inject.Inject
 
@@ -40,6 +41,7 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val handleError: HandleError,
+    private val confirmIncentiveRepository: ConfirmInstantDebitsIncentiveRepository,
 ) : LinkSignupHandler {
 
     override suspend fun performSignup(
@@ -52,6 +54,8 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
             phoneNumber = state.validPhone!!,
             country = phoneController.getCountryCode(),
         )
+
+        confirmIncentiveRepository.set(true)
 
         attachConsumerToLinkAccountSession(
             consumerSessionClientSecret = signup.consumerSession.clientSecret,

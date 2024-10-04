@@ -20,6 +20,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
@@ -349,6 +350,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     bankName = result.bankName,
                     last4 = result.last4,
                     intentId = result.intent?.id,
+                    incentiveEligible = result.incentiveEligible,
                     financialConnectionsSessionId = null,
                     mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                     isVerifyingWithMicrodeposits = false,
@@ -371,6 +373,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             ),
                             bankName = paymentAccount.bankName,
                             last4 = paymentAccount.last4,
+                            incentiveEligible = false,
                             intentId = intentId,
                             financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                             mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
@@ -389,6 +392,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             ),
                             bankName = paymentAccount.institutionName,
                             last4 = paymentAccount.last4,
+                            incentiveEligible = false,
                             intentId = intentId,
                             financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                             mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
@@ -418,7 +422,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
-        screenStateWithoutSaveForFutureUse.value = BankFormScreenState(error = error)
+        screenStateWithoutSaveForFutureUse.value = BankFormScreenState(
+            incentive = args.incentive,
+            error = error,
+        )
         saveForFutureUseElement.controller.onValueChange(true)
     }
 
@@ -438,7 +445,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return if (args.savedPaymentMethod != null) {
             args.savedPaymentMethod.screenState
         } else {
-            BankFormScreenState()
+            BankFormScreenState(incentive = args.incentive)
         }
     }
 
@@ -699,6 +706,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val incentive: PaymentMethodIncentive?,
         val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,

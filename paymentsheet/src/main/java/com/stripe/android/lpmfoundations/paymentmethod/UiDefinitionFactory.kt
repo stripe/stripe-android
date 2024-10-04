@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -91,7 +92,9 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Simple : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(): SupportedPaymentMethod
+        fun createSupportedPaymentMethod(
+            incentive: PaymentMethodIncentive? = null,
+        ): SupportedPaymentMethod
 
         fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
             return createSupportedPaymentMethod().asFormHeaderInformation()
@@ -116,9 +119,10 @@ internal sealed interface UiDefinitionFactory {
     fun supportedPaymentMethod(
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
+        incentive: PaymentMethodIncentive?,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
-            createSupportedPaymentMethod()
+            createSupportedPaymentMethod(incentive)
         }
 
         is RequiresSharedDataSpec -> {

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
+import com.stripe.android.financialconnections.repository.ConfirmInstantDebitsIncentiveRepository
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -20,6 +21,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
     private val repository: FinancialConnectionsRepository,
     private val consumerSessionProvider: ConsumerSessionProvider,
     private val elementsSessionContext: ElementsSessionContext?,
+    private val confirmIncentiveRepository: ConfirmInstantDebitsIncentiveRepository,
 ) : CreateInstantDebitsResult {
 
     override suspend fun invoke(
@@ -58,10 +60,23 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             )
         }
 
+        val shouldConfirmIncentive = confirmIncentiveRepository.get()?.shouldConfirm == true
+
+        val financialIncentive = if (shouldConfirmIncentive) {
+            consumerRepository.updateIncentiveEligibility(
+                paymentDetailId = paymentDetails.id,
+                paymentIntentId = elementsSessionContext?.paymentIntentId,
+                setupIntentId = elementsSessionContext?.setupIntentId,
+            )
+        } else {
+            null
+        }
+
         return InstantDebitsResult(
             encodedPaymentMethod = paymentMethod,
             bankName = paymentDetails.bankName,
             last4 = paymentDetails.last4,
+            incentiveEligible = financialIncentive?.isEligible ?: false,
         )
     }
 }

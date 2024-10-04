@@ -185,6 +185,7 @@ internal sealed class PaymentSelection : Parcelable {
             data class InstantDebitsInfo(
                 val paymentMethod: PaymentMethod,
                 val linkMode: LinkMode?,
+                val incentiveEligible: Boolean = false,
             ) : Parcelable
 
             @Parcelize

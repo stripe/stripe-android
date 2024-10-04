@@ -19,17 +19,20 @@ object CurrencyFormatter {
     fun format(
         amount: Long,
         amountCurrencyCode: String,
-        targetLocale: Locale = Locale.getDefault()
+        targetLocale: Locale = Locale.getDefault(),
+        compact: Boolean = false,
     ) = format(
         amount,
         Currency.getInstance(amountCurrencyCode.uppercase()),
-        targetLocale
+        targetLocale,
+        compact,
     )
 
     fun format(
         amount: Long,
         amountCurrency: Currency,
-        targetLocale: Locale = Locale.getDefault()
+        targetLocale: Locale = Locale.getDefault(),
+        compact: Boolean = false,
     ): String {
         val amountCurrencyDecimalDigits = getDefaultDecimalDigits(amountCurrency)
         val majorUnitAmount = amount / MAJOR_UNIT_BASE.pow(amountCurrencyDecimalDigits.toDouble())
@@ -63,7 +66,14 @@ object CurrencyFormatter {
                 (currencyFormat as DecimalFormat).decimalFormatSymbols
             decimalFormatSymbols.currency = amountCurrency
             decimalFormatSymbols.currencySymbol = amountCurrency.getSymbol(targetLocale)
-            currencyFormat.minimumFractionDigits = amountCurrencyDecimalDigits
+
+            if (compact) {
+                currencyFormat.minimumFractionDigits = 0
+                currencyFormat.maximumFractionDigits = 0
+            } else {
+                currencyFormat.minimumFractionDigits = amountCurrencyDecimalDigits
+            }
+
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
         }
 

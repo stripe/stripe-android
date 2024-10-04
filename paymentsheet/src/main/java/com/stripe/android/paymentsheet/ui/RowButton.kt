@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
@@ -28,6 +29,7 @@ internal fun RowButton(
 ) {
     Card(
         modifier = modifier
+            .fillMaxWidth()
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
@@ -41,6 +43,7 @@ internal fun RowButton(
                     enabled = isClickable,
                     onClick = onClick
                 )
+                .fillMaxWidth()
                 .padding(contentPaddingValues),
             verticalArrangement = verticalArrangement,
         ) {

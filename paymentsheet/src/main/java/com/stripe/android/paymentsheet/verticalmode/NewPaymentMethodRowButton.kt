@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.paymentsheet.ui.Content
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
@@ -43,6 +45,12 @@ internal fun NewPaymentMethodRowButton(
             displayablePaymentMethod.onClick()
         },
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
+        trailingContent = displayablePaymentMethod.incentive?.let {
+            {
+                // Yikes…
+                it.Content()
+            }
+        }
     )
 }
 
@@ -58,6 +66,7 @@ internal fun NewPaymentMethodRowButton(
     iconRequiresTinting: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -68,7 +77,9 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = modifier.height(iconHeight).width(iconWidth),
+                modifier = modifier
+                    .height(iconHeight)
+                    .width(iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },
@@ -76,5 +87,6 @@ internal fun NewPaymentMethodRowButton(
         subtitle = subtitle,
         onClick = onClick,
         modifier = modifier,
+        trailingContent = trailingContent,
     )
 }

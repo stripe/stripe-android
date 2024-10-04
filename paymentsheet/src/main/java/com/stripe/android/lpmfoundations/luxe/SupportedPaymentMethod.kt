@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -36,6 +37,8 @@ internal data class SupportedPaymentMethod(
 
     /** The subtitle, or marketing copy for an LPM. */
     val subtitle: ResolvableString? = null,
+
+    val incentive: PaymentMethodIncentive?,
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
@@ -44,6 +47,7 @@ internal data class SupportedPaymentMethod(
         @DrawableRes iconResource: Int,
         iconRequiresTinting: Boolean = false,
         subtitle: ResolvableString? = null,
+        incentive: PaymentMethodIncentive? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = displayNameResource.resolvableString,
@@ -52,6 +56,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        incentive = incentive,
     )
 
     constructor(
@@ -62,6 +67,7 @@ internal data class SupportedPaymentMethod(
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
         subtitle: ResolvableString? = null,
+        incentive: PaymentMethodIncentive? = null,
     ) : this(
         code = code,
         displayName = displayNameResource.resolvableString,
@@ -70,6 +76,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = darkThemeIconUrl,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        incentive = incentive,
     )
 
     fun asFormHeaderInformation(): FormHeaderInformation {
@@ -85,6 +92,7 @@ internal data class SupportedPaymentMethod(
 
     fun asDisplayablePaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
+        incentiveVisible: Boolean,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
@@ -106,6 +114,7 @@ internal data class SupportedPaymentMethod(
             iconRequiresTinting = iconRequiresTinting,
             subtitle = subtitle,
             onClick = onClick,
+            incentive = incentive.takeIf { incentiveVisible },
         )
     }
 }
