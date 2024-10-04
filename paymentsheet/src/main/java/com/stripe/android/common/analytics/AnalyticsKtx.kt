@@ -72,7 +72,7 @@ internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(
 }
 
 internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
-    return when(this) {
+    return when (this) {
         PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
         PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
         PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
