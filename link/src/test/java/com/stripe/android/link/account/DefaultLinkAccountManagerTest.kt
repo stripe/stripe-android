@@ -430,49 +430,6 @@ class DefaultLinkAccountManagerTest {
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
-    @Test
-    fun `hasUserLoggedOut is true when email is null`() = runSuspendTest {
-        val accountManager = accountManager()
-
-        assertThat(accountManager.hasUserLoggedOut(null)).isTrue()
-    }
-
-    @Test
-    fun `hasUserLoggedOut is true when email does not match link account`() = runSuspendTest {
-        val accountManager = accountManager()
-
-        accountManager.setLinkAccountFromLookupResult(
-            mockConsumerSessionLookup.copy(
-                consumerSession = mockConsumerSession.copy(
-                    emailAddress = "${EMAIL}m"
-                )
-            ),
-            startSession = true,
-        )
-
-        assertThat(accountManager.hasUserLoggedOut(EMAIL)).isTrue()
-    }
-
-    @Test
-    fun `hasUserLoggedOut is true when there is no link account`() = runSuspendTest {
-        val accountManager = accountManager()
-
-        assertThat(accountManager.hasUserLoggedOut(EMAIL)).isTrue()
-    }
-
-    @Test
-    fun `hasUserLoggedOut is false when there is a link account with the same email and valid status`() =
-        runSuspendTest {
-            val accountManager = accountManager()
-
-            accountManager.setLinkAccountFromLookupResult(
-                mockConsumerSessionLookup,
-                startSession = true,
-            )
-
-            assertThat(accountManager.hasUserLoggedOut(EMAIL)).isFalse()
-        }
-
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
         setupRepository()
         testBody()

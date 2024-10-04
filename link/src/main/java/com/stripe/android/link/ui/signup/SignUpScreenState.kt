@@ -4,7 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
 
-data class SignUpScreenState(
+internal data class SignUpScreenState(
     val emailController: TextFieldController,
     val phoneNumberController: PhoneNumberController,
     val nameController: TextFieldController,

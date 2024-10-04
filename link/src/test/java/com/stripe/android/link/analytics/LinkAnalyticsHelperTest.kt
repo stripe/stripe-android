@@ -79,57 +79,31 @@ internal class LinkAnalyticsHelperTest {
     }
 }
 
-private open class FakeLinkEventsReporter : LinkEventsReporter {
+internal open class FakeLinkEventsReporter : LinkEventsReporter {
     var calledCount = 0
-    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
-        throw NotImplementedError()
-    }
+    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
 
-    override fun onInlineSignupCheckboxChecked() {
-        throw NotImplementedError()
-    }
+    override fun onInlineSignupCheckboxChecked() = Unit
 
-    override fun onSignupFlowPresented() {
-        throw NotImplementedError()
-    }
+    override fun onSignupFlowPresented() = Unit
 
-    override fun onSignupStarted(isInline: Boolean) {
-        throw NotImplementedError()
-    }
+    override fun onSignupStarted(isInline: Boolean) = Unit
 
-    override fun onSignupCompleted(isInline: Boolean) {
-        throw NotImplementedError()
-    }
+    override fun onSignupCompleted(isInline: Boolean) = Unit
 
-    override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        throw NotImplementedError()
-    }
+    override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
 
-    override fun onAccountLookupFailure(error: Throwable) {
-        throw NotImplementedError()
-    }
+    override fun onAccountLookupFailure(error: Throwable) = Unit
 
-    override fun onPopupShow() {
-        throw NotImplementedError()
-    }
+    override fun onPopupShow() = Unit
 
-    override fun onPopupSuccess() {
-        throw NotImplementedError()
-    }
+    override fun onPopupSuccess() = Unit
 
-    override fun onPopupCancel() {
-        throw NotImplementedError()
-    }
+    override fun onPopupCancel() = Unit
 
-    override fun onPopupError(error: Throwable) {
-        throw NotImplementedError()
-    }
+    override fun onPopupError(error: Throwable) = Unit
 
-    override fun onPopupLogout() {
-        throw NotImplementedError()
-    }
+    override fun onPopupLogout() = Unit
 
-    override fun onPopupSkipped() {
-        throw NotImplementedError()
-    }
+    override fun onPopupSkipped() = Unit
 }

@@ -2,13 +2,13 @@ package com.stripe.android.link.ui.signup
 
 import androidx.navigation.NavHostController
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.StripeIntentFixtures
@@ -65,8 +65,6 @@ internal class SignUpViewModelTest {
 
     private val navController: NavHostController = mock()
     private val linkAccountManager: LinkAccountManager = mock()
-    private val linkEventsReporter: LinkEventsReporter = mock()
-    private val logger: Logger = FakeLogger()
 
     @Before
     fun setUp() {
@@ -80,43 +78,19 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
-        hasUserLoggedOut()
+        val linkEventsReporter = object : FakeLinkEventsReporter() {
+            override fun onSignupFlowPresented() {
+                calledCount += 1
+            }
+        }
 
-        createViewModel()
+        createViewModel(linkEventsReporter = linkEventsReporter)
 
-        verify(linkEventsReporter).onSignupFlowPresented()
-    }
-
-    @Test
-    fun `form should not be prefilled when user is logged out`() = runTest(dispatcher) {
-        hasUserLoggedOut(yes = true)
-
-        val viewModel = createViewModel(
-            prefilledEmail = CUSTOMER_EMAIL
-        )
-
-        assertThat(viewModel.contentState.phoneNumberController.fieldValue.value).isEqualTo("")
-        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo("")
-        assertThat(viewModel.contentState.nameController.fieldValue.value).isEqualTo("")
-    }
-
-    @Test
-    fun `form should be prefilled when user is not logged out`() = runTest(dispatcher) {
-        hasUserLoggedOut(yes = false)
-
-        val viewModel = createViewModel(
-            prefilledEmail = CUSTOMER_EMAIL
-        )
-
-        assertThat(viewModel.contentState.phoneNumberController.fieldValue.value).isEqualTo(CUSTOMER_PHONE)
-        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo(CUSTOMER_EMAIL)
-        assertThat(viewModel.contentState.nameController.fieldValue.value).isEqualTo(CUSTOMER_NAME)
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
     fun `When email is valid then lookup is triggered with delay`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel(prefilledEmail = null)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
@@ -142,8 +116,6 @@ internal class SignUpViewModelTest {
     @Test
     fun `When multiple valid emails entered quickly then lookup is triggered only for last one`() =
         runTest(dispatcher) {
-            hasUserLoggedOut()
-
             val viewModel = createViewModel(prefilledEmail = null)
 
             viewModel.contentState.emailController.onRawValueChange("first@email.com")
@@ -177,8 +149,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
@@ -187,22 +157,28 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When lookupConsumer succeeds for new account then analytics event is sent`() = runTest(dispatcher) {
-        hasUserLoggedOut()
         whenever(linkAccountManager.lookupConsumer(any(), any()))
             .thenReturn(Result.success(null))
 
-        val viewModel = createViewModel()
+        val linkEventsReporter = object : FakeLinkEventsReporter() {
+            override fun onSignupStarted(isInline: Boolean) {
+                calledCount += 1
+            }
+        }
+
+        val viewModel = createViewModel(
+            linkEventsReporter = linkEventsReporter
+        )
 
         viewModel.contentState.emailController.onRawValueChange("valid@email.com")
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        verify(linkEventsReporter).onSignupStarted()
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
     fun `When lookupConsumer fails then an error message is shown`() = runTest(dispatcher) {
-        hasUserLoggedOut()
         val errorMessage = "Error message"
         whenever(linkAccountManager.lookupConsumer(any(), any()))
             .thenReturn(Result.failure(RuntimeException(errorMessage)))
@@ -218,8 +194,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `signUp sends correct ConsumerSignUpConsentAction`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel()
 
         viewModel.performValidSignup()
@@ -235,8 +209,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signUp fails then an error message is shown`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val errorMessage = "Error message"
         whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
             .thenReturn(Result.failure(RuntimeException(errorMessage)))
@@ -249,8 +221,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel()
 
         val linkAccount = LinkAccount(
@@ -270,8 +240,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signed up with verified account then it navigates to Wallet screen`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel()
 
         val linkAccount = LinkAccount(
@@ -290,9 +258,15 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signup succeeds then analytics event is sent`() = runTest(dispatcher) {
-        hasUserLoggedOut()
+        val linkEventsReporter = object : FakeLinkEventsReporter() {
+            override fun onSignupCompleted(isInline: Boolean) {
+                calledCount += 1
+            }
+        }
 
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            linkEventsReporter = linkEventsReporter
+        )
 
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -306,28 +280,35 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        verify(linkEventsReporter).onSignupCompleted()
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
     fun `When signup fails then analytics event is sent`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-        val error = Exception()
+        val expectedError = Exception()
 
-        val viewModel = createViewModel()
+        val linkEventsReporter = object : FakeLinkEventsReporter() {
+            override fun onSignupFailure(isInline: Boolean, error: Throwable) {
+                if (!isInline && expectedError == error) {
+                    calledCount += 1
+                }
+            }
+        }
+
+        val viewModel = createViewModel(
+            linkEventsReporter = linkEventsReporter
+        )
 
         whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.failure(error))
+            .thenReturn(Result.failure(expectedError))
 
         viewModel.performValidSignup()
 
-        verify(linkEventsReporter).onSignupFailure(eq(false), eq(error))
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
     fun `Doesn't require name for US consumers`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel(
             prefilledEmail = null,
             countryCode = CountryCode.US
@@ -342,8 +323,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `Requires name for non-US consumers`() = runTest(dispatcher) {
-        hasUserLoggedOut()
-
         val viewModel = createViewModel(
             prefilledEmail = null,
             countryCode = CountryCode.CA
@@ -362,18 +341,12 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `Prefilled values are handled correctly`() = runTest(dispatcher) {
-        hasUserLoggedOut(yes = false)
-
         val viewModel = createViewModel(
             prefilledEmail = CUSTOMER_EMAIL,
             countryCode = CountryCode.US
         )
 
         assertThat(viewModel.contentState.signUpEnabled).isTrue()
-    }
-
-    private suspend fun hasUserLoggedOut(yes: Boolean = true) {
-        whenever(linkAccountManager.hasUserLoggedOut(anyOrNull())).thenAnswer { yes }
     }
 
     private fun SignUpViewModel.performValidSignup() {
@@ -385,7 +358,8 @@ internal class SignUpViewModelTest {
     private fun createViewModel(
         prefilledEmail: String? = null,
         args: LinkActivityContract.Args = defaultArgs,
-        countryCode: CountryCode = CountryCode.US
+        countryCode: CountryCode = CountryCode.US,
+        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter()
     ): SignUpViewModel {
         return SignUpViewModel(
             args = args.copy(
@@ -401,7 +375,7 @@ internal class SignUpViewModelTest {
             ),
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
-            logger = logger,
+            logger = FakeLogger(),
         ).apply {
             this.navController = this@SignUpViewModelTest.navController
         }

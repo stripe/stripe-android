@@ -41,11 +41,16 @@ internal class SignUpViewModel @Inject constructor(
     internal var navController: NavHostController? = null
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
-            emailController = EmailConfig.createController(""),
+            emailController = EmailConfig.createController(
+                initialValue = args.configuration.customerInfo.email
+            ),
             phoneNumberController = PhoneNumberController.createPhoneNumberController(
+                initialValue = args.configuration.customerInfo.phone.orEmpty(),
                 initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
             ),
-            nameController = NameConfig.createController(""),
+            nameController = NameConfig.createController(
+                initialValue = args.configuration.customerInfo.name
+            ),
             signUpEnabled = false
         )
     )
@@ -63,28 +68,12 @@ internal class SignUpViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            loadScreen()
-        }
-        viewModelScope.launch {
             signUpEnabledListener()
         }
         viewModelScope.launch {
             emailListener()
         }
         linkEventsReporter.onSignupFlowPresented()
-    }
-
-    private suspend fun loadScreen() {
-        val isLoggedOut = linkAccountManager.hasUserLoggedOut(args.configuration.customerInfo.email)
-        _state.value.emailController.onRawValueChange(
-            rawValue = args.configuration.customerInfo.email.takeUnless { isLoggedOut } ?: ""
-        )
-        _state.value.phoneNumberController.onRawValueChange(
-            rawValue = args.configuration.customerInfo.email.takeUnless { isLoggedOut } ?: ""
-        )
-        _state.value.nameController.onRawValueChange(
-            rawValue = args.configuration.customerInfo.name.takeUnless { isLoggedOut } ?: ""
-        )
     }
 
     private suspend fun signUpEnabledListener() {
