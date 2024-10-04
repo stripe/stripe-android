@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -89,35 +90,62 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         clientSecret = customerSessionClientSecret.clientSecret,
                     ),
                     externalPaymentMethods = listOf(),
-                ).mapCatching { elementsSession ->
-                    val customer = elementsSession.customer ?: run {
-                        errorReporter.report(
-                            ErrorReporter
-                                .UnexpectedErrorEvent
-                                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
-                        )
-
-                        throw IllegalStateException(
-                            "`customer` field should be available when using `CustomerSession` in elements/session!"
-                        )
-                    }
-
-                    val customerSession = customer.session
-
-                    CustomerSessionElementsSession(
-                        elementsSession = elementsSession,
-                        customer = customer,
-                        ephemeralKey = CachedCustomerEphemeralKey(
-                            customerId = customerSession.customerId,
-                            ephemeralKey = customerSession.apiKey,
-                            expiresAt = customerSession.apiKeyExpiry,
-                        )
-                    )
+                ).onSuccess {
+                    reportSuccessfulElementsSessionLoad()
+                }.onFailure {
+                    reportFailedElementsSessionLoad(it)
+                }.mapCatching { elementsSession ->
+                    createCustomerSessionElementsSession(elementsSession)
                 }.onSuccess { customerSessionElementsSession ->
                     cachedCustomerEphemeralKey = customerSessionElementsSession.ephemeralKey
                 }.getOrThrow()
             }
         }
+    }
+
+    private fun createCustomerSessionElementsSession(
+        elementsSession: ElementsSession
+    ): CustomerSessionElementsSession {
+        val customer = elementsSession.customer ?: run {
+            errorReporter.report(
+                ErrorReporter
+                    .UnexpectedErrorEvent
+                    .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+            )
+
+            throw IllegalStateException(
+                "`customer` field should be available when using `CustomerSession` in elements/session!"
+            )
+        }
+
+        val customerSession = customer.session
+
+        return CustomerSessionElementsSession(
+            elementsSession = elementsSession,
+            customer = customer,
+            ephemeralKey = CachedCustomerEphemeralKey(
+                customerId = customerSession.customerId,
+                ephemeralKey = customerSession.apiKey,
+                expiresAt = customerSession.apiKeyExpiry,
+            )
+        )
+    }
+
+    private fun reportSuccessfulElementsSessionLoad() {
+        errorReporter.report(
+            errorEvent = ErrorReporter
+                .SuccessEvent
+                .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS,
+        )
+    }
+
+    private fun reportFailedElementsSessionLoad(cause: Throwable) {
+        errorReporter.report(
+            errorEvent = ErrorReporter
+                .ExpectedErrorEvent
+                .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE,
+            stripeException = StripeException.create(cause)
+        )
     }
 
     private fun validateCustomerSessionClientSecret(customerSessionClientSecret: String) {
