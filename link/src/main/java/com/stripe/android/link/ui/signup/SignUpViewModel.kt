@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
@@ -41,7 +39,16 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger
 ) : ViewModel() {
     internal var navController: NavHostController? = null
-    private val _state = MutableStateFlow<SignUpScreenState>(SignUpScreenState.Loading)
+    private val _state = MutableStateFlow(
+        value = SignUpScreenState(
+            emailController = EmailConfig.createController(""),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController(
+                initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
+            ),
+            nameController = NameConfig.createController(""),
+            signUpEnabled = false
+        )
+    )
 
     val state: StateFlow<SignUpScreenState> = _state
 
@@ -69,25 +76,19 @@ internal class SignUpViewModel @Inject constructor(
 
     private suspend fun loadScreen() {
         val isLoggedOut = linkAccountManager.hasUserLoggedOut(args.configuration.customerInfo.email)
-        val newState = SignUpScreenState.Content(
-            emailController = EmailConfig.createController(
-                initialValue = args.configuration.customerInfo.email.takeUnless { isLoggedOut }
-            ),
-            phoneNumberController = PhoneNumberController.createPhoneNumberController(
-                initialValue = args.configuration.customerInfo.phone.takeUnless { isLoggedOut }.orEmpty(),
-                initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode,
-            ),
-            nameController = NameConfig.createController(
-                initialValue = args.configuration.customerInfo.name.takeUnless { isLoggedOut }
-            ),
-            signUpEnabled = false
+        _state.value.emailController.onRawValueChange(
+            rawValue = args.configuration.customerInfo.email.takeUnless { isLoggedOut } ?: ""
         )
-        _state.emit(newState)
+        _state.value.phoneNumberController.onRawValueChange(
+            rawValue = args.configuration.customerInfo.email.takeUnless { isLoggedOut } ?: ""
+        )
+        _state.value.nameController.onRawValueChange(
+            rawValue = args.configuration.customerInfo.name.takeUnless { isLoggedOut } ?: ""
+        )
     }
 
     private suspend fun signUpEnabledListener() {
         _state.flatMapLatest { state ->
-            if (state !is SignUpScreenState.Content) return@flatMapLatest flowOf()
             combine(
                 flow = state.nameController.fieldState.map {
                     if (requiresNameCollection) {
@@ -102,13 +103,12 @@ internal class SignUpViewModel @Inject constructor(
                 nameComplete && emailComplete && phoneComplete
             }
         }.collectLatest { formValid ->
-            updateSignUpEnabled(formValid)
+            updateState { it.copy(signUpEnabled = formValid) }
         }
     }
 
     private suspend fun emailListener() {
         _state.flatMapLatest { state ->
-            if (state !is SignUpScreenState.Content) return@flatMapLatest flowOf()
             state.emailController.formFieldValue.mapLatest { entry ->
                 entry.takeIf { it.isComplete }?.value
             }
@@ -126,7 +126,7 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            val state = (_state.value as? SignUpScreenState.Content) ?: return@launch
+            val state = _state.value
             linkAccountManager.signUp(
                 email = state.emailController.fieldValue.value,
                 phone = state.phoneNumberController.fieldValue.value,
@@ -153,7 +153,7 @@ internal class SignUpViewModel @Inject constructor(
             navController?.navigate(LinkScreen.Verification.route)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
-            (_state.value as SignUpScreenState.Content).emailController.onValueChange("")
+            _state.value.emailController.onValueChange("")
         }
     }
 
@@ -177,40 +177,31 @@ internal class SignUpViewModel @Inject constructor(
 
     private fun onError(error: Throwable) {
         logger.error("Error: ", error)
-        updateErrorMessage(
-            error = when (val errorMessage = error.getErrorMessage()) {
-                is ErrorMessage.FromResources -> {
-                    errorMessage.stringResId.resolvableString
+        updateState {
+            it.copy(
+                errorMessage = when (val errorMessage = error.getErrorMessage()) {
+                    is ErrorMessage.FromResources -> {
+                        errorMessage.stringResId.resolvableString
+                    }
+                    is ErrorMessage.Raw -> {
+                        errorMessage.errorMessage.resolvableString
+                    }
                 }
-                is ErrorMessage.Raw -> {
-                    errorMessage.errorMessage.resolvableString
-                }
-            }
-        )
+            )
+        }
     }
 
     private fun clearError() {
-        updateErrorMessage(null)
+        updateState { it.copy(errorMessage = null) }
     }
 
-    private fun updateSignUpEnabled(enabled: Boolean) {
-        _state.update { old ->
-            if (old !is SignUpScreenState.Content) return@update old
-            old.copy(signUpEnabled = enabled)
-        }
+    private fun updateState(produceValue: (SignUpScreenState) -> SignUpScreenState) {
+        _state.update(produceValue)
     }
 
     private fun updateSignUpState(signUpState: SignUpState) {
-        _state.update { old ->
-            if (old !is SignUpScreenState.Content) return@update old
+        updateState { old ->
             old.copy(signUpState = signUpState)
-        }
-    }
-
-    private fun updateErrorMessage(error: ResolvableString?) {
-        _state.update { old ->
-            if (old !is SignUpScreenState.Content) return@update old
-            old.copy(errorMessage = error)
         }
     }
 

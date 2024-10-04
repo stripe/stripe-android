@@ -16,6 +16,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -65,7 +66,7 @@ internal class SignUpViewModelTest {
     private val navController: NavHostController = mock()
     private val linkAccountManager: LinkAccountManager = mock()
     private val linkEventsReporter: LinkEventsReporter = mock()
-    private val logger = mock<Logger>()
+    private val logger: Logger = FakeLogger()
 
     @Before
     fun setUp() {
@@ -87,29 +88,29 @@ internal class SignUpViewModelTest {
     }
 
     @Test
-    fun `form should not be prefilled when user is not logged out`() = runTest(dispatcher) {
+    fun `form should not be prefilled when user is logged out`() = runTest(dispatcher) {
         hasUserLoggedOut(yes = true)
 
         val viewModel = createViewModel(
             prefilledEmail = CUSTOMER_EMAIL
         )
 
-        assertThat(viewModel.contentState?.phoneNumberController?.fieldValue?.value).isEqualTo("")
-        assertThat(viewModel.contentState?.emailController?.fieldValue?.value).isEqualTo("")
-        assertThat(viewModel.contentState?.nameController?.fieldValue?.value).isEqualTo("")
+        assertThat(viewModel.contentState.phoneNumberController.fieldValue.value).isEqualTo("")
+        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo("")
+        assertThat(viewModel.contentState.nameController.fieldValue.value).isEqualTo("")
     }
 
     @Test
-    fun `form should be prefilled when user is logged out`() = runTest(dispatcher) {
+    fun `form should be prefilled when user is not logged out`() = runTest(dispatcher) {
         hasUserLoggedOut(yes = false)
 
         val viewModel = createViewModel(
             prefilledEmail = CUSTOMER_EMAIL
         )
 
-        assertThat(viewModel.contentState?.phoneNumberController?.fieldValue?.value).isEqualTo(CUSTOMER_PHONE)
-        assertThat(viewModel.contentState?.emailController?.fieldValue?.value).isEqualTo(CUSTOMER_EMAIL)
-        assertThat(viewModel.contentState?.nameController?.fieldValue?.value).isEqualTo(CUSTOMER_NAME)
+        assertThat(viewModel.contentState.phoneNumberController.fieldValue.value).isEqualTo(CUSTOMER_PHONE)
+        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo(CUSTOMER_EMAIL)
+        assertThat(viewModel.contentState.nameController.fieldValue.value).isEqualTo(CUSTOMER_NAME)
     }
 
     @Test
@@ -118,10 +119,10 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel(prefilledEmail = null)
 
-        assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
-        viewModel.contentState?.emailController?.onRawValueChange("valid@email.com")
-        assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        viewModel.contentState.emailController.onRawValueChange("valid@email.com")
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
         // Mock a delayed response so we stay in the loading state
         linkAccountManager.stub {
@@ -134,8 +135,8 @@ internal class SignUpViewModelTest {
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        assertThat(viewModel.contentState?.emailController?.fieldValue?.value).isEqualTo("valid@email.com")
-        assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.VerifyingEmail)
+        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo("valid@email.com")
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.VerifyingEmail)
     }
 
     @Test
@@ -145,14 +146,14 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(prefilledEmail = null)
 
-            viewModel.contentState?.emailController?.onRawValueChange("first@email.com")
+            viewModel.contentState.emailController.onRawValueChange("first@email.com")
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
 
-            viewModel.contentState?.emailController?.onRawValueChange("second@email.com")
+            viewModel.contentState.emailController.onRawValueChange("second@email.com")
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
 
-            viewModel.contentState?.emailController?.onRawValueChange("third@email.com")
-            assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+            viewModel.contentState.emailController.onRawValueChange("third@email.com")
+            assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
             // Mock a delayed response so we stay in the loading state
             linkAccountManager.stub {
@@ -165,7 +166,7 @@ internal class SignUpViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.VerifyingEmail)
+            assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.VerifyingEmail)
 
             val emailCaptor = argumentCaptor<String>()
             verify(linkAccountManager).lookupConsumer(emailCaptor.capture(), any())
@@ -180,7 +181,7 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
 
-        assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
         verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
     }
 
@@ -192,7 +193,7 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.contentState?.emailController?.onRawValueChange("valid@email.com")
+        viewModel.contentState.emailController.onRawValueChange("valid@email.com")
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
@@ -208,11 +209,11 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.contentState?.emailController?.onRawValueChange(VALID_EMAIL)
+        viewModel.contentState.emailController.onRawValueChange(VALID_EMAIL)
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        assertThat(viewModel.contentState?.errorMessage).isEqualTo(errorMessage.resolvableString)
+        assertThat(viewModel.contentState.errorMessage).isEqualTo(errorMessage.resolvableString)
     }
 
     @Test
@@ -243,7 +244,7 @@ internal class SignUpViewModelTest {
         val viewModel = createViewModel()
         viewModel.performValidSignup()
 
-        assertThat(viewModel.contentState?.errorMessage).isEqualTo(errorMessage.resolvableString)
+        assertThat(viewModel.contentState.errorMessage).isEqualTo(errorMessage.resolvableString)
     }
 
     @Test
@@ -264,7 +265,7 @@ internal class SignUpViewModelTest {
         viewModel.performValidSignup()
 
         verify(navController).navigate(LinkScreen.Verification.route)
-        assertThat(viewModel.contentState?.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
     }
 
     @Test
@@ -332,11 +333,11 @@ internal class SignUpViewModelTest {
             countryCode = CountryCode.US
         )
 
-        assertThat(viewModel.contentState?.signUpEnabled).isFalse()
+        assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState?.emailController?.onRawValueChange("me@myself.com")
-        viewModel.contentState?.phoneNumberController?.onRawValueChange("1234567890")
-        assertThat(viewModel.contentState?.signUpEnabled).isTrue()
+        viewModel.contentState.emailController.onRawValueChange("me@myself.com")
+        viewModel.contentState.phoneNumberController.onRawValueChange("1234567890")
+        assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
     @Test
@@ -348,15 +349,15 @@ internal class SignUpViewModelTest {
             countryCode = CountryCode.CA
         )
 
-        assertThat(viewModel.contentState?.signUpEnabled).isFalse()
+        assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState?.emailController?.onRawValueChange("me@myself.com")
-        viewModel.contentState?.phoneNumberController?.onRawValueChange("1234567890")
-        viewModel.contentState?.nameController?.onRawValueChange("")
-        assertThat(viewModel.contentState?.signUpEnabled).isFalse()
+        viewModel.contentState.emailController.onRawValueChange("me@myself.com")
+        viewModel.contentState.phoneNumberController.onRawValueChange("1234567890")
+        viewModel.contentState.nameController.onRawValueChange("")
+        assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState?.nameController?.onRawValueChange("Someone from Canada")
-        assertThat(viewModel.contentState?.signUpEnabled).isTrue()
+        viewModel.contentState.nameController.onRawValueChange("Someone from Canada")
+        assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
     @Test
@@ -368,7 +369,7 @@ internal class SignUpViewModelTest {
             countryCode = CountryCode.US
         )
 
-        assertThat(viewModel.contentState?.signUpEnabled).isTrue()
+        assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
     private suspend fun hasUserLoggedOut(yes: Boolean = true) {
@@ -376,8 +377,8 @@ internal class SignUpViewModelTest {
     }
 
     private fun SignUpViewModel.performValidSignup() {
-        contentState?.emailController?.onRawValueChange("email@valid.co")
-        contentState?.phoneNumberController?.onRawValueChange("1234567890")
+        contentState.emailController.onRawValueChange("email@valid.co")
+        contentState.phoneNumberController.onRawValueChange("1234567890")
         onSignUpClick()
     }
 
@@ -423,8 +424,8 @@ internal class SignUpViewModelTest {
         )
     }
 
-    private val SignUpViewModel.contentState: SignUpScreenState.Content?
-        get() = state.value as? SignUpScreenState.Content
+    private val SignUpViewModel.contentState: SignUpScreenState
+        get() = state.value
 
     private companion object {
         const val MERCHANT_NAME = "merchantName"
