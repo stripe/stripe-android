@@ -13,6 +13,7 @@ import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
@@ -135,6 +136,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
         set(value) {
