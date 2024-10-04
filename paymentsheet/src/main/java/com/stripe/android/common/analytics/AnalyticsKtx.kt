@@ -76,3 +76,11 @@ internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(
 internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
 }
+
+internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
+    return when (this) {
+        PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
+        PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
+        PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
+    }
+}

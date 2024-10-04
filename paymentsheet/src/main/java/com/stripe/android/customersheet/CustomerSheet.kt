@@ -279,8 +279,8 @@ class CustomerSheet internal constructor(
                 this.appearance = appearance
             }
 
-            fun googlePayEnabled(googlePayConfiguration: Boolean) = apply {
-                this.googlePayEnabled = googlePayConfiguration
+            fun googlePayEnabled(googlePayEnabled: Boolean) = apply {
+                this.googlePayEnabled = googlePayEnabled
             }
 
             fun headerTextForSelectionScreen(headerTextForSelectionScreen: String?) = apply {

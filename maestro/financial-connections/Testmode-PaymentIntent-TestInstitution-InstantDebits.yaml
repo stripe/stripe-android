@@ -28,7 +28,8 @@ tags:
 - inputText: "6223115555"
 - tapOn: "Continue with Link"
 # Select bank
-- tapOn: "Test Institution"
+- tapOn:
+    id: "bcinst_Jg18xEfPHevfHP"
 # Bypass Chrome on-boarding screen
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
