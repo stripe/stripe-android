@@ -14,16 +14,11 @@ class PayoutsExampleViewModel(
     @OptIn(PrivateBetaConnectSDK::class)
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
         viewModelScope.launch {
-            @OptIn(PrivateBetaConnectSDK::class)
-            fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
-                viewModelScope.launch {
-                    val clientSecret = embeddedComponentService.fetchClientSecret()
-                    if (clientSecret != null) {
-                        resultCallback.onResult(clientSecret)
-                    } else {
-                        resultCallback.onError()
-                    }
-                }
+            val clientSecret = embeddedComponentService.fetchClientSecret()
+            if (clientSecret != null) {
+                resultCallback.onResult(clientSecret)
+            } else {
+                resultCallback.onError()
             }
         }
     }
