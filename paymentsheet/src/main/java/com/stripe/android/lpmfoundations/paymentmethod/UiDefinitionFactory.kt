@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -88,7 +89,9 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Simple : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(): SupportedPaymentMethod
+        fun createSupportedPaymentMethod(
+            incentiveParams: IncentiveParams? = null,
+        ): SupportedPaymentMethod
 
         fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
             return createSupportedPaymentMethod().asFormHeaderInformation()
@@ -113,9 +116,10 @@ internal sealed interface UiDefinitionFactory {
     fun supportedPaymentMethod(
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
+        incentiveParams: IncentiveParams?,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
-            createSupportedPaymentMethod()
+            createSupportedPaymentMethod(incentiveParams)
         }
 
         is RequiresSharedDataSpec -> {

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.model.PaymentMethodCode
 
 internal data class DisplayablePaymentMethod(
@@ -12,5 +13,6 @@ internal data class DisplayablePaymentMethod(
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,
     val subtitle: ResolvableString? = null,
+    val incentiveParams: IncentiveParams?,
     val onClick: () -> Unit,
 )

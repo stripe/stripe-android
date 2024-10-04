@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
@@ -27,7 +28,9 @@ internal object SwishDefinition : PaymentMethodDefinition {
 }
 
 private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        incentiveParams: IncentiveParams?,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = SwishDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,

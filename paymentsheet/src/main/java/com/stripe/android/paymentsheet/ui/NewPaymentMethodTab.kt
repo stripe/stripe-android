@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -9,8 +12,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 
@@ -21,7 +24,6 @@ private object PaymentMethodUISpacing {
 
 @Composable
 internal fun NewPaymentMethodTab(
-    minViewWidth: Dp,
     iconRes: Int,
     iconUrl: String?,
     imageLoader: StripeImageLoader,
@@ -30,7 +32,8 @@ internal fun NewPaymentMethodTab(
     isEnabled: Boolean,
     iconRequiresTinting: Boolean,
     modifier: Modifier = Modifier,
-    onItemSelectedListener: () -> Unit
+    incentiveParams: IncentiveParams?,
+    onItemSelectedListener: () -> Unit,
 ) {
     RowButton(
         isEnabled = isEnabled,
@@ -42,20 +45,27 @@ internal fun NewPaymentMethodTab(
             top = PaymentMethodUISpacing.cardPadding,
         ),
         verticalArrangement = Arrangement.Top,
-        modifier = modifier
-            .height(60.dp)
-            .widthIn(min = minViewWidth),
+        modifier = modifier.height(60.dp),
     ) {
-        PaymentMethodIcon(
-            iconRes = iconRes,
-            iconUrl = iconUrl,
-            imageLoader = imageLoader,
-            iconRequiresTinting = iconRequiresTinting,
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-                .height(PaymentMethodUISpacing.iconSize)
-                .widthIn(max = 36.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            PaymentMethodIcon(
+                iconRes = iconRes,
+                iconUrl = iconUrl,
+                imageLoader = imageLoader,
+                iconRequiresTinting = iconRequiresTinting,
+                contentAlignment = Alignment.CenterStart,
+                modifier = Modifier
+                    .height(PaymentMethodUISpacing.iconSize)
+                    .widthIn(max = 36.dp),
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            incentiveParams?.Content(tinyMode = true)
+        }
 
         LpmSelectorText(
             text = title,

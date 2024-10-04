@@ -11,12 +11,14 @@ internal sealed class USBankAccountFormScreenState(
 ) : Parcelable {
     abstract val primaryButtonText: ResolvableString
     abstract val mandateText: ResolvableString?
+    abstract val incentiveEligible: Boolean
 
     @Parcelize
     data class BillingDetailsCollection(
         override val error: ResolvableString? = null,
         override val primaryButtonText: ResolvableString,
         override val isProcessing: Boolean,
+        override val incentiveEligible: Boolean,
     ) : USBankAccountFormScreenState() {
 
         override val mandateText: ResolvableString?
@@ -29,6 +31,7 @@ internal sealed class USBankAccountFormScreenState(
         val bankName: String?,
         val last4: String?,
         val intentId: String?,
+        override val incentiveEligible: Boolean,
         override val primaryButtonText: ResolvableString,
         override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()
@@ -38,6 +41,7 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
         val intentId: String?,
+        override val incentiveEligible: Boolean,
         override val primaryButtonText: ResolvableString,
         override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()
@@ -48,6 +52,7 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String?,
         val bankName: String,
         val last4: String?,
+        override val incentiveEligible: Boolean,
         override val primaryButtonText: ResolvableString,
         override val mandateText: ResolvableString?,
     ) : USBankAccountFormScreenState()

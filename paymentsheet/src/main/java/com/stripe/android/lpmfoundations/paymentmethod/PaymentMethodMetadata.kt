@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPayme
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -47,6 +48,7 @@ internal data class PaymentMethodMetadata(
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
+    val consumerIncentive: LinkConsumerIncentive?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -91,7 +93,16 @@ internal data class PaymentMethodMetadata(
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+
+            val incentiveParams = consumerIncentive?.incentiveParams?.takeIf {
+                consumerIncentive.paymentMethod == definition.incentiveType
+            }
+
+            definition.uiDefinitionFactory().supportedPaymentMethod(
+                definition = definition,
+                sharedDataSpecs = sharedDataSpecs,
+                incentiveParams = incentiveParams,
+            )
         }
     }
 
@@ -283,6 +294,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                consumerIncentive = elementsSession.linkSettings?.consumerIncentive,
                 isGooglePayReady = isGooglePayReady,
             )
         }
@@ -315,6 +327,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                consumerIncentive = elementsSession.linkSettings?.consumerIncentive,
                 externalPaymentMethodSpecs = emptyList(),
             )
         }

@@ -6,6 +6,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.IncentiveParams
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BlikElement
@@ -29,7 +31,9 @@ internal object BlikDefinition : PaymentMethodDefinition {
 }
 
 private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        incentiveParams: IncentiveParams?,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,

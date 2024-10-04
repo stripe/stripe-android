@@ -184,6 +184,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     paymentMethodId = result.paymentMethodId,
                     last4 = result.last4,
                     bankName = result.bankName,
+                    incentiveEligible = result.incentiveEligible,
                 ),
             )
         }

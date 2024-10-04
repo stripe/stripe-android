@@ -53,6 +53,7 @@ data class CollectBankAccountResponseInternal(
     data class InstantDebitsData(
         val paymentMethodId: String,
         val last4: String?,
-        val bankName: String?
+        val bankName: String?,
+        val incentiveEligible: Boolean,
     ) : StripeModel
 }

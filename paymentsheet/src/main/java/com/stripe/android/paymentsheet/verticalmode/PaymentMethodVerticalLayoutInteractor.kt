@@ -65,7 +65,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 }
 
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
     private val formElementsForCode: (code: String) -> List<FormElement>,
@@ -272,6 +272,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     onClick = {
                         updateSelection(PaymentSelection.Link)
                     },
+                    incentiveParams = null,
                 )
             }
 
@@ -287,6 +288,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     onClick = {
                         updateSelection(PaymentSelection.GooglePay)
                     },
+                    incentiveParams = null,
                 )
             }
         }

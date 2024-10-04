@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
@@ -30,7 +31,9 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 }
 
 private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        incentiveParams: IncentiveParams?,
+    ): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,

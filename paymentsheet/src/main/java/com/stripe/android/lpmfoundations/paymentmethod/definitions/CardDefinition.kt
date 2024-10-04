@@ -12,6 +12,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
+import com.stripe.android.model.IncentiveParams
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -45,7 +47,9 @@ internal object CardDefinition : PaymentMethodDefinition {
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        incentiveParams: IncentiveParams?,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
         displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
         iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,

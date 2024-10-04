@@ -26,14 +26,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.Content
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -50,6 +55,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -67,6 +73,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
+                incentiveEligible = usBankAccountFormArgs.incentiveParams != null,
                 linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
@@ -95,6 +102,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
                     instantDebits = usBankAccountFormArgs.instantDebits,
+                    incentiveParams = usBankAccountFormArgs.incentiveParams,
                     formArgs = formArgs,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
@@ -109,6 +117,9 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.MandateCollection -> {
                 AccountPreviewScreen(
                     formArgs = formArgs,
+                    incentiveParams = usBankAccountFormArgs.incentiveParams.takeIf {
+                        screenState.incentiveEligible
+                    },
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -128,6 +139,9 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 AccountPreviewScreen(
                     formArgs = formArgs,
+                    incentiveParams = usBankAccountFormArgs.incentiveParams.takeIf {
+                        screenState.incentiveEligible
+                    },
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -147,6 +161,9 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.SavedAccount -> {
                 AccountPreviewScreen(
                     formArgs = formArgs,
+                    incentiveParams = usBankAccountFormArgs.incentiveParams.takeIf {
+                        screenState.incentiveEligible
+                    },
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -170,6 +187,7 @@ internal fun USBankAccountForm(
 @Composable
 internal fun BillingDetailsCollectionScreen(
     formArgs: FormArguments,
+    incentiveParams: IncentiveParams?,
     instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
@@ -193,12 +211,20 @@ internal fun BillingDetailsCollectionScreen(
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
         )
+
+        if (incentiveParams != null) {
+            IncentiveDisclaimer(
+                incentiveParams = incentiveParams,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
     }
 }
 
 @Composable
 internal fun AccountPreviewScreen(
     formArgs: FormArguments,
+    incentiveParams: IncentiveParams?,
     bankName: String?,
     last4: String?,
     showCheckbox: Boolean,
@@ -227,15 +253,36 @@ internal fun AccountPreviewScreen(
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
         )
+
         AccountDetailsForm(
             showCheckbox = showCheckbox,
             isProcessing = isProcessing,
             bankName = bankName,
             last4 = last4,
             saveForFutureUseElement = saveForFutureUseElement,
+            incentiveParams = incentiveParams,
             onRemoveAccount = onRemoveAccount,
         )
     }
+}
+
+@Composable
+internal fun IncentiveDisclaimer(
+    incentiveParams: IncentiveParams,
+    modifier: Modifier = Modifier
+) {
+    Html(
+        html = incentiveParams.disclaimer,
+        color = MaterialTheme.stripeColors.placeholderText,
+        style = MaterialTheme.typography.caption.copy(
+            textAlign = TextAlign.Start,
+            fontWeight = FontWeight.Normal,
+        ),
+        modifier = modifier,
+        urlSpanStyle = SpanStyle(
+            color = MaterialTheme.colors.primary
+        ),
+    )
 }
 
 @Composable
@@ -404,6 +451,7 @@ private fun AccountDetailsForm(
     bankName: String?,
     last4: String?,
     saveForFutureUseElement: SaveForFutureUseElement,
+    incentiveParams: IncentiveParams?,
     onRemoveAccount: () -> Unit,
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
@@ -441,11 +489,29 @@ private fun AccountDetailsForm(
                         modifier = Modifier.size(24.dp),
                     )
 
-                    Text(
-                        text = "$bankName •••• $last4",
-                        modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
-                        color = MaterialTheme.stripeColors.onComponent,
-                    )
+                    Column {
+                        if (bankName != null) {
+                            Text(
+                                text = bankName,
+                                modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
+                                color = MaterialTheme.stripeColors.onComponent,
+                                style = MaterialTheme.typography.h5,
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = "•••• $last4",
+                                modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
+                                color = MaterialTheme.stripeColors.onComponent,
+                            )
+
+                            incentiveParams?.Content(tinyMode = true)
+                        }
+                    }
                 }
 
                 IconButton(

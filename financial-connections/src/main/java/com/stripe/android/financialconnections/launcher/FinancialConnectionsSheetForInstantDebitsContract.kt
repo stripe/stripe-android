@@ -44,7 +44,8 @@ class FinancialConnectionsSheetForInstantDebitsContract :
             else -> Completed(
                 paymentMethodId = instantDebits.paymentMethodId,
                 last4 = instantDebits.last4,
-                bankName = instantDebits.bankName
+                bankName = instantDebits.bankName,
+                incentiveEligible = instantDebits.incentiveEligible,
             )
         }
     }

@@ -5,13 +5,17 @@ import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.IncentiveParams
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.uicore.elements.FormElement
 
 internal class ExternalPaymentMethodUiDefinitionFactory(
     private val externalPaymentMethodSpec: ExternalPaymentMethodSpec
 ) : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        incentiveParams: IncentiveParams?,
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,
             displayName = externalPaymentMethodSpec.label.resolvableString,
@@ -19,6 +23,7 @@ internal class ExternalPaymentMethodUiDefinitionFactory(
             darkThemeIconUrl = externalPaymentMethodSpec.darkImageUrl,
             iconResource = 0,
             iconRequiresTinting = false,
+            incentiveParams = incentiveParams,
         )
     }
 

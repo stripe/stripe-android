@@ -8,6 +8,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -77,10 +79,10 @@ internal fun NewPaymentMethodTabLayoutUI(
                     item.lightThemeIconUrl
                 }
                 NewPaymentMethodTab(
-                    modifier = Modifier.testTag(
-                        TEST_TAG_LIST + item.code
-                    ),
-                    minViewWidth = viewWidth,
+                    modifier = Modifier
+                        .testTag(TEST_TAG_LIST + item.code)
+                        .fillMaxWidth()
+                        .widthIn(min = viewWidth),
                     iconRes = item.iconResource,
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
@@ -88,6 +90,7 @@ internal fun NewPaymentMethodTabLayoutUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     iconRequiresTinting = item.iconRequiresTinting,
+                    incentiveParams = item.incentiveParams,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }

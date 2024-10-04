@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
+import com.stripe.android.model.IncentiveParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
@@ -36,6 +37,8 @@ internal data class SupportedPaymentMethod(
 
     /** The subtitle, or marketing copy for an LPM. */
     val subtitle: ResolvableString? = null,
+
+    val incentiveParams: IncentiveParams?,
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
@@ -44,6 +47,7 @@ internal data class SupportedPaymentMethod(
         @DrawableRes iconResource: Int,
         iconRequiresTinting: Boolean = false,
         subtitle: ResolvableString? = null,
+        incentiveParams: IncentiveParams? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = displayNameResource.resolvableString,
@@ -52,6 +56,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        incentiveParams = incentiveParams,
     )
 
     constructor(
@@ -62,6 +67,7 @@ internal data class SupportedPaymentMethod(
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
         subtitle: ResolvableString? = null,
+        incentiveParams: IncentiveParams? = null,
     ) : this(
         code = code,
         displayName = displayNameResource.resolvableString,
@@ -70,6 +76,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = darkThemeIconUrl,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        incentiveParams = incentiveParams,
     )
 
     fun asFormHeaderInformation(): FormHeaderInformation {
@@ -106,6 +113,7 @@ internal data class SupportedPaymentMethod(
             iconRequiresTinting = iconRequiresTinting,
             subtitle = subtitle,
             onClick = onClick,
+            incentiveParams = incentiveParams,
         )
     }
 }

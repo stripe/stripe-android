@@ -17,7 +17,8 @@ sealed interface CollectBankAccountForInstantDebitsResult : Parcelable {
         val intent: StripeIntent,
         val paymentMethodId: String,
         val last4: String?,
-        val bankName: String?
+        val bankName: String?,
+        val incentiveEligible: Boolean,
     ) : CollectBankAccountForInstantDebitsResult
 
     @Parcelize
@@ -56,7 +57,8 @@ internal fun CollectBankAccountResultInternal.toInstantDebitsResult(): CollectBa
                         intent = response.intent,
                         paymentMethodId = response.instantDebitsData.paymentMethodId,
                         last4 = response.instantDebitsData.last4,
-                        bankName = response.instantDebitsData.bankName
+                        bankName = response.instantDebitsData.bankName,
+                        incentiveEligible = response.instantDebitsData.incentiveEligible,
                     )
                 }
             }

@@ -335,6 +335,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 bankName = result.bankName,
                 last4 = result.last4,
                 intentId = result.intent.id,
+                incentiveEligible = result.incentiveEligible,
                 primaryButtonText = buildPrimaryButtonText(),
                 mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
             )
@@ -352,6 +353,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         paymentAccount = paymentAccount,
                         financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                         intentId = intentId,
+                        incentiveEligible = false,
                         primaryButtonText = buildPrimaryButtonText(),
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
                     )
@@ -367,6 +369,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         bankName = paymentAccount.institutionName,
                         last4 = paymentAccount.last4,
                         intentId = intentId,
+                        incentiveEligible = false,
                         primaryButtonText = buildPrimaryButtonText(),
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                     )
@@ -427,6 +430,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
                 primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
+                incentiveEligible = args.incentiveEligible,
                 isProcessing = false,
             )
         }
@@ -452,6 +456,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         } else {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
+                incentiveEligible = args.incentiveEligible,
                 isProcessing = false,
             )
         }
@@ -693,6 +698,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val incentiveEligible: Boolean,
         val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
