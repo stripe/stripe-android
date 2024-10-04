@@ -45,3 +45,4 @@ jobs:
         with:
           appId: "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
           serviceCredentialsFileContent: ${{ secrets.PAYMENTS_GOOGLE_CLOUD_KEY }}
+          file: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk
