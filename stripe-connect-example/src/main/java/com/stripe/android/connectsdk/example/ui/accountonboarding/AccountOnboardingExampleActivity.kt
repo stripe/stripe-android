@@ -35,7 +35,6 @@ class AccountOnboardingExampleActivity : ComponentActivity() {
                 }
 
                 MainContent(title = "Account Onboarding Example") {
-
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,

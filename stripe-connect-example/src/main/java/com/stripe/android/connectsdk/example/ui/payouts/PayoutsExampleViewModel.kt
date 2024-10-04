@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class PayoutsExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
-): ViewModel() {
+) : ViewModel() {
 
     @OptIn(PrivateBetaConnectSDK::class)
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
