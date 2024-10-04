@@ -67,51 +67,37 @@ internal class CustomerAdapterDataSource @Inject constructor(
         }.toCustomerSheetDataResult()
     }
 
-    override suspend fun retrievePaymentMethods() = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.retrievePaymentMethods()
-        }.toCustomerSheetDataResult()
+    override suspend fun retrievePaymentMethods() = runCatchingAdapterTask {
+        customerAdapter.retrievePaymentMethods()
     }
 
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ) = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.updatePaymentMethod(paymentMethodId, params)
-        }.toCustomerSheetDataResult()
+    ) = runCatchingAdapterTask {
+        customerAdapter.updatePaymentMethod(paymentMethodId, params)
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String) = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.attachPaymentMethod(paymentMethodId)
-        }.toCustomerSheetDataResult()
+    override suspend fun attachPaymentMethod(paymentMethodId: String) = runCatchingAdapterTask {
+        customerAdapter.attachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun detachPaymentMethod(paymentMethodId: String) = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.detachPaymentMethod(paymentMethodId)
-        }.toCustomerSheetDataResult()
+    override suspend fun detachPaymentMethod(paymentMethodId: String) = runCatchingAdapterTask {
+        customerAdapter.detachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun retrieveSavedSelection() = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.retrieveSelectedPaymentOption().map { result ->
-                result?.toSavedSelection()
-            }
-        }.toCustomerSheetDataResult()
+    override suspend fun retrieveSavedSelection() = runCatchingAdapterTask {
+        customerAdapter.retrieveSelectedPaymentOption().map { result ->
+            result?.toSavedSelection()
+        }
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?) = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption())
-        }.toCustomerSheetDataResult()
+    override suspend fun setSavedSelection(selection: SavedSelection?) = runCatchingAdapterTask {
+        customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption())
     }
 
-    override suspend fun retrieveSetupIntentClientSecret() = withContext(workContext) {
-        runCatchingAdapterTask {
-            customerAdapter.setupIntentClientSecretForCustomerAttach()
-        }.toCustomerSheetDataResult()
+    override suspend fun retrieveSetupIntentClientSecret() = runCatchingAdapterTask {
+        customerAdapter.setupIntentClientSecretForCustomerAttach()
     }
 
     private suspend fun fetchElementsSession(): Result<ElementsSession> {
@@ -167,13 +153,13 @@ internal class CustomerAdapterDataSource @Inject constructor(
 
     private suspend fun <T> runCatchingAdapterTask(
         task: suspend () -> CustomerAdapter.Result<T>
-    ): CustomerAdapter.Result<T> {
-        return runCatching {
+    ): CustomerSheetDataResult<T> = withContext(workContext) {
+        runCatching {
             task()
         }.fold(
-            onSuccess = { it },
+            onSuccess = { it.toCustomerSheetDataResult() },
             onFailure = {
-                CustomerAdapter.Result.failure(cause = it, displayMessage = null)
+                CustomerSheetDataResult.failure(cause = it, displayMessage = null)
             }
         )
     }
