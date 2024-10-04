@@ -191,6 +191,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class SelectPaymentMethod(
         code: String,
         currency: String?,
+        linkContext: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -199,6 +200,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to code,
+            FIELD_LINK_CONTEXT to linkContext,
         )
     }
 
