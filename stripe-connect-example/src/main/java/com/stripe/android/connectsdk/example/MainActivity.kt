@@ -130,9 +130,9 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun BetaBadge() {
-        val borderColor = Color(0xffa7e7fc) // none
-        val backgroundColor = Color(0xffcbf5fd) // Color(0xff051a4c)
-        val textColor = Color(0xff045ad0) // none
+        val borderColor = Color(DEFAULT_BORDER_COLOR)
+        val backgroundColor = Color(DEFAULT_BACKGROUND_COLOR)
+        val textColor = Color(DEFAULT_TEXT_COLOR)
         val shape = RoundedCornerShape(4.dp)
         val labelMediumEmphasized = TextStyle.Default.copy(
             fontSize = 14.sp,
@@ -173,5 +173,11 @@ class MainActivity : ComponentActivity() {
         ConnectSdkExampleTheme {
             BetaBadge()
         }
+    }
+
+    companion object {
+        private const val DEFAULT_BORDER_COLOR = 0xffa7e7fc
+        private const val DEFAULT_BACKGROUND_COLOR = 0xffcbf5fd
+        private const val DEFAULT_TEXT_COLOR = 0xffcbf5fd
     }
 }
