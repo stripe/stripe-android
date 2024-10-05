@@ -174,7 +174,6 @@ class CustomerSheet internal constructor(
     /**
      * Configuration for [CustomerSheet]
      */
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @ExperimentalCustomerSheetApi
     @Parcelize
     @Poko

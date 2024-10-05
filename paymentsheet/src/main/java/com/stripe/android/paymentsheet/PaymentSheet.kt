@@ -604,7 +604,7 @@ class PaymentSheet internal constructor(
         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
         Note: This is only a client-side solution.
          */
-        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+        @property:ExperimentalCardBrandFilteringApi internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -1568,7 +1568,7 @@ class PaymentSheet internal constructor(
          * Accept all card brands supported by Stripe
          */
         @Parcelize
-        object All : CardBrandAcceptance()
+        data object All : CardBrandAcceptance()
 
         /**
          * Accept only the card brands specified in the associated value
