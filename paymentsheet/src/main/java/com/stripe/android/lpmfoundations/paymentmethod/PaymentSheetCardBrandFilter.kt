@@ -19,9 +19,11 @@ class PaymentSheetCardBrandFilter(
             }
             is PaymentSheet.CardBrandAcceptance.Allowed -> {
                 val brandCategory = cardBrand.toBrandCategory()
-                if (brandCategory != null && !cardBrandAcceptance.brands.contains(brandCategory)) {
-                    // Log event if necessary
-                    // For example: Log.d("PaymentSheet", "${cardBrand.name} is not accepted")
+                if (brandCategory == null) {
+                    // TODO(porter) Log event for disallowed brand
+                    false
+                } else if (!cardBrandAcceptance.brands.contains(brandCategory)) {
+                    // TODO(porter) Log event for disallowed brand
                     false
                 } else {
                     true
@@ -30,14 +32,17 @@ class PaymentSheetCardBrandFilter(
             is PaymentSheet.CardBrandAcceptance.Disallowed -> {
                 val brandCategory = cardBrand.toBrandCategory()
                 if (brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)) {
-                    // Log event if necessary
-                    // For example: Log.d("PaymentSheet", "${cardBrand.name} is not accepted")
+                    // TODO(porter) Log event for disallowed brand
                     false
                 } else {
                     true
                 }
             }
         }
+    }
+
+    companion object {
+        val DEFAULT = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
     }
 }
 

@@ -477,7 +477,6 @@ class PaymentSheet internal constructor(
     }
 
     /** Configuration for [PaymentSheet] **/
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Parcelize
     data class Configuration internal constructor(
         /**
@@ -591,13 +590,6 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
-        /**
-         By default, PaymentSheet will accept all supported cards by Stripe.
-         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
-         Note: This is only a client-side solution.
-         */
-        @property:ExperimentalCardBrandFilteringApi val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
@@ -606,6 +598,13 @@ class PaymentSheet internal constructor(
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
         internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+
+        /**
+        By default, PaymentSheet will accept all supported cards by Stripe.
+        You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+        Note: This is only a client-side solution.
+         */
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -750,12 +749,12 @@ class PaymentSheet internal constructor(
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
-            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -810,12 +809,6 @@ class PaymentSheet internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            fun cardBrandAcceptance(
-                cardBrandAcceptance: CardBrandAcceptance
-            ) = apply {
-                this.cardBrandAcceptance = cardBrandAcceptance
-            }
-
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
@@ -858,6 +851,13 @@ class PaymentSheet internal constructor(
             @ExperimentalPaymentMethodLayoutApi
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
                 this.paymentMethodLayout = paymentMethodLayout
+            }
+
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
             }
 
             fun build() = Configuration(
@@ -1536,7 +1536,6 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
-    @ExperimentalCardBrandFilteringApi
     sealed class CardBrandAcceptance : Parcelable {
 
         /**
