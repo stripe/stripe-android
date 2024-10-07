@@ -516,4 +516,5 @@
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.24 (*)
 +--- androidx.compose.ui:ui:1.5.4 (*)
 +--- androidx.compose.foundation:foundation:1.5.4 (*)
-\--- androidx.compose.material:material:1.5.4 (*)
++--- androidx.compose.material:material:1.5.4 (*)
+\--- org.jetbrains.kotlin:kotlin-reflect:1.9.22 (*)

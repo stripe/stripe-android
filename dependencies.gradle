@@ -226,6 +226,7 @@ ext.testLibs = [
                 annotations: "org.jetbrains.kotlin:kotlin-test-annotations-common:${versions.kotlin}",
                 coroutines : "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.kotlinCoroutines}",
                 junit      : "org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}",
+                reflect    : "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}",
                 test       : "org.jetbrains.kotlin:kotlin-test:${versions.kotlin}",
         ],
         leakCanaryInstrumentation : "com.squareup.leakcanary:leakcanary-android-instrumentation:${versions.leakCanary}",
