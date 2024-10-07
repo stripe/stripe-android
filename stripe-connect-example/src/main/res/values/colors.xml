@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="default_border_color">#A7E7FC</color>
+    <color name="default_background_color">#CBF5FD</color>
+    <color name="default_text_color">#CBF5FD</color>
+</resources>

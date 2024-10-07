@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_onboarding">Account Onboarding</string>
+    <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
+    <string name="payouts">Payouts</string>
+    <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
+    <string name="connect_sdk_example">Connect SDK Example</string>
+</resources>
