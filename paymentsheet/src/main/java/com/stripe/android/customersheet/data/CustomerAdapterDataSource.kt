@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.map
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -22,7 +21,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Singleton
 internal class CustomerAdapterDataSource @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,

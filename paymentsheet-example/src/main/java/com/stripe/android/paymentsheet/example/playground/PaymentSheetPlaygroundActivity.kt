@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -84,7 +83,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -264,7 +263,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
@@ -367,7 +365,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     fun CustomerSheetUi(
         customerSheet: CustomerSheet,
@@ -490,7 +487,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
     ): Result<PaymentOption?> = withContext(Dispatchers.IO) {

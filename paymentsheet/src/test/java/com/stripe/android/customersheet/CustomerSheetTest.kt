@@ -25,7 +25,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetTest {
     @get:Rule

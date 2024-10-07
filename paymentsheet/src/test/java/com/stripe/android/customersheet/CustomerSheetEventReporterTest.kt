@@ -64,7 +64,6 @@ class CustomerSheetEventReporterTest {
         workContext = testDispatcher,
     )
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Test
     fun `onInit should fire analytics request with expected event value`() {
         eventReporter.onInit(configuration = CustomerSheetFixtures.MINIMUM_CONFIG)

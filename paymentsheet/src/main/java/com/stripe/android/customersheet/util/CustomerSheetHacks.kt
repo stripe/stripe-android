@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerSheetIntegrationType
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
@@ -25,7 +24,7 @@ import kotlinx.coroutines.flow.first
  * This objects holds references to objects that need to be shared across Activity boundaries
  * but can't be serialized, or objects that can't be injected where they are used.
  */
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 internal object CustomerSheetHacks {
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
     val initializationDataSource: Deferred<CustomerSheetInitializationDataSource>

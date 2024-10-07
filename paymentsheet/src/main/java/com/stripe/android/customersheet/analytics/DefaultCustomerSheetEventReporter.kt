@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -16,7 +15,6 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetEventReporter {
-    @OptIn(ExperimentalCustomerSheetApi::class)
     override fun onInit(configuration: CustomerSheet.Configuration) {
         fireEvent(
             CustomerSheetEvent.Init(configuration)

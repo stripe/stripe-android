@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -29,7 +28,6 @@ import kotlin.coroutines.CoroutineContext
         CoreCommonModule::class,
     ]
 )
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterComponent {
     val stripeCustomerAdapter: StripeCustomerAdapter
 
@@ -58,7 +56,6 @@ internal interface StripeCustomerAdapterComponent {
 }
 
 @Module
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
     companion object {
         @Provides

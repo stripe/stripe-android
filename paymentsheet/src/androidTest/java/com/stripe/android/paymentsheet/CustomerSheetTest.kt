@@ -5,7 +5,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
@@ -27,7 +26,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
     @get:Rule

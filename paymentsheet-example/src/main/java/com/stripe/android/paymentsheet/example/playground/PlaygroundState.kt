@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.playground
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -75,7 +74,6 @@ internal sealed interface PlaygroundState : Parcelable {
     }
 
     @Stable
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Parcelize
     data class Customer(
         private val snapshot: PlaygroundSettings.Snapshot,

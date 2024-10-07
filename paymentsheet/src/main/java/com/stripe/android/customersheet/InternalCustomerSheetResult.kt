@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(
         paymentOptionFactory: PaymentOptionFactory,

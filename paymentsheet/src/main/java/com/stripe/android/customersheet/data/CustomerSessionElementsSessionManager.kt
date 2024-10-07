@@ -4,7 +4,6 @@ import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -30,7 +29,7 @@ internal data class CustomerSessionElementsSession(
     val ephemeralKey: CachedCustomerEphemeralKey,
 )
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 @Singleton
 internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,

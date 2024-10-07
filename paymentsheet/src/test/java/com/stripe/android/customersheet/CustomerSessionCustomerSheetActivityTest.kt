@@ -41,7 +41,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSessionCustomerSheetActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
