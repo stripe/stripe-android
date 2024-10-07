@@ -16,6 +16,7 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.Locale
 import java.util.Scanner
+import java.util.UUID.randomUUID
 import javax.net.ssl.HttpsURLConnection
 import kotlin.coroutines.CoroutineContext
 
@@ -33,21 +34,21 @@ class SentryErrorReporter(
     private val osVersion: Int = Build.VERSION.SDK_INT
 ) : ErrorReporter {
 
-     override fun reportError(t: Throwable) {
+    override fun reportError(t: Throwable) {
         CoroutineScope(workContext).launch {
             runCatching {
                 send(
-                    createRequestBody(t)
+                    createEnvelopeBody(t)
                 )
             }.onFailure(::onFailure)
         }
     }
 
-    private fun send(requestBody: JSONObject) {
+    private fun send(envelopeBody: String) {
         createPostConnection().let { connection ->
             connection.outputStream.use { os ->
                 os.writer(StandardCharsets.UTF_8).use { osw ->
-                    osw.write(requestBody.toString())
+                    osw.write(envelopeBody)
                     osw.flush()
                 }
             }
@@ -74,10 +75,7 @@ class SentryErrorReporter(
         }
     }
 
-    private fun getResponseBody(
-        responseStream: InputStream
-    ) = runCatching {
-        // \A is the beginning of the stream boundary
+    private fun getResponseBody(responseStream: InputStream) = runCatching {
         val scanner = Scanner(responseStream, CHARSET).useDelimiter("\\A")
         if (scanner.hasNext()) {
             scanner.next()
@@ -93,7 +91,6 @@ class SentryErrorReporter(
 
             mapOf(
                 HEADER_CONTENT_TYPE to CONTENT_TYPE,
-                HEADER_USER_AGENT to USER_AGENT,
                 HEADER_SENTRY_AUTH to createSentryAuthHeader()
             ).forEach { (key, value) ->
                 setRequestProperty(key, value)
@@ -102,15 +99,23 @@ class SentryErrorReporter(
     }
 
     private fun openConnection(): HttpsURLConnection {
-        return URL("$HOST/api/${sentryConfig.projectId}/store/").openConnection() as HttpsURLConnection
+        return URL("$HOST/api/${sentryConfig.projectId}/envelope/").openConnection() as HttpsURLConnection
     }
 
-    @JvmSynthetic
     @VisibleForTesting
-    internal fun createRequestBody(
-        t: Throwable
-    ): JSONObject {
+    internal fun createEnvelopeBody(t: Throwable): String {
+        val eventId = generateEventId()
+        val header = JSONObject().put("event_id", eventId)
+        val itemHeaders = JSONObject().put("type", "event")
+        val itemPayload = createEventPayload(t, eventId)
+        return "$header\n$itemHeaders\n$itemPayload\n"
+    }
+
+    private fun createEventPayload(t: Throwable, eventId: String): JSONObject {
         return JSONObject()
+            .put("event_id", eventId)
+            .put("timestamp", System.currentTimeMillis() / 1000.0)
+            .put("platform", "android")
             .put("release", VERSION_NAME)
             .put(
                 "exception",
@@ -141,9 +146,7 @@ class SentryErrorReporter(
             .put("contexts", createRequestContexts())
     }
 
-    @JvmSynthetic
-    @VisibleForTesting
-    internal fun createRequestContexts(): JSONObject {
+    private fun createRequestContexts(): JSONObject {
         val packageInfo = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0)
         }.getOrNull()
@@ -181,9 +184,7 @@ class SentryErrorReporter(
             )
     }
 
-    @JvmSynthetic
-    @VisibleForTesting
-    internal fun createRequestStacktrace(t: Throwable): JSONObject {
+    private fun createRequestStacktrace(t: Throwable): JSONObject {
         return JSONObject()
             .put(
                 "frames",
@@ -203,22 +204,20 @@ class SentryErrorReporter(
     @JvmSynthetic
     @VisibleForTesting
     internal fun createSentryAuthHeader(): String {
-        return listOf(
-            "Sentry",
-            listOf(
-                "sentry_key" to sentryConfig.key,
-                "sentry_version" to sentryConfig.version,
-                "sentry_timestamp" to sentryConfig.getTimestamp(),
-                "sentry_client" to USER_AGENT,
-                "sentry_secret" to sentryConfig.secret
-            ).joinToString(separator = ", ") { (key, value) ->
-                "$key=$value"
-            }
-        ).joinToString(separator = " ")
+        return "Sentry " + listOf(
+            "sentry_key" to sentryConfig.key,
+            "sentry_version" to sentryConfig.version,
+            "sentry_client" to USER_AGENT
+        ).joinToString(", ") { (key, value) -> "$key=$value" }
     }
 
     private fun onFailure(exception: Throwable) {
         logger.error("Failed to send error report.", exception)
+    }
+
+    private fun generateEventId(): String {
+        // Generate a hexadecimal string representing a uuid4 value
+        return randomUUID().toString().replace("-", "")
     }
 
     interface Config {
@@ -234,9 +233,7 @@ class SentryErrorReporter(
         private const val HTTP_METHOD = "POST"
 
         private const val HEADER_CONTENT_TYPE = "Content-Type"
-        private const val CONTENT_TYPE = "application/json; charset=utf-8"
-
-        private const val HEADER_USER_AGENT = "User-Agent"
+        private const val CONTENT_TYPE = "application/x-sentry-envelope"
         private const val USER_AGENT = "Stripe/v1 android/$VERSION_NAME"
 
         private const val HEADER_SENTRY_AUTH = "X-Sentry-Auth"
