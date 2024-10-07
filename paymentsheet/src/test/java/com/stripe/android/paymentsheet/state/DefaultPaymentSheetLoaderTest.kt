@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -134,6 +135,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     sharedDataSpecs = emptyList(),
                     hasCustomerConfiguration = true,
                     isGooglePayReady = true,
+                    linkMode = null,
                 ),
             )
         )
@@ -568,6 +570,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            cardBrandChoice = null,
             flags = emptyMap(),
         )
 
@@ -602,6 +605,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = true,
+                linkMode = LinkMode.Passthrough,
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
             )
@@ -623,6 +627,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = false,
+                linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(
                     "link_authenticated_change_event_enabled" to false,
                     "link_bank_incentives_enabled" to false,
@@ -658,12 +663,55 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Populates Link configuration correctly with eligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isTrue()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
+    }
+
+    @Test
+    fun `Populates Link configuration correctly with ineligible card brand choice information`() = runTest {
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = false,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+
+        assertThat(cardBrandChoice?.eligible).isFalse()
+        assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
+    }
+
+    @Test
     fun `Disables link sign up if used before`() = runTest {
         val loader = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = false,
+                linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
             ),
@@ -689,6 +737,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = false,
+                linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
             )
@@ -909,7 +958,9 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
-        val loader = createPaymentSheetLoader()
+        val loader = createPaymentSheetLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
         val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
@@ -929,11 +980,12 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
-            linkMode = LinkMode.PaymentMethod,
+            linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -962,7 +1014,9 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
-        val loader = createPaymentSheetLoader()
+        val loader = createPaymentSheetLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -981,11 +1035,12 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkMode = LinkMode.PaymentMethod,
+            linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1072,7 +1127,12 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEligible = true)
+        val loader = createPaymentSheetLoader(
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -1841,6 +1901,7 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1861,11 +1922,12 @@ internal class DefaultPaymentSheetLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
-            linkMode = LinkMode.PaymentMethod,
+            linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1891,6 +1953,99 @@ internal class DefaultPaymentSheetLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
+        )
+    }
+
+    @Test
+    fun `Emits correct event when CVC recollection is required`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.LinkPaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = true
+        )
+    }
+
+    @Test
+    fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "usd"
+                ),
+                requireCvcRecollection = true
+            )
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.LinkPaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = true
+        )
+    }
+
+    @Test
+    fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 100L,
+                    currency = "usd"
+                ),
+                requireCvcRecollection = false
+            )
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = LinkMode.LinkPaymentMethod,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
@@ -1923,7 +2078,9 @@ internal class DefaultPaymentSheetLoaderTest {
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.savePaymentSelection(paymentSelection)
 
-        val loader = createPaymentSheetLoader()
+        val loader = createPaymentSheetLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
         val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
 
         loader.load(
@@ -1941,19 +2098,21 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
-            linkMode = LinkMode.PaymentMethod,
+            linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
+            requireCvcRecollection = false
         )
     }
 
     private fun createLinkSettings(passthroughModeEnabled: Boolean): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
-            linkFlags = mapOf(),
             linkPassthroughModeEnabled = passthroughModeEnabled,
+            linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
+            linkFlags = mapOf(),
             disableLinkSignup = false,
         )
     }
@@ -2012,7 +2171,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
-        isCbcEligible: Boolean = false,
+        cardBrandChoice: ElementsSession.CardBrandChoice? = null,
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
@@ -2024,7 +2183,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = linkSettings,
             sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
-            isCbcEligible = isCbcEligible,
+            cardBrandChoice = cardBrandChoice,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
@@ -2045,6 +2204,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkStore = linkStore,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
+            cvcRecollectionHandler = CvcRecollectionHandlerImpl()
         )
     }
 

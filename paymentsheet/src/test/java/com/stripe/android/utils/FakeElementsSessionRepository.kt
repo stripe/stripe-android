@@ -12,7 +12,7 @@ internal class FakeElementsSessionRepository(
     private val linkSettings: ElementsSession.LinkSettings?,
     private val sessionsCustomer: ElementsSession.Customer? = null,
     private val isGooglePayEnabled: Boolean = true,
-    private val isCbcEligible: Boolean = false,
+    private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
 ) : ElementsSessionRepository {
     data class Params(
@@ -45,11 +45,11 @@ internal class FakeElementsSessionRepository(
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
-                    isEligibleForCardBrandChoice = isCbcEligible,
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
                     externalPaymentMethodData = externalPaymentMethodData,
                     customer = sessionsCustomer,
+                    cardBrandChoice = cardBrandChoice,
                 )
             )
         }

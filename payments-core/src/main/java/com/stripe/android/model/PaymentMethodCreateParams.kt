@@ -317,7 +317,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun instantDebitsPaymentMethodId(): String? {
+    fun linkBankPaymentMethodId(): String? {
         val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
         return linkParams["payment_method_id"] as? String
     }
@@ -716,7 +716,12 @@ data class PaymentMethodCreateParams internal constructor(
                     expiryMonth = cardParams.expMonth,
                     expiryYear = cardParams.expYear,
                     cvc = cardParams.cvc,
-                    attribution = cardParams.attribution
+                    attribution = cardParams.attribution,
+                    networks = cardParams.networks?.preferred?.let {
+                        Card.Networks(
+                            preferred = it
+                        )
+                    }
                 ),
                 billingDetails = PaymentMethod.BillingDetails(
                     name = cardParams.name,

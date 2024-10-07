@@ -53,7 +53,7 @@ internal class TransformSpecToElements(
         ).mapNotNull {
             when (it) {
                 is StaticTextSpec -> it.transform()
-                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(arguments.amount))
+                is AfterpayClearpayTextSpec -> it.transform()
                 is AffirmTextSpec -> it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is MandateTextSpec -> it.transform(arguments.merchantName)

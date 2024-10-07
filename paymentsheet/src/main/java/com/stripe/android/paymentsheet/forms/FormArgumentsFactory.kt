@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -24,7 +23,6 @@ internal object FormArgumentsFactory {
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     fun create(
         paymentMethodCode: PaymentMethodCode,
         configuration: CustomerSheet.Configuration,

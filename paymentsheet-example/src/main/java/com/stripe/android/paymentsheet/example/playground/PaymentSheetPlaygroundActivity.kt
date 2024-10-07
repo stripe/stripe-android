@@ -41,10 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -84,7 +83,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCvcRecollectionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +92,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
                 viewModel::onPaymentSheetResult,
@@ -101,7 +99,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             )
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .cvcRecollectionEnabledCallback(viewModel.cvcCallback)
                 .build()
 
             val addressLauncher = rememberAddressLauncher(
@@ -112,23 +109,33 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
-            val customerAdapter by viewModel.customerAdapter.collectAsState()
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
-            val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
-                customerAdapter?.let { adapter ->
-                    rememberCustomerSheet(
-                        configuration = customerPlaygroundState.customerSheetConfiguration(),
-                        customerAdapter = adapter,
-                        callback = viewModel::onCustomerSheetCallback
-                    )
+            val customerPlaygroundState = playgroundState?.asCustomerState()
+            val customerSheet = if (customerPlaygroundState?.isUsingCustomerSession == true) {
+                val customerSessionProvider = remember(customerPlaygroundState) {
+                    viewModel.createCustomerSessionProvider(customerPlaygroundState)
                 }
+
+                rememberCustomerSheet(
+                    customerSessionProvider = customerSessionProvider,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            } else {
+                val adapter = remember(playgroundState) {
+                    viewModel.createCustomerAdapter(playgroundState)
+                }
+
+                rememberCustomerSheet(
+                    customerAdapter = adapter,
+                    callback = viewModel::onCustomerSheetCallback
+                )
             }
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
-                    endpoint.orEmpty(),
+                    currentUrl = endpoint,
                     onConfirm = { backendUrl ->
                         viewModel.onCustomUrlUpdated(backendUrl)
                         showCustomEndpointDialog = false
@@ -256,13 +263,12 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
-        customerSheet: CustomerSheet?,
+        customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
@@ -293,9 +299,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                     else -> Unit
                 }
             }
-            is PlaygroundState.Customer -> customerSheet?.run {
-                CustomerSheetUi(customerSheet = this)
-            }
+            is PlaygroundState.Customer -> CustomerSheetUi(
+                customerSheet = customerSheet,
+                playgroundState = playgroundState,
+            )
         }
     }
 
@@ -358,33 +365,37 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     fun CustomerSheetUi(
         customerSheet: CustomerSheet,
+        playgroundState: PlaygroundState.Customer,
     ) {
         val customerSheetState by viewModel.customerSheetState.collectAsState()
 
-        customerSheetState?.let { state ->
-            LaunchedEffect(state) {
-                if (state.shouldFetchPaymentOption) {
-                    fetchOption(customerSheet).onSuccess { option ->
-                        viewModel.customerSheetState.emit(
-                            CustomerSheetState(
-                                selectedPaymentOption = option,
-                                shouldFetchPaymentOption = false
-                            )
+        LaunchedEffect(playgroundState, customerSheetState) {
+            customerSheet.configure(
+                configuration = playgroundState.customerSheetConfiguration(),
+            )
+
+            if (customerSheetState?.shouldFetchPaymentOption == true) {
+                fetchOption(customerSheet).onSuccess { option ->
+                    viewModel.customerSheetState.emit(
+                        CustomerSheetState(
+                            selectedPaymentOption = option,
+                            shouldFetchPaymentOption = false
                         )
-                    }.onFailure { exception ->
-                        viewModel.status.emit(
-                            StatusMessage(
-                                message = "Failed to retrieve payment options:\n${exception.message}"
-                            )
+                    )
+                }.onFailure { exception ->
+                    viewModel.status.emit(
+                        StatusMessage(
+                            message = "Failed to retrieve payment options:\n${exception.message}"
                         )
-                    }
+                    )
                 }
             }
+        }
 
+        customerSheetState?.let { state ->
             if (state.shouldFetchPaymentOption) {
                 return
             }
@@ -436,7 +447,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
+                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
@@ -466,7 +478,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
+                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
@@ -474,7 +487,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
     ): Result<PaymentOption?> = withContext(Dispatchers.IO) {

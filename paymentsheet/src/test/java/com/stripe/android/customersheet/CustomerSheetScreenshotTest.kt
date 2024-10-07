@@ -7,6 +7,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,12 +18,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
@@ -37,9 +43,13 @@ internal class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
+    @get:Rule
+    val coroutineRule = CoroutineTestRule()
+
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
         instantDebits = false,
+        linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
@@ -47,7 +57,7 @@ internal class CustomerSheetScreenshotTest {
         clientSecret = null,
         shippingDetails = null,
         draftPaymentSelection = null,
-        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
         onMandateTextChanged = { _, _ -> },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },
@@ -65,10 +75,9 @@ internal class CustomerSheetScreenshotTest {
         isEditing = false,
         isGooglePayEnabled = false,
         primaryButtonVisible = false,
-        primaryButtonLabel = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        allowsRemovalOfLastSavedPaymentMethod = true,
+        canEdit = true,
         canRemovePaymentMethods = true,
+        isCbcEligible = false,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -76,7 +85,16 @@ internal class CustomerSheetScreenshotTest {
         formFieldValues = FormFieldValues(
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
-        formElements = emptyList(),
+        formElements = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFactory.create()
+        ).formElementsForCode(
+            code = PaymentMethod.Type.Card.code,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                linkConfigurationCoordinator = null,
+                onLinkInlineSignupStateChanged = {},
+            )
+        ) ?: listOf(),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -97,7 +115,6 @@ internal class CustomerSheetScreenshotTest {
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         errorReporter = FakeErrorReporter(),
     )
 
@@ -135,7 +152,6 @@ internal class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -172,7 +188,6 @@ internal class CustomerSheetScreenshotTest {
                     ),
                     isEditing = true,
                     isGooglePayEnabled = true,
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -191,7 +206,6 @@ internal class CustomerSheetScreenshotTest {
                     title = "Screenshot testing",
                     paymentSelection = PaymentSelection.GooglePay,
                     isGooglePayEnabled = true,
-                    primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
@@ -213,12 +227,37 @@ internal class CustomerSheetScreenshotTest {
                         PaymentMethodFixtures.US_BANK_ACCOUNT
                     ),
                     isGooglePayEnabled = false,
-                    primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text.".resolvableString
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
+        }
+    }
+
+    @Test
+    fun testAddCardForm() {
+        paparazzi.snapshot {
+            ViewModelStoreOwnerContext {
+                CustomerSheetScreen(
+                    viewState = addPaymentMethodViewState,
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testAddCardFormWithError() {
+        paparazzi.snapshot {
+            ViewModelStoreOwnerContext {
+                CustomerSheetScreen(
+                    viewState = addPaymentMethodViewState.copy(
+                        errorMessage = resolvableString("Something went wrong!")
+                    ),
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
         }
     }
 
@@ -292,10 +331,6 @@ internal class CustomerSheetScreenshotTest {
                 isLiveMode = true,
             ),
             isLiveMode = true,
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
-            savedPaymentMethods = emptyList(),
-            allowsRemovalOfLastSavedPaymentMethod = true,
-            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {
@@ -328,10 +363,6 @@ internal class CustomerSheetScreenshotTest {
                 isLiveMode = true,
             ),
             isLiveMode = true,
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
-            savedPaymentMethods = emptyList(),
-            allowsRemovalOfLastSavedPaymentMethod = false,
-            canRemovePaymentMethods = true,
         )
 
         paparazzi.snapshot {

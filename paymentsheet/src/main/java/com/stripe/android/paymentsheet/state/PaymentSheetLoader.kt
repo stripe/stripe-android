@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
@@ -76,6 +77,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
+    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheetLoader {
 
     @Suppress("LongMethod")
@@ -426,6 +428,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             billingCountryCode = config.defaultBillingDetails?.address?.country,
         )
 
+        val cardBrandChoice = elementsSession.cardBrandChoice?.let { cardBrandChoice ->
+            LinkConfiguration.CardBrandChoice(
+                eligible = cardBrandChoice.eligible,
+                preferredNetworks = cardBrandChoice.preferredNetworks,
+            )
+        }
+
         return LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = merchantName,
@@ -433,6 +442,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerInfo = customerInfo,
             shippingValues = shippingAddress,
             passthroughModeEnabled = passthroughModeEnabled,
+            cardBrandChoice = cardBrandChoice,
             flags = flags,
         )
     }
@@ -573,12 +583,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
-                linkMode = elementsSession.linkMode,
+                linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
+                    state.paymentMethodMetadata.stripeIntent,
+                    initializationMode
+                )
             )
         }
     }

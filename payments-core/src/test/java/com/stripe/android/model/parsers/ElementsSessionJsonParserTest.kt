@@ -16,6 +16,7 @@ import org.json.JSONObject
 import org.junit.Test
 
 class ElementsSessionJsonParserTest {
+
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
@@ -360,6 +361,95 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Test deferred livemode=true when publishable key does not have test or live`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_foobar",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            PaymentIntent(
+                id = "elements_session_1t6ejApXCS5",
+                clientSecret = null,
+                amount = 2000L,
+                currency = "usd",
+                captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = true,
+                setupFutureUsage = null,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
+    }
+
+    @Test
+    fun `Test deferred livemode=true when publishable key does not have test or live for setup mode`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Setup(
+                        currency = "usd",
+                        setupFutureUsage = StripeIntent.Usage.OffSession,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_foobar",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            SetupIntent(
+                id = "elements_session_1t6ejApXCS5",
+                clientSecret = null,
+                cancellationReason = null,
+                description = null,
+                nextActionData = null,
+                paymentMethodId = null,
+                paymentMethod = null,
+                status = null,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = true,
+                usage = StripeIntent.Usage.OffSession,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
+    }
+
+    @Test
     fun `Test deferred SetupIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
@@ -417,7 +507,8 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isTrue()
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
@@ -433,11 +524,12 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice?.eligible).isFalse()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
     }
 
     @Test
-    fun `Is not eligible for CBC if no info in the response`() {
+    fun `Is card brand choice is null if no info in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -449,7 +541,24 @@ class ElementsSessionJsonParserTest {
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         val session = parser.parse(intent)
 
-        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+        assertThat(session?.cardBrandChoice).isNull()
+    }
+
+    @Test
+    fun `Preferred networks is empty if not passed through response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.SetupIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS
+        val session = parser.parse(intent)
+
+        assertThat(session?.cardBrandChoice?.eligible).isTrue()
+        assertThat(session?.cardBrandChoice?.preferredNetworks).isEmpty()
     }
 
     @Test
@@ -663,6 +772,23 @@ class ElementsSessionJsonParserTest {
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
         assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+    }
+
+    @Test
+    fun parsePaymentIntent_excludesUnactivatedPaymentMethodTypesInLiveMode() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            apiKey = "pk_live_abc123",
+        ).parse(
+            JSONObject(
+                ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
+            )
+        )
+
+        assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("au_becs_debit")
     }
 
     private fun allowRedisplayTest(

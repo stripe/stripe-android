@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.analyticsValue
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -43,6 +44,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkMode: LinkMode?,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
+        requireCvcRecollection: Boolean = false
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val linkEnabled: Boolean = linkMode != null
@@ -50,10 +52,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_DURATION to duration?.asSeconds,
             FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
             FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
-            FIELD_ORDERED_LPMS to orderedLpms.joinToString(",")
+            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
+            FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
         ).plus(
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.value)
+                mapOf(FIELD_LINK_MODE to mode.analyticsValue)
             }.orEmpty()
         )
 
@@ -143,6 +146,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
+                    FIELD_PAYMENT_METHOD_LAYOUT to configuration.paymentMethodLayout.toAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -188,6 +192,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class SelectPaymentMethod(
         code: String,
         currency: String?,
+        linkContext: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -196,6 +201,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to code,
+            FIELD_LINK_CONTEXT to linkContext,
         )
     }
 
@@ -492,10 +498,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
+        const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
         const val FIELD_COMPOSE = "compose"
         const val FIELD_INTENT_TYPE = "intent_type"
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
+        const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
@@ -529,7 +537,13 @@ internal fun PaymentSelection?.linkContext(): String? {
     return when (this) {
         is PaymentSelection.Link -> "wallet"
         is PaymentSelection.New.USBankAccount -> {
-            "instant_debits".takeIf { instantDebits != null }
+            instantDebits?.let {
+                if (it.linkMode == LinkMode.LinkCardBrand) {
+                    "link_card_brand"
+                } else {
+                    "instant_debits"
+                }
+            }
         }
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,

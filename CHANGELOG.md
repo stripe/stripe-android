@@ -2,6 +2,32 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.51.1 - 2024-09-30
+* Stability and efficiency improvements.
+
+## 20.51.0 - 2024-09-23
+
+### PaymentSheet
+* [BREAKING][9295](https://github.com/stripe/stripe-android/pull/9295) Remove `ExperimentalCvcRecollectionApi` annotation. This is a breaking change for merchants using `@OptIn(ExperimentalCvcRecollectionApi::class)`.
+* [ADDED] CVC Recollection is now in GA. For more information see our docs [here](https://docs.stripe.com/payments/accept-a-payment?platform=android#android-cvc-recollection) for intent first integrations or [here](https://docs.stripe.com/payments/accept-a-payment-deferred?platform=android&type=payment#android-cvc-recollection) for deferred intent integrations.
+
+## 20.50.1 - 2024-09-16
+
+### PaymentSheet
+* [FIXED][9253](https://github.com/stripe/stripe-android/pull/9253) Fixed an issue where the US Bank Account mandate would reset when confirming the intent.
+
+## 20.50.0 - 2024-09-12
+
+### PaymentSheet
+* [FIXED][9236](https://github.com/stripe/stripe-android/pull/9236) Fixed an issue where merchant-preferred networks configured for CardInput views were ignored.
+
+### CustomerSheet
+* [BREAKING][9234](https://github.com/stripe/stripe-android/pull/9234) Updated the experimental `CustomerSheet` API for better process death handling.
+
+## 20.49.0 - 2024-09-09
+
+* [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.
+
 ## 20.48.6 - 2024-08-26
 * Stability and efficiency improvements.
 

@@ -26,9 +26,12 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
-    private var linkEnabled: Boolean = false
+    private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+
+    private val linkEnabled: Boolean
+        get() = linkMode != null
 
     override fun onInit(
         configuration: PaymentSheet.Configuration,
@@ -59,9 +62,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         initializationMode: PaymentSheet.InitializationMode,
         orderedLpms: List<String>,
+        requireCvcRecollection: Boolean
     ) {
         this.currency = currency
-        this.linkEnabled = linkMode != null
+        this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
 
         durationProvider.start(DurationProvider.Key.Checkout)
@@ -77,6 +81,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,
+                requireCvcRecollection = requireCvcRecollection
             )
         )
     }
@@ -150,6 +155,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 currency = currency,
                 linkEnabled = linkEnabled,
+                linkContext = determineLinkContextForPaymentMethodType(code),
                 googlePaySupported = googlePaySupported,
             )
         )
@@ -391,6 +397,18 @@ internal class DefaultEventReporter @Inject internal constructor(
                     additionalParams = event.params,
                 )
             )
+        }
+    }
+
+    private fun determineLinkContextForPaymentMethodType(code: String): String? {
+        return if (code == "link") {
+            if (linkMode == LinkMode.LinkCardBrand) {
+                "link_card_brand"
+            } else {
+                "instant_debits"
+            }
+        } else {
+            null
         }
     }
 }

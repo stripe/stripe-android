@@ -14,7 +14,11 @@ object PaymentMethodFactory {
         }
     }
 
-    fun PaymentMethod.update(last4: String?, addCbcNetworks: Boolean): PaymentMethod {
+    fun PaymentMethod.update(
+        last4: String?,
+        addCbcNetworks: Boolean,
+        brand: CardBrand = CardBrand.Visa
+    ): PaymentMethod {
         return copy(
             card = card?.copy(
                 last4 = last4,
@@ -25,7 +29,7 @@ object PaymentMethodFactory {
                     addCbcNetworks
                 },
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
-                brand = CardBrand.Visa,
+                brand = brand,
             )
         )
     }
@@ -87,6 +91,19 @@ object PaymentMethodFactory {
             liveMode = false,
             type = PaymentMethod.Type.USBankAccount,
             code = PaymentMethod.Type.USBankAccount.code,
+            usBankAccount = PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                bankName = "STRIPE TEST BANK",
+                fingerprint = "FFDMA0xfhBjWSZLu",
+                last4 = "6789",
+                financialConnectionsAccount = "fca_1PvmkYLu5o3P18Zp3o1YDi1z",
+                networks = PaymentMethod.USBankAccount.USBankNetworks(
+                    preferred = "ach",
+                    supported = listOf("ach")
+                ),
+                routingNumber = "110000000",
+            )
         )
     }
 
@@ -101,13 +118,7 @@ object PaymentMethodFactory {
     }
 
     fun convertCardToJson(paymentMethod: PaymentMethod): JSONObject {
-        val paymentMethodJson = JSONObject()
-
-        paymentMethodJson.put("id", paymentMethod.id)
-        paymentMethodJson.put("type", paymentMethod.type?.code)
-        paymentMethodJson.put("created", paymentMethod.created)
-        paymentMethodJson.put("customer", paymentMethod.customerId)
-        paymentMethodJson.put("livemode", paymentMethod.liveMode)
+        val paymentMethodJson = convertGenericPaymentMethodToJson(paymentMethod)
 
         val card = paymentMethod.card
         val cardJson = JSONObject()
@@ -130,6 +141,47 @@ object PaymentMethodFactory {
         cardJson.put("networks", networksJson)
 
         paymentMethodJson.put("card", cardJson)
+
+        return paymentMethodJson
+    }
+
+    fun convertUsBankAccountToJson(paymentMethod: PaymentMethod): JSONObject {
+        val paymentMethodJson = convertGenericPaymentMethodToJson(paymentMethod)
+
+        val usBankAccount = paymentMethod.usBankAccount!!
+        val usBankAccountJson = JSONObject()
+
+        usBankAccountJson.put("account_holder_type", usBankAccount.accountHolderType.value)
+        usBankAccountJson.put("account_type", usBankAccount.accountType.value)
+        usBankAccountJson.put("bank_name", usBankAccount.bankName)
+        usBankAccountJson.put("financial_connections_account", usBankAccount.financialConnectionsAccount)
+        usBankAccountJson.put("fingerprint", usBankAccount.fingerprint)
+        usBankAccountJson.put("last4", usBankAccount.last4)
+        usBankAccountJson.put("linked_account", usBankAccount.linkedAccount)
+        usBankAccountJson.put("routing_number", usBankAccount.routingNumber)
+
+        val networksJson = JSONObject()
+        networksJson.put("preferred", usBankAccount.networks?.preferred)
+        val supportedJson = JSONArray()
+        usBankAccount.networks?.supported?.forEach { supported ->
+            supportedJson.put(supported)
+        }
+        networksJson.put("supported", supportedJson)
+        usBankAccountJson.put("networks", networksJson)
+
+        paymentMethodJson.put("us_bank_account", usBankAccountJson)
+
+        return paymentMethodJson
+    }
+
+    private fun convertGenericPaymentMethodToJson(paymentMethod: PaymentMethod): JSONObject {
+        val paymentMethodJson = JSONObject()
+
+        paymentMethodJson.put("id", paymentMethod.id)
+        paymentMethodJson.put("type", paymentMethod.type?.code)
+        paymentMethodJson.put("created", paymentMethod.created)
+        paymentMethodJson.put("customer", paymentMethod.customerId)
+        paymentMethodJson.put("livemode", paymentMethod.liveMode)
 
         return paymentMethodJson
     }

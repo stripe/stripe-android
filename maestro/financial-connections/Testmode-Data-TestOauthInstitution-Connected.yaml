@@ -1,13 +1,13 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - edge
   - testmode-data
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
 - clearState
 - openLink: "stripeconnectionsexample://playground\
-    ?experience=FinancialConnections\
+    ?integration_type=Standalone\
+    &experience=FinancialConnections\
     &flow=Data\
     &financial_connections_override_native=native\
     &merchant=networking\
@@ -22,9 +22,9 @@ tags:
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
 # SELECT OAUTH INSTITUTION
-- tapOn: "Test OAuth Institution"
+- tapOn:
+    id: "bcinst_LLQZzmKZMjl0j0"
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######

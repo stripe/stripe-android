@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
-import android.content.res.Resources
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -13,18 +12,28 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.customersheet.data.CustomerSheetDataResult
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
+import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
+import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
+import com.stripe.android.customersheet.data.failureOrNull
+import com.stripe.android.customersheet.data.fold
+import com.stripe.android.customersheet.data.mapCatching
+import com.stripe.android.customersheet.data.onFailure
+import com.stripe.android.customersheet.data.onSuccess
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelComponent
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
+import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -47,6 +56,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -56,12 +67,14 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -72,15 +85,14 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel(
     application: Application, // TODO (jameswoo) remove application
-    initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
-    private val customerAdapterProvider: Deferred<CustomerAdapter>,
-    private val resources: Resources,
+    private val paymentMethodDataSourceProvider: Deferred<CustomerSheetPaymentMethodDataSource>,
+    private val intentDataSourceProvider: Deferred<CustomerSheetIntentDataSource>,
+    private val savedSelectionDataSourceProvider: Deferred<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
@@ -96,10 +108,8 @@ internal class CustomerSheetViewModel(
 
     @Inject constructor(
         application: Application,
-        initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
-        resources: Resources,
         configuration: CustomerSheet.Configuration,
         logger: Logger,
         stripeRepository: StripeRepository,
@@ -113,11 +123,11 @@ internal class CustomerSheetViewModel(
         errorReporter: ErrorReporter,
     ) : this(
         application = application,
-        initialBackStack = initialBackStack,
         originalPaymentSelection = originalPaymentSelection,
         paymentConfigurationProvider = paymentConfigurationProvider,
-        customerAdapterProvider = CustomerSheetHacks.adapter,
-        resources = resources,
+        paymentMethodDataSourceProvider = CustomerSheetHacks.paymentMethodDataSource,
+        intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
+        savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
         logger = logger,
         stripeRepository = stripeRepository,
@@ -133,7 +143,13 @@ internal class CustomerSheetViewModel(
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
-    private val backStack = MutableStateFlow(initialBackStack)
+    private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
+        listOf(
+            CustomerSheetViewState.Loading(
+                isLiveMode = isLiveModeProvider()
+            )
+        )
+    )
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -143,8 +159,58 @@ internal class CustomerSheetViewModel(
         scope = viewModelScope.plus(workContext)
     )
 
+    private val isEditing = MutableStateFlow(false)
+    private val selectionConfirmationState = MutableStateFlow(
+        SelectionConfirmationState(
+            isConfirming = false,
+            error = null,
+        )
+    )
+    private val customerState = MutableStateFlow(
+        CustomerState(
+            paymentMethods = listOf(),
+            configuration = configuration,
+            currentSelection = originalPaymentSelection,
+            permissions = CustomerPermissions(
+                canRemovePaymentMethods = false,
+            ),
+            metadata = null,
+        )
+    )
+
+    private val selectPaymentMethodState = combineAsStateFlow(
+        customerState,
+        selectionConfirmationState,
+        isEditing,
+    ) { customerState, selectionConfirmationState, editing ->
+        val paymentMethods = customerState.paymentMethods
+        val paymentMethodMetadata = customerState.metadata
+        val paymentSelection = customerState.currentSelection
+
+        val userCanEditAndIsEditing = editing && customerState.canEdit
+        val primaryButtonVisible = !userCanEditAndIsEditing && originalPaymentSelection != paymentSelection
+
+        CustomerSheetViewState.SelectPaymentMethod(
+            title = configuration.headerTextForSelectionScreen,
+            savedPaymentMethods = paymentMethods,
+            paymentSelection = paymentSelection,
+            isLiveMode = isLiveModeProvider(),
+            canRemovePaymentMethods = customerState.canRemove,
+            primaryButtonVisible = primaryButtonVisible,
+            isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
+            isEditing = userCanEditAndIsEditing,
+            isProcessing = selectionConfirmationState.isConfirming,
+            errorMessage = selectionConfirmationState.error,
+            isCbcEligible = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+            canEdit = customerState.canEdit,
+            mandateText = paymentSelection?.mandateText(
+                merchantName = configuration.merchantDisplayName,
+                isSetupFlow = false,
+            )?.takeIf { primaryButtonVisible }
+        )
+    }
+
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
-    var paymentMethodMetadata: PaymentMethodMetadata? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
     init {
@@ -155,6 +221,40 @@ internal class CustomerSheetViewModel(
         if (viewState.value is CustomerSheetViewState.Loading) {
             viewModelScope.launch(workContext) {
                 loadCustomerSheetState()
+            }
+        }
+
+        viewModelScope.launch {
+            selectPaymentMethodState.collectLatest { selectPaymentMethodState ->
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    selectPaymentMethodState
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            customerState.collectLatest { state ->
+                if (
+                    !state.canShowSavedPaymentMethods &&
+                    viewState.value is CustomerSheetViewState.SelectPaymentMethod
+                ) {
+                    delay(REMOVAL_TRANSITION_DELAY)
+
+                    transitionToAddPaymentMethod(isFirstPaymentMethod = true)
+
+                    selectionConfirmationState.value = SelectionConfirmationState(
+                        isConfirming = false,
+                        error = null,
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            customerState.collectLatest { state ->
+                if (!state.canEdit && isEditing.value) {
+                    isEditing.value = false
+                }
             }
         }
     }
@@ -215,7 +315,7 @@ internal class CustomerSheetViewModel(
 
     fun providePaymentMethodName(code: PaymentMethodCode?): ResolvableString {
         return code?.let {
-            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
+            customerState.value.metadata?.supportedPaymentMethodForCode(code)
         }?.displayName.orEmpty()
     }
 
@@ -247,13 +347,16 @@ internal class CustomerSheetViewModel(
                     supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
                     originalPaymentSelection = state.paymentSelection
-                    paymentMethodMetadata = state.paymentMethodMetadata
 
-                    transitionToInitialScreen(
+                    customerState.value = CustomerState(
                         paymentMethods = state.customerPaymentMethods,
-                        paymentSelection = state.paymentSelection,
-                        cbcEligibility = state.paymentMethodMetadata.cbcEligibility,
+                        configuration = configuration,
+                        currentSelection = state.paymentSelection,
+                        metadata = state.paymentMethodMetadata,
+                        permissions = state.customerPermissions,
                     )
+
+                    transitionToInitialScreen()
                 }
             },
             onFailure = { cause ->
@@ -264,26 +367,17 @@ internal class CustomerSheetViewModel(
         )
     }
 
-    private fun transitionToInitialScreen(
-        paymentMethods: List<PaymentMethod>,
-        paymentSelection: PaymentSelection?,
-        cbcEligibility: CardBrandChoiceEligibility,
-    ) {
-        if (paymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
-            transitionToAddPaymentMethod(
-                isFirstPaymentMethod = true,
-                cbcEligibility = cbcEligibility,
+    private fun transitionToInitialScreen() {
+        val customerState = customerState.value
+
+        if (customerState.canShowSavedPaymentMethods) {
+            transition(
+                to = selectPaymentMethodState.value,
+                reset = true
             )
         } else {
-            transition(
-                to = buildDefaultSelectPaymentMethod {
-                    it.copy(
-                        savedPaymentMethods = paymentMethods,
-                        paymentSelection = paymentSelection,
-                        cbcEligibility = cbcEligibility,
-                    )
-                },
-                reset = true
+            transitionToAddPaymentMethod(
+                isFirstPaymentMethod = true,
             )
         }
     }
@@ -315,18 +409,19 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onEditPressed() {
-        if (viewState.value.isEditing) {
+        if (!customerState.value.canEdit) {
+            return
+        }
+
+        val wasPreviouslyEditing = isEditing.value
+
+        if (wasPreviouslyEditing) {
             eventReporter.onEditCompleted()
         } else {
             eventReporter.onEditTapped()
         }
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            val isEditing = !it.isEditing
-            it.copy(
-                isEditing = isEditing,
-                primaryButtonVisible = !isEditing && originalPaymentSelection != it.paymentSelection,
-            )
-        }
+
+        isEditing.value = !wasPreviouslyEditing
     }
 
     private fun onAddPaymentMethodItemChanged(paymentMethod: SupportedPaymentMethod) {
@@ -335,6 +430,9 @@ internal class CustomerSheetViewModel(
                 return
             }
         }
+
+        val customerState = customerState.value
+        val paymentMethodMetadata = customerState.metadata
 
         eventReporter.onPaymentMethodSelected(paymentMethod.code)
 
@@ -347,7 +445,7 @@ internal class CustomerSheetViewModel(
                     paymentMethodCode = paymentMethod.code,
                     configuration = configuration,
                     merchantName = configuration.merchantDisplayName,
-                    cbcEligibility = it.cbcEligibility,
+                    cbcEligibility = customerState.cbcEligibility,
                 ),
                 formElements = paymentMethodMetadata?.formElementsForCode(
                     code = paymentMethod.code,
@@ -383,7 +481,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onFormFieldValuesCompleted(formFieldValues: FormFieldValues?) {
-        paymentMethodMetadata?.let { paymentMethodMetadata ->
+        customerState.value.metadata?.let { paymentMethodMetadata ->
             updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                 it.copy(
                     formFieldValues = formFieldValues,
@@ -408,8 +506,8 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerAdapter.Result<PaymentMethod> {
-        return awaitCustomerAdapter().detachPaymentMethod(
+    private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerSheetDataResult<PaymentMethod> {
+        return awaitPaymentMethodDataSource().detachPaymentMethod(
             paymentMethodId = paymentMethod.id!!,
         ).onSuccess {
             eventReporter.onRemovePaymentMethodSucceeded()
@@ -425,8 +523,8 @@ internal class CustomerSheetViewModel(
     private suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
         brand: CardBrand
-    ): CustomerAdapter.Result<PaymentMethod> {
-        return awaitCustomerAdapter().updatePaymentMethod(
+    ): CustomerSheetDataResult<PaymentMethod> {
+        return awaitPaymentMethodDataSource().updatePaymentMethod(
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
@@ -459,24 +557,16 @@ internal class CustomerSheetViewModel(
     private fun handleFailureToRemovePaymentMethod(
         displayMessage: String?,
     ) {
-        if (viewState.value is CustomerSheetViewState.SelectPaymentMethod) {
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                it.copy(
-                    errorMessage = displayMessage,
-                    isProcessing = false,
-                )
-            }
+        setSelectionConfirmationState { state ->
+            state.copy(
+                isConfirming = false,
+                error = displayMessage,
+            )
         }
     }
 
     private fun onModifyItem(paymentMethod: PaymentMethod) {
-        val currentViewState = viewState.value
-
-        val canRemove = if (configuration.allowsRemovalOfLastSavedPaymentMethod) {
-            true
-        } else {
-            currentViewState.savedPaymentMethods.size > 1
-        }
+        val customerState = customerState.value
 
         transition(
             to = CustomerSheetViewState.EditPaymentMethod(
@@ -507,68 +597,48 @@ internal class CustomerSheetViewModel(
                     },
                     updateExecutor = { method, brand ->
                         when (val result = modifyCardPaymentMethod(method, brand)) {
-                            is CustomerAdapter.Result.Success -> Result.success(result.value)
-                            is CustomerAdapter.Result.Failure -> Result.failure(result.cause)
+                            is CustomerSheetDataResult.Success -> Result.success(result.value)
+                            is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
                         }
                     },
-                    canRemove = canRemove,
-                    isLiveMode = requireNotNull(paymentMethodMetadata).stripeIntent.isLiveMode,
+                    canRemove = customerState.canRemove,
+                    isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
                 ),
-                isLiveMode = currentViewState.isLiveMode,
-                cbcEligibility = currentViewState.cbcEligibility,
-                savedPaymentMethods = currentViewState.savedPaymentMethods,
-                allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                // TODO(samer-stripe): Set this based on customer_session permissions
-                canRemovePaymentMethods = true,
+                isLiveMode = isLiveModeProvider(),
             )
         )
     }
 
     private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
-        val currentViewState = viewState.value
-        val newSavedPaymentMethods = currentViewState.savedPaymentMethods.filter { it.id != paymentMethod.id!! }
+        val currentCustomerState = customerState.value
+        val newSavedPaymentMethods = currentCustomerState.paymentMethods.filter { it.id != paymentMethod.id!! }
 
-        if (currentViewState is CustomerSheetViewState.SelectPaymentMethod) {
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
-                val originalSelection = originalPaymentSelection
+        val currentSelection = currentCustomerState.currentSelection
+        val originalSelection = originalPaymentSelection
 
-                val didRemoveCurrentSelection = viewState.paymentSelection is PaymentSelection.Saved &&
-                    viewState.paymentSelection.paymentMethod.id == paymentMethod.id
+        val didRemoveCurrentSelection = currentSelection is PaymentSelection.Saved &&
+            currentSelection.paymentMethod.id == paymentMethod.id
 
-                val didRemoveOriginalSelection = viewState.paymentSelection is PaymentSelection.Saved &&
-                    originalSelection is PaymentSelection.Saved &&
-                    viewState.paymentSelection.paymentMethod.id == originalSelection.paymentMethod.id
+        val didRemoveOriginalSelection = originalSelection is PaymentSelection.Saved &&
+            originalSelection.paymentMethod.id == paymentMethod.id
 
-                if (didRemoveOriginalSelection) {
-                    originalPaymentSelection = null
-                }
-
-                val updatedStateCanUpdate = canEdit(
-                    viewState.allowsRemovalOfLastSavedPaymentMethod,
-                    newSavedPaymentMethods,
-                    viewState.cbcEligibility
-                )
-
-                viewState.copy(
-                    savedPaymentMethods = newSavedPaymentMethods,
-                    paymentSelection = viewState.paymentSelection.takeUnless {
-                        didRemoveCurrentSelection
-                    } ?: originalPaymentSelection,
-                    isEditing = viewState.isEditing && updatedStateCanUpdate
-                )
-            }
+        if (didRemoveOriginalSelection) {
+            originalPaymentSelection = null
         }
 
-        if (newSavedPaymentMethods.isEmpty() && paymentMethodMetadata?.isGooglePayReady == false) {
-            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
-        }
+        customerState.value = currentCustomerState.copy(
+            paymentMethods = newSavedPaymentMethods,
+            currentSelection = currentSelection.takeUnless {
+                didRemoveCurrentSelection
+            } ?: originalPaymentSelection,
+        )
     }
 
     private fun updatePaymentMethodInState(updatedMethod: PaymentMethod) {
         viewModelScope.launch {
-            val currentViewState = viewState.value
+            val currentCustomerState = customerState.value
 
-            val newSavedPaymentMethods = currentViewState.savedPaymentMethods.map { savedMethod ->
+            val newSavedPaymentMethods = currentCustomerState.paymentMethods.map { savedMethod ->
                 val savedId = savedMethod.id
                 val updatedId = updatedMethod.id
 
@@ -579,32 +649,31 @@ internal class CustomerSheetViewModel(
                 }
             }
 
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
-                val originalSelection = originalPaymentSelection
-                val currentSelection = viewState.paymentSelection
+            val originalSelection = originalPaymentSelection
+            val currentSelection = currentCustomerState.currentSelection
 
-                val updatedCurrentSelection = if (
-                    currentSelection is PaymentSelection.Saved &&
-                    currentSelection.paymentMethod.id == updatedMethod.id
-                ) {
-                    currentSelection.copy(paymentMethod = updatedMethod)
-                } else {
-                    currentSelection
-                }
+            originalPaymentSelection = if (
+                originalSelection is PaymentSelection.Saved &&
+                originalSelection.paymentMethod.id == updatedMethod.id
+            ) {
+                originalSelection.copy(paymentMethod = updatedMethod)
+            } else {
+                originalSelection
+            }
 
-                originalPaymentSelection = if (
-                    currentSelection is PaymentSelection.Saved &&
-                    originalSelection is PaymentSelection.Saved &&
-                    currentSelection.paymentMethod.id == updatedMethod.id
-                ) {
-                    originalSelection.copy(paymentMethod = updatedMethod)
-                } else {
-                    originalSelection
-                }
+            val updatedCurrentSelection = if (
+                currentSelection is PaymentSelection.Saved &&
+                currentSelection.paymentMethod.id == updatedMethod.id
+            ) {
+                currentSelection.copy(paymentMethod = updatedMethod)
+            } else {
+                currentSelection
+            }
 
-                viewState.copy(
-                    paymentSelection = updatedCurrentSelection,
-                    savedPaymentMethods = newSavedPaymentMethods
+            setCustomerState { state ->
+                state.copy(
+                    paymentMethods = newSavedPaymentMethods,
+                    currentSelection = updatedCurrentSelection,
                 )
             }
         }
@@ -615,22 +684,13 @@ internal class CustomerSheetViewModel(
         // error source is when the payment methods cannot be loaded
         when (paymentSelection) {
             is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
-                if (viewState.value.isEditing) {
+                if (isEditing.value) {
                     return
                 }
 
-                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    val primaryButtonVisible = originalPaymentSelection != paymentSelection
-                    it.copy(
-                        paymentSelection = paymentSelection,
-                        primaryButtonVisible = primaryButtonVisible,
-                        primaryButtonLabel = resources.getString(
-                            R.string.stripe_paymentsheet_confirm
-                        ),
-                        mandateText = paymentSelection.mandateText(
-                            merchantName = configuration.merchantDisplayName,
-                            isSetupFlow = false,
-                        )?.takeIf { primaryButtonVisible },
+                setCustomerState { state ->
+                    state.copy(
+                        currentSelection = paymentSelection,
                     )
                 }
             }
@@ -657,13 +717,15 @@ internal class CustomerSheetViewModel(
                 val params = formFieldValues
                     .transformToPaymentMethodCreateParams(
                         paymentMethodCode = currentViewState.paymentMethodCode,
-                        paymentMethodMetadata = requireNotNull(paymentMethodMetadata)
+                        paymentMethodMetadata = requireNotNull(customerState.value.metadata)
                     )
                 createAndAttach(params)
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
-                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(isProcessing = true)
+                setSelectionConfirmationState { state ->
+                    state.copy(
+                        isConfirming = true
+                    )
                 }
                 when (val paymentSelection = currentViewState.paymentSelection) {
                     is PaymentSelection.GooglePay -> selectGooglePay()
@@ -709,8 +771,10 @@ internal class CustomerSheetViewModel(
 
     private fun transitionToAddPaymentMethod(
         isFirstPaymentMethod: Boolean,
-        cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility,
     ) {
+        val customerState = customerState.value
+        val paymentMethodMetadata = customerState.metadata
+
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
             ?: paymentMethodMetadata?.supportedPaymentMethodTypes()?.firstOrNull()
             ?: PaymentMethod.Type.Card.code
@@ -719,7 +783,7 @@ internal class CustomerSheetViewModel(
             paymentMethodCode = paymentMethodCode,
             configuration = configuration,
             merchantName = configuration.merchantDisplayName,
-            cbcEligibility = cbcEligibility,
+            cbcEligibility = customerState.cbcEligibility,
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
@@ -750,34 +814,7 @@ internal class CustomerSheetViewModel(
                 formFieldValues = null,
                 formElements = formElements,
                 formArguments = formArguments,
-                usBankAccountFormArguments = USBankAccountFormArguments(
-                    instantDebits = false,
-                    showCheckbox = false,
-                    onBehalfOf = null,
-                    isCompleteFlow = false,
-                    isPaymentFlow = false,
-                    stripeIntentId = stripeIntent?.id,
-                    clientSecret = stripeIntent?.clientSecret,
-                    shippingDetails = null,
-                    draftPaymentSelection = null,
-                    onMandateTextChanged = { mandate, showAbove ->
-                        handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
-                    },
-                    onCollectBankAccountResult = {
-                        handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
-                    },
-                    onConfirmUSBankAccount = {
-                        handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
-                    },
-                    onUpdatePrimaryButtonUIState = {
-                        handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
-                    },
-                    hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
-                    onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
-                    onError = { error ->
-                        handleViewAction(CustomerSheetViewAction.OnFormError(error))
-                    }
-                ),
+                usBankAccountFormArguments = createDefaultUsBankArguments(stripeIntent),
                 draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
@@ -787,10 +824,41 @@ internal class CustomerSheetViewModel(
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
-                cbcEligibility = cbcEligibility,
                 errorReporter = errorReporter,
             ),
             reset = isFirstPaymentMethod
+        )
+    }
+
+    private fun createDefaultUsBankArguments(stripeIntent: StripeIntent?): USBankAccountFormArguments {
+        return USBankAccountFormArguments(
+            instantDebits = false,
+            linkMode = null,
+            showCheckbox = false,
+            onBehalfOf = null,
+            isCompleteFlow = false,
+            isPaymentFlow = false,
+            stripeIntentId = stripeIntent?.id,
+            clientSecret = stripeIntent?.clientSecret,
+            shippingDetails = null,
+            draftPaymentSelection = null,
+            onMandateTextChanged = { mandate, showAbove ->
+                handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
+            },
+            onCollectBankAccountResult = {
+                handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
+            },
+            onConfirmUSBankAccount = {
+                handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
+            },
+            onUpdatePrimaryButtonUIState = {
+                handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
+            },
+            hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
+            onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
+            onError = { error ->
+                handleViewAction(CustomerSheetViewAction.OnFormError(error))
+            }
         )
     }
 
@@ -857,6 +925,14 @@ internal class CustomerSheetViewModel(
         }
     }
 
+    private fun setCustomerState(update: (CustomerState) -> CustomerState) {
+        customerState.value = update(customerState.value)
+    }
+
+    private fun setSelectionConfirmationState(update: (SelectionConfirmationState) -> SelectionConfirmationState) {
+        selectionConfirmationState.value = update(selectionConfirmationState.value)
+    }
+
     private suspend fun createPaymentMethod(
         createParams: PaymentMethodCreateParams
     ): Result<PaymentMethod> {
@@ -871,7 +947,7 @@ internal class CustomerSheetViewModel(
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
         viewModelScope.launch(workContext) {
-            if (awaitCustomerAdapter().canCreateSetupIntents) {
+            if (awaitIntentDataSource().canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
                 attachPaymentMethod(id = paymentMethod.id!!)
@@ -880,7 +956,7 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
-        awaitCustomerAdapter().setupIntentClientSecretForCustomerAttach()
+        awaitIntentDataSource().retrieveSetupIntentClientSecret()
             .mapCatching { clientSecret ->
                 val intent = stripeRepository.retrieveSetupIntent(
                     clientSecret = clientSecret,
@@ -890,19 +966,17 @@ internal class CustomerSheetViewModel(
                     ),
                 ).getOrThrow()
 
-                handleStripeIntent(intent, clientSecret, paymentMethod).getOrThrow()
-
-                eventReporter.onAttachPaymentMethodSucceeded(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-                )
+                handleStripeIntent(intent, clientSecret, paymentMethod)
             }.onFailure { cause, displayMessage ->
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
                 )
+
                 logger.error(
                     msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
                     t = cause,
                 )
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
@@ -918,7 +992,7 @@ internal class CustomerSheetViewModel(
         stripeIntent: StripeIntent,
         clientSecret: String,
         paymentMethod: PaymentMethod
-    ): Result<Unit> {
+    ) {
         intentConfirmationHandler.start(
             arguments = IntentConfirmationHandler.Args(
                 intent = stripeIntent,
@@ -933,22 +1007,24 @@ internal class CustomerSheetViewModel(
             )
         )
 
-        return when (val result = intentConfirmationHandler.awaitIntentResult()) {
+        when (val result = intentConfirmationHandler.awaitIntentResult()) {
             is PaymentConfirmationResult.Succeeded -> {
-                safeUpdateSelectPaymentMethodState { viewState ->
-                    viewState.copy(
-                        savedPaymentMethods = listOf(paymentMethod) + viewState.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(paymentMethod),
-                        primaryButtonVisible = true,
-                        primaryButtonLabel = resources.getString(
-                            R.string.stripe_paymentsheet_confirm
-                        ),
-                    )
-                }
-                onBackPressed()
-                Result.success(Unit)
+                eventReporter.onAttachPaymentMethodSucceeded(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
+
+                refreshAndUpdatePaymentMethods(paymentMethod)
             }
             is PaymentConfirmationResult.Failed -> {
+                eventReporter.onAttachPaymentMethodFailed(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
+
+                logger.error(
+                    msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
+                    t = result.cause,
+                )
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
@@ -956,9 +1032,9 @@ internal class CustomerSheetViewModel(
                         errorMessage = result.message,
                     )
                 }
-                Result.failure(result.cause)
             }
-            is PaymentConfirmationResult.Canceled -> {
+            is PaymentConfirmationResult.Canceled,
+            null -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         enabled = true,
@@ -966,29 +1042,17 @@ internal class CustomerSheetViewModel(
                         primaryButtonEnabled = it.formFieldValues != null,
                     )
                 }
-                Result.success(Unit)
             }
-            null -> Result.success(Unit)
         }
     }
 
     private suspend fun attachPaymentMethod(id: String) {
-        awaitCustomerAdapter().attachPaymentMethod(id)
+        awaitPaymentMethodDataSource().attachPaymentMethod(id)
             .onSuccess { attachedPaymentMethod ->
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
                 )
-                safeUpdateSelectPaymentMethodState {
-                    it.copy(
-                        savedPaymentMethods = listOf(attachedPaymentMethod) + it.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(attachedPaymentMethod),
-                        primaryButtonVisible = true,
-                        primaryButtonLabel = resources.getString(
-                            R.string.stripe_paymentsheet_confirm
-                        ),
-                    )
-                }
-                onBackPressed()
+                refreshAndUpdatePaymentMethods(attachedPaymentMethod)
             }.onFailure { cause, displayMessage ->
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
@@ -1007,10 +1071,45 @@ internal class CustomerSheetViewModel(
             }
     }
 
+    private suspend fun refreshAndUpdatePaymentMethods(
+        newPaymentMethod: PaymentMethod
+    ) {
+        awaitPaymentMethodDataSource().retrievePaymentMethods().onSuccess { paymentMethods ->
+            errorReporter.report(
+                ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
+            )
+
+            setCustomerState { state ->
+                val selection = paymentMethods.find { paymentMethod ->
+                    newPaymentMethod.id == paymentMethod.id
+                }?.let {
+                    PaymentSelection.Saved(it)
+                } ?: state.currentSelection
+
+                state.copy(
+                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    currentSelection = selection,
+                )
+            }
+
+            transition(
+                to = selectPaymentMethodState.value,
+                reset = true,
+            )
+        }.onFailure { exception, _ ->
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE,
+                StripeException.create(exception),
+            )
+
+            onDismissed()
+        }
+    }
+
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch(workContext) {
-            awaitCustomerAdapter().setSelectedPaymentOption(
-                savedPaymentSelection?.toPaymentOption()
+            awaitSavedSelectionDataSource().setSavedSelection(
+                savedPaymentSelection?.toSavedSelection()
             ).onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
@@ -1029,7 +1128,7 @@ internal class CustomerSheetViewModel(
 
     private fun selectGooglePay() {
         viewModelScope.launch(workContext) {
-            awaitCustomerAdapter().setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
+            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,
@@ -1070,53 +1169,12 @@ internal class CustomerSheetViewModel(
             msg = "Failed to persist payment selection: $paymentSelection",
             t = cause,
         )
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(
-                errorMessage = displayMessage,
-                isProcessing = false,
+        setSelectionConfirmationState { state ->
+            state.copy(
+                isConfirming = false,
+                error = displayMessage,
             )
         }
-    }
-
-    private fun safeUpdateSelectPaymentMethodState(
-        update: (state: CustomerSheetViewState.SelectPaymentMethod) -> CustomerSheetViewState.SelectPaymentMethod
-    ) {
-        val hasSelectPaymentMethodInBackStack = backStack.value.any { viewState ->
-            viewState is CustomerSheetViewState.SelectPaymentMethod
-        }
-
-        if (hasSelectPaymentMethodInBackStack) {
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { state ->
-                update(state)
-            }
-        } else {
-            backStack.update { currentStack ->
-                listOf(buildDefaultSelectPaymentMethod(update)) + currentStack
-            }
-        }
-    }
-
-    private fun buildDefaultSelectPaymentMethod(
-        override: (viewState: CustomerSheetViewState.SelectPaymentMethod) -> CustomerSheetViewState.SelectPaymentMethod
-    ): CustomerSheetViewState.SelectPaymentMethod {
-        return override(
-            CustomerSheetViewState.SelectPaymentMethod(
-                title = configuration.headerTextForSelectionScreen,
-                savedPaymentMethods = emptyList(),
-                paymentSelection = null,
-                isLiveMode = isLiveModeProvider(),
-                isProcessing = false,
-                isEditing = false,
-                isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
-                primaryButtonVisible = false,
-                primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
-                errorMessage = null,
-                cbcEligibility = paymentMethodMetadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible,
-                allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                // TODO(samer-stripe): Set this based on customer_session permissions
-                canRemovePaymentMethods = true,
-            )
-        )
     }
 
     private fun transition(to: CustomerSheetViewState, reset: Boolean = false) {
@@ -1147,8 +1205,16 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private suspend fun awaitCustomerAdapter(): CustomerAdapter {
-        return customerAdapterProvider.await()
+    private suspend fun awaitPaymentMethodDataSource(): CustomerSheetPaymentMethodDataSource {
+        return paymentMethodDataSourceProvider.await()
+    }
+
+    private suspend fun awaitIntentDataSource(): CustomerSheetIntentDataSource {
+        return intentDataSourceProvider.await()
+    }
+
+    private suspend fun awaitSavedSelectionDataSource(): CustomerSheetSavedSelectionDataSource {
+        return savedSelectionDataSourceProvider.await()
     }
 
     private val CustomerSheetViewState.eventReporterScreen: CustomerSheetEventReporter.Screen?
@@ -1158,6 +1224,37 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewState.EditPaymentMethod -> CustomerSheetEventReporter.Screen.EditPaymentMethod
             else -> null
         }
+
+    private data class CustomerState(
+        val paymentMethods: List<PaymentMethod>,
+        val currentSelection: PaymentSelection?,
+        val metadata: PaymentMethodMetadata?,
+        val permissions: CustomerPermissions,
+        val configuration: CustomerSheet.Configuration,
+    ) {
+        val canRemove = when (paymentMethods.size) {
+            0 -> false
+            1 -> configuration.allowsRemovalOfLastSavedPaymentMethod && permissions.canRemovePaymentMethods
+            else -> permissions.canRemovePaymentMethods
+        }
+
+        val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
+
+        val canEdit = canRemove || paymentMethods.any { method ->
+            isModifiable(method, cbcEligibility)
+        }
+
+        val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || metadata?.isGooglePayReady == true
+    }
+
+    private data class SelectionConfirmationState(
+        val isConfirming: Boolean,
+        val error: String?,
+    )
+
+    private companion object {
+        const val REMOVAL_TRANSITION_DELAY = 50L
+    }
 
     class Factory(
         private val args: CustomerSheetContract.Args,

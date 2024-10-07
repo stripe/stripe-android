@@ -2,14 +2,12 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
     when (this) {
         is CustomerAdapter.Result.Failure -> null
         is CustomerAdapter.Result.Success -> this.value
     }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
     transform: (T) -> CustomerAdapter.Result<R>
 ): CustomerAdapter.Result<R> {
@@ -22,7 +20,6 @@ internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.map(
     transform: (value: T) -> R
 ): CustomerAdapter.Result<R> {
@@ -35,7 +32,6 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.map(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.mapCatching(
     transform: (value: T) -> R
 ): CustomerAdapter.Result<R> {
@@ -48,7 +44,6 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.mapCatching(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Suppress("TooGenericExceptionCaught")
 private inline fun <R, T> T.runCatching(block: T.() -> R): CustomerAdapter.Result<R> {
     return try {
@@ -58,7 +53,6 @@ private inline fun <R, T> T.runCatching(block: T.() -> R): CustomerAdapter.Resul
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.fold(
     onSuccess: (value: T) -> R,
     onFailure: (cause: Throwable, displayMessage: String?) -> R
@@ -73,7 +67,6 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.fold(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.onSuccess(
     action: (value: T) -> R
 ): CustomerAdapter.Result<T> {
@@ -83,7 +76,6 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.onSuccess(
     return this
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.onFailure(
     action: (cause: Throwable, displayMessage: String?) -> R
 ): CustomerAdapter.Result<T> {
@@ -95,7 +87,6 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.onFailure(
     return this
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal fun<T> CustomerAdapter.Result<T>.failureOrNull(): CustomerAdapter.Result.Failure<T>? =
     when (this) {
         is CustomerAdapter.Result.Failure -> this

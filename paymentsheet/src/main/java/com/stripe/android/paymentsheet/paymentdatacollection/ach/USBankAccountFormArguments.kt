@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.update
  */
 internal class USBankAccountFormArguments(
     val instantDebits: Boolean,
+    val linkMode: LinkMode?,
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
@@ -81,6 +83,7 @@ internal class USBankAccountFormArguments(
                     instantDebits.not(),
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
+                linkMode = paymentMethodMetadata.linkMode,
                 onBehalfOf = onBehalfOf,
                 isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,

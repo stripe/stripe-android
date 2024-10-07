@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import java.util.UUID
@@ -37,7 +36,6 @@ internal object DefaultBillingAddressSettingsDefinition :
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     override fun configure(
         value: DefaultBillingAddress,
         configurationBuilder: CustomerSheet.Configuration.Builder,

@@ -3,7 +3,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -11,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -747,7 +748,10 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                isEligibleForCardBrandChoice = true,
+                cardBrandChoice = ElementsSession.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires"),
+                ),
             ),
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant Inc.",
@@ -755,10 +759,7 @@ internal class PaymentMethodMetadataTest {
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_1"
-                ),
+                customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
@@ -788,11 +789,11 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 isGooglePayReady = false,
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkMode = null,
             )
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -817,14 +818,18 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.create(
             elementsSession = createElementsSession(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                isEligibleForCardBrandChoice = true,
+                cardBrandChoice = ElementsSession.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires")
+                ),
             ),
             configuration = configuration,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+            ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = {
-                false
-            }
+            isFinancialConnectionsAvailable = { false }
         )
 
         assertThat(metadata).isEqualTo(
@@ -844,9 +849,12 @@ internal class PaymentMethodMetadataTest {
                 externalPaymentMethodSpecs = listOf(),
                 hasCustomerConfiguration = true,
                 isGooglePayReady = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+                ),
                 financialConnectionsAvailable = false,
                 linkInlineConfiguration = null,
+                linkMode = null,
             )
         )
     }
@@ -917,12 +925,15 @@ internal class PaymentMethodMetadataTest {
 
     private fun createElementsSession(
         intent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        isEligibleForCardBrandChoice: Boolean = true,
+        cardBrandChoice: ElementsSession.CardBrandChoice = ElementsSession.CardBrandChoice(
+            eligible = true,
+            preferredNetworks = listOf("cartes_bancaires")
+        ),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
-            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            cardBrandChoice = cardBrandChoice,
             merchantCountry = null,
             isGooglePayEnabled = false,
             customer = mobilePaymentElementComponent?.let { component ->
@@ -1247,6 +1258,34 @@ internal class PaymentMethodMetadataTest {
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
         }
 
+    @Test
+    fun `Adds LinkCardBrand if supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                linkFundingSources = listOf("card", "bank_account"),
+                paymentMethodTypes = listOf("card"),
+            ),
+            linkMode = LinkMode.LinkCardBrand,
+        )
+
+        val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
+        assertThat(displayedPaymentMethodTypes).containsExactly("card", "link")
+    }
+
+    @Test
+    fun `Does not add LinkCardBrand if not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                linkFundingSources = listOf("card", "bank_account"),
+                paymentMethodTypes = listOf("card"),
+            ),
+            linkMode = LinkMode.Passthrough,
+        )
+
+        val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
+        assertThat(displayedPaymentMethodTypes).containsExactly("card")
+    }
+
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
         return LinkInlineConfiguration(
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -1262,6 +1301,10 @@ internal class PaymentMethodMetadataTest {
                 merchantCountryCode = "CA",
                 shippingValues = mapOf(),
                 flags = mapOf(),
+                cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                    eligible = true,
+                    preferredNetworks = listOf("cartes_bancaires")
+                ),
                 passthroughModeEnabled = false,
             ),
         )

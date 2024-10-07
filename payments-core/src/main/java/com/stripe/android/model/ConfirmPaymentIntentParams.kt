@@ -116,7 +116,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
      */
-    var receiptEmail: String? = null
+    var receiptEmail: String? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true

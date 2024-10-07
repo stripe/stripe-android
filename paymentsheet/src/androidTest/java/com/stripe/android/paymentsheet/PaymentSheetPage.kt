@@ -5,20 +5,26 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
@@ -147,6 +153,13 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun fillCvcRecollection(cvc: String) {
+        waitForText("Confirm your CVC")
+        composeTestRule
+            .onNodeWithText("CVC")
+            .performTextInput(cvc)
+    }
+
     fun clickViewWithText(text: String) {
         composeTestRule.onNode(hasText(text))
             .performScrollTo()
@@ -211,22 +224,54 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun clickOnLpm(code: String) {
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(FORM_ELEMENT_TEST_TAG)
-        )
-        val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + code)
+    fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
+        if (forVerticalMode) {
+            composeTestRule.waitUntil {
+                composeTestRule
+                    .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
 
-        composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
-            .performScrollToNode(paymentMethodMatcher)
-        composeTestRule.waitForIdle()
-        composeTestRule
-            .onNode(paymentMethodMatcher)
-            .assertIsDisplayed()
-            .assertIsEnabled()
-            .performClick()
+            composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
+                .performScrollTo()
+                .performClick()
+        } else {
+            composeTestRule.waitUntilExactlyOneExists(
+                hasTestTag(FORM_ELEMENT_TEST_TAG)
+            )
+
+            val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + code)
+
+            composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
+                .performScrollToNode(paymentMethodMatcher)
+            composeTestRule.waitForIdle()
+            composeTestRule
+                .onNode(paymentMethodMatcher)
+                .assertIsDisplayed()
+                .assertIsEnabled()
+                .performClick()
+        }
 
         composeTestRule.waitForIdle()
+    }
+
+    fun assertIsOnFormPage() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    fun assertLpmSelected(code: String) {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(hasAnyDescendant(isSelected())))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
     }
 
     fun fillOutKonbini(fullName: String, email: String, phone: String) {

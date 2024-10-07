@@ -2,10 +2,12 @@ package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
+import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -33,6 +35,17 @@ class FinancialConnectionsSheet internal constructor(
     ) : Parcelable
 
     /**
+     * Context for sessions created from Stripe Elements. This isn't intended to be
+     * part of the public API, but solely to be used by the Mobile Payment Element and
+     * CustomerSheet.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class ElementsSessionContext(
+        val linkMode: LinkMode?,
+    ) : Parcelable
+
+    /**
      * Present the [FinancialConnectionsSheet].
      *
      * @param configuration the [FinancialConnectionsSheet] configuration
@@ -40,7 +53,10 @@ class FinancialConnectionsSheet internal constructor(
     fun present(
         configuration: Configuration
     ) {
-        financialConnectionsSheetLauncher.present(configuration)
+        financialConnectionsSheetLauncher.present(
+            configuration = configuration,
+            elementsSessionContext = null,
+        )
     }
 
     companion object {

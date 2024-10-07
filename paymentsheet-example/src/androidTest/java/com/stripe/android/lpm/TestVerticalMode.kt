@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -24,7 +25,7 @@ internal class TestVerticalMode : BasePlaygroundTest() {
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     ).copyPlaygroundSettings { settings ->
-        settings[LayoutSettingsDefinition] = true
+        settings[LayoutSettingsDefinition] = Layout.VERTICAL
     }
 
     private val cashAppTestParameters = TestParameters.create(
@@ -37,7 +38,7 @@ internal class TestVerticalMode : BasePlaygroundTest() {
             PaymentMethod.Type.Card,
             PaymentMethod.Type.CashAppPay
         ).joinToString(",")
-        settings[LayoutSettingsDefinition] = true
+        settings[LayoutSettingsDefinition] = Layout.VERTICAL
     }
 
     @Test

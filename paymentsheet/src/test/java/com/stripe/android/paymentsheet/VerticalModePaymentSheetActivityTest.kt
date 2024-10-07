@@ -9,18 +9,22 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -44,8 +48,10 @@ internal class VerticalModePaymentSheetActivityTest {
     private val managePage = ManagePage(composeTestRule)
     private val editPage = EditPage(composeTestRule)
 
-    private val card1 = PaymentMethodDetails("pm_12345", "4242")
-    private val card2 = PaymentMethodDetails("pm_67890", "5544")
+    private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
+    private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
+    private val usBankAccount1 = UsBankPaymentMethodDetails("pm_54321")
+    private val usBankAccount2 = UsBankPaymentMethodDetails("pm_09876")
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -113,7 +119,7 @@ internal class VerticalModePaymentSheetActivityTest {
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse()
+            setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -233,7 +239,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
-            setupV1PaymentMethodsResponse(card1, card2, addCbcNetworks = true)
+            setupV1PaymentMethodsResponse(card1.copy(addCbcNetworks = true), card2.copy(addCbcNetworks = true))
             setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
@@ -287,6 +293,37 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
+    fun `Selection is preserved after opening form`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickOnNewLpm("cashapp")
+        verticalModePage.assertLpmIsSelected("cashapp")
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertLpmIsSelected("cashapp")
+    }
+
+    @Test
     fun `Primary button label is correctly applied`() = runTest(
         primaryButtonLabel = "Gimme money!",
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
@@ -299,6 +336,82 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         verticalModePage.assertPrimaryButton(isEnabled())
         composeTestRule.onNodeWithText("Gimme money!").assertExists()
+    }
+
+    @Test
+    fun `Saved payment method mandates work correctly`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
+            setupV1PaymentMethodsResponse(usBankAccount1)
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateDoesNotExists()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        managePage.selectPaymentMethod("pm_54321")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        managePage.selectPaymentMethod("pm_12345")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateDoesNotExists()
+    }
+
+    @Test
+    fun `Default saved payment method is loaded with mandate`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
+            setupV1PaymentMethodsResponse(usBankAccount1)
+            setupV1PaymentMethodsResponse(type = "card")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
+    }
+
+    @Test
+    fun `Manage screen should not display mandates`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
+            setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
+            setupV1PaymentMethodsResponse(type = "card")
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
+        verticalModePage.assertMandateDoesNotExists()
+        managePage.selectPaymentMethod("pm_09876")
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_09876")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.assertMandateExists()
     }
 
     private fun runTest(
@@ -319,6 +432,7 @@ internal class VerticalModePaymentSheetActivityTest {
                     ),
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                         .customer(customer)
+                        .allowsDelayedPaymentMethods(true)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                         .apply {
                             if (primaryButtonLabel != null) {
@@ -367,31 +481,31 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private fun setupV1PaymentMethodsResponse(
         vararg paymentMethodDetails: PaymentMethodDetails,
-        addCbcNetworks: Boolean = false,
+        type: String = paymentMethodDetails.first().type,
     ) {
+        for (paymentMethodDetail in paymentMethodDetails) {
+            // All types must match.
+            assertThat(type).isEqualTo(paymentMethodDetail.type)
+        }
+
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", type),
         ) { response ->
-            val cardsArray = JSONArray()
+            val paymentMethodsArray = JSONArray()
 
             for (paymentMethodDetail in paymentMethodDetails) {
-                val card = PaymentMethodFactory.card(
-                    id = paymentMethodDetail.id
-                ).update(
-                    last4 = paymentMethodDetail.last4,
-                    addCbcNetworks = addCbcNetworks,
-                )
-                cardsArray.put(PaymentMethodFactory.convertCardToJson(card))
+                paymentMethodsArray.put(paymentMethodDetail.createJson())
             }
 
-            val cardsStringified = cardsArray.toString(2)
+            val paymentMethodsStringified = paymentMethodsArray.toString(2)
 
             val body = """
             {
               "object": "list",
-              "data": $cardsStringified,
+              "data": $paymentMethodsStringified,
               "has_more": false,
               "url": "/v1/payment_methods"
             }
@@ -411,31 +525,57 @@ internal class VerticalModePaymentSheetActivityTest {
         }
     }
 
-    private fun setupPaymentMethodUpdateResponse(paymentMethodDetails: PaymentMethodDetails, cardBrand: String) {
+    private fun setupPaymentMethodUpdateResponse(paymentMethodDetails: CardPaymentMethodDetails, cardBrand: String) {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_methods/${paymentMethodDetails.id}"),
             bodyPart(urlEncode("card[networks][preferred]"), cardBrand)
         ) { response ->
-            val originalCard = PaymentMethodFactory.card(
-                id = paymentMethodDetails.id
-            ).update(
-                last4 = paymentMethodDetails.last4,
-                addCbcNetworks = true,
+            response.setBody(
+                paymentMethodDetails.createJson { originalCard ->
+                    originalCard.copy(
+                        card = originalCard.card!!.copy(
+                            displayBrand = cardBrand
+                        )
+                    )
+                }.toString(2)
             )
-
-            val card = originalCard.copy(
-                card = originalCard.card!!.copy(
-                    displayBrand = cardBrand
-                )
-            )
-            response.setBody(PaymentMethodFactory.convertCardToJson(card).toString(2))
         }
     }
 
-    private data class PaymentMethodDetails(
-        val id: String,
+    sealed interface PaymentMethodDetails {
+        val id: String
+        val type: String
+
+        fun createJson(transform: (PaymentMethod) -> PaymentMethod = { it }): JSONObject
+    }
+
+    private data class CardPaymentMethodDetails(
+        override val id: String,
         val last4: String,
-    )
+        val addCbcNetworks: Boolean = false,
+    ) : PaymentMethodDetails {
+        override val type: String = "card"
+
+        override fun createJson(transform: (PaymentMethod) -> PaymentMethod): JSONObject {
+            val card = PaymentMethodFactory.card(
+                id = id
+            ).update(
+                last4 = last4,
+                addCbcNetworks = addCbcNetworks,
+            )
+            return PaymentMethodFactory.convertCardToJson(transform(card))
+        }
+    }
+
+    private data class UsBankPaymentMethodDetails(
+        override val id: String,
+    ) : PaymentMethodDetails {
+        override val type: String = "us_bank_account"
+
+        override fun createJson(transform: (PaymentMethod) -> PaymentMethod): JSONObject {
+            return PaymentMethodFactory.convertUsBankAccountToJson(PaymentMethodFactory.usBankAccount().copy(id = id))
+        }
+    }
 }

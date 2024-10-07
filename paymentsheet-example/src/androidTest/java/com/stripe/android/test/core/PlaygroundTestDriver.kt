@@ -39,8 +39,11 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
@@ -417,6 +420,43 @@ internal class PlaygroundTestDriver(
         return result
     }
 
+    fun confirmWithGooglePay(
+        country: Country
+    ) {
+        setup(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CountrySettingsDefinition] = country
+            }
+        )
+
+        launchComplete()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.googlePayButton.waitForEnabled()
+        selectors.googlePayButton.click()
+
+        composeTestRule.waitForIdle()
+
+        selectors.googlePaySheet.waitFor()
+        selectors.googlePayContinueButton.click()
+
+        composeTestRule.waitForIdle()
+
+        // Skips the full screen payment animation in `PaymentSheet`
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.mainClock.advanceTimeByFrame()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
+    }
+
     private fun pressMultiStepSelect() {
         selectors.multiStepSelect.click()
         waitForNotPlaygroundActivity()
@@ -464,7 +504,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition]) {
+        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition] != Layout.HORIZONTAL) {
             selectLpmInVerticalMode(testParameters.paymentMethodCode)
         } else {
             clickPaymentSelection()
@@ -742,7 +782,7 @@ internal class PlaygroundTestDriver(
         )
     }
 
-    fun confirmInstantDebits(
+    fun confirmLinkBankPayment(
         testParameters: TestParameters,
         afterAuthorization: (Selectors) -> Unit = {},
     ): PlaygroundState? {
@@ -1106,7 +1146,14 @@ internal class PlaygroundTestDriver(
                                 .text(testParameters.isSetupMode),
                             className = "android.widget.TextView",
                             device = device
-                        ) {}.click()
+                        ) {
+                            override fun click() {
+                                if (testParameters.paymentMethodCode == "wechat_pay") {
+                                    wait(5000)
+                                }
+                                super.click()
+                            }
+                        }.click()
                         Log.e("Stripe", "Fail authorization was a text view not a button this time")
                     }
                 }

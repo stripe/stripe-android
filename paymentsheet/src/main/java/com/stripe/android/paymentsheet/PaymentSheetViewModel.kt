@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -84,7 +84,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
-    internal val cvcRecollectionHandler: CvcRecollectionHandler
+    internal val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -427,12 +428,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         cvcRecollectionHandler.launch(
             paymentSelection = selection.value
         ) { cvcRecollectionData ->
-            val interactor = DefaultCvcRecollectionInteractor(
+            val interactor = cvcRecollectionInteractorFactory.create(
                 args = Args(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,
+                    cvc = "",
                     isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
-                )
+                ),
+                processing = processing,
+                coroutineScope = viewModelScope,
             )
             viewModelScope.launch {
                 interactor.cvcCompletionState.collectLatest(::handleCvcCompletionState)
@@ -494,11 +498,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val paymentMethodOptionsParams =
                 (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
                     ?: PaymentMethodOptionsParams.Card()
-            paymentSelection.copy(
+            val newSelection = paymentSelection.copy(
                 paymentMethodOptionsParams = paymentMethodOptionsParams.copy(
                     cvc = cvcControllerFlow.value.fieldValue.value
                 )
             )
+            updateSelection(newSelection)
+            newSelection
         } else {
             paymentSelection
         }
@@ -674,14 +680,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(
-                VerticalModeInitialScreenFactory.create(
-                    viewModel = this,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerStateHolder = customerStateHolder,
-                    savedPaymentMethodMutator = savedPaymentMethodMutator,
-                )
+        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+            return VerticalModeInitialScreenFactory.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
             )
         }
         val hasPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()

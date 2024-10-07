@@ -29,4 +29,6 @@ data class PaymentIntentBody(
     val testMode: Boolean? = null,
     @SerialName("stripe_account_id")
     val stripeAccountId: String? = null,
+    @SerialName("link_mode")
+    val linkMode: String? = null,
 )

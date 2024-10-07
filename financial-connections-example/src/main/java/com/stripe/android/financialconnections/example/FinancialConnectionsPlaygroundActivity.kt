@@ -48,7 +48,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
-import com.stripe.android.financialconnections.example.Experience.PaymentElement
+import com.stripe.android.financialconnections.example.Experience.LinkCardBrand
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
@@ -127,7 +127,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         FinancialConnectionsContent(
             state = state,
             onSettingsChanged = viewModel::onSettingsChanged,
-            onButtonClick = viewModel::startFinancialConnectionsSession
+            onButtonClick = viewModel::connectAccounts
         )
     }
 
@@ -148,6 +148,18 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         paymentSheet: PaymentSheet
     ) {
         val email = state.settings.get<EmailSetting>().selectedOption
+
+        when (integrationType) {
+            IntegrationType.Standalone -> {
+                launchStandaloneIntegration(email)
+            }
+            IntegrationType.PaymentElement -> {
+                launchPaymentSheet(paymentSheet, email)
+            }
+        }
+    }
+
+    private fun OpenForPaymentIntent.launchStandaloneIntegration(email: String) {
         when (experience) {
             FinancialConnections -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
@@ -158,32 +170,44 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            InstantDebits -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
+            InstantDebits,
+            LinkCardBrand -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
                 stripeAccountId = null,
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
+                    elementsSessionContext = elementsSessionContext,
                 )
             )
-            PaymentElement -> {
-                PaymentConfiguration.init(
-                    context = this@FinancialConnectionsPlaygroundActivity,
-                    publishableKey = publishableKey
-                )
-                paymentSheet.presentWithPaymentIntent(
-                    paymentIntentClientSecret = paymentIntentSecret,
-                    configuration = PaymentSheet.Configuration(
-                        allowsDelayedPaymentMethods = true,
-                        merchantDisplayName = "Example, Inc.",
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = requireNotNull(customerId),
-                            ephemeralKeySecret = requireNotNull(ephemeralKey)
-                        )
-                    )
-                )
-            }
         }
+    }
+
+    private fun OpenForPaymentIntent.launchPaymentSheet(
+        paymentSheet: PaymentSheet,
+        email: String,
+    ) {
+        PaymentConfiguration.init(
+            context = this@FinancialConnectionsPlaygroundActivity,
+            publishableKey = publishableKey
+        )
+
+        val config = PaymentSheet.Configuration(
+            allowsDelayedPaymentMethods = true,
+            merchantDisplayName = "Example, Inc.",
+            customer = PaymentSheet.CustomerConfiguration(
+                id = requireNotNull(customerId),
+                ephemeralKeySecret = requireNotNull(ephemeralKey),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                email = email.takeIf { it.isNotBlank() },
+            ),
+        )
+
+        paymentSheet.presentWithPaymentIntent(
+            paymentIntentClientSecret = paymentIntentSecret,
+            configuration = config,
+        )
     }
 
     @Composable

@@ -11,7 +11,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
@@ -26,7 +25,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as FuelResult
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetExampleViewModel(
     application: Application,
 ) : AndroidViewModel(application) {

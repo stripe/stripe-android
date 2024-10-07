@@ -194,7 +194,7 @@ class CardInputWidget @JvmOverloads constructor(
                     expiryMonth = params.expMonth,
                     expiryYear = params.expYear,
                     attribution = params.attribution,
-                    networks = cardBrandView.createNetworksParam(),
+                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
                 )
             }
         }
@@ -271,7 +271,8 @@ class CardInputWidget @JvmOverloads constructor(
                         cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
-                            .build()
+                            .build(),
+                        networks = cardBrandView.cardParamsNetworks()
                     )
                 }
             }

@@ -8,10 +8,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -105,11 +108,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
             .onSuccess { financialConnectionsSessionSecret: String ->
                 logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
                 hasLaunched = true
+
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 _viewEffect.emit(
                     OpenConnectionsFlow(
                         financialConnectionsSessionSecret = financialConnectionsSessionSecret,
                         publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId
+                        stripeAccountId = args.stripeAccountId,
+                        elementsSessionContext = elementsSessionContext,
                     )
                 )
             }
@@ -271,4 +277,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
     companion object {
         private const val KEY_HAS_LAUNCHED = "key_has_launched"
     }
+}
+
+private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
+    return (this as? InstantDebits)?.elementsSessionContext
 }

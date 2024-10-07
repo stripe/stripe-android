@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.AllowRedisplayFilter
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     PlaygroundSettingDefinition<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType>,
@@ -9,14 +10,10 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     by EnumSaveable(
         key = "customer_session_payment_method_redisplay_filters",
         values = RedisplayFilterType.entries.toTypedArray(),
-        defaultValue = RedisplayFilterType.All,
+        defaultValue = RedisplayFilterType.Always,
     ),
     PlaygroundSettingDefinition.Displayable<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType> {
     override val displayName: String = "Customer Session Allow Redisplay Filters"
-
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
-    }
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
@@ -30,6 +27,13 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
 
     override fun configure(value: RedisplayFilterType, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.paymentMethodRedisplayFilters(value.filters)
+    }
+
+    override fun configure(
+        value: RedisplayFilterType,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.paymentMethodRedisplayFilters(value.filters)
     }
 
     enum class RedisplayFilterType(

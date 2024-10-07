@@ -1,10 +1,12 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
+import com.stripe.android.model.LinkMode
 import javax.inject.Inject
 
 internal fun interface CreateInstantDebitsResult {
@@ -17,6 +19,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
     private val repository: FinancialConnectionsRepository,
     private val consumerSessionProvider: ConsumerSessionProvider,
+    private val elementsSessionContext: ElementsSessionContext?,
 ) : CreateInstantDebitsResult {
 
     override suspend fun invoke(
@@ -34,13 +37,21 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 
         val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
 
-        val paymentMethod = repository.createPaymentMethod(
-            paymentDetailsId = paymentDetails.id,
-            consumerSessionClientSecret = clientSecret,
-        )
+        val paymentMethodId = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
+            consumerRepository.sharePaymentDetails(
+                paymentDetailsId = paymentDetails.id,
+                consumerSessionClientSecret = clientSecret,
+                expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
+            ).paymentMethodId
+        } else {
+            repository.createPaymentMethod(
+                paymentDetailsId = paymentDetails.id,
+                consumerSessionClientSecret = clientSecret,
+            ).id
+        }
 
         return InstantDebitsResult(
-            paymentMethodId = paymentMethod.id,
+            paymentMethodId = paymentMethodId,
             bankName = paymentDetails.bankName,
             last4 = paymentDetails.last4,
         )

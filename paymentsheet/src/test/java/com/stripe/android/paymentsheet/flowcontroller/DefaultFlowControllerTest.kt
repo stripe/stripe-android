@@ -45,11 +45,8 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.CvcRecollectionCallbackHandler
-import com.stripe.android.paymentsheet.CvcRecollectionEnabledCallback
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalCvcRecollectionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
@@ -69,6 +66,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -1748,58 +1746,48 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `Launches CVC Recollection & succeeds payment`() = runTest {
-        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
-
-        val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
-        val launcher = mock<CvcRecollectionLauncher> {
-            on { launch(any(), any(), any()) } doAnswer {
-                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed("123"))
-            }
-        }
-        val launcherFactory = mock<CvcRecollectionLauncherFactory> {
-            on { create(any()) } doReturn launcher
-        }
-
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<CvcRecollectionContract>(),
-                onResult.capture()
+    fun `Launches CVC Recollection & succeeds payment`() {
+        cvcRecollectionTest(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            shouldRecollectCvc = true
+        ) { flowController ->
+            flowController.configureExpectingSuccess(
+                clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
             )
-        ).thenReturn(mock())
+        }
+    }
 
-        val flowController = createFlowController(
-            cvcRecollectionLauncherFactory = launcherFactory,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        )
-
-        verify(launcherFactory).create(any())
-
-        flowController.configureExpectingSuccess(
-            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
-        )
-
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val savedSelection = PaymentSelection.Saved(paymentMethod)
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(savedSelection)
-        )
-
-        flowController.confirm()
-
-        verify(launcher).launch(
-            eq(
-                CvcRecollectionData(
-                    lastFour = "4242",
-                    brand = CardBrand.Visa
+    @Test
+    fun `Launches CVC Recollection & succeeds payment for deferred`() {
+        cvcRecollectionTest(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            shouldRecollectCvc = true
+        ) { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    ),
+                    requireCvcRecollection = true
                 )
-            ),
-            eq(PaymentSheet.Appearance()),
-            eq(false)
-        )
+            ) { _, _ -> }
+        }
+    }
 
-        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+    @Test
+    fun `Does not launch CVC Recollection for deferred setup intent`() {
+        cvcRecollectionTest(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            shouldRecollectCvc = false
+        ) { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                    requireCvcRecollection = true
+                )
+            ) { _, _ -> }
+        }
     }
 
     @Test
@@ -2053,24 +2041,6 @@ internal class DefaultFlowControllerTest {
         assertThat(failureCall.error).isEqualTo(PaymentSheetConfirmationError.ExternalPaymentMethod)
     }
 
-    @OptIn(ExperimentalCvcRecollectionApi::class)
-    @Test
-    fun `Clears out isCvcRecollectionEnabledCallback when lifecycle owner is destroyed`() {
-        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback =
-            CvcRecollectionEnabledCallback { true }
-
-        createFlowController()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNull()
-    }
-
     @Test
     fun `On confirm existing payment method & PI, should send expected params to interceptor`() = testScope.runTest {
         val flowController = createFlowController()
@@ -2245,6 +2215,89 @@ internal class DefaultFlowControllerTest {
         }
     }
 
+    private fun cvcRecollectionTest(
+        stripeIntent: StripeIntent,
+        shouldRecollectCvc: Boolean,
+        configureFlowController: suspend (PaymentSheet.FlowController) -> Unit
+    ) = runTest {
+        val onResult = argumentCaptor<ActivityResultCallback<CvcRecollectionResult>>()
+        val cvc = "123"
+        val launcher = mock<CvcRecollectionLauncher> {
+            on { launch(any(), any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(CvcRecollectionResult.Confirmed(cvc = cvc))
+            }
+        }
+        val launcherFactory = mock<CvcRecollectionLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<CvcRecollectionContract>(),
+                onResult.capture()
+            )
+        ).thenReturn(mock())
+
+        val viewModel = createViewModel()
+        val flowController = createFlowController(
+            cvcRecollectionLauncherFactory = launcherFactory,
+            stripeIntent = stripeIntent,
+            viewModel = viewModel
+        )
+
+        verify(launcherFactory).create(any())
+        configureFlowController(flowController)
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+
+        flowController.confirm()
+
+        if (shouldRecollectCvc) {
+            verify(launcher).launch(
+                eq(
+                    CvcRecollectionData(
+                        lastFour = "4242",
+                        brand = CardBrand.Visa
+                    )
+                ),
+                eq(PaymentSheet.Appearance()),
+                eq(false)
+            )
+
+            enqueueConfirmAndVerifyPaymentSelection(cvc, viewModel)
+        } else {
+            verify(launcher, never()).launch(any(), any(), any())
+        }
+
+        flowController.onPaymentResult(PaymentResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+    }
+
+    private fun enqueueConfirmAndVerifyPaymentSelection(
+        cvc: String,
+        viewModel: FlowControllerViewModel
+    ) {
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(cvc = cvc)
+            )
+        )
+
+        verifyPaymentSelection(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedPaymentMethodOptions = (viewModel.paymentSelection as? PaymentSelection.Saved)
+                ?.paymentMethodOptionsParams
+        )
+    }
+
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {
@@ -2342,6 +2395,7 @@ internal class DefaultFlowControllerTest {
         initializedViaCompose = false,
         workContext = testScope.coroutineContext,
         logger = FakeUserFacingLogger(),
+        cvcRecollectionHandler = CvcRecollectionHandlerImpl()
     )
 
     private fun createViewModel(): FlowControllerViewModel {

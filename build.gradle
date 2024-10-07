@@ -31,6 +31,7 @@ plugins {
     id 'com.google.devtools.ksp' version '1.9.24-1.0.20' apply false
     id 'dev.drewhamilton.poko' version '0.15.2' apply false
     id 'org.jetbrains.kotlin.jvm' version '1.9.24' apply false
+    id 'com.emergetools.android' version '4.0.0' apply false
 }
 
 apply plugin: "io.gitlab.arturbosch.detekt"
@@ -97,8 +98,11 @@ apiValidation {
             "payments-core-testing",
             "paymentsheet-example",
             "stripecardscan-example",
+            "stripe-connect-example",
             "screenshot-testing",
             "3ds2playground",
+            "dokka-stripe",
+            "stripe-test-e2e",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

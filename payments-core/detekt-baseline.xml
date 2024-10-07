@@ -70,7 +70,6 @@
     <ID>MagicNumber:DateUtils.kt$DateUtils$20</ID>
     <ID>MagicNumber:DateUtils.kt$DateUtils$80</ID>
     <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$3</ID>
-    <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
     <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$4</ID>

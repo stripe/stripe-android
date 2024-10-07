@@ -16,7 +16,7 @@ data class ElementsSession(
     val stripeIntent: StripeIntent,
     val customer: Customer?,
     val merchantCountry: String?,
-    val isEligibleForCardBrandChoice: Boolean,
+    val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
 ) : StripeModel {
@@ -37,24 +37,21 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
-    val linkMode: LinkMode?
-        get() = if (isLinkEnabled) {
-            if (linkPassthroughModeEnabled) {
-                LinkMode.Passthrough
-            } else {
-                LinkMode.PaymentMethod
-            }
-        } else {
-            null
-        }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
+        val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
+    ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class CardBrandChoice(
+        val eligible: Boolean,
+        val preferredNetworks: List<String>,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -124,7 +121,7 @@ data class ElementsSession(
                 stripeIntent = stripeIntent,
                 customer = null,
                 merchantCountry = null,
-                isEligibleForCardBrandChoice = false,
+                cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
             )

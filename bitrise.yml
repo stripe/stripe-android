@@ -35,6 +35,7 @@ stages:
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-connections-e2e-payments-tests-on-push: { }
+      - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
@@ -50,6 +51,7 @@ stages:
     workflows:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
+      - run-connections-e2e-token-tests: { }
       - run-connections-e2e-livemode-tests: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
@@ -115,6 +117,11 @@ workflows:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _run-connections-e2e-tests
+  run-connections-e2e-token-tests:
+    envs:
+      - MAESTRO_TAGS: testmode-token
+    before_run:
+      - _run-connections-e2e-tests
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -124,6 +131,12 @@ workflows:
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
+    before_run:
+      - _build-connections
+      - _run-connections-e2e-tests
+  run-connections-e2e-token-tests-on-push:
+    envs:
+      - MAESTRO_TAGS: testmode-token
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
@@ -435,10 +448,6 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - activate-build-cache-for-gradle:
-          inputs:
-            - push: 'true'
-            - validation_level: warning
   conclude_all:
     steps:
       - script-runner@0:

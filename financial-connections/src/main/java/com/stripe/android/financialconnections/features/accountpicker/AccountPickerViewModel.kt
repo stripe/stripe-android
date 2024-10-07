@@ -17,7 +17,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -27,7 +26,6 @@ import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -46,6 +44,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -59,7 +58,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     @Assisted initialState: AccountPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -117,7 +116,9 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     )
                 )
             }
+
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
+            val dataAccessDisclaimer = sync.text?.accountPicker?.dataAccessNotice
 
             AccountPickerState.Payload(
                 // note that this uses ?? instead of ||, we do NOT want to skip account selection
@@ -130,11 +131,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
                 dataAccessNotice = dataAccessNotice,
-                merchantDataAccess = MerchantDataAccessModel(
-                    businessName = manifest.businessName,
-                    permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false
-                ),
+                dataAccessDisclaimer = dataAccessDisclaimer,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -310,7 +307,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 updateLocalCache = updateLocalCache
             )
 
-            val consumerSessionClientSecret = getCachedConsumerSession()?.clientSecret
+            val consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret
 
             if (manifest.isDataFlow && manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
                 // In the data flow, we save accounts to Link in this screen. In the payment flow,
@@ -405,9 +402,9 @@ internal data class AccountPickerState(
     data class Payload(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
+        val dataAccessDisclaimer: String?,
         val dataAccessNotice: DataAccessNotice?,
         val selectionMode: SelectionMode,
-        val merchantDataAccess: MerchantDataAccessModel,
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,

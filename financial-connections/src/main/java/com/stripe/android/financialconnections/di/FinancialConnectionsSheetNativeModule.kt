@@ -6,9 +6,11 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.error.ErrorReporter
 import com.stripe.android.core.error.SentryErrorReporter
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.HandleError
@@ -26,6 +28,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -128,6 +131,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale: Locale?,
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
+            fraudDetectionDataRepository: FraudDetectionDataRepository,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -136,6 +140,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale = locale ?: Locale.getDefault(),
             logger = logger,
             isLinkWithStripe = isLinkWithStripe,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
         )
 
         @Singleton
@@ -201,6 +206,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             } else {
                 linkSignupHandlerForNetworking.get()
             }
+        }
+
+        @Provides
+        internal fun provideElementsSessionContext(
+            initialState: FinancialConnectionsSheetNativeState,
+        ): FinancialConnectionsSheet.ElementsSessionContext? {
+            return initialState.elementsSessionContext
         }
     }
 }
