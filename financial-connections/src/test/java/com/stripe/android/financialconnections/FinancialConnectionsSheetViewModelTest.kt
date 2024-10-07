@@ -145,6 +145,9 @@ class FinancialConnectionsSheetViewModelTest {
                     initialArgs = ForInstantDebits(
                         configuration = configuration,
                         elementsSessionContext = ElementsSessionContext(
+                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                            amount = 123,
+                            currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
                         ),
                     )
@@ -173,6 +176,9 @@ class FinancialConnectionsSheetViewModelTest {
                 initialArgs = ForInstantDebits(
                     configuration = configuration,
                     elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                        amount = 123,
+                        currency = "usd",
                         linkMode = null,
                     ),
                 )
