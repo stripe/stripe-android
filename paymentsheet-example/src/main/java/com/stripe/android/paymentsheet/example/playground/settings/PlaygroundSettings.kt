@@ -399,6 +399,7 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
+            CardBrandAcceptanceSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -12,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
@@ -222,6 +223,13 @@ class CustomerSheet internal constructor(
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        /**
+        By default, CustomerSheet will accept all supported cards by Stripe.
+        You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+        Note: This is only a client-side solution.
+         */
+        @property:ExperimentalCardBrandFilteringApi val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         // Hide no-argument constructor init

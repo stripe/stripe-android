@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -597,6 +598,13 @@ class PaymentSheet internal constructor(
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
         internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+
+        /**
+        By default, PaymentSheet will accept all supported cards by Stripe.
+        You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+        Note: This is only a client-side solution.
+         */
+        @property:ExperimentalCardBrandFilteringApi internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -746,6 +754,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -844,6 +853,13 @@ class PaymentSheet internal constructor(
                 this.paymentMethodLayout = paymentMethodLayout
             }
 
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -861,6 +877,7 @@ class PaymentSheet internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
+                cardBrandAcceptance = cardBrandAcceptance,
             )
         }
 
@@ -1514,6 +1531,60 @@ class PaymentSheet internal constructor(
              */
             Full,
         }
+    }
+
+    /**
+     * Options to block certain card brands on the client
+     */
+    sealed class CardBrandAcceptance : Parcelable {
+
+        /**
+         * Card brand categories that can be allowed or disallowed
+         */
+        @Parcelize
+        enum class BrandCategory : Parcelable {
+            /**
+             * Visa branded cards
+             */
+            Visa,
+
+            /**
+             * Mastercard branded cards
+             */
+            Mastercard,
+
+            /**
+             * Amex branded cards
+             */
+            Amex,
+
+            /**
+             * Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo)
+             */
+            DiscoverGlobalNetwork
+        }
+
+        /**
+         * Accept all card brands supported by Stripe
+         */
+        @Parcelize
+        data object All : CardBrandAcceptance()
+
+        /**
+         * Accept only the card brands specified in the associated value
+         */
+        @Parcelize
+        data class Allowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
+
+        /**
+         * Accept all card brands supported by Stripe except for those specified in the associated value
+         */
+        @Parcelize
+        data class Disallowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
     }
 
     internal sealed interface CustomerAccessType : Parcelable {
