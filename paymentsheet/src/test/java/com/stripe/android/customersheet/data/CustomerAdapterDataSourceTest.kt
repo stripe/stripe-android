@@ -2,7 +2,6 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -21,7 +20,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterDataSourceTest {
     @Test
     fun `on retrieve payment methods, should complete successfully from adapter`() = runTest {

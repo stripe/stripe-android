@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -288,7 +287,6 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,

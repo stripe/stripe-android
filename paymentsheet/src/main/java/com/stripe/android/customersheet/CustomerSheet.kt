@@ -28,12 +28,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.parcelize.Parcelize
 
 /**
- * 🏗 This feature is in private beta and could change 🏗
- *
- * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
- * [CustomerAdapter].
+ * A drop-in class that presents a bottom sheet to manage a customer's saved payment methods.
  */
-@ExperimentalCustomerSheetApi
 class CustomerSheet internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
@@ -79,8 +75,8 @@ class CustomerSheet internal constructor(
     }
 
     /**
-     * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
-     * are delivered through the callback passed in [CustomerSheet.create].
+     * Presents a sheet to manage the customer. Results of the sheet are delivered through the callback
+     * passed in [CustomerSheet.create].
      */
     fun present() {
         val request = viewModel.configureRequest ?: run {
@@ -172,7 +168,6 @@ class CustomerSheet internal constructor(
     /**
      * Configuration for [CustomerSheet]
      */
-    @ExperimentalCustomerSheetApi
     @Parcelize
     @Poko
     class Configuration internal constructor(
@@ -252,7 +247,6 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
-        @ExperimentalCustomerSheetApi
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -435,7 +429,6 @@ class CustomerSheet internal constructor(
         abstract suspend fun providesCustomerSessionClientSecret(): Result<CustomerSessionClientSecret>
     }
 
-    @ExperimentalCustomerSheetApi
     companion object {
 
         /**

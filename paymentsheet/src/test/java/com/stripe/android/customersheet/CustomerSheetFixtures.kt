@@ -4,7 +4,6 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetFixtures {
     val MINIMUM_CONFIG = CustomerSheet.Configuration
         .builder(merchantDisplayName = "Merchant, Inc")

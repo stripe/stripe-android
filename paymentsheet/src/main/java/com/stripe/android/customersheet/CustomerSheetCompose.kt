@@ -17,7 +17,6 @@ import com.stripe.android.utils.rememberActivity
  * @param customerAdapter The [CustomerAdapter] to fetch customer-related information
  * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
  */
-@ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
     customerAdapter: CustomerAdapter,
@@ -39,7 +38,6 @@ fun rememberCustomerSheet(
 * @param customerSessionProvider provider for providing customer session elements
 * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
 */
-@ExperimentalCustomerSheetApi
 @ExperimentalCustomerSessionApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
@@ -55,7 +53,6 @@ fun rememberCustomerSheet(
     )
 }
 
-@ExperimentalCustomerSheetApi
 @Composable
 private fun rememberCustomerSheet(
     integrationType: CustomerSheetIntegrationType,

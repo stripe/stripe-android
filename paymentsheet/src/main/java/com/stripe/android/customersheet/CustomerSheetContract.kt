@@ -21,7 +21,6 @@ internal class CustomerSheetContract :
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Parcelize
     internal data class Args(
         val configuration: CustomerSheet.Configuration,

@@ -2,10 +2,8 @@ package com.stripe.android.customersheet.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetFixtures
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetEventTest {
     @Test
     fun `Init event with full config should return expected params`() {

@@ -5,7 +5,6 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -46,7 +45,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
-@OptIn(ExperimentalCustomerSheetApi::class)
 class DefaultCustomerSheetLoaderTest {
     private val lpmRepository = LpmRepository()
 

@@ -4,7 +4,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodUpdateParams
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
     override var canCreateSetupIntents: Boolean = true,
     override val paymentMethodTypes: List<String>? = null,

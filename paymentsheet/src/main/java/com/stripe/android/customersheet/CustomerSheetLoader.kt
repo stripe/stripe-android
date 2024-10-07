@@ -27,12 +27,10 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
     suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full>
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
