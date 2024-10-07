@@ -3,8 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.ExperimentalCardBrandFilteringApi
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class PaymentSheetCardBrandFilter(
