@@ -149,16 +149,37 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `on init, sends 'onInit' event to event reporter`() = runTest(testDispatcher) {
+    fun `on init, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         createViewModel(
             workContext = testDispatcher,
             eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
             configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
         )
 
-        verify(eventReporter).onInit(CustomerSheetFixtures.MINIMUM_CONFIG)
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
+    }
+
+    @Test
+    fun `on init with customer session, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
     }
 
     @Test

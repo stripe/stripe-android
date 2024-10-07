@@ -35,6 +35,7 @@ class CustomerSheet internal constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
+    private val integrationType: CustomerSheetIntegration.Type,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
@@ -93,6 +94,7 @@ class CustomerSheet internal constructor(
 
         val args = CustomerSheetContract.Args(
             configuration = request.configuration,
+            integrationType = integrationType,
             statusBarColor = statusBarColor(),
         )
 
@@ -450,7 +452,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -476,7 +478,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -501,7 +503,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -528,7 +530,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -539,13 +541,13 @@ class CustomerSheet internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
-            integrationType: CustomerSheetIntegrationType,
+            integration: CustomerSheetIntegration,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
                 application = application,
                 lifecycleOwner = lifecycleOwner,
-                integrationType = integrationType,
+                integration = integration,
             )
 
             return CustomerSheet(
@@ -553,6 +555,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = viewModelStoreOwner,
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
+                integrationType = integration.type,
                 paymentOptionFactory = PaymentOptionFactory(
                     resources = application.resources,
                     imageLoader = StripeImageLoader(application),
