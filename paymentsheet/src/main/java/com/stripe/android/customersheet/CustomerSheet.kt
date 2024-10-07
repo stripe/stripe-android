@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -334,7 +333,6 @@ class CustomerSheet internal constructor(
      * to attach payment methods with.
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
     ) {
@@ -342,7 +340,6 @@ class CustomerSheet internal constructor(
          * Builder for creating a [IntentConfiguration]
          */
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var paymentMethodTypes = listOf<String>()
 
@@ -372,13 +369,11 @@ class CustomerSheet internal constructor(
      */
     @Poko
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomerSessionClientSecret internal constructor(
         internal val customerId: String,
         internal val clientSecret: String
     ) {
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * Creates an instance of a [CustomerSessionClientSecret]
@@ -403,7 +398,6 @@ class CustomerSheet internal constructor(
      * [CustomerSessionProvider] provides the necessary functions
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class CustomerSessionProvider {
         /**
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
@@ -464,7 +458,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activity: ComponentActivity,
             customerSessionProvider: CustomerSessionProvider,
@@ -515,7 +508,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             fragment: Fragment,
             customerSessionProvider: CustomerSessionProvider,
