@@ -18,12 +18,12 @@ import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForNetworking
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.notice.RealPresentSheet
-import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
@@ -59,8 +59,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
-
-
 
     @Binds
     fun bindsHandleError(

@@ -2,6 +2,7 @@ package com.stripe.android.core.error
 
 import android.content.Context
 import android.os.Build
+import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
@@ -9,8 +10,8 @@ import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -33,6 +34,8 @@ class SentryErrorReporter(
     private val localeCountry: String = Locale.getDefault().country,
     private val osVersion: Int = Build.VERSION.SDK_INT
 ) : ErrorReporter {
+
+    val deviceId by lazy { Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) }
 
     override fun reportError(t: Throwable) {
         CoroutineScope(workContext).launch {
@@ -105,100 +108,81 @@ class SentryErrorReporter(
     @VisibleForTesting
     internal fun createEnvelopeBody(t: Throwable): String {
         val eventId = generateEventId()
-        val header = JSONObject().put("event_id", eventId)
-        val itemHeaders = JSONObject().put("type", "event")
+        val envelopeHeader = SentryEnvelopeHeader(eventId)
+        val itemHeader = SentryItemHeader("event")
         val itemPayload = createEventPayload(t, eventId)
-        return "$header\n$itemHeaders\n$itemPayload\n"
+
+        return Json.encodeToString(envelopeHeader) + "\n" +
+            Json.encodeToString(itemHeader) + "\n" +
+            Json.encodeToString(itemPayload) + "\n"
     }
 
-    private fun createEventPayload(t: Throwable, eventId: String): JSONObject {
-        return JSONObject()
-            .put("event_id", eventId)
-            .put("timestamp", System.currentTimeMillis() / 1000.0)
-            .put("platform", "android")
-            .put("release", VERSION_NAME)
-            .put(
-                "exception",
-                JSONObject()
-                    .put(
-                        "values",
-                        JSONArray()
-                            .put(
-                                JSONObject()
-                                    .put("type", t::class.java.canonicalName)
-                                    .put("value", t.message.orEmpty())
-                                    .put("stacktrace", createRequestStacktrace(t))
-                            )
+    private fun createEventPayload(t: Throwable, eventId: String): SentryEvent {
+        return SentryEvent(
+            eventId = eventId,
+            timestamp = System.currentTimeMillis() / 1000.0,
+            platform = "android",
+            release = VERSION_NAME,
+            exception = SentryException(
+                values = listOf(
+                    SentryExceptionValue(
+                        type = t::class.java.canonicalName.orEmpty(),
+                        value = t.message.orEmpty(),
+                        stacktrace = createRequestStacktrace(t)
                     )
+                )
+            ),
+            tags = config.customTags + mapOf(
+                "locale" to localeCountry,
+                "environment" to environment,
+                "android_os_version" to osVersion.toString()
+            ),
+            contexts = createRequestContexts(),
+            user = SentryUser(
+                id = deviceId
             )
-            .put(
-                "tags",
-                JSONObject()
-                    .put("locale", localeCountry)
-                    .put("environment", environment)
-                    .put("android_os_version", osVersion)
-                    .also {
-                        config.customTags.forEach { (key, value) ->
-                            it.put(key, value)
-                        }
-                    }
-            )
-            .put("contexts", createRequestContexts())
+        )
     }
 
-    private fun createRequestContexts(): JSONObject {
+    private fun createRequestStacktrace(t: Throwable): SentryStacktrace {
+        return SentryStacktrace(
+            frames = t.stackTrace.reversed().map { el ->
+                SentryFrame(
+                    lineno = el.lineNumber,
+                    filename = el.className,
+                    function = el.methodName
+                )
+            }
+        )
+    }
+
+    private fun createRequestContexts(): SentryContexts {
         val packageInfo = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0)
         }.getOrNull()
 
-        val appName = packageInfo?.applicationInfo?.loadLabel(context.packageManager)
-        return JSONObject()
-            .put(
-                "app",
-                JSONObject()
-                    .put("app_identifier", context.packageName)
-                    .put("app_name", appName)
-                    .put("app_version", packageInfo?.versionName.orEmpty())
-            )
-            .put(
-                "os",
-                JSONObject()
-                    .put("name", "Android")
-                    .put("version", Build.VERSION.RELEASE)
-                    .put("type", Build.TYPE)
-                    .put("build", Build.DISPLAY)
-            )
-            .put(
-                "device",
-                JSONObject()
-                    .put("model_id", Build.ID)
-                    .put("model", Build.MODEL)
-                    .put("manufacturer", Build.MANUFACTURER)
-                    .put("type", Build.TYPE)
-                    .put(
-                        "archs",
-                        JSONArray().also { archs ->
-                            Build.SUPPORTED_ABIS.forEach { arch -> archs.put(arch) }
-                        }
-                    )
-            )
-    }
+        val appName = packageInfo?.applicationInfo?.loadLabel(context.packageManager).toString()
 
-    private fun createRequestStacktrace(t: Throwable): JSONObject {
-        return JSONObject()
-            .put(
-                "frames",
-                JSONArray().also { frames ->
-                    t.stackTrace.reversed().forEach { el ->
-                        frames.put(
-                            JSONObject()
-                                .put("lineno", el.lineNumber)
-                                .put("filename", el.className)
-                                .put("function", el.methodName)
-                        )
-                    }
-                }
+        return SentryContexts(
+            app = SentryAppContext(
+                appIdentifier = context.packageName,
+                appName = appName,
+                appVersion = packageInfo?.versionName.orEmpty()
+            ),
+            os = SentryOsContext(
+                name = "Android",
+                version = Build.VERSION.RELEASE,
+                type = Build.TYPE,
+                build = Build.DISPLAY
+            ),
+            device = SentryDeviceContext(
+                modelId = Build.ID,
+                model = Build.MODEL,
+                manufacturer = Build.MANUFACTURER,
+                type = Build.TYPE,
+                archs = Build.SUPPORTED_ABIS.toList()
             )
+        )
     }
 
     @JvmSynthetic

@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit
 internal object FinancialConnectionsSentryConfig : SentryConfig {
     override val projectId: String = "826"
     override val key: String = BuildConfig.FC_SENTRY_KEY
-    override val secret: String = BuildConfig.FC_SENTRY_SECRET
     override val version: String = "7"
 
     /**
