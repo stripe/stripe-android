@@ -184,17 +184,18 @@ internal sealed class PaymentSelection : Parcelable {
                 merchantName: String,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
-                val isSaveForFutureUseSelected = customerRequestedSave == RequestReuse
-
-                // TODO: Update
-
-                return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
-                    merchantName = merchantName,
-                    isVerifyingMicrodeposits = usesMicrodeposits,
-                    isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-                    isInstantDebits = false,
-                    isSetupFlow = isSetupFlow,
-                )
+                return if (hasResult) {
+                    val isSaveForFutureUseSelected = customerRequestedSave == RequestReuse
+                    USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+                        merchantName = merchantName,
+                        isVerifyingMicrodeposits = usesMicrodeposits,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isInstantDebits = false,
+                        isSetupFlow = isSetupFlow,
+                    )
+                } else {
+                    null
+                }
             }
 
             @Parcelize
