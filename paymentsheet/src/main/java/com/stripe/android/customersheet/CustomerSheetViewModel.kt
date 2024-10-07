@@ -432,7 +432,7 @@ internal class CustomerSheetViewModel(
         }
 
         val customerState = customerState.value
-        val paymentMethodMetadata = customerState.metadata
+        val paymentMethodMetadata = requireNotNull(customerState.metadata)
 
         eventReporter.onPaymentMethodSelected(paymentMethod.code)
 
@@ -443,11 +443,9 @@ internal class CustomerSheetViewModel(
                 paymentMethodCode = paymentMethod.code,
                 formArguments = FormArgumentsFactory.create(
                     paymentMethodCode = paymentMethod.code,
-                    configuration = configuration,
-                    merchantName = configuration.merchantDisplayName,
-                    cbcEligibility = customerState.cbcEligibility,
+                    metadata = paymentMethodMetadata,
                 ),
-                formElements = paymentMethodMetadata?.formElementsForCode(
+                formElements = paymentMethodMetadata.formElementsForCode(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
@@ -773,24 +771,22 @@ internal class CustomerSheetViewModel(
         isFirstPaymentMethod: Boolean,
     ) {
         val customerState = customerState.value
-        val paymentMethodMetadata = customerState.metadata
+        val paymentMethodMetadata = requireNotNull(customerState.metadata)
 
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
-            ?: paymentMethodMetadata?.supportedPaymentMethodTypes()?.firstOrNull()
+            ?: paymentMethodMetadata.supportedPaymentMethodTypes().firstOrNull()
             ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
             paymentMethodCode = paymentMethodCode,
-            configuration = configuration,
-            merchantName = configuration.merchantDisplayName,
-            cbcEligibility = customerState.cbcEligibility,
+            metadata = paymentMethodMetadata,
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
+            ?: requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode))
 
-        val stripeIntent = paymentMethodMetadata?.stripeIntent
-        val formElements = paymentMethodMetadata?.formElementsForCode(
+        val stripeIntent = paymentMethodMetadata.stripeIntent
+        val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
