@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
@@ -46,7 +47,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val fraudDetectionDataRepository = mock<FraudDetectionDataRepository>()
 
     private fun buildRepository(
-        isInstantDebits: Boolean = false
+        isInstantDebits: Boolean = false,
+        elementsSessionContext: ElementsSessionContext? = null,
     ) = FinancialConnectionsConsumerSessionRepository(
         consumersApiService = consumersApiService,
         provideApiRequestOptions = { apiOptions },
@@ -56,6 +58,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         logger = logger,
         isLinkWithStripe = { isInstantDebits },
         fraudDetectionDataRepository = fraudDetectionDataRepository,
+        elementsSessionContext = elementsSessionContext,
     )
 
     @Test
@@ -81,6 +84,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                paymentIntentId = anyOrNull(),
+                setupIntentId = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -272,6 +279,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                paymentIntentId = anyOrNull(),
+                setupIntentId = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -290,6 +301,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             country = anyOrNull(),
             name = anyOrNull(),
             locale = anyOrNull(),
+            amount = anyOrNull(),
+            currency = anyOrNull(),
+            paymentIntentId = anyOrNull(),
+            setupIntentId = anyOrNull(),
             requestSurface = eq("android_connections"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
@@ -307,6 +322,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                paymentIntentId = anyOrNull(),
+                setupIntentId = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -325,6 +344,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             country = anyOrNull(),
             name = anyOrNull(),
             locale = anyOrNull(),
+            amount = anyOrNull(),
+            currency = anyOrNull(),
+            paymentIntentId = anyOrNull(),
+            setupIntentId = anyOrNull(),
             requestSurface = eq("android_instant_debits"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
