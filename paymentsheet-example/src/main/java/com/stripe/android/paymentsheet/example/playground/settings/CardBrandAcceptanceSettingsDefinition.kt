@@ -5,7 +5,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CardBrandAcceptanceSettingsDefinition :
     PlaygroundSettingDefinition<CardBrandAcceptanceType>,
@@ -23,7 +22,7 @@ internal object CardBrandAcceptanceSettingsDefinition :
             option("Allow Visa", CardBrandAcceptanceType.AllowVisa)
         )
     }
-    
+
     override fun configure(
         value: CardBrandAcceptanceType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
