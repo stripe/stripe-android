@@ -131,6 +131,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
                             elementsSessionContext = ElementsSessionContext(
+                                initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent(it.intentId),
+                                amount = it.amount,
+                                currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,

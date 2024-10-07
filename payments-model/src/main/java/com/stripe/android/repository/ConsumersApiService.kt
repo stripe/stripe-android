@@ -35,6 +35,10 @@ interface ConsumersApiService {
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        paymentIntentId: String?,
+        setupIntentId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -110,6 +114,10 @@ class ConsumersApiServiceImpl(
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        paymentIntentId: String?,
+        setupIntentId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -125,6 +133,8 @@ class ConsumersApiServiceImpl(
                     "phone_number" to phoneNumber,
                     "country" to country,
                     "country_inferring_method" to "PHONE_NUMBER",
+                    "amount" to amount,
+                    "currency" to currency,
                     "consent_action" to consentAction.value,
                     "request_surface" to requestSurface,
                 ).plus(
@@ -135,6 +145,14 @@ class ConsumersApiServiceImpl(
                     name?.let {
                         mapOf("legal_name" to it)
                     } ?: emptyMap()
+                ).plus(
+                    paymentIntentId?.let {
+                        mapOf("financial_incentive[payment_intent]" to it)
+                    }.orEmpty()
+                ).plus(
+                    setupIntentId?.let {
+                        mapOf("financial_incentive[setup_intent]" to it)
+                    }.orEmpty()
                 ),
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,

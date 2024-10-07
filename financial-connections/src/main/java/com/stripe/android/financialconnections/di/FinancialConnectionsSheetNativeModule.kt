@@ -8,7 +8,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.HandleError
@@ -127,6 +127,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
             fraudDetectionDataRepository: FraudDetectionDataRepository,
+            elementsSessionContext: ElementsSessionContext?,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -136,6 +137,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             logger = logger,
             isLinkWithStripe = isLinkWithStripe,
             fraudDetectionDataRepository = fraudDetectionDataRepository,
+            elementsSessionContext = elementsSessionContext,
         )
 
         @Singleton
@@ -193,7 +195,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         internal fun provideElementsSessionContext(
             initialState: FinancialConnectionsSheetNativeState,
-        ): FinancialConnectionsSheet.ElementsSessionContext? {
+        ): ElementsSessionContext? {
             return initialState.elementsSessionContext
         }
     }
