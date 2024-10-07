@@ -4,6 +4,7 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.CardBrand
 
@@ -14,6 +15,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     @OptIn(ExperimentalCustomerSheetApi::class)
     class Init(
         private val configuration: CustomerSheet.Configuration,
+        private val integrationType: CustomerSheetIntegration.Type,
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_INIT
         override val additionalParams: Map<String, Any?>
@@ -28,7 +30,8 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
                         ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_CUSTOMER_ACCESS_PROVIDER to integrationType.analyticsValue,
                 )
                 return mapOf(
                     FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
@@ -262,6 +265,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

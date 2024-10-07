@@ -67,7 +67,10 @@ class CustomerSheetEventReporterTest {
     @OptIn(ExperimentalCustomerSheetApi::class)
     @Test
     fun `onInit should fire analytics request with expected event value`() {
-        eventReporter.onInit(configuration = CustomerSheetFixtures.MINIMUM_CONFIG)
+        eventReporter.onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_INIT

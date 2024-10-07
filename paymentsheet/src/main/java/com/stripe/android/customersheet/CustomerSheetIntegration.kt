@@ -3,12 +3,17 @@ package com.stripe.android.customersheet
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 
 @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
-internal sealed interface CustomerSheetIntegrationType {
+internal sealed class CustomerSheetIntegration(val type: Type) {
+    enum class Type(val analyticsValue: String) {
+        CustomerAdapter("customer_adapter"),
+        CustomerSession("customer_session"),
+    }
+
     class Adapter(
         val adapter: CustomerAdapter
-    ) : CustomerSheetIntegrationType
+    ) : CustomerSheetIntegration(Type.CustomerAdapter)
 
     class CustomerSession(
         val customerSessionProvider: CustomerSheet.CustomerSessionProvider
-    ) : CustomerSheetIntegrationType
+    ) : CustomerSheetIntegration(Type.CustomerSession)
 }

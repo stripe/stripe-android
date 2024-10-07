@@ -24,8 +24,8 @@ fun rememberCustomerSheet(
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
-        integrationType = remember(customerAdapter) {
-            CustomerSheetIntegrationType.Adapter(customerAdapter)
+        integration = remember(customerAdapter) {
+            CustomerSheetIntegration.Adapter(customerAdapter)
         },
         callback = callback,
     )
@@ -48,8 +48,8 @@ fun rememberCustomerSheet(
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
-        integrationType = remember(customerSessionProvider) {
-            CustomerSheetIntegrationType.CustomerSession(customerSessionProvider)
+        integration = remember(customerSessionProvider) {
+            CustomerSheetIntegration.CustomerSession(customerSessionProvider)
         },
         callback = callback,
     )
@@ -58,7 +58,7 @@ fun rememberCustomerSheet(
 @ExperimentalCustomerSheetApi
 @Composable
 private fun rememberCustomerSheet(
-    integrationType: CustomerSheetIntegrationType,
+    integration: CustomerSheetIntegration,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -75,7 +75,7 @@ private fun rememberCustomerSheet(
     }
 
     return remember(
-        integrationType,
+        integration,
         callback,
     ) {
         CustomerSheet.getInstance(
@@ -83,7 +83,7 @@ private fun rememberCustomerSheet(
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             viewModelStoreOwner = viewModelStoreOwner,
-            integrationType = integrationType,
+            integration = integration,
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
         )

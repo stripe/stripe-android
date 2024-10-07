@@ -5,7 +5,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.customersheet.CustomerSheetIntegrationType
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
@@ -39,7 +39,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter())
+            integration = CustomerSheetIntegration.Adapter(FakeCustomerAdapter())
         )
 
         assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
@@ -57,7 +57,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.CustomerSession(FakeCustomerSessionProvider())
+            integration = CustomerSheetIntegration.CustomerSession(FakeCustomerSessionProvider())
         )
 
         assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
@@ -75,7 +75,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter())
+            integration = CustomerSheetIntegration.Adapter(FakeCustomerAdapter())
         )
         CustomerSheetHacks.clear()
 

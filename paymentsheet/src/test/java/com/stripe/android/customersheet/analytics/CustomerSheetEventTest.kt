@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetFixtures
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import kotlin.test.Test
 
@@ -11,6 +12,7 @@ class CustomerSheetEventTest {
     fun `Init event with full config should return expected params`() {
         val event = CustomerSheetEvent.Init(
             configuration = CustomerSheetFixtures.CONFIG_WITH_GOOGLE_PAY_ENABLED,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
         )
 
         assertThat(event.eventName).isEqualTo("cs_init")
@@ -44,6 +46,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "customer_access_provider" to "customer_adapter",
         )
 
         assertThat(event.additionalParams)
@@ -54,6 +57,7 @@ class CustomerSheetEventTest {
     fun `Init event with minimum config should return expected params`() {
         val event = CustomerSheetEvent.Init(
             configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
         )
 
         assertThat(event.eventName).isEqualTo("cs_init")
@@ -87,6 +91,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "customer_access_provider" to "customer_adapter",
         )
 
         assertThat(event.additionalParams)
@@ -130,15 +135,33 @@ class CustomerSheetEventTest {
             "payment_method_order" to listOf("klarna", "afterpay", "card"),
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to "cartes_bancaires, visa",
+            "customer_access_provider" to "customer_adapter",
         )
 
-        val event = CustomerSheetEvent.Init(CustomerSheetFixtures.CONFIG_WITH_EVERYTHING)
+        val event = CustomerSheetEvent.Init(
+            configuration = CustomerSheetFixtures.CONFIG_WITH_EVERYTHING,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
 
         assertThat(event.additionalParams).isEqualTo(
             mapOf(
                 "cs_config" to expectedConfigMap,
             )
         )
+    }
+
+    @Test
+    fun `Init event should return expected 'customer_access_provider' when integration is customer session`() {
+        val event = CustomerSheetEvent.Init(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
+
+        assertThat(event.eventName).isEqualTo("cs_init")
+
+        val customerSheetConfig = event.additionalParams["cs_config"] as Map<*, *>
+
+        assertThat(customerSheetConfig).containsEntry("customer_access_provider", "customer_session")
     }
 
     @Test
