@@ -7,6 +7,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,12 +18,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
@@ -36,6 +42,9 @@ internal class CustomerSheetScreenshotTest {
             .padding(0.dp)
             .fillMaxWidth(),
     )
+
+    @get:Rule
+    val coroutineRule = CoroutineTestRule()
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
@@ -76,7 +85,16 @@ internal class CustomerSheetScreenshotTest {
         formFieldValues = FormFieldValues(
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
-        formElements = emptyList(),
+        formElements = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFactory.create()
+        ).formElementsForCode(
+            code = PaymentMethod.Type.Card.code,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                linkConfigurationCoordinator = null,
+                onLinkInlineSignupStateChanged = {},
+            )
+        ) ?: listOf(),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -214,6 +232,32 @@ internal class CustomerSheetScreenshotTest {
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
+        }
+    }
+
+    @Test
+    fun testAddCardForm() {
+        paparazzi.snapshot {
+            ViewModelStoreOwnerContext {
+                CustomerSheetScreen(
+                    viewState = addPaymentMethodViewState,
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testAddCardFormWithError() {
+        paparazzi.snapshot {
+            ViewModelStoreOwnerContext {
+                CustomerSheetScreen(
+                    viewState = addPaymentMethodViewState.copy(
+                        errorMessage = resolvableString("Something went wrong!")
+                    ),
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
         }
     }
 
