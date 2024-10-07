@@ -87,6 +87,7 @@ class CustomerSheetTest {
             hasExtra(
                 "args",
                 CustomerSheetContract.Args(
+                    integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
                     configuration = configuration,
                     statusBarColor = 0
                 )

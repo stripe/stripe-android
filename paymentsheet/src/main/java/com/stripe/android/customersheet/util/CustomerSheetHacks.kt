@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.customersheet.CustomerSheetIntegrationType
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
@@ -45,14 +45,14 @@ internal object CustomerSheetHacks {
     fun initialize(
         application: Application,
         lifecycleOwner: LifecycleOwner,
-        integrationType: CustomerSheetIntegrationType,
+        integration: CustomerSheetIntegration,
     ) {
-        when (integrationType) {
-            is CustomerSheetIntegrationType.Adapter -> {
+        when (integration) {
+            is CustomerSheetIntegration.Adapter -> {
                 val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
                     .builder()
                     .application(application)
-                    .adapter(integrationType.adapter)
+                    .adapter(integration.adapter)
                     .build()
 
                 _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
@@ -60,11 +60,11 @@ internal object CustomerSheetHacks {
                 _intentDataSource.value = adapterDataSourceComponent.customerSheetIntentDataSource
                 _savedSelectionDataSource.value = adapterDataSourceComponent.customerSheetSavedSelectionDataSource
             }
-            is CustomerSheetIntegrationType.CustomerSession -> {
+            is CustomerSheetIntegration.CustomerSession -> {
                 val customerSessionDataSourceComponent = DaggerCustomerSessionDataSourceComponent
                     .builder()
                     .application(application)
-                    .customerSessionProvider(integrationType.customerSessionProvider)
+                    .customerSessionProvider(integration.customerSessionProvider)
                     .build()
 
                 _initializationDataSource.value =

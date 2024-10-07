@@ -94,6 +94,7 @@ internal class CustomerSheetViewModel(
     private val intentDataSourceProvider: Deferred<CustomerSheetIntentDataSource>,
     private val savedSelectionDataSourceProvider: Deferred<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
+    private val integrationType: CustomerSheetIntegration.Type,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
     private val eventReporter: CustomerSheetEventReporter,
@@ -111,6 +112,7 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
         logger: Logger,
         stripeRepository: StripeRepository,
         eventReporter: CustomerSheetEventReporter,
@@ -129,6 +131,7 @@ internal class CustomerSheetViewModel(
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
+        integrationType = integrationType,
         logger = logger,
         stripeRepository = stripeRepository,
         eventReporter = eventReporter,
@@ -216,7 +219,7 @@ internal class CustomerSheetViewModel(
     init {
         configuration.appearance.parseAppearance()
 
-        eventReporter.onInit(configuration)
+        eventReporter.onInit(configuration, integrationType)
 
         if (viewState.value is CustomerSheetViewState.Loading) {
             viewModelScope.launch(workContext) {
@@ -1261,6 +1264,7 @@ internal class CustomerSheetViewModel(
             val component = DaggerCustomerSheetViewModelComponent.builder()
                 .application(extras.requireApplication())
                 .configuration(args.configuration)
+                .integrationType(args.integrationType)
                 .statusBarColor(args.statusBarColor)
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()
