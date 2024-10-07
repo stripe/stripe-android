@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -238,6 +239,8 @@ class DefaultAddPaymentMethodInteractorTest {
                     preferredNetworks = emptyList(),
                 ),
                 merchantName = "Example, Inc.",
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             )
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },

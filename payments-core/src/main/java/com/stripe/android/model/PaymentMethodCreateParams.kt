@@ -1310,6 +1310,7 @@ data class PaymentMethodCreateParams internal constructor(
             paymentMethodId: String,
             requiresMandate: Boolean,
             productUsage: Set<String>,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
@@ -1319,6 +1320,7 @@ data class PaymentMethodCreateParams internal constructor(
                         "payment_method_id" to paymentMethodId,
                     ),
                 ),
+                allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
             )
         }

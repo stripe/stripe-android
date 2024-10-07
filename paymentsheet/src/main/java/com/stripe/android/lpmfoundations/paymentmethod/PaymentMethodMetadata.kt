@@ -213,45 +213,10 @@ internal data class PaymentMethodMetadata(
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
     ): PaymentMethod.AllowRedisplay {
-        return if (hasIntentToSetup()) {
-            allowRedisplayForSetupIntent(customerRequestedSave)
-        } else {
-            allowRedisplayForPaymentIntent(customerRequestedSave)
-        }
-    }
-
-    private fun allowRedisplayForSetupIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> {
-                paymentMethodSaveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
-            }
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.LIMITED
-                }
-            }
-        }
-    }
-
-    private fun allowRedisplayForPaymentIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.UNSPECIFIED
-                }
-            }
-        }
+        return paymentMethodSaveConsentBehavior.allowRedisplay(
+            isSetupIntent = hasIntentToSetup(),
+            customerRequestedSave = customerRequestedSave,
+        )
     }
 
     internal companion object {

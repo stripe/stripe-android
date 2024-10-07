@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -98,7 +99,9 @@ internal class CustomerSheetScreenshotTest {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            merchantName = ""
+            merchantName = "",
+            hasIntentToSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(

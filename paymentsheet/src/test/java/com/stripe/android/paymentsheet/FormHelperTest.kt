@@ -128,6 +128,7 @@ internal class FormHelperTest {
                     value = 1099,
                     currencyCode = "usd",
                 ),
+                hasIntentToSetup = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )
