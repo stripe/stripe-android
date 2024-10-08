@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -12,10 +13,11 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal fun FormFieldValues.createBankAccountPaymentSelection(
     createParams: PaymentMethodCreateParams,
+    extraParams: PaymentMethodExtraParams?,
 ): PaymentSelection.New.USBankAccount {
-    val bankName = fieldValuePairs[IdentifierSpec.BankName]?.value
-    val last4 = fieldValuePairs[IdentifierSpec.Last4]?.value
-    val usesMicrodeposits = fieldValuePairs[IdentifierSpec.UsesMicrodeposits]?.value?.toBoolean() ?: false
+    val bankName = fieldValuePairs[IdentifierSpec.USBankAccountBankName]?.value
+    val last4 = fieldValuePairs[IdentifierSpec.USBankAccountLast4]?.value
+    val usesMicrodeposits = fieldValuePairs[IdentifierSpec.USBankAccountUsesMicrodeposits]?.value?.toBoolean() ?: false
 
     return PaymentSelection.New.USBankAccount(
         code = PaymentMethod.Type.USBankAccount.code,
@@ -30,21 +32,22 @@ internal fun FormFieldValues.createBankAccountPaymentSelection(
         paymentMethodOptionsParams = PaymentMethodOptionsParams.USBankAccount(
             setupFutureUsage = userRequestedReuse.setupFutureUsage
         ),
+        paymentMethodExtraParams = extraParams,
         customerRequestedSave = userRequestedReuse,
     )
 }
 
 internal fun FormFieldValues.createInstantDebitsPaymentSelection(
     createParams: PaymentMethodCreateParams,
+    extraParams: PaymentMethodExtraParams?,
 ): PaymentSelection.New.USBankAccount {
-    val bankName = fieldValuePairs[IdentifierSpec.BankName]?.value
-    val last4 = fieldValuePairs[IdentifierSpec.Last4]?.value
-    val usesMicrodeposits = fieldValuePairs[IdentifierSpec.UsesMicrodeposits]?.value?.toBoolean() ?: false
+    val bankName = fieldValuePairs[IdentifierSpec.LinkBankName]?.value
+    val last4 = fieldValuePairs[IdentifierSpec.LinkLast4]?.value
 
     return PaymentSelection.New.USBankAccount(
         code = PaymentMethod.Type.Link.code,
         hasResult = fieldValuePairs.containsKey(IdentifierSpec.LinkPaymentMethodId),
-        usesMicrodeposits = usesMicrodeposits,
+        usesMicrodeposits = false,
         labelResource = resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             last4,
@@ -52,6 +55,7 @@ internal fun FormFieldValues.createInstantDebitsPaymentSelection(
         iconResource = TransformToBankIcon(bankName),
         paymentMethodCreateParams = createParams,
         paymentMethodOptionsParams = null,
+        paymentMethodExtraParams = extraParams,
         customerRequestedSave = userRequestedReuse,
     )
 }

@@ -83,12 +83,18 @@ data class IdentifierSpec(
         val OneLineAddress = IdentifierSpec("address")
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
-        // TODO: Use these to transport values?
+        val BankName = IdentifierSpec("bank_name", destination = ParameterDestination.Local.Extras)
+        val Last4 = IdentifierSpec("last4", destination = ParameterDestination.Local.Extras)
+        val UsesMicrodeposits = IdentifierSpec("uses_microdeposits", destination = ParameterDestination.Local.Extras)
+
         val BankAccountId = IdentifierSpec("us_bank_account[link_account_session]")
+        val USBankAccountBankName = IdentifierSpec("us_bank_account[bank_name]", destination = ParameterDestination.Local.Extras)
+        val USBankAccountLast4 = IdentifierSpec("us_bank_account[last4]", destination = ParameterDestination.Local.Extras)
+        val USBankAccountUsesMicrodeposits = IdentifierSpec("us_bank_account[uses_microdeposits]", destination = ParameterDestination.Local.Extras)
+
         val LinkPaymentMethodId = IdentifierSpec("link[payment_method_id]")
-        val BankName = IdentifierSpec("bank_name", ignoreField = true)
-        val Last4 = IdentifierSpec("last4", ignoreField = true)
-        val UsesMicrodeposits = IdentifierSpec("uses_microdeposits", ignoreField = true)
+        val LinkBankName = IdentifierSpec("link[bank_name]", destination = ParameterDestination.Local.Extras)
+        val LinkLast4 = IdentifierSpec("link[last4]", destination = ParameterDestination.Local.Extras)
 
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")

@@ -110,9 +110,15 @@ internal fun FormFieldValues.transformToPaymentSelection(
             customerRequestedSave = userRequestedReuse,
         )
     } else if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
-        createBankAccountPaymentSelection(createParams = params)
+        createBankAccountPaymentSelection(
+            createParams = params,
+            extraParams = extras,
+        )
     } else if (paymentMethod.code == PaymentMethod.Type.Link.code) {
-        createInstantDebitsPaymentSelection(createParams = params)
+        createInstantDebitsPaymentSelection(
+            createParams = params,
+            extraParams = extras,
+        )
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,

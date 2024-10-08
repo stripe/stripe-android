@@ -93,12 +93,12 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
             .element(nameElement)
             .element(emailElement)
 
-        if (intermediateResult is CollectBankAccountResultInternal.Completed) {
+        val bankAccountElementState = arguments.retrieveBankAccountElementState()
+
+        if (bankAccountElementState != null) {
             builder.element(
                 BankAccountElement(
-                    state = intermediateResult.toBankAccountElementState(
-                        onRemoveAccount = { arguments.onRemoveBankAccount() },
-                    ),
+                    state = bankAccountElementState,
                     isInstantDebits = false,
                 )
             )
@@ -123,6 +123,29 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         }
 
         return builder.build()
+    }
+}
+
+private fun UiDefinitionFactory.Arguments.retrieveBankAccountElementState(): BankAccountElement.State? {
+    return if (intermediateResult is CollectBankAccountResultInternal.Completed) {
+        intermediateResult.toBankAccountElementState(onRemoveAccount = onRemoveBankAccount)
+    } else {
+        val paymentMethodId = initialValues[IdentifierSpec.BankAccountId]
+        val bankName = initialValues[IdentifierSpec.USBankAccountBankName]
+        val last4 = initialValues[IdentifierSpec.USBankAccountLast4]
+        val usesMicrodeposits = initialValues[IdentifierSpec.USBankAccountUsesMicrodeposits]?.toBoolean() ?: false
+
+        if (paymentMethodId != null) {
+            BankAccountElement.State(
+                id = paymentMethodId,
+                bankName = bankName,
+                last4 = last4,
+                usesMicrodeposits = usesMicrodeposits,
+                onRemoveAccount = onRemoveBankAccount,
+            )
+        } else {
+            null
+        }
     }
 }
 

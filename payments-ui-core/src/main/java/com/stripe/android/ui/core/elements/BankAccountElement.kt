@@ -25,13 +25,14 @@ data class BankAccountElement(
         val formFieldValues = buildList {
             if (isInstantDebits) {
                 add(IdentifierSpec.LinkPaymentMethodId to FormFieldEntry(state.id, isComplete = true))
+                add(IdentifierSpec.LinkBankName to FormFieldEntry(state.bankName, isComplete = true))
+                add(IdentifierSpec.LinkLast4 to FormFieldEntry(state.last4, isComplete = true))
             } else {
                 add(IdentifierSpec.BankAccountId to FormFieldEntry(state.id, isComplete = true))
+                add(IdentifierSpec.USBankAccountBankName to FormFieldEntry(state.bankName, isComplete = true))
+                add(IdentifierSpec.USBankAccountLast4 to FormFieldEntry(state.last4, isComplete = true))
+                add(IdentifierSpec.USBankAccountUsesMicrodeposits to FormFieldEntry(state.usesMicrodeposits.toString(), isComplete = true))
             }
-
-            add(IdentifierSpec.BankName to FormFieldEntry(state.bankName, isComplete = true))
-            add(IdentifierSpec.Last4 to FormFieldEntry(state.last4, isComplete = true))
-            add(IdentifierSpec.UsesMicrodeposits to FormFieldEntry(state.usesMicrodeposits.toString(), isComplete = true))
         }
 
         return stateFlowOf(formFieldValues)

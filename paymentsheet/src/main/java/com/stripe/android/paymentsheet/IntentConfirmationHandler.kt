@@ -11,6 +11,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
@@ -187,13 +188,45 @@ internal class IntentConfirmationHandler(
     private fun handleCollectBankAccountResult(
         result: CollectBankAccountResultInternal,
     ) {
-        _state.value = State.Idle(intermediateResult = result)
+        _state.value = State.Idle(intermediateResult = result.toIntermediateResult())
+    }
+
+    private fun CollectBankAccountResultInternal.toIntermediateResult(): IntermediateResult? {
+        return when (this) {
+            is CollectBankAccountResultInternal.Completed -> {
+                IntermediateResult.Success(this)
+            }
+            is CollectBankAccountResultInternal.Failed -> {
+                IntermediateResult.Failure(
+                    error = R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString,
+                )
+            }
+            is CollectBankAccountResultInternal.Cancelled -> {
+                null
+            }
+        }
     }
 
     private fun handleCollectBankAccountForInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult,
     ) {
-        _state.value = State.Idle(intermediateResult = result)
+        _state.value = State.Idle(intermediateResult = result.toIntermediateResult())
+    }
+
+    private fun CollectBankAccountForInstantDebitsResult.toIntermediateResult(): IntermediateResult? {
+        return when (this) {
+            is CollectBankAccountForInstantDebitsResult.Completed -> {
+                IntermediateResult.Success(this)
+            }
+            is CollectBankAccountForInstantDebitsResult.Failed -> {
+                IntermediateResult.Failure(
+                    error = R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString,
+                )
+            }
+            is CollectBankAccountForInstantDebitsResult.Cancelled -> {
+                null
+            }
+        }
     }
 
     /**
@@ -829,6 +862,11 @@ internal class IntentConfirmationHandler(
         val linkMode: LinkMode?,
     ) : Parcelable
 
+    internal sealed interface IntermediateResult {
+        data class Success(val result: Any) : IntermediateResult
+        data class Failure(val error: ResolvableString) : IntermediateResult
+    }
+
     /**
      * Defines the state types that [IntentConfirmationHandler] can be in with regards to payment confirmation.
      */
@@ -838,7 +876,7 @@ internal class IntentConfirmationHandler(
          * handler is reloaded after being destroyed by process death while confirming an intent.
          */
         data class Idle(
-            val intermediateResult: Any? = null,
+            val intermediateResult: IntermediateResult? = null,
         ) : State
 
         /**

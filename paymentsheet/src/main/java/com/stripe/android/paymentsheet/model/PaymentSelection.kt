@@ -162,7 +162,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class USBankAccount constructor(
+        data class USBankAccount(
             val code: String,
             val hasResult: Boolean,
             val usesMicrodeposits: Boolean,

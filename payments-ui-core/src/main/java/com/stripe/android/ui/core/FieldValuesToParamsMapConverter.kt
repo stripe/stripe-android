@@ -130,6 +130,21 @@ class FieldValuesToParamsMapConverter {
                     confirmed = fieldValuePairsForExtras[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
                 )
 
+                PaymentMethod.Type.Link.code -> {
+                    PaymentMethodExtraParams.LinkBankPayment(
+                        bankName = fieldValuePairsForExtras[IdentifierSpec.LinkBankName]?.value,
+                        last4 = fieldValuePairsForExtras[IdentifierSpec.LinkLast4]?.value,
+                    )
+                }
+
+                PaymentMethod.Type.USBankAccount.code -> {
+                    PaymentMethodExtraParams.USBankAccount(
+                        bankName = fieldValuePairsForExtras[IdentifierSpec.USBankAccountBankName]?.value,
+                        last4 = fieldValuePairsForExtras[IdentifierSpec.USBankAccountLast4]?.value,
+                        usesMicrodeposits = fieldValuePairsForExtras[IdentifierSpec.USBankAccountUsesMicrodeposits]?.value?.toBoolean() ?: false
+                    )
+                }
+
                 else -> null
             }
         }

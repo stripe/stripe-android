@@ -347,10 +347,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             intentConfirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is IntentConfirmationHandler.State.Idle -> {
-                        if (state.intermediateResult != null) {
-                            val screen = navigationHandler.currentScreen.value
-                            screen.updateWithResult(state.intermediateResult)
-                            resetViewState(userErrorMessage = null)
+                        when (val result = state.intermediateResult) {
+                            is IntentConfirmationHandler.IntermediateResult.Success -> {
+                                val screen = navigationHandler.currentScreen.value
+                                screen.updateWithResult(result.result)
+                                resetViewState(userErrorMessage = null)
+                            }
+                            is IntentConfirmationHandler.IntermediateResult.Failure -> {
+                                resetViewState(userErrorMessage = result.error)
+                            }
+                            null -> {
+                                resetViewState(userErrorMessage = null)
+                            }
                         }
                     }
                     is IntentConfirmationHandler.State.Preconfirming -> {
