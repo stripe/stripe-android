@@ -13,6 +13,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import java.util.UUID.randomUUID
+import java.util.concurrent.TimeUnit
 
 /**
  * An [ErrorReporter] that reports to Sentry.
@@ -140,6 +141,17 @@ class SentryErrorReporter(
 
     private fun generateEventId(): String {
         return randomUUID().toString().replace("-", "")
+    }
+
+    /**
+     * If [System.currentTimeMillis] returns `1600285647423`, this method will return
+     * `"1600285647.423"`.
+     */
+    fun getTimestamp(): String {
+        val timestamp = System.currentTimeMillis()
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(timestamp)
+        val fraction = timestamp - TimeUnit.SECONDS.toMillis(seconds)
+        return "$seconds.$fraction"
     }
 
     private companion object {
