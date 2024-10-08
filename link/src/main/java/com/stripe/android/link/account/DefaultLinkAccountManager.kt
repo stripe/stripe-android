@@ -27,7 +27,7 @@ import javax.inject.Inject
  * Manages the Link account for the current user, persisting it across app usages.
  */
 @LinkScope
-internal class LinkAccountManagerImpl @Inject constructor(
+internal class DefaultLinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
