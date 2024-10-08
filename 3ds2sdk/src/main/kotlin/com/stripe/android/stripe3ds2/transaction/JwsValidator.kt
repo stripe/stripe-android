@@ -14,6 +14,7 @@ import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
@@ -23,12 +24,14 @@ import java.security.PublicKey
 import java.security.cert.CertPathBuilder
 import java.security.cert.CertStore
 import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
 import java.security.cert.CollectionCertStoreParameters
 import java.security.cert.PKIXBuilderParameters
 import java.security.cert.X509CertSelector
 import java.security.cert.X509Certificate
 import java.text.ParseException
 import java.util.Locale
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * JWS validator to validate ARes's `acsSignedContent` field.
@@ -63,11 +66,31 @@ internal class DefaultJwsValidator(
     ): JSONObject {
         val jwsObject = JWSObject.parse(jws)
 
-        if (!isLiveMode || isValid(jwsObject, rootCerts)) {
+        if (!isLiveMode) {
+            if (!jwsObject.header.x509CertChain.isNullOrEmpty()) {
+                val certificates = jwsObject.header.x509CertChain.mapNotNull { certificateFromString(it.toString()) }
+
+                if (certificates.isNotEmpty() && isValid(jwsObject, certificates)) {
+                    return JSONObject(jwsObject.payload.toString())
+                }
+
+                throw IllegalStateException("Could not validate JWS")
+            } else {
+                return JSONObject(jwsObject.payload.toString())
+            }
+        } else if (isValid(jwsObject, rootCerts)) {
             return JSONObject(jwsObject.payload.toString())
         }
 
         throw IllegalStateException("Could not validate JWS")
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun certificateFromString(base64: String): X509Certificate? {
+        val decoded = kotlin.io.encoding.Base64.decode(base64)
+        val inputStream = ByteArrayInputStream(decoded)
+
+        return CertificateFactory.getInstance("X.509").generateCertificate(inputStream) as? X509Certificate
     }
 
     @Throws(JOSEException::class, CertificateException::class)

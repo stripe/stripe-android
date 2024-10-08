@@ -25,6 +25,15 @@
         android:drawablePadding="@dimen/stripe_3ds2_challenge_zone_text_indicator_padding"
         tools:text="Challenge Info Text" />
 
+    <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
+        android:id="@+id/czv_info_label"
+        style="@style/Stripe3DS2TextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/stripe_3ds2_challenge_zone_vertical_padding"
+        android:drawablePadding="@dimen/stripe_3ds2_challenge_zone_text_indicator_padding"
+        tools:text="Challenge Info Label" />
+
     <FrameLayout
         android:id="@+id/czv_entry_view"
         android:layout_width="match_parent"

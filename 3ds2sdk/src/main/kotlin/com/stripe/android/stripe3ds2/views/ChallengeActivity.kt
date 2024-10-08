@@ -223,7 +223,9 @@ class ChallengeActivity : AppCompatActivity() {
         super.onResume()
 
         if (viewModel.shouldAutoSubmitOOB) {
-            viewModel.submit(ChallengeAction.Oob)
+            val fragment = supportFragmentManager.fragments.first() as ChallengeFragment
+
+            viewModel.submit(ChallengeAction.Oob(fragment.challengeZoneView.whitelistingSelection))
         } else if (viewModel.shouldRefreshUi) {
             viewModel.onRefreshUi()
         }

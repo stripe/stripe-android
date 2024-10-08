@@ -19,7 +19,8 @@ class ChallengeRequestDataTest {
             messageVersion = ChallengeMessageFixtures.MESSAGE_VERSION_210,
             cancelReason = ChallengeRequestData.CancelReason.UserSelected,
             messageExtensions = listOf(messageExtension, messageExtension),
-            shouldResendChallenge = false
+            shouldResendChallenge = false,
+            threeDSRequestorAppURL = ChallengeMessageFixtures.THREE_DS_APP_URL
         )
 
         val creqJson = creqData.toJson()
@@ -50,7 +51,7 @@ class ChallengeRequestDataTest {
             creqJson.getString(ChallengeRequestData.FIELD_RESEND_CHALLENGE)
         )
         assertFalse(creqJson.has(ChallengeRequestData.FIELD_CHALLENGE_DATA_ENTRY))
-        assertEquals("Y", creqJson.getString(ChallengeRequestData.FIELD_CHALLENGE_NO_ENTRY))
+        assertFalse(creqJson.has(ChallengeRequestData.FIELD_CHALLENGE_NO_ENTRY))
         assertFalse(creqJson.has(ChallengeRequestData.FIELD_CHALLENGE_HTML_DATA_ENTRY))
 
         assertEquals(
