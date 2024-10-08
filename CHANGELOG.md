@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.52.0 - 2024-10-07
+
+### CustomerSheet
+* [ADDED] `CustomerSheet` is now generally available. For more information see our docs [here](https://docs.stripe.com/elements/customer-sheet).
+* [ADDED] `CustomerSession` on `CustomerSheet` is now in private beta. For more information see our docs [here](https://docs.corp.stripe.com/elements/customer-sheet?platform=android&mobile-customer-session=customer-session).
+
 ## 20.51.1 - 2024-09-30
 * Stability and efficiency improvements.
 
@@ -26,6 +32,7 @@
 
 ## 20.49.0 - 2024-09-09
 
+* [ADDED] `CustomerSession` on `PaymentSheet` is now in private beta. For more information see our docs [here](https://docs.corp.stripe.com/payments/accept-a-payment?platform=android&mobile-customer-session=customer-session).
 * [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.
 
 ## 20.48.6 - 2024-08-26
