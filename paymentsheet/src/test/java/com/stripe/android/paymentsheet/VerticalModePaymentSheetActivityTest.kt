@@ -293,6 +293,37 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
+    fun `Selection is preserved after opening form`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1, card2)
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
+        verticalModePage.assertPrimaryButton(isEnabled())
+
+        verticalModePage.clickOnNewLpm("cashapp")
+        verticalModePage.assertLpmIsSelected("cashapp")
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        verticalModePage.assertLpmIsSelected("cashapp")
+    }
+
+    @Test
     fun `Primary button label is correctly applied`() = runTest(
         primaryButtonLabel = "Gimme money!",
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),

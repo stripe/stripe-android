@@ -32,10 +32,29 @@ class CustomerEphemeralKeyRequest private constructor(
 
     class Builder {
         private var customerType: String? = null
+        private var customerKeyType: CustomerKeyType = CustomerKeyType.Legacy
         private var merchantCountryCode: String? = null
+        private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
+            AllowRedisplayFilter.Unspecified,
+            AllowRedisplayFilter.Limited,
+            AllowRedisplayFilter.Always,
+        )
 
         fun customerType(customerType: String) = apply {
             this.customerType = customerType
+        }
+
+        fun customerKeyType(customerKeyType: CustomerKeyType) = apply {
+            this.customerKeyType = customerKeyType
+        }
+
+        fun paymentMethodRemoveFeature(state: FeatureState) {
+            this.paymentMethodRemoveFeature = state
+        }
+
+        fun paymentMethodRedisplayFilters(filters: List<AllowRedisplayFilter>) {
+            this.paymentMethodRedisplayFilters = filters
         }
 
         fun merchantCountryCode(merchantCountryCode: String?) = apply {
@@ -45,16 +64,12 @@ class CustomerEphemeralKeyRequest private constructor(
         fun build(): CustomerEphemeralKeyRequest {
             return CustomerEphemeralKeyRequest(
                 customerType = customerType,
-                customerKeyType = CustomerKeyType.Legacy,
+                customerKeyType = customerKeyType,
                 merchantCountryCode = merchantCountryCode,
                 paymentMethodSaveFeature = FeatureState.Enabled,
-                paymentMethodRemoveFeature = FeatureState.Enabled,
+                paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodRedisplayFeature = FeatureState.Enabled,
-                paymentMethodRedisplayFilters = listOf(
-                    AllowRedisplayFilter.Unspecified,
-                    AllowRedisplayFilter.Limited,
-                    AllowRedisplayFilter.Always,
-                )
+                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
             )
         }
     }

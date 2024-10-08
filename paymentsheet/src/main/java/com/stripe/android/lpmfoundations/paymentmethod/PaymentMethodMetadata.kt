@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -214,45 +213,10 @@ internal data class PaymentMethodMetadata(
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
     ): PaymentMethod.AllowRedisplay {
-        return if (hasIntentToSetup()) {
-            allowRedisplayForSetupIntent(customerRequestedSave)
-        } else {
-            allowRedisplayForPaymentIntent(customerRequestedSave)
-        }
-    }
-
-    private fun allowRedisplayForSetupIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> {
-                paymentMethodSaveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
-            }
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.LIMITED
-                }
-            }
-        }
-    }
-
-    private fun allowRedisplayForPaymentIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.UNSPECIFIED
-                }
-            }
-        }
+        return paymentMethodSaveConsentBehavior.allowRedisplay(
+            isSetupIntent = hasIntentToSetup(),
+            customerRequestedSave = customerRequestedSave,
+        )
     }
 
     internal companion object {
@@ -288,10 +252,10 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
+            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
@@ -314,7 +278,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 externalPaymentMethodSpecs = emptyList(),
             )

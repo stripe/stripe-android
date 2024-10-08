@@ -25,7 +25,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetTest {
     @get:Rule
@@ -73,7 +72,7 @@ class CustomerSheetTest {
         )
 
         val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = true)
+            .googlePayEnabled(googlePayEnabled = true)
             .preferredNetworks(preferredNetworks = listOf(CardBrand.CartesBancaires))
             .build()
 
@@ -88,6 +87,7 @@ class CustomerSheetTest {
             hasExtra(
                 "args",
                 CustomerSheetContract.Args(
+                    integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
                     configuration = configuration,
                     statusBarColor = 0
                 )
@@ -176,7 +176,7 @@ class CustomerSheetTest {
     fun `When Google payment option, should return option is config enables Google Pay`() = runPaymentOptionTest(
         paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = true)
+            .googlePayEnabled(googlePayEnabled = true)
             .build(),
     ) { result ->
         val selectedResult = result.asSelected()
@@ -188,7 +188,7 @@ class CustomerSheetTest {
     fun `When Google payment option, should not return option is config disables Google Pay`() = runPaymentOptionTest(
         paymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay),
         configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant, Inc.")
-            .googlePayEnabled(googlePayConfiguration = false)
+            .googlePayEnabled(googlePayEnabled = false)
             .build(),
     ) { result ->
         val selectedResult = result.asSelected()

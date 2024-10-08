@@ -48,6 +48,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
+import com.stripe.android.financialconnections.example.Experience.LinkCardBrand
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
@@ -146,13 +147,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         state: FinancialConnectionsPlaygroundState,
         paymentSheet: PaymentSheet
     ) {
+        val email = state.settings.get<EmailSetting>().selectedOption
+
         when (integrationType) {
             IntegrationType.Standalone -> {
-                val email = state.settings.get<EmailSetting>().selectedOption
                 launchStandaloneIntegration(email)
             }
             IntegrationType.PaymentElement -> {
-                launchPaymentSheet(paymentSheet)
+                launchPaymentSheet(paymentSheet, email)
             }
         }
     }
@@ -168,12 +170,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            InstantDebits -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
+            InstantDebits,
+            LinkCardBrand -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
                 stripeAccountId = null,
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
+                    elementsSessionContext = elementsSessionContext,
                 )
             )
         }
@@ -181,21 +185,28 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private fun OpenForPaymentIntent.launchPaymentSheet(
         paymentSheet: PaymentSheet,
+        email: String,
     ) {
         PaymentConfiguration.init(
             context = this@FinancialConnectionsPlaygroundActivity,
             publishableKey = publishableKey
         )
+
+        val config = PaymentSheet.Configuration(
+            allowsDelayedPaymentMethods = true,
+            merchantDisplayName = "Example, Inc.",
+            customer = PaymentSheet.CustomerConfiguration(
+                id = requireNotNull(customerId),
+                ephemeralKeySecret = requireNotNull(ephemeralKey),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                email = email.takeIf { it.isNotBlank() },
+            ),
+        )
+
         paymentSheet.presentWithPaymentIntent(
             paymentIntentClientSecret = paymentIntentSecret,
-            configuration = PaymentSheet.Configuration(
-                allowsDelayedPaymentMethods = true,
-                merchantDisplayName = "Example, Inc.",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = requireNotNull(customerId),
-                    ephemeralKeySecret = requireNotNull(ephemeralKey),
-                )
-            )
+            configuration = config,
         )
     }
 

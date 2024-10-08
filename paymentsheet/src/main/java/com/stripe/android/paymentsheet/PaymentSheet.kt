@@ -886,7 +886,12 @@ class PaymentSheet internal constructor(
          * Payment methods are arranged vertically.
          * Users can scroll up or down to navigate through different payment methods.
          */
-        Vertical;
+        Vertical,
+
+        /**
+         * This lets Stripe choose the best layout for payment methods in the sheet.
+         */
+        Automatic;
 
         internal companion object {
             internal val default: PaymentMethodLayout = Horizontal

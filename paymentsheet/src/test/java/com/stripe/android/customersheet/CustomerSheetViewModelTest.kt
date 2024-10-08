@@ -76,7 +76,6 @@ import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
@@ -150,16 +149,37 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `on init, sends 'onInit' event to event reporter`() = runTest(testDispatcher) {
+    fun `on init, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         createViewModel(
             workContext = testDispatcher,
             eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
             configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
         )
 
-        verify(eventReporter).onInit(CustomerSheetFixtures.MINIMUM_CONFIG)
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
+    }
+
+    @Test
+    fun `on init with customer session, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
     }
 
     @Test
@@ -643,6 +663,7 @@ class CustomerSheetViewModelTest {
             val resultTurbine = viewModel.result.testIn(backgroundScope)
 
             assertThat(viewStateTurbine.awaitItem()).isInstanceOf<SelectPaymentMethod>()
+            viewStateTurbine.cancelAndIgnoreRemainingEvents()
             assertThat(resultTurbine.awaitItem()).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
@@ -1067,6 +1088,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -1163,6 +1187,12 @@ class CustomerSheetViewModelTest {
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD.copy(id = "pm_1")),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    )
+                ),
                 onDetachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
                 },
@@ -2038,6 +2068,9 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(US_BANK_ACCOUNT_VERIFIED)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -3303,6 +3336,146 @@ class CustomerSheetViewModelTest {
             assertThat(selectState.topBarState {}.showEditMenu).isTrue()
         }
 
+    @Test
+    fun `If refreshed payment methods does not contain newly added payment method, keep original selection`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods,
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
+                assertThat(newViewState.paymentSelection).isEqualTo(originalSelection)
+            }
+        }
+
+    @Test
+    fun `If refreshed payment methods does contain newly added payment method, use new selection & sort PMs`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+            val newSelection = PaymentSelection.Saved(attachedPaymentMethod)
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods + listOf(attachedPaymentMethod),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(attachedPaymentMethod) + paymentMethods)
+                    .inOrder()
+                assertThat(newViewState.paymentSelection).isEqualTo(newSelection)
+            }
+        }
+
+    @Test
+    fun `When removing an un-selected card, selection should be maintained & primary button should not visible`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+            val paymentMethodToRemove = paymentMethods.last()
+            val originalSelection = PaymentSelection.Saved(paymentMethods.first())
+
+            val viewModel = retrieveViewModelForRemoving(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                paymentMethodToRemove = paymentMethodToRemove
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(paymentMethodToRemove))
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods.dropLast(1))
+                assertThat(currentState.paymentSelection).isEqualTo(originalSelection)
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun `When updating the original selection, original selection should be updated even if current selection is not the original`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+
+            val paymentMethodToUpdate = paymentMethods.first()
+            val updatedPaymentMethod = paymentMethodToUpdate.copy(
+                card = paymentMethodToUpdate.card?.copy(
+                    expiryYear = 2030,
+                    expiryMonth = 4
+                )
+            )
+
+            val originalSelection = PaymentSelection.Saved(paymentMethodToUpdate)
+
+            val viewModel = retrieveViewModelForUpdating(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                updatedPaymentMethod = updatedPaymentMethod,
+            )
+
+            viewModel.updatePaymentMethod(
+                originalPaymentMethod = paymentMethodToUpdate,
+                updatedPaymentMethod = updatedPaymentMethod
+            )
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(updatedPaymentMethod) + paymentMethods.drop(1))
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed)
+
+            viewModel.result.test {
+                val result = awaitItem()
+
+                assertThat(result).isInstanceOf<InternalCustomerSheetResult.Canceled>()
+
+                val canceledResult = result.asCanceled()
+
+                assertThat(canceledResult.paymentSelection).isInstanceOf<PaymentSelection.Saved>()
+
+                val savedSelection = canceledResult.paymentSelection.asSaved()
+
+                assertThat(savedSelection.paymentMethod).isEqualTo(updatedPaymentMethod)
+            }
+        }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {
@@ -3330,13 +3503,18 @@ class CustomerSheetViewModelTest {
     private fun retrieveViewModelForAttaching(
         attachWithSetupIntent: Boolean,
         shouldFailRefresh: Boolean,
+        originalPaymentMethods: List<PaymentMethod> = listOf(),
+        originalSelection: PaymentSelection.Saved? = null,
+        attachedPaymentMethod: PaymentMethod = CARD_PAYMENT_METHOD,
+        refreshedPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): CustomerSheetViewModel {
         return createViewModel(
             workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
+            customerPaymentMethods = originalPaymentMethods,
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
+            savedPaymentSelection = originalSelection,
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = attachWithSetupIntent,
                 onRetrieveSetupIntentClientSecret = {
@@ -3350,17 +3528,21 @@ class CustomerSheetViewModelTest {
                         displayMessage = null
                     )
                 } else {
-                    CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD))
+                    CustomerSheetDataResult.success(refreshedPaymentMethods)
                 },
                 onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(attachedPaymentMethod)
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                createPaymentMethodResult = Result.success(attachedPaymentMethod),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         ).apply {
+            if (originalPaymentMethods.isNotEmpty()) {
+                handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            }
+
             handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = TEST_FORM_VALUES,

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -21,7 +20,7 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
         configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: CustomerSheet.Configuration.Builder,

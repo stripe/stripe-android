@@ -6,6 +6,10 @@
   <string name="stripe_afterpay_subtitle">Kupite sada ili platite kasnije s Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Bankovni račun koji završava s %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Bankovni račun ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Bankovni račun ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Potvrdite plaćanje u aplikaciji svoje banke unutar %s da biste dovršili kupnju.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -80,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Obrađuje se...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Ukloniti bankovni račun?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Ukloni bankovni račun</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Ukloni karticu</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Ukloniti karticu?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Uklonite %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->

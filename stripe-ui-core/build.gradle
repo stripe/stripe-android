@@ -39,6 +39,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.compose.foundation
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
     implementation libs.diskLruCache

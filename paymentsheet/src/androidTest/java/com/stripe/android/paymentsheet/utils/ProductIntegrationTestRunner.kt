@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
@@ -11,7 +10,6 @@ internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
     integrationType: ProductIntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
-    paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
     block: (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
@@ -31,7 +29,6 @@ internal fun runProductIntegrationTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
                 createIntentCallback = createIntentCallback,
-                paymentOptionCallback = paymentOptionCallback,
                 resultCallback = resultCallback,
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithFlowController(context))
@@ -69,7 +66,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
     }
 
     class WithFlowController(
-        private val context: FlowControllerTestRunnerContext
+        val context: FlowControllerTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration) {
             context.configureFlowController {

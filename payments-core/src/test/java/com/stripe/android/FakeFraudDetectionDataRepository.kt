@@ -1,6 +1,7 @@
 package com.stripe.android
 
-import com.stripe.android.networking.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import java.util.UUID
 
 internal class FakeFraudDetectionDataRepository(

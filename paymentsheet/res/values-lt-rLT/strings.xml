@@ -6,6 +6,10 @@
   <string name="stripe_afterpay_subtitle">Pirkite dabar arba mokėkite vėliau naudodami „Afterpay“</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Banko sąskaita, kurios numerio paskutiniai skaičiai yra %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Banko sąskaita ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Banko sąskaita ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Patvirtinkite mokėjimą savo banko programėlėje per %s ir užbaikite pirkimą.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -80,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Apdorojama...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Pašalinti banko sąskaitą?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Pašalinti banko sąskaitą</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Pašalinti kortelę</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Ištraukti kortelę?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Pašalinti %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->

@@ -73,7 +73,8 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -94,7 +95,8 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -117,7 +119,8 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
                 )
             )
         }
@@ -140,7 +143,8 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
                 )
             )
         }

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -12,6 +13,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
@@ -56,6 +58,12 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         consumerSessionClientSecret: String,
     ): ConsumerPaymentDetails
 
+    suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        expectedPaymentMethodType: String,
+    ): SharePaymentDetails
+
     companion object {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
@@ -65,6 +73,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
             locale: Locale?,
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
+            fraudDetectionDataRepository: FraudDetectionDataRepository,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
@@ -73,6 +82,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
                 consumerSessionRepository = consumerSessionRepository,
                 locale = locale,
                 logger = logger,
+                fraudDetectionDataRepository = fraudDetectionDataRepository,
                 isLinkWithStripe = isLinkWithStripe,
             )
     }
@@ -85,6 +95,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val locale: Locale?,
     private val logger: Logger,
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     isLinkWithStripe: IsLinkWithStripe,
 ) : FinancialConnectionsConsumerSessionRepository {
 
@@ -94,6 +105,10 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         "android_instant_debits"
     } else {
         "android_connections"
+    }
+
+    init {
+        fraudDetectionDataRepository.refresh()
     }
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
@@ -186,6 +201,23 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+        ).getOrThrow()
+    }
+
+    override suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        expectedPaymentMethodType: String
+    ): SharePaymentDetails {
+        val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+
+        return consumersApiService.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = expectedPaymentMethodType,
+            requestSurface = requestSurface,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            extraParams = fraudDetectionData,
         ).getOrThrow()
     }
 

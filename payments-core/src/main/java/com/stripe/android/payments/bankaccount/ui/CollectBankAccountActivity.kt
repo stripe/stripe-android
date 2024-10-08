@@ -68,7 +68,8 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         financialConnectionsPaymentsProxy.present(
             financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
             publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId
+            stripeAccountId = stripeAccountId,
+            elementsSessionContext = elementsSessionContext,
         )
     }
 

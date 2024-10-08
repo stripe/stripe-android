@@ -400,6 +400,7 @@
 |    |         |    \--- androidx.compose.material:material-icons-core-android:1.5.4
 |    |         |         +--- androidx.compose.ui:ui:1.5.4 (*)
 |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.21 -> 1.9.24 (*)
+|    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.21 -> 1.9.24 (*)
 |    |         |         +--- androidx.compose.material:material:1.5.4 (c)
 |    |         |         \--- androidx.compose.material:material-ripple:1.5.4 (c)
 |    |         +--- androidx.compose.material:material-ripple:1.5.4
@@ -420,6 +421,7 @@
 |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.21 -> 1.9.24 (*)
 |    |         +--- androidx.compose.material:material-icons-core:1.5.4 (c)
 |    |         \--- androidx.compose.material:material-ripple:1.5.4 (c)
+|    +--- androidx.compose.material:material-icons-core:1.5.4 (*)
 |    +--- androidx.compose.ui:ui:1.5.4 (*)
 |    +--- androidx.compose.ui:ui-tooling-preview:1.5.4
 |    |    \--- androidx.compose.ui:ui-tooling-preview-android:1.5.4
@@ -552,6 +554,7 @@
 |    \--- androidx.activity:activity-ktx:1.8.2 (c)
 +--- androidx.compose.foundation:foundation:1.5.4 (*)
 +--- androidx.compose.material:material:1.5.4 (*)
++--- androidx.compose.material:material-icons-core:1.5.4 (*)
 +--- androidx.navigation:navigation-compose:2.7.6
 |    +--- androidx.activity:activity-compose:1.7.0 -> 1.8.2 (*)
 |    +--- androidx.compose.animation:animation:1.5.1 -> 1.5.4 (*)

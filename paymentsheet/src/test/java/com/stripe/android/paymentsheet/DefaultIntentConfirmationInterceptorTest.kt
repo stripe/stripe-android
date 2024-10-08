@@ -602,6 +602,46 @@ class DefaultIntentConfirmationInterceptorTest {
         )
     }
 
+    @Test
+    fun `Creates correct confirm step when confirming Link Card Brand transaction`() = runTest {
+        val paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+        val clientSecret = "pi_1234_secret_4321"
+
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            isFlowController = false,
+        )
+
+        val createParams = PaymentMethodCreateParams.createInstantDebits(
+            paymentMethodId = paymentMethodId,
+            requiresMandate = false,
+            productUsage = emptySet(),
+        )
+
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.PaymentIntent(clientSecret),
+            paymentMethodCreateParams = createParams,
+            paymentMethodOptionsParams = null,
+            shippingValues = null,
+            customerRequestedSave = false,
+        )
+
+        val expectedConfirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethodId,
+            clientSecret = clientSecret,
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmParams = expectedConfirmParams,
+                isDeferred = false,
+            )
+        )
+    }
+
     private fun succeedingCreateIntentCallback(
         expectedPaymentMethod: PaymentMethod,
     ): CreateIntentCallback {

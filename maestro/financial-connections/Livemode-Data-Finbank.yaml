@@ -19,7 +19,7 @@ tags:
 - tapOn: "Search"
 - inputText: "finbank"
 - tapOn:
-    id: "search_result_0"
+    id: "bcinst_JFqgSnbqNULPX5"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
@@ -44,6 +44,10 @@ tags:
 - assertVisible: "Your accounts were connected."
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*FinBank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*FinBank.*"
 - stopRecording

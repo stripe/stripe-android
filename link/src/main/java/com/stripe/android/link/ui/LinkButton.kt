@@ -4,6 +4,7 @@ package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
@@ -24,13 +25,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
@@ -136,7 +143,7 @@ fun LinkButton(
 }
 
 @Composable
-private fun RowScope.SignedInButtonContent(email: String) {
+private fun SignedInButtonContent(email: String) {
     val annotatedEmail = remember(email) {
         buildAnnotatedString {
             append(email)
@@ -144,16 +151,25 @@ private fun RowScope.SignedInButtonContent(email: String) {
     }
 
     val color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+    val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
 
-    LinkIconAndDivider()
-    Text(
-        text = annotatedEmail,
-        color = color,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
-        maxLines = 1
-    )
+    Row(
+        modifier = Modifier.semantics(
+            mergeDescendants = true
+        ) {
+            this.contentDescription = payWithLinkText
+        }
+    ) {
+        LinkIconAndDivider()
+        Text(
+            text = annotatedEmail,
+            color = color,
+            fontSize = LINK_EMAIL_FONT_SIZE.sp,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
+            maxLines = 1
+        )
+    }
 }
 
 @Suppress("UnusedReceiverParameter")
@@ -178,7 +194,10 @@ private fun RowScope.SignedOutButtonContent() {
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .semantics {
+                this.contentDescription = text
+            },
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
@@ -186,6 +205,7 @@ private fun RowScope.SignedOutButtonContent() {
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LinkIconAndDivider() {
     val annotatedLinkAndDivider = remember {
@@ -218,7 +238,8 @@ private fun LinkIconAndDivider() {
             add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkIcon() }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider() }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
-        }.build()
+        }.build(),
+        modifier = Modifier.semantics { this.invisibleToUser() },
     )
 }
 

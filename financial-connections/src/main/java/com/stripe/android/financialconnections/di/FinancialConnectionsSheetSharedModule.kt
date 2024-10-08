@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -33,6 +34,7 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionReposit
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
+import com.stripe.android.financialconnections.utils.DefaultFraudDetectionDataRepository
 import com.stripe.attestation.IntegrityStandardRequestManager
 import com.stripe.attestation.domain.BuildRequestIdentifier
 import dagger.Binds
@@ -195,6 +197,13 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Singleton
         internal fun providesIoDispatcher(): CoroutineDispatcher {
             return Dispatchers.IO
+        }
+
+        @Provides
+        internal fun provideFraudDetectionDataRepository(
+            application: Application,
+        ): FraudDetectionDataRepository {
+            return DefaultFraudDetectionDataRepository(application)
         }
     }
 }

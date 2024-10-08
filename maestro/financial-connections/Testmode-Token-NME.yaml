@@ -37,7 +37,9 @@ tags:
 # CONFIRM AND COMPLETE
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed.*"
 ############################################
 ## REUSE NEWLY CREATED NME ACCOUNT
 ############################################

@@ -4,7 +4,6 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -16,7 +15,6 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerSheetLoader(
     private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,

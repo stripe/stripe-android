@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -18,7 +17,6 @@ internal interface PlaygroundSettingDefinition<T> {
     ) {
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     fun configure(
         value: T,
         configurationBuilder: CustomerSheet.Configuration.Builder,
@@ -72,7 +70,6 @@ internal interface PlaygroundSettingDefinition<T> {
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     data class CustomerSheetConfigurationData(
         private val configurationBuilder: CustomerSheet.Configuration.Builder,
         var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =

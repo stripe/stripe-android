@@ -54,6 +54,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -72,7 +73,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    initialState: FinancialConnectionsSheetState,
+    private val initialState: FinancialConnectionsSheetState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -131,7 +132,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
-        val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
+
+        val linkMode = initialState.initialArgs.elementsSessionContext?.linkMode
+        val hostedAuthUrl = buildHostedAuthUrl(
+            hostedAuthUrl = manifest.hostedAuthUrl,
+            isInstantDebits = isInstantDebits,
+            linkMode = linkMode,
+        )
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -144,7 +151,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     copy(
                         manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.NONE,
-                        viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
+                        viewEffect = OpenNativeAuthFlow(
+                            configuration = initialArgs.configuration,
+                            initialSyncResponse = sync,
+                            elementsSessionContext = initialArgs.elementsSessionContext,
+                        )
                     )
                 }
             } else {
@@ -162,14 +173,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun buildHostedAuthUrl(
         hostedAuthUrl: String?,
-        isInstantDebits: Boolean
-    ): String? = when (isInstantDebits) {
-        /**
-         * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
-         * takes place on the web side of the flow and the payment method ID is returned to the app.
-         */
-        true -> hostedAuthUrl?.let { "$it&return_payment_method=true" }
-        false -> hostedAuthUrl
+        isInstantDebits: Boolean,
+        linkMode: LinkMode?,
+    ): String? {
+        if (hostedAuthUrl == null) {
+            return null
+        }
+
+        val queryParams = mutableListOf(hostedAuthUrl)
+        if (isInstantDebits) {
+            // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
+            // takes place on the web side of the flow and the payment method ID is returned to the app.
+            queryParams.add("return_payment_method=true")
+            linkMode?.let { queryParams.add("link_mode=${it.value}") }
+        }
+
+        return queryParams.joinToString("&")
     }
 
     private fun logNoBrowserAvailableAndFinish() {

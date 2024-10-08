@@ -112,6 +112,10 @@
   <string name="stripe_card_declined">Korttiasi ei hyväksytty</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s päättyy numeroihin %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
+  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
+  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
   <!-- Text for close button -->
   <string name="stripe_close">Sulje</string>
   <!-- Accessibility action for deleting a payment method -->

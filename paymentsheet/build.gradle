@@ -107,6 +107,7 @@ dependencies {
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.turbine
 
     androidTestUtil testLibs.testOrchestrator
 }

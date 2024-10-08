@@ -3,6 +3,8 @@ package com.stripe.android.customersheet
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -10,17 +12,13 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -29,19 +27,16 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
     suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full>
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-    private val elementsSessionRepository: ElementsSessionRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
-    private val customerAdapterProvider: Deferred<CustomerAdapter>,
+    private val initializationDataSourceProvider: Deferred<CustomerSheetInitializationDataSource>,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext
 ) : CustomerSheetLoader {
@@ -49,7 +44,6 @@ internal class DefaultCustomerSheetLoader(
     @Inject constructor(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-        elementsSessionRepository: ElementsSessionRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
         errorReporter: ErrorReporter,
@@ -57,10 +51,9 @@ internal class DefaultCustomerSheetLoader(
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
-        elementsSessionRepository = elementsSessionRepository,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
-        customerAdapterProvider = CustomerSheetHacks.adapter,
+        initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         errorReporter = errorReporter,
         workContext = workContext,
     )
@@ -68,37 +61,26 @@ internal class DefaultCustomerSheetLoader(
     override suspend fun load(
         configuration: CustomerSheet.Configuration
     ): Result<CustomerSheetState.Full> = workContext.runCatching {
-        val customerAdapter = retrieveCustomerAdapter().getOrThrow()
-
-        val elementsSession = retrieveElementsSession(
-            customerAdapter = customerAdapter,
-        ).getOrThrow()
+        val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
+        val customerSheetSession = initializationDataSource.loadCustomerSheetSession().toResult().getOrThrow()
 
         val metadata = createPaymentMethodMetadata(
             configuration = configuration,
-            elementsSession = elementsSession,
+            customerSheetSession = customerSheetSession,
         )
 
-        loadPaymentMethods(
-            customerAdapter = customerAdapter,
+        createCustomerSheetState(
+            customerSheetSession = customerSheetSession,
+            metadata = metadata,
             configuration = configuration,
-            elementsSessionWithMetadata = ElementsSessionWithMetadata(
-                elementsSession = elementsSession,
-                metadata = metadata,
-            ),
-        ).onFailure {
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
-                stripeException = StripeException.create(it)
-            )
-        }.getOrThrow()
+        )
     }
 
-    private suspend fun retrieveCustomerAdapter(): Result<CustomerAdapter> {
-        return customerAdapterProvider.awaitAsResult(
+    private suspend fun retrieveInitializationDataSource(): Result<CustomerSheetInitializationDataSource> {
+        return initializationDataSourceProvider.awaitAsResult(
             timeout = 5.seconds,
             error = {
-                "Couldn't find an instance of CustomerAdapter. " +
+                "Couldn't find an instance of InitializationDataSource. " +
                     "Are you instantiating CustomerSheet unconditionally in your app?"
             },
         ).onFailure {
@@ -109,33 +91,11 @@ internal class DefaultCustomerSheetLoader(
         }
     }
 
-    private suspend fun retrieveElementsSession(
-        customerAdapter: CustomerAdapter,
-    ): Result<ElementsSession> {
-        val paymentMethodTypes = createPaymentMethodTypes(customerAdapter)
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
-            PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = paymentMethodTypes,
-            )
-        )
-        return elementsSessionRepository.get(
-            initializationMode,
-            customer = null,
-            externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
-        ).onFailure {
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
-                stripeException = StripeException.create(it)
-            )
-        }
-    }
-
     private suspend fun createPaymentMethodMetadata(
         configuration: CustomerSheet.Configuration,
-        elementsSession: ElementsSession,
+        customerSheetSession: CustomerSheetSession,
     ): PaymentMethodMetadata {
+        val elementsSession = customerSheetSession.elementsSession
         val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
@@ -148,81 +108,53 @@ internal class DefaultCustomerSheetLoader(
         return PaymentMethodMetadata.create(
             elementsSession = elementsSession,
             configuration = configuration,
+            paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
         )
     }
 
-    private suspend fun loadPaymentMethods(
-        customerAdapter: CustomerAdapter,
+    private fun createCustomerSheetState(
+        customerSheetSession: CustomerSheetSession,
+        metadata: PaymentMethodMetadata,
         configuration: CustomerSheet.Configuration,
-        elementsSessionWithMetadata: ElementsSessionWithMetadata,
-    ) = coroutineScope {
-        val paymentMethodsResult = async {
-            customerAdapter.retrievePaymentMethods()
+    ): CustomerSheetState.Full {
+        val paymentMethods = customerSheetSession.paymentMethods
+
+        val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
+            when (selection) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.find { paymentMethod ->
+                        paymentMethod.id == selection.id
+                    }?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+                is SavedSelection.None -> null
+            }
         }
-        val selectedPaymentOption = async {
-            customerAdapter.retrieveSelectedPaymentOption()
-        }
 
-        paymentMethodsResult.await().flatMap { paymentMethods ->
-            selectedPaymentOption.await().map { paymentOption ->
-                Pair(paymentMethods, paymentOption)
-            }
-        }.map {
-            val paymentMethods = it.first
-            val paymentOption = it.second
-            val selection = paymentOption?.toPaymentSelection { id ->
-                paymentMethods.find { it.id == id }
-            }
-            Pair(paymentMethods, selection)
-        }.fold(
-            onSuccess = { result ->
-                val paymentSelection = result.second
-
-                val sortedPaymentMethods = sortPaymentMethods(
-                    paymentMethods = result.first,
-                    selection = paymentSelection as? PaymentSelection.Saved
-                )
-
-                val elementsSession = elementsSessionWithMetadata.elementsSession
-                val metadata = elementsSessionWithMetadata.metadata
-
-                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-
-                val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
-
-                Result.success(
-                    CustomerSheetState.Full(
-                        config = configuration,
-                        paymentMethodMetadata = metadata,
-                        supportedPaymentMethods = validSupportedPaymentMethods,
-                        customerPaymentMethods = sortedPaymentMethods,
-                        paymentSelection = paymentSelection,
-                        validationError = elementsSession.stripeIntent.validate(),
-                        customerPermissions = CustomerPermissions(
-                            // Should always be true for `legacy` case
-                            canRemovePaymentMethods = true,
-                        )
-                    )
-                )
-            },
-            onFailure = { cause, _ ->
-                Result.failure(cause)
-            }
+        val sortedPaymentMethods = sortPaymentMethods(
+            paymentMethods = customerSheetSession.paymentMethods,
+            selection = paymentSelection as? PaymentSelection.Saved
         )
-    }
 
-    private fun createPaymentMethodTypes(
-        customerAdapter: CustomerAdapter,
-    ): List<String> {
-        return if (customerAdapter.canCreateSetupIntents) {
-            customerAdapter.paymentMethodTypes ?: emptyList()
-        } else {
-            // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
-            listOf("card")
-        }
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+
+        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+
+        return CustomerSheetState.Full(
+            config = configuration,
+            paymentMethodMetadata = metadata,
+            supportedPaymentMethods = validSupportedPaymentMethods,
+            customerPaymentMethods = sortedPaymentMethods,
+            paymentSelection = paymentSelection,
+            validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
+            customerPermissions = customerSheetSession.permissions,
+        )
     }
 
     private fun filterSupportedPaymentMethods(
@@ -237,11 +169,6 @@ internal class DefaultCustomerSheetLoader(
         }
     }
 }
-
-private data class ElementsSessionWithMetadata(
-    val elementsSession: ElementsSession,
-    val metadata: PaymentMethodMetadata,
-)
 
 private suspend fun <T> Deferred<T>.awaitAsResult(
     timeout: Duration,

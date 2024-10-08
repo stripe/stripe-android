@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.repository
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
@@ -15,6 +17,7 @@ import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +26,7 @@ import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.Locale
@@ -39,6 +43,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
     private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
+    private val fraudDetectionDataRepository = mock<FraudDetectionDataRepository>()
 
     private fun buildRepository(
         isInstantDebits: Boolean = false
@@ -50,6 +55,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         locale = locale,
         logger = logger,
         isLinkWithStripe = { isInstantDebits },
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
     )
 
     @Test
@@ -323,5 +329,43 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
         )
+    }
+
+    @Test
+    fun `Sends fraud detection data when sharing PaymentDetails`() = runTest {
+        val consumerSessionClientSecret = "clientSecret"
+        val repository = buildRepository()
+
+        val fraudParams = FraudDetectionData(
+            guid = "guid_1234",
+            muid = "muid_1234",
+            sid = "sid_1234",
+            timestamp = 1234567890L,
+        )
+
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudParams)
+
+        whenever(
+            consumersApiService.sharePaymentDetails(
+                consumerSessionClientSecret = anyOrNull(),
+                paymentDetailsId = anyOrNull(),
+                expectedPaymentMethodType = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+                extraParams = eq(fraudParams.params),
+            )
+        ).thenReturn(
+            Result.success(
+                SharePaymentDetails(paymentMethodId = "pm_123")
+            )
+        )
+
+        repository.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = "pd_123",
+            expectedPaymentMethodType = "card",
+        )
+
+        verify(fraudDetectionDataRepository, never()).getLatest()
     }
 }

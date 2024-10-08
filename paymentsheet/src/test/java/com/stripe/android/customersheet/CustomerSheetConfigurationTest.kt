@@ -9,7 +9,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetConfigurationTest {
     @Test
     fun `Builder returns a configuration`() {

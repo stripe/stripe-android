@@ -3,6 +3,7 @@ package com.stripe.android.payments.financialconnections
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
@@ -17,7 +18,8 @@ internal interface FinancialConnectionsPaymentsProxy {
     fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsSessionContext: ElementsSessionContext?,
     )
 
     companion object {
@@ -70,14 +72,16 @@ internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLa
     override fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsSessionContext: ElementsSessionContext?,
     ) {
         launcher.present(
-            FinancialConnectionsSheet.Configuration(
+            configuration = FinancialConnectionsSheet.Configuration(
                 financialConnectionsSessionClientSecret,
                 publishableKey,
-                stripeAccountId
-            )
+                stripeAccountId,
+            ),
+            elementsSessionContext = elementsSessionContext,
         )
     }
 }
@@ -86,7 +90,8 @@ internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectio
     override fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        elementsSessionContext: ElementsSessionContext?,
     ) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(

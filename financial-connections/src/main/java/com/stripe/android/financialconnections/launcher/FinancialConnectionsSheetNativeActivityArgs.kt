@@ -8,5 +8,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class FinancialConnectionsSheetNativeActivityArgs constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
-    val initialSyncResponse: SynchronizeSessionResponse
+    val initialSyncResponse: SynchronizeSessionResponse,
+    val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
 ) : Parcelable

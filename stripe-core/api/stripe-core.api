@@ -124,6 +124,14 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/core/frauddetection/FraudDetectionData$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/frauddetection/FraudDetectionData;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/frauddetection/FraudDetectionData;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/Country$$serializer;
 	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;

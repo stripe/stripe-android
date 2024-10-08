@@ -44,7 +44,7 @@ data class ConfirmSetupIntentParams internal constructor(
      *
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
-    var mandateData: MandateDataParams? = null
+    var mandateData: MandateDataParams? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {

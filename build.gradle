@@ -102,6 +102,7 @@ apiValidation {
             "screenshot-testing",
             "3ds2playground",
             "dokka-stripe",
+            "stripe-test-e2e",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

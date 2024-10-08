@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
@@ -533,6 +534,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val initialPane: Pane,
     val theme: Theme,
     val isLinkWithStripe: Boolean,
+    val elementsSessionContext: ElementsSessionContext?,
 ) {
 
     /**
@@ -553,6 +555,7 @@ internal data class FinancialConnectionsSheetNativeState(
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
+        elementsSessionContext = args.elementsSessionContext,
     )
 
     companion object {

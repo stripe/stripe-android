@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.playground
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import kotlinx.parcelize.Parcelize
 
 @Stable
@@ -73,7 +74,6 @@ internal sealed interface PlaygroundState : Parcelable {
     }
 
     @Stable
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Parcelize
     data class Customer(
         private val snapshot: PlaygroundSettings.Snapshot,
@@ -88,9 +88,19 @@ internal sealed interface PlaygroundState : Parcelable {
         val isNewCustomer
             get() = snapshot[CustomerSettingsDefinition] == CustomerType.NEW
 
+        val isUsingCustomerSession
+            get() = snapshot[CustomerSessionSettingsDefinition]
+
         val inSetupMode
             get() = snapshot[CustomerSheetPaymentMethodModeDefinition] ==
                 PaymentMethodMode.SetupIntent
+
+        val supportedPaymentMethodTypes: List<String>
+            get() = snapshot[SupportedPaymentMethodsSettingsDefinition]
+                .split(",")
+                .filterNot { value ->
+                    value.isBlank()
+                }
 
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)

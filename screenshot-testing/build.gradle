@@ -6,6 +6,8 @@ dependencies {
     implementation libs.compose.foundation
     implementation libs.compose.material
 
+    implementation testLibs.kotlin.reflect
+
     // Implemented here instead of using plugin which implements with testImplementation
     api("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
         exclude group: 'jakarta.activation'

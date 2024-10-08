@@ -13,9 +13,11 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -470,6 +472,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val configuration = if (args.instantDebits) {
             CollectBankAccountConfiguration.InstantDebits(
                 email = email.value,
+                elementsSessionContext = ElementsSessionContext(
+                    linkMode = args.linkMode,
+                ),
             )
         } else {
             CollectBankAccountConfiguration.USBankAccount(
@@ -560,6 +565,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     paymentMethodId = resultIdentifier.id,
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
+                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+                        isSetupIntent = args.formArgs.hasIntentToSetup,
+                        customerRequestedSave = customerRequestedSave,
+                    ),
                 )
             }
             is ResultIdentifier.Session -> {
@@ -572,7 +581,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         email = email.value,
                         phone = phone.value,
                         address = address.value,
-                    )
+                    ),
+                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+                        isSetupIntent = args.formArgs.hasIntentToSetup,
+                        customerRequestedSave = customerRequestedSave,
+                    ),
                 )
             }
         }
@@ -580,6 +593,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val instantDebitsInfo = (resultIdentifier as? ResultIdentifier.PaymentMethod)?.let {
             PaymentSelection.New.USBankAccount.InstantDebitsInfo(
                 paymentMethodId = it.id,
+                linkMode = args.linkMode,
             )
         }
 
@@ -668,6 +682,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
         val isCompleteFlow: Boolean,

@@ -51,7 +51,7 @@ jobs:
           pattern: identity-example-release-*.apk
       - name: diffuse
         id: diffuse
-        uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
+        uses: usefulness/diffuse-action@41995fe8ff6be0a8847e63bdc5a4679c704b455c
         with:
           old-file-path: apk/identity-example-release-base.apk
           new-file-path: apk/identity-example-release-pr.apk

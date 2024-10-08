@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -147,7 +146,6 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
         fun customerSheetConfiguration(
             playgroundState: PlaygroundState.Customer
         ): CustomerSheet.Configuration {
@@ -177,7 +175,6 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
             configurationBuilder: CustomerSheet.Configuration.Builder,

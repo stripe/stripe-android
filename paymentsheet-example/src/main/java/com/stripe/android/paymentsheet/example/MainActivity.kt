@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
-import com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -96,12 +95,6 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = NewPaymentSheetPlaygroundActivity::class.java,
-                section = MenuItem.Section.Internal,
-            ),
-            MenuItem(
-                titleResId = R.string.customersheet_playground_title,
-                subtitleResId = R.string.playground_subtitle,
-                klass = CustomerSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
         )

@@ -85,7 +85,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel(
     application: Application, // TODO (jameswoo) remove application
@@ -95,6 +94,7 @@ internal class CustomerSheetViewModel(
     private val intentDataSourceProvider: Deferred<CustomerSheetIntentDataSource>,
     private val savedSelectionDataSourceProvider: Deferred<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
+    private val integrationType: CustomerSheetIntegration.Type,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
     private val eventReporter: CustomerSheetEventReporter,
@@ -112,6 +112,7 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
         configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
         logger: Logger,
         stripeRepository: StripeRepository,
         eventReporter: CustomerSheetEventReporter,
@@ -130,6 +131,7 @@ internal class CustomerSheetViewModel(
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
+        integrationType = integrationType,
         logger = logger,
         stripeRepository = stripeRepository,
         eventReporter = eventReporter,
@@ -217,7 +219,7 @@ internal class CustomerSheetViewModel(
     init {
         configuration.appearance.parseAppearance()
 
-        eventReporter.onInit(configuration)
+        eventReporter.onInit(configuration, integrationType)
 
         if (viewState.value is CustomerSheetViewState.Loading) {
             viewModelScope.launch(workContext) {
@@ -433,7 +435,7 @@ internal class CustomerSheetViewModel(
         }
 
         val customerState = customerState.value
-        val paymentMethodMetadata = customerState.metadata
+        val paymentMethodMetadata = requireNotNull(customerState.metadata)
 
         eventReporter.onPaymentMethodSelected(paymentMethod.code)
 
@@ -444,11 +446,9 @@ internal class CustomerSheetViewModel(
                 paymentMethodCode = paymentMethod.code,
                 formArguments = FormArgumentsFactory.create(
                     paymentMethodCode = paymentMethod.code,
-                    configuration = configuration,
-                    merchantName = configuration.merchantDisplayName,
-                    cbcEligibility = customerState.cbcEligibility,
+                    metadata = paymentMethodMetadata,
                 ),
-                formElements = paymentMethodMetadata?.formElementsForCode(
+                formElements = paymentMethodMetadata.formElementsForCode(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
@@ -620,9 +620,8 @@ internal class CustomerSheetViewModel(
         val didRemoveCurrentSelection = currentSelection is PaymentSelection.Saved &&
             currentSelection.paymentMethod.id == paymentMethod.id
 
-        val didRemoveOriginalSelection = currentSelection is PaymentSelection.Saved &&
-            originalSelection is PaymentSelection.Saved &&
-            currentSelection.paymentMethod.id == originalSelection.paymentMethod.id
+        val didRemoveOriginalSelection = originalSelection is PaymentSelection.Saved &&
+            originalSelection.paymentMethod.id == paymentMethod.id
 
         if (didRemoveOriginalSelection) {
             originalPaymentSelection = null
@@ -655,9 +654,8 @@ internal class CustomerSheetViewModel(
             val currentSelection = currentCustomerState.currentSelection
 
             originalPaymentSelection = if (
-                currentSelection is PaymentSelection.Saved &&
                 originalSelection is PaymentSelection.Saved &&
-                currentSelection.paymentMethod.id == updatedMethod.id
+                originalSelection.paymentMethod.id == updatedMethod.id
             ) {
                 originalSelection.copy(paymentMethod = updatedMethod)
             } else {
@@ -776,24 +774,22 @@ internal class CustomerSheetViewModel(
         isFirstPaymentMethod: Boolean,
     ) {
         val customerState = customerState.value
-        val paymentMethodMetadata = customerState.metadata
+        val paymentMethodMetadata = requireNotNull(customerState.metadata)
 
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
-            ?: paymentMethodMetadata?.supportedPaymentMethodTypes()?.firstOrNull()
+            ?: paymentMethodMetadata.supportedPaymentMethodTypes().firstOrNull()
             ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
             paymentMethodCode = paymentMethodCode,
-            configuration = configuration,
-            merchantName = configuration.merchantDisplayName,
-            cbcEligibility = customerState.cbcEligibility,
+            metadata = paymentMethodMetadata,
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
+            ?: requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode))
 
-        val stripeIntent = paymentMethodMetadata?.stripeIntent
-        val formElements = paymentMethodMetadata?.formElementsForCode(
+        val stripeIntent = paymentMethodMetadata.stripeIntent
+        val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
@@ -836,6 +832,7 @@ internal class CustomerSheetViewModel(
     private fun createDefaultUsBankArguments(stripeIntent: StripeIntent?): USBankAccountFormArguments {
         return USBankAccountFormArguments(
             instantDebits = false,
+            linkMode = null,
             showCheckbox = false,
             onBehalfOf = null,
             isCompleteFlow = false,
@@ -1081,12 +1078,16 @@ internal class CustomerSheetViewModel(
                 ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
             )
 
-            val selection = PaymentSelection.Saved(newPaymentMethod)
-
             setCustomerState { state ->
+                val selection = paymentMethods.find { paymentMethod ->
+                    newPaymentMethod.id == paymentMethod.id
+                }?.let {
+                    PaymentSelection.Saved(it)
+                } ?: state.currentSelection
+
                 state.copy(
-                    paymentMethods = sortPaymentMethods(paymentMethods, selection),
-                    currentSelection = PaymentSelection.Saved(newPaymentMethod),
+                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    currentSelection = selection,
                 )
             }
 
@@ -1263,6 +1264,7 @@ internal class CustomerSheetViewModel(
             val component = DaggerCustomerSheetViewModelComponent.builder()
                 .application(extras.requireApplication())
                 .configuration(args.configuration)
+                .integrationType(args.integrationType)
                 .statusBarColor(args.statusBarColor)
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()

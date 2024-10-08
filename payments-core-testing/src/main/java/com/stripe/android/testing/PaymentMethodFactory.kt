@@ -14,7 +14,11 @@ object PaymentMethodFactory {
         }
     }
 
-    fun PaymentMethod.update(last4: String?, addCbcNetworks: Boolean): PaymentMethod {
+    fun PaymentMethod.update(
+        last4: String?,
+        addCbcNetworks: Boolean,
+        brand: CardBrand = CardBrand.Visa
+    ): PaymentMethod {
         return copy(
             card = card?.copy(
                 last4 = last4,
@@ -25,7 +29,7 @@ object PaymentMethodFactory {
                     addCbcNetworks
                 },
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
-                brand = CardBrand.Visa,
+                brand = brand,
             )
         )
     }

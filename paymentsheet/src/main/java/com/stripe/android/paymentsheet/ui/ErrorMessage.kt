@@ -8,6 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
@@ -41,6 +44,8 @@ internal fun ErrorMessage(
         fontSize = fontSize,
         color = MaterialTheme.colors.error,
         fontFamily = FontFamily(typeface),
-        modifier = modifier,
+        modifier = modifier.semantics {
+            this.liveRegion = LiveRegionMode.Assertive
+        },
     )
 }

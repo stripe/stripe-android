@@ -3,6 +3,13 @@
 
     <application>
         <activity
+            android:name="com.stripe.android.link.LinkActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+            android:launchMode="singleTop"
+            android:theme="@style/StripeTransparentTheme" />
+
+        <activity
             android:name="com.stripe.android.link.LinkForegroundActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
