@@ -153,8 +153,14 @@ fun TextField(
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
+        @Suppress("SwallowedException")
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
-            focusManager.moveFocus(nextFocusDirection)
+            try {
+                focusManager.moveFocus(nextFocusDirection)
+            } catch (e: IllegalArgumentException) {
+                // Do nothing. Sometimes moveFocus throws this exception, we should silently fail instead of crashing
+                // when this occurs.
+            }
         }
     }
 
