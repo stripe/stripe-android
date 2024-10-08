@@ -11,15 +11,6 @@ ext {
     artifactDescrption = "The core module of Stripe Android SDKs"
 }
 
-android {
-    defaultConfig {
-        buildConfigField(
-                "String",
-                "FC_SENTRY_SECRET",
-                FC_SENTRY_SECRET
-        )
-    }
-}
 dependencies {
     implementation libs.androidx.browser
     implementation libs.dagger

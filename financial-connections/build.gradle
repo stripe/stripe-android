@@ -82,7 +82,6 @@ dependencies {
 
 android {
     defaultConfig {
-        buildConfigField "String", "FC_SENTRY_SECRET", FC_SENTRY_SECRET
         buildConfigField "String", "FC_SENTRY_KEY", FC_SENTRY_KEY
     }
 
