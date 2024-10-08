@@ -5,104 +5,39 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
-import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.InputStream
-import java.net.URL
-import java.nio.charset.StandardCharsets
 import java.util.Locale
-import java.util.Scanner
 import java.util.UUID.randomUUID
-import javax.net.ssl.HttpsURLConnection
-import kotlin.coroutines.CoroutineContext
 
 /**
  * An [ErrorReporter] that reports to Sentry.
  */
 class SentryErrorReporter(
-    private val context: Context,
-    private val config: Config = EmptyConfig,
-    private val workContext: CoroutineContext = Dispatchers.IO,
-    private val logger: Logger,
+    context: Context,
     private val sentryConfig: SentryConfig,
+    private val requestExecutor: SentryErrorRequestExecutor,
     private val environment: String = BuildConfig.BUILD_TYPE,
     private val localeCountry: String = Locale.getDefault().country,
-    private val osVersion: Int = Build.VERSION.SDK_INT
 ) : ErrorReporter {
 
     val deviceId by lazy { Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) }
 
+    private val appContext = context.applicationContext
+
     override fun reportError(t: Throwable) {
-        CoroutineScope(workContext).launch {
-            runCatching {
-                send(
-                    createEnvelopeBody(t)
-                )
-            }.onFailure(::onFailure)
+        GlobalScope.launch(Dispatchers.IO) {
+            val request = SentryErrorRequest(
+                projectId = sentryConfig.projectId,
+                envelopeBody = createEnvelopeBody(t),
+                headers = buildHeaders()
+            )
+            requestExecutor.sendErrorRequest(request)
         }
-    }
-
-    private fun send(envelopeBody: String) {
-        createPostConnection().let { connection ->
-            connection.outputStream.use { os ->
-                os.writer(StandardCharsets.UTF_8).use { osw ->
-                    osw.write(envelopeBody)
-                    osw.flush()
-                }
-            }
-
-            connection.connect()
-
-            connection.responseCode.also { responseCode ->
-                logResponse(connection, responseCode)
-            }
-
-            connection.disconnect()
-        }
-    }
-
-    private fun logResponse(connection: HttpsURLConnection, responseCode: Int) {
-        if (BuildConfig.DEBUG) {
-            if (responseCode in 200..299) {
-                connection.inputStream
-            } else {
-                connection.errorStream
-            }?.use {
-                logger.error(getResponseBody(it))
-            }
-        }
-    }
-
-    private fun getResponseBody(responseStream: InputStream) = runCatching {
-        val scanner = Scanner(responseStream, CHARSET).useDelimiter("\\A")
-        if (scanner.hasNext()) {
-            scanner.next()
-        } else {
-            null
-        }
-    }.getOrNull().orEmpty()
-
-    private fun createPostConnection(): HttpsURLConnection {
-        return openConnection().apply {
-            requestMethod = HTTP_METHOD
-            doOutput = true
-
-            mapOf(
-                HEADER_CONTENT_TYPE to CONTENT_TYPE,
-                HEADER_SENTRY_AUTH to createSentryAuthHeader()
-            ).forEach { (key, value) ->
-                setRequestProperty(key, value)
-            }
-        }
-    }
-
-    private fun openConnection(): HttpsURLConnection {
-        return URL("$HOST/api/${sentryConfig.projectId}/envelope/").openConnection() as HttpsURLConnection
     }
 
     @VisibleForTesting
@@ -117,7 +52,10 @@ class SentryErrorReporter(
             Json.encodeToString(itemPayload) + "\n"
     }
 
-    private fun createEventPayload(t: Throwable, eventId: String): SentryEvent {
+    private fun createEventPayload(
+        t: Throwable,
+        eventId: String
+    ): SentryEvent {
         return SentryEvent(
             eventId = eventId,
             timestamp = System.currentTimeMillis() / 1000.0,
@@ -132,10 +70,10 @@ class SentryErrorReporter(
                     )
                 )
             ),
-            tags = config.customTags + mapOf(
+            tags = mapOf(
                 "locale" to localeCountry,
                 "environment" to environment,
-                "android_os_version" to osVersion.toString()
+                "android_os_version" to Build.VERSION.SDK_INT.toString()
             ),
             contexts = createRequestContexts(),
             user = SentryUser(
@@ -156,16 +94,21 @@ class SentryErrorReporter(
         )
     }
 
+    private fun buildHeaders(): Map<String, String> = mapOf(
+        HEADER_CONTENT_TYPE to CONTENT_TYPE,
+        HEADER_SENTRY_AUTH to createSentryAuthHeader()
+    )
+
     private fun createRequestContexts(): SentryContexts {
         val packageInfo = runCatching {
-            context.packageManager.getPackageInfo(context.packageName, 0)
+            appContext.packageManager.getPackageInfo(appContext.packageName, 0)
         }.getOrNull()
 
-        val appName = packageInfo?.applicationInfo?.loadLabel(context.packageManager).toString()
+        val appName = packageInfo?.applicationInfo?.loadLabel(appContext.packageManager).toString()
 
         return SentryContexts(
             app = SentryAppContext(
-                appIdentifier = context.packageName,
+                appIdentifier = appContext.packageName,
                 appName = appName,
                 appVersion = packageInfo?.versionName.orEmpty()
             ),
@@ -195,33 +138,15 @@ class SentryErrorReporter(
         ).joinToString(", ") { (key, value) -> "$key=$value" }
     }
 
-    private fun onFailure(exception: Throwable) {
-        logger.error("Failed to send error report.", exception)
-    }
-
     private fun generateEventId(): String {
-        // Generate a hexadecimal string representing a uuid4 value
         return randomUUID().toString().replace("-", "")
     }
 
-    interface Config {
-        val customTags: Map<String, String>
-    }
-
-    internal object EmptyConfig : Config {
-        override val customTags: Map<String, String> = emptyMap()
-    }
-
     private companion object {
-        private const val HOST = "https://errors.stripe.com"
-        private const val HTTP_METHOD = "POST"
-
         private const val HEADER_CONTENT_TYPE = "Content-Type"
         private const val CONTENT_TYPE = "application/x-sentry-envelope"
         private const val USER_AGENT = "Stripe/v1 android/$VERSION_NAME"
 
         private const val HEADER_SENTRY_AUTH = "X-Sentry-Auth"
-
-        private val CHARSET = StandardCharsets.UTF_8.name()
     }
 }
