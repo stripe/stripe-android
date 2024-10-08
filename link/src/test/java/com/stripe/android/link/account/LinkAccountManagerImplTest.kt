@@ -31,7 +31,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class LinkAccountManagerTest {
+class LinkAccountManagerImplTest {
     private val linkRepository = mock<LinkRepository>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 
@@ -477,7 +477,7 @@ class LinkAccountManagerTest {
         customerEmail: String? = null,
         stripeIntent: StripeIntent = mock(),
         passthroughModeEnabled: Boolean = false,
-    ) = LinkAccountManager(
+    ) = LinkAccountManagerImpl(
         config = LinkConfiguration(
             stripeIntent = stripeIntent,
             customerInfo = LinkConfiguration.CustomerInfo(
