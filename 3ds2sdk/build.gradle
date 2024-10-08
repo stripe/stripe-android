@@ -86,7 +86,6 @@ dependencies {
     implementation "org.bouncycastle:bcprov-jdk15to18:1.69"
 
     implementation "com.nimbusds:nimbus-jose-jwt:9.21"
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.4'
 
     testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.fragment
