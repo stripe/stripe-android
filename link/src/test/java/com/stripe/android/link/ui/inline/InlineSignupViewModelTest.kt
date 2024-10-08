@@ -5,7 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAccountManagerImpl
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
@@ -32,7 +32,7 @@ import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
 class InlineSignupViewModelTest {
-    private val linkAccountManager = mock<LinkAccountManager>()
+    private val linkAccountManager = mock<LinkAccountManagerImpl>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 
     @BeforeTest

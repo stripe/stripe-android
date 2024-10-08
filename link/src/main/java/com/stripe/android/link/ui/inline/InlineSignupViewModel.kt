@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAccountManagerImpl
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.ErrorMessage
@@ -37,7 +37,7 @@ internal const val LOOKUP_DEBOUNCE_MS = 1000L
 internal class InlineSignupViewModel @AssistedInject constructor(
     @Assisted val signupMode: LinkSignupMode,
     config: LinkConfiguration,
-    private val linkAccountManager: LinkAccountManager,
+    private val linkAccountManager: LinkAccountManagerImpl,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
 ) : ViewModel() {
