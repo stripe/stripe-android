@@ -18,7 +18,7 @@ object ApplicationJsonHeaderInterceptor : FoldableRequestInterceptor {
 }
 
 object UserAgentHeader : FoldableRequestInterceptor {
-    fun getUserAgent(): String {
+    private fun getUserAgent(): String {
         val androidBrand = Build.BRAND
         val androidDevice = Build.MODEL
         val osVersion = Build.VERSION.SDK_INT

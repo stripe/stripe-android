@@ -18,7 +18,7 @@ import timber.log.Timber
 class PayoutsExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-): ViewModel() {
+) : ViewModel() {
 
     private val timber get() = Timber.tag("PayoutsExampleViewModel")
 

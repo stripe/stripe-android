@@ -18,7 +18,7 @@ import timber.log.Timber
 class AccountOnboardingExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-): ViewModel() {
+) : ViewModel() {
 
     private val timber get() = Timber.tag("AccountOnboardingExampleViewModel")
 
