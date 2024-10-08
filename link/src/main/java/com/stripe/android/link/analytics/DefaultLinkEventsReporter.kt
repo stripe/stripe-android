@@ -45,8 +45,12 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        val preferredParams = (error as? APIException)?.stripeError?.message?.let {
-            mapOf(FIELD_ERROR_MESSAGE to it)
+        val preferredParams = if (error is APIException) {
+            error.stripeError?.message?.let {
+                mapOf(FIELD_ERROR_MESSAGE to it)
+            }
+        } else {
+            null
         }
 
         val params = (preferredParams ?: mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage))
