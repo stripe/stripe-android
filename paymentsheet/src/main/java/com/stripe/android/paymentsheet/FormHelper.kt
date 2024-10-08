@@ -6,6 +6,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory.Arguments.BankAccountAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -24,7 +25,7 @@ internal class FormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
-    private val onRemoveBankAccount: () -> Unit,
+    private val onBankAccountAction: (BankAccountAction) -> Unit,
 ) {
     companion object {
         fun create(
@@ -40,9 +41,16 @@ internal class FormHelper(
                 },
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
-                onRemoveBankAccount = {
-                    val screen = viewModel.navigationHandler.currentScreen.value
-                    screen.updateWithResult(result = null)
+                onBankAccountAction = { action ->
+                    when (action) {
+                        is BankAccountAction.InstitutionSelected -> {
+                            viewModel.handleFinancialInstitutionSelected(action.institutionId)
+                        }
+                        is BankAccountAction.Remove -> {
+                            val screen = viewModel.navigationHandler.currentScreen.value
+                            screen.updateWithResult(result = null)
+                        }
+                    }
                 },
                 selectionUpdater = {
                     viewModel.updateSelection(it)
@@ -60,7 +68,7 @@ internal class FormHelper(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
-                onRemoveBankAccount = onRemoveBankAccount,
+                onBankAccountAction = onBankAccountAction,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
                 intermediateResult = result,

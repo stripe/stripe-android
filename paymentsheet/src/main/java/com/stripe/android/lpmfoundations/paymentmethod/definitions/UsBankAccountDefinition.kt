@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory.Arguments.BankAccountAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.R
@@ -127,6 +128,10 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
 }
 
 private fun UiDefinitionFactory.Arguments.retrieveBankAccountElementState(): BankAccountElement.State? {
+    val onRemoveBankAccount = {
+        onBankAccountAction(BankAccountAction.Remove)
+    }
+
     return if (intermediateResult is CollectBankAccountResultInternal.Completed) {
         intermediateResult.toBankAccountElementState(onRemoveAccount = onRemoveBankAccount)
     } else {

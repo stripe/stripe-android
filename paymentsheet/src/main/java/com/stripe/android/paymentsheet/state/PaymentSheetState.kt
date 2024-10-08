@@ -20,6 +20,7 @@ internal sealed interface PaymentSheetState : Parcelable {
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
+        val initializationMode: PaymentSheet.InitializationMode,
     ) : PaymentSheetState {
         val showSavedPaymentMethods: Boolean
             get() = (customer != null && customer.paymentMethods.isNotEmpty()) || paymentMethodMetadata.isGooglePayReady

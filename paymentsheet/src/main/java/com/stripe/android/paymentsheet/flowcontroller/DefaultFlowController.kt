@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
@@ -99,6 +100,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    collectBankAccountFlowLauncherFactory: CollectBankAccountFlowLauncherFactory,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     private val linkLauncher: LinkPaymentLauncher,
@@ -129,8 +131,8 @@ internal class DefaultFlowController @Inject internal constructor(
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
         googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
         errorReporter = errorReporter,
-        lazyPaymentConfig = lazyPaymentConfiguration,
         logger = logger,
+        collectBankAccountFlowLauncherFactory = collectBankAccountFlowLauncherFactory,
     ).create(viewModelScope.plus(workContext))
 
     private val initializationMode: PaymentSheet.InitializationMode?

@@ -503,8 +503,8 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 intermediateResult = intermediateResult,
-                onRemoveBankAccount = {
-                    onCollectUSBankAccountResult(bankAccountResult = null)
+                onBankAccountAction = {
+                    // TODO
                 },
             ),
         ).orEmpty()
@@ -866,8 +866,8 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 intermediateResult = null,
-                onRemoveBankAccount = {
-                    error("Not expected to call onRemoveBankAccount on initial form arguments")
+                onBankAccountAction = {
+                    // TODO
                 },
             ),
         ) ?: emptyList()

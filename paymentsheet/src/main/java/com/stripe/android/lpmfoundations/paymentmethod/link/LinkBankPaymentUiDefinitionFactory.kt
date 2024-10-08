@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory.Arguments.BankAccountAction
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
@@ -89,6 +90,10 @@ internal object LinkBankPaymentUiDefinitionFactory : UiDefinitionFactory.Simple 
 }
 
 private fun UiDefinitionFactory.Arguments.retrieveBankAccountElementState(): BankAccountElement.State? {
+    val onRemoveBankAccount = {
+        onBankAccountAction(BankAccountAction.Remove)
+    }
+
     return if (intermediateResult is CollectBankAccountForInstantDebitsResult.Completed) {
         BankAccountElement.State(
             id = intermediateResult.paymentMethodId,

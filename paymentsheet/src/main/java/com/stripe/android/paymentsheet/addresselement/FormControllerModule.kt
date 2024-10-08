@@ -42,7 +42,7 @@ internal object FormControllerModule {
                 )
             },
             intermediateResult = null,
-            onRemoveBankAccount = {
+            onBankAccountAction = {
                 // TODO
             }
         )

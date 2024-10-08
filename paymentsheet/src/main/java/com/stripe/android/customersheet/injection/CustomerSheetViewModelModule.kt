@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -144,9 +145,9 @@ internal interface CustomerSheetViewModelModule {
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
             bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
+            collectBankAccountFlowLauncherFactory: CollectBankAccountFlowLauncherFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
-            lazyPaymentConfig: Provider<PaymentConfiguration>,
             errorReporter: ErrorReporter,
         ): IntentConfirmationHandler.Factory {
             return IntentConfirmationHandler.Factory(
@@ -158,7 +159,7 @@ internal interface CustomerSheetViewModelModule {
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
-                lazyPaymentConfig = lazyPaymentConfig,
+                collectBankAccountFlowLauncherFactory = collectBankAccountFlowLauncherFactory,
                 logger = null,
             )
         }

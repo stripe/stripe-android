@@ -29,8 +29,14 @@ internal sealed interface UiDefinitionFactory {
         val requiresMandate: Boolean,
         val intermediateResult: Any?,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
-        val onRemoveBankAccount: () -> Unit,
+        val onBankAccountAction: (BankAccountAction) -> Unit,
     ) {
+
+        sealed interface BankAccountAction {
+            data object Remove : BankAccountAction
+            data class InstitutionSelected(val institutionId: String) : BankAccountAction
+        }
+
         interface Factory {
             fun create(
                 metadata: PaymentMethodMetadata,
@@ -41,7 +47,7 @@ internal sealed interface UiDefinitionFactory {
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
-                private val onRemoveBankAccount: () -> Unit,
+                private val onBankAccountAction: (BankAccountAction) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
                 private val intermediateResult: Any?,
@@ -66,7 +72,7 @@ internal sealed interface UiDefinitionFactory {
                         requiresMandate = requiresMandate,
                         intermediateResult = intermediateResult,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
-                        onRemoveBankAccount = onRemoveBankAccount,
+                        onBankAccountAction = onBankAccountAction,
                     )
                 }
             }

@@ -138,6 +138,7 @@ internal sealed class PaymentSelection : Parcelable {
         abstract val paymentMethodOptionsParams: PaymentMethodOptionsParams?
         abstract val paymentMethodExtraParams: PaymentMethodExtraParams?
         abstract val customerRequestedSave: CustomerRequestedSave
+        abstract val readyToConfirm: Boolean
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -159,6 +160,9 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New() {
             @IgnoredOnParcel
             val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
+
+            override val readyToConfirm: Boolean
+                get() = true
         }
 
         @Parcelize
@@ -179,6 +183,12 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New() {
+
+            val isInstantDebits: Boolean
+                get() = code == "link"
+
+            override val readyToConfirm: Boolean
+                get() = hasResult
 
             override fun mandateText(
                 merchantName: String,
@@ -238,6 +248,9 @@ internal sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             val label = "····${paymentDetails.last4}"
+
+            override val readyToConfirm: Boolean
+                get() = true
         }
 
         @Parcelize
@@ -250,7 +263,11 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-        ) : New()
+        ) : New() {
+
+            override val readyToConfirm: Boolean
+                get() = true
+        }
     }
 }
 
