@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory.Arguments.BankAccountAction
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -46,7 +47,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -62,6 +62,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -72,7 +74,6 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
@@ -112,6 +113,7 @@ internal class CustomerSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    private val collectBankAccountFlowLauncherFactory: CollectBankAccountFlowLauncherFactory,
 ) : ViewModel() {
 
     @Inject constructor(
@@ -130,6 +132,7 @@ internal class CustomerSheetViewModel(
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
         errorReporter: ErrorReporter,
         lazyPaymentConfig: Provider<PaymentConfiguration>,
+        collectBankAccountFlowLauncherFactory: CollectBankAccountFlowLauncherFactory,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -149,6 +152,7 @@ internal class CustomerSheetViewModel(
         editInteractorFactory = editInteractorFactory,
         errorReporter = errorReporter,
         lazyPaymentConfig = lazyPaymentConfig,
+        collectBankAccountFlowLauncherFactory = collectBankAccountFlowLauncherFactory,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
@@ -224,7 +228,7 @@ internal class CustomerSheetViewModel(
     var paymentMethodMetadata: PaymentMethodMetadata? = null
 
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
-    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+    private var collectBankAccountFlowLauncher: CollectBankAccountFlowLauncher? = null
 
     init {
         configuration.appearance.parseAppearance()
@@ -341,10 +345,13 @@ internal class CustomerSheetViewModel(
             lifecycleOwner = lifecycleOwner,
         )
 
-        collectBankAccountLauncher = CollectBankAccountLauncher.createForPaymentSheet(
-            hostedSurface = "payment_element",
+        collectBankAccountFlowLauncher = collectBankAccountFlowLauncherFactory.create(
             activityResultCaller = activityResultCaller,
-            callback = ::onCollectUSBankAccountResult,
+            hostedSurface = "customer_sheet",
+            onUSBankAccountResult = ::onCollectUSBankAccountResult,
+            onLinkBankPaymentResult = {
+                // TODO
+            },
         )
     }
 
@@ -451,7 +458,7 @@ internal class CustomerSheetViewModel(
         }
 
         val customerState = customerState.value
-        val paymentMethodMetadata = customerState.metadata
+        paymentMethodMetadata = customerState.metadata
 
         eventReporter.onPaymentMethodSelected(paymentMethod.code)
 
@@ -730,29 +737,29 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private val CustomerSheetViewState.AddPaymentMethod.shouldLaunchAchFlow: Boolean
-        get() {
-            return paymentMethodCode == USBankAccount.code && bankAccountResult == null
-        }
-
-    private fun CustomerSheetViewState.AddPaymentMethod.launchAchFlow() {
-        val sessionId = usBankAccountFormArguments.stripeIntentId ?: return
-        val name = formFieldValues?.fieldValuePairs?.get(IdentifierSpec.Name)?.value ?: return
-        val email = formFieldValues.fieldValuePairs[IdentifierSpec.Email]?.value
-        val paymentConfig = lazyPaymentConfig.get()
-
-        collectBankAccountLauncher?.presentWithDeferredSetup(
-            publishableKey = paymentConfig.publishableKey,
-            stripeAccountId = paymentConfig.stripeAccountId,
-            elementsSessionId = sessionId,
-            customerId = null,
-            onBehalfOf = null,
-            configuration = CollectBankAccountConfiguration.USBankAccount(
-                name = name,
-                email = email,
-            ),
-        )
-    }
+//    private val CustomerSheetViewState.AddPaymentMethod.shouldLaunchAchFlow: Boolean
+//        get() {
+//            return paymentMethodCode == USBankAccount.code && bankAccountResult == null
+//        }
+//
+//    private fun CustomerSheetViewState.AddPaymentMethod.launchAchFlow() {
+//        val sessionId = usBankAccountFormArguments.stripeIntentId ?: return
+//        val name = formFieldValues?.fieldValuePairs?.get(IdentifierSpec.Name)?.value ?: return
+//        val email = formFieldValues.fieldValuePairs[IdentifierSpec.Email]?.value
+//        val paymentConfig = lazyPaymentConfig.get()
+//
+//        collectBankAccountLauncher?.presentWithDeferredSetup(
+//            publishableKey = paymentConfig.publishableKey,
+//            stripeAccountId = paymentConfig.stripeAccountId,
+//            elementsSessionId = sessionId,
+//            customerId = null,
+//            onBehalfOf = null,
+//            configuration = CollectBankAccountConfiguration.USBankAccount(
+//                name = name,
+//                email = email,
+//            ),
+//        )
+//    }
 
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
@@ -762,8 +769,10 @@ internal class CustomerSheetViewModel(
                     return
                 }
 
-                if (currentViewState.shouldLaunchAchFlow) {
-                    currentViewState.launchAchFlow()
+                val paymentSelection = currentViewState.draftPaymentSelection
+
+                if (paymentSelection is PaymentSelection.New && !paymentSelection.readyToConfirm) {
+                    handlePreConfirmation(paymentSelection)
                     return
                 }
 
@@ -796,6 +805,27 @@ internal class CustomerSheetViewModel(
                 }
             }
             else -> error("${viewState.value} is not supported")
+        }
+    }
+
+    private fun handlePreConfirmation(paymentSelection: PaymentSelection.New) {
+        when (paymentSelection) {
+            is PaymentSelection.New.USBankAccount -> {
+                val metadata = paymentMethodMetadata!!
+
+                collectBankAccountFlowLauncher?.launch(
+                    intent = metadata.stripeIntent,
+                    isInstantDebits = paymentSelection.isInstantDebits,
+                    createParams = paymentSelection.paymentMethodCreateParams,
+                    linkMode = metadata.linkMode,
+                    onBehalfOf = null,
+                )
+            }
+            is PaymentSelection.New.Card,
+            is PaymentSelection.New.GenericPaymentMethod,
+            is PaymentSelection.New.LinkInline -> {
+                // Nothing to do here
+            }
         }
     }
 
@@ -866,8 +896,15 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 intermediateResult = null,
-                onBankAccountAction = {
-                    // TODO
+                onBankAccountAction = { action ->
+                    when (action) {
+                        is BankAccountAction.InstitutionSelected -> {
+                            // TODO
+                        }
+                        is BankAccountAction.Remove -> {
+                            // TODO
+                        }
+                    }
                 },
             ),
         ) ?: emptyList()

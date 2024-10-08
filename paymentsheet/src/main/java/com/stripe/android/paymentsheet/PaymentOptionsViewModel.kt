@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.navigation.updateWithResult
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.CollectBankAccountFlowLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.onBehalfOf
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -312,10 +313,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
                 collectBankAccountFlowLauncher?.launch(
                     intent = metadata.stripeIntent,
-                    initializationMode = args.state.initializationMode,
                     isInstantDebits = paymentSelection.isInstantDebits,
                     createParams = paymentSelection.paymentMethodCreateParams,
                     linkMode = metadata.linkMode,
+                    onBehalfOf = args.state.initializationMode.onBehalfOf,
                 )
             }
             is PaymentSelection.New.Card,
@@ -340,6 +341,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     ) {
         collectBankAccountFlowLauncher = collectBankAccountFlowLauncherFactory.create(
             activityResultCaller = activityResultCaller,
+            hostedSurface = "payment_element",
             onUSBankAccountResult = ::handleCollectBankAccountResult,
             onLinkBankPaymentResult = ::handleCollectBankAccountForInstantDebitsResult,
         )

@@ -24,33 +24,39 @@ internal class CollectBankAccountFlowLauncherFactory @Inject constructor(
 
     fun create(
         activityResultCaller: ActivityResultCaller,
+        hostedSurface: String,
         onUSBankAccountResult: (CollectBankAccountResultInternal) -> Unit,
         onLinkBankPaymentResult: (CollectBankAccountForInstantDebitsResult) -> Unit,
     ): CollectBankAccountFlowLauncher {
         return CollectBankAccountFlowLauncher(
             lazyPaymentConfig = lazyPaymentConfig,
             activityResultCaller = activityResultCaller,
+            hostedSurface = hostedSurface,
             onUSBankAccountResult = onUSBankAccountResult,
             onLinkBankPaymentResult = onLinkBankPaymentResult,
         )
     }
 }
 
+internal val PaymentSheet.InitializationMode.onBehalfOf: String?
+    get() = (this as? PaymentSheet.InitializationMode.DeferredIntent)?.intentConfiguration?.onBehalfOf
+
 internal class CollectBankAccountFlowLauncher(
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     activityResultCaller: ActivityResultCaller,
+    hostedSurface: String,
     private val onUSBankAccountResult: (CollectBankAccountResultInternal) -> Unit,
     private val onLinkBankPaymentResult: (CollectBankAccountForInstantDebitsResult) -> Unit,
 ) {
 
     private val collectBankAccountLauncher =  CollectBankAccountLauncher.createForPaymentSheet(
-        hostedSurface = "payment_element",
+        hostedSurface = hostedSurface,
         activityResultCaller = activityResultCaller,
         callback = ::handleCollectBankAccountResult,
     )
 
     private val collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
-        hostedSurface = "payment_element",
+        hostedSurface = hostedSurface,
         activityResultCaller = activityResultCaller,
         callback = ::handleCollectBankAccountForInstantDebitsResult,
     )
@@ -66,19 +72,19 @@ internal class CollectBankAccountFlowLauncher(
 
         launch(
             intent = intent,
-            initializationMode = initializationMode,
             isInstantDebits = isInstantDebits,
             createParams = createParams,
             linkMode = linkMode,
+            onBehalfOf = initializationMode.onBehalfOf,
         )
     }
 
     fun launch(
         intent: StripeIntent,
-        initializationMode: PaymentSheet.InitializationMode,
         isInstantDebits: Boolean,
         createParams: PaymentMethodCreateParams,
         linkMode: LinkMode?,
+        onBehalfOf: String?,
     ) {
         val clientSecret = intent.clientSecret
 
@@ -94,7 +100,7 @@ internal class CollectBankAccountFlowLauncher(
             collectBankAccountForDeferredIntent(
                 intent = intent,
                 createParams = createParams,
-                initializationMode = initializationMode,
+                onBehalfOf = onBehalfOf,
             )
         }
     }
@@ -150,9 +156,9 @@ internal class CollectBankAccountFlowLauncher(
     }
 
     private fun collectBankAccountForDeferredIntent(
-        initializationMode: PaymentSheet.InitializationMode,
         intent: StripeIntent,
         createParams: PaymentMethodCreateParams,
+        onBehalfOf: String?,
     ) {
         val elementsSessionId = intent.id ?: return
         val name = PaymentMethodCreateParams.getNameFromParams(createParams) ?: return
@@ -160,10 +166,6 @@ internal class CollectBankAccountFlowLauncher(
 
         val amount = intent.asPaymentIntent()?.amount
         val currency = intent.asPaymentIntent()?.currency
-
-        val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-            ?.intentConfiguration
-            ?.onBehalfOf
 
         when (intent) {
             is PaymentIntent -> {

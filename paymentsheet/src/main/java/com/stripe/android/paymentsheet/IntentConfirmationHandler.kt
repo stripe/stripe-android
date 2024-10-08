@@ -150,6 +150,7 @@ internal class IntentConfirmationHandler(
 
         collectBankAccountFlowLauncher = collectBankAccountFlowLauncherFactory.create(
             activityResultCaller = activityResultCaller,
+            hostedSurface = "payment_element",
             onUSBankAccountResult = ::handleCollectBankAccountResult,
             onLinkBankPaymentResult = ::handleCollectBankAccountForInstantDebitsResult,
         )
