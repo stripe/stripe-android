@@ -1,7 +1,7 @@
 package com.stripe.android.link.analytics
 
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -45,12 +45,8 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        val preferredParams = if (error is InvalidRequestException) {
-            error.stripeError?.message?.let {
-                mapOf(FIELD_ERROR_MESSAGE to it)
-            }
-        } else {
-            null
+        val preferredParams = (error as? APIException)?.stripeError?.message?.let {
+            mapOf(FIELD_ERROR_MESSAGE to it)
         }
 
         val params = (preferredParams ?: mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage))
