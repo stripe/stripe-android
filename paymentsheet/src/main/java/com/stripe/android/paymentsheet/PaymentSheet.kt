@@ -478,7 +478,8 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration internal constructor(
+    data class Configuration @OptIn(ExperimentalCardBrandFilteringApi::class)
+    internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -604,7 +605,7 @@ class PaymentSheet internal constructor(
         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
         Note: This is only a client-side solution.
          */
-        @property:ExperimentalCardBrandFilteringApi internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -754,7 +755,8 @@ class PaymentSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
-            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            @OptIn(ExperimentalCardBrandFilteringApi::class)
+            private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -860,6 +862,7 @@ class PaymentSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            @OptIn(ExperimentalCardBrandFilteringApi::class)
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1536,6 +1539,7 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
+    @ExperimentalCardBrandFilteringApi
     sealed class CardBrandAcceptance : Parcelable {
 
         /**

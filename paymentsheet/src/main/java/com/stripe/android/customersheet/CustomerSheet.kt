@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -229,7 +230,7 @@ class CustomerSheet internal constructor(
         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
         Note: This is only a client-side solution.
          */
-        @property:ExperimentalCardBrandFilteringApi val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         // Hide no-argument constructor init
@@ -266,6 +267,7 @@ class CustomerSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -315,6 +317,13 @@ class CustomerSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -325,6 +334,7 @@ class CustomerSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                cardBrandAcceptance = cardBrandAcceptance
             )
         }
 
