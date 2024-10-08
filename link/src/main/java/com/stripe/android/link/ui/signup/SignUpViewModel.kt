@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
@@ -39,18 +38,18 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger
 ) : ViewModel() {
     internal var navController: NavHostController? = null
+    val emailController = EmailConfig.createController(
+        initialValue = args.configuration.customerInfo.email
+    )
+    val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+        initialValue = args.configuration.customerInfo.phone.orEmpty(),
+        initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
+    )
+    val nameController = NameConfig.createController(
+        initialValue = args.configuration.customerInfo.name
+    )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
-            emailController = EmailConfig.createController(
-                initialValue = args.configuration.customerInfo.email
-            ),
-            phoneNumberController = PhoneNumberController.createPhoneNumberController(
-                initialValue = args.configuration.customerInfo.phone.orEmpty(),
-                initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
-            ),
-            nameController = NameConfig.createController(
-                initialValue = args.configuration.customerInfo.name
-            ),
             signUpEnabled = false
         )
     )
@@ -77,30 +76,26 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun signUpEnabledListener() {
-        _state.flatMapLatest { state ->
-            combine(
-                flow = state.nameController.fieldState.map {
-                    if (requiresNameCollection) {
-                        it.isValid()
-                    } else {
-                        true
-                    }
-                },
-                flow2 = state.emailController.fieldState.map { it.isValid() },
-                flow3 = state.phoneNumberController.isComplete
-            ) { nameComplete, emailComplete, phoneComplete ->
-                nameComplete && emailComplete && phoneComplete
-            }
+        combine(
+            flow = nameController.fieldState.map {
+                if (requiresNameCollection) {
+                    it.isValid()
+                } else {
+                    true
+                }
+            },
+            flow2 = emailController.fieldState.map { it.isValid() },
+            flow3 = phoneNumberController.isComplete
+        ) { nameComplete, emailComplete, phoneComplete ->
+            nameComplete && emailComplete && phoneComplete
         }.collectLatest { formValid ->
             updateState { it.copy(signUpEnabled = formValid) }
         }
     }
 
     private suspend fun emailListener() {
-        _state.flatMapLatest { state ->
-            state.emailController.formFieldValue.mapLatest { entry ->
-                entry.takeIf { it.isComplete }?.value
-            }
+        emailController.formFieldValue.mapLatest { entry ->
+            entry.takeIf { it.isComplete }?.value
         }.collectLatest { email ->
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
@@ -115,12 +110,11 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            val state = _state.value
             linkAccountManager.signUp(
-                email = state.emailController.fieldValue.value,
-                phone = state.phoneNumberController.fieldValue.value,
-                country = state.phoneNumberController.getCountryCode(),
-                name = state.nameController.fieldValue.value,
+                email = emailController.fieldValue.value,
+                phone = phoneNumberController.fieldValue.value,
+                country = phoneNumberController.getCountryCode(),
+                name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
             ).fold(
                 onSuccess = {
@@ -142,7 +136,7 @@ internal class SignUpViewModel @Inject constructor(
             navController?.navigate(LinkScreen.Verification.route)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
-            _state.value.emailController.onValueChange("")
+            emailController.onValueChange("")
         }
     }
 

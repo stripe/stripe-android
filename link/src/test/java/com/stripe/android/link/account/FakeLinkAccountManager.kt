@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
@@ -21,6 +22,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override val accountStatus: Flow<AccountStatus> = _accountStatus
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
+    var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
@@ -45,6 +47,16 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
 
     override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
         return lookupConsumerResult
+    }
+
+    override suspend fun signUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        return signUpResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {

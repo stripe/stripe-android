@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -28,16 +29,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doSuspendableAnswer
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -64,7 +57,6 @@ internal class SignUpViewModelTest {
     )
 
     private val navController: NavHostController = mock()
-    private val linkAccountManager: LinkAccountManager = mock()
 
     @Before
     fun setUp() {
@@ -91,86 +83,91 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When email is valid then lookup is triggered with delay`() = runTest(dispatcher) {
-        val viewModel = createViewModel(prefilledEmail = null)
-
-        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-
-        viewModel.contentState.emailController.onRawValueChange("valid@email.com")
-        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-
-        // Mock a delayed response so we stay in the loading state
-        linkAccountManager.stub {
-            onBlocking { lookupConsumer(any(), any()) }.doSuspendableAnswer {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
                 delay(100)
-                Result.success(mock())
+                return super.lookupConsumer(email, startSession)
             }
         }
+        val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
+
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        assertThat(viewModel.contentState.emailController.fieldValue.value).isEqualTo("valid@email.com")
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo("valid@email.com")
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.VerifyingEmail)
     }
 
     @Test
     fun `When multiple valid emails entered quickly then lookup is triggered only for last one`() =
         runTest(dispatcher) {
-            val viewModel = createViewModel(prefilledEmail = null)
-
-            viewModel.contentState.emailController.onRawValueChange("first@email.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
-
-            viewModel.contentState.emailController.onRawValueChange("second@email.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
-
-            viewModel.contentState.emailController.onRawValueChange("third@email.com")
-            assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-
-            // Mock a delayed response so we stay in the loading state
-            linkAccountManager.stub {
-                onBlocking { lookupConsumer(any(), any()) }.doSuspendableAnswer {
+            val linkAccountManager = object : FakeLinkAccountManager() {
+                var calledCount = 0
+                val emails = arrayListOf<String>()
+                override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                    calledCount += 1
+                    emails.add(email)
                     delay(100)
-                    Result.success(mock())
+                    return super.lookupConsumer(email, startSession)
                 }
             }
+            val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
+
+            viewModel.emailController.onRawValueChange("first@email.com")
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
+
+            viewModel.emailController.onRawValueChange("second@email.com")
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE / 2)
+
+            viewModel.emailController.onRawValueChange("third@email.com")
+            assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
             assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.VerifyingEmail)
 
-            val emailCaptor = argumentCaptor<String>()
-            verify(linkAccountManager).lookupConsumer(emailCaptor.capture(), any())
+            assertThat(linkAccountManager.calledCount).isEqualTo(1)
 
-            assertThat(emailCaptor.allValues.size).isEqualTo(1)
-            assertThat(emailCaptor.firstValue).isEqualTo("third@email.com")
+            assertThat(linkAccountManager.emails.size).isEqualTo(1)
+            assertThat(linkAccountManager.emails.firstOrNull()).isEqualTo("third@email.com")
         }
 
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() = runTest(dispatcher) {
-        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var callCount = 0
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                callCount += 1
+                return super.lookupConsumer(email, startSession)
+            }
+        }
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAccountManager = linkAccountManager)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-        verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
+        assertThat(linkAccountManager.callCount).isEqualTo(0)
     }
 
     @Test
     fun `When lookupConsumer succeeds for new account then analytics event is sent`() = runTest(dispatcher) {
-        whenever(linkAccountManager.lookupConsumer(any(), any()))
-            .thenReturn(Result.success(null))
-
         val linkEventsReporter = object : FakeLinkEventsReporter() {
             override fun onSignupStarted(isInline: Boolean) {
                 calledCount += 1
             }
         }
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupConsumerResult = Result.success(null)
 
         val viewModel = createViewModel(
             linkEventsReporter = linkEventsReporter
         )
 
-        viewModel.contentState.emailController.onRawValueChange("valid@email.com")
+        viewModel.emailController.onRawValueChange("valid@email.com")
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
@@ -180,12 +177,13 @@ internal class SignUpViewModelTest {
     @Test
     fun `When lookupConsumer fails then an error message is shown`() = runTest(dispatcher) {
         val errorMessage = "Error message"
-        whenever(linkAccountManager.lookupConsumer(any(), any()))
-            .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
-        val viewModel = createViewModel()
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
-        viewModel.contentState.emailController.onRawValueChange(VALID_EMAIL)
+        linkAccountManager.lookupConsumerResult = Result.failure(RuntimeException(errorMessage))
+
+        viewModel.emailController.onRawValueChange(VALID_EMAIL)
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
@@ -194,26 +192,37 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `signUp sends correct ConsumerSignUpConsentAction`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var counter = 0
+            override suspend fun signUp(
+                email: String,
+                phone: String,
+                country: String,
+                name: String?,
+                consentAction: SignUpConsentAction
+            ): Result<LinkAccount> {
+                if (consentAction == SignUpConsentAction.Implied) {
+                    counter += 1
+                }
+                return super.signUp(email, phone, country, name, consentAction)
+            }
+        }
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
         viewModel.performValidSignup()
 
-        verify(linkAccountManager).signUp(
-            any(),
-            any(),
-            any(),
-            anyOrNull(),
-            eq(SignUpConsentAction.Implied)
-        )
+        assertThat(linkAccountManager.counter).isEqualTo(1)
     }
 
     @Test
     fun `When signUp fails then an error message is shown`() = runTest(dispatcher) {
         val errorMessage = "Error message"
-        whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
-        val viewModel = createViewModel()
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+
+        linkAccountManager.signUpResult = Result.failure(RuntimeException(errorMessage))
+
         viewModel.performValidSignup()
 
         assertThat(viewModel.contentState.errorMessage).isEqualTo(errorMessage.resolvableString)
@@ -221,7 +230,8 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -229,8 +239,7 @@ internal class SignUpViewModelTest {
                 ConsumerSession.VerificationSession.SessionState.Started
             )
         )
-        whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.success(linkAccount))
+        linkAccountManager.signUpResult = Result.success(linkAccount)
 
         viewModel.performValidSignup()
 
@@ -240,7 +249,8 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signed up with verified account then it navigates to Wallet screen`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -248,8 +258,8 @@ internal class SignUpViewModelTest {
                 ConsumerSession.VerificationSession.SessionState.Verified
             )
         )
-        whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.success(linkAccount))
+
+        linkAccountManager.signUpResult = Result.success(linkAccount)
 
         viewModel.performValidSignup()
 
@@ -263,6 +273,7 @@ internal class SignUpViewModelTest {
                 calledCount += 1
             }
         }
+        val linkAccountManager = FakeLinkAccountManager()
 
         val viewModel = createViewModel(
             linkEventsReporter = linkEventsReporter
@@ -274,9 +285,7 @@ internal class SignUpViewModelTest {
                 ConsumerSession.VerificationSession.SessionState.Verified
             )
         )
-
-        whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.success(linkAccount))
+        linkAccountManager.signUpResult = Result.success(linkAccount)
 
         viewModel.performValidSignup()
 
@@ -295,12 +304,14 @@ internal class SignUpViewModelTest {
             }
         }
 
+        val linkAccountManager = FakeLinkAccountManager()
+
         val viewModel = createViewModel(
-            linkEventsReporter = linkEventsReporter
+            linkEventsReporter = linkEventsReporter,
+            linkAccountManager = linkAccountManager
         )
 
-        whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(Result.failure(expectedError))
+        linkAccountManager.signUpResult = Result.failure(expectedError)
 
         viewModel.performValidSignup()
 
@@ -316,8 +327,8 @@ internal class SignUpViewModelTest {
 
         assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState.emailController.onRawValueChange("me@myself.com")
-        viewModel.contentState.phoneNumberController.onRawValueChange("1234567890")
+        viewModel.emailController.onRawValueChange("me@myself.com")
+        viewModel.phoneNumberController.onRawValueChange("1234567890")
         assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
@@ -330,12 +341,12 @@ internal class SignUpViewModelTest {
 
         assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState.emailController.onRawValueChange("me@myself.com")
-        viewModel.contentState.phoneNumberController.onRawValueChange("1234567890")
-        viewModel.contentState.nameController.onRawValueChange("")
+        viewModel.emailController.onRawValueChange("me@myself.com")
+        viewModel.phoneNumberController.onRawValueChange("1234567890")
+        viewModel.nameController.onRawValueChange("")
         assertThat(viewModel.contentState.signUpEnabled).isFalse()
 
-        viewModel.contentState.nameController.onRawValueChange("Someone from Canada")
+        viewModel.nameController.onRawValueChange("Someone from Canada")
         assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
@@ -350,8 +361,8 @@ internal class SignUpViewModelTest {
     }
 
     private fun SignUpViewModel.performValidSignup() {
-        contentState.emailController.onRawValueChange("email@valid.co")
-        contentState.phoneNumberController.onRawValueChange("1234567890")
+        emailController.onRawValueChange("email@valid.co")
+        phoneNumberController.onRawValueChange("1234567890")
         onSignUpClick()
     }
 
@@ -359,7 +370,8 @@ internal class SignUpViewModelTest {
         prefilledEmail: String? = null,
         args: LinkActivityContract.Args = defaultArgs,
         countryCode: CountryCode = CountryCode.US,
-        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter()
+        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
+        linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): SignUpViewModel {
         return SignUpViewModel(
             args = args.copy(

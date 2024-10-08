@@ -144,10 +144,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    /**
-     * Registers the user for a new Link account.
-     */
-    private suspend fun signUp(
+    override suspend fun signUp(
         email: String,
         phone: String,
         country: String,
