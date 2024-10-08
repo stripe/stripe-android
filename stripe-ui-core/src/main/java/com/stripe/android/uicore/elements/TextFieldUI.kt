@@ -63,6 +63,7 @@ import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -153,14 +154,8 @@ fun TextField(
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
-        @Suppress("SwallowedException")
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
-            try {
-                focusManager.moveFocus(nextFocusDirection)
-            } catch (e: IllegalArgumentException) {
-                // Do nothing. Sometimes moveFocus throws this exception, we should silently fail instead of crashing
-                // when this occurs.
-            }
+            focusManager.moveFocusSafely(nextFocusDirection)
         }
     }
 
@@ -227,7 +222,7 @@ fun TextField(
         ),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(nextFocusDirection)
+                focusManager.moveFocusSafely(nextFocusDirection)
             },
             onDone = {
                 focusManager.clearFocus(true)
@@ -472,7 +467,7 @@ private fun Modifier.onPreviewKeyEvent(
         event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
         value.isEmpty()
     ) {
-        focusManager.moveFocus(direction)
+        focusManager.moveFocusSafely(direction)
         true
     } else {
         false
