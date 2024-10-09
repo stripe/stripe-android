@@ -210,6 +210,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         expectedPaymentMethodType: String
     ): SharePaymentDetails {
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val expandParams = mapOf("expand" to listOf("payment_method"))
 
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -217,7 +218,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            extraParams = fraudDetectionData,
+            extraParams = fraudDetectionData + expandParams,
         ).getOrThrow()
     }
 

@@ -7,5 +7,5 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class SharePaymentDetails(
-    val paymentMethodId: String,
+    val paymentMethod: LinkBankPaymentMethod,
 ) : StripeModel

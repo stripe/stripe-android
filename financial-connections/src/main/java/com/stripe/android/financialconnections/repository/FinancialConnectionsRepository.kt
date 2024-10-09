@@ -10,11 +10,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.model.LinkBankPaymentMethod
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -57,7 +57,7 @@ internal interface FinancialConnectionsRepository {
     suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-    ): PaymentMethod
+    ): LinkBankPaymentMethod
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
@@ -136,7 +136,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     override suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String
-    ): PaymentMethod {
+    ): LinkBankPaymentMethod {
         val credentials = mapOf(
             "consumer_session_client_secret" to consumerSessionClientSecret,
         )
@@ -159,7 +159,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         return requestExecutor.execute(
             request,
-            PaymentMethod.serializer()
+            LinkBankPaymentMethod.serializer()
         )
     }
 

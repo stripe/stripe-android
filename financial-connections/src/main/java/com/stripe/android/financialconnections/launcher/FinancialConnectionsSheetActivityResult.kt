@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkBankPaymentMethod
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 
@@ -54,7 +55,7 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
 
 @Parcelize
 internal data class InstantDebitsResult(
-    val paymentMethodId: String,
+    val paymentMethod: LinkBankPaymentMethod,
     val last4: String?,
     val bankName: String?
 ) : Parcelable

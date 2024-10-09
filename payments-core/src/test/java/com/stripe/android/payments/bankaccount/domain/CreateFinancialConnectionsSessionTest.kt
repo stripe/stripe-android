@@ -248,7 +248,7 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val deferredIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = elementsSessionId,
@@ -302,7 +302,7 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = null,
                     elementsSessionId = elementsSessionId,

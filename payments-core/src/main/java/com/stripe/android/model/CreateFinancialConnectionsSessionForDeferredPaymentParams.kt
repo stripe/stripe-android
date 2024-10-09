@@ -12,7 +12,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val hostedSurface: String?,
     val customer: String?,
     val onBehalfOf: String?,
-
+    val instantDebits: Boolean,
     // PaymentIntent only params
     val amount: Int?,
     val currency: String?,
@@ -29,7 +29,11 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
             PARAM_HOSTED_SURFACE to hostedSurface,
             PARAM_AMOUNT to amount,
             PARAM_CURRENCY to currency
-        )
+        ) + if (instantDebits) {
+            mapOf("product" to "instant_debits")
+        } else {
+            emptyMap()
+        }
     }
 
     private companion object {

@@ -12,6 +12,9 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.LinkBankPaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
@@ -63,7 +66,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private suspend fun createFinancialConnectionsSession() {
         when (args) {
             is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
                     hostedSurface = args.hostedSurface,
@@ -71,11 +74,12 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
                     amount = args.amount,
-                    currency = args.currency
+                    currency = args.currency,
+                    instantDebits = args.configuration is InstantDebits
                 )
 
             is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
                     hostedSurface = args.hostedSurface,
@@ -83,7 +87,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
                     amount = null,
-                    currency = null
+                    currency = null,
+                    instantDebits = args.configuration is InstantDebits
                 )
 
             is CollectBankAccountContract.Args.ForPaymentIntent ->
@@ -181,7 +186,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 intent = intent,
                 usBankAccountData = null,
                 instantDebitsData = InstantDebitsData(
-                    paymentMethodId = result.paymentMethodId,
+                    paymentMethod = result.paymentMethod.toPaymentMethod(),
                     last4 = result.last4,
                     bankName = result.bankName,
                 ),
@@ -237,7 +242,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 .mapCatching { stripeIntent ->
                     Completed(
                         CollectBankAccountResponseInternal(
-                            stripeIntent,
+                            intent = stripeIntent,
                             usBankAccountData = USBankAccountData(financialConnectionsSession),
                             instantDebitsData = null
                         )
@@ -281,4 +286,73 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
 private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
     return (this as? InstantDebits)?.elementsSessionContext
+}
+
+// TODO: Rename to LinkBankPaymentMethod
+private fun LinkBankPaymentMethod.toPaymentMethod(): PaymentMethod {
+    val type = PaymentMethod.Type.Link
+
+    return PaymentMethod.Builder()
+        .setId(id)
+        .setCode(type.code)
+        .setType(type)
+        .setAllowRedisplay(
+            allowRedisplay?.let { value ->
+                PaymentMethod.AllowRedisplay.entries.find { it.value == value }
+            }
+        )
+        .setCreated(created)
+        .setCustomerId(customer)
+        .setBillingDetails(
+            billingDetails?.let {
+                PaymentMethod.BillingDetails(
+                    address = it.address?.let { address ->
+                        Address(
+                            line1 = address.line1,
+                            line2 = address.line2,
+                            postalCode = address.postalCode,
+                            city = address.city,
+                            state = address.state,
+                            country = address.country,
+                        )
+                    },
+                    email = it.email,
+                    name = it.name,
+                    phone = it.phone,
+                )
+            }
+        ) // TODO This will be filled in later
+        .setLiveMode(livemode)
+        .setCard(
+            card?.let {
+                PaymentMethod.Card(
+                    brand = it.brand,
+                    checks = it.checks?.let { checks ->
+                        PaymentMethod.Card.Checks(
+                            addressLine1Check = checks.addressLine1Check,
+                            addressPostalCodeCheck = checks.addressPostalCodeCheck,
+                            cvcCheck = checks.cvcCheck,
+                        )
+                    },
+                    country = it.country,
+                    expiryMonth = it.expiryMonth,
+                    expiryYear = it.expiryYear,
+                    fingerprint = it.fingerprint,
+                    funding = it.funding,
+                    last4 = it.last4,
+                    threeDSecureUsage = it.threeDSecureUsage?.let { usage ->
+                        PaymentMethod.Card.ThreeDSecureUsage(
+                            isSupported = usage.isSupported,
+                        )
+                    },
+                    networks = it.networks?.let { networks ->
+                        PaymentMethod.Card.Networks(
+                            available = networks.available,
+                            preferred = networks.preferred,
+                        )
+                    },
+                )
+            }
+        )
+        .build()
 }

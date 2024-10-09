@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -54,10 +55,13 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.android.model.LinkBankPaymentMethod
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.parsers.PaymentMethodLikeObjectJsonParser
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -466,27 +470,33 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
-            .onSuccess { paymentMethodId ->
-                withState {
-                    finishWithResult(
-                        state = it,
-                        result = Completed(
-                            instantDebits = InstantDebitsResult(
-                                paymentMethodId = paymentMethodId,
-                                last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
-                            ),
-                            financialConnectionsSession = null,
-                            token = null
-                        )
+        runCatching {
+            val encodedPaymentMethod = requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD))
+            requireNotNull(parseLinkBankPaymentMethod(encodedPaymentMethod))
+        }.onSuccess { paymentMethod ->
+            withState {
+                finishWithResult(
+                    state = it,
+                    result = Completed(
+                        instantDebits = InstantDebitsResult(
+                            paymentMethod = paymentMethod,
+                            last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
+                            bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                        ),
+                        financialConnectionsSession = null,
+                        token = null
                     )
-                }
+                )
             }
-            .onFailure { error ->
-                logger.error("Could not retrieve payment method parameters from success url", error)
-                finishWithResult(stateFlow.value, Failed(error))
-            }
+        }.onFailure { error ->
+            logger.error("Could not retrieve payment method parameters from success url", error)
+            finishWithResult(stateFlow.value, Failed(error))
+        }
+    }
+
+    private fun parseLinkBankPaymentMethod(encodedValue: String): LinkBankPaymentMethod? {
+        val decodedPaymentMethod = String(Base64.decode(encodedValue, 0), Charsets.UTF_8)
+        return PaymentMethodLikeObjectJsonParser.parse(JSONObject(decodedPaymentMethod))
     }
 
     private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
@@ -551,6 +561,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         internal const val MAX_ACCOUNTS = 100
         internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
     }

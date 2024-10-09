@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.launcher
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.LinkBankPaymentMethod
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -18,7 +19,7 @@ sealed class FinancialConnectionsSheetInstantDebitsResult : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val paymentMethodId: String,
+        val paymentMethod: LinkBankPaymentMethod,
         val last4: String?,
         val bankName: String?
     ) : FinancialConnectionsSheetInstantDebitsResult()

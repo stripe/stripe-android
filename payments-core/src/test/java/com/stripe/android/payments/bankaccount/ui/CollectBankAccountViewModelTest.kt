@@ -439,7 +439,7 @@ class CollectBankAccountViewModelTest {
     ) {
         createFinancialConnectionsSession.stub {
             onBlocking {
-                forDeferredPayments(
+                forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",
@@ -458,7 +458,7 @@ class CollectBankAccountViewModelTest {
     ) {
         createFinancialConnectionsSession.stub {
             onBlocking {
-                forDeferredPayments(
+                forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",

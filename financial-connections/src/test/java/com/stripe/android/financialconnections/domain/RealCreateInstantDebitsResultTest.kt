@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkBankPaymentMethod
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -99,7 +99,13 @@ class RealCreateInstantDebitsResultTest {
         )
 
         val sharePaymentDetails = SharePaymentDetails(
-            paymentMethodId = "pm_1234",
+            paymentMethod = LinkBankPaymentMethod(
+                id = "pm_1234",
+                allowRedisplay = null,
+                created = null,
+                customer = null,
+                livemode = false,
+            ),
         )
 
         return mock<FinancialConnectionsConsumerSessionRepository> {
@@ -109,8 +115,12 @@ class RealCreateInstantDebitsResultTest {
     }
 
     private fun makeRepository(): FinancialConnectionsRepository {
-        val paymentMethod = PaymentMethod(
+        val paymentMethod = LinkBankPaymentMethod(
             id = "pm_1234",
+            allowRedisplay = null,
+            created = null,
+            customer = null,
+            livemode = false,
         )
 
         return mock<FinancialConnectionsRepository> {
