@@ -478,8 +478,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration
-    internal constructor(
+    data class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
