@@ -13,6 +13,9 @@ tags:
     &merchant=networking\
     &financial_connections_test_mode=true\
     &stripe_account_id=acct_1PnnD9CY58qxxwvr"
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
