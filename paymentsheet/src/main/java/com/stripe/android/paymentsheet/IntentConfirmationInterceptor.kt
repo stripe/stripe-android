@@ -201,6 +201,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 add("autopm")
             }
         }
+
         val params = paymentMethodCreateParams.copy(
             productUsage = productUsage,
         )
