@@ -240,6 +240,8 @@ internal class AddPaymentMethodTest {
                 paymentMethodCode = initiallySelectedPaymentMethodType,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = listOf(
                 CheckboxFieldElement(

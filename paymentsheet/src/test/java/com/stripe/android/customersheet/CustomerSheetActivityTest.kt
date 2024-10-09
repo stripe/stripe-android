@@ -41,6 +41,7 @@ internal class CustomerSheetActivityTest {
     private val intent = contract.createIntent(
         context = context,
         input = CustomerSheetContract.Args(
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true,

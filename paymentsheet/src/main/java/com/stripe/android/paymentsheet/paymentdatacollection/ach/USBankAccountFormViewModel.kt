@@ -565,6 +565,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     paymentMethodId = resultIdentifier.id,
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
+                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+                        isSetupIntent = args.formArgs.hasIntentToSetup,
+                        customerRequestedSave = customerRequestedSave,
+                    ),
                 )
             }
             is ResultIdentifier.Session -> {
@@ -577,7 +581,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         email = email.value,
                         phone = phone.value,
                         address = address.value,
-                    )
+                    ),
+                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+                        isSetupIntent = args.formArgs.hasIntentToSetup,
+                        customerRequestedSave = customerRequestedSave,
+                    ),
                 )
             }
         }

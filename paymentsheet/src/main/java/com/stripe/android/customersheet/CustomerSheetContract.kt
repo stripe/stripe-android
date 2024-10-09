@@ -23,6 +23,7 @@ internal class CustomerSheetContract :
 
     @Parcelize
     internal data class Args(
+        val integrationType: CustomerSheetIntegration.Type,
         val configuration: CustomerSheet.Configuration,
         val statusBarColor: Int?,
     ) : Parcelable {

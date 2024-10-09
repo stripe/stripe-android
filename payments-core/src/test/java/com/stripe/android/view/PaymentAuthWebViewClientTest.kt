@@ -7,8 +7,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.FakeLogger
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.isCompletionUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.runner.RunWith

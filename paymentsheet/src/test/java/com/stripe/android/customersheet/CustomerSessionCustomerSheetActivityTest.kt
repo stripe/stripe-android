@@ -319,7 +319,7 @@ class CustomerSessionCustomerSheetActivityTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.CustomerSession(
+            integration = CustomerSheetIntegration.CustomerSession(
                 customerSessionProvider = object : CustomerSheet.CustomerSessionProvider() {
                     override suspend fun providesCustomerSessionClientSecret(): Result<
                         CustomerSheet.CustomerSessionClientSecret
@@ -353,6 +353,7 @@ class CustomerSessionCustomerSheetActivityTest {
             CustomerSheetContract().createIntent(
                 ApplicationProvider.getApplicationContext(),
                 CustomerSheetContract.Args(
+                    integrationType = CustomerSheetIntegration.Type.CustomerSession,
                     configuration = CustomerSheet.Configuration(
                         merchantDisplayName = "Merchant, Inc.",
                         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,

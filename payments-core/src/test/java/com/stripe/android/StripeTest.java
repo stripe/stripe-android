@@ -42,6 +42,7 @@ import com.stripe.android.model.WeChat;
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
+import com.stripe.android.testing.FakeLogger;
 
 import java.io.File;
 import java.util.HashMap;
