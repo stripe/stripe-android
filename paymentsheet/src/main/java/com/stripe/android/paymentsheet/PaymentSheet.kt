@@ -604,6 +604,7 @@ class PaymentSheet internal constructor(
         By default, PaymentSheet will accept all supported cards by Stripe.
         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
         Note: This is only a client-side solution.
+        Note: Card brand filtering is not currently supported in Link.
          */
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
@@ -1561,9 +1562,10 @@ class PaymentSheet internal constructor(
             Amex,
 
             /**
-             * Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo)
+             * Discover branded cards
+             * **Note**: Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo).
              */
-            DiscoverGlobalNetwork
+            Discover
         }
 
         /**
@@ -1575,6 +1577,7 @@ class PaymentSheet internal constructor(
 
         /**
          * Accept only the card brands specified in the associated value
+         * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
          */
         @Parcelize
         @ExperimentalCardBrandFilteringApi
@@ -1584,6 +1587,7 @@ class PaymentSheet internal constructor(
 
         /**
          * Accept all card brands supported by Stripe except for those specified in the associated value
+         * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted when using a disallow list.
          */
         @Parcelize
         @ExperimentalCardBrandFilteringApi

@@ -50,7 +50,7 @@ internal fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.Brand
         CardBrand.Discover,
         CardBrand.DinersClub,
         CardBrand.JCB,
-        CardBrand.UnionPay -> PaymentSheet.CardBrandAcceptance.BrandCategory.DiscoverGlobalNetwork
+        CardBrand.UnionPay -> PaymentSheet.CardBrandAcceptance.BrandCategory.Discover
         else -> null
     }
 }

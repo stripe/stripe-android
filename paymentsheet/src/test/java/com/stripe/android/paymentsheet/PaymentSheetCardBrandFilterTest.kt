@@ -43,7 +43,7 @@ class PaymentSheetCardBrandFilterTest {
     fun testIsAccepted_disallowedBrands() {
         val disallowedBrands = listOf(
             PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-            PaymentSheet.CardBrandAcceptance.BrandCategory.DiscoverGlobalNetwork
+            PaymentSheet.CardBrandAcceptance.BrandCategory.Discover
         )
         val filter = PaymentSheetCardBrandFilter(
             PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
