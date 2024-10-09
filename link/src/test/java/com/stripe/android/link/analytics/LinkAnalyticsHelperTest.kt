@@ -78,32 +78,3 @@ internal class LinkAnalyticsHelperTest {
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 }
-
-internal open class FakeLinkEventsReporter : LinkEventsReporter {
-    var calledCount = 0
-    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
-
-    override fun onInlineSignupCheckboxChecked() = Unit
-
-    override fun onSignupFlowPresented() = Unit
-
-    override fun onSignupStarted(isInline: Boolean) = Unit
-
-    override fun onSignupCompleted(isInline: Boolean) = Unit
-
-    override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
-
-    override fun onAccountLookupFailure(error: Throwable) = Unit
-
-    override fun onPopupShow() = Unit
-
-    override fun onPopupSuccess() = Unit
-
-    override fun onPopupCancel() = Unit
-
-    override fun onPopupError(error: Throwable) = Unit
-
-    override fun onPopupLogout() = Unit
-
-    override fun onPopupSkipped() = Unit
-}

@@ -70,7 +70,7 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
             override fun onSignupFlowPresented() {
                 calledCount += 1
             }
@@ -155,7 +155,7 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When lookupConsumer succeeds for new account then analytics event is sent`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
             override fun onSignupStarted(isInline: Boolean) {
                 calledCount += 1
             }
@@ -207,7 +207,12 @@ internal class SignUpViewModelTest {
                 return super.signUp(email, phone, country, name, consentAction)
             }
         }
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupCompleted(isInline: Boolean) = Unit
+            }
+        )
 
         viewModel.performValidSignup()
 
@@ -219,7 +224,12 @@ internal class SignUpViewModelTest {
         val errorMessage = "Error message"
 
         val linkAccountManager = FakeLinkAccountManager()
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
+            }
+        )
 
         linkAccountManager.signUpResult = Result.failure(RuntimeException(errorMessage))
 
@@ -231,7 +241,12 @@ internal class SignUpViewModelTest {
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupCompleted(isInline: Boolean) = Unit
+            }
+        )
 
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -250,7 +265,12 @@ internal class SignUpViewModelTest {
     @Test
     fun `When signed up with verified account then it navigates to Wallet screen`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupCompleted(isInline: Boolean) = Unit
+            }
+        )
 
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -268,7 +288,7 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signup succeeds then analytics event is sent`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
             override fun onSignupCompleted(isInline: Boolean) {
                 calledCount += 1
             }
@@ -296,7 +316,7 @@ internal class SignUpViewModelTest {
     fun `When signup fails then analytics event is sent`() = runTest(dispatcher) {
         val expectedError = Exception()
 
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
             override fun onSignupFailure(isInline: Boolean, error: Throwable) {
                 if (!isInline && expectedError == error) {
                     calledCount += 1
@@ -370,7 +390,7 @@ internal class SignUpViewModelTest {
         prefilledEmail: String? = null,
         args: LinkActivityContract.Args = defaultArgs,
         countryCode: CountryCode = CountryCode.US,
-        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
+        linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): SignUpViewModel {
         return SignUpViewModel(
@@ -421,4 +441,10 @@ internal class SignUpViewModelTest {
         const val CUSTOMER_NAME = "Customer"
         const val VALID_EMAIL = "email@valid.co"
     }
+}
+
+private open class SignUpLinkEventsReporter : FakeLinkEventsReporter() {
+    override fun onSignupFlowPresented() = Unit
+
+    override fun onSignupStarted(isInline: Boolean) = Unit
 }
