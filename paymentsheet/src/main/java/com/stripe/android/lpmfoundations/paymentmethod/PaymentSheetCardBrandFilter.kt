@@ -38,7 +38,6 @@ internal class PaymentSheetCardBrandFilter(
             }
         }
     }
-
 }
 
 // Extension function to map CardBrand to BrandCategory
