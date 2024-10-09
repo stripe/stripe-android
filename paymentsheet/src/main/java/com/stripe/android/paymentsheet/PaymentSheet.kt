@@ -478,7 +478,8 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    data class Configuration
     internal constructor(
         /**
          * Your customer-facing business name.

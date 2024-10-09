@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -12,6 +13,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
 
+@OptIn(ExperimentalCardBrandFilteringApi::class)
 class PaymentConfirmationOptionKtxTest {
     @Test
     fun `On new selection, should convert to new confirmation option properly`() {

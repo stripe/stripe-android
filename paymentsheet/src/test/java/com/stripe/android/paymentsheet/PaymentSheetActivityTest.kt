@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -116,6 +117,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+@OptIn(ExperimentalCardBrandFilteringApi::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetActivityTest {
