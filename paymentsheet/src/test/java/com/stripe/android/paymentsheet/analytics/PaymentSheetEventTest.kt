@@ -78,6 +78,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -140,6 +141,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to listOf("external_paypal", "external_fawry"),
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -203,6 +205,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "payment_method_layout" to "vertical",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -265,6 +268,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -329,6 +333,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to "cartes_bancaires, visa",
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -1299,6 +1304,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1359,6 +1365,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
