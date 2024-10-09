@@ -1768,7 +1768,8 @@ internal class StripeApiRepositoryTest {
                     linkMode = LinkMode.LinkPaymentMethod,
                     amount = 1000,
                     hostedSurface = "payment_element",
-                    currency = "usd"
+                    currency = "usd",
+                    instantDebits = false,
                 ),
                 DEFAULT_OPTIONS
             )

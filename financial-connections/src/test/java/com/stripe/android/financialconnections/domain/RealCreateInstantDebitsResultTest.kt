@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingAddress
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -183,6 +182,7 @@ class RealCreateInstantDebitsResultTest {
 
         val sharePaymentDetails = SharePaymentDetails(
             paymentMethodId = "pm_1234",
+            encodedPaymentMethod = "{\"id\": \"pm_1234\"}",
         )
 
         return mock<FinancialConnectionsConsumerSessionRepository> {
@@ -192,9 +192,7 @@ class RealCreateInstantDebitsResultTest {
     }
 
     private fun makeRepository(): FinancialConnectionsRepository {
-        val paymentMethod = PaymentMethod(
-            id = "pm_1234",
-        )
+        val paymentMethod = "{\"id\": \"pm_1234\"}"
 
         return mock<FinancialConnectionsRepository> {
             onBlocking { createPaymentMethod(any(), any(), anyOrNull(), any()) } doReturn paymentMethod

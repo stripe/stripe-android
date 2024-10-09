@@ -57,7 +57,7 @@ internal sealed class USBankAccountFormScreenState(
         data class Session(val id: String) : ResultIdentifier
 
         @Parcelize
-        data class PaymentMethod(val id: String) : ResultIdentifier
+        data class PaymentMethod(val paymentMethod: com.stripe.android.model.PaymentMethod) : ResultIdentifier
     }
 }
 
