@@ -34,6 +34,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.SignUpCheckboxChecked)
     }
 
+    override fun onSignupFlowPresented() {
+        fireEvent(LinkEvent.SignUpFlowPresented)
+    }
+
     override fun onSignupStarted(isInline: Boolean) {
         durationProvider.start(DurationProvider.Key.LinkSignup)
         fireEvent(LinkEvent.SignUpStart)

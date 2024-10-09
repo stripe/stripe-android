@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -28,6 +29,17 @@ internal interface LinkAccountManager {
         email: String,
         startSession: Boolean = true,
     ): Result<LinkAccount?>
+
+    /**
+     * Registers the user for a new Link account.
+     */
+    suspend fun signUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount>
 
     /**
      * Use the user input in memory to sign in to an existing account or sign up for a new Link
