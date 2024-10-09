@@ -14,38 +14,29 @@ class PaymentSheetCardBrandFilter(
 ) : CardBrandFilter {
 
     override fun isAccepted(cardBrand: CardBrand): Boolean {
+        val brandCategory = cardBrand.toBrandCategory()
+
         return when (cardBrandAcceptance) {
-            is PaymentSheet.CardBrandAcceptance.All -> {
-                true
-            }
+            is PaymentSheet.CardBrandAcceptance.All -> true
+
             is PaymentSheet.CardBrandAcceptance.Allowed -> {
-                val brandCategory = cardBrand.toBrandCategory()
-                // If a merchant has specified brands to allow, block unknown brands
-                if (brandCategory == null) {
+                val isAllowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
+                if (!isAllowed) {
                     // TODO(porter) Log event for disallowed brand
-                    false
-                } else if (!cardBrandAcceptance.brands.contains(brandCategory)) {
-                    // TODO(porter) Log event for disallowed brand
-                    false
-                } else {
-                    true
                 }
+                isAllowed
             }
+
             is PaymentSheet.CardBrandAcceptance.Disallowed -> {
-                val brandCategory = cardBrand.toBrandCategory()
-                if (brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)) {
+                val isDisallowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
+                if (isDisallowed) {
                     // TODO(porter) Log event for disallowed brand
-                    false
-                } else {
-                    true
                 }
+                !isDisallowed
             }
         }
     }
 
-    companion object {
-        val DEFAULT = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
-    }
 }
 
 // Extension function to map CardBrand to BrandCategory

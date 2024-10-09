@@ -172,7 +172,8 @@ class CustomerSheet internal constructor(
      */
     @Parcelize
     @Poko
-    class Configuration internal constructor(
+    class Configuration @OptIn(ExperimentalCardBrandFilteringApi::class)
+    internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
          */
@@ -267,6 +268,7 @@ class CustomerSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            @OptIn(ExperimentalCardBrandFilteringApi::class)
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
@@ -324,6 +326,7 @@ class CustomerSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            @OptIn(ExperimentalCardBrandFilteringApi::class)
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
