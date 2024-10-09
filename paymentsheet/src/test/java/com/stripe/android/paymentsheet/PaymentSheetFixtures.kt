@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -16,7 +15,6 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR
         get() = "#121212".toColorInt()

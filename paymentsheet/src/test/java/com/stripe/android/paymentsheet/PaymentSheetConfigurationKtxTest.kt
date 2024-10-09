@@ -3,13 +3,11 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 class PaymentSheetConfigurationKtxTest {
     @Test
     fun `'containVolatileDifferences' should return false when no volatile differences are found`() {

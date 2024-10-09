@@ -22,7 +22,6 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
@@ -63,7 +62,6 @@ import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {

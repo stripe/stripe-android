@@ -14,7 +14,6 @@ import app.cash.turbine.turbineScope
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
@@ -148,7 +147,6 @@ import kotlin.test.Test
 import kotlin.time.Duration
 import com.stripe.android.R as PaymentsCoreR
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetViewModelTest {
