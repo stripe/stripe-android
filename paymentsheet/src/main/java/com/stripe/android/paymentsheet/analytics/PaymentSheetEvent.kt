@@ -147,6 +147,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to configuration.paymentMethodLayout.toAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -504,6 +505,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
+        const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
