@@ -1766,7 +1766,8 @@ internal class StripeApiRepositoryTest {
                     onBehalfOf = null,
                     amount = 1000,
                     hostedSurface = "payment_element",
-                    currency = "usd"
+                    currency = "usd",
+                    instantDebits = false,
                 ),
                 DEFAULT_OPTIONS
             )

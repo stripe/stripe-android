@@ -439,7 +439,7 @@ class CollectBankAccountViewModelTest {
     ) {
         createFinancialConnectionsSession.stub {
             onBlocking {
-                forDeferredPayments(
+                forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",
@@ -447,7 +447,8 @@ class CollectBankAccountViewModelTest {
                     onBehalfOf = "on_behalf_of_id",
                     amount = 1000,
                     currency = "usd",
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    product = null,
                 )
             }.doReturn(result)
         }
@@ -458,7 +459,7 @@ class CollectBankAccountViewModelTest {
     ) {
         createFinancialConnectionsSession.stub {
             onBlocking {
-                forDeferredPayments(
+                forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",
@@ -466,7 +467,8 @@ class CollectBankAccountViewModelTest {
                     onBehalfOf = "on_behalf_of_id",
                     amount = null,
                     currency = null,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    product = null,
                 )
             }.doReturn(result)
         }
