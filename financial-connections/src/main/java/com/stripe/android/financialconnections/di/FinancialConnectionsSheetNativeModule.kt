@@ -5,8 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.error.ErrorReporter
-import com.stripe.android.core.error.SentryErrorReporter
-import com.stripe.android.core.error.SentryErrorRequestExecutor
+import com.stripe.android.core.error.SentryEventReporter
+import com.stripe.android.core.error.SentryRequestExecutor
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -146,9 +146,9 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun provideErrorReporter(
             context: Application,
-            executor: SentryErrorRequestExecutor,
+            executor: SentryRequestExecutor,
         ): ErrorReporter {
-            return SentryErrorReporter(
+            return SentryEventReporter(
                 context = context,
                 sentryConfig = FinancialConnectionsSentryConfig,
                 requestExecutor = executor

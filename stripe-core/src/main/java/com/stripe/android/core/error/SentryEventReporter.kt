@@ -18,10 +18,10 @@ import java.util.concurrent.TimeUnit
 /**
  * An [ErrorReporter] that reports to Sentry.
  */
-class SentryErrorReporter(
+class SentryEventReporter(
     context: Context,
     private val sentryConfig: SentryConfig,
-    private val requestExecutor: SentryErrorRequestExecutor,
+    private val requestExecutor: SentryRequestExecutor,
     private val environment: String = BuildConfig.BUILD_TYPE,
     private val localeCountry: String = Locale.getDefault().country,
 ) : ErrorReporter {
@@ -32,7 +32,7 @@ class SentryErrorReporter(
 
     override fun reportError(t: Throwable) {
         GlobalScope.launch(Dispatchers.IO) {
-            val request = SentryErrorRequest(
+            val request = SentryEnvelopeRequest(
                 projectId = sentryConfig.projectId,
                 envelopeBody = createEnvelopeBody(t),
                 headers = buildHeaders()

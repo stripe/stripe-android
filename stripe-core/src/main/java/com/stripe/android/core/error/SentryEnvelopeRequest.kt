@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import java.io.OutputStream
 
 @Serializable
-data class SentryErrorRequest(
+data class SentryEnvelopeRequest(
     val envelopeBody: String,
     val projectId: String,
     override val headers: Map<String, String>,
