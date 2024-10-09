@@ -15,7 +15,8 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_CARD_NUMBER_COMPLETED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_EDITABLE_PAYMENT_OPTION
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
-import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT_WITH_CUSTOMER_ADAPTER
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT_WITH_CUSTOMER_SESSION
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_PAYMENT_METHOD_SELECTED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
@@ -66,10 +67,26 @@ class CustomerSheetEventReporterTest {
 
     @Test
     fun `onInit should fire analytics request with expected event value`() {
-        eventReporter.onInit(configuration = CustomerSheetFixtures.MINIMUM_CONFIG)
+        eventReporter.onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == CS_INIT
+                req.params["event"] == CS_INIT_WITH_CUSTOMER_ADAPTER
+            }
+        )
+    }
+
+    @Test
+    fun `onInit with customer session should fire analytics request with expected event value`() {
+        eventReporter.onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_INIT_WITH_CUSTOMER_SESSION
             }
         )
     }

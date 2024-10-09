@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.model.CardBrand
 
 internal interface CustomerSheetEventReporter {
@@ -8,7 +9,10 @@ internal interface CustomerSheetEventReporter {
     /**
      * User entered the [CustomerSheet] flow
      */
-    fun onInit(configuration: CustomerSheet.Configuration)
+    fun onInit(
+        configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
+    )
 
     /**
      * [Screen] was presented to user

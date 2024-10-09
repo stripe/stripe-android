@@ -3,6 +3,7 @@ name: Upload aabs on push
 # The aab is used as a base reference to compare with aab built from pull requests.
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -38,3 +39,11 @@ jobs:
         env:
           EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
           EMERGE_TAG: push
+      - name: Assemble Release
+        run: ./gradlew :paymentsheet-example:assembleRelease
+      - name: Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@a41b2f7ab3f7c2631b6a73fb2f660b517cef45a9
+        with:
+          appId: "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
+          serviceCredentialsFileContent: ${{ secrets.PAYMENTS_GOOGLE_CLOUD_KEY }}
+          file: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk

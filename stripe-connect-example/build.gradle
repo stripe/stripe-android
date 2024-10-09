@@ -24,6 +24,7 @@ dependencies {
 
     // Compose
     implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
@@ -31,6 +32,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
+    debugImplementation libs.compose.uiTooling
 
     // Test
     testImplementation testLibs.androidx.archCore

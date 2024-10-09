@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -37,6 +36,7 @@ class CustomerSheet internal constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
+    private val integrationType: CustomerSheetIntegration.Type,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
@@ -95,6 +95,7 @@ class CustomerSheet internal constructor(
 
         val args = CustomerSheetContract.Args(
             configuration = request.configuration,
+            integrationType = integrationType,
             statusBarColor = statusBarColor(),
         )
 
@@ -353,7 +354,6 @@ class CustomerSheet internal constructor(
      * to attach payment methods with.
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
     ) {
@@ -361,7 +361,6 @@ class CustomerSheet internal constructor(
          * Builder for creating a [IntentConfiguration]
          */
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var paymentMethodTypes = listOf<String>()
 
@@ -391,13 +390,11 @@ class CustomerSheet internal constructor(
      */
     @Poko
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomerSessionClientSecret internal constructor(
         internal val customerId: String,
         internal val clientSecret: String
     ) {
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * Creates an instance of a [CustomerSessionClientSecret]
@@ -422,7 +419,6 @@ class CustomerSheet internal constructor(
      * [CustomerSessionProvider] provides the necessary functions
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class CustomerSessionProvider {
         /**
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
@@ -469,7 +465,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -483,7 +479,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activity: ComponentActivity,
             customerSessionProvider: CustomerSessionProvider,
@@ -495,7 +490,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -520,7 +515,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -534,7 +529,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             fragment: Fragment,
             customerSessionProvider: CustomerSessionProvider,
@@ -547,7 +541,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -558,13 +552,13 @@ class CustomerSheet internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
-            integrationType: CustomerSheetIntegrationType,
+            integration: CustomerSheetIntegration,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
                 application = application,
                 lifecycleOwner = lifecycleOwner,
-                integrationType = integrationType,
+                integration = integration,
             )
 
             return CustomerSheet(
@@ -572,6 +566,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = viewModelStoreOwner,
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
+                integrationType = integration.type,
                 paymentOptionFactory = PaymentOptionFactory(
                     resources = application.resources,
                     imageLoader = StripeImageLoader(application),
