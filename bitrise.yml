@@ -166,7 +166,7 @@ workflows:
                 bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
-      # Notify all executions
+      # Notify all executions.
       - slack@4:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
