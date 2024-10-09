@@ -1,8 +1,8 @@
 package com.stripe.android
 
-import com.stripe.android.model.CardBrand
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

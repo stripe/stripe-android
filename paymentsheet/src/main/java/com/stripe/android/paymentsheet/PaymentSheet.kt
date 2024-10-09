@@ -478,7 +478,6 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     data class Configuration
     internal constructor(
         /**
@@ -756,7 +755,6 @@ class PaymentSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
-            @OptIn(ExperimentalCardBrandFilteringApi::class)
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -863,7 +861,6 @@ class PaymentSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
-            @OptIn(ExperimentalCardBrandFilteringApi::class)
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1540,7 +1537,6 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
-    @ExperimentalCardBrandFilteringApi
     sealed class CardBrandAcceptance : Parcelable {
 
         /**

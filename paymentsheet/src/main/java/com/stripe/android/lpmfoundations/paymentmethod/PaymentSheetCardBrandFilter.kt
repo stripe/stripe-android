@@ -9,7 +9,7 @@ import com.stripe.android.ExperimentalCardBrandFilteringApi
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class PaymentSheetCardBrandFilter(
+internal class PaymentSheetCardBrandFilter(
     private val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
 ) : CardBrandFilter {
 
@@ -23,6 +23,7 @@ class PaymentSheetCardBrandFilter(
                 val isAllowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
                 if (!isAllowed) {
                     // TODO(porter) Log event for disallowed brand
+                    // Maybe log this in the loader
                 }
                 isAllowed
             }
@@ -31,6 +32,7 @@ class PaymentSheetCardBrandFilter(
                 val isDisallowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
                 if (isDisallowed) {
                     // TODO(porter) Log event for disallowed brand
+                    // Maybe log this in the loader
                 }
                 !isDisallowed
             }
@@ -40,7 +42,7 @@ class PaymentSheetCardBrandFilter(
 }
 
 // Extension function to map CardBrand to BrandCategory
-fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
+internal fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
     return when (this) {
         CardBrand.Visa -> PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
         CardBrand.MasterCard -> PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard

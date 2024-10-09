@@ -24,5 +24,6 @@ internal object ConfigurationDefaults {
     val primaryButtonLabel: String? = null
     val shippingDetails: AddressDetails? = null
     val externalPaymentMethods: List<String> = emptyList()
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
 }
