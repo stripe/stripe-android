@@ -1546,6 +1546,7 @@ class PaymentSheet internal constructor(
          * Card brand categories that can be allowed or disallowed
          */
         @Parcelize
+        @ExperimentalCardBrandFilteringApi
         enum class BrandCategory : Parcelable {
             /**
              * Visa branded cards
@@ -1572,12 +1573,14 @@ class PaymentSheet internal constructor(
          * Accept all card brands supported by Stripe
          */
         @Parcelize
+        @ExperimentalCardBrandFilteringApi
         data object All : CardBrandAcceptance()
 
         /**
          * Accept only the card brands specified in the associated value
          */
         @Parcelize
+        @ExperimentalCardBrandFilteringApi
         data class Allowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
@@ -1586,6 +1589,7 @@ class PaymentSheet internal constructor(
          * Accept all card brands supported by Stripe except for those specified in the associated value
          */
         @Parcelize
+        @ExperimentalCardBrandFilteringApi
         data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
