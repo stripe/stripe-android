@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
@@ -13,6 +14,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -22,7 +24,7 @@ internal interface ElementsSessionRepository {
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?
+        defaultPaymentMethodId: String?,
     ): Result<ElementsSession>
 }
 
@@ -61,50 +63,47 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            fallback(params, elementsSessionFailure)
+            fallback(params, requestOptions, elementsSessionFailure)
         }
     }
 
     private suspend fun fallback(
         params: ElementsSessionParams,
+        options: ApiRequest.Options,
         elementsSessionFailure: Throwable,
     ): Result<ElementsSession> = withContext(workContext) {
-        when (params) {
+        val stripeIntent = when (params) {
             is ElementsSessionParams.PaymentIntentType -> {
                 stripeRepository.retrievePaymentIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map { intent ->
-                    ElementsSession.createFromFallback(
-                        stripeIntent = intent.withoutWeChatPay(),
-                        sessionsError = elementsSessionFailure,
-                    )
-                }
+                )
             }
             is ElementsSessionParams.SetupIntentType -> {
                 stripeRepository.retrieveSetupIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map { intent ->
-                    ElementsSession.createFromFallback(
-                        stripeIntent = intent.withoutWeChatPay(),
-                        sessionsError = elementsSessionFailure,
-                    )
-                }
+                )
             }
             is ElementsSessionParams.DeferredIntentType -> {
-                // We don't have a fallback endpoint for the deferred intent flow
-                Result.failure(elementsSessionFailure)
+                Result.success(params.toStripeIntent(options))
             }
+        }
+        stripeIntent.map { intent ->
+            ElementsSession.createFromFallback(
+                stripeIntent = intent.withoutWeChatPay(),
+                sessionsError = elementsSessionFailure
+            )
         }
     }
 }
 
 private fun StripeIntent.withoutWeChatPay(): StripeIntent {
     // We don't know if the merchant is eligible for H5 payments, so we filter out WeChat Pay.
-    val filteredPaymentMethodTypes = paymentMethodTypes.filter { it != PaymentMethod.Type.WeChatPay.code }
+    val filteredPaymentMethodTypes =
+        paymentMethodTypes.filter { it != PaymentMethod.Type.WeChatPay.code }.ifEmpty { listOf("card") }
     return when (this) {
         is PaymentIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
         is SetupIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
@@ -152,6 +151,41 @@ private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? 
     return when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
+    }
+}
+
+private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: ApiRequest.Options): StripeIntent {
+    val deferredIntentParams = this.deferredIntentParams
+    val isLiveMode = options.apiKey.contains("test")
+    val now = Calendar.getInstance().timeInMillis
+    return when (deferredIntentParams.mode) {
+        is DeferredIntentParams.Mode.Payment -> PaymentIntent(
+            id = deferredIntentParams.paymentMethodConfigurationId,
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
+            amount = (deferredIntentParams.mode as DeferredIntentParams.Mode.Payment).amount,
+            clientSecret = this.clientSecret,
+            countryCode = null,
+            created = now,
+            currency = deferredIntentParams.mode.currency,
+            isLiveMode = isLiveMode,
+            unactivatedPaymentMethods = emptyList(),
+        )
+        is DeferredIntentParams.Mode.Setup -> SetupIntent(
+            id = deferredIntentParams.paymentMethodConfigurationId,
+            cancellationReason = null,
+            countryCode = null,
+            clientSecret = this.clientSecret,
+            description = null,
+            created = now,
+            isLiveMode = isLiveMode,
+            linkFundingSources = emptyList(),
+            nextActionData = null,
+            paymentMethodId = null,
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
+            status = null,
+            unactivatedPaymentMethods = emptyList(),
+            usage = null,
+        )
     }
 }
 

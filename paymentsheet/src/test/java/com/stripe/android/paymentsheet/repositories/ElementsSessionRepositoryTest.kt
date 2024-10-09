@@ -153,7 +153,7 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
-    fun `Returns the Elements Session endpoint's exception if there's no fallback`() = runTest {
+    fun `Handles deferred intent elements session lookup failure gracefully`() = runTest {
         val endpointException = APIException(message = "this didn't work")
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
@@ -179,8 +179,41 @@ internal class ElementsSessionRepositoryTest {
             defaultPaymentMethodId = null,
         )
 
-        assertThat(session.getOrNull()).isNull()
-        assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
+        assertThat(session.isSuccess).isTrue()
+        assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `Deferred intent elements session failure uses payment method types if specified`() = runTest {
+        val endpointException = APIException(message = "this didn't work")
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.failure(endpointException)
+        )
+        val expectedPaymentMethodTypes = listOf("card", "amazon_pay")
+
+        val session = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        ).get(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                    paymentMethodTypes = expectedPaymentMethodTypes
+                )
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
+        )
+
+        assertThat(session.isSuccess).isTrue()
+        assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).isEqualTo(expectedPaymentMethodTypes)
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
