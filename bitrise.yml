@@ -166,10 +166,17 @@ workflows:
                 bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
+      # Notify all executions.
       - slack@4:
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+            - webhook_url_on_error: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+      # Notify failures.
+      - slack@4:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
+            - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
       - pagerduty@0:
           run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
           inputs:
