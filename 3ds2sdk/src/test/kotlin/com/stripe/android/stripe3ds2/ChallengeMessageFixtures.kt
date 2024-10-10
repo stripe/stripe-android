@@ -12,6 +12,7 @@ object ChallengeMessageFixtures {
     val ACS_TRANS_ID = UUID.randomUUID().toString()
     val SDK_TRANS_ID = SdkTransactionId.create()
     val SERVER_TRANS_ID = UUID.randomUUID().toString()
+    val THREE_DS_APP_URL = UUID.randomUUID().toString()
 
     val ISSUER_IMAGE = ChallengeResponseData.Image(
         "http://mediumUrl",
@@ -29,7 +30,8 @@ object ChallengeMessageFixtures {
         acsTransId = ACS_TRANS_ID,
         threeDsServerTransId = SERVER_TRANS_ID,
         sdkTransId = SDK_TRANS_ID,
-        messageVersion = MESSAGE_VERSION_210
+        messageVersion = MESSAGE_VERSION_210,
+        threeDSRequestorAppURL = THREE_DS_APP_URL
     )
 
     val CRES = ChallengeResponseData(

@@ -94,6 +94,7 @@ class ChallengeActivity : AppCompatActivity() {
     }
 
     private var progressDialog: Dialog? = null
+	
     private var currentChallengeResponseData: ChallengeResponseData? = null
     private val analyticsDelegate = AnalyticsSingleton.getInstance().analyticsDelegate
 
@@ -228,7 +229,9 @@ class ChallengeActivity : AppCompatActivity() {
         super.onResume()
 
         if (viewModel.shouldAutoSubmitOOB) {
-            viewModel.submit(ChallengeAction.Oob)
+            val fragment = supportFragmentManager.fragments.first() as ChallengeFragment
+
+            viewModel.submit(ChallengeAction.Oob(fragment.challengeZoneView.whitelistingSelection))
         } else if (viewModel.shouldRefreshUi) {
             viewModel.onRefreshUi()
         }

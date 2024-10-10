@@ -1,10 +1,14 @@
 package com.stripe.android.stripe3ds2.transaction
 
+import android.os.Build
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nimbusds.jose.jwk.KeyUse
 import com.stripe.android.stripe3ds2.CertificateFixtures
 import com.stripe.android.stripe3ds2.ChallengeMessageFixtures
 import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
+import com.stripe.android.stripe3ds2.init.DeviceDataFactoryImpl
+import com.stripe.android.stripe3ds2.init.DeviceParamNotAvailableFactoryImpl
 import com.stripe.android.stripe3ds2.init.FakeAppInfoRepository
 import com.stripe.android.stripe3ds2.init.SecurityChecker
 import com.stripe.android.stripe3ds2.init.Warning
@@ -63,22 +67,22 @@ class DefaultAuthenticationRequestParametersFactoryTest {
     }
 
     @Test
-    fun getDeviceDataJson_shouldCreateCorrectJsonString() {
-        val rootJson = JSONObject(createFactory().deviceDataJson)
+    fun getDeviceDataJson_shouldCreateCorrectJsonString() = runTest {
+        val rootJson = createFactory().deviceDataJson(SDK_TRANSACTION_ID)
         assertEquals(
-            "1.1",
+            "1.6",
             rootJson.get(DefaultAuthenticationRequestParametersFactory.KEY_DATA_VERSION)
         )
 
         val deviceDataJson =
             rootJson.getJSONObject(DefaultAuthenticationRequestParametersFactory.KEY_DEVICE_DATA)
         assertEquals("Android", deviceDataJson.getString("C001"))
-        assertEquals("HTC One_M8", deviceDataJson.getString("C002"))
+        assertEquals("unknown||robolectric", deviceDataJson.getString("C002"))
 
         val unavailableDeviceParamsJson = rootJson.getJSONObject(
             DefaultAuthenticationRequestParametersFactory.KEY_DEVICE_PARAM_NOT_AVAILABLE
         )
-        assertEquals("RE02", unavailableDeviceParamsJson.getString("C010"))
+        assertEquals("RE01", unavailableDeviceParamsJson.getString("C010"))
         assertEquals("RE03", unavailableDeviceParamsJson.getString("C011"))
 
         val securityWarnings =
@@ -97,7 +101,7 @@ class DefaultAuthenticationRequestParametersFactoryTest {
         val encryptedDeviceData = createParams().deviceData
         assertNotNull(encryptedDeviceData)
         assertThat(encryptedDeviceData)
-            .hasLength(599)
+            .hasLength(3841)
     }
 
     @Test
@@ -107,7 +111,7 @@ class DefaultAuthenticationRequestParametersFactoryTest {
             CertificateFixtures.DS_CERTIFICATE_RSA.publicKey
         ).deviceData
         assertThat(encryptedDeviceData.length)
-            .isEqualTo(599)
+            .isEqualTo(3841)
     }
 
     @Test
@@ -117,7 +121,7 @@ class DefaultAuthenticationRequestParametersFactoryTest {
             CertificateFixtures.DS_CERTIFICATE_RSA.publicKey
         ).deviceData
         assertThat(encryptedDeviceData.length)
-            .isEqualTo(599)
+            .isEqualTo(3841)
     }
 
     @Test
@@ -261,18 +265,12 @@ class DefaultAuthenticationRequestParametersFactoryTest {
         )
     ): DefaultAuthenticationRequestParametersFactory {
         return DefaultAuthenticationRequestParametersFactory(
-            {
-                mapOf(
-                    "C001" to "Android",
-                    "C002" to "HTC One_M8"
-                )
-            },
-            {
-                mapOf(
-                    "C010" to "RE02",
-                    "C011" to "RE03"
-                )
-            },
+            DeviceDataFactoryImpl(
+                context = InstrumentationRegistry.getInstrumentation().targetContext,
+                appInfoRepository = FakeAppInfoRepository(),
+                messageVersionRegistry = messageVersionRegistry
+            ),
+            DeviceParamNotAvailableFactoryImpl(apiVersion = Build.VERSION.SDK_INT),
             securityChecker,
             FakeAppInfoRepository(SDK_APP_ID),
             jweEncrypter,
