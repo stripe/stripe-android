@@ -400,6 +400,16 @@ public final class com/stripe/android/stripe3ds2/security/StripeEphemeralKeyPair
 	public fun generate ()Ljava/security/KeyPair;
 }
 
+public final class com/stripe/android/stripe3ds2/service/AnalyticsSingleton {
+	public static final field Companion Lcom/stripe/android/stripe3ds2/service/AnalyticsSingleton$Companion;
+	public final fun getAnalyticsDelegate ()Lcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;
+	public final fun setAnalyticsDelegate (Lcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;)V
+}
+
+public final class com/stripe/android/stripe3ds2/service/AnalyticsSingleton$Companion {
+	public final fun getInstance ()Lcom/stripe/android/stripe3ds2/service/AnalyticsSingleton;
+}
+
 public abstract interface class com/stripe/android/stripe3ds2/service/StripeThreeDs2Service {
 	public abstract fun cleanup ()V
 	public abstract fun createTransaction (Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/List;Ljava/security/PublicKey;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;)Lcom/stripe/android/stripe3ds2/transaction/Transaction;
@@ -408,11 +418,11 @@ public abstract interface class com/stripe/android/stripe3ds2/service/StripeThre
 }
 
 public final class com/stripe/android/stripe3ds2/service/StripeThreeDs2ServiceImpl : com/stripe/android/stripe3ds2/service/StripeThreeDs2Service {
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)V
-	public fun <init> (Landroid/content/Context;ZLkotlin/coroutines/CoroutineContext;)V
-	public synthetic fun <init> (Landroid/content/Context;ZLkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;Lkotlin/coroutines/CoroutineContext;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;ZLcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;Lkotlin/coroutines/CoroutineContext;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;ZLcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;Lkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;ZLcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;Lkotlin/coroutines/CoroutineContext;)V
+	public synthetic fun <init> (Landroid/content/Context;ZLcom/stripe/android/stripe3ds2/utils/AnalyticsDelegate;Lkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun cleanup ()V
 	public fun createTransaction (Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/List;Ljava/security/PublicKey;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;)Lcom/stripe/android/stripe3ds2/transaction/Transaction;
 	public fun getPublicKey (Ljava/lang/String;)Ljava/security/PublicKey;
@@ -1391,6 +1401,15 @@ public final class com/stripe/android/stripe3ds2/transactions/UiType : java/lang
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public static fun values ()[Lcom/stripe/android/stripe3ds2/transactions/UiType;
+}
+
+public abstract interface class com/stripe/android/stripe3ds2/utils/AnalyticsDelegate {
+	public abstract fun cancelButtonTappedWithTransactionId (Ljava/lang/String;)V
+	public abstract fun didReceiveChallengeResponseWithTransactionId (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun oobContinueButtonTappedWithTransactionID (Ljava/lang/String;)V
+	public abstract fun oobFlowDidPause (Ljava/lang/String;)V
+	public abstract fun oobFlowDidResume (Ljava/lang/String;)V
+	public abstract fun otpSubmitButtonTappedWithTransactionID (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/stripe3ds2/utils/CustomizeUtils {
