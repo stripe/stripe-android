@@ -280,6 +280,7 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `Init event with preferred networks`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,

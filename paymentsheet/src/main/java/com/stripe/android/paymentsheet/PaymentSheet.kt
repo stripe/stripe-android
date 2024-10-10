@@ -601,7 +601,8 @@ class PaymentSheet internal constructor(
 
         /**
          By default, PaymentSheet will accept all supported cards by Stripe.
-         You can specify card brands PaymentSheet should block or allow payment for by providing an array of those card brands.
+         You can specify card brands PaymentSheet should block or allow
+         payment for by providing an array of those card brands.
          Note: This is only a client-side solution.
          Note: Card brand filtering is not currently supported in Link.
          */
