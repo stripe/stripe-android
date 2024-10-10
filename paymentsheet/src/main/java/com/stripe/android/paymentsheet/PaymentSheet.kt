@@ -1608,13 +1608,13 @@ class PaymentSheet internal constructor(
         internal data object All : CardBrandAcceptance()
 
         @Parcelize
-        @ExperimentalCardBrandFilteringApi
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Allowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
 
         @Parcelize
-        @ExperimentalCardBrandFilteringApi
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()

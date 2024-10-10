@@ -14,7 +14,7 @@ class PaymentSheetCardBrandFilterTest {
     fun testIsAccepted_allBrandsAccepted() {
         val filter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
 
-        for (brand in CardBrand.values()) {
+        for (brand in CardBrand.entries) {
             assertThat(filter.isAccepted(brand)).isTrue()
         }
     }
@@ -29,7 +29,7 @@ class PaymentSheetCardBrandFilterTest {
             PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
         )
 
-        for (brand in CardBrand.values()) {
+        for (brand in CardBrand.entries) {
             val brandCategory = brand.toBrandCategory()
             val isExpectedToBeAccepted =
                 brandCategory != null && allowedBrands.contains(brandCategory)
@@ -49,7 +49,7 @@ class PaymentSheetCardBrandFilterTest {
             PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
         )
 
-        for (brand in CardBrand.values()) {
+        for (brand in CardBrand.entries) {
             val brandCategory = brand.toBrandCategory()
             val isExpectedToBeAccepted =
                 brandCategory == null || !disallowedBrands.contains(brandCategory)
@@ -68,7 +68,7 @@ class PaymentSheetCardBrandFilterTest {
             PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
         )
 
-        for (brand in CardBrand.values()) {
+        for (brand in CardBrand.entries) {
             if (brand.toBrandCategory() == null) {
                 assertThat(filter.isAccepted(brand)).isFalse()
             }
@@ -84,7 +84,7 @@ class PaymentSheetCardBrandFilterTest {
             PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
         )
 
-        for (brand in CardBrand.values()) {
+        for (brand in CardBrand.entries) {
             if (brand.toBrandCategory() == null) {
                 assertThat(filter.isAccepted(brand)).isTrue()
             }

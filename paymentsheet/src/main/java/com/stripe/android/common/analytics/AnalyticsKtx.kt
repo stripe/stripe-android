@@ -1,6 +1,5 @@
 package com.stripe.android.common.analytics
 
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -72,7 +71,6 @@ internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(
     return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
 }
