@@ -32,10 +32,7 @@ import kotlinx.coroutines.launch
  * selected a payment method, [PaymentSessionData.paymentMethod] will be updated with the
  * payment method and [PaymentSessionListener.onPaymentSessionDataChanged] will be called.
  */
-@Deprecated(
-    "Please use Mobile Payment Element instead. If you already using PaymentSession, learn how to migrate here:" +
-        " https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
-)
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
     viewModelStoreOwner: ViewModelStoreOwner,

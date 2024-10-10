@@ -19,6 +19,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.BASIC_INTEGRATION_DEPRECATION_WARNING
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
@@ -38,11 +39,7 @@ import kotlinx.coroutines.launch
  * Use [PaymentMethodsActivityStarter.Result.fromIntent]
  * to retrieve the result of this activity from an intent in onActivityResult().
  */
-@Deprecated(
-    "Please use Mobile Payment Element instead. If you already using PaymentMethodsActivity, learn how to" +
-        " migrate here:" +
-        " https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
-)
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class PaymentMethodsActivity : AppCompatActivity() {
     internal val viewBinding: StripePaymentMethodsActivityBinding by lazy {
         StripePaymentMethodsActivityBinding.inflate(layoutInflater)

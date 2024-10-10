@@ -8,6 +8,7 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import com.stripe.android.BASIC_INTEGRATION_DEPRECATION_WARNING
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSessionConfig
@@ -23,11 +24,7 @@ import kotlinx.coroutines.launch
  * Activity containing a two-part payment flow that allows users to provide a shipping address
  * as well as select a shipping method.
  */
-@Deprecated(
-    "Please use Mobile Payment Element instead. If you already using PaymentFlowActivity, learn how to" +
-        " migrate here:" +
-        " https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
-)
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class PaymentFlowActivity : StripeActivity() {
 
     private val viewBinding: StripePaymentFlowActivityBinding by lazy {

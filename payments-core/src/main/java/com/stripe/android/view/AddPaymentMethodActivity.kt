@@ -14,6 +14,7 @@ import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.BASIC_INTEGRATION_DEPRECATION_WARNING
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -32,11 +33,7 @@ import kotlinx.coroutines.launch
  *
  * Should be started with [AddPaymentMethodActivityStarter].
  */
-@Deprecated(
-    "Please use Mobile Payment Element instead. If you already using AddPaymentMethodActivity, learn how to" +
-        " migrate here: " +
-        "https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
-)
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class AddPaymentMethodActivity : StripeActivity() {
 
     private val args: AddPaymentMethodActivityStarter.Args by lazy {

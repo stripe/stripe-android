@@ -27,10 +27,7 @@ import kotlin.coroutines.CoroutineContext
  *
  * See [Creating ephemeral keys](https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys)
  */
-@Deprecated(
-    "Please use Mobile Payment Element instead. If you already using CustomerSession, learn how to migrate" +
-        " here: https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
-)
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class CustomerSession @VisibleForTesting internal constructor(
     stripeRepository: StripeRepository,
     publishableKey: String,
