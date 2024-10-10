@@ -599,13 +599,6 @@ class PaymentSheet internal constructor(
 
         internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
 
-        /**
-         By default, PaymentSheet will accept all supported cards by Stripe.
-         You can specify card brands PaymentSheet should block or allow
-         payment for by providing a list of those card brands.
-         Note: This is only a client-side solution.
-         Note: Card brand filtering is not currently supported in Link.
-         */
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
@@ -855,6 +848,13 @@ class PaymentSheet internal constructor(
                 this.paymentMethodLayout = paymentMethodLayout
             }
 
+            /**
+             * By default, PaymentSheet will accept all supported cards by Stripe.
+             * You can specify card brands PaymentSheet should block or allow
+             * payment for by providing a list of those card brands.
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card brand filtering is not currently supported in Link.
+             */
             @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
@@ -1572,6 +1572,7 @@ class PaymentSheet internal constructor(
             /**
              * Accept all card brands supported by Stripe
              */
+            @JvmStatic
             @ExperimentalCardBrandFilteringApi
             fun all(): CardBrandAcceptance = All
 
@@ -1579,6 +1580,7 @@ class PaymentSheet internal constructor(
              * Accept only the card brands specified in `brands`.
              * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
              */
+            @JvmStatic
             @ExperimentalCardBrandFilteringApi
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Allowed(brands)
@@ -1588,6 +1590,7 @@ class PaymentSheet internal constructor(
              * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted
              * when using a disallow list.
              */
+            @JvmStatic
             @ExperimentalCardBrandFilteringApi
             fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Disallowed(brands)

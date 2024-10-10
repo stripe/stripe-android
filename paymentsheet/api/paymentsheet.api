@@ -712,6 +712,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 public abstract class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Companion;
+	public static final fun all ()Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
+	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
+	public static final fun disallowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$All$Creator : android/os/Parcelable$Creator {

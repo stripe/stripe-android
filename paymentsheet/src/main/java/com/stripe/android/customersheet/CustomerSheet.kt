@@ -227,12 +227,6 @@ class CustomerSheet internal constructor(
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
-        /**
-         By default, CustomerSheet will accept all supported cards by Stripe.
-         You can specify card brands CustomerSheet should block or allow
-         payment for by providing a list of those card brands.
-         Note: This is only a client-side solution.
-         */
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
@@ -320,6 +314,13 @@ class CustomerSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            /**
+             * By default, PaymentSheet will accept all supported cards by Stripe.
+             * You can specify card brands PaymentSheet should block or allow
+             * payment for by providing a list of those card brands.
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card brand filtering is not currently supported in Link.
+             */
             @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
