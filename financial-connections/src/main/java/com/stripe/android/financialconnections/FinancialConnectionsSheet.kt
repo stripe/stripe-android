@@ -57,12 +57,15 @@ class FinancialConnectionsSheet internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed interface InitializationMode : Parcelable {
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             data class PaymentIntent(val paymentIntentId: String) : InitializationMode
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             data class SetupIntent(val setupIntentId: String) : InitializationMode
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             data object DeferredIntent : InitializationMode
         }
