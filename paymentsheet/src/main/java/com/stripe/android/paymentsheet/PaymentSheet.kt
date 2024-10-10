@@ -1581,7 +1581,7 @@ class PaymentSheet internal constructor(
              */
             @ExperimentalCardBrandFilteringApi
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
-                allowed(brands)
+                Allowed(brands)
 
             /**
              * Accept all card brands supported by Stripe except for those specified in `brands`.
