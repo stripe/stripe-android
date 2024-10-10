@@ -6,11 +6,19 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 dependencies {
     implementation project(":stripe-connect")
+    implementation project(':stripe-core')
 
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+
+    // Logging
+    implementation libs.timber
+
+    // Networking
+    implementation libs.fuel
+    implementation libs.fuelCoroutines
 
     // AndroidX
     implementation libs.androidx.activity
