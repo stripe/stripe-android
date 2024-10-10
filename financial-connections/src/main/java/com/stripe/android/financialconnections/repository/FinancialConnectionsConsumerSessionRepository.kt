@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -74,6 +75,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
             fraudDetectionDataRepository: FraudDetectionDataRepository,
+            elementsSessionContext: ElementsSessionContext?
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
@@ -84,6 +86,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
                 logger = logger,
                 fraudDetectionDataRepository = fraudDetectionDataRepository,
                 isLinkWithStripe = isLinkWithStripe,
+                elementsSessionContext = elementsSessionContext,
             )
     }
 }
@@ -96,6 +99,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     private val locale: Locale?,
     private val logger: Logger,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
+    private val elementsSessionContext: ElementsSessionContext?,
     isLinkWithStripe: IsLinkWithStripe,
 ) : FinancialConnectionsConsumerSessionRepository {
 
@@ -135,6 +139,10 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             country = country,
             name = null,
             locale = locale,
+            amount = elementsSessionContext?.amount,
+            currency = elementsSessionContext?.currency,
+            paymentIntentId = elementsSessionContext?.paymentIntentId,
+            setupIntentId = elementsSessionContext?.setupIntentId,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,

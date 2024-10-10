@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -1081,7 +1081,10 @@ class USBankAccountFormViewModelTest {
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
-                    elementsSessionContext = FinancialConnectionsSheet.ElementsSessionContext(
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
+                        amount = 5099,
+                        currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
                     ),
                 )

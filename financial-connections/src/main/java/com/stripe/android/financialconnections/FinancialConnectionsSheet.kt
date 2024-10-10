@@ -42,8 +42,34 @@ class FinancialConnectionsSheet internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class ElementsSessionContext(
+        val initializationMode: InitializationMode,
+        val amount: Long?,
+        val currency: String?,
         val linkMode: LinkMode?,
-    ) : Parcelable
+    ) : Parcelable {
+
+        val paymentIntentId: String?
+            get() = (initializationMode as? InitializationMode.PaymentIntent)?.paymentIntentId
+
+        val setupIntentId: String?
+            get() = (initializationMode as? InitializationMode.SetupIntent)?.setupIntentId
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed interface InitializationMode : Parcelable {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class PaymentIntent(val paymentIntentId: String) : InitializationMode
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class SetupIntent(val setupIntentId: String) : InitializationMode
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data object DeferredIntent : InitializationMode
+        }
+    }
 
     /**
      * Present the [FinancialConnectionsSheet].

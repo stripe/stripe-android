@@ -27,7 +27,7 @@ class RealCreateInstantDebitsResultTest {
             consumerRepository = consumerRepository,
             repository = repository,
             consumerSessionProvider = { makeCachedConsumerSession() },
-            elementsSessionContext = ElementsSessionContext(
+            elementsSessionContext = makeElementsSessionContext(
                 linkMode = LinkMode.LinkCardBrand,
             ),
         )
@@ -52,7 +52,7 @@ class RealCreateInstantDebitsResultTest {
             consumerRepository = consumerRepository,
             repository = repository,
             consumerSessionProvider = { makeCachedConsumerSession() },
-            elementsSessionContext = ElementsSessionContext(
+            elementsSessionContext = makeElementsSessionContext(
                 linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
@@ -74,7 +74,7 @@ class RealCreateInstantDebitsResultTest {
             consumerRepository = consumerRepository,
             repository = repository,
             consumerSessionProvider = { makeCachedConsumerSession() },
-            elementsSessionContext = ElementsSessionContext(
+            elementsSessionContext = makeElementsSessionContext(
                 linkMode = null,
             ),
         )
@@ -125,6 +125,17 @@ class RealCreateInstantDebitsResultTest {
             phoneNumber = "(***) *** **12",
             isVerified = true,
             publishableKey = "pk_123",
+        )
+    }
+
+    private fun makeElementsSessionContext(
+        linkMode: LinkMode?,
+    ): ElementsSessionContext {
+        return ElementsSessionContext(
+            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+            amount = 100L,
+            currency = "usd",
+            linkMode = linkMode,
         )
     }
 }
