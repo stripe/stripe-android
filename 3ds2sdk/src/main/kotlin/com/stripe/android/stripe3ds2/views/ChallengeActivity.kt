@@ -221,7 +221,11 @@ class ChallengeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.shouldRefreshUi = true
-        viewModel.shouldAutoSubmitOOB = UiType.fromCode(currentChallengeResponseData?.uiType?.code.orEmpty()) == UiType.OutOfBand
+
+        val uiType = UiType.fromCode(currentChallengeResponseData?.uiType?.code.orEmpty())
+        val isOutOfBandChallenge = uiType == UiType.OutOfBand
+        viewModel.shouldAutoSubmitOOB = isOutOfBandChallenge
+
         dismissKeyboard()
     }
 
