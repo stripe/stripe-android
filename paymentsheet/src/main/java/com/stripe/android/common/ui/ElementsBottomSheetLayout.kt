@@ -24,6 +24,7 @@ internal fun ElementsBottomSheetLayout(
     onDismissed: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    @Suppress("DEPRECATION")
     val systemUiController = rememberSystemUiController()
     val layoutInfo = rememberStripeBottomSheetLayoutInfo()
 
