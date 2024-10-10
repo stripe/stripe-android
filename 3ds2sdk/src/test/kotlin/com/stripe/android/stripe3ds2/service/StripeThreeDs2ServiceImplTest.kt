@@ -48,6 +48,7 @@ class StripeThreeDs2ServiceImplTest {
             errorReporter,
             transactionFactory,
             publicKeyFactory,
+            null,
             warnings
         )
     }

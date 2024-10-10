@@ -24,6 +24,7 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.transaction.TransactionFactory
+import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import com.stripe.android.stripe3ds2.utils.ImageCache
 import com.stripe.android.stripe3ds2.views.Brand
 import java.security.PublicKey
@@ -36,17 +37,21 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
     private val errorReporter: ErrorReporter,
     private val transactionFactory: TransactionFactory,
     private val publicKeyFactory: PublicKeyFactory,
+    private val analyticsDelegate: AnalyticsDelegate?,
     override val warnings: List<Warning>,
 ) : StripeThreeDs2Service {
+
     @JvmOverloads
     constructor(
         context: Context,
         enableLogging: Boolean = false,
+        analyticsDelegate: AnalyticsDelegate?,
         workContext: CoroutineContext
     ) : this(
         context,
         STRIPE_SDK_REFERENCE_NUMBER,
         enableLogging,
+        analyticsDelegate,
         workContext
     )
 
@@ -54,12 +59,14 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         context: Context,
         sdkReferenceNumber: String,
         enableLogging: Boolean = false,
+        analyticsDelegate: AnalyticsDelegate?,
         workContext: CoroutineContext
     ) : this(
         context,
         ImageCache.Default,
         sdkReferenceNumber,
         enableLogging,
+        analyticsDelegate,
         workContext = workContext
     )
 
@@ -68,6 +75,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         imageCache: ImageCache,
         sdkReferenceNumber: String,
         enableLogging: Boolean,
+        analyticsDelegate: AnalyticsDelegate?,
         workContext: CoroutineContext
     ) : this(
         context,
@@ -78,6 +86,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
             context = context.applicationContext,
             logger = Logger.get(enableLogging)
         ),
+        analyticsDelegate,
         workContext
     )
 
@@ -86,6 +95,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         imageCache: ImageCache,
         sdkReferenceNumber: String,
         errorReporter: ErrorReporter,
+        analyticsDelegate: AnalyticsDelegate?,
         workContext: CoroutineContext
     ) : this(
         context,
@@ -95,6 +105,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         StripeEphemeralKeyPairGenerator(errorReporter),
         DefaultSecurityChecker(),
         MessageVersionRegistry(),
+        analyticsDelegate,
         DefaultAppInfoRepository(context, workContext),
         workContext
     )
@@ -107,6 +118,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         ephemeralKeyPairGenerator: EphemeralKeyPairGenerator,
         securityChecker: SecurityChecker,
         messageVersionRegistry: MessageVersionRegistry,
+        analyticsDelegate: AnalyticsDelegate?,
         appInfoRepository: AppInfoRepository,
         workContext: CoroutineContext
     ) : this(
@@ -132,9 +144,14 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
             ephemeralKeyPairGenerator,
             sdkReferenceNumber,
         ),
+        analyticsDelegate = analyticsDelegate,
         warnings = securityChecker.getWarnings(),
         publicKeyFactory = PublicKeyFactory(context, errorReporter)
     )
+
+    init {
+        AnalyticsSingleton.getInstance().analyticsDelegate = analyticsDelegate
+    }
 
     @Throws(InvalidInputException::class, SDKRuntimeException::class)
     override fun createTransaction(
@@ -198,5 +215,20 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
 
     private companion object {
         private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020100_00142"
+    }
+}
+
+class AnalyticsSingleton private constructor() {
+
+    var analyticsDelegate: AnalyticsDelegate? = null
+
+    companion object {
+
+        @Volatile private var instance: AnalyticsSingleton? = null // Volatile modifier is necessary
+
+        fun getInstance() =
+            instance ?: synchronized(this) { // synchronized to avoid concurrency problem
+                instance ?: AnalyticsSingleton().also { instance = it }
+            }
     }
 }

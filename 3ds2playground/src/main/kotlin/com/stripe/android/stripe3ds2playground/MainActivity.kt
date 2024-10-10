@@ -409,7 +409,8 @@ class MainActivity : AppCompatActivity() {
         StripeThreeDs2ServiceImpl(
             this,
             enableLogging = true,
-            workContext = Dispatchers.IO
+            workContext = Dispatchers.IO,
+            analyticsDelegate = null
         )
     }
 
