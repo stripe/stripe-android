@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -856,6 +857,7 @@ class PaymentSheet internal constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             @ExperimentalCardBrandFilteringApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
@@ -1538,6 +1540,7 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class CardBrandAcceptance : Parcelable {
 
         /**
@@ -1545,6 +1548,7 @@ class PaymentSheet internal constructor(
          */
         @Parcelize
         @ExperimentalCardBrandFilteringApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class BrandCategory : Parcelable {
             /**
              * Visa branded cards
@@ -1568,12 +1572,14 @@ class PaymentSheet internal constructor(
             Discover
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * Accept all card brands supported by Stripe
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun all(): CardBrandAcceptance = All
 
             /**
@@ -1582,6 +1588,7 @@ class PaymentSheet internal constructor(
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Allowed(brands)
 
@@ -1592,6 +1599,7 @@ class PaymentSheet internal constructor(
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Disallowed(brands)
         }
