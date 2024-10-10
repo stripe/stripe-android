@@ -1,14 +1,12 @@
-package com.stripe.android.stripe3ds2.observability
+package com.stripe.android.financialconnections.error
 
+import com.stripe.android.core.error.SentryConfig
+import com.stripe.android.financialconnections.BuildConfig
 import java.util.concurrent.TimeUnit
 
-/**
- * Configuration for https://sentry.corp.stripe.com/stripe/android-3ds2-sdk/
- */
-internal object DefaultSentryConfig : SentryConfig {
-    override val projectId: String = "426"
-    override val key: String = "dcb428fea25c40e7b99f81ae5981ee6a"
-    override val secret: String = "deca87e736574c5c83c07314051fd93a"
+internal object FinancialConnectionsSentryConfig : SentryConfig {
+    override val projectId: String = "826"
+    override val key: String = BuildConfig.FC_SENTRY_KEY
     override val version: String = "7"
 
     /**

@@ -1,4 +1,4 @@
-package com.stripe.android.stripe3ds2.observability
+package com.stripe.android.core.error
 
 interface SentryConfig {
     val projectId: String
@@ -6,4 +6,6 @@ interface SentryConfig {
     val key: String
 
     val version: String
+
+    fun getTimestamp(): String
 }

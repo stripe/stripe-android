@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.error.ErrorReporter
+import com.stripe.android.core.error.SentryEventReporter
+import com.stripe.android.core.error.SentryRequestExecutor
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -16,6 +19,7 @@ import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForNetworking
@@ -139,6 +143,19 @@ internal interface FinancialConnectionsSheetNativeModule {
             fraudDetectionDataRepository = fraudDetectionDataRepository,
             elementsSessionContext = elementsSessionContext,
         )
+
+        @Singleton
+        @Provides
+        fun provideErrorReporter(
+            context: Application,
+            executor: SentryRequestExecutor,
+        ): ErrorReporter {
+            return SentryEventReporter(
+                context = context,
+                sentryConfig = FinancialConnectionsSentryConfig,
+                requestExecutor = executor
+            )
+        }
 
         @Singleton
         @Provides
