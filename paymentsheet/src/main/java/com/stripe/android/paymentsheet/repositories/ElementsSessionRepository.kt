@@ -156,11 +156,11 @@ private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? 
 private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: ApiRequest.Options): StripeIntent {
     val deferredIntentParams = this.deferredIntentParams
     val now = Calendar.getInstance().timeInMillis
-    return when (deferredIntentParams.mode) {
+    return when (val deferredIntentMode = deferredIntentParams.mode) {
         is DeferredIntentParams.Mode.Payment -> PaymentIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
             paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
-            amount = (deferredIntentParams.mode as DeferredIntentParams.Mode.Payment).amount,
+            amount = deferredIntentMode.amount,
             clientSecret = this.clientSecret,
             countryCode = null,
             created = now,
