@@ -102,6 +102,58 @@ internal class PaymentSheetDeferredTest {
     }
 
     @Test
+    fun testDeferredIntentCardPayment_forSetup() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("seti_example_secret_example")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/setup_intents/seti_example"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/setup_intents/seti_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
     fun testDeferredIntentCardPaymentWithCustomer() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -431,6 +483,129 @@ internal class PaymentSheetDeferredTest {
             ),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredPaymentIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_example")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(
+                bodyPart(
+                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "off_session"
+                )
+            ),
+            not(
+                bodyPart(
+                    urlEncode("payment_method_data[payment_user_agent]"),
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                )
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredSetupIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("seti_example_secret_example")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/setup_intents/seti_example"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/setup_intents/seti_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-confirm.json")
         }
 
         page.clickPrimaryButton()

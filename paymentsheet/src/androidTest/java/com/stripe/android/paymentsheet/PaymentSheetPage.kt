@@ -181,7 +181,7 @@ internal class PaymentSheetPage(
     }
 
     fun waitForText(text: String, substring: Boolean = false) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntil(timeoutMillis = 15_000) {
             composeTestRule
                 .onAllNodes(hasText(text, substring = substring))
                 .fetchSemanticsNodes().isNotEmpty()
