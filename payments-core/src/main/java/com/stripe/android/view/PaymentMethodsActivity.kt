@@ -38,6 +38,11 @@ import kotlinx.coroutines.launch
  * Use [PaymentMethodsActivityStarter.Result.fromIntent]
  * to retrieve the result of this activity from an intent in onActivityResult().
  */
+@Deprecated(
+    "Please use Mobile Payment Element instead. If you already using PaymentMethodsActivity, learn how to" +
+        " migrate here:" +
+        " https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
+)
 class PaymentMethodsActivity : AppCompatActivity() {
     internal val viewBinding: StripePaymentMethodsActivityBinding by lazy {
         StripePaymentMethodsActivityBinding.inflate(layoutInflater)

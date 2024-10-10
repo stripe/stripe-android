@@ -23,6 +23,11 @@ import kotlinx.coroutines.launch
  * Activity containing a two-part payment flow that allows users to provide a shipping address
  * as well as select a shipping method.
  */
+@Deprecated(
+    "Please use Mobile Payment Element instead. If you already using PaymentFlowActivity, learn how to" +
+        " migrate here:" +
+        " https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
+)
 class PaymentFlowActivity : StripeActivity() {
 
     private val viewBinding: StripePaymentFlowActivityBinding by lazy {

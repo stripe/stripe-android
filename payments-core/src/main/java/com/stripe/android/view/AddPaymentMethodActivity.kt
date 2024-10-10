@@ -32,6 +32,11 @@ import kotlinx.coroutines.launch
  *
  * Should be started with [AddPaymentMethodActivityStarter].
  */
+@Deprecated(
+    "Please use Mobile Payment Element instead. If you already using AddPaymentMethodActivity, learn how to" +
+        " migrate here: " +
+        "https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration"
+)
 class AddPaymentMethodActivity : StripeActivity() {
 
     private val args: AddPaymentMethodActivityStarter.Args by lazy {
