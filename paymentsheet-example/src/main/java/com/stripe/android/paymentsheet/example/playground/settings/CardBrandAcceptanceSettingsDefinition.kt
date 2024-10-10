@@ -60,18 +60,18 @@ internal object CardBrandAcceptanceSettingsDefinition :
 }
 
 sealed class CardBrandAcceptanceType(val value: String, val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) {
-    object All : CardBrandAcceptanceType("all", PaymentSheet.CardBrandAcceptance.All)
+    object All : CardBrandAcceptanceType("all", PaymentSheet.CardBrandAcceptance.all())
 
     object DisallowAmex : CardBrandAcceptanceType(
         "disallow_amex",
-        PaymentSheet.CardBrandAcceptance.Disallowed(
+        PaymentSheet.CardBrandAcceptance.disallowed(
             brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
     )
 
     object AllowVisa : CardBrandAcceptanceType(
         "allow_visa",
-        PaymentSheet.CardBrandAcceptance.Allowed(
+        PaymentSheet.CardBrandAcceptance.allowed(
             brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
         )
     )

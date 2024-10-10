@@ -1568,30 +1568,43 @@ class PaymentSheet internal constructor(
             Discover
         }
 
-        /**
-         * Accept all card brands supported by Stripe
-         */
-        @Parcelize
-        @ExperimentalCardBrandFilteringApi
-        data object All : CardBrandAcceptance()
+        companion object {
+            /**
+             * Accept all card brands supported by Stripe
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun all(): CardBrandAcceptance = All
 
-        /**
-         * Accept only the card brands specified in the associated value
-         * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
-         */
+            /**
+             * Accept only the card brands specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                allowed(brands)
+
+            /**
+             * Accept all card brands supported by Stripe except for those specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted
+             * when using a disallow list.
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Disallowed(brands)
+        }
+
+        @Parcelize
+        internal data object All : CardBrandAcceptance()
+
         @Parcelize
         @ExperimentalCardBrandFilteringApi
-        data class Allowed(
+        internal data class Allowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
 
-        /**
-         * Accept all card brands supported by Stripe except for those specified in the associated value
-         * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted when using a disallow list.
-         */
         @Parcelize
         @ExperimentalCardBrandFilteringApi
-        data class Disallowed(
+        internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
     }
