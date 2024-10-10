@@ -1,6 +1,7 @@
 package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -23,4 +24,7 @@ internal object ConfigurationDefaults {
     val primaryButtonLabel: String? = null
     val shippingDetails: AddressDetails? = null
     val externalPaymentMethods: List<String> = emptyList()
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
 }

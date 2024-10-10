@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -597,6 +598,8 @@ class PaymentSheet internal constructor(
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
         internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -746,6 +749,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -844,6 +848,20 @@ class PaymentSheet internal constructor(
                 this.paymentMethodLayout = paymentMethodLayout
             }
 
+            /**
+             * By default, PaymentSheet will accept all supported cards by Stripe.
+             * You can specify card brands PaymentSheet should block or allow
+             * payment for by providing a list of those card brands.
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card brand filtering is not currently supported in Link.
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -861,6 +879,7 @@ class PaymentSheet internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
+                cardBrandAcceptance = cardBrandAcceptance,
             )
         }
 
@@ -1514,6 +1533,83 @@ class PaymentSheet internal constructor(
              */
             Full,
         }
+    }
+
+    /**
+     * Options to block certain card brands on the client
+     */
+    sealed class CardBrandAcceptance : Parcelable {
+
+        /**
+         * Card brand categories that can be allowed or disallowed
+         */
+        @Parcelize
+        @ExperimentalCardBrandFilteringApi
+        enum class BrandCategory : Parcelable {
+            /**
+             * Visa branded cards
+             */
+            Visa,
+
+            /**
+             * Mastercard branded cards
+             */
+            Mastercard,
+
+            /**
+             * Amex branded cards
+             */
+            Amex,
+
+            /**
+             * Discover branded cards
+             * **Note**: Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo).
+             */
+            Discover
+        }
+
+        companion object {
+            /**
+             * Accept all card brands supported by Stripe
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun all(): CardBrandAcceptance = All
+
+            /**
+             * Accept only the card brands specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Allowed(brands)
+
+            /**
+             * Accept all card brands supported by Stripe except for those specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted
+             * when using a disallow list.
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Disallowed(brands)
+        }
+
+        @Parcelize
+        internal data object All : CardBrandAcceptance()
+
+        @Parcelize
+        @ExperimentalCardBrandFilteringApi
+        internal data class Allowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
+
+        @Parcelize
+        @ExperimentalCardBrandFilteringApi
+        internal data class Disallowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
     }
 
     internal sealed interface CustomerAccessType : Parcelable {
