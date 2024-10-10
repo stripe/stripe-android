@@ -14,7 +14,7 @@ import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
-    private val apiKey: String,
+    private val isLiveMode: Boolean,
     private val timeProvider: () -> Long = {
         System.currentTimeMillis()
     }
@@ -115,7 +115,7 @@ internal class ElementsSessionJsonParser(
                             DeferredPaymentIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
                                 paymentMode = params.deferredIntentParams.mode,
-                                apiKey = apiKey,
+                                isLiveMode = isLiveMode,
                                 timeProvider = timeProvider
                             ).parse(json)
                         }
@@ -123,7 +123,7 @@ internal class ElementsSessionJsonParser(
                             DeferredSetupIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
                                 setupMode = params.deferredIntentParams.mode,
-                                apiKey = apiKey,
+                                isLiveMode = isLiveMode,
                                 timeProvider = timeProvider
                             ).parse(json)
                         }

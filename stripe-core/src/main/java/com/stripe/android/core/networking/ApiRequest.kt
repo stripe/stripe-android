@@ -108,6 +108,9 @@ data class ApiRequest internal constructor(
         val apiKeyIsUserKey: Boolean
             get() = apiKey.startsWith("uk_")
 
+        val apiKeyIsLiveMode: Boolean
+            get() = !apiKey.contains("test")
+
         /**
          * Dedicated constructor for injection.
          *

@@ -12,7 +12,7 @@ import org.json.JSONObject
 class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
     private val setupMode: DeferredIntentParams.Mode.Setup,
-    private val apiKey: String,
+    private val isLiveMode: Boolean,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent {
@@ -38,7 +38,7 @@ class DeferredSetupIntentJsonParser(
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
-            isLiveMode = !apiKey.contains("test"),
+            isLiveMode = isLiveMode,
             nextActionData = null,
             paymentMethodId = null,
             created = timeProvider(),

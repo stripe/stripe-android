@@ -63,13 +63,12 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            fallback(params, requestOptions, elementsSessionFailure)
+            fallback(params, elementsSessionFailure)
         }
     }
 
     private suspend fun fallback(
         params: ElementsSessionParams,
-        options: ApiRequest.Options,
         elementsSessionFailure: Throwable,
     ): Result<ElementsSession> = withContext(workContext) {
         val stripeIntent = when (params) {
@@ -88,7 +87,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                 )
             }
             is ElementsSessionParams.DeferredIntentType -> {
-                Result.success(params.toStripeIntent(options))
+                Result.success(params.toStripeIntent(requestOptions))
             }
         }
         stripeIntent.map { intent ->
@@ -156,7 +155,6 @@ private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? 
 
 private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: ApiRequest.Options): StripeIntent {
     val deferredIntentParams = this.deferredIntentParams
-    val isLiveMode = options.apiKey.contains("test")
     val now = Calendar.getInstance().timeInMillis
     return when (deferredIntentParams.mode) {
         is DeferredIntentParams.Mode.Payment -> PaymentIntent(
@@ -167,7 +165,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             countryCode = null,
             created = now,
             currency = deferredIntentParams.mode.currency,
-            isLiveMode = isLiveMode,
+            isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
@@ -177,7 +175,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             clientSecret = this.clientSecret,
             description = null,
             created = now,
-            isLiveMode = isLiveMode,
+            isLiveMode = options.apiKeyIsLiveMode,
             linkFundingSources = emptyList(),
             nextActionData = null,
             paymentMethodId = null,
