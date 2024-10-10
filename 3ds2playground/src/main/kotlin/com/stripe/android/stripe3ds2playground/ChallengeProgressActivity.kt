@@ -3,7 +3,6 @@ package com.stripe.android.stripe3ds2playground
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
 import androidx.core.os.bundleOf
