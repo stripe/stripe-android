@@ -52,7 +52,7 @@ class ConsumersApiServiceImplTest {
             bodyPart("locale", "en-US"),
             bodyPart("amount", "1234"),
             bodyPart("currency", "cad"),
-            bodyPart("financial_incentive%5Bpayment_intent%5D", "pi_123"),
+            bodyPart(urlEncode("financial_incentive[payment_intent]"), "pi_123"),
             bodyPart("consent_action", "clicked_checkbox_nospm_mobile_v0"),
             bodyPart("request_surface", requestSurface),
         ) { response ->
